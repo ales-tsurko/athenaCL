@@ -1,0 +1,725 @@
+<?xml version="1.0"?>
+<athenaObject>
+	<athena>
+		<attr key="date" value="Mon Aug 12 15:41:02 2002"/>
+		<attr key="version" value="1.0.15"/>
+		<attr key="TnItoggle" value="1"/>
+		<attr key="nchnls" value="2"/>
+		<attr key="author" value="Christopher Ariza"/>
+	</athena>
+	<paths>
+		<attr key="CurrentPath" value="diads_sl"/>
+		<pathObjects>
+			<pi name="diadX2">
+				<attr key="CurrentPathVoice" value="auto"/>
+				<attr key="PathSizeType" value="vlParts"/>
+				<attr key="ambitus" value="8"/>
+				<attr key="field" value="[0, 0, 0, 0, 0, 0, 0, 0]"/>
+				<pathVoiceSorts>
+					<attr key="BAL" value="{(0, 1): [(2, 2, 2), (2, 2, 1)], (6, 7): [(2, 2, 2), (2, 2, 1)], (3, 4): [(2, 2, 1), (2, 2, 2)], (4, 5): [(2, 2, 2), (2, 2, 1)], (1, 2): [(2, 2, 1), (2, 2, 2)], (5, 6): [(2, 2, 2), (2, 2, 1)], (2, 3): [(2, 2, 1), (2, 2, 2)]}"/>
+					<attr key="SMTH" value="{(0, 1): [(2, 2, 1), (2, 2, 2)], (6, 7): [(2, 2, 1), (2, 2, 2)], (3, 4): [(2, 2, 1), (2, 2, 2)], (4, 5): [(2, 2, 1), (2, 2, 2)], (1, 2): [(2, 2, 1), (2, 2, 2)], (5, 6): [(2, 2, 1), (2, 2, 2)], (2, 3): [(2, 2, 1), (2, 2, 2)]}"/>
+					<attr key="UNIF" value="{(0, 1): [(2, 2, 1), (2, 2, 2)], (6, 7): [(2, 2, 1), (2, 2, 2)], (3, 4): [(2, 2, 1), (2, 2, 2)], (4, 5): [(2, 2, 1), (2, 2, 2)], (1, 2): [(2, 2, 1), (2, 2, 2)], (5, 6): [(2, 2, 1), (2, 2, 2)], (2, 3): [(2, 2, 1), (2, 2, 2)]}"/>
+				</pathVoiceSorts>
+				<pathVoices>
+					<pv name="auto">
+						<attr key="maps" value="{(0, 1): (2, 2, 1), (4, 5): (2, 2, 1), (6, 7): (2, 2, 1), (3, 4): (2, 2, 1), (1, 2): (2, 2, 1), (5, 6): (2, 2, 1), (2, 3): (2, 2, 1)}"/>
+						<attr key="ranks" value="{(0, 1): (1, 1, 2), (6, 7): (1, 1, 2), (3, 4): (1, 1, 1), (4, 5): (1, 1, 2), (1, 2): (1, 1, 1), (5, 6): (1, 1, 2), (2, 3): (1, 1, 1)}"/>
+					</pv>
+				</pathVoices>
+				<attr key="pcsPath" value="[(0, 1), (0, 1), (0, 6), (0, 6), (0, 1), (0, 1), (0, 5), (0, 5)]"/>
+				<attr key="scPath" value="[(2, 1, 0), (2, 1, 0), (2, 6, 0), (2, 6, 0), (2, 1, 0), (2, 1, 0), (2, 5, 0), (2, 5, 0)]"/>
+				<attr key="usrPath" value="[(0, 1), (0, 1), (0, 6), (0, 6), (0, 1), (0, 1), (0, 5), (0, 5)]"/>
+			</pi>
+			<pi name="diads">
+				<attr key="CurrentPathVoice" value="auto"/>
+				<attr key="PathSizeType" value="vlParts"/>
+				<attr key="ambitus" value="8"/>
+				<attr key="field" value="[0, 0, 0, 0]"/>
+				<pathVoiceSorts>
+					<attr key="BAL" value="{(1, 2): [(2, 2, 1), (2, 2, 2)], (0, 1): [(2, 2, 1), (2, 2, 2)], (2, 3): [(2, 2, 2), (2, 2, 1)]}"/>
+					<attr key="SMTH" value="{(1, 2): [(2, 2, 1), (2, 2, 2)], (0, 1): [(2, 2, 1), (2, 2, 2)], (2, 3): [(2, 2, 1), (2, 2, 2)]}"/>
+					<attr key="UNIF" value="{(1, 2): [(2, 2, 1), (2, 2, 2)], (0, 1): [(2, 2, 1), (2, 2, 2)], (2, 3): [(2, 2, 1), (2, 2, 2)]}"/>
+				</pathVoiceSorts>
+				<pathVoices>
+					<pv name="auto">
+						<attr key="maps" value="{(1, 2): (2, 2, 1), (0, 1): (2, 2, 1), (2, 3): (2, 2, 1)}"/>
+						<attr key="ranks" value="{(1, 2): (1, 1, 1), (0, 1): (1, 1, 1), (2, 3): (1, 1, 2)}"/>
+					</pv>
+				</pathVoices>
+				<attr key="pcsPath" value="[(0, 1), (0, 6), (0, 1), (0, 5)]"/>
+				<attr key="scPath" value="[(2, 1, 0), (2, 6, 0), (2, 1, 0), (2, 5, 0)]"/>
+				<attr key="usrPath" value="[(0, 1), (0, 6), (0, 1), (0, 5)]"/>
+			</pi>
+			<pi name="diads_sl">
+				<attr key="CurrentPathVoice" value="auto"/>
+				<attr key="PathSizeType" value="vlParts"/>
+				<attr key="ambitus" value="8"/>
+				<attr key="field" value="[0, 0]"/>
+				<pathVoiceSorts>
+					<attr key="BAL" value="{(0, 1): [(2, 2, 1), (2, 2, 2)]}"/>
+					<attr key="SMTH" value="{(0, 1): [(2, 2, 1), (2, 2, 2)]}"/>
+					<attr key="UNIF" value="{(0, 1): [(2, 2, 1), (2, 2, 2)]}"/>
+				</pathVoiceSorts>
+				<pathVoices>
+					<pv name="auto">
+						<attr key="maps" value="{(0, 1): (2, 2, 1)}"/>
+						<attr key="ranks" value="{(0, 1): (1, 1, 1)}"/>
+					</pv>
+				</pathVoices>
+				<attr key="pcsPath" value="[(0, 1), (0, 6)]"/>
+				<attr key="scPath" value="[(2, 1, 0), (2, 6, 0)]"/>
+				<attr key="usrPath" value="[(0, 1), (0, 6)]"/>
+			</pi>
+			<pi name="diady">
+				<attr key="CurrentPathVoice" value="auto"/>
+				<attr key="PathSizeType" value="noVL"/>
+				<attr key="ambitus" value="8"/>
+				<attr key="field" value="[0, 0, 0, 0, 0, 0, 0, 0]"/>
+				<attr key="pcsPath" value="[(0, 1), (0, 1, 3, 4), (0, 6), (0, 1, 2, 6, 8), (0, 1), (0, 1, 2, 4, 6, 8), (0, 5), (0, 1, 2, 3, 5, 6, 7, 8)]"/>
+				<attr key="scPath" value="[(2, 1, 0), (4, 3, 0), (2, 6, 0), (5, 15, 0), (2, 1, 0), (6, 22, 1), (2, 5, 0), (8, 6, 0)]"/>
+				<attr key="usrPath" value="[(0, 1), (0, 1, 3, 4), (0, 6), (0, 1, 2, 6, 8), (0, 1), (0, 1, 2, 4, 6, 8), (0, 5), (0, 1, 2, 3, 5, 6, 7, 8)]"/>
+			</pi>
+		</pathObjects>
+		<attr key="CurrentPathEngine" value="PMclass.Morris_ASIM"/>
+	</paths>
+	<textures>
+		<attr key="CurrentTextureMod" value="LineGroove"/>
+		<attr key="CurrentTexture" value="a1_"/>
+		<textureObjects>
+			<ti name="a1">
+				<attr key="auxNo" value="0"/>
+				<attr key="pathName" value="diads"/>
+				<attr key="pitchMode" value="usr"/>
+				<pmtrQDict>
+					<q key="ampQ" value="('cyclicGen', 'linearUp', 35, 62, 2.5)"/>
+					<q key="beatT" value="('staticBeat', 30.0)"/>
+					<q key="fieldQ" value="('basketGen', 'orderedCyclic', [9, 9])"/>
+					<q key="inst" value="('staticInst', 4)"/>
+					<q key="octQ" value="('basketGen', 'orderedCyclic', [5, 4, 5])"/>
+					<q key="panQ" value="('cyclicGen', 'linearDownUp', 0.5, 0.80000000000000004, 0.080000000000000002)"/>
+					<q key="rhythmQ" value="((3, 3), (3, 10))"/>
+					<q key="tRange" value="('staticRange', (0, 40))"/>
+					<q key="textQ" value="([], 0)"/>
+				</pmtrQDict>
+				<attr key="polyphonyMode" value="part"/>
+				<attr key="tempermentName" value="12equal"/>
+				<attr key="textID" value="LineGroove"/>
+			</ti>
+			<ti name="a1_">
+				<attr key="auxNo" value="0"/>
+				<attr key="pathName" value="diads"/>
+				<attr key="pitchMode" value="usr"/>
+				<pmtrQDict>
+					<q key="ampQ" value="('cyclicGen', 'linearDownUp', 15, 58, 2.0)"/>
+					<q key="beatT" value="('staticBeat', 27.272727272727273)"/>
+					<q key="fieldQ" value="('basketGen', 'orderedCyclic', [9, 9])"/>
+					<q key="inst" value="('staticInst', 4)"/>
+					<q key="octQ" value="('basketGen', 'orderedCyclic', [4, 5, 5])"/>
+					<q key="panQ" value="('cyclicGen', 'linearDownUp', 0.29999999999999999, 0.69999999999999996, 0.080000000000000002)"/>
+					<q key="rhythmQ" value="((6, 15), (3, 13))"/>
+					<q key="tRange" value="('staticRange', (0, 40))"/>
+					<q key="textQ" value="([], 0)"/>
+				</pmtrQDict>
+				<attr key="polyphonyMode" value="part"/>
+				<attr key="tempermentName" value="12equal"/>
+				<attr key="textID" value="LineGroove"/>
+			</ti>
+			<ti name="a2">
+				<attr key="auxNo" value="0"/>
+				<attr key="pathName" value="diads"/>
+				<attr key="pitchMode" value="usr"/>
+				<pmtrQDict>
+					<q key="ampQ" value="('cyclicGen', 'linearDown', 51, 65, 2)"/>
+					<q key="beatT" value="('staticBeat', 30.0)"/>
+					<q key="fieldQ" value="('basketGen', 'orderedCyclic', [9, 9])"/>
+					<q key="inst" value="('staticInst', 4)"/>
+					<q key="octQ" value="('basketGen', 'randomChoice', [5, 5, 5, 5, 5, 5, 5, 5, 6])"/>
+					<q key="panQ" value="('basketGen', 'randomChoice', [.5,.4])"/>
+					<q key="rhythmQ" value="((3, 4), (3, 10))"/>
+					<q key="tRange" value="('staticRange', (0, 40))"/>
+					<q key="textQ" value="([], 0)"/>
+				</pmtrQDict>
+				<attr key="polyphonyMode" value="part"/>
+				<attr key="tempermentName" value="12equal"/>
+				<attr key="textID" value="LineGroove"/>
+			</ti>
+			<ti name="a2_">
+				<attr key="auxNo" value="0"/>
+				<attr key="pathName" value="diads"/>
+				<attr key="pitchMode" value="usr"/>
+				<pmtrQDict>
+					<q key="ampQ" value="('cyclicGen', 'linearDownUp', 59, 64, 0.5)"/>
+					<q key="beatT" value="('staticBeat', 30.0)"/>
+					<q key="fieldQ" value="('basketGen', 'orderedCyclic', [9, 9])"/>
+					<q key="inst" value="('staticInst', 4)"/>
+					<q key="octQ" value="('basketGen', 'randomChoice', [5, 5, 5, 5, 5, 5, 5, 5, 6])"/>
+					<q key="panQ" value="('cyclicGen', 'linearDownUp', 0.45000000000000001, 0.55000000000000004, 0.001)"/>
+					<q key="rhythmQ" value="((3, 4), (3, 10))"/>
+					<q key="tRange" value="('staticRange', (0.29999999999999999, 40.299999999999997))"/>
+					<q key="textQ" value="([], 0)"/>
+				</pmtrQDict>
+				<attr key="polyphonyMode" value="part"/>
+				<attr key="tempermentName" value="12equal"/>
+				<attr key="textID" value="LineGroove"/>
+			</ti>
+			<ti name="a3">
+				<attr key="auxNo" value="0"/>
+				<attr key="pathName" value="diads"/>
+				<attr key="pitchMode" value="usr"/>
+				<pmtrQDict>
+					<q key="ampQ" value="('cyclicGen', 'linearDownUp', 30, 58, 2)"/>
+					<q key="beatT" value="('staticBeat', 30.0)"/>
+					<q key="fieldQ" value="('basketGen', 'orderedCyclic', [9, 9])"/>
+					<q key="inst" value="('staticInst', 4)"/>
+					<q key="octQ" value="('basketGen', 'orderedCyclic', [4, 5])"/>
+					<q key="panQ" value="('cyclicGen', 'linearDownUp', 0.5, 0.80000000000000004, 0.080000000000000002)"/>
+					<q key="rhythmQ" value="((3, 2), (3, 9))"/>
+					<q key="tRange" value="('staticRange', (69, 91))"/>
+					<q key="textQ" value="([], 0)"/>
+				</pmtrQDict>
+				<attr key="polyphonyMode" value="part"/>
+				<attr key="tempermentName" value="12equal"/>
+				<attr key="textID" value="LineGroove"/>
+			</ti>
+			<ti name="a3_">
+				<attr key="auxNo" value="0"/>
+				<attr key="pathName" value="diads"/>
+				<attr key="pitchMode" value="usr"/>
+				<pmtrQDict>
+					<q key="ampQ" value="('cyclicGen', 'linearDownUp', 30, 58, 2.5)"/>
+					<q key="beatT" value="('staticBeat', 30.0)"/>
+					<q key="fieldQ" value="('basketGen', 'orderedCyclic', [9, 9])"/>
+					<q key="inst" value="('staticInst', 4)"/>
+					<q key="octQ" value="('basketGen', 'orderedCyclic', [5, 5, 6, 4, 5, 6, 5])"/>
+					<q key="panQ" value="('cyclicGen', 'linearDownUp', 0.29999999999999999, 0.69999999999999996, 0.080000000000000002)"/>
+					<q key="rhythmQ" value="((6, 5), (3, 11))"/>
+					<q key="tRange" value="('staticRange', (69.25, 90))"/>
+					<q key="textQ" value="([], 0)"/>
+				</pmtrQDict>
+				<attr key="polyphonyMode" value="part"/>
+				<attr key="tempermentName" value="12equal"/>
+				<attr key="textID" value="LineGroove"/>
+			</ti>
+			<ti name="b1">
+				<attr key="auxNo" value="0"/>
+				<attr key="pathName" value="diady"/>
+				<attr key="pitchMode" value="usr"/>
+				<pmtrQDict>
+					<q key="ampQ" value="('cyclicGen', 'linearDownUp', 45, 65, 4)"/>
+					<q key="beatT" value="('staticBeat', 30.0)"/>
+					<q key="fieldQ" value="('basketGen', 'orderedCyclic', [9, 9, 9, 9])"/>
+					<q key="inst" value="('staticInst', 2)"/>
+					<q key="octQ" value="('basketGen', 'orderedCyclic', [26, 26, 7, 26, 8, 26, 26, 7, 8, 26, 7, 26])"/>
+					<q key="panQ" value="('cyclicGen', 'linearDown', 0.20000000000000001, 0.80000000000000004, 0.080000000000000002)"/>
+					<q key="rhythmQ" value="((20, 1), (20, 5))"/>
+					<q key="tRange" value="('staticRange', (10, 28))"/>
+					<q key="textQ" value="([], 0)"/>
+				</pmtrQDict>
+				<attr key="polyphonyMode" value="set"/>
+				<attr key="tempermentName" value="12equal"/>
+				<attr key="textID" value="LineGroove"/>
+			</ti>
+			<ti name="b1_">
+				<attr key="auxNo" value="0"/>
+				<attr key="pathName" value="diady"/>
+				<attr key="pitchMode" value="usr"/>
+				<pmtrQDict>
+					<q key="ampQ" value="('cyclicGen', 'linearDownUp', 5, 65, 8)"/>
+					<q key="beatT" value="('staticBeat', 26.666666666666664)"/>
+					<q key="fieldQ" value="('basketGen', 'orderedCyclic', [9, 9, 9, 9])"/>
+					<q key="inst" value="('staticInst', 2)"/>
+					<q key="octQ" value="('basketGen', 'orderedCyclic', [26, 7, 7, 7, 26, 26, 26, 7, 7, 7, 6, 26, 26])"/>
+					<q key="panQ" value="('cyclicGen', 'linearDownUp', 0.10000000000000001, 0.90000000000000002, 0.5)"/>
+					<q key="rhythmQ" value="((20, 1), (20, 4))"/>
+					<q key="tRange" value="('staticRange', (10, 28))"/>
+					<q key="textQ" value="([], 0)"/>
+				</pmtrQDict>
+				<attr key="polyphonyMode" value="set"/>
+				<attr key="tempermentName" value="12equal"/>
+				<attr key="textID" value="LineGroove"/>
+			</ti>
+			<ti name="b2">
+				<attr key="auxNo" value="0"/>
+				<attr key="pathName" value="diady"/>
+				<attr key="pitchMode" value="usr"/>
+				<pmtrQDict>
+					<q key="ampQ" value="('cyclicGen', 'linearUp', 35, 65, 2.0)"/>
+					<q key="beatT" value="('staticBeat', 30.0)"/>
+					<q key="fieldQ" value="('basketGen', 'orderedCyclic', [9, 9, 9, 9])"/>
+					<q key="inst" value="('staticInst', 2)"/>
+					<q key="octQ" value="('basketGen', 'orderedCyclic', [26, 7, 7, 26, 26, 26, 26, 14, 16, 12, 26, 26, 26, 7, 7, 6, 7, 6, 26])"/>
+					<q key="panQ" value="('cyclicGen', 'linearDown', 0.20000000000000001, 0.80000000000000004, 0.080000000000000002)"/>
+					<q key="rhythmQ" value="((20, 1), (20, 5))"/>
+					<q key="tRange" value="('staticRange', (40, 55))"/>
+					<q key="textQ" value="([], 0)"/>
+				</pmtrQDict>
+				<attr key="polyphonyMode" value="set"/>
+				<attr key="tempermentName" value="12equal"/>
+				<attr key="textID" value="LineGroove"/>
+			</ti>
+			<ti name="b2_">
+				<attr key="auxNo" value="0"/>
+				<attr key="pathName" value="diady"/>
+				<attr key="pitchMode" value="usr"/>
+				<pmtrQDict>
+					<q key="ampQ" value="('cyclicGen', 'linearDownUp', 5, 65, 12)"/>
+					<q key="beatT" value="('staticBeat', 25.71465306647238)"/>
+					<q key="fieldQ" value="('basketGen', 'orderedCyclic', [9, 9, 9, 9])"/>
+					<q key="inst" value="('staticInst', 2)"/>
+					<q key="octQ" value="('basketGen', 'orderedCyclic', [26, 15, 14, 26, 26, 26, 7, 6, 7, 7, 26, 26, 26, 12, 13, 14, 26, 26])"/>
+					<q key="panQ" value="('cyclicGen', 'linearDownUp', 0.10000000000000001, 0.90000000000000002, 0.5)"/>
+					<q key="rhythmQ" value="((20, 1), (20, 6))"/>
+					<q key="tRange" value="('staticRange', (40.25, 55))"/>
+					<q key="textQ" value="([], 0)"/>
+				</pmtrQDict>
+				<attr key="polyphonyMode" value="set"/>
+				<attr key="tempermentName" value="12equal"/>
+				<attr key="textID" value="LineGroove"/>
+			</ti>
+			<ti name="c1">
+				<attr key="auxNo" value="2"/>
+				<attr key="pathName" value="diadX2"/>
+				<attr key="pitchMode" value="usr"/>
+				<pmtrQDict>
+					<q key="ampQ" value="('cyclicGen', 'linearDownUp', 2, 60, 6)"/>
+					<q key="auxQ0" value="('cyclicGen', 'linearUp', 0.10000000000000001, 0.90000000000000002, 0.10000000000000001)"/>
+					<q key="auxQ1" value="('cyclicGen', 'linearDown', 800, 16000, 200)"/>
+					<q key="beatT" value="('staticBeat', 30.0)"/>
+					<q key="fieldQ" value="('basketGen', 'orderedCyclic', [9, 9])"/>
+					<q key="inst" value="('staticInst', 10)"/>
+					<q key="octQ" value="('basketGen', 'orderedCyclic', [5, 5, 5, 6, 7, 7, 8, 8, 9, 10, 11, 12, 12, 11, 10, 9, 8, 7, 6, 5, 5, 5, 5])"/>
+					<q key="panQ" value="('cyclicGen', 'linearDown', 0.20000000000000001, 0.59999999999999998, 0.080000000000000002)"/>
+					<q key="rhythmQ" value="((20, 1), (20, 1))"/>
+					<q key="tRange" value="('staticRange', (30, 45))"/>
+					<q key="textQ" value="([], 0)"/>
+				</pmtrQDict>
+				<attr key="polyphonyMode" value="part"/>
+				<attr key="tempermentName" value="12equal"/>
+				<attr key="textID" value="LineGroove"/>
+			</ti>
+			<ti name="c1_">
+				<attr key="auxNo" value="2"/>
+				<attr key="pathName" value="diadX2"/>
+				<attr key="pitchMode" value="usr"/>
+				<pmtrQDict>
+					<q key="ampQ" value="('cyclicGen', 'linearUp', 2, 55, 12)"/>
+					<q key="auxQ0" value="('cyclicGen', 'linearUp', 0.10000000000000001, 0.90000000000000002, 0.10000000000000001)"/>
+					<q key="auxQ1" value="('cyclicGen', 'linearDown', 800, 16000, 200)"/>
+					<q key="beatT" value="('staticBeat', 31.250000000000004)"/>
+					<q key="fieldQ" value="('basketGen', 'orderedCyclic', [9, 9])"/>
+					<q key="inst" value="('staticInst', 10)"/>
+					<q key="octQ" value="('basketGen', 'orderedCyclic', [5, 5, 5, 6, 7, 7, 8, 8, 9, 10, 11, 12, 12, 11, 10, 9, 8, 7, 6, 5, 5, 5, 5])"/>
+					<q key="panQ" value="('cyclicGen', 'linearDownUp', 0, 0.40000000000000002, 0.02)"/>
+					<q key="rhythmQ" value="((20, 1), (20, 3))"/>
+					<q key="tRange" value="('staticRange', (30, 45))"/>
+					<q key="textQ" value="([], 0)"/>
+				</pmtrQDict>
+				<attr key="polyphonyMode" value="part"/>
+				<attr key="tempermentName" value="12equal"/>
+				<attr key="textID" value="LineGroove"/>
+			</ti>
+			<ti name="c2">
+				<attr key="auxNo" value="2"/>
+				<attr key="pathName" value="diadX2"/>
+				<attr key="pitchMode" value="usr"/>
+				<pmtrQDict>
+					<q key="ampQ" value="('cyclicGen', 'linearDownUp', 2, 60, 6)"/>
+					<q key="auxQ0" value="('cyclicGen', 'linearUp', 0.10000000000000001, 0.90000000000000002, 0.10000000000000001)"/>
+					<q key="auxQ1" value="('cyclicGen', 'linearDown', 800, 16000, 200)"/>
+					<q key="beatT" value="('staticBeat', 30.0)"/>
+					<q key="fieldQ" value="('basketGen', 'orderedCyclic', [9, 9])"/>
+					<q key="inst" value="('staticInst', 10)"/>
+					<q key="octQ" value="('basketGen', 'orderedCyclic', [5, 5, 5, 6, 7, 7, 8, 8, 9, 10, 11, 12, 12, 11, 10, 9, 8, 7, 6, 5, 5, 5, 5])"/>
+					<q key="panQ" value="('cyclicGen', 'linearDown', 0.20000000000000001, 0.59999999999999998, 0.080000000000000002)"/>
+					<q key="rhythmQ" value="((20, 1), (20, 1))"/>
+					<q key="tRange" value="('staticRange', (50, 60))"/>
+					<q key="textQ" value="([], 0)"/>
+				</pmtrQDict>
+				<attr key="polyphonyMode" value="part"/>
+				<attr key="tempermentName" value="12equal"/>
+				<attr key="textID" value="LineGroove"/>
+			</ti>
+			<ti name="c2_">
+				<attr key="auxNo" value="2"/>
+				<attr key="pathName" value="diadX2"/>
+				<attr key="pitchMode" value="usr"/>
+				<pmtrQDict>
+					<q key="ampQ" value="('cyclicGen', 'linearDown', 2, 55, 14)"/>
+					<q key="auxQ0" value="('cyclicGen', 'linearUp', 0.10000000000000001, 0.90000000000000002, 0.10000000000000001)"/>
+					<q key="auxQ1" value="('cyclicGen', 'linearDown', 800, 16000, 200)"/>
+					<q key="beatT" value="('staticBeat', 28.708133971291868)"/>
+					<q key="fieldQ" value="('basketGen', 'orderedCyclic', [9, 9])"/>
+					<q key="inst" value="('staticInst', 10)"/>
+					<q key="octQ" value="('basketGen', 'orderedCyclic', [5, 5, 5, 6, 7, 7, 8, 8, 9, 10, 11, 12, 12, 11, 10, 9, 8, 7, 6, 5, 5, 5, 5])"/>
+					<q key="panQ" value="('cyclicGen', 'linearDownUp', 0.5, 0.90000000000000002, 0.02)"/>
+					<q key="rhythmQ" value="((20, 1), (20, 7))"/>
+					<q key="tRange" value="('staticRange', (50, 60))"/>
+					<q key="textQ" value="([], 0)"/>
+				</pmtrQDict>
+				<attr key="polyphonyMode" value="part"/>
+				<attr key="tempermentName" value="12equal"/>
+				<attr key="textID" value="LineGroove"/>
+			</ti>
+			<ti name="c3">
+				<attr key="auxNo" value="2"/>
+				<attr key="pathName" value="diadX2"/>
+				<attr key="pitchMode" value="usr"/>
+				<pmtrQDict>
+					<q key="ampQ" value="('cyclicGen', 'linearDownUp', 2, 60, 6)"/>
+					<q key="auxQ0" value="('cyclicGen', 'linearUp', 0.10000000000000001, 0.90000000000000002, 0.10000000000000001)"/>
+					<q key="auxQ1" value="('cyclicGen', 'linearDown', 800, 16000, 200)"/>
+					<q key="beatT" value="('staticBeat', 30.0)"/>
+					<q key="fieldQ" value="('basketGen', 'orderedCyclic', [9, 9])"/>
+					<q key="inst" value="('staticInst', 10)"/>
+					<q key="octQ" value="('basketGen', 'orderedCyclic', [5, 5, 5, 6, 7, 7, 8, 8, 9, 10, 11, 12, 12, 11, 10, 9, 8, 7, 6, 5, 5, 5, 5])"/>
+					<q key="panQ" value="('cyclicGen', 'linearDown', 0.20000000000000001, 0.59999999999999998, 0.080000000000000002)"/>
+					<q key="rhythmQ" value="((15, 1), (15, 5))"/>
+					<q key="tRange" value="('staticRange', (49, 68.700000000000003))"/>
+					<q key="textQ" value="([], 0)"/>
+				</pmtrQDict>
+				<attr key="polyphonyMode" value="part"/>
+				<attr key="tempermentName" value="12equal"/>
+				<attr key="textID" value="LineGroove"/>
+			</ti>
+			<ti name="c3_">
+				<attr key="auxNo" value="2"/>
+				<attr key="pathName" value="diadX2"/>
+				<attr key="pitchMode" value="usr"/>
+				<pmtrQDict>
+					<q key="ampQ" value="('cyclicGen', 'linearUp', 2, 55, 15)"/>
+					<q key="auxQ0" value="('cyclicGen', 'linearUp', 0.10000000000000001, 0.90000000000000002, 0.10000000000000001)"/>
+					<q key="auxQ1" value="('cyclicGen', 'linearDown', 800, 16000, 200)"/>
+					<q key="beatT" value="('staticBeat', 32.085561497326196)"/>
+					<q key="fieldQ" value="('basketGen', 'orderedCyclic', [9, 9])"/>
+					<q key="inst" value="('staticInst', 10)"/>
+					<q key="octQ" value="('basketGen', 'orderedCyclic', [5, 5, 5, 6, 7, 7, 8, 8, 9, 10, 11, 12, 12, 11, 10, 9, 8, 7, 6, 5, 5, 5, 5])"/>
+					<q key="panQ" value="('cyclicGen', 'linearDownUp', 0.050000000000000003, 0.94999999999999996, 0.02)"/>
+					<q key="rhythmQ" value="((14, 1), (14, 5))"/>
+					<q key="tRange" value="('staticRange', (59, 70.5))"/>
+					<q key="textQ" value="([], 0)"/>
+				</pmtrQDict>
+				<attr key="polyphonyMode" value="part"/>
+				<attr key="tempermentName" value="12equal"/>
+				<attr key="textID" value="LineGroove"/>
+			</ti>
+			<ti name="d1">
+				<attr key="auxNo" value="10"/>
+				<attr key="pathName" value="diads_sl"/>
+				<attr key="pitchMode" value="usr"/>
+				<pmtrQDict>
+					<q key="ampQ" value="('cyclicGen', 'linearDown', 55, 65, 2)"/>
+					<q key="auxQ0" value="('cyclicGen', 'linearUp', 0.80000000000000004, 0.90000000000000002, 0.050000000000000003)"/>
+					<q key="auxQ1" value="('cyclicGen', 'linearUp', 0.20000000000000001, 0.40000000000000002, 0.050000000000000003)"/>
+					<q key="auxQ2" value="('cyclicGen', 'linearUp', 0.69999999999999996, 0.80000000000000004, 0.050000000000000003)"/>
+					<q key="auxQ3" value="('cyclicGen', 'linearUp', 0.20000000000000001, 0.34999999999999998, 0.050000000000000003)"/>
+					<q key="auxQ4" value="('cyclicGen', 'linearUp', 0.29999999999999999, 0.40000000000000002, 0.050000000000000003)"/>
+					<q key="auxQ5" value="('cyclicGen', 'linearUpDown', 6, 8, 1)"/>
+					<q key="auxQ6" value="('cyclicGen', 'linearUpDown', 1, 1, 0)"/>
+					<q key="auxQ7" value="('cyclicGen', 'linearUp', 4, 6, 1)"/>
+					<q key="auxQ8" value="('cyclicGen', 'linearUpDown', 3, 3, 0)"/>
+					<q key="auxQ9" value="('cyclicGen', 'linearUp', 0.5, 0.80000000000000004, 0.10000000000000001)"/>
+					<q key="beatT" value="('staticBeat', 30.0)"/>
+					<q key="fieldQ" value="('basketGen', 'orderedCyclic', [9, 9])"/>
+					<q key="inst" value="('staticInst', 6)"/>
+					<q key="octQ" value="('basketGen', 'orderedCyclic', [5, 5])"/>
+					<q key="panQ" value="('cyclicGen', 'linearDown', 0.29999999999999999, 0.69999999999999996, 0.080000000000000002)"/>
+					<q key="rhythmQ" value="((2, 3), (2, 5))"/>
+					<q key="tRange" value="('staticRange', (2, 4))"/>
+					<q key="textQ" value="([], 0)"/>
+				</pmtrQDict>
+				<attr key="polyphonyMode" value="part"/>
+				<attr key="tempermentName" value="12equal"/>
+				<attr key="textID" value="LineGroove"/>
+			</ti>
+			<ti name="d1_">
+				<attr key="auxNo" value="10"/>
+				<attr key="pathName" value="diads_sl"/>
+				<attr key="pitchMode" value="usr"/>
+				<pmtrQDict>
+					<q key="ampQ" value="('cyclicGen', 'linearDownUp', 54, 63, 3)"/>
+					<q key="auxQ0" value="('cyclicGen', 'linearUp', 0.80000000000000004, 0.90000000000000002, 0.050000000000000003)"/>
+					<q key="auxQ1" value="('cyclicGen', 'linearUp', 0.20000000000000001, 0.40000000000000002, 0.050000000000000003)"/>
+					<q key="auxQ2" value="('cyclicGen', 'linearUp', 0.69999999999999996, 0.80000000000000004, 0.050000000000000003)"/>
+					<q key="auxQ3" value="('cyclicGen', 'linearUp', 0.20000000000000001, 0.34999999999999998, 0.050000000000000003)"/>
+					<q key="auxQ4" value="('cyclicGen', 'linearUp', 0.29999999999999999, 0.40000000000000002, 0.050000000000000003)"/>
+					<q key="auxQ5" value="('cyclicGen', 'linearUpDown', 6, 8, 1)"/>
+					<q key="auxQ6" value="('cyclicGen', 'linearUpDown', 1, 1, 0)"/>
+					<q key="auxQ7" value="('cyclicGen', 'linearUp', 4, 6, 1)"/>
+					<q key="auxQ8" value="('cyclicGen', 'linearUpDown', 3, 3, 0)"/>
+					<q key="auxQ9" value="('cyclicGen', 'linearUp', 0.5, 0.80000000000000004, 0.10000000000000001)"/>
+					<q key="beatT" value="('staticBeat', 30.0)"/>
+					<q key="fieldQ" value="('basketGen', 'orderedCyclic', [9, 9])"/>
+					<q key="inst" value="('staticInst', 6)"/>
+					<q key="octQ" value="('basketGen', 'orderedCyclic', [5, 5])"/>
+					<q key="panQ" value="('cyclicGen', 'linearDown', 0.29999999999999999, 0.69999999999999996, 0.080000000000000002)"/>
+					<q key="rhythmQ" value="((2, 3), (2, 5))"/>
+					<q key="tRange" value="('staticRange', (69, 71))"/>
+					<q key="textQ" value="([], 0)"/>
+				</pmtrQDict>
+				<attr key="polyphonyMode" value="part"/>
+				<attr key="tempermentName" value="12equal"/>
+				<attr key="textID" value="LineGroove"/>
+			</ti>
+			<ti name="d2">
+				<attr key="auxNo" value="10"/>
+				<attr key="pathName" value="diads_sl"/>
+				<attr key="pitchMode" value="usr"/>
+				<pmtrQDict>
+					<q key="ampQ" value="('cyclicGen', 'linearDownUp', 58, 65, 2)"/>
+					<q key="auxQ0" value="('cyclicGen', 'linearUp', 0.80000000000000004, 0.90000000000000002, 0.050000000000000003)"/>
+					<q key="auxQ1" value="('cyclicGen', 'linearUp', 0.20000000000000001, 0.40000000000000002, 0.050000000000000003)"/>
+					<q key="auxQ2" value="('cyclicGen', 'linearUp', 0.69999999999999996, 0.80000000000000004, 0.050000000000000003)"/>
+					<q key="auxQ3" value="('cyclicGen', 'linearUp', 0.20000000000000001, 0.34999999999999998, 0.050000000000000003)"/>
+					<q key="auxQ4" value="('cyclicGen', 'linearUp', 0.29999999999999999, 0.40000000000000002, 0.050000000000000003)"/>
+					<q key="auxQ5" value="('cyclicGen', 'linearUpDown', 6, 8, 1)"/>
+					<q key="auxQ6" value="('cyclicGen', 'linearUpDown', 1, 1, 0)"/>
+					<q key="auxQ7" value="('cyclicGen', 'linearUp', 4, 6, 1)"/>
+					<q key="auxQ8" value="('cyclicGen', 'linearUpDown', 3, 3, 0)"/>
+					<q key="auxQ9" value="('cyclicGen', 'linearUp', 0.5, 0.80000000000000004, 0.10000000000000001)"/>
+					<q key="beatT" value="('staticBeat', 30.0)"/>
+					<q key="fieldQ" value="('basketGen', 'orderedCyclic', [9, 9])"/>
+					<q key="inst" value="('staticInst', 6)"/>
+					<q key="octQ" value="('basketGen', 'orderedCyclic', [5, 5])"/>
+					<q key="panQ" value="('cyclicGen', 'linearDown', 0.29999999999999999, 0.69999999999999996, 0.080000000000000002)"/>
+					<q key="rhythmQ" value="((2, 3), (2, 5))"/>
+					<q key="tRange" value="('staticRange', (85, 87))"/>
+					<q key="textQ" value="([], 0)"/>
+				</pmtrQDict>
+				<attr key="polyphonyMode" value="part"/>
+				<attr key="tempermentName" value="12equal"/>
+				<attr key="textID" value="LineGroove"/>
+			</ti>
+			<ti name="e1">
+				<attr key="auxNo" value="0"/>
+				<attr key="pathName" value="diads"/>
+				<attr key="pitchMode" value="usr"/>
+				<pmtrQDict>
+					<q key="ampQ" value="('cyclicGen', 'linearDownUp', 2, 45, 4)"/>
+					<q key="beatT" value="('staticBeat', 30.0)"/>
+					<q key="fieldQ" value="('basketGen', 'orderedCyclic', [9, 9])"/>
+					<q key="inst" value="('staticInst', 3)"/>
+					<q key="octQ" value="('basketGen', 'randomChoice', [8, 8])"/>
+					<q key="panQ" value="('cyclicGen', 'linearDown', 0.59999999999999998, 1.0, 0.080000000000000002)"/>
+					<q key="rhythmQ" value="((16, 1), (16, 1))"/>
+					<q key="tRange" value="('staticRange', (36, 70))"/>
+					<q key="textQ" value="([], 0)"/>
+				</pmtrQDict>
+				<attr key="polyphonyMode" value="part"/>
+				<attr key="tempermentName" value="12equal"/>
+				<attr key="textID" value="LineGroove"/>
+			</ti>
+			<ti name="e1_">
+				<attr key="auxNo" value="0"/>
+				<attr key="pathName" value="diads"/>
+				<attr key="pitchMode" value="usr"/>
+				<pmtrQDict>
+					<q key="ampQ" value="('cyclicGen', 'linearDownUp', 0, 45, 4)"/>
+					<q key="beatT" value="('staticBeat', 31.088082901554408)"/>
+					<q key="fieldQ" value="('basketGen', 'orderedCyclic', [4, 4])"/>
+					<q key="inst" value="('staticInst', 3)"/>
+					<q key="octQ" value="('basketGen', 'randomChoice', [9, 9])"/>
+					<q key="panQ" value="('cyclicGen', 'linearDown', 0.59999999999999998, 1.0, 0.080000000000000002)"/>
+					<q key="rhythmQ" value="((16, 1), (16, 1))"/>
+					<q key="tRange" value="('staticRange', (36, 70))"/>
+					<q key="textQ" value="([], 0)"/>
+				</pmtrQDict>
+				<attr key="polyphonyMode" value="part"/>
+				<attr key="tempermentName" value="12equal"/>
+				<attr key="textID" value="LineGroove"/>
+			</ti>
+			<ti name="e2">
+				<attr key="auxNo" value="0"/>
+				<attr key="pathName" value="diads"/>
+				<attr key="pitchMode" value="usr"/>
+				<pmtrQDict>
+					<q key="ampQ" value="('cyclicGen', 'linearDownUp', 2, 55, 6)"/>
+					<q key="beatT" value="('staticBeat', 30.0)"/>
+					<q key="fieldQ" value="('basketGen', 'orderedCyclic', [9, 9])"/>
+					<q key="inst" value="('staticInst', 3)"/>
+					<q key="octQ" value="('basketGen', 'randomChoice', [8, 8, 7])"/>
+					<q key="panQ" value="('cyclicGen', 'linearUp', 0, 0.40000000000000002, 0.080000000000000002)"/>
+					<q key="rhythmQ" value="((16, 1), (32, 1))"/>
+					<q key="tRange" value="('staticRange', (42, 70))"/>
+					<q key="textQ" value="([], 0)"/>
+				</pmtrQDict>
+				<attr key="polyphonyMode" value="part"/>
+				<attr key="tempermentName" value="12equal"/>
+				<attr key="textID" value="LineGroove"/>
+			</ti>
+			<ti name="e2_">
+				<attr key="auxNo" value="0"/>
+				<attr key="pathName" value="diads"/>
+				<attr key="pitchMode" value="usr"/>
+				<pmtrQDict>
+					<q key="ampQ" value="('cyclicGen', 'linearDownUp', 2, 55, 6)"/>
+					<q key="beatT" value="('staticBeat', 28.037383177570092)"/>
+					<q key="fieldQ" value="('basketGen', 'orderedCyclic', [2, 2])"/>
+					<q key="inst" value="('staticInst', 3)"/>
+					<q key="octQ" value="('basketGen', 'randomChoice', [9, 9, 8])"/>
+					<q key="panQ" value="('cyclicGen', 'linearUp', 0, 0.40000000000000002, 0.080000000000000002)"/>
+					<q key="rhythmQ" value="((16, 1), (32, 1))"/>
+					<q key="tRange" value="('staticRange', (44, 70))"/>
+					<q key="textQ" value="([], 0)"/>
+				</pmtrQDict>
+				<attr key="polyphonyMode" value="part"/>
+				<attr key="tempermentName" value="12equal"/>
+				<attr key="textID" value="LineGroove"/>
+			</ti>
+			<ti name="e3">
+				<attr key="auxNo" value="0"/>
+				<attr key="pathName" value="diads"/>
+				<attr key="pitchMode" value="usr"/>
+				<pmtrQDict>
+					<q key="ampQ" value="('cyclicGen', 'linearDownUp', 2, 60, 6)"/>
+					<q key="beatT" value="('staticBeat', 30.0)"/>
+					<q key="fieldQ" value="('basketGen', 'orderedCyclic', [9, 9])"/>
+					<q key="inst" value="('staticInst', 3)"/>
+					<q key="octQ" value="('basketGen', 'randomChoice', [8, 8, 7])"/>
+					<q key="panQ" value="('cyclicGen', 'linearUp', 0, 0.40000000000000002, 0.080000000000000002)"/>
+					<q key="rhythmQ" value="((24, 1), (16, 1))"/>
+					<q key="tRange" value="('staticRange', (46, 70))"/>
+					<q key="textQ" value="([], 0)"/>
+				</pmtrQDict>
+				<attr key="polyphonyMode" value="part"/>
+				<attr key="tempermentName" value="12equal"/>
+				<attr key="textID" value="LineGroove"/>
+			</ti>
+			<ti name="e3_">
+				<attr key="auxNo" value="0"/>
+				<attr key="pathName" value="diads"/>
+				<attr key="pitchMode" value="usr"/>
+				<pmtrQDict>
+					<q key="ampQ" value="('cyclicGen', 'linearDownUp', 0, 60, 6)"/>
+					<q key="beatT" value="('staticBeat', 25.751072961373392)"/>
+					<q key="fieldQ" value="('basketGen', 'orderedCyclic', [9, 9])"/>
+					<q key="inst" value="('staticInst', 3)"/>
+					<q key="octQ" value="('basketGen', 'randomChoice', [9, 9, 8])"/>
+					<q key="panQ" value="('cyclicGen', 'linearUp', 0, 0.40000000000000002, 0.080000000000000002)"/>
+					<q key="rhythmQ" value="((24, 1), (16, 1))"/>
+					<q key="tRange" value="('staticRange', (47, 70))"/>
+					<q key="textQ" value="([], 0)"/>
+				</pmtrQDict>
+				<attr key="polyphonyMode" value="part"/>
+				<attr key="tempermentName" value="12equal"/>
+				<attr key="textID" value="LineGroove"/>
+			</ti>
+			<ti name="f1">
+				<attr key="auxNo" value="0"/>
+				<attr key="pathName" value="diady"/>
+				<attr key="pitchMode" value="usr"/>
+				<pmtrQDict>
+					<q key="ampQ" value="('cyclicGen', 'linearUp', 0, 65, 12)"/>
+					<q key="beatT" value="('staticBeat', 34.883720930232563)"/>
+					<q key="fieldQ" value="('basketGen', 'orderedCyclic', [9, 9])"/>
+					<q key="inst" value="('staticInst', 3)"/>
+					<q key="octQ" value="('basketGen', 'orderedCyclic', [8, 9, 8, 8, 9, 8, 8, 9, 8, 8, 8])"/>
+					<q key="panQ" value="('cyclicGen', 'linearDown', 0.59999999999999998, 1.0, 0.080000000000000002)"/>
+					<q key="rhythmQ" value="((16, 1), (16, 1))"/>
+					<q key="tRange" value="('staticRange', (64.332999999999998, 89.665999999999997))"/>
+					<q key="textQ" value="([], 0)"/>
+				</pmtrQDict>
+				<attr key="polyphonyMode" value="set"/>
+				<attr key="tempermentName" value="12equal"/>
+				<attr key="textID" value="LineGroove"/>
+			</ti>
+			<ti name="f1_">
+				<attr key="auxNo" value="0"/>
+				<attr key="pathName" value="diady"/>
+				<attr key="pitchMode" value="usr"/>
+				<pmtrQDict>
+					<q key="ampQ" value="('cyclicGen', 'linearDown', 0, 65, 16)"/>
+					<q key="beatT" value="('staticBeat', 54.054054054054049)"/>
+					<q key="fieldQ" value="('basketGen', 'orderedCyclic', [9, 9])"/>
+					<q key="inst" value="('staticInst', 3)"/>
+					<q key="octQ" value="('basketGen', 'orderedCyclic', [9, 9, 8, 10, 9, 9, 9, 9])"/>
+					<q key="panQ" value="('cyclicGen', 'linearDownUp', 0, 0.40000000000000002, 0.070000000000000007)"/>
+					<q key="rhythmQ" value="((16, 1), (16, 1))"/>
+					<q key="tRange" value="('staticRange', (62.600000000000001, 90.799999999999997))"/>
+					<q key="textQ" value="([], 0)"/>
+				</pmtrQDict>
+				<attr key="polyphonyMode" value="set"/>
+				<attr key="tempermentName" value="12equal"/>
+				<attr key="textID" value="LineGroove"/>
+			</ti>
+			<ti name="f2">
+				<attr key="auxNo" value="0"/>
+				<attr key="pathName" value="diady"/>
+				<attr key="pitchMode" value="usr"/>
+				<pmtrQDict>
+					<q key="ampQ" value="('cyclicGen', 'linearDownUp', 0, 65, 5)"/>
+					<q key="beatT" value="('staticBeat', 32.786885245901637)"/>
+					<q key="fieldQ" value="('basketGen', 'orderedCyclic', [9, 9])"/>
+					<q key="inst" value="('staticInst', 3)"/>
+					<q key="octQ" value="('basketGen', 'orderedCyclic', [8, 8, 8, 7, 9, 8, 8, 8])"/>
+					<q key="panQ" value="('cyclicGen', 'linearUp', 0, 0.40000000000000002, 0.080000000000000002)"/>
+					<q key="rhythmQ" value="((16, 1), (32, 1))"/>
+					<q key="tRange" value="('staticRange', (64, 89))"/>
+					<q key="textQ" value="([], 0)"/>
+				</pmtrQDict>
+				<attr key="polyphonyMode" value="set"/>
+				<attr key="tempermentName" value="12equal"/>
+				<attr key="textID" value="LineGroove"/>
+			</ti>
+			<ti name="f2_">
+				<attr key="auxNo" value="0"/>
+				<attr key="pathName" value="diady"/>
+				<attr key="pitchMode" value="usr"/>
+				<pmtrQDict>
+					<q key="ampQ" value="('cyclicGen', 'linearDownUp', 0, 64, 7)"/>
+					<q key="beatT" value="('staticBeat', 45.011252813203306)"/>
+					<q key="fieldQ" value="('basketGen', 'orderedCyclic', [9, 9])"/>
+					<q key="inst" value="('staticInst', 3)"/>
+					<q key="octQ" value="('basketGen', 'orderedCyclic', [9, 9, 8, 10, 9])"/>
+					<q key="panQ" value="('cyclicGen', 'linearDownUp', 0.40000000000000002, 0.90000000000000002, 0.050000000000000003)"/>
+					<q key="rhythmQ" value="((16, 1), (32, 1))"/>
+					<q key="tRange" value="('staticRange', (63.75, 90.25))"/>
+					<q key="textQ" value="([], 0)"/>
+				</pmtrQDict>
+				<attr key="polyphonyMode" value="set"/>
+				<attr key="tempermentName" value="12equal"/>
+				<attr key="textID" value="LineGroove"/>
+			</ti>
+			<ti name="f3">
+				<attr key="auxNo" value="0"/>
+				<attr key="pathName" value="diady"/>
+				<attr key="pitchMode" value="usr"/>
+				<pmtrQDict>
+					<q key="ampQ" value="('cyclicGen', 'linearUp', 0, 65, 13)"/>
+					<q key="beatT" value="('staticBeat', 34.482758620689651)"/>
+					<q key="fieldQ" value="('basketGen', 'orderedCyclic', [9, 9])"/>
+					<q key="inst" value="('staticInst', 3)"/>
+					<q key="octQ" value="('basketGen', 'orderedCyclic', [9, 8, 8, 8, 7])"/>
+					<q key="panQ" value="('cyclicGen', 'linearUp', 0, 0.40000000000000002, 0.080000000000000002)"/>
+					<q key="rhythmQ" value="((24, 1), (16, 1))"/>
+					<q key="tRange" value="('staticRange', (64, 91))"/>
+					<q key="textQ" value="([], 0)"/>
+				</pmtrQDict>
+				<attr key="polyphonyMode" value="set"/>
+				<attr key="tempermentName" value="12equal"/>
+				<attr key="textID" value="LineGroove"/>
+			</ti>
+			<ti name="f3_">
+				<attr key="auxNo" value="0"/>
+				<attr key="pathName" value="diady"/>
+				<attr key="pitchMode" value="usr"/>
+				<pmtrQDict>
+					<q key="ampQ" value="('cyclicGen', 'linearDownUp', 2, 64, 7)"/>
+					<q key="beatT" value="('staticBeat', 36.014405762304925)"/>
+					<q key="fieldQ" value="('basketGen', 'orderedCyclic', [9, 9])"/>
+					<q key="inst" value="('staticInst', 3)"/>
+					<q key="octQ" value="('basketGen', 'orderedCyclic', [9, 9, 8, 10, 9, 9])"/>
+					<q key="panQ" value="('cyclicGen', 'linearDownUp', 0.5, 0.94999999999999996, 0.040000000000000001)"/>
+					<q key="rhythmQ" value="((24, 1), (16, 1))"/>
+					<q key="tRange" value="('staticRange', (63.5, 91.5))"/>
+					<q key="textQ" value="([], 0)"/>
+				</pmtrQDict>
+				<attr key="polyphonyMode" value="set"/>
+				<attr key="tempermentName" value="12equal"/>
+				<attr key="textID" value="LineGroove"/>
+			</ti>
+		</textureObjects>
+		<textureClones>
+		</textureClones>
+		<attr key="MuteList" value="[]"/>
+	</textures>
+</athenaObject>

@@ -1,0 +1,98 @@
+# Jamfile for configuration Default of target "athenaCL" of project "athenaCL"
+
+
+JAVAC_SOURCE_FILE_ENCODING default = MacRoman ;
+
+# Implicitly computed project-wide settings for project "athenaCL"
+export deferred ANTICIPATED_BUILT_PRODUCTS_DIR = $(CONFIGURATION_BUILD_DIR) ;
+export deferred ANTICIPATED_TARGET_BUILD_DIR = $(CONFIGURATION_BUILD_DIR) ;
+export deferred BUILD_STYLE = "$(CONFIGURATION)" ;
+export deferred CONFIGURATION = Default ;
+export deferred CONFIGURATION_BUILD_DIR = $(BUILD_DIR)/$(CONFIGURATION) ;
+export deferred CONFIGURATION_TEMP_DIR = $(PROJECT_TEMP_DIR)/$(CONFIGURATION) ;
+export deferred DEVELOPMENT_LANGUAGE = English ;
+export deferred GROUP = ariza ;
+export deferred PROJECT = $(PROJECT_NAME) ;
+export deferred PROJECT_DIR = /Volumes/xdisc/_sync/_x/src/athenaCL/tools/util/aquaFront ;
+export deferred PROJECT_FILE_PATH = /Volumes/xdisc/_sync/_x/src/athenaCL/tools/util/aquaFront/athenaCL.xcodeproj ;
+export deferred PROJECT_NAME = athenaCL ;
+export deferred PROJECT_TEMP_DIR = $(OBJROOT)/$(PROJECT_NAME).build ;
+export deferred SRCROOT = /Volumes/xdisc/_sync/_x/src/athenaCL/tools/util/aquaFront ;
+export deferred TARGET_TEMP_DIR = $(CONFIGURATION_TEMP_DIR)/$(TARGET_NAME).build ;
+export deferred TEMP_DIR = $(TARGET_TEMP_DIR) ;
+export deferred USER = ariza ;
+
+# Project-wide settings for project "athenaCL"
+export deferred MACOSX_DEPLOYMENT_TARGET = 10.3 ;
+export deferred SDKROOT = /Developer/SDKs/MacOSX10.3.9.sdk ;
+
+# User-defined project-wide settings for project "athenaCL"
+
+# Build Settings for target "athenaCL"
+
+export deferred _INFO_PLIST_FILE_PATH = "$(TARGET_TEMP_DIR)/Info.plist" ;
+export deferred _PKGINFO_FILE_PATH = "$(TARGET_TEMP_DIR)/PkgInfo" ;
+export deferred _PBDEVELOPMENT_PLIST_FILE_PATH = "$(TARGET_TEMP_DIR)/pbdevelopment.plist" ;
+
+# Implicitly computed build settings for target "athenaCL"
+export deferred CLONE_HEADERS = NO ;
+export deferred PFE_FILE_C_DIALECTS = objective-c ;
+export deferred TARGETNAME = $(TARGET_NAME) ;
+export deferred TARGET_NAME = athenaCL ;
+
+# User-defined build settings for target "athenaCL"
+export deferred FRAMEWORK_SEARCH_PATHS =  ;
+export deferred HEADER_SEARCH_PATHS =  ;
+export deferred INSTALL_PATH = "$(HOME)/Applications" ;
+export deferred LIBRARY_SEARCH_PATHS =  ;
+export deferred OTHER_CFLAGS =  ;
+export deferred OTHER_LDFLAGS =  ;
+export deferred PRODUCT_NAME = athenaCL ;
+export deferred SECTORDER_FLAGS =  ;
+export deferred WARNING_CFLAGS = -Wmost -Wno-four-char-constants -Wno-unknown-pragmas ;
+export deferred WRAPPER_EXTENSION = app ;
+
+# Target "athenaCL"
+
+ConditionalDefinitions _ ;
+commitdeferred ;
+
+
+BeginApplication "<athenaCL>athenaCL.app" ;
+
+# Headers
+HEADERS = ;
+ProcessHeaders "<athenaCL>athenaCL.app" : "$(HEADERS)" : "" : BPTag000 ;
+
+# AppleScripts
+athenaCL.applescript_ATTRIBUTES = Debug ;
+APPLESCRIPTS = athenaCL.applescript ;
+CONTEXTNAME = "" ;
+ProcessApplescripts "<athenaCL>athenaCL.app" : "$(APPLESCRIPTS)" : BPTag000 : BPTag001 ;
+
+# Resources
+English.lproj/MainMenu.nib_REGION = English ;
+English.lproj/InfoPlist.strings_REGION = English ;
+RESOURCES =
+	English.lproj/MainMenu.nib
+	English.lproj/InfoPlist.strings
+	athenaCL.icns
+	csoundCLI.dmg ;
+ProcessResources "<athenaCL>athenaCL.app" : "$(RESOURCES)" : BPTag001 : BPTag002 ;
+
+# Sources
+main.m_ATTRIBUTES = ;
+SOURCES = main.m ;
+ProcessSources "<athenaCL>athenaCL.app" : "$(SOURCES)" : BPTag002 : BPTag003 ;
+
+# Frameworks & Libraries
+/System/Library/Frameworks/Cocoa.framework_ATTRIBUTES = AbsolutePath ;
+/System/Library/Frameworks/AppleScriptKit.framework_ATTRIBUTES = AbsolutePath ;
+FRAMEWORKS_AND_LIBRARIES =
+	/System/Library/Frameworks/Cocoa.framework
+	/System/Library/Frameworks/AppleScriptKit.framework ;
+ProcessFrameworksAndLibraries "<athenaCL>athenaCL.app" : "$(FRAMEWORKS_AND_LIBRARIES)" : BPTag003 : BPTag004 ;
+
+include $(TEMP_DIR)/HeaderDependencies.jam ;
+EndApplication "<athenaCL>athenaCL.app" ;
+

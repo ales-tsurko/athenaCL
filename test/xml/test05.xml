@@ -1,0 +1,83 @@
+<?xml version="1.0"?>
+<athenaObject>
+	<athena>
+		<attr key="date" value="Mon Jul 29 17:07:22 2002"/>
+		<attr key="version" value="1.0.15"/>
+		<attr key="TnItoggle" value="1"/>
+		<attr key="nchnls" value="2"/>
+		<attr key="author" value="athenaCL native"/>
+	</athena>
+	<paths>
+		<attr key="CurrentPath" value="chordA"/>
+		<pathObjects>
+			<pi name="chordA">
+				<attr key="pcsPath" value="[(2, 2, 2, 2, 2, 2, 7)]"/>
+				<attr key="field" value="[2]"/>
+				<attr key="ambitus" value="8"/>
+				<attr key="PathSizeType" value="noVL"/>
+				<attr key="scPath" value="[(2, 5, 0)]"/>
+				<attr key="CurrentPathVoice" value="auto"/>
+				<attr key="usrPath" value="[(2, 2, 2, 2, 2, 2, 7)]"/>
+			</pi>
+			<pi name="chordB">
+				<attr key="pcsPath" value="[(8, 8, 8, 8, 8, 8, 4)]"/>
+				<attr key="field" value="[4]"/>
+				<attr key="ambitus" value="8"/>
+				<attr key="PathSizeType" value="noVL"/>
+				<attr key="scPath" value="[(2, 4, 0)]"/>
+				<attr key="CurrentPathVoice" value="auto"/>
+				<attr key="usrPath" value="[(8, 8, 8, 8, 8, 8, -8)]"/>
+			</pi>
+		</pathObjects>
+		<attr key="CurrentPathEngine" value="PMclass.Morris_ASIM"/>
+	</paths>
+	<textures>
+		<attr key="CurrentTextureMod" value="LineGroove"/>
+		<attr key="CurrentTexture" value="beatB"/>
+		<textureObjects>
+			<ti name="beatA">
+				<attr key="tempermentName" value="12equal"/>
+				<attr key="pathName" value="chordA"/>
+				<attr key="pitchMode" value="usr"/>
+				<attr key="textID" value="LineGroove"/>
+				<pmtrQDict>
+					<q key="panQ" value="(0.59999999999999998, 1.0, 0.080000000000000002, 'linearDown')"/>
+					<q key="textQ" value="([], 0)"/>
+					<q key="inst" value="('staticInst', 4)"/>
+					<q key="beatT" value="('staticBeat', 40.0)"/>
+					<q key="rhythmQ" value="('loop', ((8, 1, 1), (8, 1, 1), (8, 1, 0), (8, 1, 1), (8, 1, 0), (8, 1, 1), (8, 1, 1), (8, 1, 0), (8, 1, 0), (8, 1, 1), (8, 1, 0)))"/>
+					<q key="fieldQ" value="([0], 'orderedCyclic')"/>
+					<q key="tRange" value="('staticRange', (0, 15))"/>
+					<q key="ampQ" value="(67, 69, 0.20000000000000001, 'linearDown')"/>
+					<q key="octQ" value="([6, 6, 6], 'randomChoice')"/>
+				</pmtrQDict>
+				<attr key="auxNo" value="0"/>
+				<attr key="polyphonyMode" value="set"/>
+			</ti>
+			<ti name="beatB">
+				<attr key="tempermentName" value="12equal"/>
+				<attr key="pathName" value="chordB"/>
+				<attr key="pitchMode" value="usr"/>
+				<attr key="textID" value="LineGroove"/>
+				<pmtrQDict>
+					<q key="panQ" value="(0.10000000000000001, 0.40000000000000002, 0.02, 'linearDown')"/>
+					<q key="textQ" value="([], 0)"/>
+					<q key="inst" value="('staticInst', 4)"/>
+					<q key="beatT" value="('staticBeat', 40.0)"/>
+					<q key="rhythmQ" value="('gaRhythm', ((8, 1, 1), (8, 1, 1), (8, 1, 0), (8, 1, 1), (8, 1, 0), (8, 1, 1), (8, 1, 1), (8, 1, 0), (8, 1, 0), (8, 1, 1), (8, 1, 0)), 0.69999999999999996, 0.035000000000000003, 0.14999999999999999)"/>
+					<q key="fieldQ" value="([0], 'orderedCyclic')"/>
+					<q key="tRange" value="('staticRange', (0, 15))"/>
+					<q key="ampQ" value="(68, 69, 0.20000000000000001, 'linearUp')"/>
+					<q key="octQ" value="([6, 6, 6], 'randomChoice')"/>
+				</pmtrQDict>
+				<attr key="auxNo" value="0"/>
+				<attr key="polyphonyMode" value="set"/>
+			</ti>
+		</textureObjects>
+		<textureClones>
+			<ti name="beatA">
+			</ti>
+		</textureClones>
+		<attr key="MuteList" value="[]"/>
+	</textures>
+</athenaObject>

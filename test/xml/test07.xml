@@ -1,0 +1,183 @@
+<?xml version="1.0"?>
+<athenaObject>
+	<athena>
+		<attr key="date" value="Fri Dec 13 00:13:26 2002"/>
+		<attr key="version" value="1.0.21"/>
+		<attr key="TnItoggle" value="1"/>
+		<attr key="nchnls" value="2"/>
+		<attr key="author" value="ariza"/>
+	</athena>
+	<paths>
+		<attr key="CurrentPath" value="phraseA-nonPart6"/>
+		<pathObjects>
+			<pi name="auto">
+				<attr key="CurrentPathVoice" value="auto"/>
+				<attr key="PathSizeType" value="vlMaps"/>
+				<attr key="ambitus" value="8"/>
+				<attr key="durFraction" value="[1, 1, 1]"/>
+				<attr key="field" value="[0, 0, 0]"/>
+				<pathVoiceSorts>
+					<attr key="BAL" value="{(1, 2): [(3, 4, 33), (3, 4, 13), (3, 4, 12), (3, 4, 36), (3, 4, 18), (3, 4, 26), (3, 4, 30), (3, 4, 10), (3, 4, 23), (3, 4, 14), (3, 4, 17), (3, 4, 34), (3, 4, 2), (3, 4, 3), (3, 4, 1), (3, 4, 22), (3, 4, 35), (3, 4, 31), (3, 4, 32), (3, 4, 6), (3, 4, 7), (3, 4, 19), (3, 4, 27), (3, 4, 29), (3, 4, 8), (3, 4, 9), (3, 4, 20), (3, 4, 15), (3, 4, 4), (3, 4, 16), (3, 4, 28), (3, 4, 11), (3, 4, 24), (3, 4, 5), (3, 4, 25), (3, 4, 21)], (0, 1): [(2, 3, 4), (2, 3, 6), (2, 3, 1), (2, 3, 2), (2, 3, 5), (2, 3, 3)]}"/>
+					<attr key="SMTH" value="{(1, 2): [(3, 4, 4), (3, 4, 1), (3, 4, 3), (3, 4, 14), (3, 4, 7), (3, 4, 11), (3, 4, 18), (3, 4, 6), (3, 4, 28), (3, 4, 10), (3, 4, 13), (3, 4, 2), (3, 4, 17), (3, 4, 32), (3, 4, 27), (3, 4, 8), (3, 4, 5), (3, 4, 9), (3, 4, 16), (3, 4, 22), (3, 4, 31), (3, 4, 12), (3, 4, 33), (3, 4, 25), (3, 4, 26), (3, 4, 21), (3, 4, 29), (3, 4, 19), (3, 4, 23), (3, 4, 15), (3, 4, 30), (3, 4, 35), (3, 4, 34), (3, 4, 36), (3, 4, 20), (3, 4, 24)], (0, 1): [(2, 3, 2), (2, 3, 6), (2, 3, 3), (2, 3, 4), (2, 3, 1), (2, 3, 5)]}"/>
+					<attr key="UNIF" value="{(1, 2): [(3, 4, 4), (3, 4, 1), (3, 4, 25), (3, 4, 7), (3, 4, 24), (3, 4, 3), (3, 4, 35), (3, 4, 11), (3, 4, 18), (3, 4, 31), (3, 4, 14), (3, 4, 19), (3, 4, 27), (3, 4, 8), (3, 4, 20), (3, 4, 10), (3, 4, 17), (3, 4, 23), (3, 4, 28), (3, 4, 29), (3, 4, 34), (3, 4, 6), (3, 4, 36), (3, 4, 5), (3, 4, 13), (3, 4, 26), (3, 4, 2), (3, 4, 15), (3, 4, 30), (3, 4, 21), (3, 4, 32), (3, 4, 12), (3, 4, 22), (3, 4, 9), (3, 4, 16), (3, 4, 33)], (0, 1): [(2, 3, 1), (2, 3, 3), (2, 3, 2), (2, 3, 5), (2, 3, 6), (2, 3, 4)]}"/>
+				</pathVoiceSorts>
+				<pathVoices>
+					<pv name="auto">
+						<attr key="maps" value="{(1, 2): (3, 4, 1), (0, 1): (2, 3, 1)}"/>
+						<attr key="ranks" value="{(1, 2): (2, 2, 15), (0, 1): (5, 1, 3)}"/>
+					</pv>
+				</pathVoices>
+				<attr key="pcsPath" value="[(0, 1), (0, 3, 7), (0, 2, 3, 6)]"/>
+				<attr key="scPath" value="[(2, 1, 0), (3, 11, 0), (4, 12, 0)]"/>
+				<attr key="usrPath" value="[(0, 1), (0, 3, 7), (0, 2, 3, 6)]"/>
+			</pi>
+			<pi name="phraseA">
+				<attr key="CurrentPathVoice" value="auto"/>
+				<attr key="PathSizeType" value="noVL"/>
+				<attr key="ambitus" value="8"/>
+				<attr key="durFraction" value="[1.5, 2, 2]"/>
+				<attr key="field" value="[9, 9, 2]"/>
+				<attr key="pcsPath" value="[(0, 11, 9, 0, 11, 9), (11, 9, 9, 11, 9, 9, 11, 9, 9), (9, 7, 7, 7, 2)]"/>
+				<attr key="scPath" value="[(3, 2, -1), (2, 2, 0), (3, 9, 0)]"/>
+				<attr key="usrPath" value="[(12, 11, 9, 12, 11, 9), (11, 9, 9, 11, 9, 9, 11, 9, 9), (9, 7, 7, 7, 2)]"/>
+			</pi>
+			<pi name="phraseA-nonPart">
+				<attr key="CurrentPathVoice" value="auto"/>
+				<attr key="PathSizeType" value="noVL"/>
+				<attr key="ambitus" value="8"/>
+				<attr key="durFraction" value="[1]"/>
+				<attr key="field" value="[7]"/>
+				<attr key="pcsPath" value="[(0, 11, 9, 0, 11, 9, 11, 9, 9, 11, 9, 9, 11, 9, 9, 9, 7, 7, 7, 2)]"/>
+				<attr key="scPath" value="[(5, 23, -1)]"/>
+				<attr key="usrPath" value="[(12, 11, 9, 12, 11, 9, 11, 9, 9, 11, 9, 9, 11, 9, 9, 9, 7, 7, 7, 2)]"/>
+			</pi>
+			<pi name="phraseA-nonPart2">
+				<attr key="CurrentPathVoice" value="auto"/>
+				<attr key="PathSizeType" value="noVL"/>
+				<attr key="ambitus" value="8"/>
+				<attr key="durFraction" value="[1]"/>
+				<attr key="field" value="[7]"/>
+				<attr key="pcsPath" value="[(0, 2, 11, 9, 0, 2, 11, 9, 11, 9, 9, 11, 9, 9, 11, 9, 9, 9, 7, 7, 7, 2)]"/>
+				<attr key="scPath" value="[(5, 23, -1)]"/>
+				<attr key="usrPath" value="[(12, 14, 11, 9, 12, 14, 11, 9, 11, 9, 9, 11, 9, 9, 11, 9, 9, 9, 7, 7, 7, 2)]"/>
+			</pi>
+			<pi name="phraseA-nonPart3">
+				<attr key="CurrentPathVoice" value="auto"/>
+				<attr key="PathSizeType" value="noVL"/>
+				<attr key="ambitus" value="8"/>
+				<attr key="durFraction" value="[1]"/>
+				<attr key="field" value="[7]"/>
+				<attr key="pcsPath" value="[(0, 11, 9, 0, 2, 11, 9, 11, 9, 9, 11, 9, 9, 11, 9, 9, 9, 7, 7, 7, 2)]"/>
+				<attr key="scPath" value="[(5, 23, -1)]"/>
+				<attr key="usrPath" value="[(12, 11, 9, 12, 14, 11, 9, 11, 9, 9, 11, 9, 9, 11, 9, 9, 9, 7, 7, 7, 2)]"/>
+			</pi>
+			<pi name="phraseA-nonPart4">
+				<attr key="CurrentPathVoice" value="auto"/>
+				<attr key="PathSizeType" value="noVL"/>
+				<attr key="ambitus" value="8"/>
+				<attr key="durFraction" value="[1]"/>
+				<attr key="field" value="[7]"/>
+				<attr key="pcsPath" value="[(0, 11, 9, 0, 2, 11, 9, 11, 9, 9, 11, 9, 9, 11, 9, 9, 9, 7, 7, 7, 2, 2)]"/>
+				<attr key="scPath" value="[(5, 23, -1)]"/>
+				<attr key="usrPath" value="[(12, 11, 9, 12, 14, 11, 9, 11, 9, 9, 11, 9, 9, 11, 9, 9, 9, 7, 7, 7, 2, 2)]"/>
+			</pi>
+			<pi name="phraseA-nonPart5">
+				<attr key="CurrentPathVoice" value="auto"/>
+				<attr key="PathSizeType" value="noVL"/>
+				<attr key="ambitus" value="8"/>
+				<attr key="durFraction" value="[1]"/>
+				<attr key="field" value="[7]"/>
+				<attr key="pcsPath" value="[(0, 11, 9, 0, 2, 11, 9, 11, 9, 9, 11, 9, 9, 11, 9, 9, 7, 7, 5, 4, 2, 2)]"/>
+				<attr key="scPath" value="[(7, 35, 0)]"/>
+				<attr key="usrPath" value="[(12, 11, 9, 12, 14, 11, 9, 11, 9, 9, 11, 9, 9, 11, 9, 9, 7, 7, 5, 4, 2, 2)]"/>
+			</pi>
+			<pi name="phraseA-nonPart6">
+				<attr key="CurrentPathVoice" value="auto"/>
+				<attr key="PathSizeType" value="noVL"/>
+				<attr key="ambitus" value="8"/>
+				<attr key="durFraction" value="[1]"/>
+				<attr key="field" value="[5]"/>
+				<attr key="pcsPath" value="[(0, 11, 9, 0, 2, 11, 9, 11, 9, 9, 11, 9, 9, 11, 9, 9, 9, 7, 7, 5, 2)]"/>
+				<attr key="scPath" value="[(6, 33, -1)]"/>
+				<attr key="usrPath" value="[(12, 11, 9, 12, 14, 11, 9, 11, 9, 9, 11, 9, 9, 11, 9, 9, 9, 7, 7, 5, 2)]"/>
+			</pi>
+			<pi name="test">
+				<attr key="CurrentPathVoice" value="auto"/>
+				<attr key="PathSizeType" value="noVL"/>
+				<attr key="ambitus" value="8"/>
+				<attr key="durFraction" value="[1, 1]"/>
+				<attr key="field" value="[6, 11]"/>
+				<attr key="pcsPath" value="[(0, 7, 9, 0, 6, 7, 0), (3, 2, 0, 11)]"/>
+				<attr key="scPath" value="[(4, 13, 1), (4, 3, 0)]"/>
+				<attr key="usrPath" value="[(0, 7, 9, 0, 6, 7, 0), (3, 2, 0, -1)]"/>
+			</pi>
+		</pathObjects>
+		<attr key="CurrentPathEngine" value="ASIM"/>
+	</paths>
+	<textures>
+		<attr key="CurrentTextureMod" value="MonophonicOrnament"/>
+		<attr key="CurrentTexture" value="wer"/>
+		<textureObjects>
+			<ti name="deadSpace">
+				<attr key="auxNo" value="0"/>
+				<attr key="pathName" value="phraseA-nonPart3"/>
+				<attr key="pitchMode" value="usr"/>
+				<pmtrQDict>
+					<q key="ampQ" value="('cg', 'lu', 0, 1, 0.10000000000000001)"/>
+					<q key="beatT" value="('staticBeat', 76)"/>
+					<q key="fieldQ" value="('basketGen', 'orderedCyclic', [0])"/>
+					<q key="inst" value="('staticInst', 9)"/>
+					<q key="octQ" value="([7, 8], 'randomChoice')"/>
+					<q key="panQ" value="(0.20000000000000001, 0.80000000000000004, 0.080000000000000002, 'linearDown')"/>
+					<q key="rhythmQ" value="('loop', ((2, 1, 1), (2, 3, 1), (4, 3, 0)))"/>
+					<q key="tRange" value="('staticRange', (39, 40))"/>
+					<q key="textQ0" value="('loopWithinSet', 'off')"/>
+				</pmtrQDict>
+				<attr key="polyphonyMode" value="set"/>
+				<attr key="tempermentName" value="12equal"/>
+				<attr key="textID" value="MonophonicOrnament"/>
+			</ti>
+			<ti name="wer">
+				<attr key="auxNo" value="0"/>
+				<attr key="pathName" value="phraseA-nonPart6"/>
+				<attr key="pitchMode" value="usr"/>
+				<pmtrQDict>
+					<q key="ampQ" value="('cg', 'lud', 89, 90, 0.125)"/>
+					<q key="beatT" value="('staticBeat', 76)"/>
+					<q key="fieldQ" value="('basketGen', 'orderedCyclic', [0])"/>
+					<q key="inst" value="('staticInst', 50)"/>
+					<q key="octQ" value="('bg', 'rc', 7)"/>
+					<q key="panQ" value="('c', 0.25)"/>
+					<q key="rhythmQ" value="('loop', ((4, 4, 1), (4, 5, 1), (4, 4, 1), (4, 7, 1), (4, 9, 1), (4, 7, 1), (4, 12, 1)))"/>
+					<q key="tRange" value="('staticRange', (1, 41))"/>
+					<q key="textQ0" value="('loopWithinSet', 'off')"/>
+				</pmtrQDict>
+				<attr key="polyphonyMode" value="set"/>
+				<attr key="tempermentName" value="12equal"/>
+				<attr key="textID" value="MonophonicOrnament"/>
+			</ti>
+			<ti name="wer2">
+				<attr key="auxNo" value="0"/>
+				<attr key="pathName" value="phraseA-nonPart6"/>
+				<attr key="pitchMode" value="usr"/>
+				<pmtrQDict>
+					<q key="ampQ" value="('cg', 'lud', 89, 90, 0.125)"/>
+					<q key="beatT" value="('staticBeat', 76)"/>
+					<q key="fieldQ" value="('basketGen', 'orderedCyclic', [0])"/>
+					<q key="inst" value="('staticInst', 50)"/>
+					<q key="octQ" value="('bg', 'rc', 7)"/>
+					<q key="panQ" value="('c', 0.75)"/>
+					<q key="rhythmQ" value="('loop', ((4, 4, 1), (4, 5, 1), (4, 4, 1), (4, 7, 1), (4, 9, 1), (4, 7, 1), (4, 12, 1)))"/>
+					<q key="tRange" value="('staticRange', (1, 41))"/>
+					<q key="textQ0" value="('loopWithinSet', 'off')"/>
+				</pmtrQDict>
+				<attr key="polyphonyMode" value="set"/>
+				<attr key="tempermentName" value="12noiseLight"/>
+				<attr key="textID" value="MonophonicOrnament"/>
+			</ti>
+		</textureObjects>
+		<textureClones>
+		</textureClones>
+		<attr key="MuteList" value="[]"/>
+	</textures>
+</athenaObject>

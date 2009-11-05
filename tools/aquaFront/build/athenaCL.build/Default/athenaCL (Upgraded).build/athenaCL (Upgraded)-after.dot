@@ -1,0 +1,57 @@
+digraph "athenaCL (Upgraded)" {
+   size = "10.000000,8.500000";
+   concentrate = false;
+
+   node [ shape = box, style = filled, color = "0.3 0.5 0.6", fillcolor = "0.3 0.2 0.9", fontname = "Monaco", fontsize = "9" ];
+   n00001 [ label = "Default/athenaCL.app\n185beee4589cc5c3f2f3e586d7d4e2b3\nDepsUpdated", color = "0.1 0.5 0.5", fillcolor = "0.1 0.2 0.9", peripheries = 3 ];
+   n00002 [ label = "Contents/Info.plist\n0e418cb99fce050d8615b2b5d81fd7a7\nDepsUpdated", color = "0.1 0.5 0.5", fillcolor = "0.1 0.2 0.9" ];
+   n00003 [ label = "athenaCL (Upgraded).build/Info.plist\n00000000468d93ae0000000000000305\nUpToDate" ];
+   n00004 [ label = "Contents/PkgInfo\na353b4936a5fc719f983f2f8c4b0012b\nDepsUpdated", color = "0.1 0.5 0.5", fillcolor = "0.1 0.2 0.9" ];
+   n00005 [ label = "athenaCL (Upgraded).build/PkgInfo\n00000000468d93ae0000000000000008\nUpToDate" ];
+   n00006 [ label = "Scripts/athenaCL.scpt\nccca757ddc62c2334bdbc6ec22cb8962\nUpToDate" ];
+   n00007 [ label = "aquaFront/athenaCL.applescript\n00000000468d54730000000000002889\nUpToDate" ];
+   n00008 [ label = "English.lproj/MainMenu.nib\nbd69ac461d5d6932a92c9fc9b43f1dc6\nUpToDate" ];
+   n00009 [ label = "English.lproj/MainMenu.nib\n00000000468d54d20000000000000110\nUpToDate" ];
+   n00010 [ label = "English.lproj/InfoPlist.strings\nb59174138dd0809810a264012c418654\nUpToDate" ];
+   n00011 [ label = "English.lproj/InfoPlist.strings\n00000000468d921f000000000000022c\nUpToDate" ];
+   n00012 [ label = "Resources/athenaCL.icns\n0d2b8e3a912970c963d1c2b98a0bdd2d\nUpToDate" ];
+   n00013 [ label = "aquaFront/athenaCL.icns\n0000000045193816000000000000e0fb\nUpToDate" ];
+   n00014 [ label = "ppc/main.o\n5cc70b28ff7f65dfe376aa413451f3b2\nMissing", color = "0.1 0.5 0.5", fillcolor = "0.1 0.2 0.9" ];
+   n00015 [ label = "aquaFront/main.m\n000000004519381800000000000002cf\nUpToDate" ];
+   n00016 [ label = "MacOS/athenaCL\n5a9d94954d05aae34d7b9735cfce16ee\nDepsUpdated", color = "0.1 0.5 0.5", fillcolor = "0.1 0.2 0.9" ];
+   n00017 [ label = "Frameworks/Cocoa.framework[C]\n00000000437e11b100000000000000cc\nUpToDate" ];
+   n00018 [ label = "Frameworks/AppleScriptKit.framework[C]\n00000000437e11af00000000000000cc\nUpToDate" ];
+
+   node [ shape = box, style = "filled,bold", color = "0.7 0.5 0.7", fillcolor = "0.7 0.2 1.0", fontname = "Monaco", fontsize = "9" ];
+   c00001 [ label = "PBXCp Info.plist <wt:0>\nwaitCount: 0\n00000000468d93ae0000000000000305\n^ 0e418cb9d94396a38615b2b5d81fd4a2\n= 0e418cb99fce050d8615b2b5d81fd7a7\nNeedsToRun\nNeeds to run because at least one of the outputs of the command is has an older timestamp than at least one of the inputs.", color = "0.6 0.5 0.7", fillcolor = "0.6 0.2 1.0" ];
+   c00002 [ label = "PBXCp PkgInfo <wt:0>\nwaitCount: 0\n00000000000000000000000000000000\n^ a353b4936a5fc719f983f2f8c4b0012b\n= a353b4936a5fc719f983f2f8c4b0012b\nNeedsToRun\nNeeds to run because at least one of the outputs of the command is has an older timestamp than at least one of the inputs.", color = "0.6 0.5 0.7", fillcolor = "0.6 0.2 1.0" ];
+   c00003 [ label = "OSACompile athenaCL.scpt <wt:4>\nwaitCount: 0\n00000000468d54730000000000002889\n^ ccca757d9aef96404bdbc6ec22cba1eb\n= ccca757ddc62c2334bdbc6ec22cb8962\nDoesNotNeedToRun\n(no 'why' info)" ];
+   c00004 [ label = "CpResource MainMenu.nib <wt:6>\nwaitCount: 0\n00000000000000000000000000000000\n^ bd69ac461d5d6932a92c9fc9b43f1dc6\n= bd69ac461d5d6932a92c9fc9b43f1dc6\nDoesNotNeedToRun\n(no 'why' info)" ];
+   c00005 [ label = "CpResource InfoPlist.strings <wt:6>\nwaitCount: 0\n00000000000000000000000000000000\n^ b59174138dd0809810a264012c418654\n= b59174138dd0809810a264012c418654\nDoesNotNeedToRun\n(no 'why' info)" ];
+   c00006 [ label = "CpResource athenaCL.icns <wt:6>\nwaitCount: 0\n00000000000000000000000000000000\n^ 0d2b8e3a912970c963d1c2b98a0bdd2d\n= 0d2b8e3a912970c963d1c2b98a0bdd2d\nDoesNotNeedToRun\n(no 'why' info)" ];
+   c00007 [ label = "CompileC main.o <wt:8>\nwaitCount: 0\n000000004519381800000000000002cf\n^ 5cc70b28ba665dc7e376aa413451f17d\n= 5cc70b28ff7f65dfe376aa413451f3b2\nNeedsToRun\n1 output is missing", color = "0.6 0.5 0.7", fillcolor = "0.6 0.2 1.0" ];
+   c00008 [ label = "Ld athenaCL <wt:8>\nwaitCount: 0\n5cc70b28ff7f65c1e376aa413451f3b2\n^ 065a9fbdb27acf22ae0d3d74fb9fe55c\n= 5a9d94954d05aae34d7b9735cfce16ee\nIndirectlyNeedsToRun\nNeeds to run because at least one of the inputs to the command are scheduled to be updated.", color = "0.6 0.5 0.7", fillcolor = "0.6 0.2 1.0" ];
+   c00009 [ label = "Touch athenaCL.app <wt:11>\nwaitCount: 0\n3e968fad655233a7a36928e5e3df0fbf\n^ 26cd61493dcef664519acd63340bed0c\n= 185beee4589cc5c3f2f3e586d7d4e2b3\nIndirectlyNeedsToRun\nNeeds to run because at least one of the inputs to the command are scheduled to be updated.", color = "0.6 0.5 0.7", fillcolor = "0.6 0.2 1.0" ];
+
+   edge [ style = solid, color = black, arrowhead = none, arrowtail = normal ];
+   n00001 -> { c00009 };
+   n00002 -> { c00001 };
+   n00004 -> { c00002 };
+   n00006 -> { c00003 };
+   n00008 -> { c00004 };
+   n00010 -> { c00005 };
+   n00012 -> { c00006 };
+   n00014 -> { c00007 };
+   n00016 -> { c00008 };
+   c00001 -> { n00003 };
+   c00002 -> { n00005 n00005 };
+   c00003 -> { n00007 };
+   c00004 -> { n00009 n00009 };
+   c00005 -> { n00011 n00011 };
+   c00006 -> { n00013 n00013 };
+   c00007 -> { n00015 };
+   c00008 -> { n00014 n00017 n00018 };
+   c00009 -> { n00002 n00004 n00006 n00008 n00010 n00012 n00016 };
+
+   edge [ style = solid, color = gray60, arrowhead = none, arrowtail = normal ];
+}
