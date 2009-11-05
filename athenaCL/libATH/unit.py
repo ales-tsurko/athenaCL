@@ -9,6 +9,8 @@
 #-----------------------------------------------------------------||||||||||||--
 
 import copy
+import unittest, doctest
+
 from athenaCL.libATH import drawer
 _MOD = 'unit.py'
 #-----------------------------------------------------------------||||||||||||--
@@ -45,7 +47,7 @@ def tableMinMax(table):
 def unitNormRange(series, fixRange=None):
     """read all values from a a list
     normalize values wihtin min and maximum of series
-    >>> unit.unitNormRange([0,3,4])
+    >>> unitNormRange([0,3,4])
     [0.0, 0.75, 1.0]
     """
     if fixRange != None:
@@ -73,7 +75,7 @@ def unitNormRange(series, fixRange=None):
 def unitNormRangeTable(table, fixRange=None):
     """read all values from a a list
     normalize values wihtin min and maximum of series
-    >>> unit.unitNormRangeTable([[4,-2],[234,0],[3,7]])
+    >>> unitNormRangeTable([[4,-2],[234,0],[3,7]])
     [[0.025423728813559324, 0.0], [1.0, 0.0084745762711864406], 
         [0.021186440677966101, 0.038135593220338986]]
     """
@@ -103,7 +105,7 @@ def unitNormRangeTable(table, fixRange=None):
 def unitNormEqual(parts):
     """given a certain number of parts, return a list unit-interval values
     between 0 and 1, w/ as many divisions as parts; 0 and 1 always inclusive
-    >>> unit.unitNormEqual(3)
+    >>> unitNormEqual(3)
     [0.0, 0.5, 1]
     """
     if parts <= 1: return [0]
@@ -120,9 +122,9 @@ def unitNormStep(step, a=0, b=1):
     """given a step size and an a/b min/max range, calculate number of parts
     to fill step through inclusive a,b
     then return a unit interval list of values necessary to cover region
-    >>> unit.unitNormStep(.5, 0, 1)
+    >>> unitNormStep(.5, 0, 1)
     [0.0, 0.5, 1]
-    >>> unit.unitNormStep(.5, -1, 1)
+    >>> unitNormStep(.5, -1, 1)
     [0.0, 0.25, 0.5, 0.75, 1]
     """
     if a == b: return [] # no range, return boundary
@@ -144,9 +146,9 @@ def unitNormProportion(series):
     """normalize values w/n unit interval, where max is determined
     by the sum of the series (proportional section of total)
     this is the same as that used for durFraction in Path
-    >>> unit.unitNormProportion([0,3,4])
+    >>> unitNormProportion([0,3,4])
     [0.0, 0.42857142857142855, 0.5714285714285714]
-    >>> unit.unitNormProportion([1,1,1])
+    >>> unitNormProportion([1,1,1])
     [0.33333333333333331, 0.33333333333333331, 0.33333333333333331]
     """
     # note: negative values should be shifted to positive region first
@@ -170,13 +172,13 @@ def unitNormAccumulate(series):
     than in source
     0, 0+n1, 0+n2, 0+n3
 
-    >>> unit.unitNormAccumulate([.4,.1,.4,.1])
+    >>> unitNormAccumulate([.4,.1,.4,.1])
     [0.0, 0.40000000000000002, 0.5, 0.90000000000000002, 1.0]
     
-    >>> unit.unitNormAccumulate([.8,.2,.5,.1])
+    >>> unitNormAccumulate([.8,.2,.5,.1])
     [0.0, 0.5, 0.625, 0.9375, 1.0]
     
-    >>> unit.unitNormAccumulate([.5,.5,.5])
+    >>> unitNormAccumulate([.5,.5,.5])
     [0.0, 0.33333333333333331, 0.66666666666666663, 1.0]
     """
     t = 0
@@ -242,7 +244,7 @@ def unitBoundaryEqual(parts):
     """return a list of min/mean/max values for a unit interval divided
     into user supplied partions
     note: lower and upper boundaries do overlap
-    >>> unit.unitBoundaryEqual(3)
+    >>> unitBoundaryEqual(3)
     [(0, 0.16666666666666666, 0.33333333333333331), (0.33333333333333331, 0.5,      
     0.66666666666666663), (0.66666666666666663, 0.83333333333333326, 1.0)]
     """
@@ -264,7 +266,7 @@ def unitBoundaryEqual(parts):
 def unitBoundaryFree(series):
     """take an arbitrary series, and create unit boundaries
     for n members of a series, there will be n-1 boundaries
-    >>> unit.unitBoundaryFree([0,3,4])
+    >>> unitBoundaryFree([0,3,4])
     [(0.0, 0.375, 0.75), (0.75, 0.875, 1.0)]
     """
     unit = unitNormRange(series)
@@ -285,7 +287,7 @@ def unitBoundaryProportion(series):
     """take an series of parts of an implied sum, create unit boundaries
     for n members of a series, there will be n boundaries
     note: zero cannot be an entry (not a valid proportion)
-    >>> unit.unitBoundaryProportion([1,1,2])
+    >>> unitBoundaryProportion([1,1,2])
     [(0, 0.125, 0.25), (0.25, 0.375, 0.5), (0.5, 0.75, 1.0)]
     """
     # series cannot have non-specified values, that is, 0
@@ -596,5 +598,22 @@ class FunnelUnit:
             print self.findNearest(x/float(max))
 
 
+#-----------------------------------------------------------------||||||||||||--
 
 
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
+
+
+#-----------------------------------------------------------------||||||||||||--
+
+
+
+if __name__ == '__main__':
+    from athenaCL.test import baseTest
+    baseTest.main(Test)
