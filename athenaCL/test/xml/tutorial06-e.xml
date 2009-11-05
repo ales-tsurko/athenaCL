@@ -1,0 +1,116 @@
+<?xml version="1.0"?>
+<athenaObject>
+	<athena>
+		<attr key="activeEventMode" value="midi"/>
+		<attr key="author" value="ariza"/>
+		<attr key="date" value="Wed Jun  1 21:51:39 2005"/>
+		<attr key="nchnls" value="2"/>
+		<attr key="tniMode" value="0"/>
+		<attr key="version" value="1.4.0"/>
+	</athena>
+	<paths>
+		<attr key="activePath" value="q1"/>
+		<attr key="activeSetMeasure" value="ASIM"/>
+		<pathLib>
+			<pi name="q1">
+				<attr key="activeVoice" value="auto"/>
+				<attr key="ambitus" value="0"/>
+				<attr key="durFraction" value="[8, 5, 3]"/>
+				<attr key="field" value="[8, 6, 3]"/>
+				<attr key="pcsPath" value="[(2, 8, 9, 2, 4, 11, 9), (0, 1, 6, 7, 9), (8, 9, 3, 4)]"/>
+				<attr key="psPath" value="[(-22, -4, -3, -10, -20, -13, -15), (0, 1, -6, 7, -3), (20, 9, 3, 16)]"/>
+				<attr key="scPath" value="[(5, 29, 1), (5, 19, 1), (4, 8, 0)]"/>
+			</pi>
+		</pathLib>
+	</paths>
+	<textures>
+		<attr key="activeTexture" value="a1"/>
+		<attr key="activeTextureModule" value="LineGroove"/>
+		<cloneLib>
+		</cloneLib>
+		<attr key="midiTempo" value="120"/>
+		<textureLib>
+			<ti name="a1">
+				<attr key="auxNo" value="0"/>
+				<attr key="midiCh" value="None"/>
+				<attr key="midiPgm" value="0"/>
+				<attr key="mute" value="0"/>
+				<attr key="orcMapMode" value="1"/>
+				<attr key="pathName" value="q1"/>
+				<attr key="pitchMode" value="ps"/>
+				<pmtrQDict>
+					<attr key="ampQ" value="('bg', 'rc', [0.5, 0.59999999999999998, 0.80000000000000004, 1])"/>
+					<attr key="beatT" value="('c', 120)"/>
+					<attr key="fieldQ" value="('constant', 0)"/>
+					<attr key="inst" value="('staticInst', 0, 'generalMidi')"/>
+					<attr key="octQ" value="('constant', 0)"/>
+					<attr key="panQ" value="('constant', 0.5)"/>
+					<attr key="rhythmQ" value="('l', [[4, 1, 1], [4, 1, 1], [4, 3, 0], [2, 3, 1], [3, 2, 1], [3, 2, 1]], 'oo')"/>
+					<attr key="tRange" value="('staticRange', (0, 20))"/>
+					<attr key="textQ0" value="('loopWithinSet', 'on')"/>
+					<attr key="textQ1" value="('maxTimeOffset', 0.040000000000000001)"/>
+					<attr key="textQ2" value="('levelFieldPolyphonic', 'event')"/>
+					<attr key="textQ3" value="('levelOctavePolyphonic', 'event')"/>
+				</pmtrQDict>
+				<attr key="polyphonyMode" value="set"/>
+				<attr key="silenceMode" value="0"/>
+				<attr key="temperamentName" value="NoiseMedium"/>
+				<attr key="tmName" value="LiteralVertical"/>
+			</ti>
+			<ti name="b1">
+				<attr key="auxNo" value="0"/>
+				<attr key="midiCh" value="None"/>
+				<attr key="midiPgm" value="0"/>
+				<attr key="mute" value="0"/>
+				<attr key="orcMapMode" value="1"/>
+				<attr key="pathName" value="q1"/>
+				<attr key="pitchMode" value="pcs"/>
+				<pmtrQDict>
+					<attr key="ampQ" value="('constant', 0.90000000000000002)"/>
+					<attr key="beatT" value="('c', 120)"/>
+					<attr key="fieldQ" value="('constant', 0)"/>
+					<attr key="inst" value="('staticInst', 0, 'generalMidi')"/>
+					<attr key="octQ" value="('bg', 'oc', [-3, -2, 2, -1])"/>
+					<attr key="panQ" value="('c', 0.90000000000000002)"/>
+					<attr key="rhythmQ" value="('mp', 'a{6,1,1}b{3,2,0}c{3,5,1}:{a=5|b=3|c=2}', ['c', 0])"/>
+					<attr key="tRange" value="('staticRange', (0, 20))"/>
+					<attr key="textQ0" value="('parallelMotionList', [], 0.0)"/>
+					<attr key="textQ1" value="('nonRedundantSwitch', 'on')"/>
+					<attr key="textQ2" value="('levelFieldMonophonic', 'event')"/>
+					<attr key="textQ3" value="('levelOctaveMonophonic', 'event')"/>
+				</pmtrQDict>
+				<attr key="polyphonyMode" value="set"/>
+				<attr key="silenceMode" value="0"/>
+				<attr key="temperamentName" value="NoiseLight"/>
+				<attr key="tmName" value="LineGroove"/>
+			</ti>
+			<ti name="b2">
+				<attr key="auxNo" value="0"/>
+				<attr key="midiCh" value="None"/>
+				<attr key="midiPgm" value="0"/>
+				<attr key="mute" value="0"/>
+				<attr key="orcMapMode" value="1"/>
+				<attr key="pathName" value="q1"/>
+				<attr key="pitchMode" value="pcs"/>
+				<pmtrQDict>
+					<attr key="ampQ" value="('constant', 0.90000000000000002)"/>
+					<attr key="beatT" value="('c', 120)"/>
+					<attr key="fieldQ" value="('constant', 0)"/>
+					<attr key="inst" value="('staticInst', 0, 'generalMidi')"/>
+					<attr key="octQ" value="('bg', 'oc', [-3, -2, 2, -1])"/>
+					<attr key="panQ" value="('c', 0.10000000000000001)"/>
+					<attr key="rhythmQ" value="('mp', 'a{6,1,1}b{3,2,0}c{3,5,1}:{a=5|b=3|c=2}', ['c', 0])"/>
+					<attr key="tRange" value="('staticRange', (0, 20))"/>
+					<attr key="textQ0" value="('parallelMotionList', [], 0.0)"/>
+					<attr key="textQ1" value="('nonRedundantSwitch', 'on')"/>
+					<attr key="textQ2" value="('levelFieldMonophonic', 'event')"/>
+					<attr key="textQ3" value="('levelOctaveMonophonic', 'set')"/>
+				</pmtrQDict>
+				<attr key="polyphonyMode" value="set"/>
+				<attr key="silenceMode" value="0"/>
+				<attr key="temperamentName" value="NoiseLight"/>
+				<attr key="tmName" value="LineGroove"/>
+			</ti>
+		</textureLib>
+	</textures>
+</athenaObject>
