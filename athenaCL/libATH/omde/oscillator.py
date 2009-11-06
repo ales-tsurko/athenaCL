@@ -5,7 +5,7 @@
 # Authors:       Maurizio Umberto Puxeddu
 #                    Christopher Ariza
 #
-# Copyright:     (c) 2001-2007 Christopher Ariza
+# Copyright:     (c) 2001-2009 Christopher Ariza
 # Copyright:     (c) 2000-2001 Maurizio Umberto Puxeddu
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
@@ -20,12 +20,28 @@ Oscillating function translated and normalized in the [0,1] range
 # frequency; otherwise, initially supplied fq is used
 # an initial fq can be none
 
+
+import copy
+import unittest, doctest
 from math import pow, fmod, sin, cos, pi
 from athenaCL.libATH.omde.functional import Function
 
 class Sine(Function):
     """
-    Sinusoid translated in the [0,1] range
+    Sinusoid translated in the [0,1] range.
+    This means that at t=0 the value is .5
+
+    >>> a = Sine(.5)
+    >>> a(0)
+    0.5
+    >>> a(.5)
+    1.0
+    >>> a(1.0)
+    0.5000...
+    >>> a(1.5)
+    0.0
+    >>> a(2.0)
+    0.4999...
     """
     def __init__(self, frequency=1.0, phase0=0.0):
         Function.__init__(self)
@@ -41,6 +57,18 @@ class Sine(Function):
 class Cosine(Function):
     """
     Cosinusoid translated in the [0,1] range
+
+    >>> a = Cosine(.5)
+    >>> a(0)
+    1.0
+    >>> a(.5)
+    0.5
+    >>> a(1.0)
+    0.0
+    >>> a(1.5)
+    0.499...
+    >>> a(2.0)
+    1.0
     """
     def __init__(self, frequency=1.0, phase0=0.0):
         Function.__init__(self)
@@ -142,11 +170,13 @@ class Square(Function):
     def __init__(self, frequency=1.0, phase0=0.0):
         Function.__init__(self)
         self.frequency = frequency
+        # this is time per period
         self.T = None # require when called
         self.phase0 = phase0
     
     def __call__(self, t, f=None):
-        if f != None: self.T = 1.0 / f
+        if f != None:
+            self.T = 1.0 / f
         if self.T == None:
             self.T = 1.0 / self.frequency
 
@@ -186,36 +216,22 @@ class Triangle(Function):
             return 1.0 - (t - (self.T * .5))/ (self.T * .5)
 
 
+#-----------------------------------------------------------------||||||||||||--
+
+
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
+
+
+#-----------------------------------------------------------------||||||||||||--
 
 
 
 if __name__ == '__main__':
-    f1 = Sine(1.0)
-    f2 = Cosine(1.0)
-    f3 = SawUp(1.0)
-    f4 = SawDown(1.0)
-    f5 = PowerUp(1.0, 0, 1.0)
-    f6 = PowerUp(1.0, 0, 2.0)
-    f7 = PowerUp(1.0, 0, -1.0)
-    f8 = PowerDown(1.0, 0, 1.0)
-    f9 = PowerDown(1.0, 0, 2.0)
-    f10 = PowerDown(1.0, 0, -1.0)
-    f11 = Square(1.0)
-    f12 = Triangle(1.0)
-    f13 = Sine(1.0, 0.3)
-    f14 = Cosine(1.0, 0.3)
-    f15 = SawUp(1.0, 0.3)
-    f16 = PowerUp(1.0, 0.3, 2.0)
-    f17 = PowerDown(1.0, 0.3, 2.0)
-    f18 = Square(1.0, 0.3)
-    f19 = Triangle(1.0, 0.3)
-    
-    t = -2.0
-    step = 0.01
-    for i in range(401):
-        #print t, f1(t)
-        print t, f1(t), f2(t), f3(t), f4(t), f5(t), f6(t), f7(t), f8(t), f9(t), f10(t), f11(t), f12(t), f13(t), f14(t), f15(t), f16(t), f17(t), f18(t), f19(t)
-        t += step
-        
-    
-    # end
+    from athenaCL.test import baseTest
+    baseTest.main(Test)
