@@ -8,6 +8,9 @@
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
 
+import textwrap
+
+
 from athenaCL.libATH import drawer
 from athenaCL.libATH import language
 lang = language.LangObj()
