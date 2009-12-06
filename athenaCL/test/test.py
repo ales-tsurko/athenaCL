@@ -84,11 +84,15 @@ class ModuleGather(object):
 #             modules.append(mod)
 
         from athenaCL.libATH import unit
+        from athenaCL.libATH import prefTools
+
         from athenaCL.libATH.omde import oscillator
 
         modules = []
         modules.append(unit)
         modules.append(oscillator)
+        modules.append(prefTools)
+
 
         return modules
 

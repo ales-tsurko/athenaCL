@@ -4,15 +4,21 @@
 #
 # Authors:       Christopher Ariza
 #
-# Copyright:     (c) 2001-2005 Christopher Ariza
+# Copyright:     (c) 2001-2009 Christopher Ariza
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
 
     
 import xml.dom.minidom
+import unittest, doctest
+
 from athenaCL.libATH import drawer
 from athenaCL.libATH import xmlTools
 from athenaCL.libATH import imageTools # for updating old image names
+
+_MOD = 'prefTools.py'
+#-----------------------------------------------------------------||||||||||||--
+
 
 
 CSDOFF = 'csdOff'
@@ -34,6 +40,10 @@ def getCategoryDefaultDict(platform, category):
     
     note: external prefs are read by osTools.openMedia by key value; 
     it is necessary that keys start with the appropriate format strings
+
+    >>> a = getCategoryDefaultDict('win', 'external')
+    >>> a['audioFileFormat']
+    'wav'
     """
     # common to all, some may be chagned in patform specific below
     if category == 'external':
@@ -140,6 +150,10 @@ def getCategoryDefaultDict(platform, category):
 def getDefaultDict(platform):
     """ gets all catgtegories for a given platform
          when update prefs, checks default and provides missing value
+
+    >>> a = getDefaultDict('win')
+    >>> a['external']['audioFileFormat']
+    'wav'
     """
     prefDict = {}
     prefDict['external'] = getCategoryDefaultDict(platform, 'external')
@@ -221,5 +235,29 @@ def getXmlPrefDict(prefFilePath):
     else: # cant load this data, get new data
         return {} # will fice an updates of all prefs
 
+
+
+
+
+
+#-----------------------------------------------------------------||||||||||||--
+
+
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
+
+
+#-----------------------------------------------------------------||||||||||||--
+
+
+
+if __name__ == '__main__':
+    from athenaCL.test import baseTest
+    baseTest.main(Test)
 
 
