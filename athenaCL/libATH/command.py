@@ -9880,7 +9880,7 @@ class template(Command):
 #-----------------------------------------------------------------||||||||||||--
 
 
-class Test:
+class TestOld:
     def __init__(self):
         # build temporary environment
         from athenaCL import athenaObj
@@ -9916,6 +9916,6 @@ class Test:
             print method()
 
 if __name__ == '__main__':
-    Test()
+    TestOld()
 
 

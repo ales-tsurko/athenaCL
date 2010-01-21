@@ -27,7 +27,8 @@ class ModuleGather(object):
         from music21 import base
         self.dirParent = os.path.dirname(athenaObj.__file__)
         self.modulePaths = []    
-        self.moduleSkip = []
+        # skip interactive loader application
+        self.moduleSkip = ['athenacl.py', 'test.py']
         self.pathSkip = []
         self._walk()
 
@@ -45,7 +46,7 @@ class ModuleGather(object):
         self.modulePaths.reverse()
 
     def _getName(self, fp):
-        '''Given full file path, find a name for the the module
+        '''Given full file path, find a name for the module
         '''
         fn = fp.replace(self.dirParent, '') # remove parent
         if fn.startswith(os.sep):
@@ -56,42 +57,42 @@ class ModuleGather(object):
 
      
     def load(self):
-#         loadPass = []
-#         loadFail = []
-#         modules = []
-#         for fp in self.modulePaths:
-#             skip = False
-#             for fnSkip in self.moduleSkip:
-#                 if fp.endswith(fnSkip):
-#                     skip = True   
-#                     break    
-#             for dirSkip in self.pathSkip:
-#                 if dirSkip in fp:
-#                     skip = True  
-#                     break
-#             if skip:
-#                 continue
-# 
-#             name = self._getName(fp)
-# 
-#             try:
-#                 mod = imp.load_source(name, fp)
-#             except Exception as excp: # this takes all exceptions!
-#                 msg = ['failed import:', fp, '\n', 
-#                     '\tEXCEPTION:', str(excp).strip()]
-#                 print(' '.join(msg))
-#                 continue
-#             modules.append(mod)
-
-        from athenaCL.libATH import unit
-        from athenaCL.libATH import prefTools
-
-        from athenaCL.libATH.omde import oscillator
-
+        loadPass = []
+        loadFail = []
         modules = []
-        modules.append(unit)
-        modules.append(oscillator)
-        modules.append(prefTools)
+        for fp in self.modulePaths:
+            skip = False
+            for fnSkip in self.moduleSkip:
+                if fp.endswith(fnSkip):
+                    skip = True   
+                    break    
+            for dirSkip in self.pathSkip:
+                if dirSkip in fp:
+                    skip = True  
+                    break
+            if skip:
+                continue
+
+            name = self._getName(fp)
+
+            try:
+                mod = imp.load_source(name, fp)
+            except Exception as excp: # this takes all exceptions!
+                msg = ['failed import:', fp, '\n', 
+                    '\tEXCEPTION:', str(excp).strip()]
+                print(' '.join(msg))
+                continue
+            modules.append(mod)
+
+#         from athenaCL.libATH import unit
+#         from athenaCL.libATH import prefTools
+# 
+#         from athenaCL.libATH.omde import oscillator
+# 
+#         modules = []
+#         modules.append(unit)
+#         modules.append(oscillator)
+#         modules.append(prefTools)
 
 
         return modules
@@ -114,8 +115,6 @@ def main(testGroup=['test']):
     modGather = ModuleGather()
     modules = modGather.load()
 
-    print('looking for Test classes...\n')
-
     for module in modules:
         #print _MOD, timeStr, module
         unitTestCases = []
@@ -126,13 +125,12 @@ def main(testGroup=['test']):
             if 'test' in testGroup:
                 unitTestCases.append(module.Test)
 
-        if not hasattr(module, 'TestExternal'):
-            pass
-        else:
-            if 'external' in testGroup or 'testExternal' in testGroup:
-                unitTestCases.append(module.TestExternal)
+#         if not hasattr(module, 'TestExternal'):
+#             pass
+#         else:
+#             if 'external' in testGroup or 'testExternal' in testGroup:
+#                 unitTestCases.append(module.TestExternal)
 
-        # get unittest test
         for testCase in unitTestCases:
             s2 = unittest.defaultTestLoader.loadTestsFromTestCase(testCase)
             s1.addTests(s2)
@@ -144,10 +142,8 @@ def main(testGroup=['test']):
         except ValueError:
             print('%s cannot load Doctests' % module)
             continue
-    
 
     print('running Tests...\n')
-
 
     runner = unittest.TextTestRunner(verbosity=2)
     runner.run(s1)  

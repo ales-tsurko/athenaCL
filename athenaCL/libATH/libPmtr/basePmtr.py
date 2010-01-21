@@ -907,7 +907,7 @@ def retrogradeParser(str):
 #-----------------------------------------------------------------||||||||||||--
 # test just selector here
 
-def Test():
+def TestOld():
     colTest = [[3,2,54], ['test'], ['234', 56, 'dfg', 3], [100,200], range(0,20)]
     for col in colTest:
         for control in ['randomChoice', 'randomWalk', 'randomPermutate',
@@ -925,4 +925,4 @@ def Test():
 
 
 if __name__ == '__main__':
-    Test()
+    TestOld()

@@ -330,7 +330,7 @@ class TpRel(SetMeasure):
 
 
 
-class Test:
+class TestOld:
     def __init__(self):
         self.testPathMulti()
 
@@ -340,5 +340,5 @@ class Test:
 
 
 if __name__ == '__main__':
-    a = Test()
+    a = TestOld()
 

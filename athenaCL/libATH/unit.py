@@ -4,7 +4,7 @@
 #
 # Authors:       Christopher Ariza
 #
-# Copyright:     (c) 2004-2007 Christopher Ariza
+# Copyright:     (c) 2004-2010 Christopher Ariza
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
 
@@ -18,10 +18,19 @@ _MOD = 'unit.py'
 
 
 
+class UnitException(Exception):
+    pass
+
+
+#-----------------------------------------------------------------||||||||||||--
 
 def seriesMinMax(series):
     """given any list of numbers, return e min and e max
-    must convert to list to allow sorting of array or other sequence objects"""
+    must convert to list to allow sorting of array or other sequence objects
+
+    >>> seriesMinMax([3,4,5])
+    (3, 5)
+    """
     seriesLen = len(series)
     if seriesLen == 1:
         return series[0], series[0]
@@ -47,6 +56,7 @@ def tableMinMax(table):
 def unitNormRange(series, fixRange=None):
     """read all values from a a list
     normalize values wihtin min and maximum of series
+
     >>> unitNormRange([0,3,4])
     [0.0, 0.75, 1.0]
     """
@@ -75,6 +85,7 @@ def unitNormRange(series, fixRange=None):
 def unitNormRangeTable(table, fixRange=None):
     """read all values from a a list
     normalize values wihtin min and maximum of series
+
     >>> unitNormRangeTable([[4,-2],[234,0],[3,7]])
     [[0.025423728813559324, 0.0], [1.0, 0.0084745762711864406], 
         [0.021186440677966101, 0.038135593220338986]]
@@ -122,6 +133,7 @@ def unitNormStep(step, a=0, b=1):
     """given a step size and an a/b min/max range, calculate number of parts
     to fill step through inclusive a,b
     then return a unit interval list of values necessary to cover region
+
     >>> unitNormStep(.5, 0, 1)
     [0.0, 0.5, 1]
     >>> unitNormStep(.5, -1, 1)
@@ -146,6 +158,7 @@ def unitNormProportion(series):
     """normalize values w/n unit interval, where max is determined
     by the sum of the series (proportional section of total)
     this is the same as that used for durFraction in Path
+
     >>> unitNormProportion([0,3,4])
     [0.0, 0.42857142857142855, 0.5714285714285714]
     >>> unitNormProportion([1,1,1])
@@ -195,8 +208,19 @@ def unitNormAccumulate(series):
 
 def denorm(value, a, b):
     """take a normalized value; shift it between min and max
-    assumes min and max is relevant"""
-    assert value >= 0 and value <= 1 # must be normalized
+    assumes min and max is relevant
+
+    >>> denorm(.5, 10, 20)
+    15.0
+    >>> denorm(.5, -20, 20)
+    0.0
+    >>> denorm(10, -20, 20)
+    Traceback (most recent call last):
+    UnitException: value (10) must be in unit interval
+    """
+    if value < 0 or value > 1: # must be normalized
+        raise UnitException('value (%s) must be in unit interval' % value)
+
     if a == b: return a # no range, return boundary
     if a < b: 
         min = a
@@ -210,9 +234,14 @@ def denorm(value, a, b):
 
 def denormList(unit, a, b):
     """given a list unit interval values b/n 0 and 1, denorm b/n a and b
+
+    >>> denormList([.2, .5], 10, 20)
+    [12.0, 15.0]
     """
     for value in unit:
-        assert value >= 0 and value <= 1 # must be normalized
+        if value < 0 or value > 1: # must be normalized
+            raise UnitException('value (%s) must be in unit interval' % value)
+
     if a == b: return a # no range, return boundary
     if a < b: 
         min = a
@@ -225,8 +254,15 @@ def denormList(unit, a, b):
 def interpolate(value, a, b):
     """switch between two values based on q value w/n unit interval;
     low q is a, high q is b
-    low and high are not relevant"""
-    assert value >= 0 and value <= 1 # must be normalized
+    low and high are not relevant
+
+    >>> interpolate(.5, 10, 20)
+    15.0
+    >>> interpolate(.8, 10, 20)
+    18.0
+    """
+    if value < 0 or value > 1: # must be normalized
+        raise UnitException('value (%s) must be in unit interval' % value)
     if value == 0: return a
     if value == 1: return b
     # scale each value and sum; min, max, and sign do not matter
@@ -244,12 +280,15 @@ def unitBoundaryEqual(parts):
     """return a list of min/mean/max values for a unit interval divided
     into user supplied partions
     note: lower and upper boundaries do overlap
+
     >>> unitBoundaryEqual(3)
     [(0, 0.16666666666666666, 0.33333333333333331), (0.33333333333333331, 0.5,      
     0.66666666666666663), (0.66666666666666663, 0.83333333333333326, 1.0)]
     """
     bounds = []
-    assert parts > 0
+    if parts <= 0:
+        raise UnitException('cannot process 0 parts')
+
     step = 1.0 / parts
     boundL = 0
     boundH = None
@@ -266,6 +305,7 @@ def unitBoundaryEqual(parts):
 def unitBoundaryFree(series):
     """take an arbitrary series, and create unit boundaries
     for n members of a series, there will be n-1 boundaries
+
     >>> unitBoundaryFree([0,3,4])
     [(0.0, 0.375, 0.75), (0.75, 0.875, 1.0)]
     """
@@ -287,11 +327,14 @@ def unitBoundaryProportion(series):
     """take an series of parts of an implied sum, create unit boundaries
     for n members of a series, there will be n boundaries
     note: zero cannot be an entry (not a valid proportion)
+
     >>> unitBoundaryProportion([1,1,2])
     [(0, 0.125, 0.25), (0.25, 0.375, 0.5), (0.5, 0.75, 1.0)]
     """
     # series cannot have non-specified values, that is, 0
-    assert 0 not in series
+    if 0 in series:
+        raise UnitException('cannot process series that contains zero')
+
     unit = unitNormProportion(series)
     bounds = []
     boundL = None
@@ -315,10 +358,22 @@ def unitBoundaryPos(val, bounds):
     """value is between 0 and 1, map to a value within bounds
     there is a slight error in that the last value goes to 1
     bounds must be sorted
-    returns position w/n bounds as index value, 0 to n-1"""
-    assert val >= 0 and val <= 1
+
+    returns position w/n bounds as index value, 0 to n-1
+
+    >>> unitBoundaryPos(.4, [(0, 0.125, 0.25), (0.25, 0.375, 0.5), (0.5, 0.75, 1.0)])
+    1
+    >>> unitBoundaryPos(.1, [(0, 0.125, 0.25), (0.25, 0.375, 0.5), (0.5, 0.75, 1.0)])
+    0
+
+    """
+    if val < 0 or val > 1: # must be normalized
+        raise UnitException('value (%s) must be in unit interval' % val)
+
     # make sure boudns cover complete unit interval
-    assert bounds[0][0] == 0 and bounds[-1][2] == 1
+    if bounds[0][0] != 0 or bounds[-1][2] != 1:
+        raise UnitException('incomplete bounds')
+
     if val == 1: # special case
         return len(bounds) - 1 # last one
     else:
@@ -333,10 +388,18 @@ def unitBoundaryPos(val, bounds):
 def discreteBinaryPad(series, fixRange=None):
     """take an integer series of values
     fill all spaces with zeros that are not occupied
-    the result will always be sorted"""
+    the result will always be sorted
+
+    >>> discreteBinaryPad([3,4,5])
+    [1, 1, 1]
+    >>> discreteBinaryPad([3,20,22])
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1]
+    """
     # make sure these are ints
     for x in series:
-        assert drawer.isInt(x)
+        if not drawer.isInt(x):
+            raise UnitException('non integer value found')
+
     discrete = []
     if fixRange != None:
         fixRange.sort() # make sure sorted
@@ -356,14 +419,19 @@ def discreteBinaryPad(series, fixRange=None):
 
 def discreteCompress(series):
     """takes a series; count the adjacent occurances of the same value
-    store as ordered pairs; this is primitive compression"""
+    store as ordered pairs; this is primitive compression
+
+    >>> discreteCompress([3,3,3,2,2,2,8,8,8,8,8,8,8])
+    [(3, 3), (2, 3), (8, 7)]
+
+    """
     comp = []
     xLast = None
     xCount = 0
     for i in range(0, len(series)):
         x = series[i]
         if x == xLast or xLast == None:
-            xCount = xCount + 1  
+            xCount += 1  
         elif x != xLast: # new value not the same as last
             comp.append((xLast, xCount)) # store previous series
             xCount = 1 # start at one for this value
@@ -378,7 +446,17 @@ def discreteCompress(series):
 def boundaryFit(a, b, f, boundaryMethod):
     """take boundary levels a,b and place f within them
     available methods include wrap, reflect, limit
-    used for mask-based parameter objects"""
+    used for mask-based parameter objects
+
+    >>> boundaryFit(3, 9, 23, 'limit')
+    9
+    >>> boundaryFit(3, 9, 10, 'reflect')
+    8
+    >>> boundaryFit(3, 9, 12, 'wrap')
+    6
+    >>> boundaryFit(3, 9, 5, 'wrap')
+    5
+    """
     if a > b:
         min = b; max = a
     elif a < b:
@@ -417,7 +495,17 @@ def boundaryFit(a, b, f, boundaryMethod):
 
 
 def boundaryReject(a, b, f, boundaryMethod):
-    """place f outside of a and b; """
+    """place f outside of a and b; 
+
+    >>> boundaryReject(3, 9, 23, 'limit')
+    23
+    >>> boundaryReject(3, 9, 10, 'reflect')
+    10
+    >>> boundaryReject(3, 9, 12, 'wrap')
+    12
+    >>> boundaryReject(3, 9, 5, 'wrap')
+    -1
+    """
     if a > b:
         min = b; max = a
     elif a < b:
@@ -475,11 +563,18 @@ def boundaryReject(a, b, f, boundaryMethod):
 #     post = boundaryFit(min, max, f, boundaryMethod)
 
 
+#-----------------------------------------------------------------||||||||||||--
+class FunnelUnitException(Exception):
+    pass
+
 
 #-----------------------------------------------------------------||||||||||||--
 
 class FunnelUnit:
     def __init__(self, series):
+        """
+        >>> a = FunnelUnit([3,4,20])
+        """
         self.srcSeries = series
         self.srcSeriesUnit = unitNormRange(series)
 
@@ -497,7 +592,7 @@ class FunnelUnit:
         if """
         count = 0 # number of 1's in range
         if pos >= len(self.srcSeries):
-            raise ValueError, 'series position out of range'
+            raise FunnelUnitException('series position out of range')
         for i in range(0, len(self.binaryMap)):
             if self.binaryMap[i] == 1:
                 if count == pos:
@@ -506,7 +601,7 @@ class FunnelUnit:
 
     def _binaryPosToSeriesPos(self, pos):
         if pos >= len(self.binaryMap):
-            raise ValueError, 'binary position out of range'
+            raise FunnelUnitException('binary position out of range')
         if self.binaryMap[pos] != 1:
             return None
         count = 0 # series position
@@ -516,10 +611,18 @@ class FunnelUnit:
                     return count
                 count = count + 1
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def findReject(self, val):
-        """take the binary map, and divide the zero portions appropriate"""
-        assert val >= 0 and val <= 1
+        """take the binary map, and divide the zero portions appropriate
+
+        >>> a = FunnelUnit([0,1,2,3,4,20])
+        >>> a.findReject(0)
+        0.0
+        >>> a.findReject(.1)
+        0.1000...
+        """
+        if val < 0 or val > 1:
+            raise FunnelUnitException('value (%s) must be in unit interval' % val)
         # get position w/n biary bound
         i = unitBoundaryPos(val, self.binaryBound)
         if self.binaryMap[i] == 1: # if 1, return that position
@@ -531,7 +634,12 @@ class FunnelUnit:
 
     def _findAdjacent(self, pos):
         """given a position in the binary array, determine
-        lower and upper positions that have a 1"""
+        lower and upper positions that have a 1
+
+        >>> a = FunnelUnit([0,1,2,3,4,20])
+        >>> a._findAdjacent(10)
+        (4, 20)
+        """
         posLower = None
         posUpper = None
         # get upper
@@ -549,11 +657,21 @@ class FunnelUnit:
         # check for erros
         #print _MOD, 'pos, posLower, posUpper', pos, posLower, posUpper
 
-        assert posLower != None and posUpper != None
+        if posLower == None or posUpper == None:
+            raise FunnelUnitException('neighbor positions cannot be found')
+
         return posLower, posUpper
 
     def findNearest(self, val):
-        assert val >= 0 and val <= 1
+        """
+        >>> a = FunnelUnit([0,1,2,3,4,20])
+        >>> a.findNearest(.5)
+        0.2000...
+        >>> a.findNearest(.8)
+        1.0
+        """
+        if val < 0 or val > 1:
+            raise FunnelUnitException('value (%s) must be in unit interval' % val)
         # get position w/n biary bound
         i = unitBoundaryPos(val, self.binaryBound)
         if self.binaryMap[i] == 1: # if 1, return that position
@@ -588,14 +706,14 @@ class FunnelUnit:
                 pos = self._binaryPosToSeriesPos(posUpper)
             return self.srcSeriesUnit[pos]
 
-    def test(self):
-        max = 40
-        print 'findReject'
-        for x in range(0,max+1):
-            print self.findReject(x/float(max))
-        print '\nfindNearest'
-        for x in range(0,max+1):
-            print self.findNearest(x/float(max))
+#     def test(self):
+#         max = 40
+#         print 'findReject'
+#         for x in range(0,max+1):
+#             print self.findReject(x/float(max))
+#         print '\nfindNearest'
+#         for x in range(0,max+1):
+#             print self.findNearest(x/float(max))
 
 
 #-----------------------------------------------------------------||||||||||||--

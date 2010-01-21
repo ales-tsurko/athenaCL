@@ -251,11 +251,11 @@ def factory(rawArgs):
     
     
 #-----------------------------------------------------------------||||||||||||--
-def Test():
+def TestOld():
     for name in temperamentNames:
         a = factory(name)
         print a.name, ': ', a.doc
         print [a(x) for x in range(0,12)]
 
 if __name__ == '__main__':
-    Test()
+    TestOld()

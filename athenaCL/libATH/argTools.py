@@ -4,28 +4,30 @@
 #
 # Authors:       Christopher Ariza
 #
-# Copyright:     (c) 2001-2006 Christopher Ariza
+# Copyright:     (c) 2001-2010 Christopher Ariza
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
 
 
 
 import types
+import unittest, doctest
+
 
 from athenaCL.libATH import drawer
 from athenaCL.libATH import typeset
 
 _MOD = 'argTools.py'
 
+
+
 #-----------------------------------------------------------------||||||||||||--
 
 def parseFlags(argv, flags, posStart=1, spaceLimit=0):
-    """read args flags into a list of flags
-    flags may all be 2 char '-f' like flags
-        longer flags are accepted, but second priority in searching
-        more than one of the same flag can be used
-    values con be attached to flag, or be the next arg
-    posStart is the index in the arg list to start (usually not 0)
+    """Parse flags as given form the command line.
+
+    read args flags into a list of flags. Flags may all be 2 char '-f' like flags. Longer flags are accepted, but second priority in searching more than one of the same flag can be used values con be attached to flag, or be the next arg. posStart is the index in the arg list to start (usually not 0)
+
     spaceLimit: if args are spce delimited or flag delimited
         if true, only one space will be allowed after a flag; and this 
         will end the accumlation of arg data; extra args
@@ -38,6 +40,12 @@ def parseFlags(argv, flags, posStart=1, spaceLimit=0):
         after first flag, all values are gathered together until end
         or next flag
     return a list of flag, value pairs.
+
+    >>> parseFlags(['-f', 'test', '-ogreen'], ['-f', '-o'], 0)
+    [('-f', 'test'), ('-o', 'green')]
+    >>> parseFlags(['-t', 'test', '-tgreen'], ['-t', '-g'], 0)
+    [('-t', 'test'), ('-t', 'green')]
+
     """
     # flags me be ref dict with doc vaules; check type
     if isinstance(flags, types.DictionaryType):
@@ -104,7 +112,9 @@ def parseFlags(argv, flags, posStart=1, spaceLimit=0):
 #-----------------------------------------------------------------||||||||||||--
 
 def strongType(usrArgs, argTypes, defaultArgs=[], argCountOffset=0):
-    """checks raw arg type and number, one level deep
+    """Argument checking tool.
+
+    checks raw arg type and number, one level deep
         (does not recurse into list)
     will supply defaults if missing args after last given and 
         self.defaultArgs defined
@@ -115,6 +125,15 @@ def strongType(usrArgs, argTypes, defaultArgs=[], argCountOffset=0):
     one optional args
         defaultArgs = list of default args to substitute
     returns: newArgs, ok, msg
+
+    >>> strongType([[1,2,3]], ['list'])
+    ([[1, 2, 3]], 1, '')
+    >>> strongType([.5, 3, 'three'], ['float', 'int', 'str'])
+    ([0.5, 3, 'three'], 1, '')
+    >>> strongType([3.2], ['num', 'num'])
+    ([3.2000...], 0, 'incorrect number of arguments; enter 2 arguments.')
+    >>> strongType([3.2, 5, 6], ['num', 'num'])
+    ([3.2000..., 5, 6], 0, 'too many arguments; enter 2 arguments.')
     """
     argCount = len(argTypes) 
     if len(usrArgs) < argCount:
@@ -167,14 +186,19 @@ def strongType(usrArgs, argTypes, defaultArgs=[], argCountOffset=0):
     return usrArgs, 1, ''
 
 
+
 #-----------------------------------------------------------------||||||||||||--
 class ArgOps:
-    """object to handle parsing of commandline arguments
+    """Object to handle parsing of commandline arguments.
+
     given w/o commas, space delimited, as used in Interpreter
     this arg lists only use positional values; not flags are permitted
     optional argument may follow required ones"""
     
     def __init__(self, argStr, stripComma='noStrip'):
+        """
+        >>> a = ArgOps('test')
+        """
         self.argStr = argStr.strip() # clear trailing white space
         self.argList = argStr.split() # split w/ spces
         # strip trailing comma
@@ -191,6 +215,18 @@ class ArgOps:
         addSpace can be used to remove spaces (default) or keep
             this is necessary when taking all values 
         if no arg exists for a given index, returns None on error or no arg
+
+        >>> a = ArgOps('tin a 3')
+        >>> a.get(1)
+        'a'
+        >>> a.get(2)
+        '3'
+        >>> a.get(2, evaluate='on')
+        3
+        >>> a.get(1, sumRange='end')
+        'a3'
+        >>> a.get(1, sumRange='end', addSpace='space')
+        'a 3'
         """
         if len(self.argList) == 0: return None
         if index >= len(self.argList): return None
@@ -220,6 +256,12 @@ class ArgOps:
         sumRange: either single (only the index given)
             or end (from index to end of args)
         evaluate: when on, evaluates each member of resultant list
+
+        >>> a = ArgOps('tin a 3')
+        >>> a.list(1)
+        ['a']
+        >>> a.list(0, sumRange='end')
+        ['tin', 'a', '3']
         """
         if len(self.argList) == 0:
             return None
@@ -248,13 +290,23 @@ class ArgOps:
 #-----------------------------------------------------------------||||||||||||--
 # version object for checking
 
+class VersionException(Exception):
+    pass
+
 class Version:
     """simple object to handle checking and evaluating versions"""
+
     def __init__(self, vStr):
         """split string, remove beta or other tags, place into local dict
         a beta tag is not enough to distinguish versions; a beta should
         evaluate the same as the normal version
-        date distinctions only evaluated if present in both objects"""
+        date distinctions only evaluated if present in both objects
+
+        >>> a = Version('3.25.3')
+        >>> a = Version('3.25')
+        Traceback (most recent call last):
+        VersionException: cannot process version number 3.25
+        """
         vList = vStr.split('.')
         if len(vList) >= 3:
             a, b, c = vList[0], vList[1], vList[2]
@@ -267,6 +319,9 @@ class Version:
                 self.betaTag = None
             # assign all to point
             self.point = int(a), int(b), int(c)
+        else:
+            raise VersionException('cannot process version number %s' % vStr)
+
         # get date info 
         if len(vList) >= 6: 
             self.date  = int(vList[3]), int(vList[4]), int(vList[5]) 
@@ -274,6 +329,11 @@ class Version:
             self.date = None
 
     def repr(self, format='dot', date=1):
+        """
+        >>> a = Version('3.25.5')
+        >>> a.repr()
+        '3.25.5'
+        """
         if self.date != None:
             vDate = '%s.%.2i.%.2i' % self.date
         else:
@@ -297,77 +357,128 @@ class Version:
         return self.repr() # get default
 
     def __eq__(self, other):
-        """only compare date if both have set date"""
-        if other == None: return 0
+        """only compare date if both have set date
+
+        >>> a = Version('3.25.5')
+        >>> b = Version('3.6.0')
+        >>> a == b  
+        False
+        """
+
+        if other == None: return False
         if self.date == None or other.date == None:
-            if self.point == other.point: return 1
-            else: return 0
+            if self.point == other.point: return True
+            else: return False
         else: # both have date
             if self.point == other.point:
                 if self.date == other.date:
-                    return 1
-            return 0
+                    return True
+            return False
 
     def __ne__(self, other):
-        """only compare date if both have set date"""
+        """only compare date if both have set date
+
+        >>> a = Version('3.25.5')
+        >>> b = Version('3.6.0')
+        >>> a != b  
+        True
+        """
         if other == None: return 1
         if self.date == None or other.date == None:
-            if self.point != other.point: return 1
-            else: return 0
+            if self.point != other.point: return True
+            else: return False
         else: # both have date
             if self.point != other.point:
                 if self.date != other.date:
-                    return 1
-            return 0
+                    return True
+            return False
 
     def __lt__(self, other):
-        """only compare date if both have set date"""
+        """only compare date if both have set date
+
+        >>> a = Version('3.25.5')
+        >>> b = Version('4.6.0')
+        >>> a < b  
+        True
+        """
         if self.date == None or other.date == None:
-            if self.point < other.point: return 1
-            else: return 0
+            if self.point < other.point: return True
+            else: return False
         else: 
             if self.point <= other.point: # lt or equal
                 if self.date < other.date:
-                    return 1
-            return 0
+                    return True
+            return False
 
     def __le__(self, other):
-        """only compare date if both have set date"""
+        """only compare date if both have set date
+
+        >>> a = Version('3.25.5')
+        >>> b = Version('4.6.0')
+        >>> a <= b  
+        True
+        """
         if self.date == None or other.date == None:
-            if self.point <= other.point: return 1
-            else: return 0
+            if self.point <= other.point: return True
+            else: return False
         else: 
             if self.point <= other.point:
                 if self.date <= other.date:
-                    return 1
-            return 0
+                    return True
+            return False
 
     def __gt__(self, other):
-        """only compare date if both have set date"""
+        """only compare date if both have set date
+
+        >>> a = Version('3.25.5')
+        >>> b = Version('4.6.0')
+        >>> b > a  
+        True
+        """
         if self.date == None or other.date == None:
-            if self.point > other.point: return 1
-            else: return 0
+            if self.point > other.point: return True
+            else: return False
         else: 
             if self.point >= other.point: # gt or equal
                 if self.date > other.date:
-                    return 1
-            return 0
+                    return True
+            return False
 
     def __ge__(self, other):
-        """only compare date if both have set date"""
+        """only compare date if both have set date
+
+        >>> a = Version('3.25.5')
+        >>> b = Version('4.6.0')
+        >>> b >= a  
+        True
+        """
         if self.date == None or other.date == None:
-            if self.point >= other.point: return 1
-            else: return 0
+            if self.point >= other.point: return True
+            else: return False
         else: 
             if self.point >= other.point:
                 if self.date >= other.date:
-                    return 1
-            return 0
+                    return True
+            return False
     
 
 
 
+#-----------------------------------------------------------------||||||||||||--
 
 
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
+
+
+#-----------------------------------------------------------------||||||||||||--
+if __name__ == '__main__':
+    from athenaCL.test import baseTest
+    baseTest.main(Test)
 
 

@@ -1147,7 +1147,7 @@ class Timer:
 
 
 #-----------------------------------------------------------------||||||||||||--
-class Test:
+class TestOld:
     def __init__(self):
         #self.testPulse()
         self.testPulseSplit()
@@ -1243,6 +1243,6 @@ class Test:
 
 
 if __name__ == '__main__':
-    testObj = Test()
+    testObj = TestOld()
 
 

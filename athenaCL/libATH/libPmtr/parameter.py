@@ -441,7 +441,7 @@ def doc(rawName, libName='genPmtrObjs', fmt='full'):
 #-----------------------------------------------------------------||||||||||||--
 
 # run tests
-class Test:
+class TestOld:
     def __init__(self):
         # call test methods
         #self.testBpf()
@@ -811,7 +811,7 @@ class Test:
 
 
 if __name__ == '__main__':
-    Test()
+    TestOld()
 
 
 

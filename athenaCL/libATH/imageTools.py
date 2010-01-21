@@ -2313,7 +2313,7 @@ class TextGraph(_GraphBase):
 #-----------------------------------------------------------------||||||||||||--
 #-----------------------------------------------------------------||||||||||||--
 
-class Test:
+class TestOld:
     def __init__(self):
         self.testGraph()
         self.testGraphText()
@@ -2407,7 +2407,7 @@ class Test:
         a()
 
 if __name__ == '__main__':
-    Test()
+    TestOld()
 
 
 

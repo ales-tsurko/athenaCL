@@ -1932,7 +1932,7 @@ def getPitch(termObj=None, read=None):
 
 
 
-class Test:
+class TestOld:
     def __init__(self):
         self.testMultisetData()
 
@@ -1950,6 +1950,6 @@ class Test:
         pass
     
 if __name__ == '__main__':
-    Test()
+    TestOld()
 
 

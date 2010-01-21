@@ -284,7 +284,7 @@ class Table:
 
 #-----------------------------------------------------------------||||||||||||--
 
-class Test:
+class TestOld:
 
     def __init__(self):
         self.testTable()
@@ -304,6 +304,6 @@ class Test:
 
 if __name__ == '__main__':
 
-    Test()
+    TestOld()
 
 

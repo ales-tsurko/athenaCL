@@ -1472,7 +1472,7 @@ class SievePitch:
 
 #-----------------------------------------------------------------||||||||||||--
 
-class Test:
+class TestOld:
     def __init__(self):
         self.testTimePoint()
         self.testIntersection()
@@ -1600,7 +1600,7 @@ class Test:
         print a
 
 if __name__ == '__main__':
-    x = Test()
+    x = TestOld()
 
 
 

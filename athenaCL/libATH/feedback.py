@@ -352,7 +352,7 @@ class EnvironmentThermostat(_Environment):
 
 
 #-----------------------------------------------------------------||||||||||||--
-class Test:
+class TestOld:
     def __init__(self):
         pass
     
@@ -390,7 +390,7 @@ class Test:
 #-----------------------------------------------------------------||||||||||||--
 
 if __name__ == '__main__':
-    a = Test()
+    a = TestOld()
     a.testParticle()
 
 

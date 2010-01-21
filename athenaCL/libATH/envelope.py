@@ -189,7 +189,7 @@ def durToUnit(tStart, dur, center, width, min=0, max=1):
 
 #-----------------------------------------------------------------||||||||||||--
 
-class Test:
+class TestOld:
 
     """note that there is a potential error in cases where the time interval values fall to or below zero.
 
@@ -228,7 +228,7 @@ class Test:
 
 
 if __name__ == '__main__':
-    a = Test()
+    a = TestOld()
     a.testBasic()
 
 

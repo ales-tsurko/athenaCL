@@ -837,7 +837,7 @@ class Pitch:
 #-----------------------------------------------------------------||||||||||||--
 
 
-class Test:
+class TestOld:
     def __init__(self):
         #self.testPch()
         self.testPitch()
@@ -894,7 +894,7 @@ class Test:
                                                                   attrStr,)
 
 if __name__ == '__main__':
-    testObj = Test()
+    testObj = TestOld()
 
 
 

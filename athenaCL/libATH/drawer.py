@@ -4,102 +4,169 @@
 #
 # Authors:       Christopher Ariza
 #
-# Copyright:     (c) 2004-2006 Christopher Ariza
+# Copyright:     (c) 2004-2010 Christopher Ariza
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
 
 
 import sys, os, string, types, random
+import unittest, doctest
+
 # primitive module: do not import any larger mods.
 
 _MOD = 'drawer.py'
 #-----------------------------------------------------------------||||||||||||--
 
 def isList(usrData):
-    """check if usr data is a list or tuple, return boolean"""
+    """check if usr data is a list or tuple, return boolean
+        
+    >>> isList([])
+    True
+    >>> isList('')
+    False
+    """
     if (isinstance(usrData, types.ListType) or 
          isinstance(usrData, types.TupleType)):
-        return 1
+        return True
     else:
-        return 0
+        return False
 
 def isNum(usrData):
-    """check if usr data is a number (float or int), return boolean"""
+    """check if usr data is a number (float or int), return boolean
+    
+    >>> isNum([])
+    False
+    >>> isNum(3.2)
+    True
+    >>> isNum(3)
+    True
+    """
     if (isinstance(usrData, types.FloatType) or 
          isinstance(usrData, types.IntType) or 
          isinstance(usrData, types.LongType)):
-        return 1
+        return True
     else:
-        return 0
+        return False
 
 def isBool(usrData):
-    """check if usr data is boolean, return boolean"""
+    """check if usr data is boolean, return boolean
+
+    >>> isBool(True)
+    True
+    >>> isBool(0)
+    False
+    """
     if isinstance(usrData, types.BooleanType):
-        return 1
+        return True
     else:
-        return 0
+        return False
 
 def isFloat(usrData):
-    """check if usr data is a float, return boolean"""
+    """check if usr data is a float, return boolean
+    
+    >>> isFloat(3.2)
+    True
+    >>> isFloat(3)
+    False
+    """
     if isinstance(usrData, types.FloatType):
-        return 1
+        return True
     else:
-        return 0
+        return False
 
 def isInt(usrData):
     """check if usr data is an integer, return boolean
     will fail if integer is a long: types.LongType
+
+    >>> isInt(3)
+    True
+    >>> isInt('3')
+    False
     """
     if isinstance(usrData, types.IntType):
-        return 1
+        return True
     else:
-        return 0
+        return False
 
 def isStr(usrData):
-    """check if usr data is a string, return boolean"""
+    """check if usr data is a string, return boolean
+
+    >>> isStr('test')
+    True
+    >>> isStr(3.2)
+    False
+    """
     if isinstance(usrData, types.StringType):
-        return 1
+        return True
     else:
-        return 0
+        return False
 
 def isDict(usrData):
-    """check if usr data is a ldictionary, return boolean"""
+    """check if usr data is a ldictionary, return boolean
+    
+    >>> isDict({})
+    True
+    >>> isDict('false')
+    False
+    """
     if isinstance(usrData, types.DictType):
-        return 1
+        return True
     else:
-        return 0
+        return False
 
 
 #-----------------------------------------------------------------||||||||||||--
 # higher level types
 
 def isMod(usrData):
-    """check if usr data is a module, return boolean"""
+    """check if usr data is a module, return boolean
+
+    >>> from athenaCL.libATH import markov
+    >>> isMod(markov)
+    True
+    >>> isMod(True)
+    False
+    """
     if isinstance(usrData, types.ModuleType):
-        return 1
+        return True
     else:
-        return 0
+        return False
 
 def isFunc(usrData):
-    """check if usr data is a function, return boolean"""
+    """check if usr data is a function, return boolean
+
+    >>> def mock(): pass
+    >>> isFunc(mock)
+    True
+    >>> isFunc(False)
+    False
+    """
     if isinstance(usrData, types.FunctionType):
-        return 1
+        return True
     else:
-        return 0
+        return False
 
 def isCharNum(usrData):
     """determine if a character array does contains a number as a string
     if not should be interpreted as a string, otherwise, it is a float or other
-    string symbol arrangement; will not remove list delimiters"""
+    string symbol arrangement; will not remove list delimiters
+
+    >>> isCharNum('adsf')
+    False
+    >>> isCharNum('34')
+    True
+    >>> isCharNum('34.234')
+    True
+    """
     match = len(usrData)
     count = 0
     for char in usrData: # cannot have a comma here
         if char.isdigit() or char in ['.', '-', ' ', '+']:
             count = count + 1
     if count == match:
-        return 1
+        return True
     else: 
-        return 0
+        return False
     
 #-----------------------------------------------------------------||||||||||||--
 def typeAsStr(typeStr):
@@ -691,17 +758,19 @@ def listSliceWrap(src, a, b, fmt='value'):
     format is value, active, index, or pair
     active skips pairs with values > zero; may not return whole size
     this may be implemented elsewhere
-    >>> drawer.listSliceWrap(['a','b'], 0, 6)
+
+
+    >>> listSliceWrap(['a','b'], 0, 6)
     ['a', 'b', 'a', 'b', 'a', 'b']
-    >>> drawer.listSliceWrap(['a','b'], -1, 2)
+    >>> listSliceWrap(['a','b'], -1, 2)
     ['b', 'a', 'b']
-    >>> drawer.listSliceWrap(['a','b','c'], -1, 2)
+    >>> listSliceWrap(['a','b','c'], -1, 2)
     ['c', 'a', 'b']
-    >>> drawer.listSliceWrap(['a','b','c'], -3, 3)
+    >>> listSliceWrap(['a','b','c'], -3, 3)
     ['a', 'b', 'c', 'a', 'b', 'c']
-    >>> drawer.listSliceWrap(['a','b'], 0, 2, 'index')
+    >>> listSliceWrap(['a','b'], 0, 2, 'index')
     [0, 1]
-    >>> drawer.listSliceWrap(['a','b'], -3, 3, 'index')
+    >>> listSliceWrap(['a','b'], -3, 3, 'index')
     [1, 0, 1, 0, 1, 0]
     """
     fmt = fmt.lower()
@@ -1117,12 +1186,15 @@ def restringulator(usrStr):
 
 #-----------------------------------------------------------------||||||||||||--
 
-class Test:
 
-    def __init__(self):
-        self.testSelection()
-        self.testFloatToInt()
+class Test(unittest.TestCase):
     
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
+
     def testSelection(self):
 
         # sometimes we need robust collections of synonymes
@@ -1131,10 +1203,12 @@ class Test:
                       'reflect' :['r', 'reflect']
                      }
                      
-        for usrStr in ['l', 'LIMIT', 3, 'w']:
-            print usrStr
-            print 'found', selectionParse(usrStr, choiceA)
-            
+        for usrStr in ['l', 'LIMIT', 3]:
+            self.assertEqual(selectionParse(usrStr, choiceA), 'limit')
+
+        for usrStr in ['w']:
+            self.assertEqual(selectionParse(usrStr, choiceA), 'wrap')
+
         # sometiems we just want to acronymes
         choiceB = {
             'co'      :'csoundOrchestra',
@@ -1148,19 +1222,28 @@ class Test:
             'xao'     :'xmlAthenaObject',
             }
 
-        for usrStr in ['co', 'c', 'maxcoll']:
-            print usrStr
-            print 'found', acronymExpand(usrStr, choiceB)
+        for usrStr in ['co']:
+            self.assertEqual(acronymExpand(usrStr, choiceB), 'csoundOrchestra')
+        for usrStr in ['ts', 'textspace']:
+            self.assertEqual(acronymExpand(usrStr, choiceB), 'textSpace')
 
 
     def testFloatToInt(self):
+        '''add examination here'''
         for x in range(0,50):
-            print [floatToInt(x, 'weight') for x in [
+            [floatToInt(x, 'weight') for x in [
                     .05,.2,.3,.4,7,.5,.5,.5,.5,7,.6,.7,.8,.95]]
 
 
+#-----------------------------------------------------------------||||||||||||--
+
+
+
 if __name__ == '__main__':
-    a = Test()
+    from athenaCL.test import baseTest
+    baseTest.main(Test)
+
+
 
 
 

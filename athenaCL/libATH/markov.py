@@ -4,11 +4,12 @@
 #
 # Authors:       Christopher Ariza
 #
-# Copyright:     (c) 2005-2006 Christopher Ariza
+# Copyright:     (c) 2005-2010 Christopher Ariza
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
 
 import string, random
+import unittest, doctest
 
 from athenaCL.libATH import permutate
 from athenaCL.libATH import drawer
@@ -120,6 +121,8 @@ class Transition:
         """ make key into a list of symbol strings
         store expression weight keys in a tuple, with operator leading, as a sub 
         tuple. only one operator is allowed, must be tuple b/c will be a dict key
+
+        >>> a = Transition()
         >>> a._parseWeightKey('a:b:c')
         ('a', 'b', 'c')
         >>> a._parseWeightKey('a:b:c|d')
@@ -131,6 +134,7 @@ class Transition:
         >>> a._parseWeightKey('a:*:-c')
         ('a', ('*',), ('-', 'c'))
         """
+
         # make key into a list of symbol strings
         # if key is self.STEP, assign as empty tuple
         if key == self.STEP: return ()
@@ -631,7 +635,7 @@ class Transition:
 
 #-----------------------------------------------------------------||||||||||||--
 
-class Test:
+class TestOld:
 
     def __init__(self):
         self.testParse()
@@ -766,10 +770,60 @@ class Test:
 
 
 
+#-----------------------------------------------------------------||||||||||||--
+
+
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
+
+
+    def testParse(self):
+        '''Note testing output; just looking for potential errors
+        '''
+    
+        testA = "a{x} b{y} c{z} :{a=3|b=.03|c=5} a:{a=1|b=5|c=4} b{a=2|b=2|c=6} c{a=3|b=1|c=9} a::b::{a=3|b=2} a:c:b{a=1}"
+    
+        testB = "a{234} b{12} :: {a=3|b=3}" # this is a syntax error, but accepted
+    
+        testC = "a{this} b{is} c{a string} d {short} :{a=3|b=3|c=3} a:b{c=2}"
+    
+        testD = "a{(9,3,1)}b{(3,1,1)}c{(3,2,1)}:{a=3|b=1|c=7|g}"
+
+        testE = "a{234} b{12} :{a=3|b=3} a:*:{a=3|b=3}"
+
+        testF = "a{a} b{b} c{c} :{a=3|b=3} a:a|b|c:{c=1}"
+
+        testG = "a{a} b{b} c{c} :{a=3|b=3} *:-c:{c=1}"
+
+        testH = "a{a} b{b} c{c} -a:{a=1} -b:{b=1} -c:{c=1}"
+
+        testI = "a{a} b{b} c{c} a:*{a=1|c=1} b:*{b=1|c=1} c:c{a=1|b=1}"
+
+        testJ = "a{a} b{b} c{c} a:c|b:a{c=1} b:c|a:b{a=1} c:-c:c{b=1}"
+    
+        for test in [testA, testB, testC, testD, testE, testF, testG, testH, 
+                         testI, testJ]:
+            a = Transition()
+            a.loadTransition(test)
+            for order in range(0,4):
+                msg = []
+                for x in range(30):
+                    val = random.random()
+                    a.next(val, msg, order)
 
 
 
-if __name__ == "__main__":
 
-    a = Test()
+#-----------------------------------------------------------------||||||||||||--
+
+
+
+if __name__ == '__main__':
+    from athenaCL.test import baseTest
+    baseTest.main(Test)
 

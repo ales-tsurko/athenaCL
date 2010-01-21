@@ -2427,7 +2427,7 @@ def factory(eventName, ao):
 #-----------------------------------------------------------------||||||||||||--
 #-----------------------------------------------------------------||||||||||||--
 # run tests
-class Test:
+class TestOld:
     def __init__(self):
         # call test methods
         # self.testEventList()
@@ -2487,7 +2487,7 @@ class Test:
             a.retrograde(fmt)
 
 if __name__ == '__main__':
-    Test()
+    TestOld()
 
 
 

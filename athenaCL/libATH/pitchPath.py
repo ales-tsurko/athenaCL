@@ -780,7 +780,7 @@ class PolyPath:
 #-----------------------------------------------------------------||||||||||||--
 #-----------------------------------------------------------------||||||||||||--
 
-class Test:
+class TestOld:
     def __init__(self):
         self.testPolyPathData()
 
@@ -815,7 +815,7 @@ class Test:
         print p
 
 if __name__ == '__main__':
-    Test()
+    TestOld()
 
 
 

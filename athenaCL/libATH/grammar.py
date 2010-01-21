@@ -433,7 +433,7 @@ class Grammar:
 
 
 #-----------------------------------------------------------------||||||||||||--
-class Test:
+class TestOld:
 
     def __init__(self):
         self.testParse()
