@@ -92,7 +92,7 @@ class Texture:
         self.dynPmtrManifest = [] # primary defining attribute for dyn pmtrs
         self.dynPmtrNo = 0 # set in subclass 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
 
     def _getMuteStr(self):
         """get mute string for named texture"""
@@ -182,7 +182,7 @@ class Texture:
                 label = '%s %s' % (label, refNo)
         return attrName, label
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # tools for textPmtr control and access
     def findTextStaticLabel(self, usrStr):
         """get satic texture option label from a usr string
@@ -261,7 +261,7 @@ class Texture:
                 args = self.dynPmtrManifest[i]['default']
                 self.pmtrQDict[dynLabel] = args
     
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # tCurrent, chordCurrent, pitchRaw, multisetObj, pitchObj, pitchPost
     def stateUpdate(self, tCurrent, chordCurrent, ps, 
                          multisetObj, pitchObj, pitchPost):
@@ -323,7 +323,7 @@ class Texture:
         self.fpSSDR = fpSSDR # list of paths to samples
         self.fpSADR = fpSADR # list of paths to analysis
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def getRefDict(self, t=0):
         """update dictionary with references to texture data
         passed to parameter objects with each call function
@@ -353,7 +353,7 @@ class Texture:
         refDict['auxFmt'] = self.getAuxOutputFmt()
         return refDict
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def load(self, pmtrQDict, pathObj, polyphonyMode, temperamentName, 
                 pitchMode, auxNo, fpSSDR, fpSADR, midiPgm, midiCh, mute, 
                 silenceMode=0, orcMapMode=1, refresh=1):
@@ -478,7 +478,7 @@ class Texture:
                      pitchMode, auxNo, fpSSDR, fpSADR, midiPgm, midiCh, 
                      mute, silenceMode, orcMapMode, refresh)
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def copy(self, name=None):
         """return a copy of this texture"""
         #note: this seems like a circular import, but no exception is raised
@@ -507,7 +507,7 @@ class Texture:
                     mute, silenceMode, orcMapMode)
         return obj
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # get documentation
     def reprDoc(self, format=''):
         """this for a representation of a basic module
@@ -551,7 +551,7 @@ class Texture:
         else:
             raise ValueError
             
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def _reprDocInst(self):
         """get header information for documentation of instrument"""
         entryLines = []
@@ -699,7 +699,7 @@ class Texture:
     def __str__(self):
         return self.repr()
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def getPitchMode(self):
         if self.pitchMode == 'ps':
             return 'pitchSpace'
@@ -715,7 +715,7 @@ class Texture:
         pass
         # try to match midi pgm by num, then by name
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
 
     def _getPathList(self, format='list'):
         """returns a list of pitches used based on the pitch mode
@@ -770,7 +770,7 @@ class Texture:
 
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # clocking methods for measuing path time points and boundaries
     # uses ClockRegion objects defined above
     
@@ -834,7 +834,7 @@ class Texture:
                     return i
         else: return None # error, t not in any time range of this texture              
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
 
     def _getInstInfo(self, inst, orcName='csoundNative', auxNo=None):
         """gets instrument info
@@ -1028,13 +1028,13 @@ class Texture:
             newData.refIncr()
         return 1, '' # success
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # minor edit methods
     
     def editName(self, name):
         self.name = name
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # methods used within texture module to get a value;
     # provides only minor data filtering at the event instance level
 
@@ -1129,7 +1129,7 @@ class Texture:
             auxiliary.append(self.pmtrObjDict[auxLabel].outputFmt)
         return auxiliary
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # get text pmtr data
 
     def getTextStatic(self, label, data=None):
@@ -1152,7 +1152,7 @@ class Texture:
         label = self.findTextStaticLabel(label) # may raise ValueError
         return self.pmtrObjDict[label].getArgsLabel()
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # get dyn pmtr data
     
     def getTextDynamic(self, label, tCurrent):
@@ -1167,7 +1167,7 @@ class Texture:
         return self.pmtrObjDict[label].getArgsLabel()
         
       
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # event processing methods
 
     def _sortPmtrObjPriority(self):
@@ -1251,7 +1251,7 @@ class Texture:
         self.esObj.interpolate(tFrameArray, snapSus, active)
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # score mehods: generting and returning event data
 
     def checkScore(self):

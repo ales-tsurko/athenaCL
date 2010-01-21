@@ -27,7 +27,7 @@ class Orchestra:
     def __init__(self):
         self.name = None
         self._instrNumbers = None # access w/ methods, not by looking at this attr
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # public interface methods    
     def instNoValid(self, iNo):
         """test if an instrument number is valid"""
@@ -68,7 +68,7 @@ class Orchestra:
         """for specified inst, pmtrNo, return pmtr info"""
         return None
         
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # orcMapMode determines if values are scaled or left alone
     # ('mix' refers to mixing-like values: pan, amp, pitch)
     # assume pan and amp are b/n 0 and 1; pitch is in psReal
@@ -97,7 +97,7 @@ class Orchestra:
             raise ValueError, 'bad parameter name in orchestra'
         return val
         
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # mappings of psReal, amp, pan; only applied of mix mode is on
     # mapings done before limits
     def _postMapPs(self, iNo, val):

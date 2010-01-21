@@ -5,13 +5,15 @@
 #
 # Authors:       Christopher Ariza
 #
-# Copyright:     (c) 2003-2006 Christopher Ariza
+# Copyright:     (c) 2003-2010 Christopher Ariza
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
 
 import sys, os, time, random, copy
+import unittest, doctest
 
-#-----------------------------------------------------------------||||||||||||--
+
+
 #-----------------------------------------------------------------||||||||||||--
 
 from athenaCL.libATH import argTools
@@ -57,6 +59,7 @@ try:
     import threading
 except ImportError:
     pass
+
 
 class Future:
     """future object of a new thread
@@ -119,7 +122,6 @@ class Future:
 
 
 #-----------------------------------------------------------------||||||||||||--
-
 class Command:
     """parent class for all athenacl commands
     commands can be two types: a normal command, and a subCmd
@@ -138,7 +140,13 @@ class Command:
     command objects _do_ have access to terminal object
     cmdEnviron is a dictionary of values used to control command processing
     """
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
+        """
+        >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+        >>> a = Command(ao)
+        >>> post = a.do()
+        """
+        
         self.ao = ao
         self.termObj = self.ao.termObj
         self.scObj = self.ao.external.scObj
@@ -148,22 +156,39 @@ class Command:
         self.args = args
         # store complete cmdEnviron dict for easy passing to cmds fired
         # from other commands
-        self.cmdEnviron = cmdEnviron
+        self.cmdEnviron = self._configCmdEnviron(cmdEnviron)
         self.threadAble = self.cmdEnviron['threadAble']
         self.pollDur = self.cmdEnviron['pollDur']
         self.debug = self.cmdEnviron['debug']
         self.verbose = self.cmdEnviron['verbose']
+
         if self.debug: print 'command.py: command in debug mode.'
 
         self.cmdStr = None #command name, give in subclass
         self.processSwitch = 1 # if methods should be called
         self.gatherSwitch = 1
+
         # necessary to avoid testing gfx arrangment and printing warnings
         self.gfxSwitch = 0 # default is tt comands dont graphics: must open
         self.processStatus = 0 # complete or not
         self.gatherStatus = 0 # complete or not
 
         self.subCmd = 0 # subcommands are executed from method in interpreter
+
+
+    def _configCmdEnviron(self, cmdEnviron):
+        """Return a formatted dictionary. If None or {}, provide defaults
+        """
+        if cmdEnviron == None or len(cmdEnviron) == 0:
+            dict = {}
+            dict['threadAble'] = 0
+            dict['pollDur'] = 1
+            dict['debug'] = 0
+            dict['verbose'] = 0
+            return dict
+        else:
+            return cmdEnviron # return unchanged
+
 
     def gather(self):
         """get args from user. should return None, unless error cancel
@@ -252,7 +277,7 @@ class Command:
     def undo(self):
         pass
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # utility display functions
     def _nameTest(self, name, charInclude = ''):
         """makes sure a name has valid characters"""
@@ -429,7 +454,7 @@ class Command:
         else:
             return rangeList
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # file path utilities
     def _findFilePath(self, usrStr):
         """if a complete path, checks existence and returns
@@ -463,7 +488,7 @@ class Command:
                         return filePath
             return None # failed to find anything
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # high level string parsing or interactive path assignment
     
     def _selectAppPath(self, usrStr, appType, appName, 
@@ -524,7 +549,7 @@ class Command:
         else: return None, 0 # return None on failure
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # valid path and preference utilities
     def _validWritePath(self, usrStr, forceExtension=None, forceDir=None):
         """for use when a user supplies a command line arugment for writing
@@ -655,7 +680,7 @@ class Command:
         else: # not okay
             return ok, fmt, None
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def _numPmtrDetermineFormat(self, usrStr, srcFmt=None):
         """strip leading characters from aux, text, and dyn notations"""
         allFormats = [basePmtr.AUXQ, basePmtr.TEXTQ, 
@@ -724,7 +749,7 @@ class Command:
         label = '%s%s' % (fmt, no)
         return label
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def _getNumPmtr(self, pmtrType, tName, usrStr=None):
         """have user select a numeric parameter
         owrks w/ all types
@@ -763,7 +788,7 @@ class Command:
             else:
                 return label
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # sc display utilities
 
     def _scGetTnStr(self):
@@ -772,193 +797,193 @@ class Command:
         else: classStr = lang.msgSCtn
         return classStr 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # mc methods
 
 
-    def _mcAnalysisTable(self, msg, setA, setB, mapTupleId, size, 
-             dictEntryS, rankS, dictEntryU, rankU, dictEntryB, rankB):
-        """creates a text based display of a mc analysis, including
-        all vectors,  a literal presentation of voice-to-voice movement
-        and values for displacement, offset, max and span
-        msg is a list, returns a list of str
-        """
-        partialMapId  = mapTupleId[2]
-        mapTupleIdStr = self.mcObj.mapIdTupleToString(mapTupleId)
-        map           = self.mcObj.fetchMap(mapTupleId)
-        mapStr        = self.mcObj.rawMapToString(map)
-        srcSize       = len(setA)
-        dstSize       = len(setB)
-        srcSet        = setA 
-        dstSet        = setB
-        vectorS, displS = dictEntryS
-        vectorU, orderIcPeaksU, offsetIcPeakU, maxU, spanU, offsetU = dictEntryU
-        vectorB, orderIcPeaksB, offsetIcPeakB, maxB, spanB, offsetB = dictEntryB  
+#     def _mcAnalysisTable(self, msg, setA, setB, mapTupleId, size, 
+#              dictEntryS, rankS, dictEntryU, rankU, dictEntryB, rankB):
+#         """creates a text based display of a mc analysis, including
+#         all vectors,  a literal presentation of voice-to-voice movement
+#         and values for displacement, offset, max and span
+#         msg is a list, returns a list of str
+#         """
+#         partialMapId  = mapTupleId[2]
+#         mapTupleIdStr = self.mcObj.mapIdTupleToString(mapTupleId)
+#         map           = self.mcObj.fetchMap(mapTupleId)
+#         mapStr        = self.mcObj.rawMapToString(map)
+#         srcSize       = len(setA)
+#         dstSize       = len(setB)
+#         srcSet        = setA 
+#         dstSet        = setB
+#         vectorS, displS = dictEntryS
+#         vectorU, orderIcPeaksU, offsetIcPeakU, maxU, spanU, offsetU = dictEntryU
+#         vectorB, orderIcPeaksB, offsetIcPeakB, maxB, spanB, offsetB = dictEntryB  
+# 
+#         msg.append('\nMC %s map %s\n' % (mapTupleIdStr, mapStr))
+# 
+#         listVLpairs = self.mcObj.genVlPairs(srcSet, dstSet, map)
+#         vlDgmStr = []
+#         # each of these is a pair of values in a tuple (4, 3) conver to (4<->3)
+#         for entry in listVLpairs:
+#             a, b = entry
+#             vlDgmStr.append('(%i--%i)' % (a, b)) 
+#         entryLines = []
+#         entryLines.append(['', 'VL', ','.join(vlDgmStr)])
+#         headerKey    = [] # table setup
+#         minWidthList = [lang.TABW, 7, 0]
+#         bufList      = [0, 1]
+#         justList         = ['l','l']
+#         table = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
+#                             bufList, justList, self.termObj, 'oneColumn')
+#         msg.append('%s\n' % table)
+# 
+#         entryLines = []
+#         vectorStr = drawer.listToStr(vectorS)
+#         dataA = 'vector:%s' % (vectorStr)
+#         dataB = 'displacement:%i' % (displS)
+#         entryLines.append(['', 'SMTH', dataA, dataB])
+# 
+#         vectorStr = drawer.listToStr(vectorU)
+#         dataA = 'vector:%s' % (vectorStr)
+#         dataB = 'offset:%i (Tn:%i) max:%i span:%i' % (offsetU, 
+#                                 offsetIcPeakU[0], maxU, spanU)
+#         entryLines.append(['', 'UNIF', dataA, dataB])
+# 
+#         vectorStr = drawer.listToStr(vectorB)
+#         dataA    ='vector:%s' % (vectorStr)
+#         dataB    ='offset:%i (In:%i) max:%i span:%i' % (offsetB,
+#                                 offsetIcPeakB[0], maxB, spanB)
+#         entryLines.append(['', 'BAL', dataA, dataB])
+#         data = 'S%s U%s B%s of%s' % (rankS, rankU, rankB, size)
+#         entryLines.append(['', 'rank', data, ''])
+# 
+#         headerKey    = []
+#         minWidthList = [lang.TABW,lang.SHIFTW,0,0]
+#         bufList      = [0, 0, 1, 1] # binary values
+#         justList         = ['l','l','l','l']
+#         table = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
+#                             bufList, justList, self.termObj, 'twoColumn',
+#                             'line', 2) # last value is buffer width
+#         msg.append(table)
+#         return msg # return list, do not convert
+# 
+# 
+#     def _mcGetAnalysisPostSort(self, msg, setA, setB, mapTupleId, dictS,
+#                                 orderKeyS, dictU, orderKeyU, dictB, orderKeyB):
+#         """create an mc analysis display after having already performed
+#         necessary sortings
+#         msg is a list, returns a list of strings
+#         """
+#         size = len(dictS.keys())  ### number of all comparisons
+#         
+#         partialMapId    = mapTupleId[2]
+#         mapTupleIdStr   = self.mcObj.mapIdTupleToString(mapTupleId)
+#         map             = self.mcObj.fetchMap(mapTupleId)
+#         mapStr          = self.mcObj.rawMapToString(map)
+#         srcSize         = len(setA)
+#         dstSize         = len(setB)
+#         srcSet          = setA
+#         dstSet          = setB
+#         rankS = orderKeyS.index(partialMapId) + 1
+#         rankU = orderKeyU.index(partialMapId) + 1
+#         rankB = orderKeyB.index(partialMapId) + 1
+#         
+#         msg = self._mcAnalysisTable(msg, setA, setB, mapTupleId, 
+#                          size, dictS[partialMapId], rankS, 
+#                          dictU[partialMapId], rankU, dictB[partialMapId], 
+#                          rankB)      
+#         return msg # this is a list
+# 
+# 
+#     def _mcGetAnalysisPreSort(self, msg, setA, setB, foundMapTupleID,
+#                                       verticalDisplay=0):
+#         """provide mc analysis without having a pre-sorted dictionary
+#         has vertical display option 
+#         msg is a list
+#         """
+#         # need just the index number to get ranks below
+#         partialMapId          = foundMapTupleID[2]
+#         mapTupleId            = foundMapTupleID
+#         mapTupleIdStr         = self.mcObj.mapIdTupleToString(mapTupleId)
+#         map                   = self.mcObj.fetchMap(mapTupleId)
+#         # mapStr                     = self.mcObj.rawMapToString(map)
+#         # gen final complete analysis of new set
+#         srcSize = len(setA)
+#         dstSize = len(setB)
+#         srcSet  = setA
+#         dstSet  = setB
+# 
+#         if verticalDisplay != 0: ### provide vertical display 
+#             rowDict = self.mcObj.genDoubleVlDiagram(setA, setB, map)
+#             printKeyList = rowDict.keys()
+#             printKeyList.sort()
+#             for key in printKeyList:
+#                 tempRow = rowDict[key].strip()
+#                 if tempRow == '':
+#                     continue
+#                 else:
+#                     msg.append('%s%s\n' % (lang.TAB, rowDict[key]))
+#         
+#         noMaps = self.mcObj.getNoMaps(srcSize, dstSize)
+#          
+#         dictS, orderKeyS = self.mcObj.sortSMTH(srcSet, dstSet)
+#         a = self.mcObj.sortUNIF(srcSet, dstSet)
+#         dictU, orderKeyU, orderMax, orderSpan, UNIForderOffsetList = a
+#         b = self.mcObj.sortBAL(srcSet, dstSet)
+#         dictB,  orderKeyB,  orderMax, orderSpan, BALorderOffsetList = b
+# 
+#         msg = self._mcGetAnalysisPostSort(msg, srcSet, dstSet,
+#                                              mapTupleId, dictS, orderKeyS,
+#                                              dictU, orderKeyU, dictB,
+#                                              orderKeyB)
+#         return msg # returns a list
+# 
+#     def _mcGetIntegerRange(self, query, start, end):
+#         """gets a tuple of two numbers separated by a comma
+#         start and end are given un-corrected
+#         1 is subtracted from user values after being optained"""
+#         while 1:
+#             outputRangeStr = dialog.askStr(query, self.termObj)
+#             if outputRangeStr == None or outputRangeStr == '' :
+#                 return None
+#             outputRangeTuple = self._convertListRange(outputRangeStr, start, end)
+#             if outputRangeTuple == None:
+#                 dialog.msgOut(lang.msgMCbadMapRange, self.termObj)
+#                 continue
+#             else:
+#                 return outputRangeTuple
+# 
+#     def _mcConvertSortMethod(self, usrStr):
+#         """converts a string to proper method key"""
+#         ref = {
+#             'SMTH' : ['s', 'sm', 'smth', 'smoothness'],
+#             'UNIF' : ['u', 'un', 'unif', 'uniformity'],
+#             'BAL'    : ['b', 'ba', 'bal', 'balance'],
+#                 }
+#         return drawer.selectionParse(usrStr, ref) # may be None
+#         
+#     def _mcGetSortMethod(self):
+#         """user interface version of a above conversion"""
+#         while 1:
+#             nameMeth = dialog.askStr(lang.msgMCenterRankMethod, self.termObj)
+#             if nameMeth == None or nameMeth == '':
+#                 return None
+#             nameMeth = self._mcConvertSortMethod(nameMeth)
+#             if nameMeth == None:
+#                 dialog.msgOut(lang.msgConfusedInput, self.termObj)
+#                 continue
+#             else:
+#                 return nameMeth
 
-        msg.append('\nMC %s map %s\n' % (mapTupleIdStr, mapStr))
+    #-----------------------------------------------------------------------||--
+#     def _setMeasureFactory(self, scX=None, scY=None):
+#         """return a new pe object w/ the curent pe"""
+#         modName = getattr(setMeasure, self.ao.activeSetMeasure)
+#         modObj = modName(scX, scY, self.scObj)
+#         return modObj
 
-        listVLpairs = self.mcObj.genVlPairs(srcSet, dstSet, map)
-        vlDgmStr = []
-        # each of these is a pair of values in a tuple (4, 3) conver to (4<->3)
-        for entry in listVLpairs:
-            a, b = entry
-            vlDgmStr.append('(%i--%i)' % (a, b)) 
-        entryLines = []
-        entryLines.append(['', 'VL', ','.join(vlDgmStr)])
-        headerKey    = [] # table setup
-        minWidthList = [lang.TABW, 7, 0]
-        bufList      = [0, 1]
-        justList         = ['l','l']
-        table = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
-                            bufList, justList, self.termObj, 'oneColumn')
-        msg.append('%s\n' % table)
-
-        entryLines = []
-        vectorStr = drawer.listToStr(vectorS)
-        dataA = 'vector:%s' % (vectorStr)
-        dataB = 'displacement:%i' % (displS)
-        entryLines.append(['', 'SMTH', dataA, dataB])
-
-        vectorStr = drawer.listToStr(vectorU)
-        dataA = 'vector:%s' % (vectorStr)
-        dataB = 'offset:%i (Tn:%i) max:%i span:%i' % (offsetU, 
-                                offsetIcPeakU[0], maxU, spanU)
-        entryLines.append(['', 'UNIF', dataA, dataB])
-
-        vectorStr = drawer.listToStr(vectorB)
-        dataA    ='vector:%s' % (vectorStr)
-        dataB    ='offset:%i (In:%i) max:%i span:%i' % (offsetB,
-                                offsetIcPeakB[0], maxB, spanB)
-        entryLines.append(['', 'BAL', dataA, dataB])
-        data = 'S%s U%s B%s of%s' % (rankS, rankU, rankB, size)
-        entryLines.append(['', 'rank', data, ''])
-
-        headerKey    = []
-        minWidthList = [lang.TABW,lang.SHIFTW,0,0]
-        bufList      = [0, 0, 1, 1] # binary values
-        justList         = ['l','l','l','l']
-        table = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
-                            bufList, justList, self.termObj, 'twoColumn',
-                            'line', 2) # last value is buffer width
-        msg.append(table)
-        return msg # return list, do not convert
-
-
-    def _mcGetAnalysisPostSort(self, msg, setA, setB, mapTupleId, dictS,
-                                orderKeyS, dictU, orderKeyU, dictB, orderKeyB):
-        """create an mc analysis display after having already performed
-        necessary sortings
-        msg is a list, returns a list of strings
-        """
-        size = len(dictS.keys())  ### number of all comparisons
-        
-        partialMapId    = mapTupleId[2]
-        mapTupleIdStr   = self.mcObj.mapIdTupleToString(mapTupleId)
-        map             = self.mcObj.fetchMap(mapTupleId)
-        mapStr          = self.mcObj.rawMapToString(map)
-        srcSize         = len(setA)
-        dstSize         = len(setB)
-        srcSet          = setA
-        dstSet          = setB
-        rankS = orderKeyS.index(partialMapId) + 1
-        rankU = orderKeyU.index(partialMapId) + 1
-        rankB = orderKeyB.index(partialMapId) + 1
-        
-        msg = self._mcAnalysisTable(msg, setA, setB, mapTupleId, 
-                         size, dictS[partialMapId], rankS, 
-                         dictU[partialMapId], rankU, dictB[partialMapId], 
-                         rankB)      
-        return msg # this is a list
-
-
-    def _mcGetAnalysisPreSort(self, msg, setA, setB, foundMapTupleID,
-                                      verticalDisplay=0):
-        """provide mc analysis without having a pre-sorted dictionary
-        has vertical display option 
-        msg is a list
-        """
-        # need just the index number to get ranks below
-        partialMapId          = foundMapTupleID[2]
-        mapTupleId            = foundMapTupleID
-        mapTupleIdStr         = self.mcObj.mapIdTupleToString(mapTupleId)
-        map                   = self.mcObj.fetchMap(mapTupleId)
-        # mapStr                     = self.mcObj.rawMapToString(map)
-        # gen final complete analysis of new set
-        srcSize = len(setA)
-        dstSize = len(setB)
-        srcSet  = setA
-        dstSet  = setB
-
-        if verticalDisplay != 0: ### provide vertical display 
-            rowDict = self.mcObj.genDoubleVlDiagram(setA, setB, map)
-            printKeyList = rowDict.keys()
-            printKeyList.sort()
-            for key in printKeyList:
-                tempRow = rowDict[key].strip()
-                if tempRow == '':
-                    continue
-                else:
-                    msg.append('%s%s\n' % (lang.TAB, rowDict[key]))
-        
-        noMaps = self.mcObj.getNoMaps(srcSize, dstSize)
-         
-        dictS, orderKeyS = self.mcObj.sortSMTH(srcSet, dstSet)
-        a = self.mcObj.sortUNIF(srcSet, dstSet)
-        dictU, orderKeyU, orderMax, orderSpan, UNIForderOffsetList = a
-        b = self.mcObj.sortBAL(srcSet, dstSet)
-        dictB,  orderKeyB,  orderMax, orderSpan, BALorderOffsetList = b
-
-        msg = self._mcGetAnalysisPostSort(msg, srcSet, dstSet,
-                                             mapTupleId, dictS, orderKeyS,
-                                             dictU, orderKeyU, dictB,
-                                             orderKeyB)
-        return msg # returns a list
-
-    def _mcGetIntegerRange(self, query, start, end):
-        """gets a tuple of two numbers separated by a comma
-        start and end are given un-corrected
-        1 is subtracted from user values after being optained"""
-        while 1:
-            outputRangeStr = dialog.askStr(query, self.termObj)
-            if outputRangeStr == None or outputRangeStr == '' :
-                return None
-            outputRangeTuple = self._convertListRange(outputRangeStr, start, end)
-            if outputRangeTuple == None:
-                dialog.msgOut(lang.msgMCbadMapRange, self.termObj)
-                continue
-            else:
-                return outputRangeTuple
-
-    def _mcConvertSortMethod(self, usrStr):
-        """converts a string to proper method key"""
-        ref = {
-            'SMTH' : ['s', 'sm', 'smth', 'smoothness'],
-            'UNIF' : ['u', 'un', 'unif', 'uniformity'],
-            'BAL'    : ['b', 'ba', 'bal', 'balance'],
-                }
-        return drawer.selectionParse(usrStr, ref) # may be None
-        
-    def _mcGetSortMethod(self):
-        """user interface version of a above conversion"""
-        while 1:
-            nameMeth = dialog.askStr(lang.msgMCenterRankMethod, self.termObj)
-            if nameMeth == None or nameMeth == '':
-                return None
-            nameMeth = self._mcConvertSortMethod(nameMeth)
-            if nameMeth == None:
-                dialog.msgOut(lang.msgConfusedInput, self.termObj)
-                continue
-            else:
-                return nameMeth
-
-    #------------------------------------------------------------------------||--
-    def _setMeasureFactory(self, scX=None, scY=None):
-        """return a new pe object w/ the curent pe"""
-        modName = getattr(setMeasure, self.ao.activeSetMeasure)
-        modObj = modName(scX, scY, self.scObj)
-        return modObj
-
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
 
 
     # these function are used to test the current state of all path instances
@@ -1061,7 +1086,7 @@ class Command:
 
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def _tiTestExistance(self):
         if len(self.ao.textureLib) == 0:
             return lang.msgTIcreateFirst
@@ -1386,7 +1411,7 @@ class Command:
         return startTime, endTime, totalDur # all in seconds
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def _tcTestExistance(self, tName):
         """test if this texxture has any clones"""
         if self.ao.cloneLib.number(tName) == 0:
@@ -1467,7 +1492,7 @@ class Command:
         return evalData
 
 
-    #------------------------------------------------------------------------||--         
+    #-----------------------------------------------------------------------||--         
     def _elCheckInstrumentNo(self, instNo):
         """checks if instrument exists. if true, returns number
         if no inst, return None
@@ -1525,8 +1550,15 @@ class Command:
 
 # display cmds
 class w(Command):
-    """w display"""
-    def __init__(self, ao, cmdEnviron, args=''):
+    """w display
+
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = w(ao)
+    >>> ok, result = a.do()
+    >>> ok == True
+    True
+    """
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 0 # display only
         self.gatherSwitch = 0 # display only
@@ -1535,8 +1567,14 @@ class w(Command):
         return '%s\n' % self.ao.help.w
 
 class c(Command):
-    """w display"""
-    def __init__(self, ao, cmdEnviron, args=''):
+    """w display
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = c(ao)
+    >>> ok, result = a.do()
+    >>> ok == True
+    True
+    """
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 0 # display only
         self.gatherSwitch = 0 # display only
@@ -1545,8 +1583,15 @@ class c(Command):
         return '%s\n' % self.ao.help.c
 
 class r(Command):
-    """r display"""
-    def __init__(self, ao, cmdEnviron, args=''):
+    """r display
+
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = c(ao)
+    >>> ok, result = a.do()
+    >>> ok == True
+    True
+    """
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 0 # display only
         self.gatherSwitch = 0 # display only
@@ -1555,8 +1600,15 @@ class r(Command):
         return '%s\n' % lang.msgCredits
 
 class cmd(Command):
-    """cmd display"""
-    def __init__(self, ao, cmdEnviron, args=''):
+    """cmd display
+
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = cmd(ao)
+    >>> ok, result = a.do()
+    >>> ok == True
+    True
+    """
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 0 # display only
         self.gatherSwitch = 0 # display only
@@ -1565,8 +1617,15 @@ class cmd(Command):
         return self.ao.cmdDisplay()
 
 class pypath(Command):
-    """cmd display"""
-    def __init__(self, ao, cmdEnviron, args=''):
+    """cmd display
+
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = pypath(ao)
+    >>> ok, result = a.do()
+    >>> ok == True
+    True
+    """
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 0 # display only
         self.gatherSwitch = 0 # display only
@@ -1580,8 +1639,15 @@ class pypath(Command):
         return ''.join(msg)
 
 class bug(Command):
-    """bug test command"""
-    def __init__(self, ao, cmdEnviron, args=''):
+    """bug test command
+
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = bug(ao)
+    >>> post = a.do()
+    Traceback (most recent call last):
+    TestError
+    """
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1
         self.gatherSwitch    = 0 
@@ -1590,18 +1656,27 @@ class bug(Command):
         raise error.TestError
 
 class clear(Command):
-    """clear the screen"""
-    def __init__(self, ao, cmdEnviron, args=''):
+    """clear the screen
+
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = clear(ao)
+    """
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 0
         self.gatherSwitch    = 0 
         self.cmdStr = 'clear'
+
     def display(self):
         self.termObj.clear()
         
 class py(Command):
-    """start a python interactive"""
-    def __init__(self, ao, cmdEnviron, args=''):
+    """start a python interactive
+
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = py(ao)
+    """
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 0
         self.gatherSwitch    = 0 
@@ -1612,8 +1687,12 @@ class py(Command):
         return {} # dict required return
 
 class shell(Command):
-    """fire a shell command"""
-    def __init__(self, ao, cmdEnviron, args=''):
+    """fire a shell command
+
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = shell(ao)
+    """
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 0
         self.gatherSwitch    = 1 
@@ -1632,8 +1711,16 @@ class shell(Command):
         return {'shellCmd': self.usrStr} # dict required return
 
 class help(Command):
-    """translates ? to help in   Interpreter._lineCmdArgSplit"""
-    def __init__(self, ao, cmdEnviron, args=''):
+    """translates ? to help in   Interpreter._lineCmdArgSplit
+
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = help(ao)
+    >>> ok, result = a.do()
+    >>> ok == True
+    True
+
+    """
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 0 # display only
         self.gatherSwitch = 1 # display only
@@ -1674,13 +1761,19 @@ class help(Command):
 
 
 class man(help):
-    """alias to help command"""
-    def __init__(self, ao, cmdEnviron, args=''):
+    """alias to help command
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = man(ao)
+    >>> ok, result = a.do()
+    >>> ok == True
+    True
+    """
+    def __init__(self, ao, cmdEnviron=None, args=''):
         help.__init__(self, ao, cmdEnviron, args)
 
 class quit(Command):
     "SUBCMD"
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 0 # display only
         self.gatherSwitch = 1 # display only
@@ -1713,692 +1806,691 @@ class quit(Command):
 
 class q(quit):
     """alias to quit command"""
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         quit.__init__(self, ao, cmdEnviron, args)
 
 
 #-----------------------------------------------------------------||||||||||||--
 
-class _CommandSC(Command):
-    """parent of all SC commands"""
-    def __init__(self, ao, cmdEnviron, args=''):
-        Command.__init__(self, ao, cmdEnviron, args)
-
-    def _scConvertPercentRange(self, usrStr):
-        """utility to convert a tring to percentage range tuple
-        accepts strings like '.5, .9' or '40, 60'
-        """
-        usrList = drawer.strToList(usrStr)
-        if len(usrList) != 2: return None
-        usrList = [drawer.strToPercent(usrList[0]),
-                      drawer.strToPercent(usrList[1])]
-        usrList.sort() # lower first
-        return usrList
-        
-    def _scGetPercentRange(self):
-        query = lang.msgSCenterSimCentRange
-        while 1:
-            data = dialog.askStr(query, self.termObj)
-            if data == None: return None
-            data = self._scConvertPercentRange(data)
-            if data == None:
-                dialog.msgOut(lang.msgSCcentRangeError, self.termObj)
-                continue
-            else:
-                return data
-
-        
-class SCv(_CommandSC):
-    def __init__(self, ao, cmdEnviron, args=''):
-        _CommandSC.__init__(self, ao, cmdEnviron, args)
-        self.processSwitch = 0 # display only
-        self.cmdStr = 'SCv'
-
-    def _scVectorKeyToInt(self, key):
-        VSize = int(key[:1]) # get first value of key
-        if VSize == 1: # case where vector is grater than 9
-            VSize = 10 + int(key[1:2])
-        return VSize
-
-    def _scVectorWrap(self, data):
-        """wrap vector strings so that they are readable
-        return a list of lines
-        """
-        entryLines = []
-        length = len(data)
-        if length >= 20:
-            s    = 0
-            end = 20                                 #max characters on display
-            while end <= length:
-                temp     = data[s:end]
-                temp_a = drawer.listScrub(temp[:10])###first 10
-                temp_b = drawer.listScrub(temp[10:])###last 10
-                entryLines.append(['', temp_a, '-', temp_b]) 
-                # this is all full-20 member lines
-                s    = s + 20
-                end = end + 20
-                if end == length:
-                    break
-            else:    ## only if loop runs to completion, ie no break
-                temp = data[s:length]
-                if len(temp) > 10:
-                    temp_a = drawer.listScrub(temp[:10])##first 10
-                    temp_b = drawer.listScrub(temp[10:])#last 10
-                else:
-                    temp_b = ''
-                    if len(temp) == 10:
-                        temp_a = drawer.listScrub(temp)
-                    else:
-                        temp_a = drawer.listScrub(temp)
-                entryLines.append(['', temp_a, '-', temp_b]) 
-        else:
-            if len(data) > 10:
-                temp     = data
-                temp_a = drawer.listScrub(data[:10])#first 10
-                temp_b = drawer.listScrub(data[10:])#last 10
-            else:
-                temp_a = drawer.listScrub(data)
-                temp_b = ''
-            entryLines.append(['', temp_a, '-', temp_b]) 
-        return entryLines
-
-    def gather(self): 
-        args = self.args
-        self.set = None
-        if args != '':
-            args = argTools.ArgOps(args) # no strip
-            self.set = self.setFactory(self.ao, args.get(0,'end'), self.scObj)
-            if self.set == None: return self._getUsage()
-        if self.set == None:
-            self.set = self.setFactory(self.ao, None, self.scObj)
-            if self.set == None: return lang.msgReturnCancel
-
-    def process(self):
-        pass # none to do
-    
-    def log(self):
-        if self.gatherStatus and self.processStatus: # if complete
-            return '%s %s' % (self.cmdStr, self.set.repr('pc'))
-
-    def display(self):
-        #(card, index, inv), rawPcs, tFound = self.data
-        #set_string = self.scObj.scToStr((card, index, inv))
-        #zVal = self.scObj.zData((card, index, inv))
-        if self.set.z() == None:
-            zString = 'none'
-        else:
-            zSet = self.set.zObj()
-            zString = zSet.repr('sc')
-
-        msg = [] 
-        msg.append('SC(%s), Z(%s), mode(%s)\n' % (
-                        self.set.repr('sc'),
-                        zString,
-                        self._scGetTnStr()))
-        entryLines = []
-        sc_keys = (('psName', 'Pitch Space:'),
-                      ('pc', 'Pitch Class:'),
-                      ('normal', 'Normal Form:'), 
-                      ('prime',  'Prime Form:'), 
-                      ('var', 'Invariance Vector:'), 
-                      ('icv', 'Interval Class Vector:'), ('ref', 'References:'), 
-                      ('3cv', '3CV(TnI)'), 
-                      ('4cv', '4CV(TnI)'), ('5cv', '5CV(TnI)'), ('6cv', '6CV(TnI)'), 
-                      ('7cv', '7CV(TnI)'), ('8cv', '8CV(TnI)'), ('9cv', '9CV(TnI)'),
-                      ('10cv', '10CV(TnI)'), ('11cv', '11CV(TnI)'), 
-                      ('12cv', '12CV(TnI)'),
-                      ('3xv', '3CV(Tn) '), 
-                      ('4xv', '4CV(Tn) '),  ('5xv', '5CV(Tn) '), 
-                      ('6xv', '6CV(Tn) '), ('7xv', '7CV(Tn) '), ('8xv', '8CV(Tn) '),
-                      ('9xv', '9CV(Tn) '), ('10xv', '10CV(Tn)'), 
-                      ('11xv', '11CV(Tn)'),  ('12xv', '12CV(Tn)'))
-        vectorKeys = []
-        # this is the position of the first vector (cv) in the SC data list
-        if self.ao.tniMode == 1:    
-            vCounter = 3 
-        if self.ao.tniMode != 1:    
-            vCounter = 3 + (self.set.get('card')-2)
-
-        earlyCounter = 0
-        for key, title in sc_keys:
-            if key in ['psName', 'pc', 'normal', 'prime', 'pcs', 'var', 'icv']:
-                entryLines.append([title, self.set.repr(key)])
-                earlyCounter = earlyCounter + 1
-            elif key == 'ref':
-                refLines = self.set.repr('ref') # get all refs
-                if refLines == None:
-                    entryLines.append([title, 'none'])
-                else:
-                    entryLines.append([title, ''])
-                    for line in refLines:
-                        entryLines.append([(lang.TAB + 'name'), line])
-
-            # preprocess tn/i keys
-            elif self.ao.tniMode == 1: #TnI (no x-vectors wanted)
-                if key in ('3cv', '4cv','5cv','6cv','7cv','8cv','9cv',
-                             '10cv','11cv','12cv'):
-                    #only need smaller then card, and given in order
-                    if self._scVectorKeyToInt(key) > self.set.get('card'): 
-                        continue
-                    else:
-                        vectorKeys.append((vCounter, title))
-                        vCounter = vCounter + 1
-            elif self.ao.tniMode != 1:   #Tn classificatioin (x-vectors wanted)
-                if key in ('3xv', '4xv','5xv','6xv','7xv','8xv','9xv','10xv',
-                              '11xv','12xv'):
-                    if self._scVectorKeyToInt(key) > self.set.get('card'): 
-                        #only need smaller then card, and given in order
-                        continue
-                    else:
-                        vectorKeys.append((vCounter, title))
-                        vCounter = vCounter + 1
-
-        headerKey    = [] # table setup
-        minWidthList = [lang.MMARGINW, 0]
-        bufList      = [0, 1]
-        justList         = ['l','l']
-        tableA = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
-                                bufList, justList, self.termObj, 'oneColumn')
-        msg.append(tableA + '\n')
-        entryLines = []
-        if vectorKeys == []: # for case of monad
-            return ''.join(msg)
-        msg.append('Subset Vectors:\n')
-        for key, title in vectorKeys:
-            entryLines.append([title, '', '', '']) 
-            data = list(self.set.rawData(key))
-            # returns a 4 column display
-            entryLines = entryLines + self._scVectorWrap(data)
-
-        headerKey    = [] # table setup
-        minWidthList = [(lang.LMARGINW/2), 0, 3, 0]
-        bufList      = [0, 0, 0, 1]
-        justList         = ['l','l', 'c', 'l']
-        tableB = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
-            bufList, justList, self.termObj, 'oneColumn', 'line', 0) # no buffer
-        msg.append(tableB + '\n')
-        return ''.join(msg)
-
-
-class SCh(_CommandSC):
-    """create an event list of just a set"""
-    def __init__(self, ao, cmdEnviron, args=''):
-        _CommandSC.__init__(self, ao, cmdEnviron, args)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'SCh'
-
-    def gather(self): 
-        args = self.args
-        self.set = None
-        if args != '':
-            args = argTools.ArgOps(args) # no strip
-            self.set = self.setFactory(self.ao, args.get(0,'end'), self.scObj)
-            if self.set == None: return self._getUsage()
-        if self.set == None:
-            self.set = self.setFactory(self.ao, None, self.scObj)
-            if self.set == None: return lang.msgReturnCancel
-        # get valid vile path; return an error if bail
-        self.filePath = self._validScratchEvent()    
-        if self.filePath == None: return lang.msgReturnCancel
-
-    def process(self):
-        p = pitchPath.PolyPath('temp', self.scObj)
-        p.loadMultisetList([self.set,]) # does updates
-        # create a temporary texture w/ this path
-        lclTimes = {}
-        lclTimes['tRange'] = ('staticRange', (0, 2))
-        lclTimes['beatT'] = ('c', 90)
-        # use current texture modulke, froce general midi, keep refresh
-        t = texture.factory('DroneSustain', 'temp', self.scObj)
-        t.loadDefault(0, p, self.ao.fpSSDR, self.ao.fpSADR, 
-                                lclTimes, 'generalMidi')
-        self.emObj = eventList.factory('midi', self.ao)
-        self.emObj.setRootPath(self.filePath)
-        # provide a list of textures to process
-        # turn off refreshing for faster processing
-        # provide outputRequest
-        ok, msg, outComplete = self.emObj.process([t], [], 0) 
-        self.pathMidi = self.emObj.ref['pathMid']
-
-    def display(self): 
-        msg = []
-        prefDict = self.ao.external.getPrefGroup('external')
-        failFlag = osTools.openMedia(self.pathMidi, prefDict)
-        if failFlag == 'failed':
-            msg.append(lang.msgELhearError % self.pathMidi)
-        else:
-            msg.append('SC(%s), PCS%s\n' % (
-                        self.set.repr('sc'),
-                        self.set.repr('pc'),))
-            entryLines = []
-            scKeys = (('psName', 'Pitch Space:'),
-                         ('pc', 'Pitch Class:'),)
-            for key, title in scKeys:
-                entryLines.append([title, self.set.repr(key)])
-            headerKey    = [] # table setup
-            minWidthList = [lang.MMARGINW, 0]
-            bufList      = [0, 1]
-            justList         = ['l','l']
-            tableA = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
-                                    bufList, justList, self.termObj, 'oneColumn')
-            msg.append(tableA + '\n')
-            msg.append('SC hear complete.\n(%s)\n' % (self.pathMidi))
-        return ''.join(msg)
-
-
-class SCcm(_CommandSC):
-    """compares any two set classes and 
-        displays all posible SetMeasure comparisons 
-        args: sccm setA setB
-    """
-    def __init__(self, ao, cmdEnviron, args=''):
-        _CommandSC.__init__(self, ao, cmdEnviron, args)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'SCcm'
-
-    def gather(self): 
-        dataA = None
-        dataB = None
-        args = self.args
-
-        if args != '':
-            args = argTools.ArgOps(args, 'stripComma')
-            dataA = self.setFactory(self.ao,args.get(0), self.scObj)
-            if dataA == None: return self._getUsage()
-            dataB = self.setFactory(self.ao,args.get(1), self.scObj)
-            if dataB == None: return self._getUsage()
-        if dataA == None or dataB == None:
-            dialog.msgOut(lang.msgSCselectX, self.termObj)
-            dataA = self.setFactory(self.ao, None, self.scObj)
-            if dataA == None: return lang.msgReturnCancel
-            dialog.msgOut(lang.msgSCselectY, self.termObj)
-            dataB = self.setFactory(self.ao, None, self.scObj)
-            if dataB == None: return lang.msgReturnCancel
-        self.dataA = dataA # set objects
-        self.dataB = dataB
-
-    def process(self): 
-        pass
-
-    def log(self):
-        if self.gatherStatus and self.processStatus: # if complete
-            return '%s %s %s' % (self.cmdStr, self.dataA.get('psReal'),
-                                        self.dataB.get('psReal'))
-
-    def display(self): 
-        #dataA = self.dataA
-        #dataB = self.dataB
-
-        scX = self.dataA.get('sc') # gets sc tuple data
-        scY = self.dataB.get('sc') # gets sc tuple data
-        termWidth = self.termObj.w
-        RANGEW = 12
-        graphSize = termWidth - lang.LMARGINW - RANGEW # for range
-
-        x = self.dataA.repr('sc')
-        y = self.dataB.repr('sc')
-        classification = self._scGetTnStr()
-
-        msg = []
-        msg.append('%sSC similarity: %s and %s\n' % (lang.TAB, x, y))
-        msg.append(classification)
-        entryLines = []
-
-        h = self.scObj.analysisNames()
-        h.sort()
-        repositionKeys = ['SI','sf','R0','R1','R2']
-        for key in repositionKeys:
-            h.remove(key)
-            h.append(key) # adds to end of list
-        for key in h:
-            rl = self.scObj.analysisRange(key) # return sdict
-            #rl = eval(self.scObj.analysisDict[key].__doc__)
-            range = self.scObj.analysisRangeStr(key, RANGEW)
-            min = rl['min']
-            max = rl['max']
-
-            if key in ['pRel', 'MEMBn', 'TMEMB', 'ATMEMB', 'REL', 'TpRel']:
-                value = self.scObj.analysis(key,scX,scY,self.ao.tniMode)
-                graph = typeset.graphNumber(min, max, value, graphSize)
-                key = key.replace('p', '%')
-                v = '%.2f' % value
-                entryLines.append([key, v, graph, range])
-            ### return_integers
-            elif key in ['R1', 'R0', 'R2', 'K']:
-                value = self.scObj.analysis(key, scX,scY,self.ao.tniMode)
-                graph = typeset.graphNumber(min, max, value, graphSize)
-                if key in ['R1', 'R0', 'R2']: # set empty char to be a space
-                    graph = typeset.graphNumber(min, max, value, graphSize, ' ')
-                v = '%i' % value
-                entryLines.append([key, v, graph, range])
-            else: 
-                value = self.scObj.analysis(key, scX, scY,self.ao.tniMode)
-                try:
-                    v = '%.2f' % value
-                    graph = typeset.graphNumber(min, max, value, graphSize)
-                except: # not a float
-                    graph = typeset.graphNumber(min, max, value, 
-                                                        graphSize, ' ', ' ')
-                    v = repr(value)[1:-1]
-                entryLines.append([key, v, graph, range])
-
-        headerKey    = ['name', 'value', 'graph', 'range']
-        minWidthList = ((lang.LMARGINW/2), (lang.LMARGINW/2), 
-                              graphSize, RANGEW)
-        bufList      = [0, 0, 0, 0]
-        justList         = ['l','l','l','c']
-        table = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
-                                 bufList, justList, self.termObj)
-        msg.append('%s\n' % table)
-        return ''.join(msg)
-
-
-
-class SCmode(_CommandSC):
-    """switches value of self.ao.tniMode
-        when tni toggle is set to 1, mode is tn/i; when set to 0, 
-        its in mode tn
-        args: scmode
-    """
-    def __init__(self, ao, cmdEnviron, args=''):
-        _CommandSC.__init__(self, ao, cmdEnviron, args)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'SCmode'
-
-    def _scConvertTnStr(self, usrStr):
-        """converts arg strings to tn/i types
-            returns 1 for tn/i, 0 for tn"""
-        ref = {
-            '0' : ['tn', 't', 't n' '0'],
-            '1' : ['i', 'tin', 'in', '1'],
-                }
-        usrStr = drawer.selectionParse(usrStr, ref)
-        if usrStr != None:
-            usrStr = int(usrStr)
-        return usrStr # may be None
-
-    def gather(self): 
-        args = self.args
-        self.modeVal = None
-        if args != '':
-            args = argTools.ArgOps(args, 'stripComma')
-            modeStr = args.get(0,'end')
-            if modeStr == None: return self._getUsage()
-            self.modeVal  = self._scConvertTnStr(modeStr)
-            if self.modeVal == None: return self._getUsage()
-        # w/ no args it toggles
-        if self.modeVal == None:
-            if self.ao.tniMode == 1:
-                self.modeVal = 0
-            else:
-                self.modeVal = 1
-
-    def process(self):
-        self.ao.tniMode = self.modeVal
-
-    def log(self):
-        if self.gatherStatus and self.processStatus: # if complete
-            return '%s %s' % (self.cmdStr, self.modeVal)
-
-    def display(self): 
-        if self.ao.tniMode == 1: return lang.msgSCsetTni
-        else: return lang.msgSCsetTn
-
-
-class SCf(_CommandSC):
-    """searchs all sets with various search criteria
-    """
-    def __init__(self, ao, cmdEnviron, args=''):
-        _CommandSC.__init__(self, ao, cmdEnviron, args)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'SCf'
-
-    def _scConvertFindMethod(self, usrStr):
-        """converts various find methods to proper strings"""
-        ref = {
-            'n' : ['n', 'name'],
-            'z' : ['z',],
-            's' : ['s', 'ss', 'search'],
-                }
-        usrStr = drawer.selectionParse(usrStr, ref)
-        return usrStr # may be None
-
-    def _scGetFindMethod(self):
-        """gets find method from user"""
-        query = lang.msgSCenterFindMethod
-        while 1:
-            data = dialog.askStr(query, self.termObj)
-            if data == None: return None
-            data = self._scConvertFindMethod(data)
-            if data == None:
-                dialog.msgOut(lang.msgConfusedInput, self.termObj)
-                continue
-            else:
-                return data
-
-    def _scGetFindString(self, argString=''):
-        """gets find string from user"""
-        if argString == '':
-            query = lang.msgSCenterFindString
-            while 1:
-                data = dialog.askStr(query, self.termObj)
-                if data == None: return None
-                else: return data
-        else:
-            return argString
-
-    def _scFindSuperSet(self, searchSetObj, setRange='all', tniMode=0):
-        searchResults, valDict = self.setFactory.getAllSuperset(searchSetObj,                                                        
-                                                                        'all', 1, self.scObj)
-        return searchResults, valDict
-
-    def _scFindByZ(self, setRange='all'):
-        """returns a list of all Z relateed sets"""
-        #setFindBin = self.scObj.getAllScTriples('all', 1) # force tni mode
-        valueDict = {}
-        searchResults = [] # list of set obj
-        for set in self.setFactory.getAllZ('all', 1, self.scObj):
-            zObj = set.zObj()
-            valueDict[set.get('sc')] = zObj.repr('sc')
-            searchResults.append(set) # keys in order
-        if searchResults == []: # nothing found
-            searchResults = None
-        return searchResults, valueDict
-
-    def _scFindByName(self, searchStr, setRange='all'):
-        """searches all scs to find name matches"""
-        valueDict = {}
-        searchResults = [] # list of set obj
-        for set in self.setFactory.getRef(searchStr, 'name', 
-            setRange, 0, self.scObj):
-            valueDict[set.get('sc')] = set.repr('refNames')
-            searchResults.append(set) # keys in order
-        if searchResults == []: # nothing found
-            searchResults = None
-        return searchResults, valueDict
-
-
-    def gather(self): 
-        self.method  = None
-        self.searchStr = None # percentage range
-        self.setObj = None
-        args = self.args
-    
-        if args != '':
-            args = argTools.ArgOps(args, 'stripComma')
-            self.method  = self._scConvertFindMethod(args.get(0))
-            if self.method   == None: return self._getUsage()
-            # space here re-adds space make one string from list
-            self.searchStr = args.get(1, 'end', 'off', 'space') 
-        if self.method   == None: # get args from user
-            self.method  = self._scGetFindMethod()
-            if self.method   == None: return lang.msgReturnCancel
-
-        if self.method == 'n':
-            if self.searchStr == None: # not given at command line
-                self.searchStr = self._scGetFindString(args)
-                if self.searchStr == None: return lang.msgReturnCancel
-        elif self.method == 's':
-            if self.searchStr == None:
-                dialog.msgOut('select a sub-set to search:\n', self.termObj)
-                self.setObj = self.setFactory(self.ao, None, self.scObj)
-                if self.setObj == None: return lang.msgReturnCancel
-            else: # use command line args, here searchStr
-                self.setObj = self.setFactory(self.ao, self.searchStr,
-                                                        self.scObj)
-                if self.setObj == None: return self._getUsage()
-
-    def process(self): 
-        if self.method == 'n':
-            setList = self._scFindByName(self.searchStr)
-            if setList == [] or setList == None:
-                self.results = None
-            else:
-                self.results, self.valueDict = setList
-        elif self.method == 'z':
-            self.results, self.valueDict = self._scFindByZ()
-        elif self.method == 's':
-            self.results, self.valueDict = self._scFindSuperSet(self.setObj,
-                                                                        'all', self.ao.tniMode)
-
-    def log(self):
-        if self.gatherStatus and self.processStatus: # if complete
-            if self.method == 'n':
-                return '%s %s %s' % (self.cmdStr, self.method, self.searchStr)
-            if self.method == 'z':
-                return '%s %s' % (self.cmdStr, self.method)
-            if self.method == 's':
-                return '%s %s %s' % (self.cmdStr, self.method, 
-                                            self.setObj.repr('sc'))
-
-    def display(self): 
-        msg = []
-        if self.method == 'n':
-            if self.results != None:
-                titleStr = 'found %i sets with matching names:' % len(self.results)
-            else:
-                titleStr = 'no matching names found. try a different search string.'
-            msg.append('%s\n' % titleStr)
-
-        elif self.method == 'z':
-            titleStr = 'found %i z-related sets:' % len(self.results)
-            msg.append('%s\n' % titleStr)
-
-        elif self.method == 's':
-            titleStr = 'found %i super-sets containing %s:' % (len(self.results),
-                                                                        self.setObj.repr('sc'))
-            msg.append('%s\n' % titleStr)
-
-        entryLines = []
-        table = ''
-        if self.results != None:
-            for foundSet in self.results:
-                # set is now in the second position
-                entryLines.append([foundSet.repr('sc') , 
-                                        self.valueDict[foundSet.get('sc')]])
-
-            headerKey    = ['set', 'value']
-            minWidthList = [lang.LMARGINW, 0]
-            bufList      = [0, 0]
-            justList         = ['l','l']
-            table = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
-                                  bufList, justList, self.termObj, 'oneColumn')
-            msg.append('%s\n' % table)
-        return ''.join(msg)
-
-
-class SCs(_CommandSC):
-
-    """searches all chords and returns sc that are 
-        within a similarity range
-        args: scs  set   percentLower,percentUpper
-    """
-
-    def __init__(self, ao, cmdEnviron, args=''):
-        _CommandSC.__init__(self, ao, cmdEnviron, args)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'SCs'
-
-    def gather(self): 
-        setData = None
-        data = None # percentage range
-        args = self.args
-
-        if args != '':
-            args = argTools.ArgOps(args, 'stripComma')
-            setData = self.setFactory(self.ao,args.get(0), self.scObj)
-            if setData == None: return self._getUsage()
-            data = self._scConvertPercentRange(args.get(1))
-            if data == None: return self._getUsage()
-        if setData == None or data == None:
-            dialog.msgOut('select a SC:\n', self.termObj)
-            setData = self.setFactory(self.ao, None, self.scObj)
-            if setData == None: return lang.msgReturnCancel
-            data = self._scGetPercentRange()
-            if data == None: return lang.msgReturnCancel
-        self.pcentRange = data
-        self.setObj = setData
-
-    def process(self): 
-        self.setMeasure = self._setMeasureFactory() #
-        a, b = self.pcentRange
-        tolarance = 0.0  # tolarance of 0 stops serach immediatly after range
-        self.findResults = self.setMeasure.searchSim(self.setObj, self.pcentRange, 
-                                                          tolarance, self.ao.tniMode)
-
-    def log(self):
-        if self.gatherStatus and self.processStatus: # if complete
-            return '%s %s %s' % (self.cmdStr, self.setObj.repr('sc'), 
-                                        drawer.listScrub(self.pcentRange))
-
-    def display(self): 
-        filteredResults, numFirstR, numTotal = self.findResults
-        classification = self._scGetTnStr()
-        msg = []
-        msg.append('Set %s: %s search, %s\n' % (self.setObj.repr('sc'), 
-                      self.setMeasure.name, classification))
-        msg.append('similarity percentage range: (%0.2f, %0.2f)\n' % 
-                                                                (self.pcentRange[0], 
-                                                                 self.pcentRange[1]))
-        msg.append('total found: %i\n' % (numFirstR))
-        
-        if numFirstR == 0: # dont show results if many dont count?
-            return ''.join(msg)
-        
-        sortedResults = []
-        sortDict = {}
-        for result in filteredResults:
-            sortDict[result[1]] = result[0] # make value as key
-        scList = sortDict.keys()
-        scList.sort()
-        scList.reverse()
-        for key in scList:
-            sortedResults.append((key, sortDict[key]))
-
-        entryLines = []
-        for result in sortedResults:
-            # set is now in the second position
-            value = '%0.2f' % result[0]
-            entryLines.append([self.scObj.scToStr(result[1]), value])
-        headerKey    = ['set', 'value']
-        minWidthList = [lang.LMARGINW, 0]
-        bufList      = [0, 0]
-        justList         = ['l','l']
-        table = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
-                                  bufList, justList, self.termObj)
-        msg.append('%s\n' % table)
-        return ''.join(msg)
-
-
-
-
-
-
+# class _CommandSC(Command):
+#     """parent of all SC commands"""
+#     def __init__(self, ao, cmdEnviron=None, args=''):
+#         Command.__init__(self, ao, cmdEnviron, args)
+# 
+#     def _scConvertPercentRange(self, usrStr):
+#         """utility to convert a tring to percentage range tuple
+#         accepts strings like '.5, .9' or '40, 60'
+#         """
+#         usrList = drawer.strToList(usrStr)
+#         if len(usrList) != 2: return None
+#         usrList = [drawer.strToPercent(usrList[0]),
+#                       drawer.strToPercent(usrList[1])]
+#         usrList.sort() # lower first
+#         return usrList
+#         
+#     def _scGetPercentRange(self):
+#         query = lang.msgSCenterSimCentRange
+#         while 1:
+#             data = dialog.askStr(query, self.termObj)
+#             if data == None: return None
+#             data = self._scConvertPercentRange(data)
+#             if data == None:
+#                 dialog.msgOut(lang.msgSCcentRangeError, self.termObj)
+#                 continue
+#             else:
+#                 return data
+# 
+#         
+# class SCv(_CommandSC):
+#     def __init__(self, ao, cmdEnviron=None, args=''):
+#         _CommandSC.__init__(self, ao, cmdEnviron, args)
+#         self.processSwitch = 0 # display only
+#         self.cmdStr = 'SCv'
+# 
+#     def _scVectorKeyToInt(self, key):
+#         VSize = int(key[:1]) # get first value of key
+#         if VSize == 1: # case where vector is grater than 9
+#             VSize = 10 + int(key[1:2])
+#         return VSize
+# 
+#     def _scVectorWrap(self, data):
+#         """wrap vector strings so that they are readable
+#         return a list of lines
+#         """
+#         entryLines = []
+#         length = len(data)
+#         if length >= 20:
+#             s    = 0
+#             end = 20                                 #max characters on display
+#             while end <= length:
+#                 temp     = data[s:end]
+#                 temp_a = drawer.listScrub(temp[:10])###first 10
+#                 temp_b = drawer.listScrub(temp[10:])###last 10
+#                 entryLines.append(['', temp_a, '-', temp_b]) 
+#                 # this is all full-20 member lines
+#                 s    = s + 20
+#                 end = end + 20
+#                 if end == length:
+#                     break
+#             else:    ## only if loop runs to completion, ie no break
+#                 temp = data[s:length]
+#                 if len(temp) > 10:
+#                     temp_a = drawer.listScrub(temp[:10])##first 10
+#                     temp_b = drawer.listScrub(temp[10:])#last 10
+#                 else:
+#                     temp_b = ''
+#                     if len(temp) == 10:
+#                         temp_a = drawer.listScrub(temp)
+#                     else:
+#                         temp_a = drawer.listScrub(temp)
+#                 entryLines.append(['', temp_a, '-', temp_b]) 
+#         else:
+#             if len(data) > 10:
+#                 temp     = data
+#                 temp_a = drawer.listScrub(data[:10])#first 10
+#                 temp_b = drawer.listScrub(data[10:])#last 10
+#             else:
+#                 temp_a = drawer.listScrub(data)
+#                 temp_b = ''
+#             entryLines.append(['', temp_a, '-', temp_b]) 
+#         return entryLines
+# 
+#     def gather(self): 
+#         args = self.args
+#         self.set = None
+#         if args != '':
+#             args = argTools.ArgOps(args) # no strip
+#             self.set = self.setFactory(self.ao, args.get(0,'end'), self.scObj)
+#             if self.set == None: return self._getUsage()
+#         if self.set == None:
+#             self.set = self.setFactory(self.ao, None, self.scObj)
+#             if self.set == None: return lang.msgReturnCancel
+# 
+#     def process(self):
+#         pass # none to do
+#     
+#     def log(self):
+#         if self.gatherStatus and self.processStatus: # if complete
+#             return '%s %s' % (self.cmdStr, self.set.repr('pc'))
+# 
+#     def display(self):
+#         #(card, index, inv), rawPcs, tFound = self.data
+#         #set_string = self.scObj.scToStr((card, index, inv))
+#         #zVal = self.scObj.zData((card, index, inv))
+#         if self.set.z() == None:
+#             zString = 'none'
+#         else:
+#             zSet = self.set.zObj()
+#             zString = zSet.repr('sc')
+# 
+#         msg = [] 
+#         msg.append('SC(%s), Z(%s), mode(%s)\n' % (
+#                         self.set.repr('sc'),
+#                         zString,
+#                         self._scGetTnStr()))
+#         entryLines = []
+#         sc_keys = (('psName', 'Pitch Space:'),
+#                       ('pc', 'Pitch Class:'),
+#                       ('normal', 'Normal Form:'), 
+#                       ('prime',  'Prime Form:'), 
+#                       ('var', 'Invariance Vector:'), 
+#                       ('icv', 'Interval Class Vector:'), ('ref', 'References:'), 
+#                       ('3cv', '3CV(TnI)'), 
+#                       ('4cv', '4CV(TnI)'), ('5cv', '5CV(TnI)'), ('6cv', '6CV(TnI)'), 
+#                       ('7cv', '7CV(TnI)'), ('8cv', '8CV(TnI)'), ('9cv', '9CV(TnI)'),
+#                       ('10cv', '10CV(TnI)'), ('11cv', '11CV(TnI)'), 
+#                       ('12cv', '12CV(TnI)'),
+#                       ('3xv', '3CV(Tn) '), 
+#                       ('4xv', '4CV(Tn) '),  ('5xv', '5CV(Tn) '), 
+#                       ('6xv', '6CV(Tn) '), ('7xv', '7CV(Tn) '), ('8xv', '8CV(Tn) '),
+#                       ('9xv', '9CV(Tn) '), ('10xv', '10CV(Tn)'), 
+#                       ('11xv', '11CV(Tn)'),  ('12xv', '12CV(Tn)'))
+#         vectorKeys = []
+#         # this is the position of the first vector (cv) in the SC data list
+#         if self.ao.tniMode == 1:    
+#             vCounter = 3 
+#         if self.ao.tniMode != 1:    
+#             vCounter = 3 + (self.set.get('card')-2)
+# 
+#         earlyCounter = 0
+#         for key, title in sc_keys:
+#             if key in ['psName', 'pc', 'normal', 'prime', 'pcs', 'var', 'icv']:
+#                 entryLines.append([title, self.set.repr(key)])
+#                 earlyCounter = earlyCounter + 1
+#             elif key == 'ref':
+#                 refLines = self.set.repr('ref') # get all refs
+#                 if refLines == None:
+#                     entryLines.append([title, 'none'])
+#                 else:
+#                     entryLines.append([title, ''])
+#                     for line in refLines:
+#                         entryLines.append([(lang.TAB + 'name'), line])
+# 
+#             # preprocess tn/i keys
+#             elif self.ao.tniMode == 1: #TnI (no x-vectors wanted)
+#                 if key in ('3cv', '4cv','5cv','6cv','7cv','8cv','9cv',
+#                              '10cv','11cv','12cv'):
+#                     #only need smaller then card, and given in order
+#                     if self._scVectorKeyToInt(key) > self.set.get('card'): 
+#                         continue
+#                     else:
+#                         vectorKeys.append((vCounter, title))
+#                         vCounter = vCounter + 1
+#             elif self.ao.tniMode != 1:   #Tn classificatioin (x-vectors wanted)
+#                 if key in ('3xv', '4xv','5xv','6xv','7xv','8xv','9xv','10xv',
+#                               '11xv','12xv'):
+#                     if self._scVectorKeyToInt(key) > self.set.get('card'): 
+#                         #only need smaller then card, and given in order
+#                         continue
+#                     else:
+#                         vectorKeys.append((vCounter, title))
+#                         vCounter = vCounter + 1
+# 
+#         headerKey    = [] # table setup
+#         minWidthList = [lang.MMARGINW, 0]
+#         bufList      = [0, 1]
+#         justList         = ['l','l']
+#         tableA = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
+#                                 bufList, justList, self.termObj, 'oneColumn')
+#         msg.append(tableA + '\n')
+#         entryLines = []
+#         if vectorKeys == []: # for case of monad
+#             return ''.join(msg)
+#         msg.append('Subset Vectors:\n')
+#         for key, title in vectorKeys:
+#             entryLines.append([title, '', '', '']) 
+#             data = list(self.set.rawData(key))
+#             # returns a 4 column display
+#             entryLines = entryLines + self._scVectorWrap(data)
+# 
+#         headerKey    = [] # table setup
+#         minWidthList = [(lang.LMARGINW/2), 0, 3, 0]
+#         bufList      = [0, 0, 0, 1]
+#         justList         = ['l','l', 'c', 'l']
+#         tableB = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
+#             bufList, justList, self.termObj, 'oneColumn', 'line', 0) # no buffer
+#         msg.append(tableB + '\n')
+#         return ''.join(msg)
+# 
+# 
+# class SCh(_CommandSC):
+#     """create an event list of just a set"""
+#     def __init__(self, ao, cmdEnviron=None, args=''):
+#         _CommandSC.__init__(self, ao, cmdEnviron, args)
+#         self.processSwitch = 1 # display only
+#         self.gatherSwitch = 1 # display only
+#         self.cmdStr = 'SCh'
+# 
+#     def gather(self): 
+#         args = self.args
+#         self.set = None
+#         if args != '':
+#             args = argTools.ArgOps(args) # no strip
+#             self.set = self.setFactory(self.ao, args.get(0,'end'), self.scObj)
+#             if self.set == None: return self._getUsage()
+#         if self.set == None:
+#             self.set = self.setFactory(self.ao, None, self.scObj)
+#             if self.set == None: return lang.msgReturnCancel
+#         # get valid vile path; return an error if bail
+#         self.filePath = self._validScratchEvent()    
+#         if self.filePath == None: return lang.msgReturnCancel
+# 
+#     def process(self):
+#         p = pitchPath.PolyPath('temp', self.scObj)
+#         p.loadMultisetList([self.set,]) # does updates
+#         # create a temporary texture w/ this path
+#         lclTimes = {}
+#         lclTimes['tRange'] = ('staticRange', (0, 2))
+#         lclTimes['beatT'] = ('c', 90)
+#         # use current texture modulke, froce general midi, keep refresh
+#         t = texture.factory('DroneSustain', 'temp', self.scObj)
+#         t.loadDefault(0, p, self.ao.fpSSDR, self.ao.fpSADR, 
+#                                 lclTimes, 'generalMidi')
+#         self.emObj = eventList.factory('midi', self.ao)
+#         self.emObj.setRootPath(self.filePath)
+#         # provide a list of textures to process
+#         # turn off refreshing for faster processing
+#         # provide outputRequest
+#         ok, msg, outComplete = self.emObj.process([t], [], 0) 
+#         self.pathMidi = self.emObj.ref['pathMid']
+# 
+#     def display(self): 
+#         msg = []
+#         prefDict = self.ao.external.getPrefGroup('external')
+#         failFlag = osTools.openMedia(self.pathMidi, prefDict)
+#         if failFlag == 'failed':
+#             msg.append(lang.msgELhearError % self.pathMidi)
+#         else:
+#             msg.append('SC(%s), PCS%s\n' % (
+#                         self.set.repr('sc'),
+#                         self.set.repr('pc'),))
+#             entryLines = []
+#             scKeys = (('psName', 'Pitch Space:'),
+#                          ('pc', 'Pitch Class:'),)
+#             for key, title in scKeys:
+#                 entryLines.append([title, self.set.repr(key)])
+#             headerKey    = [] # table setup
+#             minWidthList = [lang.MMARGINW, 0]
+#             bufList      = [0, 1]
+#             justList         = ['l','l']
+#             tableA = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
+#                                     bufList, justList, self.termObj, 'oneColumn')
+#             msg.append(tableA + '\n')
+#             msg.append('SC hear complete.\n(%s)\n' % (self.pathMidi))
+#         return ''.join(msg)
+# 
+# 
+# class SCcm(_CommandSC):
+#     """compares any two set classes and 
+#         displays all posible SetMeasure comparisons 
+#         args: sccm setA setB
+#     """
+#     def __init__(self, ao, cmdEnviron=None, args=''):
+#         _CommandSC.__init__(self, ao, cmdEnviron, args)
+#         self.processSwitch = 1 # display only
+#         self.gatherSwitch = 1 # display only
+#         self.cmdStr = 'SCcm'
+# 
+#     def gather(self): 
+#         dataA = None
+#         dataB = None
+#         args = self.args
+# 
+#         if args != '':
+#             args = argTools.ArgOps(args, 'stripComma')
+#             dataA = self.setFactory(self.ao,args.get(0), self.scObj)
+#             if dataA == None: return self._getUsage()
+#             dataB = self.setFactory(self.ao,args.get(1), self.scObj)
+#             if dataB == None: return self._getUsage()
+#         if dataA == None or dataB == None:
+#             dialog.msgOut(lang.msgSCselectX, self.termObj)
+#             dataA = self.setFactory(self.ao, None, self.scObj)
+#             if dataA == None: return lang.msgReturnCancel
+#             dialog.msgOut(lang.msgSCselectY, self.termObj)
+#             dataB = self.setFactory(self.ao, None, self.scObj)
+#             if dataB == None: return lang.msgReturnCancel
+#         self.dataA = dataA # set objects
+#         self.dataB = dataB
+# 
+#     def process(self): 
+#         pass
+# 
+#     def log(self):
+#         if self.gatherStatus and self.processStatus: # if complete
+#             return '%s %s %s' % (self.cmdStr, self.dataA.get('psReal'),
+#                                         self.dataB.get('psReal'))
+# 
+#     def display(self): 
+#         #dataA = self.dataA
+#         #dataB = self.dataB
+# 
+#         scX = self.dataA.get('sc') # gets sc tuple data
+#         scY = self.dataB.get('sc') # gets sc tuple data
+#         termWidth = self.termObj.w
+#         RANGEW = 12
+#         graphSize = termWidth - lang.LMARGINW - RANGEW # for range
+# 
+#         x = self.dataA.repr('sc')
+#         y = self.dataB.repr('sc')
+#         classification = self._scGetTnStr()
+# 
+#         msg = []
+#         msg.append('%sSC similarity: %s and %s\n' % (lang.TAB, x, y))
+#         msg.append(classification)
+#         entryLines = []
+# 
+#         h = self.scObj.analysisNames()
+#         h.sort()
+#         repositionKeys = ['SI','sf','R0','R1','R2']
+#         for key in repositionKeys:
+#             h.remove(key)
+#             h.append(key) # adds to end of list
+#         for key in h:
+#             rl = self.scObj.analysisRange(key) # return sdict
+#             #rl = eval(self.scObj.analysisDict[key].__doc__)
+#             range = self.scObj.analysisRangeStr(key, RANGEW)
+#             min = rl['min']
+#             max = rl['max']
+# 
+#             if key in ['pRel', 'MEMBn', 'TMEMB', 'ATMEMB', 'REL', 'TpRel']:
+#                 value = self.scObj.analysis(key,scX,scY,self.ao.tniMode)
+#                 graph = typeset.graphNumber(min, max, value, graphSize)
+#                 key = key.replace('p', '%')
+#                 v = '%.2f' % value
+#                 entryLines.append([key, v, graph, range])
+#             ### return_integers
+#             elif key in ['R1', 'R0', 'R2', 'K']:
+#                 value = self.scObj.analysis(key, scX,scY,self.ao.tniMode)
+#                 graph = typeset.graphNumber(min, max, value, graphSize)
+#                 if key in ['R1', 'R0', 'R2']: # set empty char to be a space
+#                     graph = typeset.graphNumber(min, max, value, graphSize, ' ')
+#                 v = '%i' % value
+#                 entryLines.append([key, v, graph, range])
+#             else: 
+#                 value = self.scObj.analysis(key, scX, scY,self.ao.tniMode)
+#                 try:
+#                     v = '%.2f' % value
+#                     graph = typeset.graphNumber(min, max, value, graphSize)
+#                 except: # not a float
+#                     graph = typeset.graphNumber(min, max, value, 
+#                                                         graphSize, ' ', ' ')
+#                     v = repr(value)[1:-1]
+#                 entryLines.append([key, v, graph, range])
+# 
+#         headerKey    = ['name', 'value', 'graph', 'range']
+#         minWidthList = ((lang.LMARGINW/2), (lang.LMARGINW/2), 
+#                               graphSize, RANGEW)
+#         bufList      = [0, 0, 0, 0]
+#         justList         = ['l','l','l','c']
+#         table = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
+#                                  bufList, justList, self.termObj)
+#         msg.append('%s\n' % table)
+#         return ''.join(msg)
+# 
+# 
+# 
+# class SCmode(_CommandSC):
+#     """switches value of self.ao.tniMode
+#         when tni toggle is set to 1, mode is tn/i; when set to 0, 
+#         its in mode tn
+#         args: scmode
+#     """
+#     def __init__(self, ao, cmdEnviron=None, args=''):
+#         _CommandSC.__init__(self, ao, cmdEnviron, args)
+#         self.processSwitch = 1 # display only
+#         self.gatherSwitch = 1 # display only
+#         self.cmdStr = 'SCmode'
+# 
+#     def _scConvertTnStr(self, usrStr):
+#         """converts arg strings to tn/i types
+#             returns 1 for tn/i, 0 for tn"""
+#         ref = {
+#             '0' : ['tn', 't', 't n' '0'],
+#             '1' : ['i', 'tin', 'in', '1'],
+#                 }
+#         usrStr = drawer.selectionParse(usrStr, ref)
+#         if usrStr != None:
+#             usrStr = int(usrStr)
+#         return usrStr # may be None
+# 
+#     def gather(self): 
+#         args = self.args
+#         self.modeVal = None
+#         if args != '':
+#             args = argTools.ArgOps(args, 'stripComma')
+#             modeStr = args.get(0,'end')
+#             if modeStr == None: return self._getUsage()
+#             self.modeVal  = self._scConvertTnStr(modeStr)
+#             if self.modeVal == None: return self._getUsage()
+#         # w/ no args it toggles
+#         if self.modeVal == None:
+#             if self.ao.tniMode == 1:
+#                 self.modeVal = 0
+#             else:
+#                 self.modeVal = 1
+# 
+#     def process(self):
+#         self.ao.tniMode = self.modeVal
+# 
+#     def log(self):
+#         if self.gatherStatus and self.processStatus: # if complete
+#             return '%s %s' % (self.cmdStr, self.modeVal)
+# 
+#     def display(self): 
+#         if self.ao.tniMode == 1: return lang.msgSCsetTni
+#         else: return lang.msgSCsetTn
+# 
+# 
+# class SCf(_CommandSC):
+#     """searchs all sets with various search criteria
+#     """
+#     def __init__(self, ao, cmdEnviron=None, args=''):
+#         _CommandSC.__init__(self, ao, cmdEnviron, args)
+#         self.processSwitch = 1 # display only
+#         self.gatherSwitch = 1 # display only
+#         self.cmdStr = 'SCf'
+# 
+#     def _scConvertFindMethod(self, usrStr):
+#         """converts various find methods to proper strings"""
+#         ref = {
+#             'n' : ['n', 'name'],
+#             'z' : ['z',],
+#             's' : ['s', 'ss', 'search'],
+#                 }
+#         usrStr = drawer.selectionParse(usrStr, ref)
+#         return usrStr # may be None
+# 
+#     def _scGetFindMethod(self):
+#         """gets find method from user"""
+#         query = lang.msgSCenterFindMethod
+#         while 1:
+#             data = dialog.askStr(query, self.termObj)
+#             if data == None: return None
+#             data = self._scConvertFindMethod(data)
+#             if data == None:
+#                 dialog.msgOut(lang.msgConfusedInput, self.termObj)
+#                 continue
+#             else:
+#                 return data
+# 
+#     def _scGetFindString(self, argString=''):
+#         """gets find string from user"""
+#         if argString == '':
+#             query = lang.msgSCenterFindString
+#             while 1:
+#                 data = dialog.askStr(query, self.termObj)
+#                 if data == None: return None
+#                 else: return data
+#         else:
+#             return argString
+# 
+#     def _scFindSuperSet(self, searchSetObj, setRange='all', tniMode=0):
+#         searchResults, valDict = self.setFactory.getAllSuperset(
+#             searchSetObj, 'all', 1, self.scObj)
+#         return searchResults, valDict
+# 
+#     def _scFindByZ(self, setRange='all'):
+#         """returns a list of all Z relateed sets"""
+#         #setFindBin = self.scObj.getAllScTriples('all', 1) # force tni mode
+#         valueDict = {}
+#         searchResults = [] # list of set obj
+#         for set in self.setFactory.getAllZ('all', 1, self.scObj):
+#             zObj = set.zObj()
+#             valueDict[set.get('sc')] = zObj.repr('sc')
+#             searchResults.append(set) # keys in order
+#         if searchResults == []: # nothing found
+#             searchResults = None
+#         return searchResults, valueDict
+# 
+#     def _scFindByName(self, searchStr, setRange='all'):
+#         """searches all scs to find name matches"""
+#         valueDict = {}
+#         searchResults = [] # list of set obj
+#         for set in self.setFactory.getRef(searchStr, 'name', 
+#             setRange, 0, self.scObj):
+#             valueDict[set.get('sc')] = set.repr('refNames')
+#             searchResults.append(set) # keys in order
+#         if searchResults == []: # nothing found
+#             searchResults = None
+#         return searchResults, valueDict
+# 
+# 
+#     def gather(self): 
+#         self.method  = None
+#         self.searchStr = None # percentage range
+#         self.setObj = None
+#         args = self.args
+#     
+#         if args != '':
+#             args = argTools.ArgOps(args, 'stripComma')
+#             self.method  = self._scConvertFindMethod(args.get(0))
+#             if self.method   == None: return self._getUsage()
+#             # space here re-adds space make one string from list
+#             self.searchStr = args.get(1, 'end', 'off', 'space') 
+#         if self.method   == None: # get args from user
+#             self.method  = self._scGetFindMethod()
+#             if self.method   == None: return lang.msgReturnCancel
+# 
+#         if self.method == 'n':
+#             if self.searchStr == None: # not given at command line
+#                 self.searchStr = self._scGetFindString(args)
+#                 if self.searchStr == None: return lang.msgReturnCancel
+#         elif self.method == 's':
+#             if self.searchStr == None:
+#                 dialog.msgOut('select a sub-set to search:\n', self.termObj)
+#                 self.setObj = self.setFactory(self.ao, None, self.scObj)
+#                 if self.setObj == None: return lang.msgReturnCancel
+#             else: # use command line args, here searchStr
+#                 self.setObj = self.setFactory(self.ao, self.searchStr,
+#                                                 self.scObj)
+#                 if self.setObj == None: return self._getUsage()
+# 
+#     def process(self): 
+#         if self.method == 'n':
+#             setList = self._scFindByName(self.searchStr)
+#             if setList == [] or setList == None:
+#                 self.results = None
+#             else:
+#                 self.results, self.valueDict = setList
+#         elif self.method == 'z':
+#             self.results, self.valueDict = self._scFindByZ()
+#         elif self.method == 's':
+#             self.results, self.valueDict = self._scFindSuperSet(self.setObj,
+#                                               'all', self.ao.tniMode)
+# 
+#     def log(self):
+#         if self.gatherStatus and self.processStatus: # if complete
+#             if self.method == 'n':
+#                 return '%s %s %s' % (self.cmdStr, self.method, self.searchStr)
+#             if self.method == 'z':
+#                 return '%s %s' % (self.cmdStr, self.method)
+#             if self.method == 's':
+#                 return '%s %s %s' % (self.cmdStr, self.method, 
+#                                             self.setObj.repr('sc'))
+# 
+#     def display(self): 
+#         msg = []
+#         if self.method == 'n':
+#             if self.results != None:
+#                 titleStr = 'found %i sets with matching names:' % len(self.results)
+#             else:
+#                 titleStr = 'no matching names found. try a different search string.'
+#             msg.append('%s\n' % titleStr)
+# 
+#         elif self.method == 'z':
+#             titleStr = 'found %i z-related sets:' % len(self.results)
+#             msg.append('%s\n' % titleStr)
+# 
+#         elif self.method == 's':
+#             titleStr = 'found %i super-sets containing %s:' % (len(self.results), self.setObj.repr('sc'))
+#             msg.append('%s\n' % titleStr)
+# 
+#         entryLines = []
+#         table = ''
+#         if self.results != None:
+#             for foundSet in self.results:
+#                 # set is now in the second position
+#                 entryLines.append([foundSet.repr('sc') , 
+#                                         self.valueDict[foundSet.get('sc')]])
+# 
+#             headerKey    = ['set', 'value']
+#             minWidthList = [lang.LMARGINW, 0]
+#             bufList      = [0, 0]
+#             justList         = ['l','l']
+#             table = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
+#                                   bufList, justList, self.termObj, 'oneColumn')
+#             msg.append('%s\n' % table)
+#         return ''.join(msg)
+# 
+# 
+# class SCs(_CommandSC):
+# 
+#     """searches all chords and returns sc that are 
+#         within a similarity range
+#         args: scs  set   percentLower,percentUpper
+#     """
+# 
+#     def __init__(self, ao, cmdEnviron=None, args=''):
+#         _CommandSC.__init__(self, ao, cmdEnviron, args)
+#         self.processSwitch = 1 # display only
+#         self.gatherSwitch = 1 # display only
+#         self.cmdStr = 'SCs'
+# 
+#     def gather(self): 
+#         setData = None
+#         data = None # percentage range
+#         args = self.args
+# 
+#         if args != '':
+#             args = argTools.ArgOps(args, 'stripComma')
+#             setData = self.setFactory(self.ao,args.get(0), self.scObj)
+#             if setData == None: return self._getUsage()
+#             data = self._scConvertPercentRange(args.get(1))
+#             if data == None: return self._getUsage()
+#         if setData == None or data == None:
+#             dialog.msgOut('select a SC:\n', self.termObj)
+#             setData = self.setFactory(self.ao, None, self.scObj)
+#             if setData == None: return lang.msgReturnCancel
+#             data = self._scGetPercentRange()
+#             if data == None: return lang.msgReturnCancel
+#         self.pcentRange = data
+#         self.setObj = setData
+# 
+#     def process(self): 
+#         self.setMeasure = self._setMeasureFactory() #
+#         a, b = self.pcentRange
+#         tolarance = 0.0  # tolarance of 0 stops serach immediatly after range
+#         self.findResults = self.setMeasure.searchSim(self.setObj, 
+#                     self.pcentRange,tolarance, self.ao.tniMode)
+# 
+#     def log(self):
+#         if self.gatherStatus and self.processStatus: # if complete
+#             return '%s %s %s' % (self.cmdStr, self.setObj.repr('sc'), 
+#                                         drawer.listScrub(self.pcentRange))
+# 
+#     def display(self): 
+#         filteredResults, numFirstR, numTotal = self.findResults
+#         classification = self._scGetTnStr()
+#         msg = []
+#         msg.append('Set %s: %s search, %s\n' % (self.setObj.repr('sc'), 
+#                       self.setMeasure.name, classification))
+#         msg.append('similarity percentage range: (%0.2f, %0.2f)\n' % 
+#                                      (self.pcentRange[0], 
+#                                    self.pcentRange[1]))
+#         msg.append('total found: %i\n' % (numFirstR))
+#         
+#         if numFirstR == 0: # dont show results if many dont count?
+#             return ''.join(msg)
+#         
+#         sortedResults = []
+#         sortDict = {}
+#         for result in filteredResults:
+#             sortDict[result[1]] = result[0] # make value as key
+#         scList = sortDict.keys()
+#         scList.sort()
+#         scList.reverse()
+#         for key in scList:
+#             sortedResults.append((key, sortDict[key]))
+# 
+#         entryLines = []
+#         for result in sortedResults:
+#             # set is now in the second position
+#             value = '%0.2f' % result[0]
+#             entryLines.append([self.scObj.scToStr(result[1]), value])
+#         headerKey    = ['set', 'value']
+#         minWidthList = [lang.LMARGINW, 0]
+#         bufList      = [0, 0]
+#         justList         = ['l','l']
+#         table = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
+#                                   bufList, justList, self.termObj)
+#         msg.append('%s\n' % table)
+#         return ''.join(msg)
+# 
+# 
+# 
+# 
+# 
+# 
 
 
 
@@ -2406,531 +2498,538 @@ class SCs(_CommandSC):
 
 
 #-----------------------------------------------------------------||||||||||||--
-class SMo(Command):
-    """sets value of self.ao.activeSetMeasure
-    """
-    def __init__(self, ao, cmdEnviron, args=''):
-        Command.__init__(self, ao, cmdEnviron, args)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'SMo'
-
-    def gather(self): 
-        args = self.args
-        self.name = None
-        if args != '':
-            args = argTools.ArgOps(args)
-            self.name = drawer.inList(args.get(0), 
-                                        setMeasure.engines.keys(), 'noCase')
-            if self.name == None: return self._getUsage()
-        if self.name == None:
-            query = 'which SetMeasure would you like to activate?:'
-            self.name = self._chooseFromList(query, setMeasure.engines.keys(),
-                                                      'noCase')
-            if self.name == None: return lang.msgPEnoNamedPE
-            #self.name = self._peFixName(self.name)
-
-    def process(self): 
-        self.ao.activeSetMeasure = self.name
-
-    def log(self):
-        if self.gatherStatus and self.processStatus: # if complete
-            return '%s %s' % (self.cmdStr, self.name)
-
-    def display(self): 
-        return lang.msgPEblankNowActive % self.name       
-
-
-class SMls(Command):
-    """displays all available path engines
-    """
-    def __init__(self, ao, cmdEnviron, args=''):
-        Command.__init__(self, ao, cmdEnviron, args)
-        self.processSwitch = 0 # display only
-        self.gatherSwitch = 0 # display only
-        self.cmdStr = 'SMls'
-
-    def gather(self): 
-        pass
-
-    def process(self): 
-        pass
-
-    def log(self):
-        if self.gatherStatus and self.processStatus: # if complete
-            return '%s' % (self.cmdStr)
-
-    def display(self): 
-        msg = []
-        msg.append('SetMeasures available:\n')
-        entryLines = []
-        measureNames = setMeasure.engines.keys()
-        measureNames.sort()
-        for name in measureNames:
-            if name == self.ao.activeSetMeasure:
-                activity = '+'
-            else: activity = ''
-            modName = getattr(setMeasure, name)
-            mod = modName(None, None, self.scObj)
-            ref = mod.cite
-            if mod.tnStat == 0: # 0 == no tn/tni diff
-                tnStat = 'TnI'
-            else: tnStat = 'Tn'
-
-            entryLines.append([activity, name, ref, tnStat])
-        headerKey    = ['', 'name', 'reference', 'distinction'] # table setup
-        minWidthList = [lang.TABW, lang.NAMEW, 0, 0]
-        bufList      = [0, 1, 1, 1]
-        justList         = ['c','l','l', 'l']
-        table = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
-                                 bufList, justList, self.termObj, 'twoColumn')
-        msg.append('%s\n' % table)
-        return ''.join(msg)
-
-
+# class SMo(Command):
+#     """sets value of self.ao.activeSetMeasure
+#     """
+#     def __init__(self, ao, cmdEnviron=None, args=''):
+#         Command.__init__(self, ao, cmdEnviron, args)
+#         self.processSwitch = 1 # display only
+#         self.gatherSwitch = 1 # display only
+#         self.cmdStr = 'SMo'
+# 
+#     def gather(self): 
+#         args = self.args
+#         self.name = None
+#         if args != '':
+#             args = argTools.ArgOps(args)
+#             self.name = drawer.inList(args.get(0), 
+#                                         setMeasure.engines.keys(), 'noCase')
+#             if self.name == None: return self._getUsage()
+#         if self.name == None:
+#             query = 'which SetMeasure would you like to activate?:'
+#             self.name = self._chooseFromList(query, setMeasure.engines.keys(),
+#                                                       'noCase')
+#             if self.name == None: return lang.msgPEnoNamedPE
+#             #self.name = self._peFixName(self.name)
+# 
+#     def process(self): 
+#         self.ao.activeSetMeasure = self.name
+# 
+#     def log(self):
+#         if self.gatherStatus and self.processStatus: # if complete
+#             return '%s %s' % (self.cmdStr, self.name)
+# 
+#     def display(self): 
+#         return lang.msgPEblankNowActive % self.name       
+# 
+# 
+# class SMls(Command):
+#     """displays all available path engines
+#     """
+#     def __init__(self, ao, cmdEnviron=None, args=''):
+#         Command.__init__(self, ao, cmdEnviron, args)
+#         self.processSwitch = 0 # display only
+#         self.gatherSwitch = 0 # display only
+#         self.cmdStr = 'SMls'
+# 
+#     def gather(self): 
+#         pass
+# 
+#     def process(self): 
+#         pass
+# 
+#     def log(self):
+#         if self.gatherStatus and self.processStatus: # if complete
+#             return '%s' % (self.cmdStr)
+# 
+#     def display(self): 
+#         msg = []
+#         msg.append('SetMeasures available:\n')
+#         entryLines = []
+#         measureNames = setMeasure.engines.keys()
+#         measureNames.sort()
+#         for name in measureNames:
+#             if name == self.ao.activeSetMeasure:
+#                 activity = '+'
+#             else: activity = ''
+#             modName = getattr(setMeasure, name)
+#             mod = modName(None, None, self.scObj)
+#             ref = mod.cite
+#             if mod.tnStat == 0: # 0 == no tn/tni diff
+#                 tnStat = 'TnI'
+#             else: tnStat = 'Tn'
+# 
+#             entryLines.append([activity, name, ref, tnStat])
+#         headerKey    = ['', 'name', 'reference', 'distinction'] # table setup
+#         minWidthList = [lang.TABW, lang.NAMEW, 0, 0]
+#         bufList      = [0, 1, 1, 1]
+#         justList         = ['c','l','l', 'l']
+#         table = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
+#                                  bufList, justList, self.termObj, 'twoColumn')
+#         msg.append('%s\n' % table)
+#         return ''.join(msg)
+# 
+# 
 
 
 #-----------------------------------------------------------------||||||||||||--
 
-class MCv(Command):
-    """selects a map and provides a display
-        args: mcv  srcSize,dstSize   startRange,endRange
-    """
-    def __init__(self, ao, cmdEnviron, args=''):
-        Command.__init__(self, ao, cmdEnviron, args)
-        self.processSwitch = 0 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'MCv'
-
-    def gather(self): 
-        sizeRange = None
-        outputRangeTuple = None
-        args = self.args
-
-        if args != '':
-            args = argTools.ArgOps(args, 'stripComma')
-            sizeRange = self._convertListRange(args.get(0), 1, 6, 0)
-            if sizeRange == None: return self._getUsage()
-            outputRangeTuple = args.get(1)
-        if sizeRange == None:
-            sizeRange = self.mcObj.getSetSizeBounds(None, self.termObj)
-            if sizeRange == None: return lang.msgReturnCancel
-
-        srcSize, dstSize = sizeRange
-        noMaps = self.mcObj.getNoMaps(srcSize, dstSize)
-        query = lang.msgMCenterMapSizeRange % noMaps
-
-        if outputRangeTuple == None:
-            outputRangeTuple = self._mcGetIntegerRange(query, 1, noMaps)
-            if outputRangeTuple == None: return lang.msgReturnCancel
-        else: # from args
-            outputRangeTuple = self._convertListRange(outputRangeTuple, 1, noMaps)
-            if outputRangeTuple == None: return self._getUsage()
-
-        self.sizeRange = sizeRange
-        self.outputRangeTuple = outputRangeTuple
-
-
-    def process(self): 
-        pass
-
-    def log(self):
-        if self.gatherStatus and self.processStatus: # if complete
-            return '%s %s %s' % (self.cmdStr, drawer.listScrub(self.sizeRange), 
-                  drawer.listScrub(self._setReturnError(self.outputRangeTuple)))
-
-    def display(self): 
-        sizeRange = self.sizeRange
-        outputRangeTuple = self.outputRangeTuple
-        srcSize, dstSize = sizeRange
-
-        msg = []
-        msg.append('MapClass %s:%s-%s to %s:%s-%s\n' % (srcSize, 
-                                 dstSize, outputRangeTuple[0]+1, srcSize,
-                                 dstSize, outputRangeTuple[1]+1))
-        mapDict = self.mcObj.getMapDict(srcSize, dstSize)
-        orderOfMaps = mapDict.keys()    # these keys are partial map ids
-        orderOfMaps.reverse()
-        orderOfMaps = orderOfMaps[outputRangeTuple[0]:(outputRangeTuple[1]+1)]
-
-        entryLines = []
-        for partialMapId in orderOfMaps:
-            # supply the first map of the needed size
-            mapTupleId            = (srcSize, dstSize, partialMapId)
-            mapTupleIdStr         = self.mcObj.mapIdTupleToString(mapTupleId)
-            map                   = self.mcObj.fetchMap(mapTupleId)
-            mapStr                = self.mcObj.rawMapToString(map)       
-            mcLabel = 'MC %s' % (mapTupleIdStr)
-            entryLines.append([mcLabel, mapStr])
-        headerKey    = ['name', 'map'] # table setup
-        minWidthList = [lang.LMARGINW, 0]
-        bufList      = [0, 1]
-        justList         = ['l','l']
-        table = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
-                                 bufList, justList, self.termObj)
-        msg.append('%s\n' % table)
-        return ''.join(msg)
-
-
-class MCcm(Command):
-    """allcepts two sets for comparison
-        args: mccm  setA    setB    sortMethod  startRange,endRange
-    """
-    def __init__(self, ao, cmdEnviron, args=''):
-        Command.__init__(self, ao, cmdEnviron, args)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'MCcm'
-
-    def gather(self):
-        args = self.args
- 
-        self.srcSet = None
-        self.dstSet = None
-        self.sortMethod = None
-        self.rangeTuple = None
-        if args != '':
-            args = argTools.ArgOps(args, 'stripComma')
-            self.srcSet = self.setFactory(self.ao, args.get(0), self.scObj)
-            if self.srcSet == None: return self._getUsage()
-            self.dstSet = self.setFactory(self.ao, args.get(1), self.scObj)
-            if self.dstSet == None: return self._getUsage()
-            self.sortMethod = self._mcConvertSortMethod(args.get(2))
-            if self.sortMethod == None: return self._getUsage()
-            self.rangeTuple = args.get(3)
-        if self.srcSet == None or self.dstSet == None or self.sortMethod == None:
-            dialog.msgOut(lang.msgSCselectX, self.termObj)
-            self.srcSet = self.setFactory(self.ao, None, self.scObj) 
-            if self.srcSet == None: return lang.msgMCerrorCreatingChord
-            dialog.msgOut(lang.msgSCselectY, self.termObj)
-            self.dstSet = self.setFactory(self.ao, None, self.scObj) 
-            if self.dstSet == None: return lang.msgMCerrorCreatingChord
-            self.sortMethod = self._mcGetSortMethod()
-            if self.sortMethod == None: return lang.msgReturnCancel
-        
-        noMaps = self.mcObj.getNoMaps(len(self.srcSet), len(self.dstSet))
-        query = lang.msgMCenterMapRange % noMaps
-        if self.rangeTuple == None: # from user
-            self.rangeTuple = self._mcGetIntegerRange(query, 1, noMaps)
-            if self.rangeTuple == None: return lang.msgReturnCancel
-        else: #get from args
-            self.rangeTuple = self._convertListRange(self.rangeTuple, 1, noMaps)
-            if self.rangeTuple == None: return self._getUsage()
-
-    def process(self): 
-        srcPsReal = self.srcSet.get('psReal')
-        dstPsReal = self.dstSet.get('psReal')
-        self.dictS, self.orderKeyS = self.mcObj.sortSMTH(srcPsReal, dstPsReal)
-        a = self.mcObj.sortUNIF(srcPsReal, dstPsReal)
-        self.dictU, self.orderKeyU, orderMax, orderSpan, orderOffset = a
-        b = self.mcObj.sortBAL(srcPsReal, dstPsReal)
-        self.dictB, self.orderKeyB, orderMax, orderSpan, orderOffset = b
-
-        if self.sortMethod == 'SMTH':
-            self.orderOfMaps = self.orderKeyS
-        elif self.sortMethod == 'UNIF':
-            self.orderOfMaps = self.orderKeyU
-        elif self.sortMethod == 'BAL':
-            self.orderOfMaps = self.orderKeyB
-
-    def log(self):
-        if self.gatherStatus and self.processStatus: # if complete
-            return '%s %s %s %s %s' % (self.cmdStr, self.srcSet.repr('psReal'),
-                  self.dstSet.repr('psReal'), self.sortMethod, 
-                  drawer.listScrub(self._setReturnError(self.rangeTuple)))
-
-    def display(self): 
-        msg = []
-        msg.append('\nMC %s Comparison\n' % self.sortMethod)
-        msg.append('origin %s destination %s\n' % (self.srcSet.repr('psReal'),
-                                                                 self.dstSet.repr('psReal')))
-
-        orderOfMaps = self.orderOfMaps[self.rangeTuple[0]:( 
-                          self.rangeTuple[1]+1)]
-        for partialMapId in orderOfMaps:
-            # supply the first map of the needed size
-            mapTupleId = (len(self.srcSet), len(self.dstSet), partialMapId)
-            msg = self._mcGetAnalysisPostSort(msg, self.srcSet.get('psReal'), 
-                      self.dstSet.get('psReal'), mapTupleId, self.dictS, 
-                      self.orderKeyS, self.dictU, self.orderKeyU, 
-                      self.dictB, self.orderKeyB) 
-        msg.append('\n')
-        return ''.join(msg)
-
-
-class MCgrid(Command):
-    """returns a grid of optimum values for all set classes in given card
-    args: mcgrid  srcSize  dstSize
-    """
-    def __init__(self, ao, cmdEnviron, args=''):
-        Command.__init__(self, ao, cmdEnviron, args)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'MCgrid'
-
-    def gather(self): 
-        args = self.args
-        sizeRange = None
-        if args != '':
-            args = argTools.ArgOps(args, 'stripComma')
-            sizeRange = self._convertListRange(args.get(0), 1, 6, 0)
-            if sizeRange == None: return self._getUsage()
-        if sizeRange == None:
-            query = lang.msgMCenterTwoSetSizes
-            sizeRange = self.mcObj.getSetSizeBounds(query, self.termObj)
-            if sizeRange == None: return lang.msgReturnCancel
-        self.sizeRange = sizeRange
-
-    def process(self): 
-        self.srcSize, self.dstSize = self.sizeRange
-        # gets a list of all sets in tuple notation
-        self.rowAxisSets      = self.scObj.getAllScTriples(self.srcSize, 
-                                     self.ao.tniMode)
-        self.columnAxisSets = self.scObj.getAllScTriples(self.dstSize, 
-                                     self.ao.tniMode)
-
-    def log(self):
-        if self.gatherStatus and self.processStatus: # if complete
-            return '%s %s' % (self.cmdStr, drawer.listScrub(self.sizeRange))
-
-    def display(self): 
-        msg = []
-        msg.append(lang.msgMCminDisplVal % (self.srcSize, self.dstSize))
-        entryLines = []
-        xAxisLabels = ['', ] # first needs to be blank
-        for rowEntry in self.rowAxisSets:
-            xAxisLabels.append(self.scObj.scToStr(rowEntry))
-        entryLines.append(xAxisLabels)    
- 
-        for colEntry in self.columnAxisSets: # 10 for leftmost column
-            singleRow = [self.scObj.scToStr(colEntry), ]
-            for rowEntry in self.rowAxisSets:
-                srcSet = self.scObj.pcs(colEntry)
-                dstSet = self.scObj.pcs(rowEntry)
-                a = self.mcObj.displacement(srcSet, dstSet, 1)
-                b = self.mcObj.displacement(srcSet, dstSet, 0)
-                #print _MOD, a[0], b[0]
-                minDispl, maxDispl, orderedResults, counter = a
-                singleRow.append(minDispl)
-            entryLines.append(singleRow)
-        headerKey    = [] # table setup
-        minWidthList = [(lang.LMARGINW/2),]
-        bufList      = [1,]
-        justList         = ['l',]
-        table = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
-                  bufList, justList, self.termObj,'oneColumn','bundle', 2)
-        msg.append('%s\n' % table)
-        return ''.join(msg)
-
-
-
-class MCnet(Command):
-    """gets aregs for gui window with mcgrid info
-    """
-    def __init__(self, ao, cmdEnviron, args=''):
-        Command.__init__(self, ao, cmdEnviron, args)
-        self.processSwitch = 0 # display only
-        self.gatherSwitch = 1 # display only
-        self.gfxSwitch = 1 # display
-        self.cmdStr = 'MCnet'
-
-    def gather(self): 
-        args = self.args
-        sizeRange = None
-        if args != '':
-            args = argTools.ArgOps(args, 'stripComma')
-            sizeRange = self._convertListRange(args.get(0), 1, 6, 0)
-            if sizeRange == None: return self._getUsage()
-        if sizeRange == None:
-            query = 'enter two set-sizes to compare:'
-            sizeRange = self.mcObj.getSetSizeBounds(query, self.termObj)
-            if sizeRange == None: return lang.msgReturnCancel
-        self.srcSize, self.dstSize = sizeRange
-
-    def process(self): 
-        pass
-
-    def log(self):
-        if self.gatherStatus and self.processStatus: # if complete
-            return '%s %s,%s' % (self.cmdStr, self.srcSize, self.dstSize)
-
-    def display(self):
-        return 'complete.\n'
-
-    def displayGfx(self, fmt, dir=None):
-        # supply self as first arg to get instance of command
-        prefDict = self.ao.external.getPrefGroup('external')
-        obj = imageNetwork.MCnetCanvas(self, self.srcSize, self.dstSize, fmt,
-                                                 self.termObj.parentGUI)
-        obj.show(dir, prefDict)
-
-    def displayGfxUtil(self, fmt, fp):
-        # this method is for use in auto-documentation generation
-        # can supply complete path rather than just a directory
-        obj = imageNetwork.MCnetCanvas(self, self.srcSize, self.dstSize, fmt,
-                                      self.termObj.parentGUI)
-        # second arg sets openMedia to false
-        obj.write(fp, 0)
-
-
-class MCopt(Command):
-    """returns optimum vl and i min distance for entered sets, 
-        and show pcs to pcs
-        args: mcopt setA setB
-    """
-    def __init__(self, ao, cmdEnviron, args=''):
-        Command.__init__(self, ao, cmdEnviron, args)
-        self.processSwitch = 0 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'MCopt'
-
-    def gather(self): 
-        args = self.args
-        self.setX = None
-        self.setY = None
-        if args != '':
-            args = argTools.ArgOps(args, 'stripComma')
-            self.setX = self.setFactory(self.ao, args.get(0), self.scObj)
-            self.setY = self.setFactory(self.ao, args.get(1), self.scObj)
-            if self.setX == None: return self._getUsage()
-            if self.setY == None: return self._getUsage()
-        if self.setX == None or self.setY == None:
-            dialog.msgOut(lang.msgSCselectX, self.termObj)
-            self.setX = self.setFactory(self.ao, None, self.scObj)
-            if self.setX == None: return lang.msgReturnCancel
-            dialog.msgOut(lang.msgSCselectY, self.termObj)
-            self.setY = self.setFactory(self.ao, None, self.scObj)
-            if self.setY == None: return lang.msgReturnCancel
-
-    def process(self): 
-        pass
-
-    def log(self):
-        if self.gatherStatus and self.processStatus: # if complete
-            return '%s %s %s' % (self.cmdStr, self.setX.repr('pc'), 
-                                                         self.setY.repr('pc'))
-
-    def display(self): 
-        # need to move some of this into processing method
-        pc_rawX = self.setX.get('pc')
-        pc_rawY = self.setY.get('pc')
-        #this sets that the final chord will be moved. 0 will set 
-        #the first chord to be moved    
-        setPositionToTransform = 1
-                
-        srcSize = len(pc_rawX)
-        dstSize = len(pc_rawY)
-        srcSet  = pc_rawX
-        dstSet  = pc_rawY
-
-        if srcSize > 6 or dstSize > 6:
-            return lang.msgMCbadVoiceValue
-        
-        noMaps = self.mcObj.getNoMaps(srcSize, dstSize)
-         
-        dictS, orderKeyS = self.mcObj.sortSMTH(srcSet, dstSet)
-        a = self.mcObj.sortUNIF(srcSet, dstSet)
-        dictU, orderKeyU, orderMax, orderSpan, UNIForderOffsetList = a
-        b = self.mcObj.sortBAL(srcSet, dstSet)
-        dictB,  orderKeyB,  orderMax, orderSpan, BALorderOffsetList = b
-
-        smallestUnifOffsetKey = UNIForderOffsetList[0]
-        smallestBalOffsetKey     = BALorderOffsetList[0]
-
-        textHeader  = 'Optimization between SC %s and SC %s:\n' % (
-                          self.setX.repr('sc'), self.setY.repr('sc'))
-        msg = []
-        msg.append('\n')
-        for sortMethodMap in range(0,2): # get two diagrams
-            if sortMethodMap == 0:
-                partialMapId = smallestUnifOffsetKey
-                mapTupleId = (srcSize, dstSize, smallestUnifOffsetKey)
-            elif sortMethodMap == 1:
-                partialMapId = smallestBalOffsetKey
-                mapTupleId = (srcSize, dstSize, smallestBalOffsetKey)
-            a = dictU[partialMapId]
-            vectorU, orderIcPeaksU, offsetIcPeakU, maxU, spanU, offsetU = a
-            b = dictB[partialMapId] 
-            vectorB,orderIcPeaksB,offsetIcPeakB,maxB,spanB,offsetB = b                              
-            if sortMethodMap == 0:
-                msg.append('minUNIFORMITY offset of all maps: %s' % (offsetU))
-                sortByUnifMinOffset = (offsetU)
-            elif sortMethodMap == 1:      
-                msg.append('\nminBALANCE offset of all maps: %s'  % (offsetB))
-                sortByBalMinOffset = (offsetB)
-            msg = self._mcGetAnalysisPostSort(msg, srcSet, dstSet, 
-                             mapTupleId, dictS, orderKeyS, dictU, 
-                             orderKeyU, dictB, orderKeyB)
-
-        if sortByUnifMinOffset < sortByBalMinOffset:
-            msg.append("\nminDistance: %s (U)\n" % sortByUnifMinOffset)
-        elif sortByUnifMinOffset == sortByBalMinOffset:
-            msg.append("\nminDistance: %s (U/B)\n" % sortByBalMinOffset)    
-        else:
-            msg.append("\nminDistance: %s (B)\n" % sortByBalMinOffset)
-        data = self.mcObj.displacement(srcSet, dstSet, setPositionToTransform)
-        minDispl, maxDispl, orderedResults, counter = data
-
-        msg.append('DISPLvalues: min:%i max:%i of%i sets\n'  % (minDispl, 
-                                                                         maxDispl, counter))
-
-        entryLines = [] 
-        for entry in orderedResults:
-            displ, foundSet, setClassTupleID, foundT, foundMapTupleID = entry
-            scString = 'SC %s' % self.scObj.scToStr(setClassTupleID)
-            tString = 'T%s' % foundT
-            mapString = self.mcObj.rawMapToString(self.mcObj.fetchMap(
-                                                              foundMapTupleID))
-            setStr = drawer.listToStr(foundSet)
-            entryLines.append(['', displ, scString, tString, mapString, setStr])
-
-        headerKey    = ['', 'DISPL', 'SC', 'T', 'map', 'set'] # table setup
-        minWidthList = [lang.TABW, lang.SHIFTW, 0, 0, 0, 0]
-        bufList      = [0, 1, 1, 1, 1, 1]
-        justList         = ['l','l','l','l','l','l']
-        table = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
-                                 bufList, justList, self.termObj,
-                                 'twoColumn','line', 2)
-        msg.append('%s\n' % table)
-
-        # get the optimum
-        a = orderedResults[0]
-        displ, foundSet, setClassTupleID, foundT, foundMapTupleID = a
-        map   = self.mcObj.fetchMap(foundMapTupleID)
-        mapStr  = self.mcObj.rawMapToString(map)    
-        
-        # create new set definitions         
-        if setPositionToTransform == 0:
-            setA = foundSet
-            setClassIDA = setClassTupleID
-            setB = dstSet
-            setClassIDB = self.setY.get('sc')
-        else:
-            setA = srcSet
-            setClassIDA = self.setX.get('sc')
-            setB = foundSet
-            setClassIDB = setClassTupleID     
-
-        if setPositionToTransform == 0:
-            msg.append("\nOptimized VL: SC %s (T=%i) to SC %s\n" % (
-                self.scObj.scToStr(setClassIDA), foundT, 
-                self.scObj.scToStr(setClassIDB)))
-        else:
-            msg.append("\nOptimized VL: SC %s to SC %s (T=%i)\n" % (
-                self.scObj.scToStr(setClassIDA), 
-                self.scObj.scToStr(setClassIDB), foundT))
-        ## fnal value creates vertical display as well as horixontal
-        msg = self._mcGetAnalysisPreSort(msg, setA, setB, foundMapTupleID, 1)
-        msg.append('\n')
-        return ''.join(msg)
+# class MCv(Command):
+#     """selects a map and provides a display
+#         args: mcv  srcSize,dstSize   startRange,endRange
+#     """
+#     def __init__(self, ao, cmdEnviron=None, args=''):
+#         Command.__init__(self, ao, cmdEnviron, args)
+#         self.processSwitch = 0 # display only
+#         self.gatherSwitch = 1 # display only
+#         self.cmdStr = 'MCv'
+# 
+#     def gather(self): 
+#         sizeRange = None
+#         outputRangeTuple = None
+#         args = self.args
+# 
+#         if args != '':
+#             args = argTools.ArgOps(args, 'stripComma')
+#             sizeRange = self._convertListRange(args.get(0), 1, 6, 0)
+#             if sizeRange == None: return self._getUsage()
+#             outputRangeTuple = args.get(1)
+#         if sizeRange == None:
+#             sizeRange = self.mcObj.getSetSizeBounds(None, self.termObj)
+#             if sizeRange == None: return lang.msgReturnCancel
+# 
+#         srcSize, dstSize = sizeRange
+#         noMaps = self.mcObj.getNoMaps(srcSize, dstSize)
+#         query = lang.msgMCenterMapSizeRange % noMaps
+# 
+#         if outputRangeTuple == None:
+#             outputRangeTuple = self._mcGetIntegerRange(query, 1, noMaps)
+#             if outputRangeTuple == None: return lang.msgReturnCancel
+#         else: # from args
+#             outputRangeTuple = self._convertListRange(outputRangeTuple, 1, noMaps)
+#             if outputRangeTuple == None: return self._getUsage()
+# 
+#         self.sizeRange = sizeRange
+#         self.outputRangeTuple = outputRangeTuple
+# 
+# 
+#     def process(self): 
+#         pass
+# 
+#     def log(self):
+#         if self.gatherStatus and self.processStatus: # if complete
+#             return '%s %s %s' % (self.cmdStr, drawer.listScrub(self.sizeRange), 
+#                   drawer.listScrub(self._setReturnError(self.outputRangeTuple)))
+# 
+#     def display(self): 
+#         sizeRange = self.sizeRange
+#         outputRangeTuple = self.outputRangeTuple
+#         srcSize, dstSize = sizeRange
+# 
+#         msg = []
+#         msg.append('MapClass %s:%s-%s to %s:%s-%s\n' % (srcSize, 
+#                                  dstSize, outputRangeTuple[0]+1, srcSize,
+#                                  dstSize, outputRangeTuple[1]+1))
+#         mapDict = self.mcObj.getMapDict(srcSize, dstSize)
+#         orderOfMaps = mapDict.keys()    # these keys are partial map ids
+#         orderOfMaps.reverse()
+#         orderOfMaps = orderOfMaps[outputRangeTuple[0]:(outputRangeTuple[1]+1)]
+# 
+#         entryLines = []
+#         for partialMapId in orderOfMaps:
+#             # supply the first map of the needed size
+#             mapTupleId            = (srcSize, dstSize, partialMapId)
+#             mapTupleIdStr         = self.mcObj.mapIdTupleToString(mapTupleId)
+#             map                   = self.mcObj.fetchMap(mapTupleId)
+#             mapStr                = self.mcObj.rawMapToString(map)       
+#             mcLabel = 'MC %s' % (mapTupleIdStr)
+#             entryLines.append([mcLabel, mapStr])
+#         headerKey    = ['name', 'map'] # table setup
+#         minWidthList = [lang.LMARGINW, 0]
+#         bufList      = [0, 1]
+#         justList         = ['l','l']
+#         table = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
+#                                  bufList, justList, self.termObj)
+#         msg.append('%s\n' % table)
+#         return ''.join(msg)
+# 
+# 
+# class MCcm(Command):
+#     """allcepts two sets for comparison
+#         args: mccm  setA    setB    sortMethod  startRange,endRange
+#     """
+#     def __init__(self, ao, cmdEnviron=None, args=''):
+#         Command.__init__(self, ao, cmdEnviron, args)
+#         self.processSwitch = 1 # display only
+#         self.gatherSwitch = 1 # display only
+#         self.cmdStr = 'MCcm'
+# 
+#     def gather(self):
+#         args = self.args
+#  
+#         self.srcSet = None
+#         self.dstSet = None
+#         self.sortMethod = None
+#         self.rangeTuple = None
+#         if args != '':
+#             args = argTools.ArgOps(args, 'stripComma')
+#             self.srcSet = self.setFactory(self.ao, args.get(0), self.scObj)
+#             if self.srcSet == None: return self._getUsage()
+#             self.dstSet = self.setFactory(self.ao, args.get(1), self.scObj)
+#             if self.dstSet == None: return self._getUsage()
+#             self.sortMethod = self._mcConvertSortMethod(args.get(2))
+#             if self.sortMethod == None: return self._getUsage()
+#             self.rangeTuple = args.get(3)
+#         if self.srcSet == None or self.dstSet == None or self.sortMethod == None:
+#             dialog.msgOut(lang.msgSCselectX, self.termObj)
+#             self.srcSet = self.setFactory(self.ao, None, self.scObj) 
+#             if self.srcSet == None: return lang.msgMCerrorCreatingChord
+#             dialog.msgOut(lang.msgSCselectY, self.termObj)
+#             self.dstSet = self.setFactory(self.ao, None, self.scObj) 
+#             if self.dstSet == None: return lang.msgMCerrorCreatingChord
+#             self.sortMethod = self._mcGetSortMethod()
+#             if self.sortMethod == None: return lang.msgReturnCancel
+#         
+#         noMaps = self.mcObj.getNoMaps(len(self.srcSet), len(self.dstSet))
+#         query = lang.msgMCenterMapRange % noMaps
+#         if self.rangeTuple == None: # from user
+#             self.rangeTuple = self._mcGetIntegerRange(query, 1, noMaps)
+#             if self.rangeTuple == None: return lang.msgReturnCancel
+#         else: #get from args
+#             self.rangeTuple = self._convertListRange(self.rangeTuple, 1, noMaps)
+#             if self.rangeTuple == None: return self._getUsage()
+# 
+#     def process(self): 
+#         srcPsReal = self.srcSet.get('psReal')
+#         dstPsReal = self.dstSet.get('psReal')
+#         self.dictS, self.orderKeyS = self.mcObj.sortSMTH(srcPsReal, dstPsReal)
+#         a = self.mcObj.sortUNIF(srcPsReal, dstPsReal)
+#         self.dictU, self.orderKeyU, orderMax, orderSpan, orderOffset = a
+#         b = self.mcObj.sortBAL(srcPsReal, dstPsReal)
+#         self.dictB, self.orderKeyB, orderMax, orderSpan, orderOffset = b
+# 
+#         if self.sortMethod == 'SMTH':
+#             self.orderOfMaps = self.orderKeyS
+#         elif self.sortMethod == 'UNIF':
+#             self.orderOfMaps = self.orderKeyU
+#         elif self.sortMethod == 'BAL':
+#             self.orderOfMaps = self.orderKeyB
+# 
+#     def log(self):
+#         if self.gatherStatus and self.processStatus: # if complete
+#             return '%s %s %s %s %s' % (self.cmdStr, self.srcSet.repr('psReal'),
+#                   self.dstSet.repr('psReal'), self.sortMethod, 
+#                   drawer.listScrub(self._setReturnError(self.rangeTuple)))
+# 
+#     def display(self): 
+#         msg = []
+#         msg.append('\nMC %s Comparison\n' % self.sortMethod)
+#         msg.append('origin %s destination %s\n' % (self.srcSet.repr('psReal'),
+#                                                                  self.dstSet.repr('psReal')))
+# 
+#         orderOfMaps = self.orderOfMaps[self.rangeTuple[0]:( 
+#                           self.rangeTuple[1]+1)]
+#         for partialMapId in orderOfMaps:
+#             # supply the first map of the needed size
+#             mapTupleId = (len(self.srcSet), len(self.dstSet), partialMapId)
+#             msg = self._mcGetAnalysisPostSort(msg, self.srcSet.get('psReal'), 
+#                       self.dstSet.get('psReal'), mapTupleId, self.dictS, 
+#                       self.orderKeyS, self.dictU, self.orderKeyU, 
+#                       self.dictB, self.orderKeyB) 
+#         msg.append('\n')
+#         return ''.join(msg)
+# 
+# 
+# class MCgrid(Command):
+#     """returns a grid of optimum values for all set classes in given card
+#     args: mcgrid  srcSize  dstSize
+#     """
+#     def __init__(self, ao, cmdEnviron=None, args=''):
+#         Command.__init__(self, ao, cmdEnviron, args)
+#         self.processSwitch = 1 # display only
+#         self.gatherSwitch = 1 # display only
+#         self.cmdStr = 'MCgrid'
+# 
+#     def gather(self): 
+#         args = self.args
+#         sizeRange = None
+#         if args != '':
+#             args = argTools.ArgOps(args, 'stripComma')
+#             sizeRange = self._convertListRange(args.get(0), 1, 6, 0)
+#             if sizeRange == None: return self._getUsage()
+#         if sizeRange == None:
+#             query = lang.msgMCenterTwoSetSizes
+#             sizeRange = self.mcObj.getSetSizeBounds(query, self.termObj)
+#             if sizeRange == None: return lang.msgReturnCancel
+#         self.sizeRange = sizeRange
+# 
+#     def process(self): 
+#         self.srcSize, self.dstSize = self.sizeRange
+#         # gets a list of all sets in tuple notation
+#         self.rowAxisSets      = self.scObj.getAllScTriples(self.srcSize, 
+#                                      self.ao.tniMode)
+#         self.columnAxisSets = self.scObj.getAllScTriples(self.dstSize, 
+#                                      self.ao.tniMode)
+# 
+#     def log(self):
+#         if self.gatherStatus and self.processStatus: # if complete
+#             return '%s %s' % (self.cmdStr, drawer.listScrub(self.sizeRange))
+# 
+#     def display(self): 
+#         msg = []
+#         msg.append(lang.msgMCminDisplVal % (self.srcSize, self.dstSize))
+#         entryLines = []
+#         xAxisLabels = ['', ] # first needs to be blank
+#         for rowEntry in self.rowAxisSets:
+#             xAxisLabels.append(self.scObj.scToStr(rowEntry))
+#         entryLines.append(xAxisLabels)    
+#  
+#         for colEntry in self.columnAxisSets: # 10 for leftmost column
+#             singleRow = [self.scObj.scToStr(colEntry), ]
+#             for rowEntry in self.rowAxisSets:
+#                 srcSet = self.scObj.pcs(colEntry)
+#                 dstSet = self.scObj.pcs(rowEntry)
+#                 a = self.mcObj.displacement(srcSet, dstSet, 1)
+#                 b = self.mcObj.displacement(srcSet, dstSet, 0)
+#                 #print _MOD, a[0], b[0]
+#                 minDispl, maxDispl, orderedResults, counter = a
+#                 singleRow.append(minDispl)
+#             entryLines.append(singleRow)
+#         headerKey    = [] # table setup
+#         minWidthList = [(lang.LMARGINW/2),]
+#         bufList      = [1,]
+#         justList         = ['l',]
+#         table = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
+#                   bufList, justList, self.termObj,'oneColumn','bundle', 2)
+#         msg.append('%s\n' % table)
+#         return ''.join(msg)
+# 
+# 
+# 
+# class MCnet(Command):
+#     """gets aregs for gui window with mcgrid info
+#     """
+#     def __init__(self, ao, cmdEnviron=None, args=''):
+#         Command.__init__(self, ao, cmdEnviron, args)
+#         self.processSwitch = 0 # display only
+#         self.gatherSwitch = 1 # display only
+#         self.gfxSwitch = 1 # display
+#         self.cmdStr = 'MCnet'
+# 
+#     def gather(self): 
+#         args = self.args
+#         sizeRange = None
+#         if args != '':
+#             args = argTools.ArgOps(args, 'stripComma')
+#             sizeRange = self._convertListRange(args.get(0), 1, 6, 0)
+#             if sizeRange == None: return self._getUsage()
+#         if sizeRange == None:
+#             query = 'enter two set-sizes to compare:'
+#             sizeRange = self.mcObj.getSetSizeBounds(query, self.termObj)
+#             if sizeRange == None: return lang.msgReturnCancel
+#         self.srcSize, self.dstSize = sizeRange
+# 
+#     def process(self): 
+#         pass
+# 
+#     def log(self):
+#         if self.gatherStatus and self.processStatus: # if complete
+#             return '%s %s,%s' % (self.cmdStr, self.srcSize, self.dstSize)
+# 
+#     def display(self):
+#         return 'complete.\n'
+# 
+#     def displayGfx(self, fmt, dir=None):
+#         # supply self as first arg to get instance of command
+#         prefDict = self.ao.external.getPrefGroup('external')
+#         obj = imageNetwork.MCnetCanvas(self, self.srcSize, self.dstSize, fmt,
+#                                                  self.termObj.parentGUI)
+#         obj.show(dir, prefDict)
+# 
+#     def displayGfxUtil(self, fmt, fp):
+#         # this method is for use in auto-documentation generation
+#         # can supply complete path rather than just a directory
+#         obj = imageNetwork.MCnetCanvas(self, self.srcSize, self.dstSize, fmt,
+#                                       self.termObj.parentGUI)
+#         # second arg sets openMedia to false
+#         obj.write(fp, 0)
+# 
+# 
+# class MCopt(Command):
+#     """returns optimum vl and i min distance for entered sets, 
+#         and show pcs to pcs
+#         args: mcopt setA setB
+#     """
+#     def __init__(self, ao, cmdEnviron=None, args=''):
+#         Command.__init__(self, ao, cmdEnviron, args)
+#         self.processSwitch = 0 # display only
+#         self.gatherSwitch = 1 # display only
+#         self.cmdStr = 'MCopt'
+# 
+#     def gather(self): 
+#         args = self.args
+#         self.setX = None
+#         self.setY = None
+#         if args != '':
+#             args = argTools.ArgOps(args, 'stripComma')
+#             self.setX = self.setFactory(self.ao, args.get(0), self.scObj)
+#             self.setY = self.setFactory(self.ao, args.get(1), self.scObj)
+#             if self.setX == None: return self._getUsage()
+#             if self.setY == None: return self._getUsage()
+#         if self.setX == None or self.setY == None:
+#             dialog.msgOut(lang.msgSCselectX, self.termObj)
+#             self.setX = self.setFactory(self.ao, None, self.scObj)
+#             if self.setX == None: return lang.msgReturnCancel
+#             dialog.msgOut(lang.msgSCselectY, self.termObj)
+#             self.setY = self.setFactory(self.ao, None, self.scObj)
+#             if self.setY == None: return lang.msgReturnCancel
+# 
+#     def process(self): 
+#         pass
+# 
+#     def log(self):
+#         if self.gatherStatus and self.processStatus: # if complete
+#             return '%s %s %s' % (self.cmdStr, self.setX.repr('pc'), 
+#                                                          self.setY.repr('pc'))
+# 
+#     def display(self): 
+#         # need to move some of this into processing method
+#         pc_rawX = self.setX.get('pc')
+#         pc_rawY = self.setY.get('pc')
+#         #this sets that the final chord will be moved. 0 will set 
+#         #the first chord to be moved    
+#         setPositionToTransform = 1
+#                 
+#         srcSize = len(pc_rawX)
+#         dstSize = len(pc_rawY)
+#         srcSet  = pc_rawX
+#         dstSet  = pc_rawY
+# 
+#         if srcSize > 6 or dstSize > 6:
+#             return lang.msgMCbadVoiceValue
+#         
+#         noMaps = self.mcObj.getNoMaps(srcSize, dstSize)
+#          
+#         dictS, orderKeyS = self.mcObj.sortSMTH(srcSet, dstSet)
+#         a = self.mcObj.sortUNIF(srcSet, dstSet)
+#         dictU, orderKeyU, orderMax, orderSpan, UNIForderOffsetList = a
+#         b = self.mcObj.sortBAL(srcSet, dstSet)
+#         dictB,  orderKeyB,  orderMax, orderSpan, BALorderOffsetList = b
+# 
+#         smallestUnifOffsetKey = UNIForderOffsetList[0]
+#         smallestBalOffsetKey     = BALorderOffsetList[0]
+# 
+#         textHeader  = 'Optimization between SC %s and SC %s:\n' % (
+#                           self.setX.repr('sc'), self.setY.repr('sc'))
+#         msg = []
+#         msg.append('\n')
+#         for sortMethodMap in range(0,2): # get two diagrams
+#             if sortMethodMap == 0:
+#                 partialMapId = smallestUnifOffsetKey
+#                 mapTupleId = (srcSize, dstSize, smallestUnifOffsetKey)
+#             elif sortMethodMap == 1:
+#                 partialMapId = smallestBalOffsetKey
+#                 mapTupleId = (srcSize, dstSize, smallestBalOffsetKey)
+#             a = dictU[partialMapId]
+#             vectorU, orderIcPeaksU, offsetIcPeakU, maxU, spanU, offsetU = a
+#             b = dictB[partialMapId] 
+#             vectorB,orderIcPeaksB,offsetIcPeakB,maxB,spanB,offsetB = b                              
+#             if sortMethodMap == 0:
+#                 msg.append('minUNIFORMITY offset of all maps: %s' % (offsetU))
+#                 sortByUnifMinOffset = (offsetU)
+#             elif sortMethodMap == 1:      
+#                 msg.append('\nminBALANCE offset of all maps: %s'  % (offsetB))
+#                 sortByBalMinOffset = (offsetB)
+#             msg = self._mcGetAnalysisPostSort(msg, srcSet, dstSet, 
+#                              mapTupleId, dictS, orderKeyS, dictU, 
+#                              orderKeyU, dictB, orderKeyB)
+# 
+#         if sortByUnifMinOffset < sortByBalMinOffset:
+#             msg.append("\nminDistance: %s (U)\n" % sortByUnifMinOffset)
+#         elif sortByUnifMinOffset == sortByBalMinOffset:
+#             msg.append("\nminDistance: %s (U/B)\n" % sortByBalMinOffset)    
+#         else:
+#             msg.append("\nminDistance: %s (B)\n" % sortByBalMinOffset)
+#         data = self.mcObj.displacement(srcSet, dstSet, setPositionToTransform)
+#         minDispl, maxDispl, orderedResults, counter = data
+# 
+#         msg.append('DISPLvalues: min:%i max:%i of%i sets\n'  % (minDispl, 
+#                                                                          maxDispl, counter))
+# 
+#         entryLines = [] 
+#         for entry in orderedResults:
+#             displ, foundSet, setClassTupleID, foundT, foundMapTupleID = entry
+#             scString = 'SC %s' % self.scObj.scToStr(setClassTupleID)
+#             tString = 'T%s' % foundT
+#             mapString = self.mcObj.rawMapToString(self.mcObj.fetchMap(
+#                                                               foundMapTupleID))
+#             setStr = drawer.listToStr(foundSet)
+#             entryLines.append(['', displ, scString, tString, mapString, setStr])
+# 
+#         headerKey    = ['', 'DISPL', 'SC', 'T', 'map', 'set'] # table setup
+#         minWidthList = [lang.TABW, lang.SHIFTW, 0, 0, 0, 0]
+#         bufList      = [0, 1, 1, 1, 1, 1]
+#         justList         = ['l','l','l','l','l','l']
+#         table = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
+#                                  bufList, justList, self.termObj,
+#                                  'twoColumn','line', 2)
+#         msg.append('%s\n' % table)
+# 
+#         # get the optimum
+#         a = orderedResults[0]
+#         displ, foundSet, setClassTupleID, foundT, foundMapTupleID = a
+#         map   = self.mcObj.fetchMap(foundMapTupleID)
+#         mapStr  = self.mcObj.rawMapToString(map)    
+#         
+#         # create new set definitions         
+#         if setPositionToTransform == 0:
+#             setA = foundSet
+#             setClassIDA = setClassTupleID
+#             setB = dstSet
+#             setClassIDB = self.setY.get('sc')
+#         else:
+#             setA = srcSet
+#             setClassIDA = self.setX.get('sc')
+#             setB = foundSet
+#             setClassIDB = setClassTupleID     
+# 
+#         if setPositionToTransform == 0:
+#             msg.append("\nOptimized VL: SC %s (T=%i) to SC %s\n" % (
+#                 self.scObj.scToStr(setClassIDA), foundT, 
+#                 self.scObj.scToStr(setClassIDB)))
+#         else:
+#             msg.append("\nOptimized VL: SC %s to SC %s (T=%i)\n" % (
+#                 self.scObj.scToStr(setClassIDA), 
+#                 self.scObj.scToStr(setClassIDB), foundT))
+#         ## fnal value creates vertical display as well as horixontal
+#         msg = self._mcGetAnalysisPreSort(msg, setA, setB, foundMapTupleID, 1)
+#         msg.append('\n')
+#         return ''.join(msg)
 
 
 
 #-----------------------------------------------------------------||||||||||||--
 
 class PIals(Command):
-    """ list all attributes of a path,  a hidden function"""
-    def __init__(self, ao, cmdEnviron, args=''):
+    """ list all attributes of a path,  a hidden function
+
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = PIals(ao)
+    >>> ok, result = a.do()
+    >>> ok == True
+    True
+    """
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 0 # display only
         self.gatherSwitch = 0 # display only
@@ -2969,8 +3068,22 @@ class PIn(Command):
     """creates a path instance
     args are given as:
     args: pin  name  eval(pathString)
+
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = PIn(ao)
+    >>> a.args = 'a 3-2'
+    >>> ok, result = a.do()
+    >>> ok == True
+    True
+
+    >>> a = PIn(ao)
+    >>> a.args = 'b 8,12,21,34'
+    >>> ok, result = a.do()
+    >>> ok == True
+    True
+
     """
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -3043,7 +3156,7 @@ class PIn(Command):
 
 class PIv(Command):
     """displays a path"""
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 0 # display only
         self.gatherSwitch = 1 # display only
@@ -3153,7 +3266,7 @@ class PIv(Command):
 
 class PIe(Command):
     """edits a single set of a path"""
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -3292,7 +3405,7 @@ class PIdf(Command):
         uses currently selected path
         user can enter a list as an arg
     """
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -3357,7 +3470,7 @@ class PIdf(Command):
 
 class PIls(Command):
     """list all paths"""
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 0 # display only
         self.gatherSwitch = 1 # display only
@@ -3394,7 +3507,7 @@ class PIls(Command):
 
 class PIcp(Command):
     """copies a path"""
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -3456,7 +3569,7 @@ class PIcp(Command):
 
 
 class PIrm(Command):
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -3524,7 +3637,7 @@ class PIrm(Command):
 
 class PIo(Command):
     """sets self.ao.activePath"""
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -3555,7 +3668,7 @@ class PIo(Command):
         return 'PI %s now active.\n' % self.ao.activePath
 
 class PImv(Command):
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -3614,7 +3727,7 @@ class PImv(Command):
 
 class PIret(Command):
     """create new path as a retrograde of current path"""
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -3653,7 +3766,7 @@ class PIrot(Command):
     since this is a rotation, cannot copy old maps over to new PI
     args: pirot  name    startPosition
     """
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -3701,7 +3814,7 @@ class PIopt(Command):
     """create new path as an optimization of current path
         since this is a rotation, cannot copy old maps over to new PI
     """
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -3794,7 +3907,7 @@ class PIslc(Command):
     """create a new path as a slice of current path
         args: pislc  name    startPos,endPos
     """
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -3840,7 +3953,7 @@ class PIslc(Command):
 
 class PIh(Command):
     """create an event list of just the current path"""
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -3889,7 +4002,7 @@ class PScma(Command):
     """compares adjacent sets, comparison A
         args: pscma 
     """
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -3959,7 +4072,7 @@ class PScmb(Command):
     """one to many analysis
         args: pscmb  set
     """
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -4035,7 +4148,7 @@ class PScmb(Command):
 
 #-----------------------------------------------------------------||||||||||||--
 class _CommandPV(Command):
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
 
     def _pvSelectRankOrMap(self, srcSet, dstSet):
@@ -4088,7 +4201,7 @@ class _CommandPV(Command):
 
 
 class PVv(_CommandPV):
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         _CommandPV.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 0 # display only
         self.gatherSwitch = 1 # display only
@@ -4192,7 +4305,7 @@ class PVan(_CommandPV):
     """provides analysis view of current path voice
         args: pvan
     """
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         _CommandPV.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 0 # display only
         self.gatherSwitch = 1 # display only
@@ -4253,7 +4366,7 @@ class PVcm(_CommandPV):
     """compares a voice in a path to all voices available
     args: pvcm  startPos,endPos  sortMethod  startRange,endRange
     """
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         _CommandPV.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -4368,7 +4481,7 @@ class PVcm(_CommandPV):
 
 
 class PVls(_CommandPV):
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         _CommandPV.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 0 # display only
         self.gatherSwitch = 1 # display only
@@ -4413,7 +4526,7 @@ class PVls(_CommandPV):
 
 
 class PVe(_CommandPV):
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         _CommandPV.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -4500,7 +4613,7 @@ class PVe(_CommandPV):
 
 
 class PVn(_CommandPV):
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         _CommandPV.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -4601,7 +4714,7 @@ class PVauto(_CommandPV):
     a sort method
     pvauto name sortMethod firstLast
     """
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         _CommandPV.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -4724,7 +4837,7 @@ class PVauto(_CommandPV):
         return msg
         
 class PVo(_CommandPV):
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         _CommandPV.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -4763,7 +4876,7 @@ class PVcp(_CommandPV):
     """makes a copy of a VLmapGroup
         args: pvcp  source  target1  target2 ...
     """
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         _CommandPV.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -4825,7 +4938,7 @@ class PVcp(_CommandPV):
         return ''.join(self.report)
         
 class PVrm(_CommandPV):
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         _CommandPV.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -4894,7 +5007,7 @@ class PVrm(_CommandPV):
 
 class TMo(Command):
     """selects currtne texture module"""
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -4925,7 +5038,7 @@ class TMo(Command):
         return 'TextureModule %s now active.\n' % self.ao.activeTextureModule
 
 class TMv(Command):
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 0 # display only
@@ -4946,7 +5059,7 @@ class TMv(Command):
 
 
 class TMls(Command):
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 0 # display only
@@ -4998,7 +5111,7 @@ class TMls(Command):
 
 
 class _CommandTP(Command):
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
 
     def _tpGetLib(self, mode):
@@ -5064,7 +5177,7 @@ class _CommandTP(Command):
                       
 class TPls(_CommandTP):
     """displays texture parameter object information"""
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         _CommandTP.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 0 # display only
         self.gatherSwitch = 1 # display only
@@ -5108,7 +5221,7 @@ class TPls(_CommandTP):
 
 class TPv(_CommandTP):
     """displays texture rhythm object information"""
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         _CommandTP.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 0 # display only
         self.gatherSwitch = 1 # display only
@@ -5197,7 +5310,7 @@ class TPv(_CommandTP):
 
 
 class TPmap(_CommandTP):
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         _CommandTP.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -5316,7 +5429,7 @@ class TPmap(_CommandTP):
 
 class TPeg(_CommandTP):
     """sub class TPmap for exporting generator values"""
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         _CommandTP.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1
         self.gatherSwitch = 1 
@@ -5434,7 +5547,7 @@ class TPeg(_CommandTP):
 #-----------------------------------------------------------------||||||||||||--
 
 class TIo(Command):
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -5467,7 +5580,7 @@ class TIo(Command):
 
 class TImute(Command):
     """mutes the current texture"""
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -5521,7 +5634,7 @@ class TImode(Command):
     args: timode  modeChoice  modeValue
     """
 
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -5685,7 +5798,7 @@ class TImidi(Command):
         work done mostly from within midiTools.py
     """
 
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -5779,7 +5892,7 @@ class TImidi(Command):
 class TIv(Command):
     """views the current texture, or name if provided with args"""
 
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 0 # display only
         self.gatherSwitch = 1 # display only
@@ -5821,7 +5934,7 @@ class TIv(Command):
 
 class TIe(Command):
     """eidits attributes of a texture"""
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -5914,7 +6027,7 @@ class TIn(Command):
     of a texture created, uses last duration and tempo
     """
 
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -5998,7 +6111,7 @@ class TIn(Command):
             
             
 class TIls(Command):
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 0 # display only
         self.gatherSwitch = 1 # display only
@@ -6044,7 +6157,7 @@ class TIls(Command):
         return ''.join(msg)
          
 class TIrm(Command):
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -6094,7 +6207,7 @@ class TIrm(Command):
         return ''.join(self.report)
 
 class TIcp(Command):
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -6159,7 +6272,7 @@ class TIcp(Command):
         return ''.join(self.report)
 
 class TImv(Command):
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -6216,7 +6329,7 @@ class TIdoc(Command):
     args can be the name of a different texture
     """
 
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 0 # display only
         self.gatherSwitch = 1 # display only
@@ -6255,7 +6368,7 @@ class TIdoc(Command):
 class TIals(Command):
     """ list all attributes of a texture, a hidden command"""
 
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 0 # display only
         self.gatherSwitch = 1 # display only
@@ -6289,7 +6402,7 @@ class TIals(Command):
         return ''.join(msg) 
 
 class TImap(Command):
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -6338,7 +6451,7 @@ class TImap(Command):
 class TEe(Command):
     """edits all textures"""
 
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -6431,7 +6544,7 @@ class TEe(Command):
 class TEv(Command):
     """ensemble view, displays parallel attributes for all textures"""
 
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -6506,7 +6619,7 @@ class TEv(Command):
 
 
 class TEmap(Command):
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -6573,7 +6686,7 @@ class TEmidi(Command):
     work done mostly from within midiTools.py
     """
 
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -6626,7 +6739,7 @@ class TCn(Command):
     check for negative start times
     args: tcn  name  timeShift
     """
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -6676,7 +6789,7 @@ class TCn(Command):
 class TCv(Command):
     """views the current clone, or name if provided with args"""
 
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 0 # display only
         self.gatherSwitch = 1 # display only
@@ -6724,7 +6837,7 @@ class TCv(Command):
 
 
 class TCo(Command):
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -6759,7 +6872,7 @@ class TCo(Command):
 
 class TCmute(Command):
     """mutes the current clone"""
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -6814,7 +6927,7 @@ class TCls(Command):
     check for negative start times
     """
 
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 0 # display only
         self.gatherSwitch = 1 # display only
@@ -6865,7 +6978,7 @@ class TCls(Command):
 class TCe(Command):
     """eidits attributes of a clone"""
 
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -6945,7 +7058,7 @@ class TCe(Command):
 
 
 class TCcp(Command):
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -7012,7 +7125,7 @@ class TCcp(Command):
 
 
 class TCmap(Command):
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -7061,7 +7174,7 @@ class TCdoc(Command):
     of this texture, as well as in
     args can be the name of a different texture
     """
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 0 # display only
         self.gatherSwitch = 1 # display only
@@ -7121,7 +7234,7 @@ class TCrm(Command):
         check for negative start times
     """
 
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -7186,7 +7299,7 @@ class TCrm(Command):
 class TCals(Command):
     """ list all attributes of a texture, a hidden command"""
 
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 0 # display only
         self.gatherSwitch = 1 # display only
@@ -7228,7 +7341,7 @@ class TCals(Command):
 #-----------------------------------------------------------------||||||||||||--
 
 class TTls(Command):
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 0 # display only
         self.gatherSwitch = 1 # display only
@@ -7269,7 +7382,7 @@ class TTls(Command):
 
 
 class TTo(Command):
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -7316,7 +7429,7 @@ class TTo(Command):
 
 class _CommandEO(Command):
     """parent of all eventMode commands"""
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
 
     def _emSelectOutputFormat(self):
@@ -7358,7 +7471,7 @@ class _CommandEO(Command):
 
 class EOo(_CommandEO):
     """add an output format"""
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         _CommandEO.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -7406,7 +7519,7 @@ class EOo(_CommandEO):
 
 class EOrm(_CommandEO):
     """remove an output format"""
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         _CommandEO.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -7453,7 +7566,7 @@ class EOrm(_CommandEO):
 
 
 class EOls(_CommandEO):
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         _CommandEO.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 0 # display only
         self.gatherSwitch = 0 # display only
@@ -7493,7 +7606,7 @@ class EOls(_CommandEO):
 class EMo(Command):
     """switches value of self.ao.activeEventMode
     """
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -7535,7 +7648,7 @@ class EMo(Command):
 
 
 class EMls(Command):
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 0 # display only
         self.gatherSwitch = 0 # display only
@@ -7569,7 +7682,7 @@ class EMls(Command):
 
 
 class EMv(Command):
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 0 # display only
         self.gatherSwitch = 0 # display only
@@ -7597,7 +7710,7 @@ class EMv(Command):
 class EMi(Command):
     """prints a list of all instruments
     """
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 0 
         self.gatherSwitch = 1
@@ -7652,7 +7765,7 @@ class ELn(Command):
     """creates a score and all related files as needed
     """
 
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -7763,7 +7876,7 @@ class ELw(ELn):
     """writes a score and all related files as needed
     does not refresh event lists, unless refresh mode is set
     """
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         ELn.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -7783,7 +7896,7 @@ class ELr(Command):
     """renders the most recent score in csound
     """
 
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -7841,7 +7954,7 @@ class ELh(Command):
     """opens the audio file most recently created
     uses platform specific apps
     """
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -7900,7 +8013,7 @@ class ELv(Command):
     """displays the csound score file most recently created
     uses platform specific apps
     """
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -7936,7 +8049,7 @@ class CPch(Command):
     """set the value of the number of channels
     """
 
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -7991,7 +8104,7 @@ class CPff(Command):
     """set the values of the audio foile format
     """
 
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -8032,7 +8145,7 @@ class CPff(Command):
 class CPauto(Command):
     """causes eln to auto render and hear a newly created score
     """
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 
         self.gatherSwitch = 1 
@@ -8069,10 +8182,10 @@ class CPauto(Command):
 #-----------------------------------------------------------------||||||||||||--
 class _CommandAO(Command):
     """parent class of all AO commands"""
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # methods for loading and files
     
     def _tiLoad(self, textureName, textureModName, pathName, polyphonyMode, 
@@ -8291,7 +8404,7 @@ class _CommandAO(Command):
         else:
             return 'unknown', lang.msgAOnotAOdoc
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # tools for updating data imported from xml and evaluated, but not loaded
 
     def _aoRenameConflicts(self, pData, tData):
@@ -8337,7 +8450,7 @@ class _CommandAO(Command):
 class AOl(_CommandAO):
     """load an AthenaObject, replacing the current one
     """
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         _CommandAO.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -8465,7 +8578,7 @@ class AOmg(_CommandAO):
     must check for name conflicts
     """
 
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         _CommandAO.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -8518,7 +8631,7 @@ class AOals(_CommandAO):
     """view internal attributes of athean object. hidden command
     """
 
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         _CommandAO.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 0 # display only
         self.gatherSwitch = 0 # display only
@@ -8548,7 +8661,7 @@ class AOals(_CommandAO):
 
 class AOrm(_CommandAO):
     "SUBCMD"
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         _CommandAO.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 0 # display only
         self.gatherSwitch = 1 # display only
@@ -8583,7 +8696,7 @@ class AOrm(_CommandAO):
 class APdlg(Command):
     """toggles between dialog modes"""
 
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -8635,7 +8748,7 @@ class APgfx(Command):
     all command objs that call graphics check the pref fmt against available fmts
     """
 
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -8673,7 +8786,7 @@ class APgfx(Command):
 
 class APcurs(Command):
     """toggles between cursor modes"""
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 0 # display only
@@ -8697,7 +8810,7 @@ class APcurs(Command):
 
 class APr(Command):
     """toggles refresh modes"""
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -8733,7 +8846,7 @@ class APcc(Command):
         can also restore defaults
     """
 
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -8822,7 +8935,7 @@ class APcc(Command):
 
 class APwid(Command):
     """manually sets screen width"""
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -8954,7 +9067,7 @@ class APea(Command):
     for backwards compat
     the csound executable on mac, sets the creator type of the csound app
     """
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 0 # display only
         self.gatherSwitch = 1 # display only
@@ -9067,7 +9180,7 @@ class APea(Command):
 # athena history commands
 class AHls(Command):
     "list history"
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 0 # display only
         self.gatherSwitch = 0 # display only
@@ -9107,7 +9220,7 @@ class AHls(Command):
 
 class AHrm(Command):
     "list history"
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 0 # display only
@@ -9127,7 +9240,7 @@ class AHrm(Command):
 # athena history commands
 class AHexe(Command):
     "SUBCMD: execute history"
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -9184,7 +9297,7 @@ class AHexe(Command):
 # athena script commands
 class ASexe(Command):
     "SUBCMD"
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 0 # display only
         self.gatherSwitch = 1 # display only
@@ -9215,7 +9328,7 @@ class ASexe(Command):
 class AUdoc(Command):
     "open html documentation"
     
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 0 # display only
         self.gatherSwitch = 0 # display only
@@ -9249,7 +9362,7 @@ class AUdoc(Command):
 class AUup(Command):
     "check for athenacl updates"
 
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 0 # display only
         self.gatherSwitch = 1 # display only
@@ -9283,7 +9396,7 @@ class AUup(Command):
 class AUlog(Command):
     "open the athenacl log file"
 
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 0 # display only
         self.gatherSwitch = 0 # display only
@@ -9302,7 +9415,7 @@ class AUlog(Command):
 class AUsys(Command):
     """provide a display about the system
     """
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 0 # display only
         self.gatherSwitch = 0 # display only
@@ -9398,7 +9511,7 @@ class AUsys(Command):
 class AUbeat(Command):
     "utility to get a beat with tapping; not currently in use"
 
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 0 # display only
         self.gatherSwitch = 1 # display only
@@ -9421,7 +9534,7 @@ class AUbeat(Command):
 class AUpc(Command):
     "utility for pitch conversion"
 
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 0 # display only
         self.gatherSwitch = 1 # display only
@@ -9459,7 +9572,7 @@ class AUpc(Command):
 
 class AUmg(Command):
     "utility for markov generation"
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 
         self.gatherSwitch = 1 
@@ -9525,7 +9638,7 @@ class AUmg(Command):
 class AUma(Command):
     "utility for markov analysis"
 
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 
         self.gatherSwitch = 1 
@@ -9573,7 +9686,7 @@ class AUma(Command):
 
 class AUca(Command):
 
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -9665,7 +9778,7 @@ class AUca(Command):
 
 class AUbug(Command):
     "utility testiing"
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 0 # display only
         self.gatherSwitch = 0 # display only
@@ -9680,7 +9793,7 @@ class _Menu(Command):
     note: child classes have underscore appended to name
     this underscore is removed in ao.cmdManifest, and 
     re-added in Interpreter._lineCmdArgSplit"""
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 0
         self.gatherSwitch    = 1 
@@ -9727,135 +9840,135 @@ class _Menu(Command):
         return {'command':self.usrCmd} # dict required return
 
 
-class SC_(_Menu):
-    """menu command"""
-    def __init__(self, ao, cmdEnviron, args=''):
-        _Menu.__init__(self, ao, cmdEnviron, args)
-        self.prefix = 'SC'
+# class SC_(_Menu):
+#     """menu command"""
+#     def __init__(self, ao, cmdEnviron=None, args=''):
+#         _Menu.__init__(self, ao, cmdEnviron, args)
+#         self.prefix = 'SC'
+# 
+# class SM_(_Menu):
+#     """menu command"""
+#     def __init__(self, ao, cmdEnviron=None, args=''):
+#         _Menu.__init__(self, ao, cmdEnviron, args)
+#         self.prefix = 'SM'
 
-class SM_(_Menu):
-    """menu command"""
-    def __init__(self, ao, cmdEnviron, args=''):
-        _Menu.__init__(self, ao, cmdEnviron, args)
-        self.prefix = 'SM'
-
-class MC_(_Menu):
-    """menu command"""
-    def __init__(self, ao, cmdEnviron, args=''):
-        _Menu.__init__(self, ao, cmdEnviron, args)
-        self.prefix = 'MC'
-
-class PE_(_Menu):
-    """menu command"""
-    def __init__(self, ao, cmdEnviron, args=''):
-        _Menu.__init__(self, ao, cmdEnviron, args)
-        self.prefix = 'PE'
-
-class PM_(_Menu):
-    """menu command"""
-    def __init__(self, ao, cmdEnviron, args=''):
-        _Menu.__init__(self, ao, cmdEnviron, args)
-        self.prefix = 'PM'
+# class MC_(_Menu):
+#     """menu command"""
+#     def __init__(self, ao, cmdEnviron=None, args=''):
+#         _Menu.__init__(self, ao, cmdEnviron, args)
+#         self.prefix = 'MC'
+# 
+# class PE_(_Menu):
+#     """menu command"""
+#     def __init__(self, ao, cmdEnviron=None, args=''):
+#         _Menu.__init__(self, ao, cmdEnviron, args)
+#         self.prefix = 'PE'
+# 
+# class PM_(_Menu):
+#     """menu command"""
+#     def __init__(self, ao, cmdEnviron=None, args=''):
+#         _Menu.__init__(self, ao, cmdEnviron, args)
+#         self.prefix = 'PM'
 
 class PI_(_Menu):
     """menu command"""
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         _Menu.__init__(self, ao, cmdEnviron, args)
         self.prefix = 'PI'
 
-class PS_(_Menu):
-    """menu command"""
-    def __init__(self, ao, cmdEnviron, args=''):
-        _Menu.__init__(self, ao, cmdEnviron, args)
-        self.prefix = 'PS'
-
-class PV_(_Menu):
-    """menu command"""
-    def __init__(self, ao, cmdEnviron, args=''):
-        _Menu.__init__(self, ao, cmdEnviron, args)
-        self.prefix = 'PV'
+# class PS_(_Menu):
+#     """menu command"""
+#     def __init__(self, ao, cmdEnviron=None, args=''):
+#         _Menu.__init__(self, ao, cmdEnviron, args)
+#         self.prefix = 'PS'
+# 
+# class PV_(_Menu):
+#     """menu command"""
+#     def __init__(self, ao, cmdEnviron=None, args=''):
+#         _Menu.__init__(self, ao, cmdEnviron, args)
+#         self.prefix = 'PV'
 
 class TM_(_Menu):
     """menu command"""
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         _Menu.__init__(self, ao, cmdEnviron, args)
         self.prefix = 'TM'
 
 class TP_(_Menu):
     """menu command"""
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         _Menu.__init__(self, ao, cmdEnviron, args)
         self.prefix = 'TP'
 
 class TI_(_Menu):
     """menu command"""
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         _Menu.__init__(self, ao, cmdEnviron, args)
         self.prefix = 'TI'
 
 class TC_(_Menu):
     """menu command"""
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         _Menu.__init__(self, ao, cmdEnviron, args)
         self.prefix = 'TC'
 
 class TT_(_Menu):
     """menu command"""
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         _Menu.__init__(self, ao, cmdEnviron, args)
         self.prefix = 'TT'
 
 class TE_(_Menu):
     """menu command"""
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         _Menu.__init__(self, ao, cmdEnviron, args)
         self.prefix = 'TE'
 
 class EO_(_Menu):
     """menu command"""
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         _Menu.__init__(self, ao, cmdEnviron, args)
         self.prefix = 'EO'
 
 class EM_(_Menu):
     """menu command"""
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         _Menu.__init__(self, ao, cmdEnviron, args)
         self.prefix = 'EM'
 
 class EL_(_Menu):
     """menu command"""
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         _Menu.__init__(self, ao, cmdEnviron, args)
         self.prefix = 'EL'
 
 class CP_(_Menu):
     """menu command"""
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         _Menu.__init__(self, ao, cmdEnviron, args)
         self.prefix = 'CP'
 
 class AO_(_Menu):
     """menu command"""
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         _Menu.__init__(self, ao, cmdEnviron, args)
         self.prefix = 'AO'
 
 class AP_(_Menu):
     """menu command"""
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         _Menu.__init__(self, ao, cmdEnviron, args)
         self.prefix = 'AP'
 
 class AH_(_Menu):
     """menu command"""
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         _Menu.__init__(self, ao, cmdEnviron, args)
         self.prefix = 'AH'
 
 class AU_(_Menu):
     """menu command"""
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         _Menu.__init__(self, ao, cmdEnviron, args)
         self.prefix = 'AU'
 
@@ -9864,7 +9977,7 @@ class AU_(_Menu):
 
 class template(Command):
 
-    def __init__(self, ao, cmdEnviron, args=''):
+    def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -9915,7 +10028,22 @@ class TestOld:
             method = getattr(objObj, methodStr)
             print method()
 
-if __name__ == '__main__':
-    TestOld()
 
+#-----------------------------------------------------------------||||||||||||--
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
+
+
+#-----------------------------------------------------------------||||||||||||--
+
+
+
+if __name__ == '__main__':
+    from athenaCL.test import baseTest
+    baseTest.main(Test)
 

@@ -328,7 +328,7 @@ class Residual:
         self.segFmtOption = ['int', 'bin', 'unit', 'wid']
         self.segFmt = 'int'
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # utility functions
     def zAssign(self, z):
         "z is the range of integers to use when generating a list"
@@ -345,7 +345,7 @@ class Residual:
         assert fmt in self.segFmtOption
         self.segFmt = fmt
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def segment(self, n=0, z=None, format=None):
         """get a residual subset of this modulus at this n
         within the integer range provided by z
@@ -389,7 +389,7 @@ class Residual:
         """period is M; obvious, but nice for completeness"""
         return self.m
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def copy(self):
         m = copy.copy(self.m)
         shift = copy.copy(self.shift)
@@ -489,7 +489,7 @@ class Residual:
         pass
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def _cmpIntersection(self, m1, m2, n1, n2):
         """compression by intersection
         find m,n such that the intersection of two Residual's can 
@@ -575,7 +575,7 @@ class CompressionSeg:
             self.z = range(zMin, (zMax + 1)) 
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def __call__(self):
         return self.residuals
 
@@ -589,7 +589,7 @@ class CompressionSeg:
             resStr = '|'.join(resStr)
         return resStr
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
 
     def _subset(self, sub, set):
         """true if sub is part of set; assumes no redundancies in each"""
@@ -720,7 +720,7 @@ class Sieve:
         if self.usrStr != None:
             self._load()
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def _load(self):
         if drawer.isList(self.usrStr):
             self._resClear()
@@ -772,7 +772,7 @@ class Sieve:
             self._expPeriod = lcmExp
             self._cmpPeriod = _lcmRecurse(mListCmp)
  
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def expand(self):
         self.state = 'exp'
 
@@ -787,7 +787,7 @@ class Sieve:
             self.state = 'cmp'
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def dataLoad(self, data):
         """load reinit an existing object"""
         self.usrStr = data['logStr']
@@ -804,7 +804,7 @@ class Sieve:
             data['z'] = self.z
         return data
         
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # utility functions
     def zAssign(self, z):
         "z is the range of integers to use when generating a list"
@@ -821,7 +821,7 @@ class Sieve:
         assert fmt in self.segFmtOption
         self.segFmt = fmt
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # operator overloading for sieves
     # problem: redunant parenthesis are not removed
 
@@ -875,7 +875,7 @@ class Sieve:
         pass
         
         
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # string conversions
     def _parseResidual(self, usrStr):
         """process an arg string for proper Residual creation
@@ -964,7 +964,7 @@ class Sieve:
         usrStr = usrStr.replace(' ','')
         return usrStr
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def _setInstantiateStr(self, valList):
         """return string necessary to instantiate a set object"""
         valList = list(valList)
@@ -1059,7 +1059,7 @@ class Sieve:
         elif state == 'exp':
             raise ValueError, 'expanded residual classes shold never be cleared'
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # expansion methods
 
     def _initLoadSegment(self, usrData):
@@ -1163,7 +1163,7 @@ class Sieve:
         self.expTree = ''.join(self.expTree)
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # compression methods
     def _cmpIntersection(self):
         """an unbound sieve, interesect Residual
@@ -1213,7 +1213,7 @@ class Sieve:
 
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
 
     def segment(self, state, n=0, z=None, format=None):
         if z == None:
@@ -1480,7 +1480,7 @@ class TestOld:
         self.testSievePitch()
         self.testSieve()
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # may be usefull for testing
     def complement(self, set, z=None):
         """not, exclusion
@@ -1505,7 +1505,7 @@ class TestOld:
         return ab
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def _clean(self, l):
         "cleans a list"
         return str(l).replace(' ', '')[1:-1]

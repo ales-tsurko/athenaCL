@@ -537,7 +537,7 @@ class TestOld:
         print out
         print # need a space
             
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
 
     def testBinaryAccent(self):
         obj = factory(('binaryAccent', ((2,1),(4,1))), 'rthmPmtrObjs')
@@ -578,7 +578,7 @@ class TestOld:
                             'rthmPmtrObjs')
         self._testBasic(obj, 20)
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def testStaticInst(self):
         args = ('staticInst', 3,)
         self._testBasic(factory(args), 5)
@@ -588,7 +588,7 @@ class TestOld:
         self._testBasic(factory(args), 5)
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def testCyclicGen(self):
         args = ('cyclicGen', 'ldu', 40, 70, 2.5)
         self._testBasic(factory(args), 20)
@@ -648,7 +648,7 @@ class TestOld:
                                  ('a',.5,('c',.0125)),1,('c',1),('ru',0,5)]
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def testDirectorySelect(self):  
         args = ('directorySelect', 
                   '/src/athenaCL/libATH/ssdir', 'aif', 'rw')
@@ -675,7 +675,7 @@ class TestOld:
         self._testBasic(obj, 20)
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def testWaveSine(self):
         args = ('waveSine', 't', 30, 0, 0, 10)
         self._testBasic(factory(args), 30)
@@ -708,7 +708,7 @@ class TestOld:
         args = ('wavePowerDown', 't', 30, 0, 2.5, 0, 10)
         self._testBasic(factory(args), 30)
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def testRandomUniform(self):
         args = ('randomUniform', 0, 10)
         self._testBasic(factory(args), 30)
@@ -729,7 +729,7 @@ class TestOld:
         args = ('randomInverseTriangular', 20, 50)
         self._testBasic(factory(args), 30)
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def testRandomExponential(self):
         args = ('randomExponential', .5, 20, 2000)
         self._testBasic(factory(args), 30)
@@ -742,7 +742,7 @@ class TestOld:
         args = ('randomBilateralExponential', .5, 20, 2000)
         self._testBasic(factory(args), 30)
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def testRandomGauss(self):
         args = ('randomGauss', .5, 1, 1, 9)
         self._testBasic(factory(args), 30)
@@ -759,7 +759,7 @@ class TestOld:
         args = ('randomWeibull', .5, 2.0, 1, 9)
         self._testBasic(factory(args), 30)
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def testFibonacciSeries(self):  
         args = ('fibonacciSeries', 1, 5, 1, 0, 'rw')
         self._testBasic(factory(args), 10)
@@ -770,7 +770,7 @@ class TestOld:
         args = ('fibonacciSeries', 2, -20, 1, 0, 'oo')
         self._testBasic(factory(args), 10)
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def testValueSieve(self):    
         args = ('valueSieve', '3|4|13', 26, 1, 0, 'rw')
         self._testBasic(factory(args), 20)
@@ -793,7 +793,7 @@ class TestOld:
 
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def testBreakPointLinear(self):
         args = ('breakPointLinear', 'e', 'l', ((0,0), (5,1), (10,.5)))
         self._testBasic(factory(args), 20)

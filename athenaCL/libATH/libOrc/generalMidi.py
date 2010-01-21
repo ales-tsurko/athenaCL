@@ -203,7 +203,7 @@ class GeneralMidi(baseOrc.Orchestra):
         # midi inst have no additional parameter information
         return 'no information available'       
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # mappings of psReal, amp, pan; only applied of mix mode is on
     def _postMapPs(self, iNo, val): # alwasy map pitch
         # pitchtools limit will automatically constrain min/max as well

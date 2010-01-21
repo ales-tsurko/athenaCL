@@ -361,7 +361,7 @@ class Ornament:
                          'ampInstPcentOffset' : .010},
                          }
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def _getOrnLibrary(self, name=None, ornPos='release', 
                              pitchLang='path', microTone=.5):
         """finds the name, builds a complete preset dict by adding usr info
@@ -629,7 +629,7 @@ class Ornament:
                                                                          estOrnDurFraction)
         return totOrnDur, durList
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
 
     def create(self, refDict, presetName='trill', ornPos='release', 
                   pitchLang='path', microTone=.5):

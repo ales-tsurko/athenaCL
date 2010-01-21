@@ -166,7 +166,7 @@ class CsoundSilence(baseOrc.Orchestra):
         
     # assume amp is midiAmps
     # assume pan is floating point 0 to 1
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # mappings of psReal, amp, pan; only applied of mix mode is on
     def _postMapPs(self, iNo, val):
         val = pitchTools.psToMidi(val, 'noLimit')

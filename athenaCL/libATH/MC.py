@@ -109,7 +109,7 @@ class MapClass:
         flipedMap = tuple(flipedMap)
         return flipedMap
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # data access
     def _getMapSrcDstSize(self, sourceMap):
         #length of map is number of positions in the source
@@ -191,7 +191,7 @@ class MapClass:
         mapIndexNo = mapIdTuple[2]
         return self.getSingleMap(srcSize, dstSize, mapIndexNo)
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
 
     def mapIdTupleToString(self, mapIdTuple):
         srcSize = mapIdTuple[0]
@@ -251,7 +251,7 @@ class MapClass:
         return (srcSize, dstSize, goodKey) 
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def genVlPairs(self, pcsX, pcsY, map):
         # generates one vl pair set for single map (takes rawmap, not mapTupleId)
         # this method does not check for the appropriate map; should be 
@@ -340,7 +340,7 @@ class MapClass:
                 rowDict[i] = rowDict[i] + '%s' % str(pcsY[i]).rjust(2)
         return rowDict      
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def getAllVl(self, pcsX, pcsY):
         """returns a dictionary of key : ((), ()) vl tuple paris,  pcsX and pcsY 
         can be of any size =< 6; the key is the same as the mapDict key
@@ -518,7 +518,7 @@ class MapClass:
         # (srcSize, dstSize, foundMapKey)
         return (foundMapKey, rawVlPairs)
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def displacement(self, srcSet, dstSet, posToTransform):
         """finds value of displacement between two sets
         position to transform is either 1 or 0, for second or first
@@ -583,7 +583,7 @@ class MapClass:
         # forte inverse, which is a forte prime
         return minDispl, maxDispl, allResults, len(setsToCompare)
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def getSetSizeBounds(self, query=None, termObj=None):
         """utility interactive command to get src, dest pair from the user
             if no query provided, one supplied
@@ -945,7 +945,7 @@ class MapClass:
         return mapIdTuple, mapGotten
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def getUserMapFromRank(self, sourceSet, destinationSet, orderKey, 
                                   methodTypeString, termObj=None):
         srcSize = len(sourceSet)
@@ -989,7 +989,7 @@ class MapClass:
                 dialog.msgOut(lang.msgMCnoSuchRank, termObj)
                 continue
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def SMTH(self, pcsX, pcsY, map):
         # this is the measure of smoothness
         # pcs must be of same size before entering this_function, map is a 
@@ -1156,7 +1156,7 @@ class MapClass:
 
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def UNIF(self, pcsX, pcsY, map):
         vlPairs = self.genVlPairs(pcsX, pcsY, map)
         vectorU = [0,0,0,0,0,0,0,0,0,0,0,0]
@@ -1436,7 +1436,7 @@ class MapClass:
             msg = msg + '%sMC %i, map %s\n' % (line.ljust(55), key, mapString)
         print msg
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def BAL(self, pcsX, pcsY, map):
         vlPairs = self.genVlPairs(pcsX, pcsY, map)
         vectorB = [0,0,0,0,0,0,0,0,0,0,0,0]

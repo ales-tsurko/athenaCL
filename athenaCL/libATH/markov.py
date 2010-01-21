@@ -81,7 +81,7 @@ class Transition:
         # symbols may not include spaces, nor case
         self.SYM = string.lowercase + string.digits
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def _sortWeightKey(self, dict):
         """sort transition keys by size first"""
         keys = dict.keys()
@@ -111,7 +111,7 @@ class Transition:
                     post.append((s,w))
         return post
   
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def _parseValidate(self, usrStr):
         """make sure the the string appears correct"""
         if usrStr.count(self.OPEN) != usrStr.count(self.CLOSE):
@@ -292,7 +292,7 @@ class Transition:
         self._checkSymbolUsage()
         
 
-    #------------------------------------------------------------------------||--         
+    #-----------------------------------------------------------------------||--         
     def _valueToSymbol(self, value):
         """for a data value, return the defined symbol label"""
         for s, v in self._symbols.items():
@@ -309,7 +309,7 @@ class Transition:
             msg.append(self._valueToSymbol(v))
         return tuple(msg)
         
-    #------------------------------------------------------------------------||--         
+    #-----------------------------------------------------------------------||--         
     # methods for analysis
     
     def _analyzeZero(self, data):
@@ -441,7 +441,7 @@ class Transition:
         self._checkSymbolUsage()
 
 
-    #------------------------------------------------------------------------||--         
+    #-----------------------------------------------------------------------||--         
     def _reprWeightList(self, wList):
         """format a weight list for presentation"""
         # wList can be none:
@@ -500,7 +500,7 @@ class Transition:
         
             
         
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def loadTransition(self, usrStr):
         """load a transition string"""
         self._srcStr = usrStr
@@ -521,7 +521,7 @@ class Transition:
         """will analuyze from 0 to order provided"""
         self._analyzeList(data, order)
         
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def getSignified(self):
         """return symbol values as a list; useful for checking type and quality
         of possible outptus"""
@@ -536,7 +536,7 @@ class Transition:
         return self._ordersSrc[-1]
         
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
 
     def _findWeights(self, srcSeq):
         """given a src sequence, find a weight label that matches

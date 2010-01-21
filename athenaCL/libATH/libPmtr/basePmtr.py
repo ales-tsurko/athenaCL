@@ -4,12 +4,14 @@
 #
 # Authors:       Christopher Ariza
 #
-# Copyright:     (c) 2001-2007 Christopher Ariza
+# Copyright:     (c) 2001-2010 Christopher Ariza
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
 
 
 import random, copy
+import unittest, doctest
+
 from athenaCL.libATH import drawer
 from athenaCL.libATH import typeset
 from athenaCL.libATH import unit
@@ -17,6 +19,7 @@ from athenaCL.libATH import error
 from athenaCL.libATH import language
 from athenaCL.libATH import table
 from athenaCL.libATH import argTools
+
 lang = language.LangObj()
 
 _MOD = 'basePmtr.py'
@@ -36,7 +39,12 @@ cCOMMONQ = ('time', 'sus', 'acc', 'fieldQ', 'octQ', 'ampQ', 'panQ', )
 REFDICT_SIM = {'bpm':120, 'sadr':[], 'ssdr':[]}
 
 
+
 def _getLabels(no, prefix, index):
+    """
+    >>> _getLabels(1, 'ampQ', 0)
+    ['ampQ0']
+    """
     labels = []
     for i in range(0, no):
         if index: # store two data attributes
@@ -46,24 +54,43 @@ def _getLabels(no, prefix, index):
     return labels
 
 def auxLabel(auxNo, index=0):
+    """
+    >>> auxLabel(3,0)
+    ['auxQ0', 'auxQ1', 'auxQ2']
+    """
     return _getLabels(auxNo, AUXQ, index)
 
 def textLabel(textNo, index=0):
+    """
+    >>> textLabel(3,0)
+    ['textQ0', 'textQ1', 'textQ2']
+    """
     return _getLabels(textNo, TEXTQ, index)
 
 def cloneLabel(textNo, index=0):
+    """
+    >>> cloneLabel(3, 0)
+    ['cloneQ0', 'cloneQ1', 'cloneQ2']
+    """
     return _getLabels(textNo, CLONEQ, index)
 
 def dynLabel(dynNo, index=0):
+    """
+    >>> dynLabel(3)
+    ['dynQ0', 'dynQ1', 'dynQ2']
+    """
     return _getLabels(dynNo, DYNQ, index)
 
 
 #-----------------------------------------------------------------||||||||||||--
-class Selector:
+class Selector(object):
     """object to handle selecting things from a list
     basic selectors that do not require additional parameters
     can be initialized w/ and empty source, but will raise an index
-    error if __call__ is used w/ empty list"""
+    error if __call__ is used w/ empty list
+
+    >>> a = Selector([3,4,5], 'randomWalk')
+    """
     
     # selection methods to add:
     # orderReverse
@@ -179,6 +206,22 @@ class Selector:
         return select
         
     def __call__(self):
+        """
+        >>> a = Selector([3,4,5], 'orderedCyclic')
+        >>> a()
+        3
+        >>> a()
+        4
+
+        >>> b = Selector([3,4,5], 'randomPermutate')
+        >>> post = [b() for x in range(3)]
+        >>> post.sort()
+        >>> post = [3,4,5]
+
+        >>> c = Selector([3,4,5], 'randomChoice')
+        >>> d = Selector([3,4,5], 'randomWalk')
+        >>> e = Selector([3,4,5], 'orderedOscillate')
+        """
         # emergency check
         if len(self.ref) == 0:
             raise IndexError, 'selector has no values'
@@ -210,6 +253,9 @@ class Parameter:
     the base class sets up attributes before calling the parent class init
     """
     def __init__(self, args, refDict=None):
+        """
+        >>> a = Parameter([])
+        """
         self.args = args
         self.currentValue = None
         # retain source of parent class to deferntiate b/n rhythm pmtrs
@@ -248,8 +294,8 @@ class Parameter:
         # note: some of these values should be obtained from the parsers
         # defined below
         self._argNameRef = {
-            'selectionString' : ['randomChoice', 'randomWalk', 'randomPermutate', 
-                                        'orderedCyclic', 'orderedOscillate'],
+            'selectionString' : ['randomChoice', 'randomWalk', 
+                'randomPermutate', 'orderedCyclic', 'orderedOscillate'],
             'articulationString': ['attack', 'sustain'],
             'anchorString' : ['lower', 'upper', 'average', 'median'],
             'directionString' : ['upDown', 'downUp', 'up', 'down'],
@@ -369,7 +415,7 @@ class Parameter:
         """
         return eventDict
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # utility methods
     def _checkRawArgs(self):
         """checks raw arg type and number
@@ -382,8 +428,7 @@ class Parameter:
                                     # provide arg count offset as 1
         return ok, msg
 
-    #------------------------------------------------------------------------||--
-    
+    #-----------------------------------------------------------------------||--
     def _loadSub(self, arg, lib, idStr=''):
         from athenaCL.libATH.libPmtr import parameter
         try:
@@ -455,7 +500,7 @@ class Parameter:
         return minObj, maxObj
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def _scrubList(self, data, min=None, max=None):
         """for presenting list data
         used to apply scalar to uncalculated values"""
@@ -467,14 +512,19 @@ class Parameter:
         dataStr = ','.join(msg)
         return '(%s)' % dataStr
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # string conversion
     # only place those tt are share by multiple po here
     # most of these should be converted to raise exceptions on error
 
     def _directionParser(self, usrStr):
         """decode direction strings; this used to have values preceded
-        by 'linear; keep for backwards compat"""
+        by 'linear; keep for backwards compat
+
+        >>> a = Parameter([])
+        >>> a._directionParser('ud')
+        'upDown'
+        """
         ref = {
             'upDown' : ['ud', 'lud', 'linearupdown', '0'],
             'downUp' : ['du', 'ldu', 'lineardownup', '1'],
@@ -488,7 +538,12 @@ class Parameter:
         return usrStr
     
     def _selectorParser(self, usrStr):
-        "decode control choice strings; exception on error"
+        """decode control choice strings; exception on error
+
+        >>> a = Parameter([])
+        >>> a._selectorParser('rp')
+        'randomPermutate'
+        """
         ref = {
             'randomChoice' : [ 'rc', '0'],
             'randomWalk' : ['rw'],
@@ -503,7 +558,12 @@ class Parameter:
         return usrStr
 
     def _loopControlParser(self, usrStr):
-        """determine if a value referes to loop (1) or single (0)"""
+        """determine if a value referes to loop (1) or single (0)
+
+        >>> a = Parameter([])
+        >>> a._loopControlParser(0)
+        'single'
+        """
         ref = {
             'loop' : ['l', '1'],
             'single' : ['s', '0'],
@@ -516,7 +576,12 @@ class Parameter:
 
     def _stepControlParser(self, usrStr):
         """determine if a value refers to step (event) control (1) or
-        real-time control (0)"""
+        real-time control (0)
+
+        >>> a = Parameter([])
+        >>> a._stepControlParser('e')
+        'event'
+        """
         ref = {
             'event' : ['e', '1'],
             'time' : ['t', '0'],
@@ -529,6 +594,11 @@ class Parameter:
         
 
     def _selectLevelFrameParser(self, usrStr):
+        """
+        >>> a = Parameter([])
+        >>> a._selectLevelFrameParser('f')
+        'frame'
+        """
         ref = {
             'event' : ['e', '1'],
             'frame' : ['f', '0'],
@@ -541,7 +611,12 @@ class Parameter:
 
 
     def _boundaryParser(self, usrStr):
-        "decode control choice strings"
+        """decode control choice strings
+
+        >>> a = Parameter([])
+        >>> a._boundaryParser('w')
+        'wrap'
+        """
         ref = {
             'limit' : [ 'l'],
             'wrap' : ['w'],
@@ -554,7 +629,12 @@ class Parameter:
         return usrStr # may be None
     
     def _onOffParser(self, usrStr):
-        "decode control choice strings"
+        """decode control choice strings
+
+        >>> a = Parameter([])
+        >>> a._onOffParser(1)
+        'on'
+        """
         ref = {
             'on' : ['1'],
             'off' : ['0'],
@@ -566,6 +646,11 @@ class Parameter:
         return usrStr
 
     def _anchorParser(self, usrStr):
+        """
+        >>> a = Parameter([])
+        >>> a._anchorParser('a')
+        'average'
+        """
         ref = {
             'lower' : ['l'],
             'upper' : ['u'],
@@ -579,7 +664,12 @@ class Parameter:
         return usrStr
 
     def _scaleSwitchParser(self, usrStr):
-        """determine if a value refers to absolute or proportional values"""
+        """determine if a value refers to absolute or proportional values         
+
+        >>> a = Parameter([])
+        >>> a._scaleSwitchParser('p')
+        'proportional'
+        """
         ref = {
             'absolute' : ['a', '1'],
             'proportional' : ['p', '0'],
@@ -592,6 +682,11 @@ class Parameter:
         
 
     def _thresholdMatchParser(self, usrStr):
+        """
+        >>> a = Parameter([])
+        >>> a._thresholdMatchParser('u')
+        'upper'
+        """
         ref = {
             'lower' : ['l'],
             'upper' : ['u'],
@@ -605,7 +700,11 @@ class Parameter:
 
 
     def _valueSelectBiParser(self, usrStr):
-        'xy selection'
+        """xy selection
+        >>> a = Parameter([])
+        >>> a._valueSelectBiParser('xy')
+        'xy'
+        """
         ref = { # automatically uses keys as case insensitive values
             'x' : [],
             'y' : [],
@@ -645,7 +744,12 @@ class Parameter:
 
         
     def _articulationParser(self, usrStr):
-        "decode control choice strings"
+        """decode control choice strings
+
+        >>> a = Parameter([])
+        >>> a._articulationParser('a')
+        'attack'
+        """
         ref = {
             'attack' : ['a'],
             'sustain' : ['s'],
@@ -685,7 +789,12 @@ class Parameter:
         
 
     def _comparisonParser(self, usrStr):
-        "decode control choice strings"
+        """decode control choice strings
+
+        >>> a = Parameter([])
+        >>> a._comparisonParser('lt')
+        'lessThan'    
+        """
         ref = {
             'equal' : ['e', '='],
             'greaterThan' : ['gt', 'g', 'greater', '>'],
@@ -712,7 +821,12 @@ class Parameter:
         return usrStr
 
     def _selectLevelPolyphonicParser(self, usrStr):
-        "decode control choice strings"
+        """decode control choice strings
+
+        >>> a = Parameter([])
+        >>> a._selectLevelPolyphonicParser('e')
+        'event'    
+        """
         ref = {
             'event' : ['e'],
             'set' : ['s'],
@@ -739,7 +853,12 @@ class Parameter:
         return usrStr
 
     def _selectTimeRefParser(self, usrStr):
-        "decode control choice strings"
+        """decode control choice strings
+
+        >>> a = Parameter([])
+        >>> a._selectTimeRefParser('tt')
+        'textureTime'
+        """
         ref = {
             'textureTime' : ['tt'],
             'cloneTime' : ['ct'],
@@ -758,6 +877,9 @@ class RhythmParameter(Parameter):
     all rhythm objects store a triple for currentValue
     """
     def __init__(self, args, refDict):
+        """
+        >>> a = RhythmParameter([], {})
+        """
         Parameter.__init__(self, args, refDict) # call base init
         self.argCountOffset = 1 # dif b/n kept and shown args
         self.parent = 'rhythm' # mark as a special type
@@ -777,6 +899,9 @@ class StaticParameterTexture(Parameter):
     values can be switches or other static control information, perferences
     arguments are named and accessed by name"""
     def __init__(self, args, refDict):
+        """
+        >>> a = StaticParameterTexture([], {})
+        """
         # note: look for first arg as type and remove
         if not drawer.isList(args): # single tuple not evaluated as list
             args = [args,] # add to list
@@ -849,7 +974,11 @@ class StaticParameterTexture(Parameter):
 # internal statuc clone parameters
 class StaticParameterClone(StaticParameterTexture):
     """just like texture static parameter objects, except for clonse"""
+
     def __init__(self, args, refDict):
+        """
+        >>> a = StaticParameterClone([], {})
+        """
         StaticParameterTexture.__init__(self, args, refDict) # call base init
         self.parent = 'cloneStatic' # mark as a special type
 
@@ -866,7 +995,11 @@ class FilterParameter(Parameter):
     be used (rhythm parameter objects on return use the dur value to change
     offsets, while sustain is a separate parameter for clonse)
     """
+
     def __init__(self, args, refDict):
+        """
+        >>> a = FilterParameter([], {})
+        """
         Parameter.__init__(self, args, refDict) # call base init
         self.parent = 'cloneFilter' # mark as a special type
         self.outputFmt = None # output values from dictionary
@@ -885,15 +1018,27 @@ class FilterParameter(Parameter):
 # only used in ioTools for backwards compat with pickled data structs
 
 def selectorParser(str):
+    """
+    >>> selectorParser('rw')
+    'randomWalk'
+    """
     obj = Parameter(None)
     return obj._selectorParser(str)
 
 def directionParser(str):
+    """
+    >>> directionParser('u')
+    'up'
+    """
     obj = Parameter(None)
     return obj._directionParser(str)
 
 # used for backwards compat of old clones
 def retrogradeParser(str):
+    """
+    >>> retrogradeParser('o')
+    'off'
+    """
     obj = Parameter(None)
     try:
         return obj._selectRetrogradeParser(str)
@@ -924,5 +1069,22 @@ def TestOld():
             print
 
 
+
+#-----------------------------------------------------------------||||||||||||--
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
+
+
+
+
+
+#-----------------------------------------------------------------||||||||||||--
+
 if __name__ == '__main__':
-    TestOld()
+    from athenaCL.test import baseTest
+    baseTest.main(Test)

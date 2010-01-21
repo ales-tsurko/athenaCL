@@ -148,7 +148,7 @@ class InfoManager:
         self._divChar = ['.'] + ['_'] * 24
         self._divWidth = 68
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def historyScrub(self):
         path = os.path.join(self.athPath, 'docs', 'HISTORY.txt')
         print _MOD, 'history updated', path
@@ -170,7 +170,7 @@ class InfoManager:
         f.writelines(newMsg)
         f.close()
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def writeReadme(self):
         """write a the readme file"""
 
@@ -460,7 +460,7 @@ VII.    CREDITS and ACKNOWLEDGMENTS:
         print 'info.py: writing %s' % self.readmePath
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # athenaCL should be installed in python's site-packages;
 
     # section was 'audio'; changed to 'sound'
@@ -483,7 +483,7 @@ VII.    CREDITS and ACKNOWLEDGMENTS:
 # """ % (lang.msgAth.lower(), self.athVersion, lang.msgAuthor, 
 #         lang.msgAuthorEmail, lang.msgAth.lower(), lang.msgAthDescShort)
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # fink configuration issues
     # version identified should have revision: athenacl-1.4.2-1
 
@@ -586,7 +586,7 @@ DescDetail: <<
         
         
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def writeMan(self):
         "writes a man file"
 

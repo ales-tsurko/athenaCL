@@ -22,7 +22,7 @@ class HelpDoc:
     names must be the same as actual commands
     names without commands will apprea as general topics
     """
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # define common messages shared w/ commands private variables    
     _tniToggle = 'The output of this command is configured by the active system Tn/TnI mode; to change the set class Tn/TnI mode enter the command "SCmode".'
     
@@ -32,7 +32,7 @@ class HelpDoc:
     
     _scratchDir = 'This file is written in the scratch directory specified by APdir command.'
     
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     
     
     # this needs more explanation
@@ -51,7 +51,7 @@ class HelpDoc:
     _pitchGroups = 'Users may specify pitch groups in a variety of formats. A Forte set class number (6-23A), a pitch-class set (4,3,9), a pitch-space set (-3, 23.2, 14), standard pitch letter names (A, C##, E~, G#), MIDI note numbers (58m, 62m), frequency values (222hz, 1403hz), a Xenakis sieve (5&3|11), or an Audacity frequency-analysis file (import) all may be provided. ' + _formatPitch + ' ' + _formatSieve + ' ' + _formatAudacity
     
     
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     w = 'This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. http://www.fsf.org/copyleft/gpl.html'
     w_usage = 'w'
 
@@ -82,7 +82,7 @@ class HelpDoc:
     pypath = 'pypath: Lists all file paths in the Python search path.'
     pypath_usage = 'pypath'
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
 
     SCv = 'SCv: SetClass: View: Displays all data in the set class dictionary for the user-supplied pitch groups. %s For all pitch groups the SCv command interprets the values as a set class. The Normal Form, Invariance Vector and all N Class Vectors (for the active Tn/TnI mode) are displayed. N-Class Vectors, when necessary, are displayed in 20 register rows divided into two groups of 10 and divided with a dash (-). %s' % (_pitchGroups, _tniToggle)
     SCv_usage = 'scv set'
@@ -102,14 +102,14 @@ class HelpDoc:
     SCh = 'SCh: SetClass: Hear: Creates a temporary Texture with the selected set and the DroneSustain TextureModule, and uses this Texture to write a short sample EventList as a temporary MIDI file. %s If possible, this file is opened and presented to the user.' % _scratchDir
     SCh_usage = 'sch'
     
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     SMo = 'SMo: SetMeasure: Select: Sets the active SetMeasure, or computational method of set class comparison, used for "SCf", "PScpa", "PScpb" commands.'
     SCo_usage = 'smo name'
 
     SMls = 'SMls: SetMeasure: List: Displays a list of all available SetMeasures.'
     SMls_usage = 'smls'
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     MCv = 'MCv: MapClass: View: Displays a listing of MapClasses for a given size class (source to destination size) and between a range of indexes. %s' % _formatMap
     MCv_usage = 'mcv sizeSource,sizeDestination beginMap,endMap'
 
@@ -126,7 +126,7 @@ class HelpDoc:
     MCnet_usage = 'mcnet sizeSource,sizeDestination'
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     PIn = 'PIn: PathInstance: New: Create a new Path from user-specified pitch groups. %s' % _pitchGroups     
     PIn_usage = 'pin name set1 ... setN'
 
@@ -172,14 +172,14 @@ class HelpDoc:
     PIh = 'PIh: PathInstance: Hear: Creates a temporary Texture with the active Path and the active TextureModule, and uses this Texture to write a short sample EventList as a temporary MIDI file. %s If possible, this file is opened and presented to the user.' % _scratchDir
     PIh_usage = 'pih'
     
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     PScma = 'PScma: PathSet: Comparison A: Analyze the active Path as a sequence of set classes. Compare each adjacent pair of pitch groups, as set classes, using the active SetMeasure. A SetMeasure is activated with the "SMo" command.'         
     PScma_usage = 'pscma'
 
     PScmb = 'PScmb: PathSet: Comparison B: Analyze the active Path as a Sequence of set classes. Compare each set class with a reference set class, employing the active SetMeasure.'    
     PScmb_usage = 'pscma set'
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     PVn = 'PVn: PathVoice: New: Create a new PathVoice (a collection of voice leadings) for the active Path. Each PathVoice voice leading may be selected by rank or map. Rank allows the user to select a map based on its Smoothness, Uniformity, or Balance ranking.'      
     PVn_usage = 'pvn name map1 ... mapN'
 
@@ -210,7 +210,7 @@ class HelpDoc:
     PVauto = 'PVauto: PathVoice: Auto: Create a new PathVoice with mappings chosen automatically from either the first or last ranked map of a user-selected ranking method (Smoothness, Uniformity, or Balance). A new PathVoice is created, all maps being either first or last of the particular ranking.'  
     PVauto_usage = 'pvauto name analysis firstLast'
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
 
     TMo = 'TMo: TextureModule: Select: Choose the active TextureModule. This TextureModule is used with the "TIn" and "TMv" commands.'   
     TMo_usage = 'tmo name'
@@ -221,7 +221,7 @@ class HelpDoc:
     TMls = 'TMls: TextureModule: List: Displays a list of all TextureModules.'    
     TMls_usage = 'tmls'
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
 
 
     TPls = 'TPls: TextureParameter: List: Displays a list of all ParameterObjects.'  
@@ -239,7 +239,7 @@ class HelpDoc:
 
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
 
     TIn = 'TIn: TextureInstance: New: Creates a new instance of a Texture with a user supplied Instrument and Texture name. The new instance uses the active TextureModule, the active Path, and an Instrument selected from the active EventMode-determined Orchestra. For some Orchestras, the user must supply the number of auxiliary parameters.'    
     TIn_usage = 'tin name instNumber'
@@ -283,7 +283,7 @@ class HelpDoc:
     TImap = 'TImap: TextureInstance: Map: Displays a graphical map of the parameter values of the active Texture. With the use of two optional arguments, the TImap display can be presented in four orientations. A TImap diagram can position values on the x-axis in an equal-spaced orientation for each event (event-base), or in a time-proportional orientation, where width is relative to the time of each event (time-base). A TImap diagram can display, for each parameter, direct ParameterObject values as provided to the TextureModule (pre-TM), or the values of each parameter of each event after TextureModule processing (post-TM). %s' % _gfxCommand
     TImap_usage = 'timap [timeEvent prePost]'
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
 
     TEv = 'TEv: TextureEnsemble: View: Displays a list of ParameterObject arguments for a single attribute of all Textures.'    
     TEv_usage = 'tev parameter'
@@ -297,7 +297,7 @@ class HelpDoc:
     TEmap = 'TEmap: TextureEnsemble: Map: Provides a text-based display and/or graphical display of the temporal distribution of Textures and Clones. %s' % _gfxCommand
     TEmap_usage = 'temap'
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     TCn = 'TCn: TextureClone: New: Creates a new Clone associated with the active Texture.'
     TCn_usage = 'tcn name'
 
@@ -332,7 +332,7 @@ class HelpDoc:
     TCals_usage = 'tcals'
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     TTls = 'TTls: TextureTemperament: List: Displays a list of all temperaments available.'
     TTls_usage = 'ttls'
 
@@ -340,7 +340,7 @@ class HelpDoc:
     TTo_usage = 'tco name'
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     EOls = 'EOls: EventOutput: List: List all available EventOutput formats.' 
     EOls_usage = 'eols'
 
@@ -351,7 +351,7 @@ class HelpDoc:
     EOrm_usage = 'eorm format'
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     EMls = 'EMls: EventMode: List: Displays a list of available EventModes.'  
     EMls_usage = 'EMls'
 
@@ -365,7 +365,7 @@ class HelpDoc:
     EMi_usage = 'emi'
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     ELn = 'ELn: EventList: New: Create a new event list, in whatever formats are specified within the active EventMode and EventOutput. Generates new events for all Textures and Clones that are not muted. Specific output formats are determined by the active EventMode (EMo) and selected output formats (EOo).'
     ELn_usage = 'eln filename.xml'
 
@@ -382,7 +382,7 @@ class HelpDoc:
     ELr = 'ELr: EventList: Render: Renders the last event list created in the current session with the Csound application specified by APea.'    
     ELr_usage = 'elr'
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     CPff = 'CPff: CsoundPreferences: FileFormat: Choose which audio file format (AIF, WAVE, or SoundDesignerII) is created by Csound.'   
     CPff_usage = 'cpff format'
 
@@ -397,7 +397,7 @@ class HelpDoc:
 
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     AOw = 'AOw: AthenaObject: Save: Saves an AthenaObject file, containing all Paths, Textures, Clones, and environment settings.'  
     AOw_usage = 'aow filename.xml'
 
@@ -414,7 +414,7 @@ class HelpDoc:
     AOals_usage = 'aoals'
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
 
     APcurs = 'APcurs: AthenaPreferences: Cursor: Toggle between showing or hiding the cursor prompt tool.'
     APcurs_usage = 'apcurs'
@@ -440,7 +440,7 @@ class HelpDoc:
     APea = 'APea: AthenaPreferences: External Applications: Set the file path to external utility applications used by athenaCL. External applications can be set for Csound (csoundCommand) and for handling various media files: midi (midiPlayer), audio (audioPlayer), text (textReader), image (imageViewer), and postscript (psViewer).'
     APea_usage = 'apea appType filePath'
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
 
     AHls = 'AHls: AthenaHistory: List: Displays a listing of the current history.'
     AHls_usage = 'ahls'
@@ -452,12 +452,12 @@ class HelpDoc:
     AHexe_usage = 'ahexe cmdRange'
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
 
     ASexe = 'ASexe: AthenaScript: Execute: Runs an AthenaScript if found in the libATH/libAS directory. Not for general use.'    
     ASexe_usage = 'asexe [scriptName]'
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
 
     AUbeat = 'AUbeat: AthenaUtility: Beat: Simple tool to calculate the duration of a beat in BPM.'
     AUbeat_usage = 'aubeat'
@@ -491,7 +491,7 @@ class HelpDoc:
     AUca = 'AUca: AthenaUtility: Cellular Automata: Utility for producing visual representations of values generated by various one-dimensional cellular automata.' 
     AUca_usage = 'auca spec rule mutation'
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     SC = 'SetClass: Commands: Displays a list of all SetClass dictionary commands.'
     SC_usage = 'sc'
     MC = 'MapClass: Commands: Displays a list of all MapClass dictionary commands.'
@@ -541,7 +541,7 @@ class HelpDoc:
     AU = 'AthenaUtility: Commands: Displays a list of all AthenaUtility commands.'
     AU_usage = 'au'
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
 
     def __init__(self, termObj=None):
     
@@ -594,7 +594,7 @@ class HelpDoc:
             else: filter.append(name)
         return filter
 
-    #------------------------------------------------------------------------||--         
+    #-----------------------------------------------------------------------||--         
     def listCmdDoc(self):
         """provide a list of command documentation topics
         this includes only topics that do not start with an underscore
@@ -645,7 +645,7 @@ class HelpDoc:
                     
         return filter
         
-    #------------------------------------------------------------------------||--         
+    #-----------------------------------------------------------------------||--         
     def reprUsage(self, searchStr, errorStr=None):
         """just return a formatted usage string, or error message if none
         exists; this is used as an error message from command.py when bad command

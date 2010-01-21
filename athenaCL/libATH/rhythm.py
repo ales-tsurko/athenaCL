@@ -417,7 +417,7 @@ class Pulse:
         self.triple[1] = self.triple[1] * value
         
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def ratioRaise(self, value):
         """increasing divider and multipler; opposite of reducing
         raising ot a higher terms
@@ -549,7 +549,7 @@ class Rhythm:
             raise error.PulseSyntaxError
         return objList
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # presentation
     def _reprListData(self, listData, outer=1):
         msgList = []
@@ -579,7 +579,7 @@ class Rhythm:
         return self.repr()
 
     # data access and manipulation
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def setSus(self, sustain):
         "set sustain for all pulse objects with the same value"
         for pulse in self.pulseList:
@@ -595,7 +595,7 @@ class Rhythm:
         for pulse in self.pulseList:
             pulse.setBpm(bpm)
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def copy(self):
         obj = Rhythm(copy.deepcopy(self.srcData))
         # copy pulse list manually to ensure identity
@@ -605,7 +605,7 @@ class Rhythm:
         obj.pulseList = pulseList
         return obj
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def ratioRaise(self, value):
         "set sustain for all pulse objects with the same value"
         for pulse in self.pulseList:
@@ -617,7 +617,7 @@ class Rhythm:
             pulse.ratioTarget(div)
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def __len__(self):
         return len(self.pulseList)
 

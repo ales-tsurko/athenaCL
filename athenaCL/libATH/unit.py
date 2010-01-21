@@ -717,8 +717,6 @@ class FunnelUnit:
 
 
 #-----------------------------------------------------------------||||||||||||--
-
-
 class Test(unittest.TestCase):
     
     def runTest(self):

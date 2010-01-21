@@ -77,7 +77,7 @@ class PolyPath:
 
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     #data modifucation an editting
 
     def insert(self, multiSet, i=None):
@@ -109,7 +109,7 @@ class PolyPath:
     def __getitem__(self, key):
         return self.multisetPath[key]
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # do these edits in place
 
 
@@ -165,7 +165,7 @@ class PolyPath:
             self.multisetPath[i].i()
         self._updateMultisetChange()
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # display methods
 
     def _pssToNoteName(self, set):
@@ -250,7 +250,7 @@ class PolyPath:
         return self.repr('scPath')
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # semi auto loaders      
     def loadPsList(self, pcsList):
         """adds pcs from a list of pc's, not as a complex set of data"""
@@ -267,7 +267,7 @@ class PolyPath:
             self.multisetPath.append(pitch)
         self._updateNew()
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def loadDataModel(self, pathData):
         """load data stored in an athenaCL xml file"""
         p = pathData
@@ -359,7 +359,7 @@ class PolyPath:
         return copy.deepcopy(p) # return a copy
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def copy(self, name):
         """output a copy of this object, as new object"""
         pathObj = PolyPath(name, self.scObj)
@@ -384,7 +384,7 @@ class PolyPath:
         """
         self.loadPsList([psList,] ) # does updates an inits
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
 
     def len(self):
         return len(self.multisetPath)
@@ -419,7 +419,7 @@ class PolyPath:
             raise ValueError, 'bad format name: %s' % name
         return self._access(name)
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # semi public update methods; use these as much as possible
     def _updateNew(self, forceNoVL=0):
         "all updates when a new path is created"
@@ -433,7 +433,7 @@ class PolyPath:
         self._updatePathSizeType(forceNoVL)
         self._updateVoiceRank() # updates all groups
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # low level updates
     def _updateDurSum(self):
         """ this updates durSum durPrecent with a whatever values are
@@ -461,7 +461,7 @@ class PolyPath:
             i = i + 1
         self._updateDurSum() # updates all relavent values
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # reference counting for use w/ textures
 
     def refIncr(self):
@@ -475,7 +475,7 @@ class PolyPath:
             self.refCount = 0
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # map and voice utility functions
 
     def voiceNames(self):
@@ -538,7 +538,7 @@ class PolyPath:
         self.voiceRank = {'SMTH': {}, 'UNIF': {}, 'BAL': {} }
         self.activeVoice = 'auto'
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # utility functions
 
     def _updateVoiceRank(self, group='all'):

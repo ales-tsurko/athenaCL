@@ -32,7 +32,7 @@ class Die:
             self.sideBounds = drawer.unitBoundaryEqual(self.sideNo)
         self.roll() # do an initial roll to set valueLast
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # public methods
 
     def roll(self):
@@ -82,7 +82,7 @@ class DiceUnit:
         # store a default, even weight to save processing; list of equal values
         self.diceWeightDefault = [(1.0/self.diceNo)] * self.diceNo
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def roll(self, binArray, diceWeight=None):
         """provide a binary array to roll selected die in self.dice
         die is rolled only if value is not he same as previous"""
@@ -154,7 +154,7 @@ class GameNoise:
         # temporaru init display
         #print _MOD, 'GameNoise:', 'noValues', self.noVal, 'noDice', self.noDice, 'noMoves', len(self.move)
         
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # methods for producing binary lists and proper exponents
 
     def _intToBinary(self, dec):
@@ -198,7 +198,7 @@ class GameNoise:
             found[i].reverse()
         return found    
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # methods for calculating the weight
     # note: weights have a minimum of 1, and max up to large numbers (65, 512)
 
@@ -236,7 +236,7 @@ class GameNoise:
         return diceWeight
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def reset(self):
         self.movePos = 0
         self.dice.reset() # resets last move record

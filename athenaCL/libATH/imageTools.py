@@ -886,7 +886,7 @@ grestore showpage defaults restore
 %%EOF""")
         return ''.join(msg)
   
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # conversion utilities
     def _convertCoordSquare(self, x1, y1, x2, y2):
         """convert xy pairs to four points necessary for drawing
@@ -949,7 +949,7 @@ grestore showpage defaults restore
         self.defIndex = self.defIndex + 1 # increment def index
         return strDef
             
-    #------------------------------------------------------------------------||-- 
+    #-----------------------------------------------------------------------||-- 
     
     def rectangle(self, x1, y1, x2, y2, fill=None, 
                       outline=None, width=1):
@@ -1128,7 +1128,7 @@ gsave %s 1 1 scale grestore
 """ % strDefName)
         self.c.append(''.join(msg))
 
-    #------------------------------------------------------------------------||--     
+    #-----------------------------------------------------------------------||--     
     def gridText(self, x, y, anchor='nw', msg='test', font='micro', 
                 fill='#ffffff', kernBit=1,
                 vertBit=None, xMult=1, yMult=1, horizontal=1, charWrapWidth=None):
@@ -1186,7 +1186,7 @@ gsave %s 1 1 scale grestore
             x = 0
             y = y + 1
         
-    #------------------------------------------------------------------------||--     
+    #-----------------------------------------------------------------------||--     
     
     def write(self, filePath=None, openMedia=1, prefDict=None):
         if filePath == None:
@@ -1671,7 +1671,7 @@ class _GraphBase:
         self.canvas.destroy()
         del self.canvas
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def setIconSize(self, wIcon, hIcon, wIconGutter, hIconGutter):
         # reinit w/ the format string, not w/ the canvas
         self.wIcon = wIcon
@@ -1719,7 +1719,7 @@ class _GraphBase:
         self.bitColorDict = bitColorDict
         # no update necessary
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def _iconA(self, args):
         # x and y do not include margin; are icon's upper left and right corner
         # if x1 == x2, this is a width of 1 (in a bit map relm)
@@ -1747,7 +1747,7 @@ class _GraphBase:
                             } # map integers to icon methods
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def _drawMargin(self):
         # draw top
         if self.tMargin != 0:
@@ -1773,7 +1773,7 @@ class _GraphBase:
                          self.colorMargin, None, 0)
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def _yGraphPosList(self):
         """gets a list of all necessary graph positions
         these are absoult points based on origin values
@@ -1808,7 +1808,7 @@ class _GraphBase:
         #print _MOD, 'xGraphPosList', points
         return points
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def _drawGrid(self):
         """to deal with error, add to length of horizontal grid"""
         if self.rowGridKey != []:
@@ -1951,7 +1951,7 @@ class _GraphBase:
             self.font, self.colorTitle, self.kernBit)
         #self.canvas.bitmap(xPos, yPos, gridData, self.colorTitle)
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def _xGridToPixel(self, xRaw):
         """returns upper left corner for an integer grid bit map
         translated into pixel positions"""
@@ -2016,7 +2016,7 @@ class _GraphBase:
             meth(args)
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def draw(self):
         self._updateBitDict()
         self._drawGrid() # covers horizontal error introduced for vector version

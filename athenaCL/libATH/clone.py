@@ -69,7 +69,7 @@ class Clone:
         self.auxNo = 0 # set w/ load method
         self.auxFmt = None # set w/ load method
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
 
     def _getMuteStr(self):
         """get mute string for named texture"""
@@ -268,7 +268,7 @@ class Clone:
         return self.repr()
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
 
     def load(self, pmtrQDict, auxNo, auxFmt, mute=0):
         """load clone data
@@ -330,7 +330,7 @@ class Clone:
         self.load(pmtrQDict, auxNo, auxFmt)
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def copy(self, name=None, nameParent=None):
         """return a copy of this clone
         optionally, can chnage name and name of Parent at creation"""
@@ -352,7 +352,7 @@ class Clone:
         return obj
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def _updateInstPmtr(self, refDict):
         """when a texture's instrument is changed, aux numbers may change
         this change must be represented in the clone
@@ -507,7 +507,7 @@ class Clone:
         return 1, '' # success
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # these all expect array arguments: lists of data for each event
     # refDict is a refDictArray, a list of refDict's
 
@@ -588,7 +588,7 @@ class Clone:
             auxiliary.append(eventData)
         return auxiliary
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # since all clones have the same clone options, can list each by name
     # cant do this w/ textures objs; better to keep parallel itnerface
 
@@ -609,7 +609,7 @@ class Clone:
         label = self.findCloneStaticLabel(label)
         return self.pmtrObjDict[label].getArgsLabel()
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
 
 
     def _scorePre(self, esObj, refDictTexture): # called w/n score method
@@ -755,7 +755,7 @@ class CloneManager:
         if tName not in self.tNames(): return 0
         return len(self._tRef[tName])
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # easy acces routines for getting data form clone objects
     # since all clone objects are the same, this is okay
     # will fail if no clones exist: might need to create temporary objects
@@ -772,7 +772,7 @@ class CloneManager:
         cName = self._tRefCurrent[tName]
         return self._tRef[tName][cName].clonePmtrNo
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def load(self, tName, cName, pmtrQDict, auxNo, auxFmt, mute=0):
         """initialize a clone object inside the appropriate texture label"""
         if not self._tRef.has_key(tName):
@@ -866,7 +866,7 @@ class CloneManager:
         return self._tRef[tName][cName]
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # tools for storing current clone name
     # there can be a current clone for each ti name
 

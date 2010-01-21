@@ -9,6 +9,8 @@
 #-----------------------------------------------------------------||||||||||||--
 
 import os, random, array, copy
+import unittest, doctest
+
 
 from athenaCL.libATH import drawer
 from athenaCL.libATH import unit
@@ -17,6 +19,9 @@ from athenaCL.libATH import table
 from athenaCL.libATH import typeset
 from athenaCL.libATH import permutate
 
+
+
+# TODO: remove this conditional
 # decimal may be used to get accurate continuous ca
 # this increase computation time considerably
 try: 
@@ -177,6 +182,10 @@ _MOD = 'automata.py'
 #-----------------------------------------------------------------||||||||||||--
 
 def caFormatParser(usrStr):
+    """
+    >>> caFormatParser('tot')
+    't'
+    """
     ref = {
         's' : ['s', 'standard'],
         't' : ['t', 'tot', 'totalistic'],
@@ -188,8 +197,14 @@ def caFormatParser(usrStr):
 
 
 def caInitParser(usrStr):
+    """
+    >>> caInitParser('center')
+    'center'
+    >>> caInitParser('junk') == None
+    True
+    """
     usrNum, junk = drawer.strExtractNum(usrStr)
-    if (len(usrNum) == len(usrStr) or drawer.isNum(usrStr) or
+    if drawer.isNum(usrStr) or (len(usrNum) == len(usrStr) or 
         drawer.isList(usrStr)):
         return usrStr # not a string, a data obj
     # only parse if a string
@@ -201,12 +216,15 @@ def caInitParser(usrStr):
     return usrStr # may be Non
 
     
+
     
 class AutomataSpecification:
     """object to mange arguments for automata"""
 
     def __init__(self, usrStr):
-    
+        """
+        >>> a = AutomataSpecification('f{c}x{81}y{80}r{2}')
+        """
         self.OPEN = '{'
         self.CLOSE = '}'
         
@@ -237,6 +255,12 @@ class AutomataSpecification:
         return usrStr # may be None
 
     def get(self, key):
+        """
+        >>> a = AutomataSpecification('f{c}x{81}y{80}r{2}')
+        >>> a.get('x')
+        81
+        """
+
         if key == 'yTotal': # y with skip, for actual generations
             return self.src['y'] + self.src['s']
         elif key in self.src.keys():
@@ -244,6 +268,12 @@ class AutomataSpecification:
         else: raise AttributeError
 
     def repr(self, fmt='full'):
+        """
+        >>> a = AutomataSpecification('f{c}x{81}y{80}r{2}')
+        >>> a.repr('x')
+        'f{c}k{0}r{2}i{center}x{81}y{80}w{81}c{0}s{0}'
+        """
+
         if fmt == 'line': # split into multiple lines
             return 'f{%s}k{%s}r{%s}\ni{%s}\nx{%s}y{%s}\nw{%s}c{%s}s{%s}' % (
             self.src['f'], self.src['k'], self.src['r'], self.src['i'],
@@ -335,7 +365,7 @@ class AutomataSpecification:
         return src
 
 #-----------------------------------------------------------------||||||||||||--
-# rule translatino schemes
+# rule translation schemes
 # the order of rules does not matter
 # http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/343386
 
@@ -364,6 +394,18 @@ class AutomataSpecification:
 
 #-----------------------------------------------------------------||||||||||||--
 def ruleCount(srcSpan, dstValues, srcValues=None):
+    """
+    >>> k=2; r=1; q=k-1
+    >>> pow(k,((r*2)+1)*q)
+    8
+    >>> ruleCount(((r*2)+1),range(k),(((r*2)+1)*(k-1)))
+    8
+    >>> k=3; r=2; q=k-1
+    >>> pow(k,((r*2)+1)*q)
+    59049
+    >>> ruleCount(((r*2)+1),range(k),(((r*2)+1)*(k-1)))
+    59049
+    """
     # srcSpan == r*2+1, len(dstValues) == k
     # totalistic rule count: k = k, len(dstValues)
     if drawer.isNum(dstValues):
@@ -389,6 +431,12 @@ def ruleGen(ruleNo, srcSpan=3, dstValues=[0,1], srcValues=None):
     k == number of cell values (len(dstValues))
     srcSpan is number of previous values considered (3 here is an r of 1)
     srcValues for totalistic rules, where src and dst are not the same
+
+    >>> ruleGen(3)
+    [[[0, 0, 0], 1], [[0, 0, 1], 1], [[0, 1, 0], 0], [[0, 1, 1], 0], [[1, 0, 0], 0], [[1, 0, 1], 0], [[1, 1, 0], 0], [[1, 1, 1], 0]]
+    >>> ruleGen(234, 5)
+    [[[0, 0, 0, 0, 0], 0], [[0, 0, 0, 0, 1], 1], [[0, 0, 0, 1, 0], 0], [[0, 0, 0, 1, 1], 1], [[0, 0, 1, 0, 0], 0], [[0, 0, 1, 0, 1], 1], [[0, 0, 1, 1, 0], 1], [[0, 0, 1, 1, 1], 1], [[0, 1, 0, 0, 0], 0], [[0, 1, 0, 0, 1], 0], [[0, 1, 0, 1, 0], 0], [[0, 1, 0, 1, 1], 0], [[0, 1, 1, 0, 0], 0], [[0, 1, 1, 0, 1], 0], [[0, 1, 1, 1, 0], 0], [[0, 1, 1, 1, 1], 0], [[1, 0, 0, 0, 0], 0], [[1, 0, 0, 0, 1], 0], [[1, 0, 0, 1, 0], 0], [[1, 0, 0, 1, 1], 0], [[1, 0, 1, 0, 0], 0], [[1, 0, 1, 0, 1], 0], [[1, 0, 1, 1, 0], 0], [[1, 0, 1, 1, 1], 0], [[1, 1, 0, 0, 0], 0], [[1, 1, 0, 0, 1], 0], [[1, 1, 0, 1, 0], 0], [[1, 1, 0, 1, 1], 0], [[1, 1, 1, 0, 0], 0], [[1, 1, 1, 0, 1], 0], [[1, 1, 1, 1, 0], 0], [[1, 1, 1, 1, 1], 0L]]
+
     """
     dstNo = len(dstValues) # number of possible cell values
     if srcValues == None: # non totalistic riles
@@ -413,6 +461,9 @@ def ruleGen(ruleNo, srcSpan=3, dstValues=[0,1], srcValues=None):
 class _Automaton:
     def __init__(self, size, rule=0, init=0, dstValues=None, 
                      srcSpan=3, srcValues=None, mutation=None):
+        """
+        >>> a = _Automaton(3)
+        """
         self.rule = rule # number, or string perhaps
         self.format = None # define in subclass
         self.dimension = None # define in subclass
@@ -439,9 +490,12 @@ class _Automaton:
             self.r = (self.srcSpan - 1) / 2.0 # must be a float
         else: # of odd, get an int
             self.r = (self.srcSpan - 1) / 2 
+
         # self.dstValues == None signifies a continuous
-        if self.dstValues != None: self.k = len(self.dstValues)
-        else: self.k = 0
+        if self.dstValues != None: 
+            self.k = len(self.dstValues)
+        else: 
+            self.k = 0
 
         self.mutation = mutation # w/n unit interval
         self.stepHistory = [] # store steps as lists or arrays
@@ -508,6 +562,13 @@ class _Automaton:
             return self._fmtStepQuad(msg)
 
     def repr(self, style=None):
+        """
+        >>> a = _Automaton(3)
+        >>> a.format = 'continuous'
+        >>> a.repr()
+        'f{c}k{0}r{1}'
+        """
+
         if style == 'brief':
             msg = 'f{%s}k{%s}r{%s}' % (self.format[0], self.k, self.r)
         elif style == 'line':
@@ -534,6 +595,9 @@ class _Automaton:
 class _AutomatonOneDimension(_Automaton):
     def __init__(self, size, rule=0, init=0, dstValues=[0,1], 
                      srcSpan=3, srcValues=None, mutation=None):
+        """
+        >>> a = _AutomatonOneDimension(10)
+        """
         _Automaton.__init__(self, size, rule, init, dstValues, 
                                              srcSpan, srcValues, mutation)
         self.dimension = 1 
@@ -564,7 +628,9 @@ class _AutomatonOneDimension(_Automaton):
     def clear(self):
         """processes init value and replaces history with first generation
         will always add an init to the history, meaning that there will always
-        be one more generation than expected in most cases"""
+        be one more generation than expected in most cases
+
+        """
         stepInit = self._getTemplate()
         if drawer.isStr(self.init):
             numStr, junk = drawer.strExtractNum(self.init)
@@ -701,6 +767,9 @@ class _AutomatonOneDimension(_Automaton):
 # override apply rule and gen
 class _AutomatonOneDimensionContinuous(_AutomatonOneDimension):
     def __init__(self, size, rule=0, init=0, srcSpan=3, mutation=None):
+        """
+        >>> a = _AutomatonOneDimensionContinuous(30)
+        """
         srcValues=None 
         dstValues=None # always none for continuous
         _AutomatonOneDimension.__init__(self, size, rule, init, dstValues, 
@@ -754,6 +823,10 @@ class _AutomatonOneDimensionContinuous(_AutomatonOneDimension):
 
 class Standard(_AutomatonOneDimension):
     def __init__(self, usrStr, rule=0, mutation=0):
+        """
+        >>> a = Standard('k{3}r{2}')
+        >>> a.gen()
+        """
         self.spec = AutomataSpecification(usrStr)
         k = self.spec.get('k')
         r = self.spec.get('r')
@@ -782,6 +855,11 @@ class Standard(_AutomatonOneDimension):
 
 class Totalistic(_AutomatonOneDimension):
     def __init__(self, usrStr, rule=0, mutation=0):
+        """
+        >>> a = Totalistic('k{3}r{2}')
+        >>> a.gen()
+        """
+
         self.spec = AutomataSpecification(usrStr)
         k = self.spec.get('k')
         r = self.spec.get('r')
@@ -826,9 +904,14 @@ class Totalistic(_AutomatonOneDimension):
 
 class Continuous(_AutomatonOneDimensionContinuous):
     def __init__(self, usrStr, rule=0, mutation=0):
-        # rules here are constant values tt are added to cels
-        # then the float portion is taken as the new value
-        # self.dstValues always None for continuous
+        """
+        rules here are constant values tt are added to cels
+        then the float portion is taken as the new value
+        self.dstValues always None for continuous
+
+        >>> a = Totalistic('k{3}r{2}')
+        >>> a.gen()
+        """
 
         self.spec = AutomataSpecification(usrStr)
         r = self.spec.get('r')
@@ -853,7 +936,12 @@ class Continuous(_AutomatonOneDimensionContinuous):
 
 class Float(_AutomatonOneDimensionContinuous):
     def __init__(self, usrStr, rule=0, mutation=0):
+        """
         # like a continuous, but uses floats for speed
+
+        >>> a = Float('k{3}r{2}')
+        >>> a.gen()
+        """
         
         self.spec = AutomataSpecification(usrStr)
         r = self.spec.get('r')
@@ -879,6 +967,9 @@ class Float(_AutomatonOneDimensionContinuous):
 #-----------------------------------------------------------------||||||||||||--
 class _AutomatonTwoDimension(_Automaton):
     def __init__(self, size, rule=0, init=0):
+        """
+        >>> a = _AutomatonTwoDimension([5,21])
+        """
         _Automaton.__init__(self, size, rule, init)
         self.dimension = 2
 
@@ -918,12 +1009,7 @@ class _AutomatonTwoDimension(_Automaton):
                 print self._fmtStep(row)
 
 
-
-
-
 #-----------------------------------------------------------------||||||||||||--
-
-
 caMonoClasses = [Standard, Totalistic, Continuous]
 
 def factory(usrStr, rule=0, mutation=0):     
@@ -1000,12 +1086,47 @@ class TestOld:
 
 
 
+
+
+#-----------------------------------------------------------------||||||||||||--
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
+
+
+    def testOneDimensionPerformance(self):        
+        for type in caMonoClasses:
+            k = 2
+            r = 1
+            for ruleNo in range(30,40):
+                usrStr = 'k{%s}r{%s}' % (k, r) # k, r, 39, 
+                a = type(usrStr, ruleNo)
+                a.gen(3)
+
+
+
 #-----------------------------------------------------------------||||||||||||--
 
+
+
 if __name__ == '__main__':
-    
-    a = TestOld()
-    a.testOneDimensionDisplay()
+    from athenaCL.test import baseTest
+    baseTest.main(Test)
+
+
+
+
+
+#-----------------------------------------------------------------||||||||||||--
+
+# if __name__ == '__main__':
+#     
+#     a = TestOld()
+#     a.testOneDimensionDisplay()
 
     #a.testOneDimensionPerformance()
 

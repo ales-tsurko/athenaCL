@@ -517,7 +517,7 @@ class WebPage:
         self.headOpenClose = None # header info; may be generated head of page
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def setImageRoot(self, path):
         self.imageRoot = path
 
@@ -1198,7 +1198,7 @@ pageTracker._trackPageview();
 
         return dateStr
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # common form templates
     
     
@@ -1261,7 +1261,7 @@ pageTracker._trackPageview();
 
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def getDateString(self, postBreaks=1, style=None):
         timeStr = time.asctime(time.localtime())
         msg = []
@@ -1379,7 +1379,7 @@ Version=2
 
         return ''.join(b)
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def htaccess(self, htmlPath, lines=None):
         """writes an htaaccess file, appends lines as needed
         lines is a list of strings to add to file

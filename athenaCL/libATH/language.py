@@ -73,7 +73,7 @@ class LangEn:
     if other methods are needed, use _name for private
     """
     
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # sizes and symbols
     TAB  = '      '
     TABW = 3 # width of tab, cannot be greater than 9
@@ -113,7 +113,7 @@ class LangEn:
     # other data
     BIRTH = (2000, 6, 30) # first release date
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     #strings
     msgCommentBreak = ('-'*65) + ('|'*12) + ('-'*2)
     msgAth              = 'athenaCL'
@@ -134,7 +134,7 @@ class LangEn:
 
     msgAthIntro         = 'Enter "cmd" to see all commands. For help enter "?".\nEnter "c" for copyright, "w" for warranty, "r" for credits.\n'
     
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # key description paragrahs
     
     # very short
@@ -200,7 +200,7 @@ Voice leading analysis and ranking with Joseph N. Straus's Smoothness, Uniformit
 
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     msgAthCopyright       = 'Copyright (c) 2000-2009 Christopher Ariza and others.'
     msgLicenseShort       = 'athenaCL is free software, distributed under the GNU General Public License.\n'
     msgLicenseName            = 'GPL' # this is the necessary package code 
@@ -215,7 +215,7 @@ Apple, Macintosh, Mac OS, and QuickTime are trademarks or registered trademarks 
 
 # IBM PC is trademark of IBM. 
     
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     msgAthObjError            = 'apologies: the previous command could not be completed as expected.\nplease report this bug when quitting, or examine the log (AUlog).\n'
     msgSubmitLog              = 'anonymously submit bug report?'
     msgSubmitLogFail          = 'no connection possible; try again when on-line.\n'
@@ -279,7 +279,7 @@ Apple, Macintosh, Mac OS, and QuickTime are trademarks or registered trademarks 
     msgDocBrowser             = 'to open documentation in a browser, enter "AUdoc".\n'
     msgDocHead                = 'athenaCL commands:\n'
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # strings for particular commands
     msgSCselectX              = 'select SC X:\n'
     msgSCselectY              = 'select SC Y:\n'
@@ -454,7 +454,7 @@ Apple, Macintosh, Mac OS, and QuickTime are trademarks or registered trademarks 
     msgAPcursorTool       = 'cursor tool set to %s.\n'
     msgAPrefreshMode          = 'refresh mode set to %s.\n'
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     salutationAm0             = 'welcome'
     salutationAm1             = 'good day.'
     salutationAm2             = 'good morning.'
@@ -475,7 +475,7 @@ Apple, Macintosh, Mac OS, and QuickTime are trademarks or registered trademarks 
     admonish5                 = 'never implemented a %s.'
     admonish6                 = '%s is a curious thing to consider.'
     
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # documentation stringsL output engines
     
     docOeAudioFile = 'Translates events to audio samples, and writes an audio file. Each event\'s amplitude is scaled between -1 and 1. Event timing and other event parameter data are stripped. Compatible with all Orchestras.'
@@ -495,7 +495,7 @@ Apple, Macintosh, Mac OS, and QuickTime are trademarks or registered trademarks 
     
     docOeText = 'Translate events to a plain text file. All event parameter values are separated by a delimiter (tab or space) and ended with a return carriage. Compatible with all Orchestras; EventMode Orchestra will be used for event postMap conversions.'
     
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # documentation strings: tm
     docTmMonophonicOrnament = "This TextureModule performs each set of a Path as a literal line; pitches are chosen from sets in order, and are optionally repeated within a single set's duration. Algorithmic ornamentation is added to a line based on two factors: the selection of an ornament repertory, and the specification of ornament density."
     
@@ -527,7 +527,7 @@ Apple, Macintosh, Mac OS, and QuickTime are trademarks or registered trademarks 
 
     docTmInterpolateFill = "This TextureModule interpolates parameters between events generated under a non-linear monophonic context. %s" % (_interpolation)
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # documentation strings: po
     # generators
     
@@ -686,7 +686,7 @@ Apple, Macintosh, Mac OS, and QuickTime are trademarks or registered trademarks 
 
     docPoOo = 'Produces the value of one over the value of a ParameterObject. Divisors of zero are resolved to 1.'
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # omde pmtrObjects
     
     docPoWs = 'Provides sinusoid oscillation %s %s' % (_waveValuePeriod,
@@ -729,7 +729,7 @@ Apple, Macintosh, Mac OS, and QuickTime are trademarks or registered trademarks 
 
     docPoFs = "Provides values derived from a contigous section of the Fibonacci series. A section is built from an initial value (start) and as many additional values as specified by the length argument. Negative length values reverse the direction of the series. %s %s %s" % (_normalizedList, _selectionStr, _scaleAfter)
     
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     _bpCommon = 'from a list of (x,y) coordinate pairs (pointList). A step type (stepString) determines if x values in the pointList refer to events or real-time values. Interpolated y values are the output of the Generator. The edgeString argument determines if the break-point function loops, or is executed once at the given coordinates.'
     
     docPoBpl = 'Provides a break-point function with linear interpolation %s' % _bpCommon
@@ -740,7 +740,7 @@ Apple, Macintosh, Mac OS, and QuickTime are trademarks or registered trademarks 
 
     docPoBpf = 'Provides a break-point function without interpolation %s' % _bpCommon
     
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     _bgCommon = 'A list of (x,y) coordinate pairs is generated from two embedded Generator ParameterObjects. The number of generated pairs is determined by the count argument. A step type (stepString) determines if x values in the pointList refer to events or real-time values. Interpolated y values are the output of the Generator. The edgeString argument determines if the break-point function loops, or is executed once at the given coordinates.'
     
     docPoBgl = 'Provides a dynamic break-point function with linear interpolation. %s' % _bgCommon
@@ -751,7 +751,7 @@ Apple, Macintosh, Mac OS, and QuickTime are trademarks or registered trademarks 
 
     docPoBgf = 'Provides a dynamic break-point function without interpolation. %s' % _bgCommon
     
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # file pmtrObjects
     
     docPoSs = "Given a list of file names (fileNameList), this Generator provides a complete file path to the file found within either the libATH/ssdir or the user-selected ssdir. %s" % _selectionStr
@@ -762,7 +762,7 @@ Apple, Macintosh, Mac OS, and QuickTime are trademarks or registered trademarks 
 
     docPoCf = 'Given an absolute file path, a constant file path is returned as a string. Note: %s.' % _symLinks
     
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # rhythm parameter objects
     
     docPoBa = 'Deploys two Pulses based on event pitch selection. Every instance of the first pitch in the current set of a Texture\'s Path is assigned the second Pulse; all other pitches are assigned the first Pulse. Amplitude values of events that have been assigned the second pulse are increased by a scaling function.'
@@ -785,7 +785,7 @@ Apple, Macintosh, Mac OS, and QuickTime are trademarks or registered trademarks 
 
     docPoPt = 'Produces Pulse sequences with four Generator ParameterObjects that directly specify Pulse triple values and a sustain scalar. The Generators specify Pulse divisor, multiplier, accent, and sustain scalar. Floating-point divisor and multiplier values are treated as probabilistic weightings. Note: divisor and multiplier values of 0 are not permitted and are replaced by 1; the absolute value is taken of all values.'
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # filter parameter objects    
     
     docPoB = 'Each input value is returned unaltered.'
@@ -820,7 +820,7 @@ Apple, Macintosh, Mac OS, and QuickTime are trademarks or registered trademarks 
 
     docPoMsf = 'Each input value is collected into a list. %s %s %s' % (_normalizedList, _selectionStr, _scaleAfter)
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # static parameter objects
     docPoPml = 'List is a collection of transpositions created above every Texture-generated base note. The timeDelay value determines the amount of time in seconds between each successive transposition in the transpositionList.'
      

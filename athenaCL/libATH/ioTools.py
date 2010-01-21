@@ -111,7 +111,7 @@ class BackwardsCompat:
     def __init__(self, debug=0):
         self.debug = debug
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # pre 1.3
     # old problem updates
 
@@ -179,7 +179,7 @@ class BackwardsCompat:
                             if self.debug:
                                 print _MOD, 'unknown old arg:', pmtrKey, rawArgs
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # pre 1.3
     # bridge to 1.3 data formats, change octave ref, chagne min/max rep
 
@@ -334,7 +334,7 @@ class BackwardsCompat:
                 else:
                     pass
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # pre 1.3.0
     # bridge to 1.3 data formats, change instrument numbers for csound native
 
@@ -516,7 +516,7 @@ class BackwardsCompat:
                 self.pData['pathLib'][pName]['voiceLib'] = data
                 if self.debug: print _MOD, 'renaming pathVoices'
                 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # pre 1.3.0 clone fix
 
     def _basicCloneOption(self, rawVal):
@@ -573,7 +573,7 @@ class BackwardsCompat:
 
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # pre 1.4.0
     
     def _waveReplace(self, argSrc):
@@ -640,7 +640,7 @@ class BackwardsCompat:
 
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def _pre144_pmtrObjUpdates(self):
         """minor fixes to old parameterObjects"""
         t = self.tData
@@ -686,7 +686,7 @@ class BackwardsCompat:
                         if self.debug: print _MOD, 'removed extra auxQ:', pmtrKey
                         
                 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
 
     def process(self, aData, pData, tData):
         """main methods for providing backwards compat for global changes

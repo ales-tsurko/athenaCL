@@ -381,7 +381,7 @@ class SampleGenerator:
         self.bytes = bytes
         self.absMax = byteToInt(self.bytes) # value in integers
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # synthesize for given frames
 
     def silence(self, frames):
@@ -401,7 +401,7 @@ class SampleGenerator:
 
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # funtionst the process string and list data
     def multiply(self, xStr, yList):
         """multiple two data strings, both not supplied as lists
@@ -488,7 +488,7 @@ class SampleGenerator:
         # convert back to data string format
         return array.array("h", zList).tostring()
         
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # tools to load unit interval array as samples
     # concver with various methods
         
@@ -569,7 +569,7 @@ class AudioFile:
         self._open(None) # None auto-determines what to do
         self._close()
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # private methods for opening and closing file
     
     def _open(self, mode='r', ch=None):
@@ -618,7 +618,7 @@ class AudioFile:
         # update values in sample gen obj
         self.sampleGenObj.update(self.ch, self.sr, self.bytes)
         
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # methods that use open/close above to wrap public methods
     
     def getSize(self):
@@ -833,7 +833,7 @@ class AudioFile:
         self.aObj.writeframesraw(newData)
         self._close()
         
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # methods for producing new files form existing ones
     
     def extract(self, newPath, start, length, fadeLen=None, ch=None):
@@ -862,7 +862,7 @@ class AudioFile:
             newObj.envelopeSymmetric(fadeLen)
         return newObj
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # high level methods that do not open/close; only call above methods
     
     def testAmp(self, pos, frames, rmsThresh=.08, maxThresh=.50):
@@ -901,7 +901,7 @@ class AudioFile:
                 return trialStart
         return None # if nothing found
         
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def play(self):
         osTools.openMedia(self.absPath)
         

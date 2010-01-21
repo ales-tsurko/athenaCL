@@ -1311,7 +1311,7 @@ class Multiset:
         # removed as redundant; use get
         # self.card = self._scTriple[0]
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # data representation
     def _reprListData(self, listData, outer=1):
         msgList = []
@@ -1391,7 +1391,7 @@ class Multiset:
         """default string representation is as 'psReal'"""
         return self.repr()
     
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # data entry, updating
     def setDur(self, value):
         self.dur = value
@@ -1420,7 +1420,7 @@ class Multiset:
         self._update()
         return self._psList[key]
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # data access
     def __len__(self):
         return len(self._psList)
@@ -1494,7 +1494,7 @@ class Multiset:
         return self.scObj.rawSetData(self._scTriple[0], self._scTriple[1],
                                               self._scTriple[2], key)
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # data transformations
 
     def _update(self):

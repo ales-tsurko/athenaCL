@@ -123,7 +123,7 @@ nchnls = 4
             self._instrObjDict[iNo] = objAttr() # instantiate obj
         
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def instNoValid(self, iNo):
         """test if an instrument number is valid"""
         if drawer.isInt(iNo) and iNo in self._instrNumbers:
@@ -227,7 +227,7 @@ nchnls = 4
         else:
             return 'no information available'
         
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # mappings of psReal, amp, pan; only applied of mix mode is on
     # mapings done before limits
     

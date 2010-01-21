@@ -111,7 +111,7 @@ class Chromosome:
                 restSum = restSum + self._calcNoteDur(beatTime, entry)
         return noteSum, restSum
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def updateDur(self):
         self.duration = self._calcDur(self.beatTime, self.bitVector)
         self.noteRestDuration = self._calcNoteRestDur(self.beatTime, 
@@ -173,7 +173,7 @@ class Chromosome:
         # a large chromo needs a large population
             
 
-    #------------------------------------------------------------------------||--             
+    #-----------------------------------------------------------------------||--             
     def mutate(self, forceMutate='off'):
         """ five ways of mutation of rhythm vectors:
         0: replace an entry wiht any rhythm from self.fitValues
@@ -523,7 +523,7 @@ class GeneticAlgorithm:
             else: # create a clone, # copies entire vector
                 chromo.bitVector = copy.deepcopy(chromoDad.bitVector) 
 
-    #------------------------------------------------------------------------||--             
+    #-----------------------------------------------------------------------||--             
     def generationStep(self, percentElite=.00):
         "process one generation "
         i = 0
@@ -701,7 +701,7 @@ class Genome:
                 tubList.append(chromo)   
             return tubList
             
-    #------------------------------------------------------------------------||--             
+    #-----------------------------------------------------------------------||--             
     def edit(self, crossoverRate=.40, mutationRate=.025):
         self.ga.mutationRate     = mutationRate
         self.ga.crossoverRate = crossoverRate

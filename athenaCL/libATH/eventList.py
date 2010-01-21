@@ -150,7 +150,7 @@ class EventSequence:
         # can store: tStart, tEnd, ampMax
         self._eventData = {} # dictionary that store attribute data
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # built in methods
     def append(self, eventDict):
         """append an event dictionary"""
@@ -197,7 +197,7 @@ class EventSequence:
             alt.append(self._eventList[i])
         self._eventList = alt # assign to eventList
         
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # data access and loading
 
     def list(self):
@@ -223,7 +223,7 @@ class EventSequence:
             self._eventList[i][name] = data[i] 
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # updates and other management
     def updatePre(self):
         # called in before before scoreing
@@ -261,7 +261,7 @@ class EventSequence:
         return  self._eventData['tAbsEnd'] - self._eventData['tAbsStart']
     
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # transformations to the event sequence
 
     def interpolate(self, tFrameArray, snapSus, 
@@ -451,7 +451,7 @@ class EventSequence:
 
         self._eventList = alt # reassign to eventList
             
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # format conversions
     def fillSplitScore(self, splitScore):
         """a split score stores all data in parallel lists
@@ -591,7 +591,7 @@ class EventSequenceSplit:
             self.pmtrArgs[pmtr] = ''
         self.splitScore = splitScore
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def _updateEventCount(self):
         self.nEvent = len(self.splitScore['event']) # store total number of events
 
@@ -694,7 +694,7 @@ class EventSequenceSplit:
                     self.splitScore['sus'].append(sus)
                     self.splitScore['acc'].append(acc)
 
-    #------------------------------------------------------------------------||--             
+    #-----------------------------------------------------------------------||--             
     def load(self, tmRelation='pre', strBypass=1):
         self.strBypass = strBypass # will skip all pmtr args w/ string output
         # load all parameter args depending on srcFmt set at init
@@ -770,7 +770,7 @@ class EventSequenceSplit:
                 filter.append(pmtr)
         return filter
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # event engines are polyphonic; these outputs are monophonic, or single
     # generator values; only provided output for one parameter objects
     
@@ -1112,7 +1112,7 @@ class _OutputEngine:
         self._write()
         self._writePost()
         
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # string and data processing conversion
     
     def _fmtHeadSco(self, headStr='', prepend=''):
@@ -1195,7 +1195,7 @@ class _OutputEngine:
                 label.append(key)
         return '%s%s\n' % (prefix, delimit.join(label))
         
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # covnert single eventList into necessary data structures, lists or strings
 
             
@@ -1295,7 +1295,7 @@ class _OutputEngine:
         msg.append('\n')
         return ''.join(msg), label # returns string
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def _translateMidiList(self, orcMapMode, esObj):
         """mid list is a short list of data
         consists only of tStart, sus, midiVel, midiPs, midiPan"""
@@ -1382,7 +1382,7 @@ class _OutputEngine:
             i = i + 1
         return intList
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def _translateTextDelimitStr(self, orcMapMode, esObj, delimit='\t'):
         """used for creating both a plain text file and a tab delimitted
         file"""
@@ -1604,7 +1604,7 @@ class EngineCsoundNative(_OutputEngine):
             pass
         self.outComplete.append('csoundData')
         
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def _translatePoly(self):
         """set self.polySeqStr w/ complet orc from self.polySeq
         """
@@ -2093,7 +2093,7 @@ class EventMode:
         #    'pathXml', 'pathMid', 'pathCsd', 'pathMaxColl', 'pathTxtTab',
         #    'pathTxtSpace']
         
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # tools for init processing of paths and other data
 
     def _getAudioFlags(self):
@@ -2162,7 +2162,7 @@ class EventMode:
 
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
         
     def _engineAllocate(self, outRequest):
         """determine, for this event mode, what engines are necessary
@@ -2217,7 +2217,7 @@ class EventMode:
             engineLib[engine] = mod(self.name, self.ref)
         return engineLib
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # post processing updates
     def _updateInfo(self, ref):
         """get ref to aoInfo dict, update last paths
@@ -2262,7 +2262,7 @@ class EventMode:
             msg.append('%s\n' % self._outputToPath(output))
         return ''.join(msg)
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # main operations
 
     def setRootPath(self, rootPath=None):

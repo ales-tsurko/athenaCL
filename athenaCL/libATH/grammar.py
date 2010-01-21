@@ -134,7 +134,7 @@ class Grammar:
 
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
 
         
     def _sortSymbolLabel(self, pair):
@@ -154,7 +154,7 @@ class Grammar:
                     post.append((s,w))
         return post
   
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def _parseValidate(self, usrStr):
         """make sure the the string is well formed"""
         if usrStr.count(self.OPEN) != usrStr.count(self.CLOSE):
@@ -312,7 +312,7 @@ class Grammar:
                 raise error.TransitionSyntaxError, "rule component (%s) references an undefined symbol" % outRule
     
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
 
     def _parse(self, usrStr):
         # divide all groups into pairs of key, {}-enclosed values
@@ -375,7 +375,7 @@ class Grammar:
         #self._checkSymbolUsage()
         
 
-    #------------------------------------------------------------------------||--         
+    #-----------------------------------------------------------------------||--         
     def _valueToSymbol(self, value):
         """for a data value, return the defined symbol label"""
         for s, v in self._symbols.items():
@@ -393,7 +393,7 @@ class Grammar:
         return tuple(msg)
         
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def repr(self):
         """provide a complete grammar string"""
         # do symbol list first
@@ -421,7 +421,7 @@ class Grammar:
         
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def load(self, usrStr):
         """load a transition string"""
         self._srcStr = usrStr
