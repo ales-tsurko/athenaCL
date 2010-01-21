@@ -511,7 +511,7 @@ class Command:
         else: # interactive
             if appName != None:
                 appDialogQuery = 'select a %s application (%s):' % (appType,
-                                                                                     appName)
+                                                                    appName)
             else:
                 appDialogQuery = 'select a %s application:' % (appType)          
             appDialogError = 'this is not a %s application. try again.' % appType
@@ -3070,14 +3070,12 @@ class PIn(Command):
     args: pin  name  eval(pathString)
 
     >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
-    >>> a = PIn(ao)
-    >>> a.args = 'a 3-2'
+    >>> a = PIn(ao, args='a 3-2')
     >>> ok, result = a.do()
     >>> ok == True
     True
 
-    >>> a = PIn(ao)
-    >>> a.args = 'b 8,12,21,34'
+    >>> a = PIn(ao, args='b 8,12,21,34')
     >>> ok, result = a.do()
     >>> ok == True
     True
@@ -3155,7 +3153,20 @@ class PIn(Command):
 
 
 class PIv(Command):
-    """displays a path"""
+    """displays a path
+
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+
+    >>> a = PIn(ao, args='a 3-2')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True
+
+    >>> a = PIv(ao)
+    >>> ok, result = a.do()
+    >>> ok == True
+    True
+    """
     def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 0 # display only
@@ -3265,7 +3276,10 @@ class PIv(Command):
 
 
 class PIe(Command):
-    """edits a single set of a path"""
+    """edits a single set of a path
+
+    TODO: does not yet accept command args, and thus cannot be remotely tested
+    """
     def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
@@ -3404,6 +3418,17 @@ class PIdf(Command):
     """duration fraction settings
         uses currently selected path
         user can enter a list as an arg
+
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = PIn(ao, args='a 3-2 6,7,23')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True
+
+    >>> a = PIdf(ao, args='3,2')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True
     """
     def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
@@ -3468,8 +3493,23 @@ class PIdf(Command):
     def display(self): 
         return 'PI %s edited.\n' % self.name
 
+
+
 class PIls(Command):
-    """list all paths"""
+    """list all paths
+
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = PIn(ao, args='a 3-2 6,7,23')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True
+
+    >>> a = PIls(ao)
+    >>> ok, result = a.do()
+    >>> ok == True
+    True
+
+    """
     def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 0 # display only
@@ -3505,8 +3545,21 @@ class PIls(Command):
         msg.append('%s\n' % table)
         return ''.join(msg)
 
+
 class PIcp(Command):
-    """copies a path"""
+    """copies a path
+
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = PIn(ao, args='a 3-2 6,7,23')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True
+
+    >>> a = PIcp(ao, args = 'a b')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True
+    """
     def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
@@ -3569,6 +3622,18 @@ class PIcp(Command):
 
 
 class PIrm(Command):
+    """
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = PIn(ao, args='a 3-2 6,7,23')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True
+
+    >>> a = PIrm(ao, args='a')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True
+    """
     def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
@@ -3636,7 +3701,24 @@ class PIrm(Command):
 
 
 class PIo(Command):
-    """sets self.ao.activePath"""
+    """sets self.ao.activePath
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = PIn(ao, args='a 3-2 6,7,23')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True
+
+    >>> a = PIn(ao, args='b 2@3')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True
+
+    >>> a = PIo(ao, args='a')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True
+    
+    """
     def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
@@ -3668,6 +3750,19 @@ class PIo(Command):
         return 'PI %s now active.\n' % self.ao.activePath
 
 class PImv(Command):
+    """
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = PIn(ao, args='a 3-2 6,7,23')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True
+
+    >>> a = PImv(ao, args='a b')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True
+
+    """
     def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
@@ -3726,7 +3821,20 @@ class PImv(Command):
 
 
 class PIret(Command):
-    """create new path as a retrograde of current path"""
+    """create new path as a retrograde of current path
+
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = PIn(ao, args='a 3-2 6,7,23')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True
+
+    >>> a = PIret(ao, args='e')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True
+
+    """
     def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
@@ -3765,6 +3873,17 @@ class PIrot(Command):
     """create new path as a rotation of current path
     since this is a rotation, cannot copy old maps over to new PI
     args: pirot  name    startPosition
+
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = PIn(ao, args='a 3-2 6,7,23, 2-3')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True
+
+    >>> a = PIrot(ao, args='b 2')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True
     """
     def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
@@ -3803,109 +3922,123 @@ class PIrot(Command):
     def process(self): 
         cut = self.rotZero - 1 # needs to be corrected 
         self.ao.pathLib[self.newName] = self.ao.pathLib[self.oldName].copy(
-                                                                                self.newName)
+                                                         self.newName)
         self.ao.pathLib[self.newName].rotate(cut)
         self.ao.activePath = self.newName
 
     def display(self): 
         return 'rotation PI %s added to PathInstances.\n' % self.newName
         
-class PIopt(Command):
-    """create new path as an optimization of current path
-        since this is a rotation, cannot copy old maps over to new PI
-    """
-    def __init__(self, ao, cmdEnviron=None, args=''):
-        Command.__init__(self, ao, cmdEnviron, args)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'PIopt'
 
-    def gather(self): 
-        if self._piTestExistance() != None: #check existance
-            return self._piTestExistance()
-        if self._piTestNameExists() != None: # check name
-            return self._piTestNameExists()
-        if self._piTestNoVL() != None: # check voiceType
-            return self._piTestNoVL()
-        # check current PVgroup name
-        if self._piTestCurrentPVgroupNameExists() != None: 
-            return self._piTestCurrentPVgroupNameExists()
-            
-        query = 'name this optimization of PI %s:' % self.ao.activePath
-        newName = self._piGetNewName(query)
-        if newName == None: return lang.msgReturnCancel
+# class PIopt(Command):
+#     """create new path as an optimization of current path
+#         since this is a rotation, cannot copy old maps over to new PI
+#     """
+#     def __init__(self, ao, cmdEnviron=None, args=''):
+#         Command.__init__(self, ao, cmdEnviron, args)
+#         self.processSwitch = 1 # display only
+#         self.gatherSwitch = 1 # display only
+#         self.cmdStr = 'PIopt'
+# 
+#     def gather(self): 
+#         if self._piTestExistance() != None: #check existance
+#             return self._piTestExistance()
+#         if self._piTestNameExists() != None: # check name
+#             return self._piTestNameExists()
+#         if self._piTestNoVL() != None: # check voiceType
+#             return self._piTestNoVL()
+#         # check current PVgroup name
+#         if self._piTestCurrentPVgroupNameExists() != None: 
+#             return self._piTestCurrentPVgroupNameExists()
+#             
+#         query = 'name this optimization of PI %s:' % self.ao.activePath
+#         newName = self._piGetNewName(query)
+#         if newName == None: return lang.msgReturnCancel
+# 
+#         while 1:
+#             usrStr = dialog.askStr(lang.msgPIoptOrAntiopt, self.termObj)
+#             if usrStr == None: return lang.msgReturnCancel
+#             if 'o' in usrStr:
+#                 optimizeType = 'o'
+#                 break
+#             elif 'a' in usrStr:
+#                 optimizeType = 'a'
+#                 break
+#             else:
+#                 continue
+#         self.newName = newName
+#         self.optimizeType = optimizeType
+# 
+#     def process(self): 
+#         newName = self.newName
+#         optimizeType = self.optimizeType
+# 
+#         # this shoudl returna copy of the psPath
+#         cloneUsrPath = self.ao.pathLib[self.ao.activePath].get('psPath')
+#         newUsrPath = self.ao.pathLib[self.ao.activePath].get('psPath')
+# 
+#         newVLgroup = [] # list of mapTupleIds
+#         i = 0
+#         
+#         while 1:
+#             if (i+1) == len(cloneUsrPath):
+#                 break
+#             srcPosition = i
+#             dstPosition = i + 1
+#             srcSet = newUsrPath[srcPosition]
+#             dstSet = newUsrPath[dstPosition]
+#             srcSize = len(newUsrPath[srcPosition])
+#             dstSize = len(newUsrPath[dstPosition])
+#             # supply the first map of the needed size
+#             # "1" changes the destination set
+#             a = self.mcObj.displacement(srcSet, dstSet, 1) 
+#             minDispl, maxDispl, orderedResults, counter = a
+#             if optimizeType == 'o':
+#                 displ, foundSet, setClassTupleID, foundT, foundMapTupleID = orderedResults[0]
+#             if optimizeType == 'a':
+#                 displ, foundSet, setClassTupleID, foundT, foundMapTupleID = orderedResults[-1]  
+#             newVLgroup.append(('opt', (srcPosition, dstPosition), foundMapTupleID))     
+#             newUsrPath[dstPosition] = foundSet  # change destination chord
+#             i = i + 1
+# 
+#         self.ao.pathLib[newName] = pitchPath.PolyPath(newName, self.scObj)
+#         # maps are NOT copied here, so default is auto
+#         self.ao.pathLib[newName].activeVoice = 'opt' 
+#         self.ao.pathLib[newName].ambitus = copy.deepcopy(
+#                   self.ao.pathLib[self.ao.activePath].ambitus)
+#         self.ao.pathLib[newName].loadPsList(newUsrPath)
+#         durFraction = self.ao.pathLib[self.ao.activePath].get('durFraction')
+#         # updates all dur percentages
+#         self.ao.pathLib[newName].loadDur(durFraction) 
+#         # update current path
+#         self.ao.activePath = newName                         
+#         ## add found VL group
+#         for entry in newVLgroup:
+#             thisGroupName, (srcPosition, dstPosition), mapTupleId = entry
+#             self.ao.pathLib[self.ao.activePath].voiceMapAdd(thisGroupName, 
+#                                     (srcPosition, dstPosition), mapTupleId)
+#         self.ao.pathLib[self.ao.activePath].voiceFillRank()
+#         self.ao.pathLib[self.ao.activePath].voiceUpdateMapRank('opt')    
+# 
+#     def display(self): 
+#         return 'optimized PI %s added to PathInstances.\n' % self.ao.activePath
 
-        while 1:
-            usrStr = dialog.askStr(lang.msgPIoptOrAntiopt, self.termObj)
-            if usrStr == None: return lang.msgReturnCancel
-            if 'o' in usrStr:
-                optimizeType = 'o'
-                break
-            elif 'a' in usrStr:
-                optimizeType = 'a'
-                break
-            else:
-                continue
-        self.newName = newName
-        self.optimizeType = optimizeType
 
-    def process(self): 
-        newName = self.newName
-        optimizeType = self.optimizeType
 
-        # this shoudl returna copy of the psPath
-        cloneUsrPath = self.ao.pathLib[self.ao.activePath].get('psPath')
-        newUsrPath = self.ao.pathLib[self.ao.activePath].get('psPath')
-
-        newVLgroup = [] # list of mapTupleIds
-        i = 0
-        
-        while 1:
-            if (i+1) == len(cloneUsrPath):
-                break
-            srcPosition = i
-            dstPosition = i + 1
-            srcSet = newUsrPath[srcPosition]
-            dstSet = newUsrPath[dstPosition]
-            srcSize = len(newUsrPath[srcPosition])
-            dstSize = len(newUsrPath[dstPosition])
-            # supply the first map of the needed size
-            # "1" changes the destination set
-            a = self.mcObj.displacement(srcSet, dstSet, 1) 
-            minDispl, maxDispl, orderedResults, counter = a
-            if optimizeType == 'o':
-                displ, foundSet, setClassTupleID, foundT, foundMapTupleID = orderedResults[0]
-            if optimizeType == 'a':
-                displ, foundSet, setClassTupleID, foundT, foundMapTupleID = orderedResults[-1]  
-            newVLgroup.append(('opt', (srcPosition, dstPosition), foundMapTupleID))     
-            newUsrPath[dstPosition] = foundSet  # change destination chord
-            i = i + 1
-
-        self.ao.pathLib[newName] = pitchPath.PolyPath(newName, self.scObj)
-        # maps are NOT copied here, so default is auto
-        self.ao.pathLib[newName].activeVoice = 'opt' 
-        self.ao.pathLib[newName].ambitus = copy.deepcopy(
-                  self.ao.pathLib[self.ao.activePath].ambitus)
-        self.ao.pathLib[newName].loadPsList(newUsrPath)
-        durFraction = self.ao.pathLib[self.ao.activePath].get('durFraction')
-        # updates all dur percentages
-        self.ao.pathLib[newName].loadDur(durFraction) 
-        # update current path
-        self.ao.activePath = newName                         
-        ## add found VL group
-        for entry in newVLgroup:
-            thisGroupName, (srcPosition, dstPosition), mapTupleId = entry
-            self.ao.pathLib[self.ao.activePath].voiceMapAdd(thisGroupName, 
-                                    (srcPosition, dstPosition), mapTupleId)
-        self.ao.pathLib[self.ao.activePath].voiceFillRank()
-        self.ao.pathLib[self.ao.activePath].voiceUpdateMapRank('opt')    
-
-    def display(self): 
-        return 'optimized PI %s added to PathInstances.\n' % self.ao.activePath
-        
 class PIslc(Command):
     """create a new path as a slice of current path
         args: pislc  name    startPos,endPos
+
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = PIn(ao, args='a 3-2 6,7,23, 2-3')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True
+
+    >>> a = PIslc(ao, args='b 1')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True
     """
     def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
@@ -3952,7 +4085,16 @@ class PIslc(Command):
 
 
 class PIh(Command):
-    """create an event list of just the current path"""
+    """create an event list of just the current path
+
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = PIn(ao, args='a 3-2 6,7,23, 2-3')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True
+
+    >>> a = PIh(ao) # running will open a player
+    """
     def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
@@ -3998,1015 +4140,1023 @@ class PIh(Command):
 
 
 #-----------------------------------------------------------------||||||||||||--
-class PScma(Command):
-    """compares adjacent sets, comparison A
-        args: pscma 
-    """
-    def __init__(self, ao, cmdEnviron=None, args=''):
-        Command.__init__(self, ao, cmdEnviron, args)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'PScma'
-
-    def gather(self): 
-        args = self.args
-
-        if self._piTestExistance() != None: #check existance
-            return self._piTestExistance()
-        if self._piTestNameExists() != None: # check name
-            return self._piTestNameExists()
-        self.setMeasure = self._setMeasureFactory()
-        self.scList = self.ao.pathLib[self.ao.activePath].get('scPath')
-
-    def process(self): 
-        self.compValues = []
-        for i in range(0, len(self.scList)):
-            scX = i
-            if i == len(self.scList) - 1:
-                scY = 0
-            else: 
-                scY = i+1
-            value = self.setMeasure.compareSet(self.scList[scX], self.scList[scY], 
-                          self.ao.tniMode) # not all need tni, but all accept
-            self.compValues.append(value)
-
-    def display(self): 
-        termWidth = self.termObj.w
-        graphSize = termWidth - lang.LMARGINW # for range
-
-        msg = []
-        msg.append('PI: %s, %s analysis\n' % (self.ao.activePath, 
-                                                          self.setMeasure.name))
-        msg.append(self._scGetTnStr()+'\n')
-
-        minStr = str(self.setMeasure.min) + '(min)'       
-        maxStr = '(max)' + str(self.setMeasure.max) 
-
-        graphRuler = typeset.graphLabeledRuler(minStr, maxStr, graphSize)
-        graphRuler = '%s%s\n' % (lang.msgSCsimRange.ljust(lang.LMARGINW), 
-                                         graphRuler)
-        msg.append(graphRuler)
-        entryLines = []
-
-        for i in range(0, len(self.scList)):
-            p_str = self.scObj.scToStr(self.scList[i])
-            v_str = '%.2f' % self.compValues[i]
-            graph = typeset.graphNumber(self.setMeasure.min, self.setMeasure.max,
-                                                self.compValues[i], graphSize)
-            entryLines.append(['', p_str, ''])
-            entryLines.append([v_str, '', graph])
-        lastSet = self.scObj.scToStr(self.scList[0])
-        entryLines.append(['', lastSet, ''])
-
-        headerKey    = [] #['similarity', 'set', 'graph']
-        minWidthList = ((lang.LMARGINW/2), (lang.LMARGINW/2), graphSize)
-        bufList      = [0, 0, 0]
-        justList         = ['l','l','l']
-        table = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
-                                          bufList, justList, self.termObj)
-        msg.append('%s\n' % table)
-        return ''.join(msg)
-
-
-class PScmb(Command):
-    """one to many analysis
-        args: pscmb  set
-    """
-    def __init__(self, ao, cmdEnviron=None, args=''):
-        Command.__init__(self, ao, cmdEnviron, args)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'PScmb'
-
-    def gather(self): 
-        args = self.args
-
-        if self._piTestExistance() != None: #check existance
-            return self._piTestExistance()
-        if self._piTestNameExists() != None: # check name
-            return self._piTestNameExists()
-
-        data = None
-        if args != '':
-            args = argTools.ArgOps(args) # no strip
-            data = self.setFactory(self.ao,args.get(0,'end'), self.scObj)
-            if data == None: return self._getUsage()
-        if data == None:
-            dialog.msgOut('enter a SC for comparison to the path:\n',
-                                 self.termObj)
-            data = self.setFactory(self.ao, None, self.scObj)
-            if data == None: return lang.msgReturnCancel
-        self.setMeasure = self._setMeasureFactory() #optional tonic/dom arguments excluded
-        self.scList = self.ao.pathLib[self.ao.activePath].get('scPath')
-        self.data = data # setObj
-
-    def process(self): 
-        self.compValues = []
-        for i in range(0, len(self.scList)):
-            scX = i # tni not used by all
-            value = self.setMeasure.compareSet(self.scList[scX], 
-                            self.data.get('sc'), self.ao.tniMode) 
-            self.compValues.append(value)
-
-
-    def display(self): 
-        termObj = self.termObj       
-        termWidth = termObj.w
-        graphSize = termWidth - lang.LMARGINW # for range
-
-        msg = []
-        msg.append('PI: %s, %s analysis\n' % (self.ao.activePath, 
-                                                          self.setMeasure.name))
-        msg.append(self._scGetTnStr() + '\n')
-        msg.append('reference SC %s\n' % self.data.repr('sc'))
-
-        minStr = str(self.setMeasure.min) + '(min)'
-        maxStr = '(max)' + str(self.setMeasure.max)
-
-        graphRuler = typeset.graphLabeledRuler(minStr, maxStr, graphSize)
-        graphRuler = '%s%s\n' % (lang.msgSCsimRange.ljust(lang.LMARGINW), 
-                                         graphRuler)
-        msg.append(graphRuler)
-        entryLines = []
-
-        for i in range(0, len(self.scList)):
-            p_str = self.scObj.scToStr(self.scList[i])
-            v_str = '%.2f' % self.compValues[i]
-            graph = typeset.graphNumber(self.setMeasure.min, self.setMeasure.max,
-                                                self.compValues[i], graphSize)
-            entryLines.append([v_str, p_str, graph])
-        headerKey    = [] # ['similarity', 'set', 'graph']
-        minWidthList = ((lang.LMARGINW/2), (lang.LMARGINW/2), graphSize)
-        bufList      = [0, 0, 0]
-        justList         = ['l','l','l']
-        table = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
-                                         bufList, justList, self.termObj)
-        msg.append('%s\n' % table)
-        return ''.join(msg)
-
-
-
-#-----------------------------------------------------------------||||||||||||--
-class _CommandPV(Command):
-    def __init__(self, ao, cmdEnviron=None, args=''):
-        Command.__init__(self, ao, cmdEnviron, args)
-
-    def _pvSelectRankOrMap(self, srcSet, dstSet):
-        """have user select between rank or map"""
-        query = 'enter a map from %s to %s: by rank or map? (r or m):' % (
-                      drawer.listToStr(srcSet), drawer.listToStr(dstSet))
-        while 1:
-            reply = dialog.askStr(query, self.termObj)
-            if reply == None:
-                return None
-            reply = reply.lower()
-            if reply.find('r') != -1:
-                return 'r'
-            elif reply.find('m') != -1:
-                return 'm'
-            else:
-                dialog.msgOut(lang.msgPVmapOrRankError, self.termObj)
-                continue
-
-    def _pvGetNewName(self, query, pathName):
-        """asks user for a pathVoice name. must provide a path
-            for which to search voiceLib within
-        """
-        while 1:
-            name = dialog.askStr(query, self.termObj)
-            if name == None or name == '' :
-                return None
-            name = self._nameReplace(name)
-            if self._nameTest(name) != None:
-                dialog.msgOut(self._nameTest(name), self.termObj)
-            elif self.ao.pathLib[pathName].voiceLib.has_key(name):
-                dialog.msgOut(lang.msgPVnameTaken, self.termObj)
-            else:
-                return name
-
-
-    def _pvSelectMapPosition(self, currentVLgroup, noKeys, variString='compare'):
-        query = 'PathVoice %s has map positions (1,2) through (%i,%i): enter position to %s:' % (currentVLgroup, noKeys, noKeys+1, variString)
-        while 1:
-            locStr = dialog.askStr(query, self.termObj)
-            if locStr == None: return None
-
-            locTuple = self._convertListRange(locStr, 1, noKeys+1)#max in user-land
-            if locTuple == None:
-                dialog.msgOut(lang.msgMCbadPosition, self.termObj)
-                continue
-            else:
-                return locTuple
-
-
-
-class PVv(_CommandPV):
-    def __init__(self, ao, cmdEnviron=None, args=''):
-        _CommandPV.__init__(self, ao, cmdEnviron, args)
-        self.processSwitch = 0 # display only
-        self.gatherSwitch = 1 # display only
-        self.gfxSwitch = 1 # display
-        self.cmdStr = 'PVv'
-
-    def gather(self): 
-        if self._piTestExistance() != None: #check existance
-            return self._piTestExistance()
-        if self._piTestNameExists() != None: # check name
-            return self._piTestNameExists()
-        if self._piTestNoVL() != None: # check voiceType
-            return self._piTestNoVL()
-        # check current PVgroup name
-        if self._piTestCurrentPVgroupNameExists() != None: 
-            return self._piTestCurrentPVgroupNameExists()
-
-    def process(self): 
-        pass
-
-    def display(self): 
-        piName = self.ao.activePath
-        msg = []
-        msg.append('PI: %s, PathVoice: %s\n' % (piName, 
-                        self.ao.pathLib[piName].activeVoice))
-        # pre fill with aprop spacing
-        entryLines = [[],[],[],[],[],[],[],[],[],[],[]] 
-        rankDIVIDER = '.'
-        positionRange = range(0, len(self.ao.pathLib[piName]))
-        for i in positionRange:
-            if (i+1) == len(self.ao.pathLib[self.ao.activePath]):
-                break
-            srcPosition = i
-            dstPosition = i + 1
-            srcSize = len(self.ao.pathLib[piName][srcPosition])
-            dstSize = len(self.ao.pathLib[piName][dstPosition])
-            # supply the first map of the needed size
-            mapTupleId = self.ao.pathLib[piName].voiceLib[ 
-                             self.ao.pathLib[piName].activeVoice]['maps'][(srcPosition, 
-                                                                                        dstPosition)]
-            map = self.mcObj.fetchMap(mapTupleId)
-            pcSet = self.ao.pathLib[piName].get('pcsPath')[i]
-            rowDict = self.mcObj.genSingleVlDiagram(pcSet, map)
-            # the keys are numbered from 0 to 5, the indexe's for 6 line numbers
-            rowKeys = rowDict.keys()        
-            rowKeys.sort()
-            for key in rowKeys:
-                entryLines[key].append(rowDict[key])
-                # stringDict[key] = stringDict[key] + '%s' % rowDict[key]
-            (rankS,rankU,rankB),size = self.ao.pathLib[ 
-                  piName].voiceMapRank(self.ao.pathLib[piName].activeVoice, 
-                                                    srcPosition, dstPosition)
-            # creates a divider b/n rank and path
-            entryLines[6].append(rankDIVIDER * 9 ) 
-            entryLines[7].append('%sS%s ' % (lang.TAB, str(rankS).ljust(4)))
-            entryLines[8].append('%sU%s ' % (lang.TAB, str(rankU).ljust(4)))
-            entryLines[9].append('%sB%s ' % (lang.TAB, str(rankB).ljust(4)))
-            entryLines[10].append('%sof%s' % (lang.TAB, str(size).ljust(4)))
-        # add last chord, i is now at the appropriate index
-        for q in range(0, 6):
-            try:
-                pcValue = self.ao.pathLib[self.ao.activePath].get('pcsPath')[i][q]
-                data = str(pcValue).rjust(2)
-            except IndexError:
-                data = '      '
-            entryLines[q].append(data)
-
-        entryLines[6].append(rankDIVIDER *2) # this is the last chord in the path 
-        # remove blank lines if set smaller than 6 elements
-        finalLines = []
-        for key in range(0,11):
-            charSum = ''
-            for col in entryLines[key]:
-                charSum = charSum + str(col)
-            if charSum.strip() != '':
-                finalLines.append(entryLines[key])
-        headerKey    = []
-        minWidthList = [6,6]
-        bufList      = [0]
-        justList         = ['l',]
-        table = typeset.formatVariCol(headerKey, finalLines, minWidthList, 
-                                    bufList, justList, self.termObj,
-                                    'normal', 'bundle', 0)
-        msg.append('%s\n' % table)
-        return ''.join(msg)
-
-    def displayGfx(self, fmt, dir=None):
-        prefDict = self.ao.external.getPrefGroup('external')
-        obj = imagePath.PVviewCanvas(self.ao, 10, None, fmt, 
-                                              self.termObj.parentGUI)
-        obj.show(dir, prefDict)
-
-    def displayGfxUtil(self, fmt, fp):
-        obj = imagePath.PVviewCanvas(self.ao, 10, None, fmt, 
-                                              self.termObj.parentGUI)
-                                              # second arg sets openMedia to false
-        obj.write(fp, 0)
-
-
-class PVan(_CommandPV):
-    """provides analysis view of current path voice
-        args: pvan
-    """
-    def __init__(self, ao, cmdEnviron=None, args=''):
-        _CommandPV.__init__(self, ao, cmdEnviron, args)
-        self.processSwitch = 0 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'PVan'
-
-    def gather(self): 
-        args = self.args
-        if self._piTestExistance() != None: #check existance
-            return self._piTestExistance()
-        if self._piTestNameExists() != None: # check name
-            return self._piTestNameExists()
-        if self._piTestNoVL() != None: # check voiceType
-            return self._piTestNoVL()
-        if self._piTestCurrentPVgroupNameExists() != None: 
-            return self._piTestCurrentPVgroupNameExists()
-
-    def process(self): 
-        pass
-
-    def display(self): 
-        piName = self.ao.activePath
-        msg = []
-        msg.append('PI: %s, PathVoice: %s\n' % (piName, 
-                                          self.ao.pathLib[piName].activeVoice)) 
-        positionRange = range(0, len(self.ao.pathLib[piName]))
-        for i in positionRange:
-            if (i+1) == len(self.ao.pathLib[piName]):
-                break
-            srcPosition = i
-            dstPosition = i + 1
-            srcSize = len(self.ao.pathLib[piName][srcPosition])
-            dstSize = len(self.ao.pathLib[piName][dstPosition])
-            srcSet = self.ao.pathLib[piName].get('pcsPath')[srcPosition]
-            dstSet = self.ao.pathLib[piName].get('pcsPath')[dstPosition]
-            # supply the first map of the needed size
-            mapTupleId = self.ao.pathLib[piName].voiceLib[ 
-                             self.ao.pathLib[piName].activeVoice]['maps'][(srcPosition, 
-                                                                                        dstPosition)]
-            mapTypleIdStr = self.mcObj.mapIdTupleToString(mapTupleId)
-            map           = self.mcObj.fetchMap(mapTupleId)
-            mapStr        = self.mcObj.rawMapToString(map)
- 
-            msg.append('\nPosition %i,%i: origin %s destination %s' % 
-                    (srcPosition+1, dstPosition+1, 
-                    drawer.listToStr(srcSet), drawer.listToStr(dstSet)))
-                    
-            (rankS,rankU,rankB), size = self.ao.pathLib[ 
-                     piName].voiceMapRank(self.ao.pathLib[piName].activeVoice, 
-                                                      srcPosition, dstPosition)
-            msg = self._mcAnalysisTable(msg, srcSet, dstSet, mapTupleId, 
-                                  size, self.mcObj.SMTH(srcSet, dstSet, map), 
-                                rankS, self.mcObj.UNIF(srcSet, dstSet, map), 
-                        rankU, self.mcObj.BAL(srcSet, dstSet, map), rankB)       
-        msg.append('\n')
-        return ''.join(msg)
-
-class PVcm(_CommandPV):
-    """compares a voice in a path to all voices available
-    args: pvcm  startPos,endPos  sortMethod  startRange,endRange
-    """
-    def __init__(self, ao, cmdEnviron=None, args=''):
-        _CommandPV.__init__(self, ao, cmdEnviron, args)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'PVcm'
-
-    def gather(self): 
-        args = self.args
-
-        if self._piTestExistance() != None: #check existance
-            return self._piTestExistance()
-        if self._piTestNameExists() != None: # check name
-            return self._piTestNameExists()
-        if self._piTestNoVL() != None: # check voiceType
-            return self._piTestNoVL()
-        if self._piTestCurrentPVgroupNameExists() != None: 
-            return self._piTestCurrentPVgroupNameExists()
-        # get position
-        currentVLgroup   = self.ao.pathLib[self.ao.activePath].activeVoice
-        mapPositionkeys = self.ao.pathLib[self.ao.activePath].mapKeysFromVoice( 
-                                currentVLgroup)
-        noKeys = len(mapPositionkeys)
-
-        locTuple = None
-        sortMethod = None
-        outputRangeTuple = None
-        if args != '':
-            args = argTools.ArgOps(args, 'stripComma')
-            locTuple = args.get(0)
-            locTuple = self._convertListRange(locTuple, 1, noKeys)
-            if locTuple == None: return self._getUsage()
-            sortMethod = self._mcConvertSortMethod(args.get(1))
-            if sortMethod == None: return self._getUsage()
-            outputRangeTuple = args.get(2) # tested below
-        if sortMethod == None or locTuple == None:
-            locTuple = self._pvSelectMapPosition(currentVLgroup, noKeys)
-            if locTuple == None: return lang.msgReturnCancel
-            sortMethod = self._mcGetSortMethod()
-            if sortMethod == None: return lang.msgReturnCancel
-
-        srcPosition = locTuple[0]
-        dstPosition = locTuple[1]
-        srcSize = len(self.ao.pathLib[self.ao.activePath][srcPosition])
-        dstSize = len(self.ao.pathLib[self.ao.activePath][dstPosition])
-        srcSet = self.ao.pathLib[self.ao.activePath].get('pcsPath')[srcPosition]
-        dstSet = self.ao.pathLib[self.ao.activePath].get('pcsPath')[dstPosition]
-                
-        noMaps = self.mcObj.getNoMaps(srcSize, dstSize)
-        query = lang.msgMCenterMapRange % noMaps
-        if outputRangeTuple == None:
-            outputRangeTuple = self._mcGetIntegerRange(query, 1, noMaps)
-            if outputRangeTuple == None: return lang.msgReturnCancel
-        else: #get from args
-            outputRangeTuple = self._convertListRange(outputRangeTuple, 1, noMaps)
-            if outputRangeTuple == None: return self._getUsage()
-
-        self.locTuple = locTuple
-        self.sortMethod = sortMethod 
-        self.outputRangeTuple = outputRangeTuple
-        self.srcSet = srcSet
-        self.dstSet = dstSet
-        self.srcSize = srcSize
-        self.dstSize = dstSize
-        self.srcPosition = srcPosition
-        self.dstPosition = dstPosition
-
-    def process(self): 
-        locTuple = self.locTuple
-        sortMethod = self.sortMethod 
-        outputRangeTuple = self.outputRangeTuple
-        srcSet = self.srcSet
-        dstSet = self.dstSet
-
-        self.dictS, self.orderKeyS = self.mcObj.sortSMTH(srcSet, dstSet)
-        a = self.mcObj.sortUNIF(srcSet, dstSet)
-        self.dictU, self.orderKeyU, orderMax, orderSpan, orderOffset = a
-
-        b = self.mcObj.sortBAL(srcSet, dstSet)
-        self.dictB, self.orderKeyB, orderMax, orderSpan, orderOffset = b
-
-        size = len(self.dictS.keys())
-        
-        if sortMethod == 'SMTH':
-            self.orderOfMaps = self.orderKeyS
-        elif sortMethod == 'UNIF':
-            self.orderOfMaps = self.orderKeyU
-        elif sortMethod == 'BAL':
-            self.orderOfMaps = self.orderKeyB
-
-    def display(self): 
-        orderOfMaps = self.orderOfMaps 
-        outputRangeTuple = self.outputRangeTuple
-        srcSize = self.srcSize
-        dstSize = self.dstSize
-        srcSet = self.srcSet
-        dstSet = self.dstSet
-        
-        msg = []
-        msg.append('\nPI: %s, VL %s Comparison\n' % (self.ao.activePath,
-                         self.sortMethod))
-        msg.append('Position %i,%i: origin %s destination %s\n' % (
-                         self.srcPosition+1, self.dstPosition+1,
-                         drawer.listToStr(srcSet), drawer.listToStr(dstSet)))
-        orderOfMaps = orderOfMaps[outputRangeTuple[0]:(outputRangeTuple[1]+1)]
-        for partialMapId in orderOfMaps:
-            mapTupleId = (srcSize, dstSize, partialMapId)
-            msg = self._mcGetAnalysisPostSort(msg, srcSet, dstSet, 
-                             mapTupleId, self.dictS, self.orderKeyS,
-                             self.dictU, self.orderKeyU, self.dictB, 
-                             self.orderKeyB)
-        msg.append('\n')
-        return ''.join(msg)
-
-
-class PVls(_CommandPV):
-    def __init__(self, ao, cmdEnviron=None, args=''):
-        _CommandPV.__init__(self, ao, cmdEnviron, args)
-        self.processSwitch = 0 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'PVls'
-
-    def gather(self): 
-        if self._piTestExistance() != None: #check existance
-            return self._piTestExistance()
-        if self._piTestNameExists() != None: # check name
-            return self._piTestNameExists()
-        if self._piTestNoVL() != None: # check voiceType
-            return self._piTestNoVL()
-        if self._piTestCurrentPVgroupNameExists() != None: 
-            return self._piTestCurrentPVgroupNameExists()
-
-    def process(self): 
-        pass
-
-    def display(self): 
-        msg = []
-        msg.append('PathVoices available for PI %s:\n' % self.ao.activePath)
-        entryLines = []
-        groupNames = self.ao.pathLib[self.ao.activePath].voiceNames()
-        currentG      = self.ao.pathLib[self.ao.activePath].activeVoice
-        groupNames.sort()
-        for name in groupNames:
-            if name == self.ao.pathLib[self.ao.activePath].activeVoice: 
-                status = lang.ACTIVE
-            else: status = lang.INACTIVE
-            mapStringList = self.ao.pathLib[self.ao.activePath].voiceRepr(      
-                                 name)
-            entryLines.append([status, name, mapStringList])
-
-        headerKey    = ['', 'name','mapClass']
-        minWidthList = (lang.TABW, lang.NAMEW, 0)
-        bufList      = [0, 1, 0]
-        justList         = ['c','l','l']
-        table = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
-                                      bufList, justList, self.termObj)
-        msg.append('%s\n' % table)
-        return ''.join(msg)
-
-
-class PVe(_CommandPV):
-    def __init__(self, ao, cmdEnviron=None, args=''):
-        _CommandPV.__init__(self, ao, cmdEnviron, args)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'PVe'
-
-    def gather(self): 
-        if self._piTestExistance() != None: #check existance
-            return self._piTestExistance()
-        if self._piTestNameExists() != None: # check name
-            return self._piTestNameExists()
-        if self._piTestNoVL() != None: # check voiceType
-            return self._piTestNoVL()
-        if self._piTestCurrentPVgroupNameExists() != None: 
-            return self._piTestCurrentPVgroupNameExists()
-
-        name = self.ao.pathLib[self.ao.activePath].activeVoice
-        mapPositionkeys = self.ao.pathLib[ 
-                                self.ao.activePath].mapKeysFromVoice(name)
-        noKeys = len(mapPositionkeys)
-
-        locTuple = self._pvSelectMapPosition(name, noKeys, 'edit')
-        if locTuple == None: return lang.msgReturnCancel
-        srcPosition = locTuple[0]   
-        dstPosition = locTuple[1]
-        srcSet = self.ao.pathLib[self.ao.activePath].get('pcsPath')[srcPosition]
-        dstSet = self.ao.pathLib[self.ao.activePath].get('pcsPath')[dstPosition]
-        srcSize = len(self.ao.pathLib[self.ao.activePath][srcPosition])
-        dstSize = len(self.ao.pathLib[self.ao.activePath][dstPosition])
-
-        selectStr = self._pvSelectRankOrMap(srcSet, dstSet)
-        if selectStr == None: return lang.msgReturnCancel
-
-        # end gather here
-
-        if selectStr == 'r':
-            sortStr = self._mcGetSortMethod()
-            if sortStr == None: lang.msgReturnCancel
-
-            if sortStr == 'SMTH':
-                dictS, orderKeyList = self.mcObj.sortSMTH(srcSet, dstSet)
-                mapIdTuple = self.mcObj.getUserMapFromRank(srcSet, dstSet, 
-                                 orderKeyList, 'Smoothness', self.termObj)
-                if mapIdTuple == None: return lang.msgReturnCancel
-            elif sortStr == 'UNIF':
-                a = self.mcObj.sortUNIF(srcSet, dstSet)
-                dictU,orderKeyList,orderMax,orderSpan,orderOffset=a
-                mapIdTuple = self.mcObj.getUserMapFromRank(srcSet, dstSet, 
-                                         orderKeyList, 'Uniformity', self.termObj)
-                if mapIdTuple == None: return lang.msgReturnCancel
-            elif sortStr == 'BAL':
-                a = self.mcObj.sortBAL(srcSet, dstSet)
-                dictB,orderKeyList,orderMax,orderSpan,orderOffset = a
-                mapIdTuple = self.mcObj.getUserMapFromRank(srcSet, dstSet, 
-                                  orderKeyList, 'Balance', self.termObj)
-                if mapIdTuple == None: return lang.msgReturnCancel
-        elif selectStr == 'm':
-            try:
-                mapIdTuple, mapGotten = self.mcObj.getUserMap(srcSet, dstSet, 
-                                                self.termObj)
-            except (ValueError, TypeError): # returned none
-                mapIdTuple = None
-            if mapIdTuple == None: return lang.msgReturnCancel
-
-        self.name = name
-        self.srcPosition = srcPosition
-        self.dstPosition = dstPosition
-        self.mapIdTuple = mapIdTuple
-        self.locTuple = locTuple
-
-    def process(self): 
-        # add new map over old one
-        self.ao.pathLib[self.ao.activePath].voiceMapAdd(self.name, (self.srcPosition, 
-                        self.dstPosition), self.mapIdTuple)
-        # do not updtae analysis
-        # self.ao.pathLib[self.ao.activePath].voiceFillRank()
-        # update ranks
-        self.ao.pathLib[self.ao.activePath].voiceUpdateMapRank(self.name)
-
-    def display(self): 
-        msg = []
-        msg.append('map at %s in PathVoice %s edited.\n' % 
-                      (drawer.listToStr(self.locTuple), self.name))
-        return ''.join(msg)
-
-
-class PVn(_CommandPV):
-    def __init__(self, ao, cmdEnviron=None, args=''):
-        _CommandPV.__init__(self, ao, cmdEnviron, args)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'PVn'
-
-    def gather(self): 
-        # note: no command-line pv creation available yet
-        if self._piTestExistance() != None: #check existance
-            return self._piTestExistance()
-        if self._piTestNameExists() != None: # check name
-            return self._piTestNameExists()
-        if self._piTestNoVL() != None: # check voiceType
-            return self._piTestNoVL()
-
-        piName = self.ao.activePath
-        query = 'name this PathVoice for PI %s:' % piName
-        name = self._pvGetNewName(query, piName)
-        if name == None: return lang.msgReturnCancel
-
-        self.ao.pathLib[piName].activeVoice = name
-        i = 0
-        while 1:
-            if (i+1) == len(self.ao.pathLib[piName]):
-                break
-            srcPosition = i
-            dstPosition = i + 1
-            
-            srcSet = self.ao.pathLib[piName].get('pcsPath')[srcPosition]
-            dstSet = self.ao.pathLib[piName].get('pcsPath')[dstPosition]
-            srcSize = len(self.ao.pathLib[piName][srcPosition])
-            dstSize = len(self.ao.pathLib[piName][dstPosition])
-            # supply the first map of the needed size
-
-            selectStr = self._pvSelectRankOrMap(srcSet, dstSet)
-            if selectStr == None: return lang.msgReturnCancel
-
-            if selectStr == 'r':
-                sortStr = self._mcGetSortMethod()
-                if sortStr == None: return lang.msgReturnCancel
-                if sortStr == 'SMTH':
-                    dictS, orderKeyList = self.mcObj.sortSMTH(srcSet, dstSet)
-                    mapIdTuple = self.mcObj.getUserMapFromRank(srcSet, dstSet, 
-                                             orderKeyList, 'Smoothness', self.termObj)
-                    if mapIdTuple == None:
-                        dialog.msgOut(lang.msgMCnoSuchRank, self.termObj)
-                        continue     # may want to make this a break
-                elif sortStr == 'UNIF':
-                    a = self.mcObj.sortUNIF(srcSet, dstSet)
-                    dictU = a[0]
-                    orderKeyList = a[1]
-                    orderMax = a[2]
-                    orderSpan = a[3]
-                    orderOffset = a[4]
-                    mapIdTuple = self.mcObj.getUserMapFromRank(srcSet, dstSet,
-                                             orderKeyList, 'Uniformity',self.termObj)
-                    if mapIdTuple == None:
-                        dialog.msgOut(lang.msgMCnoSuchRank, self.termObj)
-                        continue     # may want to make this a break
-                elif sortStr == 'BAL':
-                    b = self.mcObj.sortBAL(srcSet, dstSet)
-                    # dictB = b[0]
-                    orderKeyList = b[1]
-                    orderMax = b[2]
-                    orderSpan = b[3]
-                    orderOffset = b[4]
-                    mapIdTuple = self.mcObj.getUserMapFromRank(srcSet, dstSet,
-                                             orderKeyList, 'Balance', self.termObj)
-                    if mapIdTuple == None:
-                        dialog.msgOut(lang.msgMCnoSuchRank, self.termObj)
-                        continue     # may want to make this a break
-            elif selectStr == 'm':  
-                try:
-                    mapIdTuple, mapGotten = self.mcObj.getUserMap(srcSet, dstSet,
-                                                    self.termObj)
-                except (ValueError, TypeError):
-                    mapIdTuple = None
-                if mapIdTuple == None:
-                    dialog.msgOut(lang.msgMCnoSuchMap, self.termObj)
-                    continue     # do not increment incase there is an error
-
-            self.ao.pathLib[piName].voiceMapAdd(name, (srcPosition, 
-                            dstPosition), mapIdTuple)
-            i = i + 1
-        # post loop
-        self.name = name
-        
-    def process(self): 
-        # update analysis and ranks
-        #self.ao.pathLib[self.ao.activePath].voiceFillRank()
-        self.ao.pathLib[self.ao.activePath].voiceUpdateMapRank(self.name)
-
-    def display(self): 
-        msg = 'PathVoice %s added to PI %s.\n' % (self.name, self.ao.activePath)
-        return msg
-
-class PVauto(_CommandPV):
-    """automatically fill a path voice with the first or last of 
-    a sort method
-    pvauto name sortMethod firstLast
-    """
-    def __init__(self, ao, cmdEnviron=None, args=''):
-        _CommandPV.__init__(self, ao, cmdEnviron, args)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'PVauto'
-
-    def _pvConvertFirstOrLast(self, usrStr):
-        """convert string to first or last"""
-        ref = {
-            'f' : ['first', 'f'],
-            'l' : ['last', 'l'],
-                }
-        usrStr = drawer.selectionParse(usrStr, ref)
-        return usrStr # may be None             
-
-    def _pvSelectFirstOrLast(self):
-        """have user select between first or last"""
-        query = lang.msgPVselectFirstLast
-        while 1:
-            reply = dialog.askStr(query, self.termObj)
-            if reply == None:
-                return None
-            reply = self._pvConvertFirstOrLast(reply)
-            if reply == None:
-                dialog.msgOut(lang.msgPVfirstOrLastError, self.termObj)
-                continue
-            else:
-                return reply
-
-    def gather(self): 
-        args = self.args
-
-        if self._piTestExistance() != None: #check existance
-            return self._piTestExistance()
-        if self._piTestNameExists() != None: # check name
-            return self._piTestNameExists()
-        if self._piTestNoVL() != None: # check voiceType
-            return self._piTestNoVL()
-        name = None
-        sortStr = None
-        orderStr = None
-        if args != '':
-            args = argTools.ArgOps(args, 'stripComma')
-            name = args.get(0)
-            if name == None: return self._getUsage()
-            sortStr = self._mcConvertSortMethod(args.get(1))
-            if sortStr == None: return self._getUsage()
-            orderStr = self._pvConvertFirstOrLast(args.get(2))
-            if orderStr == None: return self._getUsage()
-        if name == None or sortStr == None or orderStr == None:
-            query = 'name this auto PathVoice for PI %s:' % self.ao.activePath
-            name = self._pvGetNewName(query, self.ao.activePath)
-            if name == None: return lang.msgReturnCancel
-            self.ao.pathLib[self.ao.activePath].activeVoice = name
-            sortStr = self._mcGetSortMethod()
-            if sortStr == None: return lang.msgReturnCancel
-            orderStr = self._pvSelectFirstOrLast()
-            if orderStr == None: return lang.msgReturnCancel
-
-        self.name = name
-        self.orderStr = orderStr
-        self.sortStr = sortStr
-
-    def process(self): 
-        name = self.name
-        orderStr = self.orderStr
-        sortStr = self.sortStr
-        piName = self.ao.activePath
-        i = 0
-        while 1:
-            if (i+1) == len(self.ao.pathLib[piName]):
-                break
-            srcPosition = i
-            dstPosition = i + 1
-            srcSet = self.ao.pathLib[piName].get('pcsPath')[srcPosition]
-            dstSet = self.ao.pathLib[piName].get('pcsPath')[dstPosition]
-            srcSize = len(self.ao.pathLib[piName][srcPosition])
-            dstSize = len(self.ao.pathLib[piName][dstPosition])
-            # supply the first map of the needed size
-
-            if sortStr == 'SMTH':
-                dictS, orderKeyList = self.mcObj.sortSMTH(srcSet, dstSet)
-                if orderStr == 'f': # first is the first value in list
-                    mapIdTuple = (srcSize, dstSize, orderKeyList[0])
-                elif orderStr == 'l':  # last is the key at end of list
-                    mapIdTuple = (srcSize, dstSize, orderKeyList[-1])
-            elif sortStr == 'UNIF':
-                a = self.mcObj.sortUNIF(srcSet, dstSet)
-                # dictU = a[0]
-                orderKeyList = a[1]
-                orderMax = a[2]
-                orderSpan = a[3]
-                orderOffset = a[4]
-                if orderStr == 'f': # first is the first value in list
-                    mapIdTuple = (srcSize, dstSize, orderKeyList[0])
-                elif orderStr == 'l':  # last is the key at end of list
-                    mapIdTuple = (srcSize, dstSize, orderKeyList[-1])
-            elif sortStr == 'BAL':
-                b = self.mcObj.sortBAL(srcSet, dstSet)
-                dictB = b[0]
-                orderKeyList = b[1]
-                orderMax = b[2]
-                orderSpan = b[3]
-                orderOffset = b[4]
-                if orderStr == 'f': # first is the first value in list
-                    mapIdTuple = (srcSize, dstSize, orderKeyList[0])
-                elif orderStr == 'l':  # last is the key at end of list
-                    mapIdTuple = (srcSize, dstSize, orderKeyList[-1])
-
-            self.ao.pathLib[piName].voiceMapAdd(name, (srcPosition,
-                                                         dstPosition), mapIdTuple)
-            i = i + 1
-            
-        # update analysis and ranks
-        #self.ao.pathLib[piName].voiceFillRank(name)
-        self.ao.pathLib[piName].voiceUpdateMapRank(name)
-
-    def display(self): 
-        msg = 'auto PathVoice %s added to PI %s.\n' % (self.name, 
-                                                            self.ao.activePath)
-        return msg
-        
-class PVo(_CommandPV):
-    def __init__(self, ao, cmdEnviron=None, args=''):
-        _CommandPV.__init__(self, ao, cmdEnviron, args)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'PVo'
-
-    def gather(self): 
-        args = self.args
-        if self._piTestExistance() != None: #check existance
-            return self._piTestExistance()
-        if self._piTestNameExists() != None: # check name
-            return self._piTestNameExists()
-        if self._piTestNoVL() != None: # check voiceType
-            return self._piTestNoVL()
-        name = None
-        if args != '':
-            args = argTools.ArgOps(args)
-            pvNames = self.ao.pathLib[self.ao.activePath].voiceNames()
-            name = drawer.inList(args.get(0), pvNames)
-            if name == None: return self._getUsage()
-        if name == None:
-            name = self._chooseFromList('select a PathVoice:', 
-                          self.ao.pathLib[self.ao.activePath].voiceNames(),
-                          'case')
-            if name == None: return lang.msgPVbadName
-        self.name = name
-
-    def process(self): 
-        self.ao.pathLib[self.ao.activePath].activeVoice = self.name
-
-    def display(self): 
-        msg = 'PathVoice %s now active.\n' % (self.ao.pathLib[ 
-                                                self.ao.activePath].activeVoice)
-        return msg
-
-class PVcp(_CommandPV):
-    """makes a copy of a VLmapGroup
-        args: pvcp  source  target1  target2 ...
-    """
-    def __init__(self, ao, cmdEnviron=None, args=''):
-        _CommandPV.__init__(self, ao, cmdEnviron, args)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'PVcp'
-
-    def _pvCopy(self, pathName, srcName, dstName):
-        if (pathName in self.ao.pathLib.keys() and srcName != dstName):
-
-            if srcName not in self.ao.pathLib[pathName].voiceNames():
-                return None
-            # does all updates, changes current map
-            self.ao.pathLib[pathName].voiceCopy(srcName, dstName)
-            return 'PathVoice %s created.\n' % dstName 
-        else:
-            return None
-
-    def gather(self): 
-        args = self.args
-        self.cpList = []
-
-        if self._piTestExistance() != None: #check existance
-            return self._piTestExistance()
-        if self._piTestNameExists(self.ao.activePath) != None: # check name
-            return self._piTestNameExists(self.ao.activePath)
-        if self._piTestNoVL() != None: # check voiceType
-            return self._piTestNoVL()
-    
-        if args != '':
-            args = argTools.ArgOps(args, 'stripComma')
-            pvNames = self.ao.pathLib[self.ao.activePath].voiceNames()
-            oldName = drawer.inList(args.get(0), pvNames)
-            if oldName == None: return self._getUsage()
-            if args.list(1, 'end') != None: # if supplied
-                for newName in args.list(1, 'end'):
-                    self.cpList.append(newName)
-            else: return self._getUsage()
-
-        if self.cpList == []:
-            oldName = self._chooseFromList('select a PathVoice to copy:', 
-                self.ao.pathLib[self.ao.activePath].voiceNames(), 'case')
-            if oldName == None: return lang.msgPVbadName
-            query = 'name this PathVoice for PI %s:' % oldName
-            newName = self._pvGetNewName(query, self.ao.activePath)
-            if newName == None: return lang.msgReturnCancel
-            self.cpList.append(newName)
-
-        self.oldName = oldName
-
-    def process(self): 
-        self.report = []
-        for name in self.cpList:
-            msg = self._pvCopy(self.ao.activePath, self.oldName, name)
-            if msg != None:
-                self.report.append(msg)
-            else:
-                self.report.append(lang.msgBadArgFormat)
-
-    def display(self): 
-        return ''.join(self.report)
-        
-class PVrm(_CommandPV):
-    def __init__(self, ao, cmdEnviron=None, args=''):
-        _CommandPV.__init__(self, ao, cmdEnviron, args)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'PVrm'
-
-    def _pvRemove(self, pathName, name):
-        if name == 'auto':
-            return None # cant be deleted
-        pvNames = self.ao.pathLib[pathName].voiceNames()
-        if name not in pvNames:
-            return None
-        if name == self.ao.pathLib[pathName].activeVoice:
-            self.ao.pathLib[pathName].activeVoice = 'auto'
-        self.ao.pathLib[pathName].voiceDelete(name)
-        return 'PathVoice ' + name + ' destroyed.\n'
-
-    def gather(self): 
-        args = self.args
-        self.rmList = []
-
-        if self._piTestExistance() != None: #check existance
-            return self._piTestExistance()
-        if self._piTestNameExists() != None: # check name
-            return self._piTestNameExists()
-        if self._piTestNoVL() != None: # check voiceType
-            return self._piTestNoVL()
-
-        if args != '':
-            args = argTools.ArgOps(args, 'stripComma')
-            pvNames = self.ao.pathLib[self.ao.activePath].voiceNames()
-            pvNames.remove('auto')
-            if args.list(0, 'end') != None: # if supplied
-                for newName in args.list(0, 'end'):
-                    newName = drawer.inList(newName, pvNames)
-                    if newName == None: return self._getUsage()
-                    self.rmList.append(newName)
-            else: return self._getUsage()
-
-        if self.rmList == []:
-            name = self._chooseFromList('select a PathVoice to delete:', 
-                self.ao.pathLib[self.ao.activePath].voiceNames(), 'case')
-            if name == None: return lang.msgPVbadName
-            if name == 'auto':
-                return 'PathVoice %s is reserved and can not be deleted.\n' % name
-            query = 'are you sure you want to delete PathVoice %s? ' % name
-            askUsr = dialog.askYesNoCancel(query, 1, self.termObj)
-            if askUsr == 1:
-                self.rmList.append(name)
-            else:
-                return lang.msgReturnCancel
-
-    def process(self): 
-        self.report = []
-        for name in self.rmList:
-            msg = self._pvRemove(self.ao.activePath, name)
-            if msg != None:
-                self.report.append(msg)
-            else:
-                self.report.append(lang.msgBadArgFormat)
-
-    def display(self): 
-        return ''.join(self.report)
+# class PScma(Command):
+#     """compares adjacent sets, comparison A
+#         args: pscma 
+#     """
+#     def __init__(self, ao, cmdEnviron=None, args=''):
+#         Command.__init__(self, ao, cmdEnviron, args)
+#         self.processSwitch = 1 # display only
+#         self.gatherSwitch = 1 # display only
+#         self.cmdStr = 'PScma'
+# 
+#     def gather(self): 
+#         args = self.args
+# 
+#         if self._piTestExistance() != None: #check existance
+#             return self._piTestExistance()
+#         if self._piTestNameExists() != None: # check name
+#             return self._piTestNameExists()
+#         self.setMeasure = self._setMeasureFactory()
+#         self.scList = self.ao.pathLib[self.ao.activePath].get('scPath')
+# 
+#     def process(self): 
+#         self.compValues = []
+#         for i in range(0, len(self.scList)):
+#             scX = i
+#             if i == len(self.scList) - 1:
+#                 scY = 0
+#             else: 
+#                 scY = i+1
+#             value = self.setMeasure.compareSet(self.scList[scX], self.scList[scY], 
+#                           self.ao.tniMode) # not all need tni, but all accept
+#             self.compValues.append(value)
+# 
+#     def display(self): 
+#         termWidth = self.termObj.w
+#         graphSize = termWidth - lang.LMARGINW # for range
+# 
+#         msg = []
+#         msg.append('PI: %s, %s analysis\n' % (self.ao.activePath, 
+#                                                           self.setMeasure.name))
+#         msg.append(self._scGetTnStr()+'\n')
+# 
+#         minStr = str(self.setMeasure.min) + '(min)'       
+#         maxStr = '(max)' + str(self.setMeasure.max) 
+# 
+#         graphRuler = typeset.graphLabeledRuler(minStr, maxStr, graphSize)
+#         graphRuler = '%s%s\n' % (lang.msgSCsimRange.ljust(lang.LMARGINW), 
+#                                          graphRuler)
+#         msg.append(graphRuler)
+#         entryLines = []
+# 
+#         for i in range(0, len(self.scList)):
+#             p_str = self.scObj.scToStr(self.scList[i])
+#             v_str = '%.2f' % self.compValues[i]
+#             graph = typeset.graphNumber(self.setMeasure.min, self.setMeasure.max,
+#                                                 self.compValues[i], graphSize)
+#             entryLines.append(['', p_str, ''])
+#             entryLines.append([v_str, '', graph])
+#         lastSet = self.scObj.scToStr(self.scList[0])
+#         entryLines.append(['', lastSet, ''])
+# 
+#         headerKey    = [] #['similarity', 'set', 'graph']
+#         minWidthList = ((lang.LMARGINW/2), (lang.LMARGINW/2), graphSize)
+#         bufList      = [0, 0, 0]
+#         justList         = ['l','l','l']
+#         table = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
+#                                           bufList, justList, self.termObj)
+#         msg.append('%s\n' % table)
+#         return ''.join(msg)
+# 
+# 
+# class PScmb(Command):
+#     """one to many analysis
+#         args: pscmb  set
+#     """
+#     def __init__(self, ao, cmdEnviron=None, args=''):
+#         Command.__init__(self, ao, cmdEnviron, args)
+#         self.processSwitch = 1 # display only
+#         self.gatherSwitch = 1 # display only
+#         self.cmdStr = 'PScmb'
+# 
+#     def gather(self): 
+#         args = self.args
+# 
+#         if self._piTestExistance() != None: #check existance
+#             return self._piTestExistance()
+#         if self._piTestNameExists() != None: # check name
+#             return self._piTestNameExists()
+# 
+#         data = None
+#         if args != '':
+#             args = argTools.ArgOps(args) # no strip
+#             data = self.setFactory(self.ao,args.get(0,'end'), self.scObj)
+#             if data == None: return self._getUsage()
+#         if data == None:
+#             dialog.msgOut('enter a SC for comparison to the path:\n',
+#                                  self.termObj)
+#             data = self.setFactory(self.ao, None, self.scObj)
+#             if data == None: return lang.msgReturnCancel
+#         self.setMeasure = self._setMeasureFactory() #optional tonic/dom arguments excluded
+#         self.scList = self.ao.pathLib[self.ao.activePath].get('scPath')
+#         self.data = data # setObj
+# 
+#     def process(self): 
+#         self.compValues = []
+#         for i in range(0, len(self.scList)):
+#             scX = i # tni not used by all
+#             value = self.setMeasure.compareSet(self.scList[scX], 
+#                             self.data.get('sc'), self.ao.tniMode) 
+#             self.compValues.append(value)
+# 
+# 
+#     def display(self): 
+#         termObj = self.termObj       
+#         termWidth = termObj.w
+#         graphSize = termWidth - lang.LMARGINW # for range
+# 
+#         msg = []
+#         msg.append('PI: %s, %s analysis\n' % (self.ao.activePath, 
+#                                                           self.setMeasure.name))
+#         msg.append(self._scGetTnStr() + '\n')
+#         msg.append('reference SC %s\n' % self.data.repr('sc'))
+# 
+#         minStr = str(self.setMeasure.min) + '(min)'
+#         maxStr = '(max)' + str(self.setMeasure.max)
+# 
+#         graphRuler = typeset.graphLabeledRuler(minStr, maxStr, graphSize)
+#         graphRuler = '%s%s\n' % (lang.msgSCsimRange.ljust(lang.LMARGINW), 
+#                                          graphRuler)
+#         msg.append(graphRuler)
+#         entryLines = []
+# 
+#         for i in range(0, len(self.scList)):
+#             p_str = self.scObj.scToStr(self.scList[i])
+#             v_str = '%.2f' % self.compValues[i]
+#             graph = typeset.graphNumber(self.setMeasure.min, self.setMeasure.max,
+#                                                 self.compValues[i], graphSize)
+#             entryLines.append([v_str, p_str, graph])
+#         headerKey    = [] # ['similarity', 'set', 'graph']
+#         minWidthList = ((lang.LMARGINW/2), (lang.LMARGINW/2), graphSize)
+#         bufList      = [0, 0, 0]
+#         justList         = ['l','l','l']
+#         table = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
+#                                          bufList, justList, self.termObj)
+#         msg.append('%s\n' % table)
+#         return ''.join(msg)
+# 
+# 
+# 
+# #-----------------------------------------------------------------||||||||||||--
+# class _CommandPV(Command):
+#     def __init__(self, ao, cmdEnviron=None, args=''):
+#         Command.__init__(self, ao, cmdEnviron, args)
+# 
+#     def _pvSelectRankOrMap(self, srcSet, dstSet):
+#         """have user select between rank or map"""
+#         query = 'enter a map from %s to %s: by rank or map? (r or m):' % (
+#                       drawer.listToStr(srcSet), drawer.listToStr(dstSet))
+#         while 1:
+#             reply = dialog.askStr(query, self.termObj)
+#             if reply == None:
+#                 return None
+#             reply = reply.lower()
+#             if reply.find('r') != -1:
+#                 return 'r'
+#             elif reply.find('m') != -1:
+#                 return 'm'
+#             else:
+#                 dialog.msgOut(lang.msgPVmapOrRankError, self.termObj)
+#                 continue
+# 
+#     def _pvGetNewName(self, query, pathName):
+#         """asks user for a pathVoice name. must provide a path
+#             for which to search voiceLib within
+#         """
+#         while 1:
+#             name = dialog.askStr(query, self.termObj)
+#             if name == None or name == '' :
+#                 return None
+#             name = self._nameReplace(name)
+#             if self._nameTest(name) != None:
+#                 dialog.msgOut(self._nameTest(name), self.termObj)
+#             elif self.ao.pathLib[pathName].voiceLib.has_key(name):
+#                 dialog.msgOut(lang.msgPVnameTaken, self.termObj)
+#             else:
+#                 return name
+# 
+# 
+#     def _pvSelectMapPosition(self, currentVLgroup, noKeys, variString='compare'):
+#         query = 'PathVoice %s has map positions (1,2) through (%i,%i): enter position to %s:' % (currentVLgroup, noKeys, noKeys+1, variString)
+#         while 1:
+#             locStr = dialog.askStr(query, self.termObj)
+#             if locStr == None: return None
+# 
+#             locTuple = self._convertListRange(locStr, 1, noKeys+1)#max in user-land
+#             if locTuple == None:
+#                 dialog.msgOut(lang.msgMCbadPosition, self.termObj)
+#                 continue
+#             else:
+#                 return locTuple
+# 
+# 
+# 
+# class PVv(_CommandPV):
+#     def __init__(self, ao, cmdEnviron=None, args=''):
+#         _CommandPV.__init__(self, ao, cmdEnviron, args)
+#         self.processSwitch = 0 # display only
+#         self.gatherSwitch = 1 # display only
+#         self.gfxSwitch = 1 # display
+#         self.cmdStr = 'PVv'
+# 
+#     def gather(self): 
+#         if self._piTestExistance() != None: #check existance
+#             return self._piTestExistance()
+#         if self._piTestNameExists() != None: # check name
+#             return self._piTestNameExists()
+#         if self._piTestNoVL() != None: # check voiceType
+#             return self._piTestNoVL()
+#         # check current PVgroup name
+#         if self._piTestCurrentPVgroupNameExists() != None: 
+#             return self._piTestCurrentPVgroupNameExists()
+# 
+#     def process(self): 
+#         pass
+# 
+#     def display(self): 
+#         piName = self.ao.activePath
+#         msg = []
+#         msg.append('PI: %s, PathVoice: %s\n' % (piName, 
+#                         self.ao.pathLib[piName].activeVoice))
+#         # pre fill with aprop spacing
+#         entryLines = [[],[],[],[],[],[],[],[],[],[],[]] 
+#         rankDIVIDER = '.'
+#         positionRange = range(0, len(self.ao.pathLib[piName]))
+#         for i in positionRange:
+#             if (i+1) == len(self.ao.pathLib[self.ao.activePath]):
+#                 break
+#             srcPosition = i
+#             dstPosition = i + 1
+#             srcSize = len(self.ao.pathLib[piName][srcPosition])
+#             dstSize = len(self.ao.pathLib[piName][dstPosition])
+#             # supply the first map of the needed size
+#             mapTupleId = self.ao.pathLib[piName].voiceLib[ 
+#                              self.ao.pathLib[piName].activeVoice]['maps'][(srcPosition, 
+#                                                                                         dstPosition)]
+#             map = self.mcObj.fetchMap(mapTupleId)
+#             pcSet = self.ao.pathLib[piName].get('pcsPath')[i]
+#             rowDict = self.mcObj.genSingleVlDiagram(pcSet, map)
+#             # the keys are numbered from 0 to 5, the indexe's for 6 line numbers
+#             rowKeys = rowDict.keys()        
+#             rowKeys.sort()
+#             for key in rowKeys:
+#                 entryLines[key].append(rowDict[key])
+#                 # stringDict[key] = stringDict[key] + '%s' % rowDict[key]
+#             (rankS,rankU,rankB),size = self.ao.pathLib[ 
+#                   piName].voiceMapRank(self.ao.pathLib[piName].activeVoice, 
+#                                                     srcPosition, dstPosition)
+#             # creates a divider b/n rank and path
+#             entryLines[6].append(rankDIVIDER * 9 ) 
+#             entryLines[7].append('%sS%s ' % (lang.TAB, str(rankS).ljust(4)))
+#             entryLines[8].append('%sU%s ' % (lang.TAB, str(rankU).ljust(4)))
+#             entryLines[9].append('%sB%s ' % (lang.TAB, str(rankB).ljust(4)))
+#             entryLines[10].append('%sof%s' % (lang.TAB, str(size).ljust(4)))
+#         # add last chord, i is now at the appropriate index
+#         for q in range(0, 6):
+#             try:
+#                 pcValue = self.ao.pathLib[self.ao.activePath].get('pcsPath')[i][q]
+#                 data = str(pcValue).rjust(2)
+#             except IndexError:
+#                 data = '      '
+#             entryLines[q].append(data)
+# 
+#         entryLines[6].append(rankDIVIDER *2) # this is the last chord in the path 
+#         # remove blank lines if set smaller than 6 elements
+#         finalLines = []
+#         for key in range(0,11):
+#             charSum = ''
+#             for col in entryLines[key]:
+#                 charSum = charSum + str(col)
+#             if charSum.strip() != '':
+#                 finalLines.append(entryLines[key])
+#         headerKey    = []
+#         minWidthList = [6,6]
+#         bufList      = [0]
+#         justList         = ['l',]
+#         table = typeset.formatVariCol(headerKey, finalLines, minWidthList, 
+#                                     bufList, justList, self.termObj,
+#                                     'normal', 'bundle', 0)
+#         msg.append('%s\n' % table)
+#         return ''.join(msg)
+# 
+#     def displayGfx(self, fmt, dir=None):
+#         prefDict = self.ao.external.getPrefGroup('external')
+#         obj = imagePath.PVviewCanvas(self.ao, 10, None, fmt, 
+#                                               self.termObj.parentGUI)
+#         obj.show(dir, prefDict)
+# 
+#     def displayGfxUtil(self, fmt, fp):
+#         obj = imagePath.PVviewCanvas(self.ao, 10, None, fmt, 
+#                                               self.termObj.parentGUI)
+#                                               # second arg sets openMedia to false
+#         obj.write(fp, 0)
+# 
+# 
+# class PVan(_CommandPV):
+#     """provides analysis view of current path voice
+#         args: pvan
+#     """
+#     def __init__(self, ao, cmdEnviron=None, args=''):
+#         _CommandPV.__init__(self, ao, cmdEnviron, args)
+#         self.processSwitch = 0 # display only
+#         self.gatherSwitch = 1 # display only
+#         self.cmdStr = 'PVan'
+# 
+#     def gather(self): 
+#         args = self.args
+#         if self._piTestExistance() != None: #check existance
+#             return self._piTestExistance()
+#         if self._piTestNameExists() != None: # check name
+#             return self._piTestNameExists()
+#         if self._piTestNoVL() != None: # check voiceType
+#             return self._piTestNoVL()
+#         if self._piTestCurrentPVgroupNameExists() != None: 
+#             return self._piTestCurrentPVgroupNameExists()
+# 
+#     def process(self): 
+#         pass
+# 
+#     def display(self): 
+#         piName = self.ao.activePath
+#         msg = []
+#         msg.append('PI: %s, PathVoice: %s\n' % (piName, 
+#                                           self.ao.pathLib[piName].activeVoice)) 
+#         positionRange = range(0, len(self.ao.pathLib[piName]))
+#         for i in positionRange:
+#             if (i+1) == len(self.ao.pathLib[piName]):
+#                 break
+#             srcPosition = i
+#             dstPosition = i + 1
+#             srcSize = len(self.ao.pathLib[piName][srcPosition])
+#             dstSize = len(self.ao.pathLib[piName][dstPosition])
+#             srcSet = self.ao.pathLib[piName].get('pcsPath')[srcPosition]
+#             dstSet = self.ao.pathLib[piName].get('pcsPath')[dstPosition]
+#             # supply the first map of the needed size
+#             mapTupleId = self.ao.pathLib[piName].voiceLib[ 
+#                              self.ao.pathLib[piName].activeVoice]['maps'][(srcPosition, 
+#                                                                                         dstPosition)]
+#             mapTypleIdStr = self.mcObj.mapIdTupleToString(mapTupleId)
+#             map           = self.mcObj.fetchMap(mapTupleId)
+#             mapStr        = self.mcObj.rawMapToString(map)
+#  
+#             msg.append('\nPosition %i,%i: origin %s destination %s' % 
+#                     (srcPosition+1, dstPosition+1, 
+#                     drawer.listToStr(srcSet), drawer.listToStr(dstSet)))
+#                     
+#             (rankS,rankU,rankB), size = self.ao.pathLib[ 
+#                      piName].voiceMapRank(self.ao.pathLib[piName].activeVoice, 
+#                                                       srcPosition, dstPosition)
+#             msg = self._mcAnalysisTable(msg, srcSet, dstSet, mapTupleId, 
+#                                   size, self.mcObj.SMTH(srcSet, dstSet, map), 
+#                                 rankS, self.mcObj.UNIF(srcSet, dstSet, map), 
+#                         rankU, self.mcObj.BAL(srcSet, dstSet, map), rankB)       
+#         msg.append('\n')
+#         return ''.join(msg)
+# 
+# class PVcm(_CommandPV):
+#     """compares a voice in a path to all voices available
+#     args: pvcm  startPos,endPos  sortMethod  startRange,endRange
+#     """
+#     def __init__(self, ao, cmdEnviron=None, args=''):
+#         _CommandPV.__init__(self, ao, cmdEnviron, args)
+#         self.processSwitch = 1 # display only
+#         self.gatherSwitch = 1 # display only
+#         self.cmdStr = 'PVcm'
+# 
+#     def gather(self): 
+#         args = self.args
+# 
+#         if self._piTestExistance() != None: #check existance
+#             return self._piTestExistance()
+#         if self._piTestNameExists() != None: # check name
+#             return self._piTestNameExists()
+#         if self._piTestNoVL() != None: # check voiceType
+#             return self._piTestNoVL()
+#         if self._piTestCurrentPVgroupNameExists() != None: 
+#             return self._piTestCurrentPVgroupNameExists()
+#         # get position
+#         currentVLgroup   = self.ao.pathLib[self.ao.activePath].activeVoice
+#         mapPositionkeys = self.ao.pathLib[self.ao.activePath].mapKeysFromVoice( 
+#                                 currentVLgroup)
+#         noKeys = len(mapPositionkeys)
+# 
+#         locTuple = None
+#         sortMethod = None
+#         outputRangeTuple = None
+#         if args != '':
+#             args = argTools.ArgOps(args, 'stripComma')
+#             locTuple = args.get(0)
+#             locTuple = self._convertListRange(locTuple, 1, noKeys)
+#             if locTuple == None: return self._getUsage()
+#             sortMethod = self._mcConvertSortMethod(args.get(1))
+#             if sortMethod == None: return self._getUsage()
+#             outputRangeTuple = args.get(2) # tested below
+#         if sortMethod == None or locTuple == None:
+#             locTuple = self._pvSelectMapPosition(currentVLgroup, noKeys)
+#             if locTuple == None: return lang.msgReturnCancel
+#             sortMethod = self._mcGetSortMethod()
+#             if sortMethod == None: return lang.msgReturnCancel
+# 
+#         srcPosition = locTuple[0]
+#         dstPosition = locTuple[1]
+#         srcSize = len(self.ao.pathLib[self.ao.activePath][srcPosition])
+#         dstSize = len(self.ao.pathLib[self.ao.activePath][dstPosition])
+#         srcSet = self.ao.pathLib[self.ao.activePath].get('pcsPath')[srcPosition]
+#         dstSet = self.ao.pathLib[self.ao.activePath].get('pcsPath')[dstPosition]
+#                 
+#         noMaps = self.mcObj.getNoMaps(srcSize, dstSize)
+#         query = lang.msgMCenterMapRange % noMaps
+#         if outputRangeTuple == None:
+#             outputRangeTuple = self._mcGetIntegerRange(query, 1, noMaps)
+#             if outputRangeTuple == None: return lang.msgReturnCancel
+#         else: #get from args
+#             outputRangeTuple = self._convertListRange(outputRangeTuple, 1, noMaps)
+#             if outputRangeTuple == None: return self._getUsage()
+# 
+#         self.locTuple = locTuple
+#         self.sortMethod = sortMethod 
+#         self.outputRangeTuple = outputRangeTuple
+#         self.srcSet = srcSet
+#         self.dstSet = dstSet
+#         self.srcSize = srcSize
+#         self.dstSize = dstSize
+#         self.srcPosition = srcPosition
+#         self.dstPosition = dstPosition
+# 
+#     def process(self): 
+#         locTuple = self.locTuple
+#         sortMethod = self.sortMethod 
+#         outputRangeTuple = self.outputRangeTuple
+#         srcSet = self.srcSet
+#         dstSet = self.dstSet
+# 
+#         self.dictS, self.orderKeyS = self.mcObj.sortSMTH(srcSet, dstSet)
+#         a = self.mcObj.sortUNIF(srcSet, dstSet)
+#         self.dictU, self.orderKeyU, orderMax, orderSpan, orderOffset = a
+# 
+#         b = self.mcObj.sortBAL(srcSet, dstSet)
+#         self.dictB, self.orderKeyB, orderMax, orderSpan, orderOffset = b
+# 
+#         size = len(self.dictS.keys())
+#         
+#         if sortMethod == 'SMTH':
+#             self.orderOfMaps = self.orderKeyS
+#         elif sortMethod == 'UNIF':
+#             self.orderOfMaps = self.orderKeyU
+#         elif sortMethod == 'BAL':
+#             self.orderOfMaps = self.orderKeyB
+# 
+#     def display(self): 
+#         orderOfMaps = self.orderOfMaps 
+#         outputRangeTuple = self.outputRangeTuple
+#         srcSize = self.srcSize
+#         dstSize = self.dstSize
+#         srcSet = self.srcSet
+#         dstSet = self.dstSet
+#         
+#         msg = []
+#         msg.append('\nPI: %s, VL %s Comparison\n' % (self.ao.activePath,
+#                          self.sortMethod))
+#         msg.append('Position %i,%i: origin %s destination %s\n' % (
+#                          self.srcPosition+1, self.dstPosition+1,
+#                          drawer.listToStr(srcSet), drawer.listToStr(dstSet)))
+#         orderOfMaps = orderOfMaps[outputRangeTuple[0]:(outputRangeTuple[1]+1)]
+#         for partialMapId in orderOfMaps:
+#             mapTupleId = (srcSize, dstSize, partialMapId)
+#             msg = self._mcGetAnalysisPostSort(msg, srcSet, dstSet, 
+#                              mapTupleId, self.dictS, self.orderKeyS,
+#                              self.dictU, self.orderKeyU, self.dictB, 
+#                              self.orderKeyB)
+#         msg.append('\n')
+#         return ''.join(msg)
+# 
+# 
+# class PVls(_CommandPV):
+#     def __init__(self, ao, cmdEnviron=None, args=''):
+#         _CommandPV.__init__(self, ao, cmdEnviron, args)
+#         self.processSwitch = 0 # display only
+#         self.gatherSwitch = 1 # display only
+#         self.cmdStr = 'PVls'
+# 
+#     def gather(self): 
+#         if self._piTestExistance() != None: #check existance
+#             return self._piTestExistance()
+#         if self._piTestNameExists() != None: # check name
+#             return self._piTestNameExists()
+#         if self._piTestNoVL() != None: # check voiceType
+#             return self._piTestNoVL()
+#         if self._piTestCurrentPVgroupNameExists() != None: 
+#             return self._piTestCurrentPVgroupNameExists()
+# 
+#     def process(self): 
+#         pass
+# 
+#     def display(self): 
+#         msg = []
+#         msg.append('PathVoices available for PI %s:\n' % self.ao.activePath)
+#         entryLines = []
+#         groupNames = self.ao.pathLib[self.ao.activePath].voiceNames()
+#         currentG      = self.ao.pathLib[self.ao.activePath].activeVoice
+#         groupNames.sort()
+#         for name in groupNames:
+#             if name == self.ao.pathLib[self.ao.activePath].activeVoice: 
+#                 status = lang.ACTIVE
+#             else: status = lang.INACTIVE
+#             mapStringList = self.ao.pathLib[self.ao.activePath].voiceRepr(      
+#                                  name)
+#             entryLines.append([status, name, mapStringList])
+# 
+#         headerKey    = ['', 'name','mapClass']
+#         minWidthList = (lang.TABW, lang.NAMEW, 0)
+#         bufList      = [0, 1, 0]
+#         justList         = ['c','l','l']
+#         table = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
+#                                       bufList, justList, self.termObj)
+#         msg.append('%s\n' % table)
+#         return ''.join(msg)
+# 
+# 
+# class PVe(_CommandPV):
+#     def __init__(self, ao, cmdEnviron=None, args=''):
+#         _CommandPV.__init__(self, ao, cmdEnviron, args)
+#         self.processSwitch = 1 # display only
+#         self.gatherSwitch = 1 # display only
+#         self.cmdStr = 'PVe'
+# 
+#     def gather(self): 
+#         if self._piTestExistance() != None: #check existance
+#             return self._piTestExistance()
+#         if self._piTestNameExists() != None: # check name
+#             return self._piTestNameExists()
+#         if self._piTestNoVL() != None: # check voiceType
+#             return self._piTestNoVL()
+#         if self._piTestCurrentPVgroupNameExists() != None: 
+#             return self._piTestCurrentPVgroupNameExists()
+# 
+#         name = self.ao.pathLib[self.ao.activePath].activeVoice
+#         mapPositionkeys = self.ao.pathLib[ 
+#                                 self.ao.activePath].mapKeysFromVoice(name)
+#         noKeys = len(mapPositionkeys)
+# 
+#         locTuple = self._pvSelectMapPosition(name, noKeys, 'edit')
+#         if locTuple == None: return lang.msgReturnCancel
+#         srcPosition = locTuple[0]   
+#         dstPosition = locTuple[1]
+#         srcSet = self.ao.pathLib[self.ao.activePath].get('pcsPath')[srcPosition]
+#         dstSet = self.ao.pathLib[self.ao.activePath].get('pcsPath')[dstPosition]
+#         srcSize = len(self.ao.pathLib[self.ao.activePath][srcPosition])
+#         dstSize = len(self.ao.pathLib[self.ao.activePath][dstPosition])
+# 
+#         selectStr = self._pvSelectRankOrMap(srcSet, dstSet)
+#         if selectStr == None: return lang.msgReturnCancel
+# 
+#         # end gather here
+# 
+#         if selectStr == 'r':
+#             sortStr = self._mcGetSortMethod()
+#             if sortStr == None: lang.msgReturnCancel
+# 
+#             if sortStr == 'SMTH':
+#                 dictS, orderKeyList = self.mcObj.sortSMTH(srcSet, dstSet)
+#                 mapIdTuple = self.mcObj.getUserMapFromRank(srcSet, dstSet, 
+#                                  orderKeyList, 'Smoothness', self.termObj)
+#                 if mapIdTuple == None: return lang.msgReturnCancel
+#             elif sortStr == 'UNIF':
+#                 a = self.mcObj.sortUNIF(srcSet, dstSet)
+#                 dictU,orderKeyList,orderMax,orderSpan,orderOffset=a
+#                 mapIdTuple = self.mcObj.getUserMapFromRank(srcSet, dstSet, 
+#                                          orderKeyList, 'Uniformity', self.termObj)
+#                 if mapIdTuple == None: return lang.msgReturnCancel
+#             elif sortStr == 'BAL':
+#                 a = self.mcObj.sortBAL(srcSet, dstSet)
+#                 dictB,orderKeyList,orderMax,orderSpan,orderOffset = a
+#                 mapIdTuple = self.mcObj.getUserMapFromRank(srcSet, dstSet, 
+#                                   orderKeyList, 'Balance', self.termObj)
+#                 if mapIdTuple == None: return lang.msgReturnCancel
+#         elif selectStr == 'm':
+#             try:
+#                 mapIdTuple, mapGotten = self.mcObj.getUserMap(srcSet, dstSet, 
+#                                                 self.termObj)
+#             except (ValueError, TypeError): # returned none
+#                 mapIdTuple = None
+#             if mapIdTuple == None: return lang.msgReturnCancel
+# 
+#         self.name = name
+#         self.srcPosition = srcPosition
+#         self.dstPosition = dstPosition
+#         self.mapIdTuple = mapIdTuple
+#         self.locTuple = locTuple
+# 
+#     def process(self): 
+#         # add new map over old one
+#         self.ao.pathLib[self.ao.activePath].voiceMapAdd(self.name, (self.srcPosition, 
+#                         self.dstPosition), self.mapIdTuple)
+#         # do not updtae analysis
+#         # self.ao.pathLib[self.ao.activePath].voiceFillRank()
+#         # update ranks
+#         self.ao.pathLib[self.ao.activePath].voiceUpdateMapRank(self.name)
+# 
+#     def display(self): 
+#         msg = []
+#         msg.append('map at %s in PathVoice %s edited.\n' % 
+#                       (drawer.listToStr(self.locTuple), self.name))
+#         return ''.join(msg)
+# 
+# 
+# class PVn(_CommandPV):
+#     def __init__(self, ao, cmdEnviron=None, args=''):
+#         _CommandPV.__init__(self, ao, cmdEnviron, args)
+#         self.processSwitch = 1 # display only
+#         self.gatherSwitch = 1 # display only
+#         self.cmdStr = 'PVn'
+# 
+#     def gather(self): 
+#         # note: no command-line pv creation available yet
+#         if self._piTestExistance() != None: #check existance
+#             return self._piTestExistance()
+#         if self._piTestNameExists() != None: # check name
+#             return self._piTestNameExists()
+#         if self._piTestNoVL() != None: # check voiceType
+#             return self._piTestNoVL()
+# 
+#         piName = self.ao.activePath
+#         query = 'name this PathVoice for PI %s:' % piName
+#         name = self._pvGetNewName(query, piName)
+#         if name == None: return lang.msgReturnCancel
+# 
+#         self.ao.pathLib[piName].activeVoice = name
+#         i = 0
+#         while 1:
+#             if (i+1) == len(self.ao.pathLib[piName]):
+#                 break
+#             srcPosition = i
+#             dstPosition = i + 1
+#             
+#             srcSet = self.ao.pathLib[piName].get('pcsPath')[srcPosition]
+#             dstSet = self.ao.pathLib[piName].get('pcsPath')[dstPosition]
+#             srcSize = len(self.ao.pathLib[piName][srcPosition])
+#             dstSize = len(self.ao.pathLib[piName][dstPosition])
+#             # supply the first map of the needed size
+# 
+#             selectStr = self._pvSelectRankOrMap(srcSet, dstSet)
+#             if selectStr == None: return lang.msgReturnCancel
+# 
+#             if selectStr == 'r':
+#                 sortStr = self._mcGetSortMethod()
+#                 if sortStr == None: return lang.msgReturnCancel
+#                 if sortStr == 'SMTH':
+#                     dictS, orderKeyList = self.mcObj.sortSMTH(srcSet, dstSet)
+#                     mapIdTuple = self.mcObj.getUserMapFromRank(srcSet, dstSet, 
+#                                              orderKeyList, 'Smoothness', self.termObj)
+#                     if mapIdTuple == None:
+#                         dialog.msgOut(lang.msgMCnoSuchRank, self.termObj)
+#                         continue     # may want to make this a break
+#                 elif sortStr == 'UNIF':
+#                     a = self.mcObj.sortUNIF(srcSet, dstSet)
+#                     dictU = a[0]
+#                     orderKeyList = a[1]
+#                     orderMax = a[2]
+#                     orderSpan = a[3]
+#                     orderOffset = a[4]
+#                     mapIdTuple = self.mcObj.getUserMapFromRank(srcSet, dstSet,
+#                                              orderKeyList, 'Uniformity',self.termObj)
+#                     if mapIdTuple == None:
+#                         dialog.msgOut(lang.msgMCnoSuchRank, self.termObj)
+#                         continue     # may want to make this a break
+#                 elif sortStr == 'BAL':
+#                     b = self.mcObj.sortBAL(srcSet, dstSet)
+#                     # dictB = b[0]
+#                     orderKeyList = b[1]
+#                     orderMax = b[2]
+#                     orderSpan = b[3]
+#                     orderOffset = b[4]
+#                     mapIdTuple = self.mcObj.getUserMapFromRank(srcSet, dstSet,
+#                                              orderKeyList, 'Balance', self.termObj)
+#                     if mapIdTuple == None:
+#                         dialog.msgOut(lang.msgMCnoSuchRank, self.termObj)
+#                         continue     # may want to make this a break
+#             elif selectStr == 'm':  
+#                 try:
+#                     mapIdTuple, mapGotten = self.mcObj.getUserMap(srcSet, dstSet,
+#                                                     self.termObj)
+#                 except (ValueError, TypeError):
+#                     mapIdTuple = None
+#                 if mapIdTuple == None:
+#                     dialog.msgOut(lang.msgMCnoSuchMap, self.termObj)
+#                     continue     # do not increment incase there is an error
+# 
+#             self.ao.pathLib[piName].voiceMapAdd(name, (srcPosition, 
+#                             dstPosition), mapIdTuple)
+#             i = i + 1
+#         # post loop
+#         self.name = name
+#         
+#     def process(self): 
+#         # update analysis and ranks
+#         #self.ao.pathLib[self.ao.activePath].voiceFillRank()
+#         self.ao.pathLib[self.ao.activePath].voiceUpdateMapRank(self.name)
+# 
+#     def display(self): 
+#         msg = 'PathVoice %s added to PI %s.\n' % (self.name, self.ao.activePath)
+#         return msg
+# 
+# class PVauto(_CommandPV):
+#     """automatically fill a path voice with the first or last of 
+#     a sort method
+#     pvauto name sortMethod firstLast
+#     """
+#     def __init__(self, ao, cmdEnviron=None, args=''):
+#         _CommandPV.__init__(self, ao, cmdEnviron, args)
+#         self.processSwitch = 1 # display only
+#         self.gatherSwitch = 1 # display only
+#         self.cmdStr = 'PVauto'
+# 
+#     def _pvConvertFirstOrLast(self, usrStr):
+#         """convert string to first or last"""
+#         ref = {
+#             'f' : ['first', 'f'],
+#             'l' : ['last', 'l'],
+#                 }
+#         usrStr = drawer.selectionParse(usrStr, ref)
+#         return usrStr # may be None             
+# 
+#     def _pvSelectFirstOrLast(self):
+#         """have user select between first or last"""
+#         query = lang.msgPVselectFirstLast
+#         while 1:
+#             reply = dialog.askStr(query, self.termObj)
+#             if reply == None:
+#                 return None
+#             reply = self._pvConvertFirstOrLast(reply)
+#             if reply == None:
+#                 dialog.msgOut(lang.msgPVfirstOrLastError, self.termObj)
+#                 continue
+#             else:
+#                 return reply
+# 
+#     def gather(self): 
+#         args = self.args
+# 
+#         if self._piTestExistance() != None: #check existance
+#             return self._piTestExistance()
+#         if self._piTestNameExists() != None: # check name
+#             return self._piTestNameExists()
+#         if self._piTestNoVL() != None: # check voiceType
+#             return self._piTestNoVL()
+#         name = None
+#         sortStr = None
+#         orderStr = None
+#         if args != '':
+#             args = argTools.ArgOps(args, 'stripComma')
+#             name = args.get(0)
+#             if name == None: return self._getUsage()
+#             sortStr = self._mcConvertSortMethod(args.get(1))
+#             if sortStr == None: return self._getUsage()
+#             orderStr = self._pvConvertFirstOrLast(args.get(2))
+#             if orderStr == None: return self._getUsage()
+#         if name == None or sortStr == None or orderStr == None:
+#             query = 'name this auto PathVoice for PI %s:' % self.ao.activePath
+#             name = self._pvGetNewName(query, self.ao.activePath)
+#             if name == None: return lang.msgReturnCancel
+#             self.ao.pathLib[self.ao.activePath].activeVoice = name
+#             sortStr = self._mcGetSortMethod()
+#             if sortStr == None: return lang.msgReturnCancel
+#             orderStr = self._pvSelectFirstOrLast()
+#             if orderStr == None: return lang.msgReturnCancel
+# 
+#         self.name = name
+#         self.orderStr = orderStr
+#         self.sortStr = sortStr
+# 
+#     def process(self): 
+#         name = self.name
+#         orderStr = self.orderStr
+#         sortStr = self.sortStr
+#         piName = self.ao.activePath
+#         i = 0
+#         while 1:
+#             if (i+1) == len(self.ao.pathLib[piName]):
+#                 break
+#             srcPosition = i
+#             dstPosition = i + 1
+#             srcSet = self.ao.pathLib[piName].get('pcsPath')[srcPosition]
+#             dstSet = self.ao.pathLib[piName].get('pcsPath')[dstPosition]
+#             srcSize = len(self.ao.pathLib[piName][srcPosition])
+#             dstSize = len(self.ao.pathLib[piName][dstPosition])
+#             # supply the first map of the needed size
+# 
+#             if sortStr == 'SMTH':
+#                 dictS, orderKeyList = self.mcObj.sortSMTH(srcSet, dstSet)
+#                 if orderStr == 'f': # first is the first value in list
+#                     mapIdTuple = (srcSize, dstSize, orderKeyList[0])
+#                 elif orderStr == 'l':  # last is the key at end of list
+#                     mapIdTuple = (srcSize, dstSize, orderKeyList[-1])
+#             elif sortStr == 'UNIF':
+#                 a = self.mcObj.sortUNIF(srcSet, dstSet)
+#                 # dictU = a[0]
+#                 orderKeyList = a[1]
+#                 orderMax = a[2]
+#                 orderSpan = a[3]
+#                 orderOffset = a[4]
+#                 if orderStr == 'f': # first is the first value in list
+#                     mapIdTuple = (srcSize, dstSize, orderKeyList[0])
+#                 elif orderStr == 'l':  # last is the key at end of list
+#                     mapIdTuple = (srcSize, dstSize, orderKeyList[-1])
+#             elif sortStr == 'BAL':
+#                 b = self.mcObj.sortBAL(srcSet, dstSet)
+#                 dictB = b[0]
+#                 orderKeyList = b[1]
+#                 orderMax = b[2]
+#                 orderSpan = b[3]
+#                 orderOffset = b[4]
+#                 if orderStr == 'f': # first is the first value in list
+#                     mapIdTuple = (srcSize, dstSize, orderKeyList[0])
+#                 elif orderStr == 'l':  # last is the key at end of list
+#                     mapIdTuple = (srcSize, dstSize, orderKeyList[-1])
+# 
+#             self.ao.pathLib[piName].voiceMapAdd(name, (srcPosition,
+#                                                          dstPosition), mapIdTuple)
+#             i = i + 1
+#             
+#         # update analysis and ranks
+#         #self.ao.pathLib[piName].voiceFillRank(name)
+#         self.ao.pathLib[piName].voiceUpdateMapRank(name)
+# 
+#     def display(self): 
+#         msg = 'auto PathVoice %s added to PI %s.\n' % (self.name, 
+#                                                             self.ao.activePath)
+#         return msg
+#         
+# class PVo(_CommandPV):
+#     def __init__(self, ao, cmdEnviron=None, args=''):
+#         _CommandPV.__init__(self, ao, cmdEnviron, args)
+#         self.processSwitch = 1 # display only
+#         self.gatherSwitch = 1 # display only
+#         self.cmdStr = 'PVo'
+# 
+#     def gather(self): 
+#         args = self.args
+#         if self._piTestExistance() != None: #check existance
+#             return self._piTestExistance()
+#         if self._piTestNameExists() != None: # check name
+#             return self._piTestNameExists()
+#         if self._piTestNoVL() != None: # check voiceType
+#             return self._piTestNoVL()
+#         name = None
+#         if args != '':
+#             args = argTools.ArgOps(args)
+#             pvNames = self.ao.pathLib[self.ao.activePath].voiceNames()
+#             name = drawer.inList(args.get(0), pvNames)
+#             if name == None: return self._getUsage()
+#         if name == None:
+#             name = self._chooseFromList('select a PathVoice:', 
+#                           self.ao.pathLib[self.ao.activePath].voiceNames(),
+#                           'case')
+#             if name == None: return lang.msgPVbadName
+#         self.name = name
+# 
+#     def process(self): 
+#         self.ao.pathLib[self.ao.activePath].activeVoice = self.name
+# 
+#     def display(self): 
+#         msg = 'PathVoice %s now active.\n' % (self.ao.pathLib[ 
+#                                                 self.ao.activePath].activeVoice)
+#         return msg
+# 
+# class PVcp(_CommandPV):
+#     """makes a copy of a VLmapGroup
+#         args: pvcp  source  target1  target2 ...
+#     """
+#     def __init__(self, ao, cmdEnviron=None, args=''):
+#         _CommandPV.__init__(self, ao, cmdEnviron, args)
+#         self.processSwitch = 1 # display only
+#         self.gatherSwitch = 1 # display only
+#         self.cmdStr = 'PVcp'
+# 
+#     def _pvCopy(self, pathName, srcName, dstName):
+#         if (pathName in self.ao.pathLib.keys() and srcName != dstName):
+# 
+#             if srcName not in self.ao.pathLib[pathName].voiceNames():
+#                 return None
+#             # does all updates, changes current map
+#             self.ao.pathLib[pathName].voiceCopy(srcName, dstName)
+#             return 'PathVoice %s created.\n' % dstName 
+#         else:
+#             return None
+# 
+#     def gather(self): 
+#         args = self.args
+#         self.cpList = []
+# 
+#         if self._piTestExistance() != None: #check existance
+#             return self._piTestExistance()
+#         if self._piTestNameExists(self.ao.activePath) != None: # check name
+#             return self._piTestNameExists(self.ao.activePath)
+#         if self._piTestNoVL() != None: # check voiceType
+#             return self._piTestNoVL()
+#     
+#         if args != '':
+#             args = argTools.ArgOps(args, 'stripComma')
+#             pvNames = self.ao.pathLib[self.ao.activePath].voiceNames()
+#             oldName = drawer.inList(args.get(0), pvNames)
+#             if oldName == None: return self._getUsage()
+#             if args.list(1, 'end') != None: # if supplied
+#                 for newName in args.list(1, 'end'):
+#                     self.cpList.append(newName)
+#             else: return self._getUsage()
+# 
+#         if self.cpList == []:
+#             oldName = self._chooseFromList('select a PathVoice to copy:', 
+#                 self.ao.pathLib[self.ao.activePath].voiceNames(), 'case')
+#             if oldName == None: return lang.msgPVbadName
+#             query = 'name this PathVoice for PI %s:' % oldName
+#             newName = self._pvGetNewName(query, self.ao.activePath)
+#             if newName == None: return lang.msgReturnCancel
+#             self.cpList.append(newName)
+# 
+#         self.oldName = oldName
+# 
+#     def process(self): 
+#         self.report = []
+#         for name in self.cpList:
+#             msg = self._pvCopy(self.ao.activePath, self.oldName, name)
+#             if msg != None:
+#                 self.report.append(msg)
+#             else:
+#                 self.report.append(lang.msgBadArgFormat)
+# 
+#     def display(self): 
+#         return ''.join(self.report)
+#         
+# class PVrm(_CommandPV):
+#     def __init__(self, ao, cmdEnviron=None, args=''):
+#         _CommandPV.__init__(self, ao, cmdEnviron, args)
+#         self.processSwitch = 1 # display only
+#         self.gatherSwitch = 1 # display only
+#         self.cmdStr = 'PVrm'
+# 
+#     def _pvRemove(self, pathName, name):
+#         if name == 'auto':
+#             return None # cant be deleted
+#         pvNames = self.ao.pathLib[pathName].voiceNames()
+#         if name not in pvNames:
+#             return None
+#         if name == self.ao.pathLib[pathName].activeVoice:
+#             self.ao.pathLib[pathName].activeVoice = 'auto'
+#         self.ao.pathLib[pathName].voiceDelete(name)
+#         return 'PathVoice ' + name + ' destroyed.\n'
+# 
+#     def gather(self): 
+#         args = self.args
+#         self.rmList = []
+# 
+#         if self._piTestExistance() != None: #check existance
+#             return self._piTestExistance()
+#         if self._piTestNameExists() != None: # check name
+#             return self._piTestNameExists()
+#         if self._piTestNoVL() != None: # check voiceType
+#             return self._piTestNoVL()
+# 
+#         if args != '':
+#             args = argTools.ArgOps(args, 'stripComma')
+#             pvNames = self.ao.pathLib[self.ao.activePath].voiceNames()
+#             pvNames.remove('auto')
+#             if args.list(0, 'end') != None: # if supplied
+#                 for newName in args.list(0, 'end'):
+#                     newName = drawer.inList(newName, pvNames)
+#                     if newName == None: return self._getUsage()
+#                     self.rmList.append(newName)
+#             else: return self._getUsage()
+# 
+#         if self.rmList == []:
+#             name = self._chooseFromList('select a PathVoice to delete:', 
+#                 self.ao.pathLib[self.ao.activePath].voiceNames(), 'case')
+#             if name == None: return lang.msgPVbadName
+#             if name == 'auto':
+#                 return 'PathVoice %s is reserved and can not be deleted.\n' % name
+#             query = 'are you sure you want to delete PathVoice %s? ' % name
+#             askUsr = dialog.askYesNoCancel(query, 1, self.termObj)
+#             if askUsr == 1:
+#                 self.rmList.append(name)
+#             else:
+#                 return lang.msgReturnCancel
+# 
+#     def process(self): 
+#         self.report = []
+#         for name in self.rmList:
+#             msg = self._pvRemove(self.ao.activePath, name)
+#             if msg != None:
+#                 self.report.append(msg)
+#             else:
+#                 self.report.append(lang.msgBadArgFormat)
+# 
+#     def display(self): 
+#         return ''.join(self.report)
 
 
 #-----------------------------------------------------------------||||||||||||--
 
 class TMo(Command):
-    """selects currtne texture module"""
+    """selects currtne texture module
+
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = TMo(ao, args='da')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True
+
+    """
     def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
@@ -5038,6 +5188,14 @@ class TMo(Command):
         return 'TextureModule %s now active.\n' % self.ao.activeTextureModule
 
 class TMv(Command):
+    """
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = TMv(ao, args='da')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True
+
+    """
     def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
@@ -5059,6 +5217,13 @@ class TMv(Command):
 
 
 class TMls(Command):
+    """
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = TMls(ao)
+    >>> ok, result = a.do()
+    >>> ok == True
+    True
+    """
     def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
@@ -5111,6 +5276,7 @@ class TMls(Command):
 
 
 class _CommandTP(Command):
+
     def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
 
@@ -5176,7 +5342,14 @@ class _CommandTP(Command):
                       
                       
 class TPls(_CommandTP):
-    """displays texture parameter object information"""
+    """displays texture parameter object information
+
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = TPls(ao)
+    >>> ok, result = a.do()
+    >>> ok == True
+    True
+    """
     def __init__(self, ao, cmdEnviron=None, args=''):
         _CommandTP.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 0 # display only
@@ -5220,7 +5393,14 @@ class TPls(_CommandTP):
 
 
 class TPv(_CommandTP):
-    """displays texture rhythm object information"""
+    """displays texture rhythm object information
+
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = TPv(ao, args='ru')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True
+    """
     def __init__(self, ao, cmdEnviron=None, args=''):
         _CommandTP.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 0 # display only
@@ -5310,6 +5490,12 @@ class TPv(_CommandTP):
 
 
 class TPmap(_CommandTP):
+    """
+    TODO: library should not be a required argument
+
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = TPmap(ao, args='tpmap g 120 ru,0,1')
+    """
     def __init__(self, ao, cmdEnviron=None, args=''):
         _CommandTP.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
@@ -5428,7 +5614,11 @@ class TPmap(_CommandTP):
         obj.write(fp, 0) 
 
 class TPeg(_CommandTP):
-    """sub class TPmap for exporting generator values"""
+    """sub class TPmap for exporting generator values
+
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = TPeg(ao, args='tpmap g 120 ru,0,1')
+    """
     def __init__(self, ao, cmdEnviron=None, args=''):
         _CommandTP.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1
@@ -5546,7 +5736,119 @@ class TPeg(_CommandTP):
 
 #-----------------------------------------------------------------||||||||||||--
 
+class TIn(Command):
+    """create a new texture instance
+    of a texture created, uses last duration and tempo
+
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = TIn(ao, args='a 0')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+    """
+
+    def __init__(self, ao, cmdEnviron=None, args=''):
+        Command.__init__(self, ao, cmdEnviron, args)
+        self.processSwitch = 1 # display only
+        self.gatherSwitch = 1 # display only
+        self.cmdStr = 'TIn'
+
+    def _tiGetCurrentTextTime(self):
+        """get data for loading pmtr obj"""
+        lclTimes = None
+        if self.ao.activeTexture != '':
+            lclTimes = {}
+            t = self.ao.textureLib[self.ao.activeTexture]
+            lclTimes['tRange'] = t.pmtrQDict['tRange']
+            lclTimes['beatT']    = t.pmtrQDict['beatT'] # get data
+        return lclTimes
+
+    def gather(self): 
+        args = self.args
+        self.name = None
+        self.inst = None
+        self.auxNo = None # optional argument, used depending on eventMode
+        if args != '':
+            args = argTools.ArgOps(args)
+            self.name = args.get(0)
+            if self.name == None: return self._getUsage()
+            if self.name in self.ao.textureLib.keys():
+                return self._getUsage()
+            if self._nameTest(self.name) != None:
+                return self._getUsage(self._nameTest(self.name))
+            self.inst = self._elCheckInstrumentNo(args.get(1))
+            if self.inst == None: return self._getUsage()
+            if self.ao.activeEventMode in ['csoundExternal']:
+                self.auxNo = drawer.strToNum(args.get(2), 'int', 0)
+                if self.auxNo == None: return self._getUsage()
+            # if midiController, must get info for each controller number   
+                
+        if self.name == None or self.inst == None:
+            self.name = self._tiGetNewName(lang.msgTIname)
+            if self.name == None: return lang.msgReturnCancel
+            self.inst = self._elGetInstrumentNo()
+            if self.inst == None: return lang.msgReturnCancel
+            if self.ao.activeEventMode in ['csoundExternal']:
+                query = 'provide number of auxiliary parameters:'
+                self.auxNo = self._getNumber(query, 'int', 0)
+                if self.auxNo == None: return lang.msgReturnCancel
+            # if midiController, must get info for each controller number   
+
+    def process(self): 
+        mod = self.ao.activeTextureModule # same as self.tmName
+        self.ao.textureLib[self.name] = texture.factory(mod, self.name,
+                                                                      self.scObj)
+        # if refresh mode is active, will auto-score to test
+        refresh = self.ao.aoInfo['refreshMode']
+        # get current texture values
+        lclTimes = self._tiGetCurrentTextTime()
+        # in some cases, supply (and create) a different path
+        if self.ao.activeEventMode == 'midiPercussion':
+            # after, activePath as pName, returns a unused piRef not necessary
+            piRef = self._piAutoCreateMidiPercussion(self.inst) 
+        else: # check that current path exists
+            if (self._piTestExistance() != None or
+                self._piTestNameExists() != None): #check existance
+                # if not path exists, create
+                self._piAutoCreate() # will be named autp
+                        
+        pathObj = self.ao.pathLib[self.ao.activePath]  #this is a reference
+        self.ao.pathLib[self.ao.activePath].refIncr() # add ref
+        # auxNo will be provided; if None, aux is taken from instrument
+        # if given, will override aux provided from orchestra
+        self.ao.textureLib[self.name].loadDefault(self.inst, pathObj,
+                                self.ao.fpSSDR, self.ao.fpSADR, 
+                                lclTimes, self.ao.orcObj.name, 
+                                self.auxNo, refresh)
+        self.ao.activeTexture = self.name
+
+    def log(self):
+        if self.gatherStatus and self.processStatus: # if complete
+            return '%s %s %s' % (self.cmdStr, self.name, self.inst)   
+
+    def display(self): 
+        return lang.msgTIcreated % self.ao.activeTexture
+            
+
+
 class TIo(Command):
+    """
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = TIn(ao, args='a 0')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    >>> a = TIn(ao, args='b 32')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    >>> a = TIo(ao, args='a')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+    """
     def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
@@ -5579,7 +5881,20 @@ class TIo(Command):
         return 'TI %s now active.\n' % self.ao.activeTexture
 
 class TImute(Command):
-    """mutes the current texture"""
+    """mutes the current texture
+
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = TIn(ao, args='a 0')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    >>> a = TImute(ao)
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    """
     def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
@@ -5632,6 +5947,17 @@ class TImute(Command):
 class TImode(Command):
     """sets pitch, poly, silence, and postMap mode of current texture
     args: timode  modeChoice  modeValue
+
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = TIn(ao, args='a 0')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    >>> a = TImode(ao, args='pitch ps')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
     """
 
     def __init__(self, ao, cmdEnviron=None, args=''):
@@ -5729,7 +6055,7 @@ class TImode(Command):
             elif modeChoice == 's':
                 while modeValue == None:
                     query = lang.msgTImodeSilenceChoose % typeset.boolAsStr(
-                                                                      currentSilenceMode)
+                                                           currentSilenceMode)
                     modeValue = dialog.askStr(query, self.termObj)
                     if modeValue == None: return lang.msgReturnCancel
                     modeValue = typeset.convertBool(modeValue)
@@ -5739,7 +6065,7 @@ class TImode(Command):
             elif modeChoice == 'm':
                 while modeValue == None:
                     query = lang.msgTImodeMixChoose % typeset.boolAsStr(
-                                                                      currentOrcMapMode)
+                                                        currentOrcMapMode)
                     modeValue = dialog.askStr(query, self.termObj)
                     if modeValue == None: return lang.msgReturnCancel
                     modeValue = typeset.convertBool(modeValue)
@@ -5796,6 +6122,23 @@ class TImode(Command):
 class TImidi(Command):
     """sets midi settings for the current texture
         work done mostly from within midiTools.py
+
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = TIn(ao, args='a 0')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    >>> a = TImidi(ao, args='pgm 3')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    >>> a = TImidi(ao, args='ch 2')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
     """
 
     def __init__(self, ao, cmdEnviron=None, args=''):
@@ -5890,7 +6233,20 @@ class TImidi(Command):
             return 'midi channel changed to %s\n' % self.pmtrValue
 
 class TIv(Command):
-    """views the current texture, or name if provided with args"""
+    """views the current texture, or name if provided with args
+
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = TIn(ao, args='a 0')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    >>> a = TIv(ao)
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    """
 
     def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
@@ -5921,7 +6277,7 @@ class TIv(Command):
         extData = {}
         extData['cloneNo'] = self.ao.cloneLib.number(nameToView)
         headList, entryLines = self.ao.textureLib[nameToView].repr('full',
-                                                                                     extData)
+                                                                 extData)
         headerKey    = [] # removes header
         minWidthList = [lang.LMARGINW, 0]
         bufList      = [0, 1]
@@ -5933,7 +6289,19 @@ class TIv(Command):
 
 
 class TIe(Command):
-    """eidits attributes of a texture"""
+    """eidits attributes of a texture
+
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = TIn(ao, args='a 0')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    >>> a = TIv(ao, args='a ru,0,1')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+    """
     def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
@@ -6021,96 +6389,21 @@ class TIe(Command):
             return 'TI %s: parameter %s updated.\n' % (self.ao.activeTexture,
                                                                      self.label)
 
-
-class TIn(Command):
-    """create a new texture instance
-    of a texture created, uses last duration and tempo
-    """
-
-    def __init__(self, ao, cmdEnviron=None, args=''):
-        Command.__init__(self, ao, cmdEnviron, args)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'TIn'
-
-    def _tiGetCurrentTextTime(self):
-        """get data for loading pmtr obj"""
-        lclTimes = None
-        if self.ao.activeTexture != '':
-            lclTimes = {}
-            t = self.ao.textureLib[self.ao.activeTexture]
-            lclTimes['tRange'] = t.pmtrQDict['tRange']
-            lclTimes['beatT']    = t.pmtrQDict['beatT'] # get data
-        return lclTimes
-
-    def gather(self): 
-        args = self.args
-        self.name = None
-        self.inst = None
-        self.auxNo = None # optional argument, used depending on eventMode
-        if args != '':
-            args = argTools.ArgOps(args)
-            self.name = args.get(0)
-            if self.name == None: return self._getUsage()
-            if self.name in self.ao.textureLib.keys():
-                return self._getUsage()
-            if self._nameTest(self.name) != None:
-                return self._getUsage(self._nameTest(self.name))
-            self.inst = self._elCheckInstrumentNo(args.get(1))
-            if self.inst == None: return self._getUsage()
-            if self.ao.activeEventMode in ['csoundExternal']:
-                self.auxNo = drawer.strToNum(args.get(2), 'int', 0)
-                if self.auxNo == None: return self._getUsage()
-            # if midiController, must get info for each controller number   
-                
-        if self.name == None or self.inst == None:
-            self.name = self._tiGetNewName(lang.msgTIname)
-            if self.name == None: return lang.msgReturnCancel
-            self.inst = self._elGetInstrumentNo()
-            if self.inst == None: return lang.msgReturnCancel
-            if self.ao.activeEventMode in ['csoundExternal']:
-                query = 'provide number of auxiliary parameters:'
-                self.auxNo = self._getNumber(query, 'int', 0)
-                if self.auxNo == None: return lang.msgReturnCancel
-            # if midiController, must get info for each controller number   
-
-    def process(self): 
-        mod = self.ao.activeTextureModule # same as self.tmName
-        self.ao.textureLib[self.name] = texture.factory(mod, self.name,
-                                                                      self.scObj)
-        # if refresh mode is active, will auto-score to test
-        refresh = self.ao.aoInfo['refreshMode']
-        # get current texture values
-        lclTimes = self._tiGetCurrentTextTime()
-        # in some cases, supply (and create) a different path
-        if self.ao.activeEventMode == 'midiPercussion':
-            # after, activePath as pName, returns a unused piRef not necessary
-            piRef = self._piAutoCreateMidiPercussion(self.inst) 
-        else: # check that current path exists
-            if (self._piTestExistance() != None or
-                self._piTestNameExists() != None): #check existance
-                # if not path exists, create
-                self._piAutoCreate() # will be named autp
-                        
-        pathObj = self.ao.pathLib[self.ao.activePath]  #this is a reference
-        self.ao.pathLib[self.ao.activePath].refIncr() # add ref
-        # auxNo will be provided; if None, aux is taken from instrument
-        # if given, will override aux provided from orchestra
-        self.ao.textureLib[self.name].loadDefault(self.inst, pathObj,
-                                self.ao.fpSSDR, self.ao.fpSADR, 
-                                lclTimes, self.ao.orcObj.name, 
-                                self.auxNo, refresh)
-        self.ao.activeTexture = self.name
-
-    def log(self):
-        if self.gatherStatus and self.processStatus: # if complete
-            return '%s %s %s' % (self.cmdStr, self.name, self.inst)   
-
-    def display(self): 
-        return lang.msgTIcreated % self.ao.activeTexture
-            
             
 class TIls(Command):
+    """
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = TIn(ao, args='a 0')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    >>> a = TIls(ao)
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    """
     def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 0 # display only
@@ -6157,6 +6450,18 @@ class TIls(Command):
         return ''.join(msg)
          
 class TIrm(Command):
+    """
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = TIn(ao, args='a 0')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    >>> a = TIrm(ao, args='a')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+    """
     def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
@@ -6207,6 +6512,18 @@ class TIrm(Command):
         return ''.join(self.report)
 
 class TIcp(Command):
+    """
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = TIn(ao, args='a 0')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    >>> a = TIcp(ao, args='a b')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+    """
     def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
@@ -6271,7 +6588,21 @@ class TIcp(Command):
     def display(self): 
         return ''.join(self.report)
 
+
 class TImv(Command):
+    """
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = TIn(ao, args='a 0')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    >>> a = TImv(ao, args='a b')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    """
     def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
@@ -6327,6 +6658,18 @@ class TIdoc(Command):
     """displays all essential information about parameters
     of this texture, as well as in
     args can be the name of a different texture
+
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = TIn(ao, args='a 0')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    >>> a = TIdoc(ao)
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
     """
 
     def __init__(self, ao, cmdEnviron=None, args=''):
@@ -6366,7 +6709,20 @@ class TIdoc(Command):
 
 
 class TIals(Command):
-    """ list all attributes of a texture, a hidden command"""
+    """ list all attributes of a texture, a hidden command
+
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = TIn(ao, args='a 0')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    >>> a = TIals(ao)
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    """
 
     def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
@@ -6402,6 +6758,16 @@ class TIals(Command):
         return ''.join(msg) 
 
 class TImap(Command):
+    """
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = TIn(ao, args='a 0')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    >>> a = TImap(ao) # cannot test interactively
+
+    """
     def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
@@ -6446,10 +6812,29 @@ class TImap(Command):
                              self.xRelation, fmt, self.termObj.parentGUI)
         # second arg sets openMedia to false
         obj.write(fp, 0)
-        
+
+
 #-----------------------------------------------------------------||||||||||||--
 class TEe(Command):
-    """edits all textures"""
+    """edits all textures
+
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = TIn(ao, args='a 0')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    >>> a = TIn(ao, args='b 2')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    >>> a = TEe(ao, args='a ru,.3,1')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    """
 
     def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
@@ -6542,7 +6927,25 @@ class TEe(Command):
 
 
 class TEv(Command):
-    """ensemble view, displays parallel attributes for all textures"""
+    """ensemble view, displays parallel attributes for all textures
+
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = TIn(ao, args='a 0')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    >>> a = TIn(ao, args='b 2')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    >>> a = TEv(ao, args='a')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    """
 
     def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
@@ -6619,6 +7022,21 @@ class TEv(Command):
 
 
 class TEmap(Command):
+    """
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = TIn(ao, args='a 0')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    >>> a = TIn(ao, args='b 2')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    >>> a = TEmap(ao, args='a')
+
+    """
     def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
@@ -6684,6 +7102,23 @@ class TEmap(Command):
 class TEmidi(Command):
     """sets midi tempo for the complete midi score
     work done mostly from within midiTools.py
+
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = TIn(ao, args='a 0')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    >>> a = TIn(ao, args='b 2')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    >>> a = TEmidi(ao, args='230')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
     """
 
     def __init__(self, ao, cmdEnviron=None, args=''):
@@ -6738,6 +7173,18 @@ class TCn(Command):
     """creates exact duplicate of texture instance at shifted time
     check for negative start times
     args: tcn  name  timeShift
+
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = TIn(ao, args='a 0')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    >>> a = TCn(ao, args='a')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
     """
     def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
@@ -6786,8 +7233,28 @@ class TCn(Command):
         msg = 'TC %s created.\n' % self.name
         return msg
         
+
+
 class TCv(Command):
-    """views the current clone, or name if provided with args"""
+    """views the current clone, or name if provided with args
+
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = TIn(ao, args='a 0')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    >>> a = TCn(ao, args='a')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    >>> a = TCv(ao)
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    """
 
     def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
@@ -6837,6 +7304,29 @@ class TCv(Command):
 
 
 class TCo(Command):
+    """
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = TIn(ao, args='a 0')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    >>> a = TCn(ao, args='a')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    >>> a = TCn(ao, args='b')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    >>> a = TCo(ao, args='a')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    """
     def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
@@ -6871,7 +7361,24 @@ class TCo(Command):
         return 'TC %s of TI %s now active.\n' % (self.name, self.tName)
 
 class TCmute(Command):
-    """mutes the current clone"""
+    """mutes the current clone
+
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = TIn(ao, args='a 0')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    >>> a = TCn(ao, args='a')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    >>> a = TCmute(ao)
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+    """
     def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
@@ -6925,6 +7432,22 @@ class TCls(Command):
     """shows all clones for current texture, with adjust start and end 
     times (ls for current textre)
     check for negative start times
+
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = TIn(ao, args='a 0')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    >>> a = TCn(ao, args='a')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    >>> a = TCls(ao)
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
     """
 
     def __init__(self, ao, cmdEnviron=None, args=''):
@@ -6976,7 +7499,25 @@ class TCls(Command):
 
 
 class TCe(Command):
-    """eidits attributes of a clone"""
+    """eidits attributes of a clone
+
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = TIn(ao, args='a 0')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    >>> a = TCn(ao, args='a')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    >>> a = TCe(ao, args='a fa,(ru,0,1)')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    """
 
     def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
@@ -7058,6 +7599,24 @@ class TCe(Command):
 
 
 class TCcp(Command):
+    """
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = TIn(ao, args='a 0')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    >>> a = TCn(ao, args='a')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    >>> a = TCcp(ao, args='a b')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    """
     def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
@@ -7125,6 +7684,21 @@ class TCcp(Command):
 
 
 class TCmap(Command):
+    """
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = TIn(ao, args='a 0')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    >>> a = TCn(ao, args='a')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    >>> a = TCmap(ao) # cannot test interactively
+
+    """
     def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
@@ -7173,6 +7747,23 @@ class TCdoc(Command):
     """displays all essential information about parameters
     of this texture, as well as in
     args can be the name of a different texture
+
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = TIn(ao, args='a 0')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    >>> a = TCn(ao, args='a')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    >>> a = TCdoc(ao)
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
     """
     def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
@@ -7232,6 +7823,22 @@ class TCdoc(Command):
 class TCrm(Command):
     """remove a clone from this textures clone dict
         check for negative start times
+
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = TIn(ao, args='a 0')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    >>> a = TCn(ao, args='a')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    >>> a = TCrm(ao, args='a')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
     """
 
     def __init__(self, ao, cmdEnviron=None, args=''):
@@ -7297,7 +7904,25 @@ class TCrm(Command):
 
 
 class TCals(Command):
-    """ list all attributes of a texture, a hidden command"""
+    """ list all attributes of a texture, a hidden command
+
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = TIn(ao, args='a 0')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    >>> a = TCn(ao, args='a')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    >>> a = TCals(ao)
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    """
 
     def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
@@ -7341,6 +7966,20 @@ class TCals(Command):
 #-----------------------------------------------------------------||||||||||||--
 
 class TTls(Command):
+    """
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+
+    >>> a = TIn(ao, args='a 0')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    >>> a = TTls(ao)
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    """
     def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 0 # display only
@@ -7382,6 +8021,19 @@ class TTls(Command):
 
 
 class TTo(Command):
+    """
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> a = TIn(ao, args='a 0')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    >>> a = TTo(ao, args='nl')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    """
     def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
@@ -10038,6 +10690,17 @@ class Test(unittest.TestCase):
     def testDummy(self):
         self.assertEqual(True, True)
 
+    def testTPv(self):
+        from athenaCL import athenaObj
+        ao = athenaObj.AthenaObject()
+        from athenaCL.libATH.libPmtr import parameter
+        # TODO: this takes a long time to do all;
+        # thus, only doing the first 10
+        # ultimate: do all
+        for tp in parameter.allPmtrObjs[:10]:
+            a = TPv(ao, args=tp)
+            ok, result = a.do()
+            self.assertEqual(ok, True)
 
 #-----------------------------------------------------------------||||||||||||--
 

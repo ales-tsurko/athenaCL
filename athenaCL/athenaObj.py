@@ -37,6 +37,9 @@ _PKGDIR = os.path.dirname(libPath)
 _OUTDIR = os.path.dirname(_PKGDIR)
 if _OUTDIR not in sys.path: sys.path.append(_OUTDIR)
 
+
+
+
 #-----------------------------------------------------------------||||||||||||--
 from athenaCL.libATH import argTools
 from athenaCL.libATH import command
@@ -60,6 +63,9 @@ from athenaCL.libATH import eventList
 
 _MOD = 'athenaObj.py'
 
+
+
+
 #-----------------------------------------------------------------||||||||||||--
 class External:
     """used to remaintain remote files used by the AthenaObject
@@ -82,7 +88,7 @@ class External:
         self._updateLogs()
         self.updatePrefs()
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def _updateDirs(self, verbose=0):
         """called to get athenaCL directories and load modules
         checks for libATH, libATH/libTM, libATH/libAS
@@ -157,7 +163,7 @@ class External:
             if self.prefsDir == None: # cant use getcwd
                 self.prefsDir = self.libATHpath # used before and two versions 1.4.2
             
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def getCvsStat(self):
         """return string if this is likely a cvs co"""
         if self.cvsDirPresent: return 'cvs'
@@ -272,7 +278,7 @@ class External:
         else:
             return None
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def updatePrefs(self, forcePath=None):
         """check for prefs, update and add if missing
         """
@@ -333,7 +339,7 @@ class External:
             d[key] = self.prefDict[category][key]
         return d
         
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def getFilePathSample(self):
         """returns a list of file paths for samples"""
         ssdrPath = os.path.join(self.libATHpath, 'ssdir')
@@ -367,6 +373,8 @@ class External:
             return self.visualMethod
 
 
+
+
 #-----------------------------------------------------------------||||||||||||--
 #-----------------------------------------------------------------||||||||||||--
 
@@ -391,8 +399,11 @@ class AthenaObject:
         self.versionObj = argTools.Version('%s.%s' % (self.athVersion, 
                                                         self.athBuild))
         self.athDate = athDate
-        self.termObj = termObj # defaut terminal handler, from Interpreter
+
+        # defaut terminal handler, from Interpreter
+        self.termObj = self._configTerminal(termObj) 
         self.debug = debug # debug option
+
         # possible session types are 'terminal', 'idle', 'cgi';
         # these methods initializes external modules and resources
         self.external = External(self.termObj) 
@@ -453,22 +464,23 @@ class AthenaObject:
         # this is directory of main commands presented to user
         # any other commands are considered hidden
         self.cmdDict = {
-      'scCmd':('SetClass', 'SCv(view)', 'SCcm(comp)', 
-                  'SCf(find)', 'SCs(search)', 'SCmode(mode)', 'SCh(hear)',),
-      'smCmd':('SetMeasure',    
-                  'SMls(list)', 'SMo(select)',),
-      'mcCmd':('MapClass', 'MCv(view)', 'MCcm(comp)', 
-                  'MCopt(optimum)', 'MCgrid(grid)', 'MCnet(network)'),
+#       'scCmd':('SetClass', 'SCv(view)', 'SCcm(comp)', 
+#                   'SCf(find)', 'SCs(search)', 'SCmode(mode)', 'SCh(hear)',),
+#       'smCmd':('SetMeasure',    
+#                   'SMls(list)', 'SMo(select)',),
+#       'mcCmd':('MapClass', 'MCv(view)', 'MCcm(comp)', 
+#                   'MCopt(optimum)', 'MCgrid(grid)', 'MCnet(network)'),
       'piCmd':('PathInstance', 'PIn(new)',      'PIcp(copy)', 
                   'PIrm(remove)','PIo(select)', 'PIv(view)', 
                   'PIe(edit)', 'PIdf(duration)', 'PIls(list)', 'PIh(hear)', 
                   'PIret(retro)', 
-                  'PIrot(rot)', 'PIslc(slice)', 'PIopt(optimum)'),
-      'psCmd':('PathSet','PScma(compA)','PScmb(compB)'),
-      'pvCmd':('PathVoice', 'PVn(new)', 'PVcp(copy)', 'PVrm(remove)',
-                  'PVo(select)', 'PVv(view)',    'PVe(edit)',     
-                  'PVls(list)', 
-                  'PVan(analysis)', 'PVcm(compare)', 'PVauto(auto)'),
+                  'PIrot(rot)', 'PIslc(slice)'),
+# 'PIopt(optimum)'
+#       'psCmd':('PathSet','PScma(compA)','PScmb(compB)'),
+#       'pvCmd':('PathVoice', 'PVn(new)', 'PVcp(copy)', 'PVrm(remove)',
+#                   'PVo(select)', 'PVv(view)',    'PVe(edit)',     
+#                   'PVls(list)', 
+#                   'PVan(analysis)', 'PVcm(compare)', 'PVauto(auto)'),
       'tmCmd':('TextureModule', 'TMo(select)', 'TMv(view)',                                  
                   'TMls(list)'),
       'tpCmd':('TextureParameter', 'TPls(list)', 'TPv(select)', 'TPmap(map)', 
@@ -503,12 +515,11 @@ class AthenaObject:
                   'APr(refresh)', 'APwid(width)', 'APcc(custom)' ),
         }
 
-        self.cmdOrder = [None, 'scCmd', 'smCmd', 'mcCmd', 
-                              None, 'piCmd', 'psCmd', 'pvCmd', 
-                              None, 'tmCmd', 'tpCmd', 'tiCmd', 'tcCmd', 
-                                      'ttCmd', 'teCmd', 
-                              None, 'eoCmd', 'emCmd', 'elCmd', 'cpCmd', 
-                              None, 'apCmd', 'ahCmd', 'auCmd', 'aoCmd']
+        self.cmdOrder = [None, 'piCmd', #'psCmd', 'pvCmd', 
+                      None, 'tmCmd', 'tpCmd', 'tiCmd', 'tcCmd', 
+                              'ttCmd', 'teCmd', 
+                      None, 'eoCmd', 'emCmd', 'elCmd', 'cpCmd', 
+                      None, 'apCmd', 'ahCmd', 'auCmd', 'aoCmd']
         # two-letter prefix for all athenaCL commands
         self.cmdPrefixes = [] # store w/ caps
         for key in self.cmdDict: 
@@ -544,7 +555,16 @@ class AthenaObject:
         return self.cmdDict[prefix.lower()+'Cmd'][0] # 0 gets title
 
 
-    #------------------------------------------------------------------------||--
+    def _configTerminal(self, termObj):
+        """Provide a default Termainl if not provided
+        """
+        if termObj == None:
+            return Terminal('terminal', None)
+        else:
+            return termObj
+
+
+    #-----------------------------------------------------------------------||--
     # managing and displaying command names
 
     def cmdDisplay(self):
@@ -644,7 +664,7 @@ class AthenaObject:
                 i = i + 1
         return usrStr
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # tools for version checking
 
     def compareVersion(self, versionOther=None):
@@ -684,7 +704,7 @@ class AthenaObject:
         #print 'time since last version check %s\n' % dif
         return dif
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # these are used in error messages, AUsys
 
     def osStr(self):
@@ -704,7 +724,7 @@ class AthenaObject:
                          self.aoStr(), self.external.getCvsStat())
         return headStr
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # methods to maintain internal utility objects
 
     def setEventMode(self, usrStr, default=None):
@@ -723,8 +743,12 @@ class AthenaObject:
         this is used for automated image generation in documentation"""
         self.external.updatePrefs(filePath) # msgs on
 
+
+
+
+
 #-----------------------------------------------------------------||||||||||||--
-# this term handling thanks inpart to avkutil.py
+# this term handling thanks in part to avkutil.py
 class Terminal:
     """terminal management.
     represents basic screen presentation issues, even w/o a tty
@@ -822,7 +846,7 @@ class Terminal:
 
 
 #-----------------------------------------------------------------||||||||||||--
-# this Interpreter is based on a cmd.py: thanks to the Python crew!
+# this Interpreter is based on Python cmd.py
 
 class Interpreter:
     """command line envonment to interact with athenaObj.py
@@ -838,7 +862,9 @@ class Interpreter:
         changes some processing in order to provide more accurate errors.
     """
 
-    def __init__(self, sessionType='terminal', threadAble=1, verbose=0, debug=0):
+    def __init__(self, sessionType='terminal', threadAble=1, 
+        verbose=0, debug=0):
+
         # instance of athenaObj class, where all athena processing takes place
         self.sessionType = sessionType # can be: terminal, idle, Tkinter, cgi
         self.verbose = verbose # determine output level
@@ -873,7 +899,7 @@ class Interpreter:
         self.intro = athTitle + lang.msgAthIntro + '\n\n'
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def out(self, msg):
         """main output filter for all text displays
         all text output, when using the intereter, passes through here
@@ -882,7 +908,7 @@ class Interpreter:
         if self.verbose >= 1:
             dialog.msgOut(msg, self.termObj)
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
 
     def _updateCmdEnviron(self):
         "passed to command objects for interperter prefs"
@@ -935,7 +961,7 @@ class Interpreter:
         return cmd, arg
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def _cmd(self, line):
         """does actual processing of each command, adding do prefix
         separates args from command
@@ -991,6 +1017,7 @@ class Interpreter:
         cmd = self.ao.cmdCorrect(cmd)
         func = self._getFunc(cmd)
         if func == None: return 0, "no command given"
+
         try: # execute function, manage threads
             cmdObj = func(self.ao, self.cmdEnviron, arg)
             ok, result = cmdObj.do() # no out on resutl here
@@ -1002,8 +1029,9 @@ class Interpreter:
             ok = 0
         return ok, result
 
-    #------------------------------------------------------------------------||--
 
+
+    #-----------------------------------------------------------------------||--
     def _precmd(self, line):
         return line
 
@@ -1015,7 +1043,7 @@ class Interpreter:
         self._updatePrompt()
         return stop
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def cmdExecute(self, cmdList):
         """used for athenaScripts, does many commands in a list
         a simple list of commands is executed one at a time
@@ -1059,8 +1087,8 @@ class Interpreter:
                 self.echo = 0
         #self.postloop()
 
-    #------------------------------------------------------------------------||--
 
+    #-----------------------------------------------------------------------||--
     def runScript(self, name, scriptArgs=None):
         """will run a script in libAS folder, or a complete path
         if given (not implemented yet)"""
@@ -1078,7 +1106,7 @@ class Interpreter:
         stop = self.cmdExecute(scriptObj.cmdList)
         self.echo = 0
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     #def preloop(self): pass
     #def postloop(self): pass
     def _clearCount(self):
@@ -1104,7 +1132,8 @@ class Interpreter:
         self._blankCount = self._blankCount + 1 
         # return nothing
 
-    #------------------------------------------------------------------------||--
+
+    #-----------------------------------------------------------------------||--
     def _getCursorToolConvert(self):
         """read prefs and return a conversion dictionary
         called on init of Interpreter"""
@@ -1137,7 +1166,7 @@ class Interpreter:
         else:
             self.prompt = '%s ' % (promptRoot)
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def _testThreads(self, force=0):
         """testing if threading modules are available
         cgi threads are always single-threaded
@@ -1166,7 +1195,8 @@ class Interpreter:
         if self.echo == 1: self.echo = 0
         else: self.echo = 1
 
-    #------------------------------------------------------------------------||--
+
+    #-----------------------------------------------------------------------||--
     # error handling and logging
     def _errorReport(self, cmd, arg, tbObj):
         """fmtTbList is a list of formatted tb data
@@ -1195,10 +1225,9 @@ class Interpreter:
         # dont do 
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     # proc_ commands need acces to interpreter to function
     # have initila shell in command.py
-
 
     def proc_menu(self, data):
         # used for menu commands?

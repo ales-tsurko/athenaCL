@@ -165,7 +165,7 @@ class Measure:
         """return current attribute dictionary for comparison later"""
         return self._attributes 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def addNote(self, ps, dur, dyn=None):
         """add a list of note objects?"""
         obj = Note(ps, dur, dyn)
@@ -183,7 +183,7 @@ class Measure:
 
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def __call__(self, number):
         """number is measure number"""
         msg = []
@@ -333,7 +333,7 @@ class Score:
         return '\n'.join(msg)
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def addMeasureList(self, measurePart):
         """add a list of measure objects"""
         self._measures.append(measurePart)
@@ -344,7 +344,7 @@ class Score:
         self._measures = measures
 
 
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
 
     def getPart(self, partId):
         msg = []
@@ -357,7 +357,7 @@ class Score:
         return '\n'.join(msg)
         
     
-    #------------------------------------------------------------------------||--
+    #-----------------------------------------------------------------------||--
     def write(self, fp):
         msg = []
         msg.append(self.head)

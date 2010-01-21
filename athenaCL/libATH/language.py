@@ -42,7 +42,7 @@ class LangObj:
             try:
                 return getattr(self.langDict['en'], name)
             except AttributeError:
-                print self.errorStr % name
+                #print self.errorStr % name
                 return self.errorStr % name
         else:
             try:
