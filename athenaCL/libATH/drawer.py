@@ -1000,7 +1000,8 @@ def floatToInt(x, method='round'):
 
 #-----------------------------------------------------------------||||||||||||--                  
 def _labelOrdered(msg, n, symbols):
-    """recursive function to create symbol labels"""
+    """recursive function to create symbol labels
+    """
     x, y = divmod(n, len(symbols))
     # y can always be used to access a character
     # x is one more than the necessary value
@@ -1019,7 +1020,10 @@ def _labelOrdered(msg, n, symbols):
 
 def genAlphaLabel(number):
     """generate alphabetic symbol labels, in the form: 
-    a-z, aa, ab, ..., ba, bb, ..."""          
+    a-z, aa, ab, ..., ba, bb, ...
+    
+    >>> genAlphaLabel(12)
+    """          
     label = []
     for n in range(number):
         msg = []
