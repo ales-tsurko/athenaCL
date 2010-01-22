@@ -57,8 +57,7 @@ from athenaCL.libATH import prefTools
 from athenaCL.libATH import rhythm # needed for timing
 from athenaCL.libATH import language
 lang = language.LangObj()
-from athenaCL.libATH import SC
-from athenaCL.libATH import MC
+#from athenaCL.libATH import SC
 from athenaCL.libATH.libOrc import orc
 from athenaCL.libATH.libTM import texture # needed for test script
 from athenaCL.libATH import clone # needed for proc_AUtest
@@ -122,8 +121,8 @@ class External:
         # create util objects
 
 
-        self.scObj = SC.SetClass() 
-        self.mcObj = MC.MapClass()
+        #self.scObj = SC.SetClass() 
+        #self.mcObj = MC.MapClass()
 
         # check for texture module directory, demo dirs
         libATHcontents = os.listdir(self.libATHpath)
@@ -433,7 +432,7 @@ class AthenaObject:
         self.author = '' # stored for a loaded athenaObj
         self.tniMode = 0    #true == TnI, false == Tn
         # PATH DATA
-        self.activeSetMeasure = 'ASIM' # default
+        #self.activeSetMeasure = 'ASIM' # default
         self.pathLib = {}
         self.activePath = ''
         # TEXTURE DATA
@@ -1362,7 +1361,6 @@ class Interpreter:
         """run a script and print results
         """
         scriptArgs = {} # gather data to generate commands
-        scriptArgs['setMeasureNames'] = setMeasure.engines.keys()
         scriptArgs['allCmds'] = self.ao.cmdDocManifest()
         scriptArgs['textureNames'] = texture.tmObjs
         

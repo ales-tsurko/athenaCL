@@ -2471,73 +2471,6 @@ def factory(eventName, ao):
 
 
 
-
-
-#-----------------------------------------------------------------||||||||||||--
-#-----------------------------------------------------------------||||||||||||--
-# run tests
-class TestOld:
-    def __init__(self):
-        # call test methods
-        # self.testEventList()
-        self.testRetrograde()
-        
-        
-    def testEventList(self):
-        from athenaCL.libATH import SC
-
-        multisetFactory = SC.MultisetFactory()
-        scObj = SC.SetClass()
-        setData = 'c4, d3, a#4', 'd#2, a3', '3-5'
-        setList = []
-        for set in setData:
-            setList.append(multisetFactory(None, set, scObj))
-        from athenaCL.libATH import pitchPath
-        polyPath = pitchPath.PolyPath('test', scObj)
-        polyPath.loadMultisetList(setList)
-        from athenaCL.libATH.libTM import texture
-        texture_ = texture.factory('LineGroove')
-
-        textureParameters = {}
-        textureParameters['inst']    = ('staticInst', 2) 
-        textureParameters['ampQ']    = ('constant', 70)
-        textureParameters['panQ']    = ('constant', .5)
-        textureParameters['octQ']    = ('constant', 0)
-        textureParameters['fieldQ'] = ('constant', 0)
-        textureParameters['rhythmQ'] = ('loop', ((4,1,1),(4,5,1)))
-        textureParameters['tRange'] = ('staticRange', (0, 15)) 
-        textureParameters['beatT']   = ('c', 30)
-        
-        pitchMode = 'ps'
-        polyphonyMode = '' 
-        temperamentName = '12equal' 
-        auxNo = 0
-        midiPgm = 0
-        midiCh = None
-        fpSSDR = ''
-        fpSADR = ''
-        texture_.load(textureParameters, polyPath, polyphonyMode, temperamentName, 
-                     pitchMode, auxNo, fpSSDR, fpSADR, midiPgm, midiCh)
-        ok = texture_.score()
-        print texture_.elScore
-
-    def testRetrograde(self):
-    
-        for fmt in ['eventInverse', 'timeInverse']: #, 'timeInverse']:
-            a = EventSequence()
-            tCur = 100
-            for x in range(0, 7):
-                d = random.choice([1,3,7,13])
-                event = {'time':tCur, 'dur':d}
-                a.append(event)
-                tCur = tCur + d
-            print '\neventSequence: %s' % fmt
-            a.sort() # maually sort
-            a.retrograde(fmt)
-
-
-
-
 #-----------------------------------------------------------------||||||||||||--
 class Test(unittest.TestCase):
     
@@ -2549,16 +2482,15 @@ class Test(unittest.TestCase):
 
 
     def testEventList(self):
-        from athenaCL.libATH import SC
+        from athenaCL.libATH import multiset
 
-        multisetFactory = SC.MultisetFactory()
-        scObj = SC.SetClass()
+        multisetFactory = multiset.MultisetFactory()
         setData = 'c4, d3, a#4', 'd#2, a3', '3-5'
         setList = []
         for set in setData:
-            setList.append(multisetFactory(None, set, scObj))
+            setList.append(multisetFactory(None, set))
         from athenaCL.libATH import pitchPath
-        polyPath = pitchPath.PolyPath('test', scObj)
+        polyPath = pitchPath.PolyPath('test')
         polyPath.loadMultisetList(setList)
         from athenaCL.libATH.libTM import texture
         textureObj = texture.factory('LineGroove')

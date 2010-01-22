@@ -50,6 +50,9 @@ pitchSpaceTransposer = pitchTools.psTransposer
 def pcSetTransposer(chord, trans):
     """transposes an entire set by trans. w/ mod12
     will strip oct info, retain micro info
+
+    >>> pcSetTransposer([3,4,5], 3)
+    (6, 7, 8)
     """
     newSet = []
     for pc in chord:
@@ -59,6 +62,9 @@ def pcSetTransposer(chord, trans):
 def psSetTransposer(chord, trans):
     """transposes an entire set by trans, no mod12
     retains oct info, micro info 
+
+    >>> pcSetTransposer([3,4,5], 14)
+    (5, 6, 7)
     """
     newSet = []
     for pc in chord:    ## works for negative or positive numbers
@@ -238,6 +244,9 @@ def forteToSc(card, index, inversion=-2):
     possible errors: this function will check and suply an alternitive if 
     there is an error rather than raising an exception. its used heavily 
     and is a source of possible errors
+
+    >>> forteToSc(4,3)
+    (4, 3, 0)
     """
     boundError = 0
     if card > 12 or card < 1:
@@ -315,10 +324,13 @@ def tupleToSc(rawForte):
         raise ValueError
     return scTuple
 
-# scToStr method should be moved inside Multiset
+
 def scToStr(rawForte):
     """raw fortte is a tuple with either 2 or 3 elements, needing to be 
         checked
+
+    >>> scToStr([4,3])
+    '4-3'
     """
     if drawer.isInt(rawForte):
         return '1-1' 
@@ -354,23 +366,35 @@ def anySetToPcs(set):
 
 
 def forteToPcs(rawForte):      
+    """
+    >>> forteToPcs([6,45])
+    (0, 2, 3, 4, 6, 9)
+    """
     scTuple = tupleToSc(rawForte)
     return SCDICT[scTuple[0]][scTuple[1], scTuple[2]][0]
 
 def forteToVar(rawForte):
+    """
+    >>> forteToVar([5,3])
+    (1, 0, 0, 0, 1, 1, 1, 0)
+    """
     scTuple = tupleToSc(rawForte)
     return SCDICT[scTuple[0]][scTuple[1], scTuple[2]][1]
 
 def forteToIcv(rawForte):
+    """
+    >>> forteToIcv([8,3])
+    (6, 5, 6, 5, 4, 2)
+    """
     scTuple = tupleToSc(rawForte)
     return SCDICT[scTuple[0]][scTuple[1], scTuple[2]][2]
-
-
 
 
 def forteToZData(rawForte):            
     """returns sc tuple of z relation, if it exists
         otherwise, returns none
+    >>> forteToZData([6,43])
+    (6, 17, 1)
     """       
     scTuple = tupleToSc(rawForte)
     zVal = forte[scTuple[0]][scTuple[1]][3] # gets z relation val
@@ -429,8 +453,12 @@ def _strToSearchList(str):
     strList = str.split() # returns a list
     return strList         
 
-def refData(self, rawForte):
-    """returns dictionary of references from SCdata"""
+def refData(rawForte):
+    """returns dictionary of references from SCdata
+
+    >>> refData([4,3])
+    {'name': ('alternating tetramirror',)}
+    """
     scTuple = tupleToSc(rawForte)
     setRef = SCREF[scTuple]
     if setRef == {} or setRef == None:
@@ -439,7 +467,13 @@ def refData(self, rawForte):
         return setRef
 
 
-def findRef(self, searchStr, refType='name', setRange='all', tniMode=0):
+def findRef(searchStr, refType='name', setRange='all', tniMode=0):
+    """
+    >>> findRef('Neapolitan pentachord')[0]
+    (5, 32, 1)
+    >>> findRef('minor-second diminished tetrachord')[0]
+    (4, 13, 1)
+    """
     searchWords = _strToSearchList(searchStr) # returns a list
     scoreDict = {}
     for setTuple in getAllScTriples('all', tniMode):
@@ -447,7 +481,7 @@ def findRef(self, searchStr, refType='name', setRange='all', tniMode=0):
         scoreDict[setTuple] = 0
         if refDict == None:
             continue
-        if refDict.has_key(refType): # name groups
+        if refType in refDict.keys(): # name groups
             nameList = refDict[refType]
             nameWords = []
             for nameStrings in nameList: # list of strings
@@ -458,8 +492,22 @@ def findRef(self, searchStr, refType='name', setRange='all', tniMode=0):
                     nwTemp = nw.lower() # keep case
                     if nwTemp.find(swTemp) >= 0:
                         scoreDict[setTuple] = scoreDict[setTuple] + 1 # add
+    rankList = []
+    for setTuple in scoreDict.keys():
+        if scoreDict[setTuple] == 0:
+            del scoreDict[setTuple] # remove if 0 score
+        else: # add ranks to a list
+            rankList.append((scoreDict[setTuple], setTuple))
 
-
+    rankList.sort()
+    rankList.reverse()      
+    searchResults = []
+    for rank, setTuple in rankList: # ordered
+        searchResults.append(setTuple)
+    if searchResults == []:
+        return None
+    else:
+        return searchResults # list of triples
 
 #-----------------------------------------------------------------||||||||||||--
 
@@ -1392,12 +1440,14 @@ class Multiset:
     """
     
     def __init__(self, psRealSrc=None, scTriple=None):
-        """ store scObj for reference
+        """ 
         _psRealSrc is stored as original data entered; not transposed or changed
         and should not be read as data
         scTriple stores forte name as data strcuture
         must be update for all changes
         psList is the internal data representation
+
+        >>> a = Multiset([5,3,15])
         """
         self.forms = ('midi', 'psReal', 'psName', 'pch', 'fq', 'pc', # pitch obj
                           'sc', 'dur', 'normal', 'mason', 'card') 
@@ -1885,7 +1935,7 @@ class MultisetFactory:
                     lang.TAB), termObj)          
         
         
-    def _makeObj(self, ao=None, read=None, scObj=None):
+    def _makeObj(self, ao=None, read=None):
         """ returns sc, pcset, trans from 0=C, and inv
         read arg allows non-interactive use: provide data as arg
         can be used to replace calls to getSet
@@ -1995,16 +2045,13 @@ class MultisetFactory:
 
     def getRef(self, searchStr, refType, setRange='all', tni=0):
         """return a list of all set objects that match search
-        scObj required"""
-        if scObj == None:
-            scObj = SetClass()
-        self.scObj = scObj
+        """
 
         objList = []
-        resultList = self.scObj.findRef(searchStr, refType, setRange, tni)
+        resultList = findRef(searchStr, refType, setRange, tni)
         if resultList != None:
             for scTriple in resultList:
-                objList.append(Multiset(None, scTriple, self.scObj))
+                objList.append(Multiset(None, scTriple))
         return objList # ordered list by incidence
 
 

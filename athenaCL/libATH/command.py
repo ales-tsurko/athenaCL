@@ -36,7 +36,7 @@ from athenaCL.libATH import pitchTools
 from athenaCL.libATH import rhythm
 from athenaCL.libATH import temperament
 from athenaCL.libATH import typeset
-from athenaCL.libATH import SC
+from athenaCL.libATH import multiset
 from athenaCL.libATH.libPmtr import parameter
 from athenaCL.libATH.libPmtr import basePmtr
 from athenaCL.libATH.libTM import texture
@@ -148,9 +148,9 @@ class Command:
         
         self.ao = ao
         self.termObj = self.ao.termObj
-        self.scObj = self.ao.external.scObj
+        #self.scObj = self.ao.external.scObj
         #self.mcObj = self.ao.external.mcObj
-        self.setFactory = SC.MultisetFactory() # for building set objs
+        self.setFactory = multiset.MultisetFactory() # for building set objs
 
         self.args = args
         # store complete cmdEnviron dict for easy passing to cmds fired
@@ -1027,7 +1027,7 @@ class Command:
         for eventModes that requre a path
         will not overwrite existing paths with the same name"""
         if name not in self.ao.pathLib.keys():
-            self.ao.pathLib[name] = pitchPath.PolyPath(name, self.scObj)
+            self.ao.pathLib[name] = pitchPath.PolyPath(name)
             self.ao.pathLib[name].autoFill(psList)
         self.ao.activePath = name
         # all updates now done w/ load opperations
@@ -3090,7 +3090,7 @@ class PIn(Command):
         objList = []
         currentPosition = 0
         while 1:
-            data = self.setFactory(self.ao, None, self.scObj) 
+            data = self.setFactory(self.ao, None) 
             if data == None:
                 return None #lang.msgMCerrorCreatingChord
             objList.append(data)
@@ -3125,7 +3125,7 @@ class PIn(Command):
             if pssList == None: return self._getUsage()
             self.dataList = []
             for setStr in pssList: # converts to string
-                a = self.setFactory(self.ao, setStr, self.scObj)
+                a = self.setFactory(self.ao, setStr)
                 if a == None: break
                 self.dataList.append(a)
             if len(self.dataList) < 1:
@@ -3137,7 +3137,7 @@ class PIn(Command):
             if self.dataList == None: return lang.msgPIcancel   
 
     def process(self): 
-        self.ao.pathLib[self.name] = pitchPath.PolyPath(self.name, self.scObj)
+        self.ao.pathLib[self.name] = pitchPath.PolyPath(self.name)
         self.ao.pathLib[self.name].loadMultisetList(self.dataList) # does updates
         self.ao.activePath = self.name
 
@@ -3333,7 +3333,7 @@ class PIe(Command):
     def _piGetMatchingSet(self, sizeToMatch):
         """used pie to get a set of the smae size as a sorouce"""
         while 1:
-            setObj = self.setFactory(self.ao, None, self.scObj)
+            setObj = self.setFactory(self.ao, None)
             if setObj == None: return None
             if len(setObj) == sizeToMatch:
                 return setObj
@@ -4114,7 +4114,7 @@ class PIh(Command):
         lclTimes['tRange'] = ('staticRange', (0, 10))
         lclTimes['beatT'] = ('c', 90)
         # use current texture module, ignore refresh status
-        t = texture.factory(self.ao.activeTextureModule, 'temp', self.scObj)
+        t = texture.factory(self.ao.activeTextureModule, 'temp')
         t.loadDefault(0, p, self.ao.fpSSDR, self.ao.fpSADR, 
                                 lclTimes, 'generalMidi')
         self.emObj = eventList.factory('midi', self.ao)
@@ -5795,8 +5795,7 @@ class TIn(Command):
 
     def process(self): 
         mod = self.ao.activeTextureModule # same as self.tmName
-        self.ao.textureLib[self.name] = texture.factory(mod, self.name,
-                                                                      self.scObj)
+        self.ao.textureLib[self.name] = texture.factory(mod, self.name)
         # if refresh mode is active, will auto-score to test
         refresh = self.ao.aoInfo['refreshMode']
         # get current texture values
@@ -8847,7 +8846,7 @@ class _CommandAO(Command):
         called from AOload when load xml files
         """
         self.ao.textureLib[textureName] = texture.factory(textureModName, 
-                                                     textureName, self.scObj)
+                                                     textureName)
         # test to see if pathname exists
         pathObj = self.ao.pathLib[pathName]  ## this is a reference, not a copy
         self.ao.textureLib[textureName].load(pmtrQDict, pathObj, polyphonyMode,
@@ -8910,7 +8909,7 @@ class _CommandAO(Command):
             pass # do nothing, and add paths
         if len(pathData['pathLib'].keys()) > 0: # paths exist
             for pathName in pathData['pathLib'].keys():
-                self.ao.pathLib[pathName] = pitchPath.PolyPath(pathName, self.scObj)
+                self.ao.pathLib[pathName] = pitchPath.PolyPath(pathName)
                 self.ao.pathLib[pathName].loadDataModel(
                                                   pathData['pathLib'][pathName])
         else: # no paths exist, create dummy plug
@@ -10196,10 +10195,10 @@ class AUpc(Command):
         self.pObj = None
         if args != '':
             args = argTools.ArgOps(args) # no strip
-            self.pObj = SC.getPitch(self.termObj, args.get(0,'end'))
+            self.pObj = multiset.getPitch(self.termObj, args.get(0,'end'))
             if self.pObj == None: return self._getUsage()
         if self.pObj == None:
-            self.pObj = SC.getPitch(self.termObj)
+            self.pObj = multiset.getPitch(self.termObj)
             if self.pObj == None: return lang.msgReturnCancel
 
     def log(self): # return an executable command str, subclass

@@ -4,7 +4,7 @@
 #
 # Authors:       Christopher Ariza
 #
-# Copyright:     (c) 2007 Christopher Ariza
+# Copyright:     (c) 2010 Christopher Ariza
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
 
@@ -21,8 +21,8 @@ lang = language.LangObj()
 #-----------------------------------------------------------------||||||||||||--
 
 class HarmonicShuffle(baseTexture.Texture):
-    def __init__(self, name=None, scObj=None):
-        baseTexture.Texture.__init__(self, name, scObj) # init base class
+    def __init__(self, name=None):
+        baseTexture.Texture.__init__(self, name) # init base class
         self.author = 'athenaCL native'
         self.tmName = 'HarmonicShuffle'
         # will get defaults from object, order determines labels

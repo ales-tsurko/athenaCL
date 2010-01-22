@@ -4,7 +4,7 @@
 #
 # Authors:       Christopher Ariza
 #
-# Copyright:     (c) 2006 Christopher Ariza
+# Copyright:     (c) 2006-2010 Christopher Ariza
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
 
@@ -17,8 +17,8 @@ from athenaCL.libATH import language
 lang = language.LangObj()
 
 class TimeFill(baseTexture.Texture):
-    def __init__(self, name=None, scObj=None):
-        baseTexture.Texture.__init__(self, name, scObj) # init base class
+    def __init__(self, name=None):
+        baseTexture.Texture.__init__(self, name) # init base class
         self.author = 'athenaCL native'
         self.tmName = 'TimeFill'
         # will get defaults from object, order determines labels

@@ -10,8 +10,10 @@
 
 import copy
 from athenaCL.libATH import temperament
-from athenaCL.libATH import SC
-scObj = SC.SetClass()
+from athenaCL.libATH import multiset
+
+# from athenaCL.libATH import SC
+# scObj = SC.SetClass()
 from athenaCL.libATH import language
 lang = language.LangObj()
 from athenaCL.libATH import drawer
@@ -56,13 +58,13 @@ class Texture:
     texuture parameters defined in texture
     aux parameters defined by instrument
     """
-    def __init__(self, name=None, scObj=None):
+    def __init__(self, name=None):
         """init variables used only during score creation
             additional variable added later
         """
-        if scObj == None:
-            scObj = SC.SetClass()
-        self.scObj = scObj
+#         if scObj == None:
+#             scObj = SC.SetClass()
+#         self.scObj = scObj
         self.name = name
         self.doc = None # from subclass
         self.mute = 0
@@ -500,7 +502,7 @@ class Texture:
         from athenaCL.libATH.libTM import texture
         if name == None: # if no name givne, use this texture's name
             name = self.name
-        obj = texture.factory(self.tmName, name, self.scObj) 
+        obj = texture.factory(self.tmName, name) 
         # use main load function to load texture
         obj.load(pmtrQDict, path, polyphonyMode, temperamentName, 
                     pitchMode, auxNo, fpSSDR, fpSADR, midiPgm, midiCh, 
@@ -725,7 +727,7 @@ class Texture:
         if self.pitchMode == 'sc':
             for scIdTuple in self.path.get('scPath'):
                 # convert the sc's into pcs at 0; better way to do this...
-                pathList.append(list(self.scObj.pcs(scIdTuple)))
+                pathList.append(list(multiset.forteToPcs(scIdTuple)))
         elif self.pitchMode == 'pcs':
             for set in self.path.get('pcsPath'):
                 pathList.append(list(set))   
@@ -745,7 +747,7 @@ class Texture:
         """gets pitch gruop as a data structure, w/n the correct pitch mode
         pitch representation will always be psReal values, likely ints"""
         if self.pitchMode == 'sc':
-            return list(self.scObj.pcs(self.path.get('scPath')[pos]))
+            return list(multiset.forteToPcs(self.path.get('scPath')[pos]))
         elif self.pitchMode == 'pcs':
             return list(copy.copy(self.path.get('pcsPath')[pos]))    
         elif self.pitchMode == 'ps':

@@ -12,19 +12,20 @@
 import copy
 import unittest, doctest
 
-from athenaCL.libATH import SC
+#from athenaCL.libATH import SC
 #from athenaCL.libATH import MC
 from athenaCL.libATH import pitchTools
 from athenaCL.libATH import drawer
+from athenaCL.libATH import multiset
 
 _MOD = 'pitchPath'
 
 class PolyPath:
-    def __init__(self, name='test', scObj=None, mcObj=None):
+    def __init__(self, name='test'):
         self.name = name
         # if not given create
-        if scObj == None: self.scObj = SC.SetClass()
-        else: self.scObj = scObj
+#         if scObj == None: self.scObj = SC.SetClass()
+#         else: self.scObj = scObj
 #         if mcObj == None: self.mcObj = MC.MapClass()
 #         else: self.mcObj = mcObj
 
@@ -259,7 +260,7 @@ class PolyPath:
         self.multisetPath = [] # clear
         for entry in pcsList:
             pcSet = tuple(entry)
-            self.multisetPath.append(SC.Multiset(pcSet))
+            self.multisetPath.append(multiset.Multiset(pcSet))
         self._updateNew()
 
     def loadMultisetList(self, objList):
@@ -281,7 +282,7 @@ class PolyPath:
         # load pitch data
         if p['psPath'] == None: #pre1.0path
             for set in p['scPath']: # must have a set path
-                self.multisetPath.append(SC.Multiset(None, set, self.scObj))
+                self.multisetPath.append(multiset.Multiset(None, set))
         else: # use all data
             psPath = copy.deepcopy(p['psPath'])
             pcsPath = copy.deepcopy(p['pcsPath'])
@@ -293,7 +294,7 @@ class PolyPath:
                 durFraction = copy.deepcopy(p['durFraction'])
             i = 0
             for set in psPath:
-                setObj = SC.Multiset(psPath[i], scPath[i], self.scObj)
+                setObj = multiset.Multiset(psPath[i], scPath[i])
                 setObj.setT(field[i])
                 if p.has_key('durFraction'): 
                     setObj.setDur(durFraction[i])
@@ -366,7 +367,7 @@ class PolyPath:
     #-----------------------------------------------------------------------||--
     def copy(self, name):
         """output a copy of this object, as new object"""
-        pathObj = PolyPath(name, self.scObj)
+        pathObj = PolyPath(name)
         # this may not be the best method as it runs update init methods
         newDurPath = []
         for set in self.multisetPath:
@@ -797,7 +798,7 @@ class Test(unittest.TestCase):
         dummyPath = ((2,5,1),(-4,5,3),(2,6,4))
         objList = []
         for set in dummyPath:
-            objList.append(SC.Multiset(set))
+            objList.append(multiset.Multiset(set))
         p = PolyPath()
         p.loadMultisetList(objList)
         for name in p.forms:

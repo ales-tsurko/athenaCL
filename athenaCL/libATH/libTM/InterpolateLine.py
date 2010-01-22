@@ -52,8 +52,8 @@ lang = language.LangObj()
 class InterpolateLine(baseTexture.Texture):
     """linear interpolation between event points
     """
-    def __init__(self, name=None, scObj=None):
-        baseTexture.Texture.__init__(self, name, scObj) # init base class
+    def __init__(self, name=None):
+        baseTexture.Texture.__init__(self, name) # init base class
         self.author = 'athenaCL native'
         self.tmName = 'InterpolateLine'
         # will get defaults from object, order determines labels

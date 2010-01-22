@@ -21,8 +21,8 @@ lang = language.LangObj()
 #-----------------------------------------------------------------||||||||||||--
 
 class HarmonicAssembly(baseTexture.Texture):
-    def __init__(self, name=None, scObj=None):
-        baseTexture.Texture.__init__(self, name, scObj) # init base class
+    def __init__(self, name=None):
+        baseTexture.Texture.__init__(self, name) # init base class
         self.author = 'athenaCL native'
         self.tmName = 'HarmonicAssembly'
         # will get defaults from object, order determines labels

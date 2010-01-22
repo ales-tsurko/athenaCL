@@ -80,7 +80,7 @@ def locator(usrStr):
     return modFound, objType
 
 
-def factory(tmName, name=None, scObj=None):
+def factory(tmName, name=None):
     """this is used only for loading adn returning an object
     can return obj or parsed args
     first thing in list must be a string, type def
@@ -93,7 +93,7 @@ def factory(tmName, name=None, scObj=None):
         raise ValueError, 'texture module type error' # failure
 
     tmObjAttr = getattr(mod, objType)
-    tmObj = tmObjAttr(name, scObj)
+    tmObj = tmObjAttr(name)
     return tmObj
 
 

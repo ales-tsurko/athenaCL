@@ -23,8 +23,8 @@ _MOD = 'IntervalExpansion.py'
 class IntervalExpansion(baseTexture.Texture):
     """simple one dimension line algorithm
     """
-    def __init__(self, name=None, scObj=None):
-        baseTexture.Texture.__init__(self, name, scObj) # init base class
+    def __init__(self, name=None):
+        baseTexture.Texture.__init__(self, name) # init base class
         self.author = 'athenaCL native'
         self.tmName = 'IntervalExpansion'
         # will get defaults from object, order determines labels
