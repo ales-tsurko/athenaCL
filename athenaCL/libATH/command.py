@@ -10623,23 +10623,9 @@ class AU_(_Menu):
         _Menu.__init__(self, ao, cmdEnviron, args)
         self.prefix = 'AU'
 
-#-----------------------------------------------------------------||||||||||||--
 
 
-class template(Command):
 
-    def __init__(self, ao, cmdEnviron=None, args=''):
-        Command.__init__(self, ao, cmdEnviron, args)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = ''
-
-    def gather(self):
-        pass
-    def process(self):
-        pass
-    def display(self): 
-        pass
 
 #-----------------------------------------------------------------||||||||||||--
 
