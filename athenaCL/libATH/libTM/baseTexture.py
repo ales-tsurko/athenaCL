@@ -355,7 +355,7 @@ class Texture:
 
     #-----------------------------------------------------------------------||--
     def load(self, pmtrQDict, pathObj, polyphonyMode, temperamentName, 
-                pitchMode, auxNo, fpSSDR, fpSADR, midiPgm, midiCh, mute, 
+                pitchMode, auxNo, fpSSDR, fpSADR, midiPgm, midiCh, mute=0, 
                 silenceMode=0, orcMapMode=1, refresh=1):
         """used for starting a texture from a pmtrQDict
         used when loading an athenaObject XML file

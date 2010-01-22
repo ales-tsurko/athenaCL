@@ -5,10 +5,12 @@
 #
 # Authors:       Christopher Ariza
 #
-# Copyright:     (c) 2004-2006 Christopher Ariza
+# Copyright:     (c) 2004-2010 Christopher Ariza
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
 import os, time, random, copy, array
+import unittest, doctest
+
 
 from athenaCL.libATH import drawer
 from athenaCL.libATH import language
@@ -74,7 +76,11 @@ def eventModeParser(typeName):
 def selectEventModeOrc(emName):
     """for a given emName, supply the appropriate orchestra name
     most often, these will be the same; but two different eventLists may 
-    want to sare the same orhestra"""   
+    want to sare the same orhestra
+
+    >>> selectEventModeOrc('midi')
+    'generalMidi'
+    """   
     emName = eventModeParser(emName)
     assert emName in eventModeNames.values() and emName != None
     if emName == 'csoundNative':
@@ -92,7 +98,11 @@ def selectEventModeOrc(emName):
 # in some cases the emName will determine the orc used w/ an engine
 # in other cases, the emName has nothing to do w/ what orc is used
 def selectOutEngineOrc(emName, oeName):
-    """for a given eventMode and outputEngine, determine best orchestra"""
+    """for a given eventMode and outputEngine, determine best orchestra
+
+    >>> selectOutEngineOrc('midi', 'EngineCsoundNative')
+    'csoundNative'
+    """
     assert emName in eventModeNames.values() and emName != None
     if oeName not in outputEngineNames:
         raise ValueError, 'bad Output name: %s' % oeName    
@@ -144,6 +154,8 @@ class EventSequence:
         
     eventData: stores meta data about event list;
         tAbsStart, tAbsEnd
+
+    >>> a = EventSequence()
     """
     def __init__(self):
         self._eventList = [] # a list of event dictionaries, perhaps un sorted
@@ -507,12 +519,13 @@ class EventSequenceSplit:
     
     need aoInfo such as ssdr and sadr to get file paths
     this is not normally stored in ao.aoInfo, but packed here in command.py
+
     """
     def __init__(self, srcObj, srcFmt='t', eventCount=None, refresh=0,\
                      aoInfo=None):
         """srcFmt is either t (texture) or c (clone)
         or pg or pf, parameter generator or parameter filter"""
-        self.srcObj = srcObj # a list of lable, pmtrObj apurs
+        self.srcObj = srcObj # a list of table, pmtrObj pairs
         self.srcFmt = srcFmt
         # can be used to limt number of events shown
         # only implemented for pmtr event sequences (pg, pf, pr)
@@ -811,14 +824,19 @@ class EventSequenceSplit:
             raise ValueError, 'unexpected src fmt'
 
 
-#-----------------------------------------------------------------||||||||||||--
+
+
 #-----------------------------------------------------------------||||||||||||--
 class Performer:
     """used only by EventMode
     can provide complete scores of all textures as flat data obj
     or can step through a score as a rt performnace
     does contain objects, and thus cannot be store 
-        (this is unlike an esObj, which is simple a data structure)"""
+        (this is unlike an esObj, which is simple a data structure)
+
+
+    >>> a = Performer()
+    """
     def __init__(self):
         self.polySeq = {} # data representation of calculated score       
         self.scoreCount = 0 # number of textures processed
@@ -920,6 +938,8 @@ class Performer:
                         print _MOD, 'clone failed to score', tName, cName
                         continue
                 self._packClone(tName, cName, c)
+
+
 
 
 #-----------------------------------------------------------------||||||||||||--
@@ -1419,9 +1439,12 @@ class _OutputEngine:
 
 
 #-----------------------------------------------------------------||||||||||||--
-#-----------------------------------------------------------------||||||||||||--
 class EngineAudioFile(_OutputEngine):
     def __init__(self, emName, ref):
+        """
+
+        >>> a = EngineAudioFile('generalMidi', {})
+        """
         _OutputEngine.__init__(self, emName, ref) # provide event name
         self.name = 'EngineAudioFile'
         self.doc = lang.docOeAudioFile
@@ -1481,13 +1504,12 @@ class EngineAudioFile(_OutputEngine):
             className = tDict['className']
             esObj = tDict['esObj']
             if not tDict['mute']: # pass object to mix data into
-                self.aObj = self._translateAudioFile(orcMapMode, esObj, self.aObj,
-                                                                self.unitSynthesizerMethod)
+                self.aObj = self._translateAudioFile(orcMapMode, esObj, self.aObj, self.unitSynthesizerMethod)
             for cName in tDict['TC'].keys():
                 if not tDict['TC'][cName]['mute']:
                     esObj = tDict['TC'][cName]['esObj'] 
                     self.aObj = self._translateAudioFile(orcMapMode, esObj,
-                                              self.aObj, self.unitSynthesizerMethod)
+                               self.aObj, self.unitSynthesizerMethod)
         return 1 # sucess
         
     def _write(self):
@@ -1501,6 +1523,10 @@ class EngineAudioFile(_OutputEngine):
 #-----------------------------------------------------------------||||||||||||--
 class EngineCsoundNative(_OutputEngine):
     def __init__(self, emName, ref):
+        """
+
+        >>> a = EngineCsoundNative('generalMidi', {})
+        """
         _OutputEngine.__init__(self, emName, ref) # provide event name
         self.name = 'EngineCsoundNative'
         self.doc = lang.docOeCsoundNative
@@ -1537,8 +1563,7 @@ class EngineCsoundNative(_OutputEngine):
             audioDirFlag = '' # not used
             # quotes req on win; not sure if space after 0 is req
             audioPathFlag = '\"-o' + self.ref['pathAudio'] + '\" '  
-            batFileHead = '@ECHO off\nc:\ncd %s\n%s ' % (self.ref['pathDirCsound'],
-                                                                        self.ref['nameExeCsound'])
+            batFileHead = '@ECHO off\nc:\ncd %s\n%s ' % (self.ref['pathDirCsound'],self.ref['nameExeCsound'])
         renderOpt = ('-m2 '+ # msg level. Sum 1=amps, 2=out-of-range, 4=warnings
             '-d ' + # suppress all displays (-d) (ascii displays -g)
             self.ref['audioFlag'] +               
@@ -1561,10 +1586,10 @@ class EngineCsoundNative(_OutputEngine):
         f.write(batStr)
         f.close()       
         # sytem dependent post-adjustments to batch file
-        if os.name == 'mac': # 'VRmi' (Mills), 'sNoC' (Ingalls)
-            osTools.rsrcSetCreator(self.ref['pathBat'], 
-                                          self.ref['nameCsoundCreator'], 'TEXT')
-        elif os.name == 'posix':        
+#         if os.name == 'mac': # 'VRmi' (Mills), 'sNoC' (Ingalls)
+#             osTools.rsrcSetCreator(self.ref['pathBat'], 
+#                              self.ref['nameCsoundCreator'], 'TEXT')
+        if os.name == 'posix':        
             os.chmod(self.ref['pathBat'], 0755) #makes executable (744=rwxr--r--) 
         else: # win or other
             pass
@@ -1581,9 +1606,9 @@ class EngineCsoundNative(_OutputEngine):
         xmlHead = '<?xml version="1.0"?>\n' # add?
         msg = []
         msg.append('<CsoundSynthesizer>\n\n')
-        if os.name == 'mac':
-            optStr = "%s/n%s/n%s/n/n%s" % ('<MacOptions>', 2, 1, 
-                     '-b64 -A -s -m0 -K -B0 -Lstdin </MacOptions>')
+#         if os.name == 'mac':
+#             optStr = "%s/n%s/n%s/n/n%s" % ('<MacOptions>', 2, 1, 
+#                      '-b64 -A -s -m0 -K -B0 -Lstdin </MacOptions>')
         optStr = '<CsOptions>\n' + csdOptions + '\n\n' + '</CsOptions>\n'
         msg.append(optStr)
         msg.append('%s\n%s%s\n\n' % ('<CsInstruments>', self.orcObj.srcStr,
@@ -1691,6 +1716,10 @@ class EngineCsoundNative(_OutputEngine):
 #-----------------------------------------------------------------||||||||||||--
 class EngineCsoundExternal(_OutputEngine):
     def __init__(self, emName, ref):
+        """
+
+        >>> a = EngineCsoundExternal('generalMidi', {})
+        """
         _OutputEngine.__init__(self, emName, ref) # provide event name
         self.name = 'EngineCsoundExternal'
         self.doc = lang.docOeCsoundExternal
@@ -1737,6 +1766,10 @@ class EngineCsoundExternal(_OutputEngine):
 #-----------------------------------------------------------------||||||||||||--
 class EngineCsoundSilence(_OutputEngine):
     def __init__(self, emName, ref):
+        """
+
+        >>> a = EngineCsoundSilence('generalMidi', {})
+        """
         _OutputEngine.__init__(self, emName, ref) # provide event name
         self.name = 'EngineCsoundSilence'
         self.doc = lang.docOeCsoundSilence      
@@ -1782,6 +1815,8 @@ class EngineCsoundSilence(_OutputEngine):
 
 
 #-----------------------------------------------------------------||||||||||||--
+# TODO: remove?
+
 class EngineMaxColl(_OutputEngine):
     """used to translate from athenaCL format to midi int score format
     int format is used to get athenaCL data into Max/MSP or similar
@@ -1795,6 +1830,10 @@ class EngineMaxColl(_OutputEngine):
     note: always uses a midi orchestra
     """
     def __init__(self, emName, ref):
+        """
+
+        >>> a = EngineMaxColl('generalMidi', {})
+        """
         _OutputEngine.__init__(self, emName, ref) # provide event name
         self.name = 'EngineMaxColl'
         self.doc = lang.docOeMaxColl
@@ -1847,6 +1886,10 @@ class EngineMaxColl(_OutputEngine):
 class EngineMidiFile(_OutputEngine):
     """writes a midi file"""
     def __init__(self, emName, ref):
+        """
+
+        >>> a = EngineMidiFile('generalMidi', {})
+        """
         _OutputEngine.__init__(self, emName, ref) # provide event name
         self.name = 'EngineMidiFile'
         self.doc = lang.docOeMidiFile
@@ -1894,6 +1937,10 @@ class EngineMidiFile(_OutputEngine):
 class EngineAcToolbox(_OutputEngine):
     """writes a midi file"""
     def __init__(self, emName, ref):
+        """
+
+        >>> a = EngineAcToolbox('generalMidi', {})
+        """
         _OutputEngine.__init__(self, emName, ref) # provide event name
         self.name = 'EngineAcToolbox'
         self.doc = lang.docOeAcToolbox
@@ -1999,6 +2046,9 @@ class EngineAcToolbox(_OutputEngine):
 #-----------------------------------------------------------------||||||||||||--
 class EngineText(_OutputEngine):
     def __init__(self, emName, ref):
+        """
+        >>> a = EngineText('generalMidi', {})
+        """
         _OutputEngine.__init__(self, emName, ref) # provide event name
         self.name = 'EngineText'
         self.doc = lang.docOeText
@@ -2018,16 +2068,15 @@ class EngineText(_OutputEngine):
             if not tDict['mute']:
                 msg.append(self._fmtHeadTexture(className, tName,))
                 esObj = tDict['esObj']
-                data, label = self._translateTextDelimitStr(orcMapMode, esObj, 
-                                                                          delimit)
+                data, label = self._translateTextDelimitStr(orcMapMode, 
+                                esObj, delimit)
                 msg.append(label)
                 msg.append(data)
             for cName in tDict['TC'].keys():
                 if not tDict['TC'][cName]['mute']:
                     msg.append(self._fmtHeadClone(className, tName, cName,))
                     esObj = tDict['TC'][cName]['esObj']  
-                    data, label = self._translateTextDelimitStr(orcMapMode, esObj,
-                                                                              delimit)
+                    data, label = self._translateTextDelimitStr(orcMapMode, esObj, delimit)
                     msg.append(label)
                     msg.append(data)
         self.polySeqStr = ''.join(msg)
@@ -2400,7 +2449,7 @@ class EventMode:
 
 
 #-----------------------------------------------------------------||||||||||||--
-# publicj factory for create an event object
+# public factory for create an event object
 def factory(eventName, ao):
     eventName = eventModeParser(eventName)
     assert eventName != None
@@ -2486,9 +2535,74 @@ class TestOld:
             a.sort() # maually sort
             a.retrograde(fmt)
 
+
+
+
+#-----------------------------------------------------------------||||||||||||--
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
+
+
+    def testEventList(self):
+        from athenaCL.libATH import SC
+
+        multisetFactory = SC.MultisetFactory()
+        scObj = SC.SetClass()
+        setData = 'c4, d3, a#4', 'd#2, a3', '3-5'
+        setList = []
+        for set in setData:
+            setList.append(multisetFactory(None, set, scObj))
+        from athenaCL.libATH import pitchPath
+        polyPath = pitchPath.PolyPath('test', scObj)
+        polyPath.loadMultisetList(setList)
+        from athenaCL.libATH.libTM import texture
+        textureObj = texture.factory('LineGroove')
+
+        textureParameters = {}
+        textureParameters['inst']    = ('staticInst', 2) 
+        textureParameters['ampQ']    = ('constant', 70)
+        textureParameters['panQ']    = ('constant', .5)
+        textureParameters['octQ']    = ('constant', 0)
+        textureParameters['fieldQ'] = ('constant', 0)
+        textureParameters['rhythmQ'] = ('loop', ((4,1,1),(4,5,1)))
+        textureParameters['tRange'] = ('staticRange', (0, 15)) 
+        textureParameters['beatT']   = ('c', 30)
+        
+        pitchMode = 'ps'
+        polyphonyMode = '' 
+        temperamentName = '12equal' 
+        auxNo = 0
+        midiPgm = 0
+        midiCh = None
+        fpSSDR = ''
+        fpSADR = ''
+        textureObj.load(textureParameters, polyPath, polyphonyMode, temperamentName, 
+                     pitchMode, auxNo, fpSSDR, fpSADR, midiPgm, midiCh)
+        ok = textureObj.score()
+
+    def testRetrograde(self):
+    
+        for fmt in ['eventInverse', 'timeInverse']: #, 'timeInverse']:
+            a = EventSequence()
+            tCur = 100
+            for x in range(0, 7):
+                d = random.choice([1,3,7,13])
+                event = {'time':tCur, 'dur':d}
+                a.append(event)
+                tCur = tCur + d
+            a.sort() # maually sort
+            a.retrograde(fmt)
+
+
+#-----------------------------------------------------------------||||||||||||--
+
+
+
 if __name__ == '__main__':
-    TestOld()
-
-
-
-
+    from athenaCL.test import baseTest
+    baseTest.main(Test)

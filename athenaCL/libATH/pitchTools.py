@@ -4,14 +4,15 @@
 #                    defines Pitch class, usefull for any pitch operation
 #
 # Authors:       Christopher Ariza
-#                    Jonathan Saggau
 #
-# Copyright:     (c) 2004-2006 Christopher Ariza, Jonathan Saggau
+# Copyright:     (c) 2004-2010 Christopher Ariza, Jonathan Saggau
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
 
 # this module should not import any lower level athenacl modules
 import copy, math
+import unittest, doctest
+
 
 from athenaCL.libATH import drawer
 from athenaCL.libATH import typeset
@@ -56,7 +57,11 @@ REFpcToName =   {0:'c',
 
 def splitOctPs(pitch):
     """this function is used in SC.py and elsewhere
-    if a microtone is present, it will be passd in the ps"""
+    if a microtone is present, it will be passd in the ps
+
+    >>> splitOctPs(23)
+    (1, 11)
+    """
     oct, ps = divmod(pitch, 12)
     oct = int(oct) # oct is always an int
     return oct, ps
@@ -65,6 +70,9 @@ def splitOctPs(pitch):
 def splitPsReal(pitch):
     """micro should never be greater than one
     not sure if oct, pc should be converted to ints
+    
+    >>> splitPsReal(6.23)
+    (0, 6, 0.2300...)
     """
     oct, psReal = divmod(pitch, 12)
     pc, micro = divmod(psReal, 1)
@@ -75,7 +83,11 @@ def splitPsReal(pitch):
 def joinPsReal(oct, pc, micro):
     """used in clone.py to process octave from ps
     used in psToTempered:
-    note: pc can be a full psReal beyond the scope of 0-11 ints"""
+    note: pc can be a full psReal beyond the scope of 0-11 ints
+
+    >>> joinPsReal(4, 3, .018)
+    51.018...
+    """
     return (oct * 12) + pc + micro 
 
 def _splitPch(pch, sigMicro=6):
@@ -539,7 +551,11 @@ def fqHarmonicSeries(base, size):
 
 
 def allMidiNoteNames():
-    """provide a scale of usable midi note numbers"""
+    """provide a scale of usable midi note numbers
+
+    >>> allMidiNoteNames()
+    ['C0', 'C#0', 'D0', 'D#0', 'E0', 'F0', 'F#0', 'G0', 'G#0', 'A0', 'A#0', 'B0', 'C1', 'C#1', 'D1', 'D#1', 'E1', 'F1', 'F#1', 'G1', 'G#1', 'A1', 'A#1', 'B1', 'C2', 'C#2', 'D2', 'D#2', 'E2', 'F2', 'F#2', 'G2', 'G#2', 'A2', 'A#2', 'B2', 'C3', 'C#3', 'D3', 'D#3', 'E3', 'F3', 'F#3', 'G3', 'G#3', 'A3', 'A#3', 'B3', 'C4', 'C#4', 'D4', 'D#4', 'E4', 'F4', 'F#4', 'G4', 'G#4', 'A4', 'A#4', 'B4', 'C5', 'C#5', 'D5', 'D#5', 'E5', 'F5', 'F#5', 'G5', 'G#5', 'A5', 'A#5', 'B5', 'C6', 'C#6', 'D6', 'D#6', 'E6', 'F6', 'F#6', 'G6', 'G#6', 'A6', 'A#6', 'B6', 'C7', 'C#7', 'D7', 'D#7', 'E7', 'F7', 'F#7', 'G7', 'G#7', 'A7', 'A#7', 'B7', 'C8', 'C#8', 'D8', 'D#8', 'E8', 'F8', 'F#8', 'G8']
+    """
     scale = []
     for x in range(12, 116):
         scale.append(midiToNoteName(x))
@@ -564,7 +580,10 @@ class Pitch:
 
     def __init__(self, srcData, format=None):
         """src data can be an int, float, or str
-        strings are evaluated if numbers to the appropriate data"""
+        strings are evaluated if numbers to the appropriate data
+
+        a = Pitch('m30')
+        """
         # all valid data forms as strings
         self.forms = ('midi', 'psReal', 'psName', 'pch', 'fq', 'pc')
 
@@ -676,6 +695,14 @@ class Pitch:
         midi, psName, psReal, [pch, fq] # pch, fq not yet implemented
         does not change internal data representation
         alows conversion between any types
+
+        >>> a = Pitch(2)
+        >>> a.get('midi')
+        62
+        >>> a.get('pc')
+        2
+        >>> a.get('fq')
+        293.664...
         """
         if src == None:
             src = self.format # the format provided at initialization
@@ -795,6 +822,11 @@ class Pitch:
         """transpose in pitch space
         t value can be like any psReal, ie 2 is a whole step transposition
         .25 is a quarter tone transposition
+
+        >>> a = Pitch(4)
+        >>> a.t(3)
+        >>> a.get('midi')
+        67
         """
         self._real = psTransposer(self._real, value)
         # convert _real back to native data format
@@ -834,49 +866,16 @@ class Pitch:
 
 
 
+
+
 #-----------------------------------------------------------------||||||||||||--
-
-
-class TestOld:
-    def __init__(self):
-        #self.testPch()
-        self.testPitch()
-        
-    def testPch(self):
-        #print pchTransposer(8.00009834159, 0)
-        #print pchTransposer(8.00009834159, 0)
-        #print pchTransposer(7.00002930847, 0)
-
-        #print _normalizePch(8.00009834159)
-        #print _normalizePch(8.00009834159)
-        #print _normalizePch(7.00002930847)
-
-        print '_splitPch'
-        print _splitPch(8.0129834159)
-        print _splitPch(8.010029834159)
-        print _splitPch(8.090029834159)
-        print _splitPch(8.120029834159)
-        print _splitPch(8.12)
-
-        print '_splitPch'
-        print _splitPch(8.00009834159)
-        print _splitPch(8.00009834159)
-        print _splitPch(7.00002930847)
-
-        print pchToPs(8.0001)
-        print pchToPs(7)
-        print pchToPs(8.111)
-        print pchToPs(7.01)
-        print pchToPs(9.05)
-
-        print '_normalizePch'
-        print _normalizePch(12.12)
-        print _normalizePch(13.12)
-        print _normalizePch(13.13)
-        print _normalizePch(12.24)
-        print _normalizePch(5.12)
-        print _normalizePch(4.08)
-
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
 
     def testPitch(self):
         demo = ((0, 'psReal'),(0.5, 'psReal'), (1, 'psReal'), 
@@ -885,17 +884,14 @@ class TestOld:
                   ('12.12', 'pch'), (12.1225, 'pch'))
         for val, format in demo:
             obj = Pitch(val, format)
-            print '\ntesting object:', obj, obj.format 
             for form in obj.forms:
-                attr = eval('obj.%s' % form)
+                attr = eval('obj.get("%s")' % form)
                 attrStr = str(attr)
-                print 'attr %s repr %s eval %s ' % (form.ljust(7), 
-                                                              obj.repr(form).ljust(10), 
-                                                                  attrStr,)
+
+#-----------------------------------------------------------------||||||||||||--
+
+
 
 if __name__ == '__main__':
-    testObj = TestOld()
-
-
-
-
+    from athenaCL.test import baseTest
+    baseTest.main(Test)

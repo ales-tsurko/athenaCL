@@ -4,11 +4,14 @@
 #
 # Authors:       Christopher Ariza
 #
-# Copyright:     (c) 2008 Christopher Ariza
+# Copyright:     (c) 2008-2010 Christopher Ariza
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
 
 import random, copy
+import unittest, doctest
+
+
 from athenaCL.libATH import unit
 from athenaCL.libATH import error
 
@@ -36,6 +39,9 @@ def durToTrapezoid(tStart, propAbsSwitch, dur, rampUp, widthMax, rampDown,
     """assume dir of peal is widthOn
     will automatically convert to proportion if abs sum extends past dur
     this is an trapezoid with only one ramp; may not have complete duration time; always leads on
+
+    >>> durToTrapezoid(0, 'absolute', 10, 3, 3, 3, .5)
+    [[0, 0.0], [3, 1.0], [6, 1.0], [9, 0.0], [9.999..., 0.0]]
     """
 
     # will automatically sort min, max
@@ -81,6 +87,10 @@ def durToAdsr(tStart, propAbsSwitch, dur, attack, decay,
     """create an adsr envelope
     sustain scalar is a value, w/n the unit interval, of the difference between
     min and max
+
+    >>> durToAdsr(0, 'absolute', 10, 2, 1, 2, 2, .5)
+    [[0, 0.0], [2, 1.0], [3, 0.5], [5, 0.5], [7, 0.0], [9.999..., 0.0]]
+
     """
     # will automatically sort min, max
     peak = unit.denorm(1, min, max)
@@ -132,9 +142,13 @@ def durToAdsr(tStart, propAbsSwitch, dur, attack, decay,
 def durToUnit(tStart, dur, center, width, min=0, max=1):
     """
     this unit envelope is based on a csound model here
-#     iAttack     = ((1 - iSusPcent) * iSusCenterPcent) * iDur 
-#     iRelease    = ((1 - iSusPcent) * (1-iSusCenterPcent)) * iDur 
-#     kAmp        linen     iAmp, iAttack, iDur, iRelease
+     iAttack     = ((1 - iSusPcent) * iSusCenterPcent) * iDur 
+     iRelease    = ((1 - iSusPcent) * (1-iSusCenterPcent)) * iDur 
+     kAmp        linen     iAmp, iAttack, iDur, iRelease
+
+    >>> durToUnit(0, 10, .5, .5)
+    [[0, 0.0], [2.5, 1.0], [7.5, 1.0], [9.999..., 0.0]]
+
 """
     # will automatically sort min, max
     peak = unit.denorm(1, min, max)
@@ -189,52 +203,70 @@ def durToUnit(tStart, dur, center, width, min=0, max=1):
 
 #-----------------------------------------------------------------||||||||||||--
 
-class TestOld:
+# class TestOld:
+# 
+#     """note that there is a potential error in cases where the time interval values fall to or below zero.
+# 
+#     zero values in some positions could cause the last point to come before the penultimate point. htis error will not be caught
+# 
+#     the _stepFilter function attempt to catch many possible simple errors
+#     """
+# 
+#     def __init__(self):
+#         pass
+# 
+#     def testBasic(self):
+#         print 'durToTrapezoid'
+#         post = durToTrapezoid(0, 'proportional', 300, 10,10,10,10,0,1)
+#         print post
+# 
+#         post = durToTrapezoid(120, 'proportional', 300, 10,20000,10,10,-2,10)
+#         print post
+# 
+# 
+#         print 'durToAdsr'
+#         post = durToAdsr(0, 'proportional', 300, 10,10,10,10,.5, 0,1)
+#         print post
+# 
+#         post = durToAdsr(120, 'proportional', 300, 10,200,100,50, .5, -2,10)
+#         print post
+# 
+# 
+#         print 'durToUnit'
+#         post = durToUnit(0, 300, .8, .4, 0,1)
+#         print post
+# 
+#         post = durToUnit(120, 300, .01, .01, -2,10)
+#         print post
+# 
 
-    """note that there is a potential error in cases where the time interval values fall to or below zero.
 
-    zero values in some positions could cause the last point to come before the penultimate point. htis error will not be caught
 
-    the _stepFilter function attempt to catch many possible simple errors
-    """
-
-    def __init__(self):
+#-----------------------------------------------------------------||||||||||||--
+class Test(unittest.TestCase):
+    
+    def runTest(self):
         pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
 
     def testBasic(self):
-        print 'durToTrapezoid'
         post = durToTrapezoid(0, 'proportional', 300, 10,10,10,10,0,1)
-        print post
-
         post = durToTrapezoid(120, 'proportional', 300, 10,20000,10,10,-2,10)
-        print post
-
-
-        print 'durToAdsr'
         post = durToAdsr(0, 'proportional', 300, 10,10,10,10,.5, 0,1)
-        print post
-
         post = durToAdsr(120, 'proportional', 300, 10,200,100,50, .5, -2,10)
-        print post
-
-
-        print 'durToUnit'
         post = durToUnit(0, 300, .8, .4, 0,1)
-        print post
-
         post = durToUnit(120, 300, .01, .01, -2,10)
-        print post
+
+
+#-----------------------------------------------------------------||||||||||||--
 
 
 
 if __name__ == '__main__':
-    a = TestOld()
-    a.testBasic()
-
-
-
-
-
+    from athenaCL.test import baseTest
+    baseTest.main(Test)
 
 
 

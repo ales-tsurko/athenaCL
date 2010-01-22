@@ -6,12 +6,14 @@
 #
 # Authors:       Christopher Ariza
 #
-# Copyright:     (c) 2004-2008 Christopher Ariza
+# Copyright:     (c) 2004-2010 Christopher Ariza
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
 
 # this module should not import any lower level athenacl modules
 import copy, time
+import unittest, doctest
+
 from athenaCL.libATH import drawer
 from athenaCL.libATH import error
 _MOD = 'rhythm.py'
@@ -80,10 +82,19 @@ def accToDynStr(num):
 
 
 def beatTimeToBpm(timePerBeat):
-    """return value in bpm"""
+    """return value in bpm
+
+    >>> beatTimeToBpm(30)
+    2.0
+    """
     return 60.0 * (1.00 / timePerBeat)
+
 def bpmToBeatTime(bpmValue):
-    """return value in seconds"""
+    """return value in seconds
+        
+    >>> bpmToBeatTime(120)
+    0.5
+    """
     return (60.0 / float(bpmValue))
 
 
@@ -675,13 +686,10 @@ class RhythmMeasure:
     ignore bpm values for all pulses
 
     """
-
 # >>> from athenaCL.libATH import rhythm
 # >>> a = rhythm.RhythmMeasure([(1,1),(1,5),(2,5),(1,3),(4,1),(1,7)])
 # >>> a.setMeasureForm([(1,4)])
 # >>> a.partition()
-
-
 
     def __init__(self, srcRhythm, srcEvent=[None]):
 
@@ -1142,7 +1150,6 @@ class Timer:
         return tObj.repr('watch')
         #return self.stopwatchStr(self.tDif)
 
-#-----------------------------------------------------------------||||||||||||--
 
 
 
@@ -1156,20 +1163,6 @@ class TestOld:
         #self.testTimer()
         #self.testTimeValue()
 
-    def testPulse(self):
-        testVals = (1, .5, 'q', 's', '4,3,2', (1,4,.5), (2,4), 
-                        (1,2,'+'), '(3,8,+)', (2,3,'fff'), 
-                        '3,3,ff', 'mf')     
-        for test in testVals:
-            print '\nraw input:', test
-            pulse = Pulse(test)
-            for type in pulse.forms:
-                print type, pulse.repr(type), pulse.get(type)
-            print pulse(30)
-            print pulse(60, 1.6) # call w/ bpm and sustain ratio
-            print pulse(60, .3)
-
-
     def testPulseSplit(self):
         for triple in ([4,1], [3,1], [1,1], [5,3]):
             a = Pulse(triple)
@@ -1182,27 +1175,6 @@ class TestOld:
                 print 'sum:', x()[0] + y()[0]
                 print
 
-    def testConversions(self):
-        print accToDynStr(1)
-        print accToDynStr(.9)
-        print accToDynStr(.8)
-        print accToDynStr(.4)
-        print accToDynStr(.3)
-        print accToDynStr(.1)
-        print accToDynStr(0)
-
-        pulse = Pulse(.5)
-        print pulse._scrubDynStr('(3,2,mf)')
-        print pulse._scrubDynStr('(3,2,o)')
-        print pulse._scrubDynStr('(3,2,+)')
-        print pulse._scrubDynStr('(3,2,mp)')
-        print pulse._scrubDynStr('(3,2,f)')
-        print pulse._scrubDynStr('(3,2,fff)')
-        print pulse._scrubDynStr('(3,2,p)')
-        print pulse._scrubDynStr('(3,2,pp)')
-        print pulse._scrubDynStr('(3,2,.4)')
-        print pulse._scrubDynStr('fff')
-        print pulse._scrubDynStr('+')
 
     def testRhythm(self):
         testVals = (((2,1),(3,1),(5,1,0)), ('(3,2,1)','(1,1,mf)','(3,1)'),
@@ -1242,7 +1214,56 @@ class TestOld:
 
 
 
+#-----------------------------------------------------------------||||||||||||--
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
+
+
+    def testPulse(self):
+        testVals = (1, .5, 'q', 's', '4,3,2', (1,4,.5), (2,4), 
+                        (1,2,'+'), '(3,8,+)', (2,3,'fff'), 
+                        '3,3,ff', 'mf')     
+        for test in testVals:
+            pulse = Pulse(test)
+            for type in pulse.forms:
+                post = type, pulse.repr(type), pulse.get(type)
+            post = pulse(30)
+            post = pulse(60, 1.6) # call w/ bpm and sustain ratio
+            post = pulse(60, .3)
+
+
+
+    def testConversions(self):
+        post = accToDynStr(1)
+        post =  accToDynStr(.9)
+        post =  accToDynStr(.8)
+        post =  accToDynStr(.4)
+        post =  accToDynStr(.3)
+        post =  accToDynStr(.1)
+        post =  accToDynStr(0)
+
+        pulse = Pulse(.5)
+        post =  pulse._scrubDynStr('(3,2,mf)')
+        post =  pulse._scrubDynStr('(3,2,o)')
+        post =  pulse._scrubDynStr('(3,2,+)')
+        post =  pulse._scrubDynStr('(3,2,mp)')
+        post =  pulse._scrubDynStr('(3,2,f)')
+        post =  pulse._scrubDynStr('(3,2,fff)')
+        post =  pulse._scrubDynStr('(3,2,p)')
+        post =  pulse._scrubDynStr('(3,2,pp)')
+        post =  pulse._scrubDynStr('(3,2,.4)')
+        post =  pulse._scrubDynStr('fff')
+        post =  pulse._scrubDynStr('+')
+
+#-----------------------------------------------------------------||||||||||||--
+
+
+
 if __name__ == '__main__':
-    testObj = TestOld()
-
-
+    from athenaCL.test import baseTest
+    baseTest.main(Test)

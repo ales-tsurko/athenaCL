@@ -84,46 +84,46 @@ class HelpDoc:
 
     #-----------------------------------------------------------------------||--
 
-    SCv = 'SCv: SetClass: View: Displays all data in the set class dictionary for the user-supplied pitch groups. %s For all pitch groups the SCv command interprets the values as a set class. The Normal Form, Invariance Vector and all N Class Vectors (for the active Tn/TnI mode) are displayed. N-Class Vectors, when necessary, are displayed in 20 register rows divided into two groups of 10 and divided with a dash (-). %s' % (_pitchGroups, _tniToggle)
-    SCv_usage = 'scv set'
-
-    SCcm = 'SCcm: SetClass: Comparison: Compare any two user-selected pitch groups (as set classes) with all available Set Class similarity measures (SetMeasures). For each SetMeasure the calculated similarity value, a proportional graph of that value within the SetMeasure\'s range, and the measure\'s range (between minimum and maximum) are displayed.'
-    SCcm_usage = 'scv set1 set2'
-
-    SCs = 'SCs: SetClass: Search: Search all set classes with the active SetMeasure for similarity to a pitch group (as a set class) and within a similarity range. The user must supply a pitch group and a percent similarity range. Similarity ranges are stated within the unit interval (between 0 and 1). To change the active SetMeasure, enter "SMo".'
-    SCs_usage = 'scv set percentMin,percentMax'
-
-    SCf = 'SCf: SetClass: Find: Search all set classes with various search methods. Search methods include searching by common name (such as major, all-interval, phrygian, or pentatonic), z-relation, or superset.'
-    SCf_usage = 'scf method argument'
-
-    SCmode = 'SCmode: SetClass: Mode: Sets system-wide Tn (set classes not differentiated by transposition) or Tn/I (set classes not differentiated by transposition and inversion) state for all athenaCL set class processing. To view active SCmode state, enter "AUsys".'
-    SCmode_usage = 'scmode'
-    
-    SCh = 'SCh: SetClass: Hear: Creates a temporary Texture with the selected set and the DroneSustain TextureModule, and uses this Texture to write a short sample EventList as a temporary MIDI file. %s If possible, this file is opened and presented to the user.' % _scratchDir
-    SCh_usage = 'sch'
-    
-    #-----------------------------------------------------------------------||--
-    SMo = 'SMo: SetMeasure: Select: Sets the active SetMeasure, or computational method of set class comparison, used for "SCf", "PScpa", "PScpb" commands.'
-    SCo_usage = 'smo name'
-
-    SMls = 'SMls: SetMeasure: List: Displays a list of all available SetMeasures.'
-    SMls_usage = 'smls'
-
-    #-----------------------------------------------------------------------||--
-    MCv = 'MCv: MapClass: View: Displays a listing of MapClasses for a given size class (source to destination size) and between a range of indexes. %s' % _formatMap
-    MCv_usage = 'mcv sizeSource,sizeDestination beginMap,endMap'
-
-    MCcm = 'MCcm: MapClass: Comparison: Displays all possible maps and analysis data between any two sets of six or fewer members. Maps can be sorted by Joseph N. Straus\'s atonal voice-leading measures Smoothness, Uniformity, or Balance. Full analysis data is provided for each map, including vectors for each measure, displacement, offset, max, and span.'
-    MCcm_usage = 'mccm set1 set2 analysis beginMap,endMap'
-
-    MCopt = 'MCopt: MapClass: Optimum: Finds an optimum voice leading and minimum distance for any two sets of six or fewer elements.'
-    MCopt_usage = 'mcopt set1 set2'
-
-    MCgrid = 'MCgrid: MapClass: Grid: Creates a grid of all minimum displacements between every set class of two cardinalities. Cardinalities must be six or fewer. Note: for large cardinalities, processing time may be long. Note: values calculated between different-sized sets may not represent the shortest transitional distance.'
-    MCgrid_usage = 'mcgrid sizeSource,sizeDestination'
-
-    MCnet = 'MCnet: MapClass: Network: Creates a graphical display of displacement networks between set classes.'
-    MCnet_usage = 'mcnet sizeSource,sizeDestination'
+#     SCv = 'SCv: SetClass: View: Displays all data in the set class dictionary for the user-supplied pitch groups. %s For all pitch groups the SCv command interprets the values as a set class. The Normal Form, Invariance Vector and all N Class Vectors (for the active Tn/TnI mode) are displayed. N-Class Vectors, when necessary, are displayed in 20 register rows divided into two groups of 10 and divided with a dash (-). %s' % (_pitchGroups, _tniToggle)
+#     SCv_usage = 'scv set'
+# 
+#     SCcm = 'SCcm: SetClass: Comparison: Compare any two user-selected pitch groups (as set classes) with all available Set Class similarity measures (SetMeasures). For each SetMeasure the calculated similarity value, a proportional graph of that value within the SetMeasure\'s range, and the measure\'s range (between minimum and maximum) are displayed.'
+#     SCcm_usage = 'scv set1 set2'
+# 
+#     SCs = 'SCs: SetClass: Search: Search all set classes with the active SetMeasure for similarity to a pitch group (as a set class) and within a similarity range. The user must supply a pitch group and a percent similarity range. Similarity ranges are stated within the unit interval (between 0 and 1). To change the active SetMeasure, enter "SMo".'
+#     SCs_usage = 'scv set percentMin,percentMax'
+# 
+#     SCf = 'SCf: SetClass: Find: Search all set classes with various search methods. Search methods include searching by common name (such as major, all-interval, phrygian, or pentatonic), z-relation, or superset.'
+#     SCf_usage = 'scf method argument'
+# 
+#     SCmode = 'SCmode: SetClass: Mode: Sets system-wide Tn (set classes not differentiated by transposition) or Tn/I (set classes not differentiated by transposition and inversion) state for all athenaCL set class processing. To view active SCmode state, enter "AUsys".'
+#     SCmode_usage = 'scmode'
+#     
+#     SCh = 'SCh: SetClass: Hear: Creates a temporary Texture with the selected set and the DroneSustain TextureModule, and uses this Texture to write a short sample EventList as a temporary MIDI file. %s If possible, this file is opened and presented to the user.' % _scratchDir
+#     SCh_usage = 'sch'
+#     
+#     #-----------------------------------------------------------------------||--
+#     SMo = 'SMo: SetMeasure: Select: Sets the active SetMeasure, or computational method of set class comparison, used for "SCf", "PScpa", "PScpb" commands.'
+#     SCo_usage = 'smo name'
+# 
+#     SMls = 'SMls: SetMeasure: List: Displays a list of all available SetMeasures.'
+#     SMls_usage = 'smls'
+# 
+#     #-----------------------------------------------------------------------||--
+#     MCv = 'MCv: MapClass: View: Displays a listing of MapClasses for a given size class (source to destination size) and between a range of indexes. %s' % _formatMap
+#     MCv_usage = 'mcv sizeSource,sizeDestination beginMap,endMap'
+# 
+#     MCcm = 'MCcm: MapClass: Comparison: Displays all possible maps and analysis data between any two sets of six or fewer members. Maps can be sorted by Joseph N. Straus\'s atonal voice-leading measures Smoothness, Uniformity, or Balance. Full analysis data is provided for each map, including vectors for each measure, displacement, offset, max, and span.'
+#     MCcm_usage = 'mccm set1 set2 analysis beginMap,endMap'
+# 
+#     MCopt = 'MCopt: MapClass: Optimum: Finds an optimum voice leading and minimum distance for any two sets of six or fewer elements.'
+#     MCopt_usage = 'mcopt set1 set2'
+# 
+#     MCgrid = 'MCgrid: MapClass: Grid: Creates a grid of all minimum displacements between every set class of two cardinalities. Cardinalities must be six or fewer. Note: for large cardinalities, processing time may be long. Note: values calculated between different-sized sets may not represent the shortest transitional distance.'
+#     MCgrid_usage = 'mcgrid sizeSource,sizeDestination'
+# 
+#     MCnet = 'MCnet: MapClass: Network: Creates a graphical display of displacement networks between set classes.'
+#     MCnet_usage = 'mcnet sizeSource,sizeDestination'
 
 
     #-----------------------------------------------------------------------||--
@@ -173,42 +173,42 @@ class HelpDoc:
     PIh_usage = 'pih'
     
     #-----------------------------------------------------------------------||--
-    PScma = 'PScma: PathSet: Comparison A: Analyze the active Path as a sequence of set classes. Compare each adjacent pair of pitch groups, as set classes, using the active SetMeasure. A SetMeasure is activated with the "SMo" command.'         
-    PScma_usage = 'pscma'
-
-    PScmb = 'PScmb: PathSet: Comparison B: Analyze the active Path as a Sequence of set classes. Compare each set class with a reference set class, employing the active SetMeasure.'    
-    PScmb_usage = 'pscma set'
-
-    #-----------------------------------------------------------------------||--
-    PVn = 'PVn: PathVoice: New: Create a new PathVoice (a collection of voice leadings) for the active Path. Each PathVoice voice leading may be selected by rank or map. Rank allows the user to select a map based on its Smoothness, Uniformity, or Balance ranking.'      
-    PVn_usage = 'pvn name map1 ... mapN'
-
-    PVcp = 'PVcp: PathVoice: Copy: Duplicate an existing PathVoice within the active Path. To see all PathVoices enter "PVls".'
-    PVcp_usage = 'pvcp source target1 ... targetN'
-
-    PVrm = 'PVrm: PathVoice: Delete: Delete an existing PathVoice within the active Path. To see all PathVoices enter "PVls".'    
-    PVrm_usage = 'pvrm name1 ... nameN'
-
-    PVo = 'PVo: PathVoice: Select: Select an existing PathVoice within the active Path. To see all PathVoices enter "PVls".'    
-    PVo_usage = 'pvo name'
-
-    PVv = 'PVv: PathVoice: View: Displays the active Path and the active PathVoice.'     
-    PVv_usage = 'pvv [name]'
-
-    PVls = 'PVls: PathVoice: List: Displays a list of all PathVoices associated with the active Path.'   
-    PVls_usage = 'pvls'
-
-    PVan = 'PVan: PathVoice: Analysis: Displays Smoothness, Uniformity, and Balance analysis data for each map in the active PathVoice of the active Path.' 
-    PVan_usage = 'pvan'
-
-    PVcm = 'PVcm: PathVoice: Comparison: Displays Smoothness, Uniformity, and Balance analysis data for an ordered partition of all maps available between any two sets in the active Path.'    
-    PVcm_usage = 'pvcm positionStart,positionEnd analysis beginMap,endMap'
-
-    PVe = 'PVe: PathVoice: Edit: Choose a new map for a single position within the active PathVoice and Path.'   
-    PVe_usage = 'pve position map'
-
-    PVauto = 'PVauto: PathVoice: Auto: Create a new PathVoice with mappings chosen automatically from either the first or last ranked map of a user-selected ranking method (Smoothness, Uniformity, or Balance). A new PathVoice is created, all maps being either first or last of the particular ranking.'  
-    PVauto_usage = 'pvauto name analysis firstLast'
+#     PScma = 'PScma: PathSet: Comparison A: Analyze the active Path as a sequence of set classes. Compare each adjacent pair of pitch groups, as set classes, using the active SetMeasure. A SetMeasure is activated with the "SMo" command.'         
+#     PScma_usage = 'pscma'
+# 
+#     PScmb = 'PScmb: PathSet: Comparison B: Analyze the active Path as a Sequence of set classes. Compare each set class with a reference set class, employing the active SetMeasure.'    
+#     PScmb_usage = 'pscma set'
+# 
+#     #-----------------------------------------------------------------------||--
+#     PVn = 'PVn: PathVoice: New: Create a new PathVoice (a collection of voice leadings) for the active Path. Each PathVoice voice leading may be selected by rank or map. Rank allows the user to select a map based on its Smoothness, Uniformity, or Balance ranking.'      
+#     PVn_usage = 'pvn name map1 ... mapN'
+# 
+#     PVcp = 'PVcp: PathVoice: Copy: Duplicate an existing PathVoice within the active Path. To see all PathVoices enter "PVls".'
+#     PVcp_usage = 'pvcp source target1 ... targetN'
+# 
+#     PVrm = 'PVrm: PathVoice: Delete: Delete an existing PathVoice within the active Path. To see all PathVoices enter "PVls".'    
+#     PVrm_usage = 'pvrm name1 ... nameN'
+# 
+#     PVo = 'PVo: PathVoice: Select: Select an existing PathVoice within the active Path. To see all PathVoices enter "PVls".'    
+#     PVo_usage = 'pvo name'
+# 
+#     PVv = 'PVv: PathVoice: View: Displays the active Path and the active PathVoice.'     
+#     PVv_usage = 'pvv [name]'
+# 
+#     PVls = 'PVls: PathVoice: List: Displays a list of all PathVoices associated with the active Path.'   
+#     PVls_usage = 'pvls'
+# 
+#     PVan = 'PVan: PathVoice: Analysis: Displays Smoothness, Uniformity, and Balance analysis data for each map in the active PathVoice of the active Path.' 
+#     PVan_usage = 'pvan'
+# 
+#     PVcm = 'PVcm: PathVoice: Comparison: Displays Smoothness, Uniformity, and Balance analysis data for an ordered partition of all maps available between any two sets in the active Path.'    
+#     PVcm_usage = 'pvcm positionStart,positionEnd analysis beginMap,endMap'
+# 
+#     PVe = 'PVe: PathVoice: Edit: Choose a new map for a single position within the active PathVoice and Path.'   
+#     PVe_usage = 'pve position map'
+# 
+#     PVauto = 'PVauto: PathVoice: Auto: Create a new PathVoice with mappings chosen automatically from either the first or last ranked map of a user-selected ranking method (Smoothness, Uniformity, or Balance). A new PathVoice is created, all maps being either first or last of the particular ranking.'  
+#     PVauto_usage = 'pvauto name analysis firstLast'
 
     #-----------------------------------------------------------------------||--
 

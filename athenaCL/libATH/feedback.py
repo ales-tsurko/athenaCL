@@ -4,11 +4,13 @@
 #
 # Authors:       Christopher Ariza
 #
-# Copyright:     (c) 2007-2008 Christopher Ariza
+# Copyright:     (c) 2007-2010 Christopher Ariza
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
 
 import random
+import unittest, doctest
+
 from athenaCL.libATH import error
 from athenaCL.libATH import drawer
 
@@ -352,17 +354,53 @@ class EnvironmentThermostat(_Environment):
 
 
 #-----------------------------------------------------------------||||||||||||--
-class TestOld:
-    def __init__(self):
-        pass
+# class TestOld:
+#     def __init__(self):
+#         pass
+#     
+#     def testParticle(self):
+#         a = Particle([('a',3), ('b',4), ('c',8)])
+#         print a.lifeCycle
+#         print a.lifeBounds
+#         while 1:
+#             post = a(random.random()+.125)
+#             print a
+#             if post == 0: break
+# 
+# 
+#     def testSensorProducer(self):
+#         threshold = 10
+#         boundaryShift = 4 # use for up and down
+#         particleLifeCycle = [('a', 10)]
+#         particleSenseType = 'a'
+# 
+#         sp = feedback.SensorProducer() 
+#         sp.setThreshold(threshold, boundaryShift, boundaryShift)
+#         sp.setParticle(particleLifeCycle, particleSenseType) 
+#         print sp._getBoundary()
+#         a = sp._produce()
+#         print a
+#         print sp._sense({'d':80,'a':10,'b':20})
+# 
+# 
+#     def testEnvironment(self):
+#         pass
+
+
+
+#-----------------------------------------------------------------||||||||||||--
+class Test(unittest.TestCase):
     
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
+
     def testParticle(self):
         a = Particle([('a',3), ('b',4), ('c',8)])
-        print a.lifeCycle
-        print a.lifeBounds
         while 1:
             post = a(random.random()+.125)
-            print a
             if post == 0: break
 
 
@@ -372,29 +410,18 @@ class TestOld:
         particleLifeCycle = [('a', 10)]
         particleSenseType = 'a'
 
-        sp = feedback.SensorProducer() 
+        sp = SensorProducer() 
         sp.setThreshold(threshold, boundaryShift, boundaryShift)
         sp.setParticle(particleLifeCycle, particleSenseType) 
-        print sp._getBoundary()
-        a = sp._produce()
-        print a
-        print sp._sense({'d':80,'a':10,'b':20})
-
-
-    def testEnvironment(self):
-        pass
-
-
-
+        a = sp.produce()
 
 #-----------------------------------------------------------------||||||||||||--
 
+
+
 if __name__ == '__main__':
-    a = TestOld()
-    a.testParticle()
-
-
-
+    from athenaCL.test import baseTest
+    baseTest.main(Test)
 
 
 

@@ -55,6 +55,9 @@ _MOD = 'markov.py'
 class Transition:
 
     def __init__(self):
+        """
+        >>> a = Transition()
+        """
         self._srcStr = ''
         # a dictionary of alphabetic symbols and their assoicated values
         self._symbols = {}
@@ -502,13 +505,21 @@ class Transition:
         
     #-----------------------------------------------------------------------||--
     def loadTransition(self, usrStr):
-        """load a transition string"""
+        """load a transition string
+
+        >>> a = Transition()
+        >>> a.loadTransition('a{234} b{12} :: {a=3|b=3}')
+        """
         self._srcStr = usrStr
         self._parse(self._srcStr)
         
     def loadString(self, data, order):   
         """take a list of symbols and produce an analysis
-        symbols cannot contain braces or equals signs"""
+        symbols cannot contain braces or equals signs
+
+        >>> a = Transition()
+        >>> a.loadString('abaaaccdaacaca', 2)
+        """
         self._analyzeStr(data, order, ' ', ['\n', '-'])
 
     def loadFileText(self, filePath):

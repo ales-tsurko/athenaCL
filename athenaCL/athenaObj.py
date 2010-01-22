@@ -8,11 +8,13 @@
 #
 # Authors:       Christopher Ariza
 #
-# Copyright:     (c) 2001-2007 Christopher Ariza
+# Copyright:     (c) 2001-2010 Christopher Ariza
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
 
 import sys, os, time, random, traceback, httplib, urllib
+import unittest, doctest
+
 
 athVersion  = '2.0.0-beta'
 athBuild        = '2009.08.15'
@@ -20,6 +22,9 @@ athRevision = 1 # for debian based versioning
 athDate     = '15 August 2009' # human readable version
 __version__ = athVersion
 __license__ = "GPL"
+
+
+
 
 # athenaObj.py needs correct dir information for writing
 # a file (prefs) and loading demos, and opening .xml and and other resources 
@@ -69,11 +74,14 @@ _MOD = 'athenaObj.py'
 #-----------------------------------------------------------------||||||||||||--
 class External:
     """used to remaintain remote files used by the AthenaObject
-    handles preferences (stored in xml) and erro log files
+    handles preferences (stored in xml) and error log files
     also reloads textures, gets path preferences, orchestra files
     """
     def __init__(self, termObj=None):
-        """termObj used to provide session type information"""
+        """termObj used to provide session type information
+
+        >>> a = External()
+        """
         if termObj != None:
             self.termObj = termObj
             self.sessionType = termObj.sessionType
@@ -103,14 +111,18 @@ class External:
             dialog.msgOut(lang.msgMissingLibATH, self.termObj)
             temp = dialog.askStr(lang.msgReturnToExit, self.termObj)
             sys.exit()
-        try: # check for XML abilities:
-            import xml.dom.minidom
-            doc = xml.dom.minidom.parseString("<doc>test.</doc>")        
-        except: # xml.sax._exceptions.SAXReaderNotAvailable
-            dialog.msgOut(lang.msgMissingXML, self.termObj)
-            temp = dialog.askStr(lang.msgReturnToExit, self.termObj)
-            sys.exit()
+
+# this isi not necessary with new versions of python
+#         try: # check for XML abilities:
+#             import xml.dom.minidom
+#             doc = xml.dom.minidom.parseString("<doc>test.</doc>")        
+#         except: # xml.sax._exceptions.SAXReaderNotAvailable
+#             dialog.msgOut(lang.msgMissingXML, self.termObj)
+#             temp = dialog.askStr(lang.msgReturnToExit, self.termObj)
+#             sys.exit()
         # create util objects
+
+
         self.scObj = SC.SetClass() 
         self.mcObj = MC.MapClass()
 
@@ -154,9 +166,10 @@ class External:
             self.docsPath = None
 
         # assign a dir in which to write pref/log files
-        if os.name == 'mac': # macos 9
-            self.prefsDir = self.libATHpath
-        elif os.name == 'posix':
+#         if os.name == 'mac': # macos 9
+#             self.prefsDir = self.libATHpath
+
+        if os.name == 'posix':
             self.prefsDir = drawer.getud() # get active users dir
         else: # win or other
             self.prefsDir = drawer.getud()
@@ -393,6 +406,8 @@ class AthenaObject:
         
         information/objects that need to be accessed both in Interpreter (holds 
         one permanent ao) and many command objects (one ao passed to them)
+
+        >>> a = AthenaObject()
         """
         self.athVersion = athVersion
         self.athBuild = athBuild
@@ -535,7 +550,15 @@ class AthenaObject:
         """for a given prefix will return a list of 
         cmds and a list of their names
         only returns heirarchical commands, never special commands
+
+        >>> a = AthenaObject()
+        >>> a.prefixCmdGroup('tmCmd')
+        (['TMo', 'TMv', 'TMls'], ['select', 'view', 'list'])
+        >>> a.prefixCmdGroup('teCmd')
+        (['TEv', 'TEe', 'TEmap', 'TEmidi'], ['view', 'edit', 'map', 'midi'])
         """
+        if prefix not in self.cmdDict.keys():
+            prefix = prefix.lower() + 'Cmd'
         if prefix in self.cmdDict.keys():
             cmdNameList = self.cmdDict[prefix]
             cmdList = []
@@ -552,11 +575,15 @@ class AthenaObject:
         else: return None
 
     def prefixName(self, prefix):
+        """
+        >>> a = AthenaObject()
+        >>> a.prefixName('tm')
+        'TextureModule'
+        """
         return self.cmdDict[prefix.lower()+'Cmd'][0] # 0 gets title
 
-
     def _configTerminal(self, termObj):
-        """Provide a default Termainl if not provided
+        """Provide a default Terminal if not provided
         """
         if termObj == None:
             return Terminal('terminal', None)
@@ -569,7 +596,11 @@ class AthenaObject:
 
     def cmdDisplay(self):
         """get heirarchical display, scaled to screen widthw
-        used for cmd display"""
+        used for cmd display
+
+        >>> a = AthenaObject()
+        >>> post = a.cmdDisplay()
+        """
         w = self.termObj.w
         msg = []
         msg.append('athenaCL Commands:\n')
@@ -584,14 +615,21 @@ class AthenaObject:
     def cmdCorrect(self, line):
         """acts as an athenaCL cmd parser:
         capitalizes and corrects user cmd strings called w/n cmdExecute
-        does not deal with special commands like q, quit, cmd, and others"""
+        does not deal with special commands like q, quit, cmd, and others
+
+        >>> a = AthenaObject()
+        >>> a.cmdCorrect('tils')
+        'TIls'
+        >>> a.cmdCorrect('TILS')
+        'TIls'
+        """
         if line == None:
             return None
         line = line.strip()
         if len(line) <= 1: return line
         # if first two letters lower case, make upper
         prefix  = line[:2].upper()
-        postfix = line[2:]
+        postfix = line[2:].lower()
         if prefix in self.cmdPrefixes: #check for lower case
             newPrefix = prefix
             line = newPrefix + postfix
@@ -600,7 +638,11 @@ class AthenaObject:
         return line
 
     def cmdManifest(self):
-        "get all commands from command.py;"
+        """get all commands from command.py;
+
+        >>> a = AthenaObject()
+        >>> post = a.cmdManifest()
+        """
         cmdList = dir(command) # get listing from module
         cmdFilter = []
         for entry in cmdList:
@@ -623,6 +665,9 @@ class AthenaObject:
         """gets all commands by looking in class attributes
         this listing includes hidden commands and commands not
         getAllCmds, formerly 
+
+        >>> a = AthenaObject()
+        >>> post = a.cmdDocManifest()
         """
         cmdsDoc = []
         cmdsUndoc = []
@@ -640,8 +685,17 @@ class AthenaObject:
 
     def prefixMatch(self, prefix, usrStr):
         """will attempt to match a user string to a command, knowing the prefix
-        that command will be found in. if an SC command, user can enter both v or         
-        SCv. returns the complete command string, or unmodified if no mathc"""
+        that command will be found in. if an PI command, user can enter both v or         
+        PIv. returns the complete command string, or unmodified if no match
+
+        >>> a = AthenaObject()
+        >>> a.prefixMatch('pi', 'v')
+        'PIv'
+        >>> a.prefixMatch('pi', 'view')
+        'PIv'
+        >>> a.prefixMatch('pi', 'piv')
+        'PIv'
+        """
         if usrStr == None:
             return None
         prefix = prefix.upper()
@@ -669,7 +723,12 @@ class AthenaObject:
 
     def compareVersion(self, versionOther=None):
         """compare version to current version
-        version is a string"""
+        version is a string
+
+        >>> a = AthenaObject()
+        >>> a.compareVersion(argTools.Version('99.0.0'))
+        ('major', '99.0.0')
+        """
         if versionOther == None:# assume we want to compare to online 
             versionOther = self.external.onlineVersionFetch()
             if versionOther == None: return None, None # if not online
@@ -757,7 +816,10 @@ class Terminal:
     if not, returs default width
     """
     def __init__(self, sessionType='terminal', parentGUI=None):
-        """possible session types are 'terminal', 'idle', 'cgi' """
+        """possible session types are 'terminal', 'idle', 'cgi'
+
+        >>> a = Terminal()
+        """
         self.sessionType = sessionType
         self.parentGUI = parentGUI # keep for gui management
         # try to import readline
@@ -811,6 +873,9 @@ class Terminal:
     def size(self):
         """Return terminal size as tuple (height, width).
         this is called once with each command, updated size 
+
+        >>> a = Terminal()
+        >>> post = a.size()
         """
         if self.termLive:
             h, w = self.defaultH, self.defaultW
@@ -860,9 +925,11 @@ class Interpreter:
 
     debug option passed to all commands; used to remove error checking
         changes some processing in order to provide more accurate errors.
+
+    >>> a = Interpreter()
     """
 
-    def __init__(self, sessionType='terminal', threadAble=1, 
+    def __init__(self, sessionType='terminal', threadAble=0, 
         verbose=0, debug=0):
 
         # instance of athenaObj class, where all athena processing takes place
@@ -879,8 +946,9 @@ class Interpreter:
         self.athVersion = self.ao.athVersion
         self.athBuild = self.ao.athBuild
         # special handling for threads
-        self.threadAble, threadStr = self._testThreads(threadAble)
-        self.pollDur = .25 # time between polls in seconds
+        #self.threadAble, threadStr = self._testThreads(threadAble)
+        #self.pollDur = .25 # time between polls in seconds
+
         self.versionCheckWait = rhythm.TimeValue.sPerDay * 28 # every 28 days
         #self.cmdqueue    = [] # not used
 
@@ -892,9 +960,9 @@ class Interpreter:
         self._updateCmdEnviron()  # creates self.cmdEnviron
         self.cursorToolConvert = self._getCursorToolConvert() # done once at init
         self._updatePrompt('msg') # creates self.prompt
-        athTitle = '\n' + 'athenaCL %s (on %s via %s %s)\n' % (
+        athTitle = '\n' + 'athenaCL %s (on %s via %s)\n' % (
                           self.athVersion, sys.platform, 
-                          self.sessionType, threadStr)
+                          self.sessionType)
         # two returns required after changes to line wrapping function
         self.intro = athTitle + lang.msgAthIntro + '\n\n'
 
@@ -913,8 +981,8 @@ class Interpreter:
     def _updateCmdEnviron(self):
         "passed to command objects for interperter prefs"
         self.cmdEnviron = {}
-        self.cmdEnviron['threadAble'] = self.threadAble
-        self.cmdEnviron['pollDur'] = self.pollDur
+        #self.cmdEnviron['threadAble'] = self.threadAble
+        #self.cmdEnviron['pollDur'] = self.pollDur
         self.cmdEnviron['verbose'] = self.verbose
         self.cmdEnviron['debug'] = self.debug
 
@@ -937,14 +1005,29 @@ class Interpreter:
         return func
 
     def _proc(self, cmdObj, data):
-        """gets a processor, only used for sub commands"""
+        """gets a processor, only used for sub commands
+
+        >>> a = Interpreter()
+        >>> from athenaCL.libATH import command
+        >>> ao = AthenaObject()
+        >>> b = command.q(ao)
+        >>> a._proc(b, 'confirm')
+        -1
+        """
         func = getattr(self, 'proc_' + cmdObj.cmdStr)   
         return func(data)         
 
     def _lineCmdArgSplit(self, line):
         """take a user input line and parse into cmd and arg
         does special character translations
-        handles specian commands like SC by adding underscore"""
+        handles specian commands like SC by adding underscore
+
+        >>> a = Interpreter()
+        >>> a._lineCmdArgSplit('? test')
+        ('help', 'test')
+        >>> a._lineCmdArgSplit('pin a 2,3,4')
+        ('pin', 'a 2,3,4')
+        """
         line = line.strip()
         if not line: return None
         elif line[0] == '?':
@@ -968,6 +1051,12 @@ class Interpreter:
         all commands pass through this method, inner most try/except loop
         sub commands provide data dictionaries that are then processed in
         the interepreter (not in the command object itself)
+
+        >>> a = Interpreter()
+        >>> a._cmd('pin a 3')
+        >>> a._cmd('tin a 0')
+        >>> a._cmd('q confirm')
+        -1
         """
         self._updateCmdEnviron() # update vars passed to command obj
         splitLine = self._lineCmdArgSplit(line)
@@ -1004,6 +1093,10 @@ class Interpreter:
         does not log errors, does not keep a history
         _not_ used in normal interactive loop
         returns a status flag, and msg string
+
+        >>> a = Interpreter()
+        >>> a.cmd('pin', 'a 3')[0]
+        1
         """
         self._updateCmdEnviron() # update vars passed to command obj
         if arg == None: # no args, assume cmd needs to be split
@@ -1048,6 +1141,9 @@ class Interpreter:
         """used for athenaScripts, does many commands in a list
         a simple list of commands is executed one at a time
         called from self.cmdLoop
+
+        >>> a = Interpreter()
+        >>> a.cmdExecute(['pin a 3-4', 'tin b 0'])
         """
         for cmdLine in cmdList:
             if cmdLine == None: continue
@@ -1167,28 +1263,28 @@ class Interpreter:
             self.prompt = '%s ' % (promptRoot)
 
     #-----------------------------------------------------------------------||--
-    def _testThreads(self, force=0):
-        """testing if threading modules are available
-        cgi threads are always single-threaded
-        """
-        if force == 0 or self.sessionType in ['cgi', 'idle']:
-            status = 0 # turn off
-        else:
-            status = 1
-            if os.name == 'mac':
-                pass
-            elif os.name == 'posix':
-                try: import threading
-                except ImportError: status = 0
-            else: # all win flavors
-                status = 1
-                # threads work fine in win, but even when not in idle
-                # the animation trick does not do /b correctly
-        if status == 0: # no threading
-            msg = 'threading off' # need leading space
-        elif status == 1:
-            msg ='threading active' # need leading space
-        return status, msg
+#     def _testThreads(self, force=0):
+#         """testing if threading modules are available
+#         cgi threads are always single-threaded
+#         """
+#         if force == 0 or self.sessionType in ['cgi', 'idle']:
+#             status = 0 # turn off
+#         else:
+#             status = 1
+#             if os.name == 'mac':
+#                 pass
+#             elif os.name == 'posix':
+#                 try: import threading
+#                 except ImportError: status = 0
+#             else: # all win flavors
+#                 status = 1
+#                 # threads work fine in win, but even when not in idle
+#                 # the animation trick does not do /b correctly
+#         if status == 0: # no threading
+#             msg = 'threading off' # need leading space
+#         elif status == 1:
+#             msg ='threading active' # need leading space
+#         return status, msg
 
     def toggleEcho(self):
         """flips echo status on and off"""
@@ -1292,5 +1388,22 @@ class Interpreter:
         self.echo = 0
         dialog.msgOut('AthenaHistory Execute complete.\n', self.termObj)         
 
+
+
+
+
+#-----------------------------------------------------------------||||||||||||--
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
+
+#-----------------------------------------------------------------||||||||||||--
+if __name__ == '__main__':
+    from athenaCL.test import baseTest
+    baseTest.main(Test)
 
 

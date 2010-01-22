@@ -28,6 +28,7 @@ from athenaCL.libATH import fileTools
 # a list of directories is given each time the command is called
 # allowing the user to specify only file names
 # List of dirs given in TMclass.TextureOps.getAux, each time command is called
+
 class _FileChooser(basePmtr.Parameter):
     def __init__(self, args, refDict):
         """searches a list of directories recursively and finds all files

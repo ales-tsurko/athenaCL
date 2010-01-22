@@ -5,12 +5,15 @@
 #
 # Authors:       Christopher Ariza
 #
-# Copyright:     (c) 2003-2006 Christopher Ariza
+# Copyright:     (c) 2003-2010 Christopher Ariza
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
 
 
 import os, tempfile, time, shutil, time
+import unittest, doctest
+
+
 from athenaCL.libATH import drawer
 from athenaCL.libATH import language
 lang = language.LangObj()
@@ -344,7 +347,7 @@ def curlFtpUplad(srcPath, dstPath, user, pswd):
     # need quotes around user and password incase of crazy chars
     # -m is max transfer time; not set here as does not seem to make a difference
     cmdStr = 'curl -# --max-time 2048 -T %s -u "%s":"%s" ftp://%s' % (srcPath,
-                                                                         user, pswd, dstPath)
+                                                         user, pswd, dstPath)
     os.system(cmdStr)
 
 def curlFtpDelete(path, user, pswd, dummy='__init__.py'):
@@ -634,6 +637,9 @@ def extSplit(name, extList=None):
     """split name, extension; if extList is given, find only w/n this list
     return wholeName (even if a path), None if ext not found
     all '.' are dropped from both name and ext
+
+    >>> extSplit('testing/this.py', ['.py'])
+    ('testing/this', '.py')
     """
     if extList == None:
         extList = knownEXT # search all known extensions
@@ -674,6 +680,10 @@ def dirGather(searchDir, extList):
 def pathTrimStub(path, stub=None):
     """takes a path and removes the parent stub component
         path should always be longer then stub
+
+    >>> pathTrimStub('this/is/a/long/path', 'this/is/a')
+    'long/path'
+
     """
     if stub == None:
         return path # do nothing
@@ -784,6 +794,8 @@ def openMedia(path, prefDict=None):
     else: # win or other, rely on system settings
         cmdExe = '%s' % path # on win, just launch path          
     return launch(cmdExe) # returns None on success
+
+
 
 
 #-----------------------------------------------------------------||||||||||||--
@@ -933,3 +945,28 @@ def findAthBinPath(optFink=0):
         dir = '/usr/local/bin'
     # launcher is one word lower case
     return os.path.join(dir, 'athenacl')
+
+
+
+
+
+
+
+#-----------------------------------------------------------------||||||||||||--
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
+
+
+#-----------------------------------------------------------------||||||||||||--
+
+
+
+if __name__ == '__main__':
+    from athenaCL.test import baseTest
+    baseTest.main(Test)
+

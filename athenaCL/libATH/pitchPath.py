@@ -4,12 +4,14 @@
 #
 # Authors:       Christopher Ariza
 #
-# Copyright:     (c) 2001-2006 Christopher Ariza
+# Copyright:     (c) 2001-2010 Christopher Ariza
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
 
 
 import copy
+import unittest, doctest
+
 from athenaCL.libATH import SC
 from athenaCL.libATH import MC
 from athenaCL.libATH import pitchTools
@@ -70,8 +72,8 @@ class PolyPath:
         # unless the set changes
 
         self.voiceRank = { 'SMTH': {},  
-                                'UNIF': {},  
-                                'BAL': {}
+                            'UNIF': {},  
+                            'BAL': {}
                              }
         self.activeVoice = 'auto'
 
@@ -138,10 +140,10 @@ class PolyPath:
         self._voiceReinit() # erases all maps, sorts: should be replaced w/ rot met
         self._updateNew() # updates all map sorts, group ranks
 
-    def optimize(self, opt='o'):
-        """optimize the path in place
-        opt can be o for optimize, a for antioptimze"""
-        pass # not yet implemented
+#     def optimize(self, opt='o'):
+#         """optimize the path in place
+#         opt can be o for optimize, a for antioptimze"""
+#         pass # not yet implemented
 
     def t(self, value, key=None):
         """if key == None, all sets are are transposed"""
@@ -694,7 +696,7 @@ class PolyPath:
             unifRank = unifList.index(thisMapTupleId) + 1
             balRank = balList.index(thisMapTupleId) + 1
             self.voiceLib[groupName]['ranks'][(srcPos, dstPos)] = (smthRank,
-                                                                                 unifRank, balRank) 
+                                          unifRank, balRank) 
             i = i + 1
 
     def voiceMapRank(self, name, srcPos, dstPos):
@@ -777,46 +779,40 @@ class PolyPath:
 
 
 
-#-----------------------------------------------------------------||||||||||||--
-#-----------------------------------------------------------------||||||||||||--
 
-class TestOld:
-    def __init__(self):
-        self.testPolyPathData()
+
+#-----------------------------------------------------------------||||||||||||--
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
+
 
     def testPolyPathData(self):
         dummyPath = ((2,5,1),(-4,5,3),(2,6,4))
         objList = []
         for set in dummyPath:
             objList.append(SC.Multiset(set))
-
         p = PolyPath()
         p.loadMultisetList(objList)
-        print p
         for name in p.forms:
-            print name, p.get(name)
-        print p[2]
+            post = name, p.get(name)
         p[2].t(5)
-        print p[2]
-        print p.repr('psName')
         p.t(3)
-        print p.repr('psName')
         p.i()
-        print p.repr('psName')
-
-        print p.voiceLib
-        print p.voiceRank
-        print p
         p.retro()
-        print p
         p.rotate(1)
-        print p
         p.slice((1,3))
-        print p
+
+
+
+#-----------------------------------------------------------------||||||||||||--
+
+
 
 if __name__ == '__main__':
-    TestOld()
-
-
-
-
+    from athenaCL.test import baseTest
+    baseTest.main(Test)

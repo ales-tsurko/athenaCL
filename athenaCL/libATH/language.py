@@ -4,7 +4,7 @@
 #
 # Authors:       Christopher Ariza
 #
-# Copyright:     (c) 2001-2008 Christopher Ariza
+# Copyright:     (c) 2001-2010 Christopher Ariza
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
 
@@ -13,6 +13,7 @@
 
 
 import string, random
+import unittest, doctest
 # language must be set by this class reading a preference file
 # otherwise, works only as a global class
 
@@ -21,12 +22,13 @@ class LangObj:
 # interface constants
 
     def __init__(self, language='en'):
+        """
+        >>> a = LangObj()
+        """
         self.language = language
         self.langDict = {}
         # always need en, can optional load other language
         self.langDict['en'] = LangEn() # english 
-        self.langDict['es'] = LangEs() # spanish
-        self.langDict['it'] = LangIt() # italian
 
         self.errorStr = 'missing string (%s)'
 
@@ -116,23 +118,23 @@ class LangEn:
     #-----------------------------------------------------------------------||--
     #strings
     msgCommentBreak = ('-'*65) + ('|'*12) + ('-'*2)
-    msgAth              = 'athenaCL'
-    msgAthURL           = 'www.athenacl.org'
-    msgAthDocURL        = 'www.flexatone.net/athenaDocs/'
-    msgAthSfURL         = 'www.sourceforge.net/projects/athenacl'
-    msgAuthor           = 'Christopher Ariza'
-    msgAuthorEmail      = 'ariza@flexatone.net'
-    msgBugReport        = 'athenacl-development@lists.sourceforge.net'
+    msgAth = 'athenaCL'
+    msgAthURL = 'www.athenacl.org'
+    msgAthDocURL = 'www.flexatone.net/athenaDocs/'
+    msgAthSfURL = 'www.sourceforge.net/projects/athenacl'
+    msgAuthor = 'Christopher Ariza'
+    msgAuthorEmail = 'ariza@flexatone.net'
+    msgBugReport = 'athenacl-development@lists.sourceforge.net'
 
 
-    msgCgiDomain        = 'www.flexatone.net:80'
-    msgCgiURL           = '/cgi-bin/py/flexNet/software/q.cgi' #?stateNext=8'
-    msgVersionURL       = 'www.flexatone.net/athenaCL/version.txt'
+    msgCgiDomain = 'www.flexatone.net:80'
+    msgCgiURL = '/cgi-bin/py/flexNet/software/q.cgi' #?stateNext=8'
+    msgVersionURL = 'www.flexatone.net/athenaCL/version.txt'
     msgAthDownloadURL = 'www.flexatone.net/athena.html#athenaDownload'
     # common file path to a tar file; add version number
     msgAthDownloadTar = 'http://www.flexatone.net/athenaCL/athenaCL.tar.gz'
 
-    msgAthIntro         = 'Enter "cmd" to see all commands. For help enter "?".\nEnter "c" for copyright, "w" for warranty, "r" for credits.\n'
+    msgAthIntro = 'Enter "cmd" to see all commands. For help enter "?".\nEnter "c" for copyright, "w" for warranty, "r" for credits.\n'
     
     #-----------------------------------------------------------------------||--
     # key description paragrahs
@@ -164,7 +166,7 @@ Modular, polyphonic, poly-paradigm algorithmic music composition in a cross-plat
     msgAthDescFull = """\
 Musical parts are deployed as Textures, layered surface-defining objects containing numerous independent ParameterObjects to control pitch, tempo, rhythm, amplitude, panning, and instrument (Csound) parameters. The system includes an integrated library of Csound instruments, and supports output for external Csound instruments, MIDI, and a variety of alternative formats. %s Textures can be combined and edited, and tuned with algorithmic Temperament objects. Texture Clones allow the filtering and processing of Texture events, performing transformations not possible with parameter generation alone.
 
-The analytic and algorithmic systems use Path objects to organize and share pitch groups. Paths provide simultaneous representations of ordered content groups in set-class, pitch-class space, and pitch space. Paths may contain numerous PathVoices (voice leadings) and may be analyzed with both set-class similarity measures and voice leading rankings. As a reference utility, pitch groups can be searched, analyzed, and compared with a wide variety of tools.""" % (_pmtrObjSummary)
+The algorithmic system uses Path objects to organize and share pitch groups. Paths provide simultaneous representations of ordered content groups in set-class, pitch-class space, and pitch space. Paths may contain numerous PathVoices (voice leadings) and may be analyzed with both set-class similarity measures and voice leading rankings. As a reference utility, pitch groups can be searched, analyzed, and compared with a wide variety of tools.""" % (_pmtrObjSummary)
 
     msgAthFeatInterface =  """\
 Advanced, easy to use, interactive command line: enter commands with arguments, or just enter the command and athenaCL will prompt the user for all necessary data.
@@ -190,24 +192,18 @@ Control pitch data with Paths: reusable, partitioned pitch collections. Paths   
 
     msgAthFeatAnalytic = """\
 Pitch set class dictionary containing all 351 sets (all Tn types from the singleton to the dodecachord) and capable of quickly converting any pitch set, Forte number, or Xenakis sieve to normal-form.
-
-Access to all Tn and all TnI subset vectors, Forte interval-vectors, and Morris invariance vectors for all sets.    
-
-Over twenty set class similarity measures, including John Rahn's ATMEMB and David Lewin's REL. 
-
-Voice leading analysis and ranking with Joseph N. Straus's Smoothness, Uniformity, and Balance measures. Ability to sort and store numerous voice leadings of the same Path, select maps by rank or map, and display images of vertical voice-leading mappings.
 """
 
 
 
     #-----------------------------------------------------------------------||--
-    msgAthCopyright       = 'Copyright (c) 2000-2009 Christopher Ariza and others.'
-    msgLicenseShort       = 'athenaCL is free software, distributed under the GNU General Public License.\n'
-    msgLicenseName            = 'GPL' # this is the necessary package code 
-    msgAthUsage               = 'Usage: athenacl [options]'
+    msgAthCopyright = 'Copyright (c) 2000-2010 Christopher Ariza and others.'
+    msgLicenseShort = 'athenaCL is free software, distributed under the GNU General Public License.\n'
+    msgLicenseName = 'GPL' # this is the necessary package code 
+    msgAthUsage = 'Usage: athenacl [options]'
 
-    msgCredits                = """\
-athenaCL was created and is maintained by Christopher Ariza. Numerous generator ParameterObjects based in part on the Object-oriented Music Definition Environment (OMDE/pmask), Copyright 2000-2001 Maurizio Umberto Puxemdu; Cmask was created by Andre Bartetzki. The Command Line Interpreter is based in part on cmd.py; the module textwrap.py is by Greg Ward; both are distributed with Python, Copyright 2001-2003 Python Software Foundation. The fractional noise implementation in dice.py, Audacity spectrum importing, and dynamic ParameterObject boundaries are based in part on implementations by Paul Berg. The module genetic.py is based in part on code by Robert Rowe. The module midiTools.py is based in part on code by Bob van der Poel. The module chaos.py is based in part on code by Hans Mikelson. The module permutate.py is based in part on code by Ulrich Hoffman. Pitch class set names provided in part by Larry Solomon. Voice leading tools based on a model by Joseph N. Straus. The module OSC.py is Copyright 2002 Daniel Holth and Clinton McChesney. Additional OSC programming and Python interface by Jonathan Saggau. The Notification Framework is Copyright 2001, 2002, 2003 Sebastien Bigaret. The Singleton Pattern is by Jurgen Hermann. The Future thread model is by David Perry. The Rabin-Miller Primality Test is based in part on an implementation by Stephen Krenzel. The mpkg installer is generated with py2app (bdist_mpkg) by Bob Ippolito. Python language testing done with PyChecker (by Neal Norwitz Copyright 2000-2001 MetaSlash Inc.) and pyflakes (by Phil Frost Copyright 2005 Divmod Inc.). Thanks to the following people for suggestions and feedback: Paul Berg, Per Bergqvist, Marc Demers, Ryan Dorin, Elizabeth Hoffman, Anthony Kozar, Paula Matthusen, Robert Rowe, Jonathan Saggau, and Jesse Sklar. Thanks also to the many users who have submitted anonymous bug-reports."""
+    msgCredits = """\
+athenaCL was created and is maintained by Christopher Ariza. Numerous generator ParameterObjects based in part on the Object-oriented Music Definition Environment (OMDE/pmask), Copyright 2000-2001 Maurizio Umberto Puxemdu; Cmask was created by Andre Bartetzki. The Command Line Interpreter is based in part on cmd.py; the module textwrap.py is by Greg Ward; both are distributed with Python, Copyright 2001-2003 Python Software Foundation. The fractional noise implementation in dice.py, Audacity spectrum importing, and dynamic ParameterObject boundaries are based in part on implementations by Paul Berg. The module genetic.py is based in part on code by Robert Rowe. The module midiTools.py is based in part on code by Bob van der Poel. The module chaos.py is based in part on code by Hans Mikelson. The module permutate.py is based in part on code by Ulrich Hoffman. Pitch class set names provided in part by Larry Solomon. The Rabin-Miller Primality Test is based in part on an implementation by Stephen Krenzel. The mpkg installer is generated with py2app (bdist_mpkg) by Bob Ippolito. Python language testing done with PyChecker (by Neal Norwitz Copyright 2000-2001 MetaSlash Inc.) and pyflakes (by Phil Frost Copyright 2005 Divmod Inc.). Thanks to the following people for suggestions and feedback: Paul Berg, Per Bergqvist, Marc Demers, Ryan Dorin, Elizabeth Hoffman, Anthony Kozar, Paula Matthusen, Robert Rowe, Jonathan Saggau, and Jesse Sklar. Thanks also to the many users who have submitted anonymous bug-reports."""
     
     # these are only used for athenacl now
     msgTrademarks             = """\
@@ -216,68 +212,68 @@ Apple, Macintosh, Mac OS, and QuickTime are trademarks or registered trademarks 
 # IBM PC is trademark of IBM. 
     
     #-----------------------------------------------------------------------||--
-    msgAthObjError            = 'apologies: the previous command could not be completed as expected.\nplease report this bug when quitting, or examine the log (AUlog).\n'
-    msgSubmitLog              = 'anonymously submit bug report?'
-    msgSubmitLogFail          = 'no connection possible; try again when on-line.\n'
-    msgSubmitLogSuccess   = 'thank you! submitting bugs is very important, please continue to do so in the future.\n'
-    msgVersionCheck       = 'check online for updates to athenaCL?'
-    msgVersionUpdate          = 'a %s update to athenaCL (%s) is now available.\nopen download page in a browser?'
-    msgUpTodate               = 'athenaCL %s is up to date.\n'
+    msgAthObjError = 'apologies: the previous command could not be completed as expected.\nplease report this bug when quitting, or examine the log (AUlog).\n'
+    msgSubmitLog = 'anonymously submit bug report?'
+    msgSubmitLogFail = 'no connection possible; try again when on-line.\n'
+    msgSubmitLogSuccess = 'thank you! submitting bugs is very important, please continue to do so in the future.\n'
+    msgVersionCheck = 'check online for updates to athenaCL?'
+    msgVersionUpdate = 'a %s update to athenaCL (%s) is now available.\nopen download page in a browser?'
+    msgUpTodate = 'athenaCL %s is up to date.\n'
 
-    msgBadPmtrFormat          = 'incorrect parameter format.\n'
-    msgBadArgFormat       = 'incorrect argument format.\n'
-    msgConfusedInput          = TAB + 'incomprehensible input, try again.\n'
-    msgIncorrectEntry         = TAB + 'incorrect entry. try again.\n'
+    msgBadPmtrFormat = 'incorrect parameter format.\n'
+    msgBadArgFormat = 'incorrect argument format.\n'
+    msgConfusedInput = TAB + 'incomprehensible input, try again.\n'
+    msgIncorrectEntry = TAB + 'incorrect entry. try again.\n'
     # this was just empty, but was not giving a proper new line in some cases
-    msgReturnCancel       = '' #'   .' 
-    msgMenuChangeDir          = 'to change directory enter name, path, or ".."\ncancel or select? (c or s):'
-    msgMenuFile               = 'name file, change directory, or cancel? (f, cd, c):'
-    msgBadAthObj              = TAB + 'there is a problem with this AthenaObject file. make sure an AthenaObject has been selected, then try (1) opening the file in a text editor and re-saving the file with the appropriate line endings or (2) restart athenaCL and try again.\n'
-    msgBadInput               = TAB + 'unidentified input. try again:\n'
-    msgBadNameChars       = TAB + 'this name consists of invalid characters. try again:\n'
-    msgBadNameLength          = TAB + 'this name is too long. try again:\n'
-    msgUnknownCmd             = 'unknown command. enter "cmd" to see all commands.\n'   
-    msgFileError              = 'a bad file path has been selected; try to write files in a better location.\n'
-    msgFileIoError            = 'i/o error occurred while trying to write %s.'
-    msgPlatformError          = 'this command is not available on %s platforms.\n'
+    msgReturnCancel  = '' #'   .' 
+    msgMenuChangeDir = 'to change directory enter name, path, or ".."\ncancel or select? (c or s):'
+    msgMenuFile = 'name file, change directory, or cancel? (f, cd, c):'
+    msgBadAthObj = TAB + 'there is a problem with this AthenaObject file. make sure an AthenaObject has been selected, then try (1) opening the file in a text editor and re-saving the file with the appropriate line endings or (2) restart athenaCL and try again.\n'
+    msgBadInput = TAB + 'unidentified input. try again:\n'
+    msgBadNameChars = TAB + 'this name consists of invalid characters. try again:\n'
+    msgBadNameLength = TAB + 'this name is too long. try again:\n'
+    msgUnknownCmd = 'unknown command. enter "cmd" to see all commands.\n'   
+    msgFileError = 'a bad file path has been selected; try to write files in a better location.\n'
+    msgFileIoError = 'i/o error occurred while trying to write %s.'
+    msgPlatformError = 'this command is not available on %s platforms.\n'
 
-    msgGfxTkError             = 'install Tk in Python for tk graphic output.'
-    msgGfxIdleError       = 'tk graphics are not available during an IDLE session.'
-    msgGfxPilError            = 'install PIL in Python for jpg or png graphic output.'
+    msgGfxTkError = 'install Tk in Python for tk graphic output.'
+    msgGfxIdleError = 'tk graphics are not available during an IDLE session.'
+    msgGfxPilError = 'install PIL in Python for jpg or png graphic output.'
     
-    msgReturnToExit       = 'press return to exit:'
-    msgPleaseWait             = 'processing.'
+    msgReturnToExit = 'press return to exit:'
+    msgPleaseWait = 'processing.'
     
-    msgMissingLibATH          = '\nlibATH cannot be found. reinstall athenaCL\n'
-    msgMissingLibTM       = '\nlibTM cannot be found. reinstall athenaCL\n'
-    msgMissingLibAS       = '\nlibAS cannot be found. reinstall athenaCL\n'
-    msgMissingXML             = '\nno XML parsers found: athenaCL requires Python xml.dom.minidom.\nupgrade or replace this version of Python.\n'
-    msgMissingDemo            = '\ndemo cannot be found. reinstall athenaCL\n'
-    msgMemoryError            = '\nnot enough memory to load %s.py: try again?'
+    msgMissingLibATH = '\nlibATH cannot be found. reinstall athenaCL\n'
+    msgMissingLibTM = '\nlibTM cannot be found. reinstall athenaCL\n'
+    msgMissingLibAS = '\nlibAS cannot be found. reinstall athenaCL\n'
+    msgMissingXML = '\nno XML parsers found: athenaCL requires Python xml.dom.minidom.\nupgrade or replace this version of Python.\n'
+    msgMissingDemo = '\ndemo cannot be found. reinstall athenaCL\n'
+    msgMemoryError = '\nnot enough memory to load %s.py: try again?'
     
-    msgDlgBadPath             = TAB + 'this is not a valid path. try again?'
-    msgDlgBadInput            = TAB + ERROR + ' %s not understood. try again.\n'
-    msgDlgSaveInThisDir   = '%s\n' + TAB + 'save in this directory?'
-    msgDlgFileExists          = 'this file already exists. replace?'
-    msgDlgSaveThisFile    = '%s\n' + TAB + 'save this file?'
+    msgDlgBadPath = TAB + 'this is not a valid path. try again?'
+    msgDlgBadInput = TAB + ERROR + ' %s not understood. try again.\n'
+    msgDlgSaveInThisDir = '%s\n' + TAB + 'save in this directory?'
+    msgDlgFileExists = 'this file already exists. replace?'
+    msgDlgSaveThisFile = '%s\n' + TAB + 'save this file?'
     msgDlgBadFileNameStart = TAB + ERROR + ' a file name cannot start with "%s". try again.\n'
-    msgDlgBadFileNameChar  = TAB + ERROR + ' a file name cannot contain "%s". try again.\n'
-    msgDlgEnterIntRange     = TAB + 'enter an integer between 0 and %s.\n'
+    msgDlgBadFileNameChar = TAB + ERROR + ' a file name cannot contain "%s". try again.\n'
+    msgDlgEnterIntRange = TAB + 'enter an integer between 0 and %s.\n'
 
-    msgDlgNoSuchDir       = 'no such directory\n'
-    msgDlgDirNotFile          = 'this is a directory, not a file. try again?'
-    msgDlgNotApp              = 'this is neither an application nor an executable. try again?'
-    msgDlgNameFile            = 'name file?'
-    msgDlgBadFileName         = 'no such file exists. try again?'
-    msgDlgSelectThisFile      = '%s\n' + TAB + 'select this file?'
-    msgDlgMacError            = 'Mac dialogs not currently available.'
-    msgDlgTkError             = 'Tk dialogs not currently available.'
+    msgDlgNoSuchDir = 'no such directory\n'
+    msgDlgDirNotFile = 'this is a directory, not a file. try again?'
+    msgDlgNotApp = 'this is neither an application nor an executable. try again?'
+    msgDlgNameFile = 'name file?'
+    msgDlgBadFileName = 'no such file exists. try again?'
+    msgDlgSelectThisFile = '%s\n' + TAB + 'select this file?'
+    msgDlgMacError = 'Mac dialogs not currently available.'
+    msgDlgTkError = 'Tk dialogs not currently available.'
 
-    msgDocAdditionalHelp      = 'for help with a command, enter "?" followed by the command.\n'
-    msgDocCmd                 = 'to see a hierarchical listing of commands, enter "cmd".\n'
-    msgDocPrefix              = 'to see all commands associated with a prefix, enter that prefix.\n'
-    msgDocBrowser             = 'to open documentation in a browser, enter "AUdoc".\n'
-    msgDocHead                = 'athenaCL commands:\n'
+    msgDocAdditionalHelp = 'for help with a command, enter "?" followed by the command.\n'
+    msgDocCmd = 'to see a hierarchical listing of commands, enter "cmd".\n'
+    msgDocPrefix = 'to see all commands associated with a prefix, enter that prefix.\n'
+    msgDocBrowser = 'to open documentation in a browser, enter "AUdoc".\n'
+    msgDocHead = 'athenaCL commands:\n'
 
     #-----------------------------------------------------------------------||--
     # strings for particular commands
@@ -327,8 +323,8 @@ Apple, Macintosh, Mac OS, and QuickTime are trademarks or registered trademarks 
     msgMCchooseRank       = 'choose a rank of %s between 1 and %s:'
     msgMCthisAsthat       = TAB + 'MC %s as %s?'
     
-    msgPEnoNamedPE            = 'no such SetMeasure exists. enter "SMls" to see all names.\n'    
-    msgPEblankNowActive   = 'SetMeasure %s now active.\n'
+#     msgPEnoNamedPE            = 'no such SetMeasure exists. enter "SMls" to see all names.\n'    
+#     msgPEblankNowActive   = 'SetMeasure %s now active.\n'
     
     msgPInameGet              = 'name this PathInstance:'
     msgPIcreateFirst          = 'create a PathInstance first: enter "PIn".\n'
@@ -413,16 +409,16 @@ Apple, Macintosh, Mac OS, and QuickTime are trademarks or registered trademarks 
     msgEMinstAvail            = '%s instruments:\n' # used to say Orchestra here
     msgEMmodeSet              = 'EventMode mode set to: %s.\n'
     msgEMselect               = 'select an EventMode mode:'
-    msgEMbadMode              = TAB + 'no such EventMode mode exists. try again.\n'
-    msgEMnoInstrument         = TAB + 'no such instrument available, enter "?" to view all instruments.\n'
-    msgEMgetOutput            = 'select output format: %s? (%s):'
-    msgEMnoOutput             = TAB + 'no such format exists.\n'
+    msgEMbadMode = TAB + 'no such EventMode mode exists. try again.\n'
+    msgEMnoInstrument  = TAB + 'no such instrument available, enter "?" to view all instruments.\n'
+    msgEMgetOutput  = 'select output format: %s? (%s):'
+    msgEMnoOutput = TAB + 'no such format exists.\n'
 
 
-    msgELcreateFirst          = 'create an event list first. enter "ELn".\n'
-    msgELfileMoved            = 'the file (%s) cannot be found. enter "ELn" to create new EventList files.\n'
-    msgELnoScores             = 'too many rests: no events were created.\n'
-    msgELviewInit             = 'EventList view initiated: %s\n'
+    msgELcreateFirst  = 'create an event list first. enter "ELn".\n'
+    msgELfileMoved    = 'the file (%s) cannot be found. enter "ELn" to create new EventList files.\n'
+    msgELnoScores   = 'too many rests: no events were created.\n'
+    msgELviewInit = 'EventList view initiated: %s\n'
     msgELnameScore            = 'name an EventList. use a ".xml" extension:'
     msgELbadScoreName         = 'EventList files must end with a ".xml" extension.\n'
     msgELrenderError          = 'audio rendering failed (%s). check audio and csound preferences.\n'
@@ -690,17 +686,17 @@ Apple, Macintosh, Mac OS, and QuickTime are trademarks or registered trademarks 
     # omde pmtrObjects
     
     docPoWs = 'Provides sinusoid oscillation %s %s' % (_waveValuePeriod,
-                                                                        _waveCommon)    
+                                                           _waveCommon)    
     docPoWc = 'Provides cosinusoid oscillation %s %s' % (_waveValuePeriod,
-                                                                          _waveCommon)
+                                                             _waveCommon)
     docPoWsu = 'Provides a saw-up wave %s %s' % (_waveValuePeriod, _waveCommon)
     docPoWsd = 'Provides a saw-down wave %s %s' % (_waveValuePeriod, _waveCommon)
     docPoWp = 'Provides a pulse (square) wave %s %s' % (_waveValuePeriod,
-                                                                         _waveCommon)
+                                                        _waveCommon)
     docPoWt = 'Provides a triangle wave %s %s' % (_waveValuePeriod, _waveCommon)
     docPoWpu = 'Provides a power up wave %s %s' % (_waveValuePeriod, _waveCommon)
     docPoWpd = 'Provides a power down wave %s %s' % (_waveValuePeriod,
-                                                                     _waveCommon)
+                                                            _waveCommon)
     
     docPoRu = 'Provides random numbers between 0 and 1 within an uniform distribution. %s Note: values are evenly distributed between min and max.' % _scaleCommon
     docPoRl = 'Provides random numbers between 0 and 1 within a linearly decreasing distribution. %s Note: values are distributed more strongly toward min.' % _scaleCommon
@@ -876,25 +872,31 @@ Apple, Macintosh, Mac OS, and QuickTime are trademarks or registered trademarks 
     docPoImc = 'Selects the type of interpolation used for all parameters.'
 
     
-    def __init__(self): pass
+    def __init__(self): 
+        """
+        >>> a = LangEn()
+        """
+        pass
+
+
 
 #-----------------------------------------------------------------||||||||||||--
-class LangEs(LangEn):
-    "all spanish strings; missing strings will use english"
-    TAB = LangEn.TAB
-    msgAOnotAOdoc             = TAB + 'este non es un documento AthenaObject.\n'
-    def __init__(self): pass
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
 
-#-----------------------------------------------------------------||||||||||||--
-class LangIt(LangEn):
-    "all italian strings; missing strings will use english"
-    TAB = LangEn.TAB
-    msgAOnotAOdoc             = TAB + 'questo non \'e un documento AthenaObject.\n'
-    def __init__(self): pass
 
 #-----------------------------------------------------------------||||||||||||--
 
 
+
+if __name__ == '__main__':
+    from athenaCL.test import baseTest
+    baseTest.main(Test)
 
 
 

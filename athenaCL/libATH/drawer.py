@@ -1023,6 +1023,7 @@ def genAlphaLabel(number):
     a-z, aa, ab, ..., ba, bb, ...
     
     >>> genAlphaLabel(12)
+    ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l']
     """          
     label = []
     for n in range(number):
@@ -1038,7 +1039,12 @@ def genAlphaLabel(number):
 def acronymLibToStr(refDict):
     """convert a refDict of acronyms and names into
     two stings presentable to the user, showing the expanded string
-    and the acronym"""
+    and the acronym
+
+    >>> refDict = {'o': 'open', 'ls':'list'}
+    >>> acronymLibToStr(refDict)
+    ('list, open', 'ls, o')
+    """
     short = []
     long = []
     keys = refDict.keys()
@@ -1053,7 +1059,13 @@ def acronymLibToStr(refDict):
 def acronymExtract(usrStr):
     """take a usrStr and compact into an accronym if capitals are used
     if not capitals, just get first letter
-    always returned in lower case"""
+    always returned in lower case
+
+    >>> acronymExtract('thisIsATest')
+    'tiat'
+    >>> acronymExtract('thisIsAnotherTest')
+    'tiat'
+    """
     # serach usrStr before reducing case
     autoStr = []
     for i in range(0, len(usrStr)):
@@ -1067,6 +1079,10 @@ def acronymExtract(usrStr):
 def optionUniqueKeyLeadChar(refDict):
     """determine if a dictionary of options has unique first
     characters, such that auto acronym expansion can happen
+
+    >>> refDict = {'oc':'orderedCyclic', 'rw':'randomWalk'}
+    >>> optionUniqueKeyLeadChar(refDict)
+    True
     """
     firstChar = []
     for label in refDict.keys(): # keys are acronymes
@@ -1074,9 +1090,9 @@ def optionUniqueKeyLeadChar(refDict):
         char = label[0] # get firs character
         if char in firstChar:
             # cant auto search, as more than one key have same first letter
-            return 0 
+            return False
         firstChar.append(char)
-    return 1 # all keys have unique first characters
+    return True # all keys have unique first characters
         
 def acronymExpand(usrStr, refDict, autoSearch=None):
     """provide a standard name reference dictionary in the format:
@@ -1090,6 +1106,12 @@ def acronymExpand(usrStr, refDict, autoSearch=None):
     
     in this refDict, the desired string is the value, not the key:
         a = {'oc':'orderedCyclic', }
+
+    >>> refDict = {'oc':'orderedCyclic', 'rw':'randomWalk'}
+    >>> acronymExpand('oc', refDict)
+    'orderedCyclic'
+    >>> acronymExpand('OC', refDict)
+    'orderedCyclic'
     """
     if usrStr == None: return None
     assert isStr(usrStr) and isDict(refDict)
@@ -1125,6 +1147,12 @@ def selectionParse(usrStr, refDict, autoSearch=None):
     
     in this refDict, the desired string is the key, not the values:
         a = {'orderedCyclic': ['oc', 3, 'order'], }
+
+    >>> refDict = {'orderedCyclic': ['oc', 3, 'order'], }
+    >>> selectionParse('oc', refDict)
+    'orderedCyclic'
+    >>> selectionParse('order', refDict)
+    'orderedCyclic'
     """
     if usrStr == None: return None
     assert isDict(refDict) and (isStr(usrStr) or isNum(usrStr))
@@ -1230,6 +1258,12 @@ def restringulator(usrStr):
     note: will choke if a comma is found inside of string arg!
         will also choke if a comma is fonud w/n a brace
         for these reasons a special check is done
+
+    >>> restringulator('this, is, a , test')
+    "'this','is','a','test'"
+    >>> restringulator('this, 3, 12.5, (test, (a, 3, 4)), test')
+    "'this',3,12.5,['test',['a',3,4]],'test'"
+
     """
     if usrStr == '': return usrStr
     newStr = []

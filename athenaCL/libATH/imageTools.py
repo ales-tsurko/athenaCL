@@ -5,11 +5,14 @@
 #
 # Authors:       Christopher Ariza
 #
-# Copyright:     (c) 2004-2006 Christopher Ariza
+# Copyright:     (c) 2004-2010 Christopher Ariza
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
 
 import os, random, string, copy, time, array
+import unittest, doctest
+
+
 from athenaCL.libATH import drawer
 from athenaCL.libATH import interpolate
 from athenaCL.libATH import fontLibrary
@@ -31,6 +34,8 @@ try:
     TK = 1
 except ImportError:
     TK = 0
+
+
 #-----------------------------------------------------------------||||||||||||--
 FONTPATH = os.path.join(os.path.expanduser('~'), 'Library', 'FontsPIL')
 if not os.path.exists(FONTPATH):
@@ -44,7 +49,11 @@ if not os.path.exists(FONTPATH):
 # http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/266466/index_txt
 
 def RGBToHTMLColor(rgb_tuple):
-    """ convert an (R, G, B) tuple to #RRGGBB """
+    """ convert an (R, G, B) tuple to #RRGGBB 
+
+    >>> RGBToHTMLColor((3,4,5))
+    '#030405'
+    """
     if drawer.isStr(rgb_tuple):
         if rgb_tuple[0] == '#': # already a string
             return rgb_tuple
@@ -56,7 +65,11 @@ def RGBToHTMLColor(rgb_tuple):
     return hexcolor
 
 def HTMLColorToRGB(colorstring):
-    """ convert #RRGGBB to an (R, G, B) tuple """
+    """ convert #RRGGBB to an (R, G, B) tuple 
+
+    >>> HTMLColorToRGB(('#ffffff'))
+    (255, 255, 255)
+    """
     colorstring = colorstring.strip()
     if colorstring[0] == '#': colorstring = colorstring[1:]
     if len(colorstring) != 6:
@@ -67,7 +80,11 @@ def HTMLColorToRGB(colorstring):
     
 def HTMLColorToUnitRGB(colorstring):
     """ converts #RRGGBB to postScript style float values
-    assume that there are 256 values"""
+    assume that there are 256 values
+
+    >>> HTMLColorToUnitRGB('#ffffff')
+    (1.0, 1.0, 1.0)
+    """
     max = 255.0
     r, g, b = HTMLColorToRGB(colorstring)
     r = r / max
@@ -131,7 +148,11 @@ def FloatToRGB(cellValue):
 imageFormatNames = ['text', 'eps', 'tk', 'png', 'jpg']
 
 def imageFormatParser(usrStr):
-    """provide backward compat to older names"""
+    """provide backward compat to older names
+
+    >>> imageFormatParser('jpeg')
+    'jpg'
+    """
     ref = {
         'jpg' : ['pil', 'jpeg', 'jpg', 'j'],
         'png' : ['file', 'png', 'p'],
@@ -226,12 +247,14 @@ class Thumb:
 #-----------------------------------------------------------------||||||||||||--
 class GridGraphic:
     """uess a list of lists as matrix for generating images"""
+
     def __init__(self, gridData=None, dataType='float', transp=None):
         """if dataType == float values are interpreted as gray scale
         if dataType == hex, html hex a decimal strings expected
         if dataType == rgb, assume rgb triples
         rot is rotatioin in degrees
         transparency: None is off, value is color that is transparent?
+
         """
         self.dataType = dataType
         self.transp = transp
@@ -2402,13 +2425,28 @@ class TestOld:
         os.system('open %s' % path)
 
 
+
+
+
+#-----------------------------------------------------------------||||||||||||--
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
+
     def testProcGraphCoord(self):
         a = ProcessGraphCoordData()
         a()
 
+
+
+#-----------------------------------------------------------------||||||||||||--
+
+
+
 if __name__ == '__main__':
-    TestOld()
-
-
-
-
+    from athenaCL.test import baseTest
+    baseTest.main(Test)
