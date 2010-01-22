@@ -5,14 +5,21 @@
 #
 # Authors:       Christopher Ariza
 #
-# Copyright:     (c) 2001-2006 Christopher Ariza
+# Copyright:     (c) 2001-2010 Christopher Ariza
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
+
+import unittest, doctest
+
+
 
 
 class FaqDictionary:
 
     def __init__(self):
+        """
+        >>> a = FaqDictionary()
+        """
         self.keyList = range(1,30) # increase number for new entries
 
         self.groupTitleDict = {'general': 'General Information',
@@ -143,7 +150,7 @@ class Faq1(FaqEntry):
     id       = 1
     group    = 'general'
     query    = 'What does athenaCL do?'
-    answer = "athenaCL's utility can be divided into two categories. First, athenaCL is a tool for computer-aided algorithmic composition, producing outputs for Csound, MIDI, and various other formats. Second, athenaCL it can be used for pitch modeling and analysis. This means that pitch structures,     or ordered successions of pitch sets (called paths), can be created, edited, analyzed, and voiced in a variety of ways. This has application for musicological analysis, exercises and experiments in music theory, and pre-compositional sketching and organization of pitch materials."
+    answer = "athenaCL is a tool for computer-aided algorithmic composition, producing outputs for Csound, MIDI, and various other formats."
 
 class Faq2(FaqEntry):
     id       = 2
@@ -162,7 +169,7 @@ class Faq4(FaqEntry):
     id       = 4
     group    = 'install'
     query    = 'What platforms does athenaCL run on?'
-    answer = 'Because of the cross-platform foundations of the Python programming language, athenaCL runs on every platform that Python runs on. This includes Mac OS9/OSX, Windows 95/98/NT/2000/ME/XP, Linux, BSD and all UNIX-based systems.'
+    answer = 'Because of the cross-platform foundations of the Python programming language, athenaCL runs on every modern platform that Python runs on. This includes Mac OSX, Windows, Linux, BSD and all UNIX-based systems.'
 
 class Faq5(FaqEntry):
     id       = 5
@@ -174,13 +181,13 @@ class Faq6(FaqEntry):
     id       = 6
     group    = 'general'
     query    = 'Who is athenaCL designed for?'
-    answer = 'athenaCL is designed for use by musicians, composers, sound designers, musicologists, music theorists, and programmers. For dealing with pitch models, basic knowledge of contemporary pitch-class and set-class notations, as well as post-tonal theory is helpful. Basic familiarity with stochastics, computer music concepts, and output formats (MIDI, Csound) is also helpful.'
+    answer = 'athenaCL is designed for use by musicians, composers, sound designers, and programmers. Basic familiarity with stochastics, computer music concepts, and output formats (MIDI, Csound) is helpful.'
 
 class Faq7(FaqEntry):
     id       = 7
     group    = 'general'
     query    = 'Where is the source code?'
-    answer = 'Every distribution download of athenaCL comes with a complete copy of the source code. Since Python is an interpreted language, the source code can be run "live": there is no executable or binary of athenaCL, the source-code simply runs in the Python interpreter. Developers can get (with CVS) the most recent source at SourceForge (www.sourceforge.net/projects/athenacl). An athenaCL.exe installer is available; this installs athenaCL as a Python package, and is not the athenaCL program itself.'
+    answer = 'Every distribution download of athenaCL comes with a complete copy of the source code. Since Python is an interpreted language, the source code can be run "live": there is no executable or binary of athenaCL, the source-code simply runs in the Python interpreter. Developers can get (with SVN) the most recent source at SourceForge (http://code.google.com/p/athenacl/). An athenaCL.exe installer is available; this installs athenaCL as a Python package, and is not the athenaCL program itself.'
 
 class Faq8(FaqEntry):
     id       = 8
@@ -317,4 +324,23 @@ class Faq29(FaqEntry):
 
 
   
+
+
+#-----------------------------------------------------------------||||||||||||--
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
+
+
+#-----------------------------------------------------------------||||||||||||--
+
+
+
+if __name__ == '__main__':
+    from athenaCL.test import baseTest
+    baseTest.main(Test)
 

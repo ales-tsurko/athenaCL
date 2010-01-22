@@ -492,13 +492,13 @@ class HelpDoc:
     AUca_usage = 'auca spec rule mutation'
 
     #-----------------------------------------------------------------------||--
-    SC = 'SetClass: Commands: Displays a list of all SetClass dictionary commands.'
-    SC_usage = 'sc'
-    MC = 'MapClass: Commands: Displays a list of all MapClass dictionary commands.'
-    MC_usage = 'mc'
-
-    SM = 'SetMeasure: Commands: Displays a list of all SetMeasure dictionary commands.'
-    SM_usage = 'sm'
+#     SC = 'SetClass: Commands: Displays a list of all SetClass dictionary commands.'
+#     SC_usage = 'sc'
+#     MC = 'MapClass: Commands: Displays a list of all MapClass dictionary commands.'
+#     MC_usage = 'mc'
+# 
+#     SM = 'SetMeasure: Commands: Displays a list of all SetMeasure dictionary commands.'
+#     SM_usage = 'sm'
 
     PI = 'PathInstance: Commands: Displays a list of all PathInstance commands.'
     PI_usage = 'pi'

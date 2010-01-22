@@ -9,6 +9,8 @@
 #-----------------------------------------------------------------||||||||||||--
 
 import random, copy
+import unittest, doctest
+
 from athenaCL.libATH.libTM import baseTexture
 from athenaCL.libATH import ornament
 from athenaCL.libATH import pitchTools
@@ -18,6 +20,8 @@ lang = language.LangObj()
 
 class MonophonicOrnament(baseTexture.Texture):
     """simple one dimension line algorithm
+
+    >>> a = MonophonicOrnament('test')
     """
     def __init__(self, name=None):
         baseTexture.Texture.__init__(self, name) # init base class
@@ -217,3 +221,20 @@ class MonophonicOrnament(baseTexture.Texture):
         return 1
 
         
+#-----------------------------------------------------------------||||||||||||--
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
+
+
+#-----------------------------------------------------------------||||||||||||--
+
+
+
+if __name__ == '__main__':
+    from athenaCL.test import baseTest
+    baseTest.main(Test)

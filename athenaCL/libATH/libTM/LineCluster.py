@@ -4,11 +4,13 @@
 #
 # Authors:       Christopher Ariza
 #
-# Copyright:     (c) 2001-2006 Christopher Ariza
+# Copyright:     (c) 2001-2010 Christopher Ariza
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
 
 import copy
+import unittest, doctest
+
 from athenaCL.libATH.libTM import baseTexture
 from athenaCL.libATH.libPmtr import basePmtr
 from athenaCL.libATH import pitchTools
@@ -19,6 +21,8 @@ _MOD = 'LineCluster.py'
 
 class LineCluster(baseTexture.Texture):
     """simple one dimension chord algorithm
+
+    >>> a = LineCluster('test')
     """
     def __init__(self, name=None):
         baseTexture.Texture.__init__(self, name) # init base class
@@ -131,4 +135,25 @@ class LineCluster(baseTexture.Texture):
             self.clockForward() # advances path positon 
         # return value to check for errors   
         return 1
+
+
+
+
+#-----------------------------------------------------------------||||||||||||--
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
+
+
+#-----------------------------------------------------------------||||||||||||--
+
+
+
+if __name__ == '__main__':
+    from athenaCL.test import baseTest
+    baseTest.main(Test)
 

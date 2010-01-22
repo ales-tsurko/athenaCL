@@ -9,6 +9,8 @@
 #-----------------------------------------------------------------||||||||||||--
 
 import copy
+import unittest, doctest
+
 from athenaCL.libATH.libTM import baseTexture
 from athenaCL.libATH.libPmtr import basePmtr
 from athenaCL.libATH.libPmtr import parameter   
@@ -22,6 +24,9 @@ lang = language.LangObj()
 
 class HarmonicAssembly(baseTexture.Texture):
     def __init__(self, name=None):
+        """
+        >>> a = HarmonicAssembly('test')
+        """
         baseTexture.Texture.__init__(self, name) # init base class
         self.author = 'athenaCL native'
         self.tmName = 'HarmonicAssembly'
@@ -172,3 +177,22 @@ class HarmonicAssembly(baseTexture.Texture):
         return 1
 
         
+
+#-----------------------------------------------------------------||||||||||||--
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
+
+
+#-----------------------------------------------------------------||||||||||||--
+
+
+
+if __name__ == '__main__':
+    from athenaCL.test import baseTest
+    baseTest.main(Test)
+

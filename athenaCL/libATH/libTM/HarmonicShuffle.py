@@ -9,6 +9,8 @@
 #-----------------------------------------------------------------||||||||||||--
 
 import copy
+import unittest, doctest
+
 from athenaCL.libATH.libTM import baseTexture
 from athenaCL.libATH.libPmtr import basePmtr
 from athenaCL.libATH.libPmtr import parameter   
@@ -22,6 +24,9 @@ lang = language.LangObj()
 
 class HarmonicShuffle(baseTexture.Texture):
     def __init__(self, name=None):
+        """
+        >>> a = HarmonicShuffle('test')
+        """
         baseTexture.Texture.__init__(self, name) # init base class
         self.author = 'athenaCL native'
         self.tmName = 'HarmonicShuffle'
@@ -163,3 +168,20 @@ class HarmonicShuffle(baseTexture.Texture):
         return 1
 
         
+#-----------------------------------------------------------------||||||||||||--
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
+
+
+#-----------------------------------------------------------------||||||||||||--
+
+
+
+if __name__ == '__main__':
+    from athenaCL.test import baseTest
+    baseTest.main(Test)

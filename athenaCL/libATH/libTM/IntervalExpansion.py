@@ -3,13 +3,16 @@
 # Purpose:       simple texture module for creating an ornamented line.
 #
 # Authors:       Christopher Ariza
-#                    Paula Matthusen
+#                Paula Matthusen
 #
-# Copyright:     (c) 2003, 2006 Christopher Ariza, Paula Matthusen
+# Copyright:     (c) 2003, 2006-2010 Christopher Ariza, Paula Matthusen
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
 
 import random, copy
+import unittest, doctest
+
+
 from athenaCL.libATH.libTM import baseTexture
 from athenaCL.libATH import ornament
 from athenaCL.libATH import pitchTools
@@ -22,6 +25,8 @@ _MOD = 'IntervalExpansion.py'
 
 class IntervalExpansion(baseTexture.Texture):
     """simple one dimension line algorithm
+
+    >>> a = IntervalExpansion('test')
     """
     def __init__(self, name=None):
         baseTexture.Texture.__init__(self, name) # init base class
@@ -267,3 +272,23 @@ class IntervalExpansion(baseTexture.Texture):
         return 1
 
         
+
+
+#-----------------------------------------------------------------||||||||||||--
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
+
+
+#-----------------------------------------------------------------||||||||||||--
+
+
+
+if __name__ == '__main__':
+    from athenaCL.test import baseTest
+    baseTest.main(Test)
+

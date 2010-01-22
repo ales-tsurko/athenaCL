@@ -4,11 +4,13 @@
 #
 # Authors:       Christopher Ariza
 #
-# Copyright:     (c) 2004-2006 Christopher Ariza
+# Copyright:     (c) 2004-2010 Christopher Ariza
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
 
 import copy
+import unittest, doctest
+
 from athenaCL.libATH.libTM import baseTexture
 from athenaCL.libATH import pitchTools
 from athenaCL.libATH.libPmtr import parameter   
@@ -17,6 +19,8 @@ lang = language.LangObj()
 
 class DroneArticulate(baseTexture.Texture):
     """polyphonic vertical drone
+
+    >>> a = DroneArticulate('test')
     """
     def __init__(self, name=None):
         baseTexture.Texture.__init__(self, name) # init base class
@@ -132,3 +136,22 @@ class DroneArticulate(baseTexture.Texture):
         return 1
 
         
+
+#-----------------------------------------------------------------||||||||||||--
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
+
+
+#-----------------------------------------------------------------||||||||||||--
+
+
+
+if __name__ == '__main__':
+    from athenaCL.test import baseTest
+    baseTest.main(Test)
+

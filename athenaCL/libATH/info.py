@@ -5,11 +5,14 @@
 #
 # Authors:       Christopher Ariza
 #
-# Copyright:     (c) 2002-2009 Christopher Ariza
+# Copyright:     (c) 2002-2010 Christopher Ariza
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
 
 import os, sys
+import unittest, doctest
+
+
 from athenaCL import athenaObj
 from athenaCL.libATH import typeset
 from athenaCL.libATH import language
@@ -242,7 +245,7 @@ http://www.pythonware.com/products/pil/
 IIIa.    QUICK START DISTRIBUTIONS:
 
 All Platforms
-    1. install Python 2.3 to 2.6
+    1. install Python 2.6
     2. decompress athenaCL distribution and place wherever desired
 
 UNIX, Command Line Environments, Macintosh MacOS X:
@@ -648,6 +651,21 @@ is %s <%s>."""    % (lang.msgBugReport, lang.msgAuthor, lang.msgAuthorEmail))
         f = open(self.manPath, 'w')
         f.writelines(msg)        
         f.close()  
+
+
+
+        
+#-----------------------------------------------------------------||||||||||||--
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
+
+
+
 
 
 

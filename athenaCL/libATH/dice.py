@@ -4,7 +4,7 @@
 #
 # Authors:       Christopher Ariza
 #
-# Copyright:     (c) 2004 Christopher Ariza
+# Copyright:     (c) 2004-2010 Christopher Ariza
 # Note:          The implementation of GameNoise is based in part on an 
 #                    implementation by Paul Berg.
 # License:       GPL
@@ -13,6 +13,9 @@
 
 
 import random, math
+import unittest, doctest
+
+
 from athenaCL.libATH import drawer
 from athenaCL.libATH import unit
 _MOD = 'dice.py'
@@ -29,7 +32,7 @@ class Die:
         self.sideBounds = []
         self.valueLast = None # last value rolled
         if self.sideNo != 0: # gets triplke of low, mean, max
-            self.sideBounds = drawer.unitBoundaryEqual(self.sideNo)
+            self.sideBounds = unit.unitBoundaryEqual(self.sideNo)
         self.roll() # do an initial roll to set valueLast
 
     #-----------------------------------------------------------------------||--
@@ -40,7 +43,7 @@ class Die:
         if self.sideNo == 0:
             self.valueLast = valCont
         else: 
-            i = drawer.unitBoundaryPos(valCont, self.sideBounds)
+            i = unit.unitBoundaryPos(valCont, self.sideBounds)
             a, m, b = self.sideBounds[i]
             self.valueLast = m
 
@@ -290,38 +293,51 @@ class Test:
         #self._testDice()
         self._testNoiseGame()
 
-    def _testDie(self):
+
+        
+#-----------------------------------------------------------------||||||||||||--
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
+
+    def testDie(self):
         for side in [0, 3, 7, 13]:
             a = Die(side)
-            print a
             for x in range(0, 6):
                 a.roll()
-                print a()
+                post = a()
 
-    def _testDice(self):
+    def testDice(self):
         games = ([3,4,5], [3,3,3], [0,0,0])
 
         for diceFmt in games:
             a = DiceUnit(diceFmt)
-            print a
             for i in range(0, 6):
                 # get a random array
                 binArray = []
                 for slot in range(0, len(diceFmt)):
                     binArray.append(random.choice([0,1]))
                 a.roll(binArray)
-                print binArray, a.sum()
+                post = binArray, a.sum()
 
-    def _testNoiseGame(self):
+    def testNoiseGame(self):
         noVal = 100
         for gamma in [0,1,2,3,4]:
             x = GameNoise(noVal)
             for i in range(0, 20):
                 x.step(gamma)
-                print x
+
+
+
+
+#-----------------------------------------------------------------||||||||||||--
+
+
 
 if __name__ == '__main__':
-    Test()
-
-
-
+    from athenaCL.test import baseTest
+    baseTest.main(Test)

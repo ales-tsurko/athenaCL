@@ -24,15 +24,6 @@ class Script(script.AthenaScript):
     
         # test all commands
         cmdListB = (
-        'SCv (1,5,4,6,7)',
-        'SCmode',
-        'SCcm 4-8  4-13',
-        'MCv 4,4     1,10',
-        'MCcm 3-4  4,3,2,11 bal  1,4',
-        'MCgrid 2,2',
-        'MCgrid 4,1 ',
-        'MCgrid 1,4 ',
-        'MCopt (4,3,5)   4-14',
 
         'PIn test1  5-4  3-4     2-5',
         'PIn test2  (3,4,4,4,4) (3,3,3) (1,1,2,3)',
@@ -42,17 +33,8 @@ class Script(script.AthenaScript):
         'PIrm test4',
         'PIls',
         'PIo test1',
-        # pie
-        'SMls',
         )
-        
-        cmdListC = []
-        for setMeasure in setMeasureNames:
-            cmdListC.append('SMo %s' % setMeasure) #smo dependent
-            cmdListC.append('SCs 5-3  .7,1') #smo
-            cmdListC.append('PScma')            #smo
-            cmdListC.append('PScmb 6-4')        #smo
-    
+            
         
         cmdListD = (
         'PIret test1retro',
@@ -60,16 +42,7 @@ class Script(script.AthenaScript):
         'PIslc test1retroRotSlc  2,3',
         'PIo test2',
         # pvn
-        # pve
-        'PVv ',
-        'PVan ',
-        'PVcm 1,2  u  1,4',
-        'PVauto mostUniform u f',
-        'PVauto leastSmooth s l',
-        'PVcp leastSmooth test1 test2 test3',
-        'PVrm test1 test2',
-        'PVo mostUniform',
-        'PVls',)
+        )
 
         cmdListE = []
         for texture in textureNames:

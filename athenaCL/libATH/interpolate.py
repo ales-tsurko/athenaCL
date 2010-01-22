@@ -1,3 +1,4 @@
+import unittest, doctest
 
 
 # low level interpolation tools
@@ -6,7 +7,9 @@
 class OneDimensionalLinear:
 
     def __init__(self, start, end):
-        """interpolate b/n two values"""
+        """interpolate b/n two values
+        >>> a = OneDimensionalLinear(3, 21)
+        """
         if start <= end:
             self.min = start
             self.max = end
@@ -41,3 +44,20 @@ class OneDimensionalLinear:
 
 
 
+#-----------------------------------------------------------------||||||||||||--
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
+
+
+#-----------------------------------------------------------------||||||||||||--
+
+
+
+if __name__ == '__main__':
+    from athenaCL.test import baseTest
+    baseTest.main(Test)

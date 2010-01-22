@@ -9,14 +9,19 @@
 #-----------------------------------------------------------------||||||||||||--
 
 import copy
+import unittest, doctest
+
 from athenaCL.libATH.libTM import baseTexture
 from athenaCL.libATH import pitchTools
 from athenaCL.libATH.libPmtr import parameter
 from athenaCL.libATH import language
 lang = language.LangObj()
 
+
 class DroneSustain(baseTexture.Texture):
     """simple one dimension line algorithm
+
+    >>> a = DroneSustain()
     """
     def __init__(self, name=None):
         baseTexture.Texture.__init__(self, name) # init base class
@@ -120,3 +125,22 @@ class DroneSustain(baseTexture.Texture):
         return 1
 
         
+
+
+#-----------------------------------------------------------------||||||||||||--
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
+
+
+#-----------------------------------------------------------------||||||||||||--
+
+
+
+if __name__ == '__main__':
+    from athenaCL.test import baseTest
+    baseTest.main(Test)

@@ -336,13 +336,13 @@ Apple, Macintosh, Mac OS, and QuickTime are trademarks or registered trademarks 
     msgPIbadSliceRange    = TAB + 'incorrect slice format. enter (start, end).\n'
     msgPIbadDuration          = TAB + 'enter a list of %s values greater than zero, separated by commas.\n'  
 
-    msgPVnotAvailable         = 'no PV operations are available.\n'
-    msgPVgroupMissingName  = 'that PathVoice no longer exists: enter "PVo".\n'
-    msgPVbadName              = 'no such PathVoice exists. enter "PVls" to see all names.\n'
-    msgPVnameTaken            = TAB + 'that PathVoice name already exists, choose another.\n'
-    msgPVmapOrRankError   = TAB + 'select rank or map by entering r or m.\n'
-    msgPVselectFirstLast      = 'select first or last map from each ranking? (f or l):'
-    msgPVfirstOrLastError  = TAB + 'select first or last by entering f or l.\n'
+#     msgPVnotAvailable         = 'no PV operations are available.\n'
+#     msgPVgroupMissingName  = 'that PathVoice no longer exists: enter "PVo".\n'
+#     msgPVbadName              = 'no such PathVoice exists. enter "PVls" to see all names.\n'
+#     msgPVnameTaken            = TAB + 'that PathVoice name already exists, choose another.\n'
+#     msgPVmapOrRankError   = TAB + 'select rank or map by entering r or m.\n'
+#     msgPVselectFirstLast      = 'select first or last map from each ranking? (f or l):'
+#     msgPVfirstOrLastError  = TAB + 'select first or last by entering f or l.\n'
     
     msgTMbadName              = 'no such TextureModule exists. enter "TMls" to see all names.\n' 
     
