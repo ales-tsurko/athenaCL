@@ -14,7 +14,7 @@ import unittest, doctest
 
 
 # master data tables used for all set data access
-from athenaCL.libATH import SCdata
+from athenaCL.libATH import setTables
 from athenaCL.libATH import dialog
 from athenaCL.libATH import drawer
 from athenaCL.libATH import pitchTools
@@ -24,12 +24,12 @@ from athenaCL.libATH import sieve
 from athenaCL.libATH import error
 lang = language.LangObj()
 
-SCDICT  = SCdata.SCDICT  # data for all sets, vectors and docs
-TNMAX = SCdata.TNMAX     # dictionary
-TNIMAX = SCdata.TNIMAX  # ref dictionary
-TNREF = SCdata.TNREF     # ref dcitionary
-SCREF = SCdata.SCREF     # ref dcitionary
-forte = SCdata.forte     # classic forte table
+SCDICT  = setTables.SCDICT  # data for all sets, vectors and docs
+TNMAX = setTables.TNMAX     # dictionary
+TNIMAX = setTables.TNIMAX  # ref dictionary
+TNREF = setTables.TNREF     # ref dcitionary
+SCREF = setTables.SCREF     # ref dcitionary
+forte = setTables.forte     # classic forte table
 
 #-----------------------------------------------------------------||||||||||||--
 
