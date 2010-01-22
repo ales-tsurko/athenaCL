@@ -50,25 +50,18 @@ def getCategoryDefaultDict(platform, category):
         catDict = {
                       'autoRenderOption': 'autoOff', # this is a csound opt
                       'csoundPath': '', # should be name csoundCommand...
-                      'csoundCreatorCode': '', # for macos9 only 
                       'midiPlayerPath': '',
-                      'midiPlayerCreatorCode': '',
                       'audioPlayerPath': '',
-                      'audioPlayerCreatorCode': '',
                       'textReaderPath': '',
-                      'textReaderCreatorCode': '',
                       'imageViewerPath': '',
-                      'imageViewerCreatorCode': '',
                       'psViewerPath': '',
-                      'psViewerCreatorCode': '',
                      }
     if category == 'athena':
         catDict = {'fpLastDir': '', 
                       'fpLastDirSco': '',
                       'tLastVersionCheck': '',
-                      'scratch': '', # used for writing temporary files
-                      'ssdir': '',
-                      'sadir': '',   
+                      'scratchDir': '', # used for writing temporary files
+                      'audioDir': '',
                       'eventOutput': "('midiFile', 'xmlAthenaObject')",
                       'eventMode':'csoundNative', # startup value
                       'refreshMode': '1', # esObj refreshing
@@ -98,17 +91,17 @@ def getCategoryDefaultDict(platform, category):
                      }
 
     # platform dependent preferences
-    if platform == 'mac': # refers mainly to macos9 mac
-        if category == 'external':
-            catDict['audioFileFormat'] = 'aif' 
-            catDict['csoundCreatorCode'] = 'VRmi' 
-        if category == 'athena':
-            catDict['dlgVisualMethod'] = 'mac'
-            catDict['gfxVisualMethod'] = 'tk' # tk on os9?
-        if category == 'gui':
-            catDict['fontTitle'] = "('helvetica', 9, 'normal')" 
-            catDict['fontText'] = "('monaco', 9, 'normal')" 
-    elif platform == 'posix':
+#     if platform == 'mac': # refers mainly to macos9 mac
+#         if category == 'external':
+#             catDict['audioFileFormat'] = 'aif' 
+#             catDict['csoundCreatorCode'] = 'VRmi' 
+#         if category == 'athena':
+#             catDict['dlgVisualMethod'] = 'mac'
+#             catDict['gfxVisualMethod'] = 'tk' # tk on os9?
+#         if category == 'gui':
+#             catDict['fontTitle'] = "('helvetica', 9, 'normal')" 
+#             catDict['fontText'] = "('monaco', 9, 'normal')" 
+    if platform == 'posix':
         if drawer.isDarwin():
             if category == 'external':
                 catDict['audioFileFormat'] = 'aif' 
@@ -127,6 +120,7 @@ def getCategoryDefaultDict(platform, category):
                 catDict['textReaderPath'] = 'more' # will use system default
                 catDict['imageViewerPath'] = 'imagemagick'
                 catDict['psViewerPath'] = 'gs'
+
         # common for all posix
         if category == 'athena':
             catDict['dlgVisualMethod'] = 'text'
@@ -194,13 +188,12 @@ def updatePrefDict(oldPrefDict, platform):
             for key in oldCatKeys: 
                 if key not in newCatKeys: # remove old keys no long used
                     del oldPrefDict[catName][key]
+
     # do specific name replacements and changes for backwards compat
     # options user may have selected
     x = oldPrefDict['athena']['gfxVisualMethod']
     oldPrefDict['athena']['gfxVisualMethod'] = imageTools.imageFormatParser(x)
-# no longer necessary, as pref optio named changed
-#     x = oldPrefDict['external']['audioFileFormat']
-#     oldPrefDict['external']['audioFileFormat'] = audioTools.audioFormatParser(x)
+
     return oldPrefDict
 
 def writePrefDict(prefFilePath, prefDict):

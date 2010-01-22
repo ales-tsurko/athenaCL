@@ -695,10 +695,13 @@ class BackwardsCompat:
         self.pData = pData
         self.tData = tData
 
-        if self.aData['version'] != 'pickled':
-            self.fileVersionObj = argTools.Version(self.aData['version'])
-        else: # first version w/ xml loading was 1.0.15
-            self.fileVersionObj = argTools.Version('1.0.14') # assume before 1.0.15
+
+        self.fileVersionObj = argTools.Version(self.aData['version'])
+
+#         if self.aData['version'] != 'pickled':
+#             
+#         else: # first version w/ xml loading was 1.0.15
+#             self.fileVersionObj = argTools.Version('1.0.14') # assume before 1.0.15
 
         # first boundary: pre 1.3.0
 #         boundary = argTools.Version('1.3.0')

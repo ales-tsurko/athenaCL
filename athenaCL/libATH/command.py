@@ -9945,32 +9945,32 @@ class AHexe(Command):
 
 #-----------------------------------------------------------------||||||||||||--
 # athena script commands
-class ASexe(Command):
-    "SUBCMD"
-    def __init__(self, ao, cmdEnviron=None, args=''):
-        Command.__init__(self, ao, cmdEnviron, args)
-        self.processSwitch = 0 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'ASexe'
-        self.subCmd = 1 # if 1, executed within method of interptreter
-
-    def gather(self): 
-        args = self.args
-        self.name = None
-        if args != '':
-            args = argTools.ArgOps(args)
-            self.name = args.get(0,'end')
-        if self.name == None:
-            dialog.msgOut('supply argument with command line.\n', 
-                                self.termObj)
-            return lang.msgReturnCancel
-
-    def log(self): # no history stored, as ao is removed
-        if self.gatherStatus and self.processStatus: # if complete
-            return '%s %s' % (self.cmdStr, self.name) 
-
-    def result(self):
-        return {'name':self.name}
+# class ASexe(Command):
+#     "SUBCMD"
+#     def __init__(self, ao, cmdEnviron=None, args=''):
+#         Command.__init__(self, ao, cmdEnviron, args)
+#         self.processSwitch = 0 # display only
+#         self.gatherSwitch = 1 # display only
+#         self.cmdStr = 'ASexe'
+#         self.subCmd = 1 # if 1, executed within method of interptreter
+# 
+#     def gather(self): 
+#         args = self.args
+#         self.name = None
+#         if args != '':
+#             args = argTools.ArgOps(args)
+#             self.name = args.get(0,'end')
+#         if self.name == None:
+#             dialog.msgOut('supply argument with command line.\n', 
+#                                 self.termObj)
+#             return lang.msgReturnCancel
+# 
+#     def log(self): # no history stored, as ao is removed
+#         if self.gatherStatus and self.processStatus: # if complete
+#             return '%s %s' % (self.cmdStr, self.name) 
+# 
+#     def result(self):
+#         return {'name':self.name}
 
 
 #-----------------------------------------------------------------||||||||||||--
@@ -10685,6 +10685,10 @@ class Test(unittest.TestCase):
             a = TPv(ao, args=tp)
             ok, result = a.do()
             self.assertEqual(ok, True)
+
+
+
+            
 
 #-----------------------------------------------------------------||||||||||||--
 
