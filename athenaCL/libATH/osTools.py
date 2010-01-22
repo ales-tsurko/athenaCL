@@ -318,7 +318,10 @@ def chmodSudo(value, path, sudoFound=None):
 
 #-----------------------------------------------------------------||||||||||||--
 def md5checksum(filePath):
-    """return an md5 checksum for a file"""
+    """return an md5 checksum for a file
+
+    TODO: update with hashlib
+    """
     import md5 # this is depcreated; use hashlib
 
     print _MOD, 'mpd5 obtained from:', filePath

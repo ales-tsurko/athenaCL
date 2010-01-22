@@ -157,8 +157,8 @@ class Command:
         # store complete cmdEnviron dict for easy passing to cmds fired
         # from other commands
         self.cmdEnviron = self._configCmdEnviron(cmdEnviron)
-        self.threadAble = self.cmdEnviron['threadAble']
-        self.pollDur = self.cmdEnviron['pollDur']
+        #self.threadAble = self.cmdEnviron['threadAble']
+        #self.pollDur = self.cmdEnviron['pollDur']
         self.debug = self.cmdEnviron['debug']
         self.verbose = self.cmdEnviron['verbose']
 
@@ -181,8 +181,6 @@ class Command:
         """
         if cmdEnviron == None or len(cmdEnviron) == 0:
             dict = {}
-            dict['threadAble'] = 0
-            dict['pollDur'] = 1
             dict['debug'] = 0
             dict['verbose'] = 0
             return dict
@@ -242,23 +240,24 @@ class Command:
         # (2) process
         if self.processSwitch:
             # optional execution in separate thread         
-            if self.threadAble: # and cmd in self.cmdThread:
-                ani = dialog.Animate(self.termObj)
-                ani.setStart() # printing gets in the way of user interface
-                #arg = [] # no args necessary
-                #self.threadObj = Future(time.sleep, 10) # starts thread
-                threadObj = Future(self.process) # starts thread
-                while 1:
-                    #print threadObj
-                    ani.printFrame()
-                    time.sleep(self.pollDur)
-                    ani.clearFrame()
-                    ani.advanceFrame()
-                    if threadObj.isDone():
-                        break
-                post = threadObj() # gets result
-            else: # non threaded version
-                post = self.process()
+#             if self.threadAble: # and cmd in self.cmdThread:
+#                 ani = dialog.Animate(self.termObj)
+#                 ani.setStart() # printing gets in the way of user interface
+#                 #arg = [] # no args necessary
+#                 #self.threadObj = Future(time.sleep, 10) # starts thread
+#                 threadObj = Future(self.process) # starts thread
+#                 while 1:
+#                     #print threadObj
+#                     ani.printFrame()
+#                     time.sleep(self.pollDur)
+#                     ani.clearFrame()
+#                     ani.advanceFrame()
+#                     if threadObj.isDone():
+#                         break
+#                 post = threadObj() # gets result
+#             else: # non threaded version
+
+            post = self.process()
             if post != None:
                 ok = 0
                 return ok, post  # an error or cancel str
@@ -10651,8 +10650,8 @@ class TestOld:
         from athenaCL import athenaObj
         self.ao = athenaObj.AthenaObject()
         self.cmdEnviron = {}
-        self.cmdEnviron['threadAble'] = 0
-        self.cmdEnviron['pollDur'] = 1
+        #self.cmdEnviron['threadAble'] = 0
+        #self.cmdEnviron['pollDur'] = 1
 
         self.testCmd()
         #self.testConversions()

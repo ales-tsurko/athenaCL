@@ -170,7 +170,11 @@ def isCharNum(usrData):
     
 #-----------------------------------------------------------------||||||||||||--
 def typeAsStr(typeStr):
-    """convert types strings to user friendly type names"""
+    """convert types strings to user friendly type names
+
+    >>> typeAsStr('float')
+    'floating point number'
+    """
     if typeStr == 'list':
         return 'list'
     elif typeStr == 'num':
@@ -191,6 +195,10 @@ def typeAsStr(typeStr):
 # may want to use this in argTools.strongType ?
 
 def isType(usrData, type):
+    """
+    >>> isType(True, 'bool')
+    True
+    """
     if type == 'list':
         return isList(usrData)
     elif type == 'num':
@@ -215,6 +223,13 @@ def inList(value, valueList, caseSens='case'):
     """checks to see if value (string or number) in list
     if not, return None
     caseSense optional
+
+    >>> inList(3, [3,4,5])
+    3
+    >>> inList('f', [3,'F',4,5]) == None
+    True
+    >>> inList('f', [3,'F',4,5], 'noCase')
+    'F'
     """
     if value == None:
         return None
@@ -240,7 +255,12 @@ def inList(value, valueList, caseSens='case'):
 
 def inListSearch(usrStr, choiceList):
     """given a list of things, search with usrString and produce
-    a list of possible matches. if no match, return None"""
+    a list of possible matches. if no match, return None
+
+    >>> inListSearch('pi', ['piv', 'pils'])
+    ['piv', 'pils']
+
+    """
     usrStr = usrStr.strip()
     usrStr = usrStr.lower()
     if usrStr == '': return None # return None if no match
@@ -342,10 +362,11 @@ def isApp(fp):
     is an application or not; must provide absolute path"""
     if fp == None: return 0
     if not os.path.exists(fp): return 0
-    if os.name == 'mac': # cant be a directory
-        if os.path.isdir(fp): return 0
-        else: return 1
-    elif os.name == 'posix':
+
+#     if os.name == 'mac': # cant be a directory
+#         if os.path.isdir(fp): return 0
+#         else: return 1
+    if os.name == 'posix':
         if isDarwin():
             if fp.endswith('.app'): return 1
         # otherwise, see if it is an executable: how?
@@ -360,9 +381,9 @@ def appPathFilter(fp):
     has been given, but the path is not complete: it may be missing a .app or
     .exe extension"""
     if fp == None or fp == '': return fp
-    if os.name == 'mac': 
-        pass # nothing to do
-    elif os.name == 'posix':
+#     if os.name == 'mac': 
+#         pass # nothing to do
+    if os.name == 'posix':
         if isDarwin():
             fpMod = fp + '.app'
             if not os.path.exists(fp) and os.path.exists(fpMod):
@@ -383,7 +404,13 @@ def appPathFilter(fp):
 def strToNum(usrStr, numType='num', min=None, max=None, force=0):
     """convert a raw user string to number; return None on error
     min and max are inclusive; returns None if exceeds bounds
-    if force, resolve values tt exceed min/max to min/max"""
+    if force, resolve values tt exceed min/max to min/max
+
+    >>> strToNum('345')
+    345
+    >>> strToNum('345.234')
+    345.23...
+    """
     if usrStr == None: return None
     try:
         if numType == 'float':
@@ -412,7 +439,13 @@ def strToNum(usrStr, numType='num', min=None, max=None, force=0):
 
 
 def intToStr(num, zeroBuff=None):
-    """for typesetting a number w/ zero spacing"""
+    """for typesetting a number w/ zero spacing
+    
+    >>> intToStr(3)
+    '3'
+    >>> intToStr(3, 3)
+    '003'
+    """
     if zeroBuff == None:
         return str(num)
     else:
@@ -425,7 +458,13 @@ def intToStr(num, zeroBuff=None):
 
 def intHalf(num):
     """take a number, split into two parts; if number is odd
-    provide proper sizes, with right having more"""
+    provide proper sizes, with right having more
+
+    >>> intHalf(3)
+    (1, 2)
+    >>> intHalf(4)
+    (2, 2)
+    """
     if num % 2 == 0: # if event
         return num/2, num/2
     else: # odd 
@@ -433,7 +472,11 @@ def intHalf(num):
 
 def strScrub(usrStr, case=None, rm=[]):
     """common string cleaning necessities
-    rm is a list of characters to remove"""
+    rm is a list of characters to remove
+
+    >>> strScrub('    sdfwer       \t\t')
+    'sdfwer'
+    """
     if not isStr(usrStr): # convert to string if not already
         usrStr = str(usrStr)
     if case != None:
@@ -451,7 +494,14 @@ def strScrub(usrStr, case=None, rm=[]):
     return usrStr
 
 def strStripAlpha(usrStr):            
-    """use to remove alphas from a string"""
+    """use to remove alphas from a string
+
+    note: this leaves whitespace
+
+    >>> strStripAlpha('sdf234isdf345sg   234sdf4')
+    '234345   2344'
+
+    """
     if usrStr == '': return ''
     newStr = []
     for char in usrStr:
@@ -462,7 +512,12 @@ def strStripAlpha(usrStr):
 def strExtractAlpha(usrStr, opt=[]):            
     """use to gather non-numbers from a string
     will return all alphas, alone, from a string
-    opt: a list of additional chars that are accepted as alpha-like"""
+    opt: a list of additional chars that are accepted as alpha-like
+
+    >>> strExtractAlpha('sfd234dfg09')
+    'sfddfg'
+
+    """
     if usrStr == '': return ''
     newStr = []
     for char in usrStr:
@@ -472,7 +527,11 @@ def strExtractAlpha(usrStr, opt=[]):
 
 def strExtractNum(usrStr, optAccept=''):
     """extract numbers from a string in order
-    optAccept is string of oher characters accepted"""
+    optAccept is string of oher characters accepted
+
+    >>> strExtractNum('sdf2349dfg3234')
+    ('23493234', 'sdfdfg')
+    """
     numbers = list(string.digits) + list(optAccept)
     usrStr = strScrub(usrStr)
     foundStr = []
@@ -488,7 +547,11 @@ def strExtractNum(usrStr, optAccept=''):
 def strCompactSpace(usrStr):
     """take a string of space-separated arguments
     remove all white space, tab, and returns, and replace any 
-    span of white space with exactly one space, good for splitting"""
+    span of white space with exactly one space, good for splitting
+
+    >>> strCompactSpace('adsf     234 sdf 493  345   asdf')
+    'adsf 234 sdf 493 345 asdf'
+    """
     newStr = []
     count = 0
     usrStr = usrStr.strip() # remove lead and trail space
@@ -513,6 +576,13 @@ def strToPercent(usrStr, fmt=None):
     returns None on error
     if fmt== None, tries to auto determine if unit or macro percent
     if a percentage sign is given, it is always interpreted as macro
+
+    >>> strToPercent(.5)
+    0.5
+    >>> strToPercent(40)
+    0.40...
+    >>> strToPercent('6.18%')
+    0.061...
     """
     usrStr = strScrub(usrStr)
     if usrStr == None: return None
@@ -534,6 +604,9 @@ def strToList(usrStr, delimit=','):
     if commas are present, use to demarcate
     if not, add string as single element in a list
     can use variable delimiters: default is ,
+
+    >>> strToList('this, is, a, test')
+    ['this', ' is', ' a', ' test']
     """
     # replace delimit w/ commas (if not commas)
     usrStr = usrStr.replace(delimit, ',')
@@ -551,6 +624,10 @@ def strToListFlat(usrStr, case=None, delimit=','):
     if commas are present, use to demarcate
     if not, add string as single element in a list
     can use variable delimiters: default is ,
+
+    >>> strToListFlat('this, (is, a), test')
+    ['this', ' is', ' a', ' test']
+
     """
     # replace delimit w/ commas (if not commas)
     usrStr = usrStr.replace(delimit, ',')
@@ -576,6 +653,10 @@ def strToSequence(usrStr, dataLen=None, dataTypeList=None, delimit=','):
     dataTypeList, if not None, ensures that data is of type in order
     returns None on error
     a single item will be returned in a list
+
+    >>> strToSequence('3, 6, 3')
+    [3, 6, 3]
+
     """
     # produce a list of string values
     usrList = strToList(usrStr, delimit)
@@ -603,9 +684,8 @@ def pathScrub(usrStr):
     note: may want to use os.abspath to find abs paths"""
     if not isStr(usrStr):
         raise ValueError, 'non-string submitted as a path string: %r' % usrStr
-    if os.name == 'mac':     
-        pass
-    elif os.name == 'posix':
+
+    if os.name == 'posix':
         # expand user must be done before realpath on posix
         # causes a strange arrnagment otherwise
         usrStr = os.path.expanduser(usrStr)
@@ -669,21 +749,34 @@ def getud():
         return dir
 
 def listToStr(set, space='rmSpace'):
-    """converts a list/tuple to a string, removes space"""
+    """converts a list/tuple to a string, removes space
+
+    >>> listToStr([3,4,2.3])
+    '(3,4,2.3)'
+    """
     if isNum(set): # if a single number
         set = [set] # place in a list
-    try:
-        set = tuple(set) # gets paren, not bracket
-    except TypeError, e: # if an error, get more information 
-        raise TypeError, '%s: %s' % (e, repr(set))
-    setRepr = str(set)
+#     try:
+#         set = tuple(set) # gets paren, not bracket
+#     except TypeError, e: # if an error, get more information 
+#         raise TypeError, '%s: %s' % (e, repr(set))
+    setRepr = []
+    for part in set:
+        setRepr.append(str(part))
+
+    setRepr = '(%s)' % ','.join(setRepr)
     if space == 'rmSpace':
         setRepr = setRepr.replace(' ', '')
     return setRepr
 
 def listToStrGrammar(items, finalSeparator=None): 
     """convert a list into a grammatical sentence, with a final 'and' or
-    'or' at the end, add space, commas in between"""
+    'or' at the end, add space, commas in between
+
+    >>> listToStrGrammar(['red', 'green', 'blue'], 'and')
+    'red, green, and blue'
+
+    """
     if len(items) == 1:
         return items[0]
     elif len(items) == 2:
@@ -710,7 +803,11 @@ def listToStrGrammar(items, finalSeparator=None):
                 
 def typeListAsStr(typeList, finalSeparator=None):
     """convert a list to string list, separated by commas
-    optional finalSeparator adds a 'and' or 'or' before last element"""
+    optional finalSeparator adds a 'and' or 'or' before last element
+
+    >>> typeListAsStr(['float', 'bool', 'int'], 'or')
+    'floating point number, yes or no, or integer number'
+    """
     items = []
     for typeStr in typeList:
         items.append('%s' % (typeAsStr(typeStr)))
@@ -721,7 +818,12 @@ def listScrub(set, space='rmSpace', quote=None):
     """converts a list/tuple to string, removes space
     outer braces, and trailing commas, 
     can remove space: either rmSpace or None
-    can remove quotes: either rmQuote or None"""
+    can remove quotes: either rmQuote or None
+
+    >>> listScrub([3,4,5])
+    '3,4,5'
+
+    """
     if isNum(set): # if a single number
         set = [set] # place in a list
     if len(set) == 0: # if empty
@@ -739,7 +841,11 @@ def listScrub(set, space='rmSpace', quote=None):
     return setRepr
 
 def listInterleave(a, b, offset=0):
-    """interleave two lists, optionally remove redundances"""
+    """interleave two lists, optionally remove redundances
+
+    >>> listInterleave([1,2,3], ['a', 'b', 'c'])
+    [1, 'a', 2, 'b', 3, 'c']
+    """
     post = []
     lastA = None
     lastB = None
@@ -818,7 +924,13 @@ def urlStrBreak(url):
     return url
 
 def urlPrep(url, fmt=None):
-    """prep a url: add http:// if needed"""
+    """prep a url: add http:// if needed
+
+    >>> urlPrep('athenacl.org')
+    'http://athenacl.org'
+    >>> urlPrep('http://athenacl.org')
+    'http://athenacl.org'
+    """
     httpStub = 'http://'
     fileStub = 'file://' # may be different for dif browsers/plats
     if fmt == None:
@@ -845,7 +957,20 @@ def floatToInt(x, method='round'):
     """convert a float to an int with various methods
     methods: round, floor, weight
     weight performa a probabilistic rounding to the nearest integer
-        this means that at .5, there is an equal chance"""
+        this means that at .5, there is an equal chance
+
+    >>> floatToInt(3.5)
+    4
+    >>> floatToInt(3.5, 'floor')
+    3
+    >>> floatToInt(3.5, 'ceiling')
+    4
+    >>> post = [floatToInt(3.5, 'weight') for x in range(100)]
+    >>> post.count(3) > 35
+    True
+    >>> post.count(4) > 35
+    True
+    """
     if isInt(x): return x # dont change if already an int
     if method == 'round':
         return int(round(x))
