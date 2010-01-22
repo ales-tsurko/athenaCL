@@ -58,7 +58,6 @@ from athenaCL.libATH import rhythm # needed for timing
 from athenaCL.libATH import language
 lang = language.LangObj()
 from athenaCL.libATH import SC
-from athenaCL.libATH import setMeasure
 from athenaCL.libATH import MC
 from athenaCL.libATH.libOrc import orc
 from athenaCL.libATH.libTM import texture # needed for test script

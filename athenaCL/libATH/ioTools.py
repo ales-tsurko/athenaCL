@@ -16,7 +16,6 @@ from athenaCL.libATH import argTools
 from athenaCL.libATH import language
 from athenaCL.libATH import error
 lang = language.LangObj()
-from athenaCL.libATH import setMeasure # for updating pe names
 from athenaCL.libATH.libPmtr import basePmtr
 from athenaCL.libATH.libPmtr import parameter
 from athenaCL.libATH import xmlTools

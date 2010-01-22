@@ -34,7 +34,6 @@ from athenaCL.libATH import outFormat
 from athenaCL.libATH import pitchPath
 from athenaCL.libATH import pitchTools
 from athenaCL.libATH import rhythm
-from athenaCL.libATH import setMeasure
 from athenaCL.libATH import temperament
 from athenaCL.libATH import typeset
 from athenaCL.libATH import SC
@@ -150,7 +149,7 @@ class Command:
         self.ao = ao
         self.termObj = self.ao.termObj
         self.scObj = self.ao.external.scObj
-        self.mcObj = self.ao.external.mcObj
+        #self.mcObj = self.ao.external.mcObj
         self.setFactory = SC.MultisetFactory() # for building set objs
 
         self.args = args
@@ -1010,16 +1009,16 @@ class Command:
         except:
             return lang.msgPVnotAvailable
 
-    def _piTestCurrentPVgroupNameExists(self):
-        """checks if a path voice name exists"""
-        try:
-            if (self.ao.pathLib[self.ao.activePath].activeVoice in 
-                 self.ao.pathLib[self.ao.activePath].voiceNames()):
-                return None
-            else:
-                return lang.msgPVgroupMissingName
-        except:
-            return lang.msgPVgroupMissingName
+#     def _piTestCurrentPVgroupNameExists(self):
+#         """checks if a path voice name exists"""
+#         try:
+#             if (self.ao.pathLib[self.ao.activePath].activeVoice in 
+#                  self.ao.pathLib[self.ao.activePath].voiceNames()):
+#                 return None
+#             else:
+#                 return lang.msgPVgroupMissingName
+#         except:
+#             return lang.msgPVgroupMissingName
 
 
     def _piAutoCreate(self, name='auto', psList=[0]):
@@ -3250,27 +3249,28 @@ class PIv(Command):
                                         bufList, justList, self.termObj, 'oneColumn')
             msg.append('%s\n' % tableB)
 
-        if self.ao.pathLib[nameToView].voiceType == 'none':
-            msg.append('PathVoices: none.\n')
-        else:    ## this is the vl list command
-            entryLines = []
-            msg.append('PathVoices:\n')
-            groupNames = self.ao.pathLib[nameToView].voiceNames()
-            groupNames.sort()
-            for name in groupNames:
-                if name == self.ao.pathLib[nameToView].activeVoice: 
-                    status = lang.ACTIVE
-                else: status = lang.INACTIVE
-                mapStringList = self.ao.pathLib[nameToView].voiceRepr(name)
-                entryLines.append([status, name, mapStringList])
-            headerKey    = []
-            minWidthList = (lang.TABW, lang.NAMEW, 0)
-            bufList      = [0, 1, 0]
-            justList         = ['c','l','l']
-            tableC = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
-                                        bufList, justList, self.termObj,
-                                        'twoColumn')
-            msg.append('%s\n' % tableC)
+#         if self.ao.pathLib[nameToView].voiceType == 'none':
+#             msg.append('PathVoices: none.\n')
+#         else:    ## this is the vl list command
+#             entryLines = []
+#             msg.append('PathVoices:\n')
+#             groupNames = self.ao.pathLib[nameToView].voiceNames()
+#             groupNames.sort()
+#             for name in groupNames:
+#                 if name == self.ao.pathLib[nameToView].activeVoice: 
+#                     status = lang.ACTIVE
+#                 else: status = lang.INACTIVE
+#                 mapStringList = self.ao.pathLib[nameToView].voiceRepr(name)
+#                 entryLines.append([status, name, mapStringList])
+#             headerKey    = []
+#             minWidthList = (lang.TABW, lang.NAMEW, 0)
+#             bufList      = [0, 1, 0]
+#             justList         = ['c','l','l']
+#             tableC = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
+#                                         bufList, justList, self.termObj,
+#                                         'twoColumn')
+#             msg.append('%s\n' % tableC)
+
         return ''.join(msg)
 
 
@@ -3533,9 +3533,9 @@ class PIls(Command):
             if name == self.ao.activePath: status = lang.ACTIVE
             else: status = lang.INACTIVE
             refNo        = self.ao.pathLib[name].refCount
-            noGroup  = len(self.ao.pathLib[name].voiceNames())
-            entryLines.append([status, name, refNo, noGroup, pathStr])
-        headerKey    = ['', 'name', 'TIrefs','PVgroups','scPath']
+            #noGroup  = len(self.ao.pathLib[name].voiceNames())
+            entryLines.append([status, name, refNo, pathStr])
+        headerKey    = ['', 'name', 'TIrefs','scPath']
         minWidthList = (lang.TABW, lang.NAMEW, 3, 3, 0)
         bufList      = [0, 1, 1, 1, 0]
         justList         = ['c','l', 'l', 'l', 'l']
