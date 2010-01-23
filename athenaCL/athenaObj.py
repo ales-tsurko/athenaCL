@@ -31,15 +31,32 @@ __license__ = "GPL"
 # External is sometimes called by itself, needs to find correct paths
 # this checks for correct path access, attempts to mangle sys.path to fix
 #-----------------------------------------------------------------||||||||||||--
-try: import libATH #assume we are in package dir
+# try: import libATH #assume we are in package dir
+# except ImportError:
+#     try: from athenaCL import libATH
+#     except ImportError: print 'athenaCL package cannot be found.'; sys.exit()
+# 
+# 
+# libPath = libATH.__path__[0] # list, get first item
+# if os.path.isabs(libPath) != 1: #relative path, add cwd
+#     libPath = os.path.abspath(libPath)
+# _PKGDIR = os.path.dirname(libPath)
+# _OUTDIR = os.path.dirname(_PKGDIR)
+# if _OUTDIR not in sys.path: sys.path.append(_OUTDIR)
+
+
+try: 
+    import libTM #assume we are in libATH
 except ImportError:
-    try: from athenaCL import libATH
-    except ImportError: print 'athenaCL package cannot be found.'; sys.exit()
-libPath = libATH.__path__[0] # list, get first item
-if os.path.isabs(libPath) != 1: #relative path, add cwd
-    libPath = os.path.abspath(libPath)
-_PKGDIR = os.path.dirname(libPath)
-_OUTDIR = os.path.dirname(_PKGDIR)
+    try: from athenaCL.libATH import libTM
+    except ImportError: 
+        sys.stdout.write('athenaCL package cannot be found.\n')
+        sys.exit()
+
+libPathTM = libTM.__path__[0] # list, get first item
+libPath = os.path.dirname(libPathTM) # libATH dir
+_PKGDIR = os.path.dirname(libPath) # athenaCL dir
+_OUTDIR = os.path.dirname(_PKGDIR) # athenacl dir
 if _OUTDIR not in sys.path: sys.path.append(_OUTDIR)
 
 

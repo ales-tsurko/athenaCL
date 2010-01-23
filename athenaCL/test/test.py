@@ -14,7 +14,7 @@ import os, time, imp, sys
 import traceback
 
 
-from athenaCL import athenaObj
+from athenaCL.libATH import athenaObj
 
 
 

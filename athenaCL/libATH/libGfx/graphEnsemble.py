@@ -45,7 +45,7 @@ class TEmapCanvas:
         # bar height is the height of texture in pixels. the total height of a
         # of a window is determined by the number of textures         
         if ao == None:
-            from athenaCL import athenaObj # update needed for color prefs
+            from athenaCL.libATH import athenaObj # update needed for color prefs
             update = athenaObj.External()
             update.updateAll('noMessages')
             self.tiMapDict = tiMapDemo

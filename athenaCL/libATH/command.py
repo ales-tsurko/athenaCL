@@ -139,7 +139,7 @@ class Command:
     """
     def __init__(self, ao, cmdEnviron=None, args=''):
         """
-        >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+        >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
         >>> a = Command(ao)
         >>> post = a.do()
         """
@@ -1548,7 +1548,7 @@ class Command:
 class w(Command):
     """w display
 
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> a = w(ao)
     >>> ok, result = a.do()
     >>> ok == True
@@ -1564,7 +1564,7 @@ class w(Command):
 
 class c(Command):
     """w display
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> a = c(ao)
     >>> ok, result = a.do()
     >>> ok == True
@@ -1581,7 +1581,7 @@ class c(Command):
 class r(Command):
     """r display
 
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> a = c(ao)
     >>> ok, result = a.do()
     >>> ok == True
@@ -1598,7 +1598,7 @@ class r(Command):
 class cmd(Command):
     """cmd display
 
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> a = cmd(ao)
     >>> ok, result = a.do()
     >>> ok == True
@@ -1615,7 +1615,7 @@ class cmd(Command):
 class pypath(Command):
     """cmd display
 
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> a = pypath(ao)
     >>> ok, result = a.do()
     >>> ok == True
@@ -1637,7 +1637,7 @@ class pypath(Command):
 class bug(Command):
     """bug test command
 
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> a = bug(ao)
     >>> post = a.do()
     Traceback (most recent call last):
@@ -1654,7 +1654,7 @@ class bug(Command):
 class clear(Command):
     """clear the screen
 
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> a = clear(ao)
     """
     def __init__(self, ao, cmdEnviron=None, args=''):
@@ -1669,7 +1669,7 @@ class clear(Command):
 class py(Command):
     """start a python interactive
 
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> a = py(ao)
     """
     def __init__(self, ao, cmdEnviron=None, args=''):
@@ -1685,7 +1685,7 @@ class py(Command):
 class shell(Command):
     """fire a shell command
 
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> a = shell(ao)
     """
     def __init__(self, ao, cmdEnviron=None, args=''):
@@ -1709,7 +1709,7 @@ class shell(Command):
 class help(Command):
     """translates ? to help in   Interpreter._lineCmdArgSplit
 
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> a = help(ao)
     >>> ok, result = a.do()
     >>> ok == True
@@ -1758,7 +1758,7 @@ class help(Command):
 
 class man(help):
     """alias to help command
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> a = man(ao)
     >>> ok, result = a.do()
     >>> ok == True
@@ -3019,7 +3019,7 @@ class q(quit):
 class PIals(Command):
     """ list all attributes of a path,  a hidden function
 
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> a = PIals(ao)
     >>> ok, result = a.do()
     >>> ok == True
@@ -3065,7 +3065,7 @@ class PIn(Command):
     args are given as:
     args: pin  name  eval(pathString)
 
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> a = PIn(ao, args='a 3-2')
     >>> ok, result = a.do()
     >>> ok == True
@@ -3151,7 +3151,7 @@ class PIn(Command):
 class PIv(Command):
     """displays a path
 
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
 
     >>> a = PIn(ao, args='a 3-2')
     >>> ok, result = a.do()
@@ -3416,7 +3416,7 @@ class PIdf(Command):
         uses currently selected path
         user can enter a list as an arg
 
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> a = PIn(ao, args='a 3-2 6,7,23')
     >>> ok, result = a.do()
     >>> ok == True
@@ -3495,7 +3495,7 @@ class PIdf(Command):
 class PIls(Command):
     """list all paths
 
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> a = PIn(ao, args='a 3-2 6,7,23')
     >>> ok, result = a.do()
     >>> ok == True
@@ -3546,7 +3546,7 @@ class PIls(Command):
 class PIcp(Command):
     """copies a path
 
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> a = PIn(ao, args='a 3-2 6,7,23')
     >>> ok, result = a.do()
     >>> ok == True
@@ -3620,7 +3620,7 @@ class PIcp(Command):
 
 class PIrm(Command):
     """
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> a = PIn(ao, args='a 3-2 6,7,23')
     >>> ok, result = a.do()
     >>> ok == True
@@ -3699,7 +3699,7 @@ class PIrm(Command):
 
 class PIo(Command):
     """sets self.ao.activePath
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> a = PIn(ao, args='a 3-2 6,7,23')
     >>> ok, result = a.do()
     >>> ok == True
@@ -3748,7 +3748,7 @@ class PIo(Command):
 
 class PImv(Command):
     """
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> a = PIn(ao, args='a 3-2 6,7,23')
     >>> ok, result = a.do()
     >>> ok == True
@@ -3820,7 +3820,7 @@ class PImv(Command):
 class PIret(Command):
     """create new path as a retrograde of current path
 
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> a = PIn(ao, args='a 3-2 6,7,23')
     >>> ok, result = a.do()
     >>> ok == True
@@ -3871,7 +3871,7 @@ class PIrot(Command):
     since this is a rotation, cannot copy old maps over to new PI
     args: pirot  name    startPosition
 
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> a = PIn(ao, args='a 3-2 6,7,23, 2-3')
     >>> ok, result = a.do()
     >>> ok == True
@@ -4026,7 +4026,7 @@ class PIslc(Command):
     """create a new path as a slice of current path
         args: pislc  name    startPos,endPos
 
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> a = PIn(ao, args='a 3-2 6,7,23, 2-3')
     >>> ok, result = a.do()
     >>> ok == True
@@ -4084,7 +4084,7 @@ class PIslc(Command):
 class PIh(Command):
     """create an event list of just the current path
 
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> a = PIn(ao, args='a 3-2 6,7,23, 2-3')
     >>> ok, result = a.do()
     >>> ok == True
@@ -5147,7 +5147,7 @@ class PIh(Command):
 class TMo(Command):
     """selects currtne texture module
 
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> a = TMo(ao, args='da')
     >>> ok, result = a.do()
     >>> ok == True
@@ -5186,7 +5186,7 @@ class TMo(Command):
 
 class TMv(Command):
     """
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> a = TMv(ao, args='da')
     >>> ok, result = a.do()
     >>> ok == True
@@ -5215,7 +5215,7 @@ class TMv(Command):
 
 class TMls(Command):
     """
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> a = TMls(ao)
     >>> ok, result = a.do()
     >>> ok == True
@@ -5341,7 +5341,7 @@ class _CommandTP(Command):
 class TPls(_CommandTP):
     """displays texture parameter object information
 
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> a = TPls(ao)
     >>> ok, result = a.do()
     >>> ok == True
@@ -5392,7 +5392,7 @@ class TPls(_CommandTP):
 class TPv(_CommandTP):
     """displays texture rhythm object information
 
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> a = TPv(ao, args='ru')
     >>> ok, result = a.do()
     >>> ok == True
@@ -5490,7 +5490,7 @@ class TPmap(_CommandTP):
     """
     TODO: library should not be a required argument
 
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> a = TPmap(ao, args='tpmap g 120 ru,0,1')
     """
     def __init__(self, ao, cmdEnviron=None, args=''):
@@ -5613,7 +5613,7 @@ class TPmap(_CommandTP):
 class TPeg(_CommandTP):
     """sub class TPmap for exporting generator values
 
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> a = TPeg(ao, args='tpmap g 120 ru,0,1')
     """
     def __init__(self, ao, cmdEnviron=None, args=''):
@@ -5737,7 +5737,7 @@ class TIn(Command):
     """create a new texture instance
     of a texture created, uses last duration and tempo
 
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> ao.setEventMode('m')
 
     >>> a = TIn(ao, args='a 0')
@@ -5831,7 +5831,7 @@ class TIn(Command):
 
 class TIo(Command):
     """
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> ao.setEventMode('m')
 
     >>> a = TIn(ao, args='a 0')
@@ -5883,7 +5883,7 @@ class TIo(Command):
 class TImute(Command):
     """mutes the current texture
 
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> ao.setEventMode('m')
 
     >>> a = TIn(ao, args='a 0')
@@ -5950,7 +5950,7 @@ class TImode(Command):
     """sets pitch, poly, silence, and postMap mode of current texture
     args: timode  modeChoice  modeValue
 
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> ao.setEventMode('m')
 
     >>> a = TIn(ao, args='a 0')
@@ -6127,7 +6127,7 @@ class TImidi(Command):
     """sets midi settings for the current texture
         work done mostly from within midiTools.py
 
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> ao.setEventMode('m')
 
     >>> a = TIn(ao, args='a 0')
@@ -6241,7 +6241,7 @@ class TImidi(Command):
 class TIv(Command):
     """views the current texture, or name if provided with args
 
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> ao.setEventMode('m')
 
     >>> a = TIn(ao, args='a 0')
@@ -6299,7 +6299,7 @@ class TIv(Command):
 class TIe(Command):
     """eidits attributes of a texture
 
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> ao.setEventMode('m')
 
     >>> a = TIn(ao, args='a 0')
@@ -6402,7 +6402,7 @@ class TIe(Command):
             
 class TIls(Command):
     """
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> ao.setEventMode('m')
 
     >>> a = TIn(ao, args='a 0')
@@ -6463,7 +6463,7 @@ class TIls(Command):
          
 class TIrm(Command):
     """
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> ao.setEventMode('m')
 
     >>> a = TIn(ao, args='a 0')
@@ -6527,7 +6527,7 @@ class TIrm(Command):
 
 class TIcp(Command):
     """
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> ao.setEventMode('m')
 
     >>> a = TIn(ao, args='a 0')
@@ -6607,7 +6607,7 @@ class TIcp(Command):
 
 class TImv(Command):
     """
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> ao.setEventMode('m')
 
     >>> a = TIn(ao, args='a 0')
@@ -6677,7 +6677,7 @@ class TIdoc(Command):
     of this texture, as well as in
     args can be the name of a different texture
 
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> ao.setEventMode('m')
 
     >>> a = TIn(ao, args='a 0')
@@ -6731,7 +6731,7 @@ class TIdoc(Command):
 class TIals(Command):
     """ list all attributes of a texture, a hidden command
 
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> ao.setEventMode('m')
 
     >>> ao.setEventMode('m')
@@ -6782,7 +6782,7 @@ class TIals(Command):
 
 class TImap(Command):
     """
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> ao.setEventMode('m')
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
@@ -6842,7 +6842,7 @@ class TImap(Command):
 class TEe(Command):
     """edits all textures
 
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> ao.setEventMode('m')
 
     >>> a = TIn(ao, args='a 0')
@@ -6955,7 +6955,7 @@ class TEe(Command):
 class TEv(Command):
     """ensemble view, displays parallel attributes for all textures
 
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> ao.setEventMode('m')
 
     >>> a = TIn(ao, args='a 0')
@@ -7051,7 +7051,7 @@ class TEv(Command):
 
 class TEmap(Command):
     """
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> ao.setEventMode('m')
 
     >>> a = TIn(ao, args='a 0')
@@ -7133,7 +7133,7 @@ class TEmidi(Command):
     """sets midi tempo for the complete midi score
     work done mostly from within midiTools.py
 
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> ao.setEventMode('m')
 
     >>> a = TIn(ao, args='a 0')
@@ -7206,7 +7206,7 @@ class TCn(Command):
     check for negative start times
     args: tcn  name  timeShift
 
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> ao.setEventMode('m')
 
     >>> a = TIn(ao, args='a 0')
@@ -7272,7 +7272,7 @@ class TCn(Command):
 class TCv(Command):
     """views the current clone, or name if provided with args
 
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> ao.setEventMode('m')
 
     >>> a = TIn(ao, args='a 0')
@@ -7341,7 +7341,7 @@ class TCv(Command):
 
 class TCo(Command):
     """
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> ao.setEventMode('m')
 
     >>> a = TIn(ao, args='a 0')
@@ -7401,7 +7401,7 @@ class TCo(Command):
 class TCmute(Command):
     """mutes the current clone
 
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> ao.setEventMode('m')
 
     >>> a = TIn(ao, args='a 0')
@@ -7473,7 +7473,7 @@ class TCls(Command):
     times (ls for current textre)
     check for negative start times
 
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> ao.setEventMode('m')
 
     >>> a = TIn(ao, args='a 0')
@@ -7543,7 +7543,7 @@ class TCls(Command):
 class TCe(Command):
     """eidits attributes of a clone
 
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> ao.setEventMode('m')
 
     >>> a = TIn(ao, args='a 0')
@@ -7644,7 +7644,7 @@ class TCe(Command):
 
 class TCcp(Command):
     """
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> ao.setEventMode('m')
 
     >>> a = TIn(ao, args='a 0')
@@ -7731,7 +7731,7 @@ class TCcp(Command):
 
 class TCmap(Command):
     """
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> ao.setEventMode('m')
 
     >>> a = TIn(ao, args='a 0')
@@ -7796,7 +7796,7 @@ class TCdoc(Command):
     of this texture, as well as in
     args can be the name of a different texture
 
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> ao.setEventMode('m')
 
     >>> a = TIn(ao, args='a 0')
@@ -7874,7 +7874,7 @@ class TCrm(Command):
     """remove a clone from this textures clone dict
         check for negative start times
 
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> ao.setEventMode('m')
 
     >>> a = TIn(ao, args='a 0')
@@ -7958,7 +7958,7 @@ class TCrm(Command):
 class TCals(Command):
     """ list all attributes of a texture, a hidden command
 
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> ao.setEventMode('m')
 
     >>> a = TIn(ao, args='a 0')
@@ -8021,7 +8021,7 @@ class TCals(Command):
 
 class TTls(Command):
     """
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> ao.setEventMode('m')
 
     >>> a = TIn(ao, args='a 0')
@@ -8077,7 +8077,7 @@ class TTls(Command):
 
 class TTo(Command):
     """
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> ao.setEventMode('m')
 
     >>> a = TIn(ao, args='a 0')
@@ -9063,7 +9063,7 @@ class _CommandAO(Command):
 class AOl(_CommandAO):
     """load an AthenaObject, replacing the current one
 
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> ao.setEventMode('m')
 
     >>> a = AOl(ao, args='empty01.xml')
@@ -9204,7 +9204,7 @@ class AOmg(_CommandAO):
     """load path and texture data into the local athenaObject
     must check for name conflicts
 
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> ao.setEventMode('m')
 
     >>> a = AOl(ao, args='empty01.xml')
@@ -9271,7 +9271,7 @@ class AOmg(_CommandAO):
 class AOals(_CommandAO):
     """view internal attributes of athean object. hidden command
 
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> ao.setEventMode('m')
 
     >>> a = AOals(ao, args='empty01.xml')
@@ -9647,7 +9647,7 @@ class APdir(Command):
 
     def _apConvertDirName(self, usrStr):
         """
-        >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+        >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
         >>> ao.setEventMode('m')
 
         >>> a = APdir(ao, args='')
@@ -9831,7 +9831,7 @@ class APa(Command):
     channels and sampling rate are stored in atheanobj
     file type is stored in preference file
 
-    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> ao.setEventMode('m')
 
     >>> a = APa(ao, args='f aif')    
@@ -9854,7 +9854,7 @@ class APa(Command):
 
     def _apConvertAudioPrefName(self, usrStr):
         """
-        >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+        >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
         >>> ao.setEventMode('m')
 
         >>> a = APa(ao, args='')
@@ -10810,7 +10810,7 @@ class AU_(_Menu):
 class TestOld:
     def __init__(self):
         # build temporary environment
-        from athenaCL import athenaObj
+        from athenaCL.libATH import athenaObj
         self.ao = athenaObj.AthenaObject()
         self.cmdEnviron = {}
         #self.cmdEnviron['threadAble'] = 0
@@ -10853,7 +10853,7 @@ class Test(unittest.TestCase):
         self.assertEqual(True, True)
 
     def testTPv(self):
-        from athenaCL import athenaObj
+        from athenaCL.libATH import athenaObj
         ao = athenaObj.AthenaObject()
         from athenaCL.libATH.libPmtr import parameter
         # TODO: this takes a long time to do all;

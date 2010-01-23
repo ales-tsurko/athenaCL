@@ -13,7 +13,7 @@ import os, sys
 import unittest, doctest
 
 
-from athenaCL import athenaObj
+from athenaCL.libATH import athenaObj
 from athenaCL.libATH import typeset
 from athenaCL.libATH import language
 lang = language.LangObj()

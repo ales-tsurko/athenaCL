@@ -19,7 +19,7 @@ class CAmapCanvas:
                      cellWIDTH=4, cellHEIGHT=4, fmt='png', master=None, title=None):         
         
         if ao == None:
-            from athenaCL import athenaObj # update need for color prefs
+            from athenaCL.libATH import athenaObj # update need for color prefs
             update = athenaObj.External()
             update.updateAll('noMessages')
         else:

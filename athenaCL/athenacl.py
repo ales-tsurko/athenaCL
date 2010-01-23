@@ -30,7 +30,7 @@ from athenaCL.libATH import language
 from athenaCL.libATH import drawer
 from athenaCL.libATH import osTools
 lang = language.LangObj()
-from athenaCL import athenaObj
+from athenaCL.libATH import athenaObj
 
 _MOD = 'athenacl.py'
 # check if in idle; this file may call this file again (under idle) and thus
