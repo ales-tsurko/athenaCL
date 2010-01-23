@@ -4,11 +4,14 @@
 #
 # Authors:       Christopher Ariza
 #
-# Copyright:     (c) 2001-2006 Christopher Ariza
+# Copyright:     (c) 2001-2010 Christopher Ariza
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
 
 import sys, os, time, random
+import unittest, doctest
+
+
 from athenaCL.libATH import drawer
 from athenaCL.libATH import typeset
 from athenaCL.libATH import language
@@ -680,43 +683,43 @@ def promptGetFile(prompt='select a file', defaultDir='', mode='file',
 
 
 #-----------------------------------------------------------------||||||||||||--
-def getSalutation(cursorToolConvert):
-    """selects a welcom message based on time of day
-    cursor tool convert is a dictionary of strings used to make cursor
-    can customized by the user
-    if no cursor is displayed, no prompts are displayed
-    """
-    timeTuple = time.localtime()
-    localYear = timeTuple[0]
-    localMonth = timeTuple[1]
-    localDay     = timeTuple[2]
-    localHour = timeTuple[3]
-    localMin     = timeTuple[4]
-    localSec     = timeTuple[5]
-
-    if localHour >= 3 and localHour < 5:
-        salutation = lang.salutationAm1
-    elif localHour >= 5 and localHour < 12:
-        salutation = lang.salutationAm2
-    elif localHour >= 12 and localHour < 17:
-        salutation = lang.salutationPm1
-    elif localHour >= 17 and localHour < 22:
-        salutation = lang.salutationPm2
-    elif localHour >= 22 and localHour < 24:
-        salutation = lang.salutationPm3
-    elif localHour >= 0 and localHour < 3:
-        salutation = lang.salutationAm0
-    
-    # provide exceptions for special times
-    if localMonth == lang.BIRTH[1] and localDay == lang.BIRTH[2]:
-        age = abs(localYear - lang.BIRTH[0])
-        salutation = lang.salutationBirth % age
-
-    if localSec % 13 == 0: # 13, 26, 39, 52, use salutation
-        cursTool = cursorToolConvert['['] + salutation + cursorToolConvert[']']
-    else: # provide a blank cursor (cursor tool may not be displayed)
-        cursTool = cursorToolConvert['empty'] % ('','') # must fill with empty str
-    return cursTool
+# def getSalutation(cursorToolConvert):
+#     """selects a welcom message based on time of day
+#     cursor tool convert is a dictionary of strings used to make cursor
+#     can customized by the user
+#     if no cursor is displayed, no prompts are displayed
+#     """
+#     timeTuple = time.localtime()
+#     localYear = timeTuple[0]
+#     localMonth = timeTuple[1]
+#     localDay     = timeTuple[2]
+#     localHour = timeTuple[3]
+#     localMin     = timeTuple[4]
+#     localSec     = timeTuple[5]
+# 
+#     if localHour >= 3 and localHour < 5:
+#         salutation = lang.salutationAm1
+#     elif localHour >= 5 and localHour < 12:
+#         salutation = lang.salutationAm2
+#     elif localHour >= 12 and localHour < 17:
+#         salutation = lang.salutationPm1
+#     elif localHour >= 17 and localHour < 22:
+#         salutation = lang.salutationPm2
+#     elif localHour >= 22 and localHour < 24:
+#         salutation = lang.salutationPm3
+#     elif localHour >= 0 and localHour < 3:
+#         salutation = lang.salutationAm0
+#     
+#     # provide exceptions for special times
+#     if localMonth == lang.BIRTH[1] and localDay == lang.BIRTH[2]:
+#         age = abs(localYear - lang.BIRTH[0])
+#         salutation = lang.salutationBirth % age
+# 
+#     if localSec % 13 == 0: # 13, 26, 39, 52, use salutation
+#         cursTool = cursorToolConvert['['] + salutation + cursorToolConvert[']']
+#     else: # provide a blank cursor (cursor tool may not be displayed)
+#         cursTool = cursorToolConvert['empty'] % ('','') # must fill with empty str
+#     return cursTool
 
 def getEncouragement():
     options = [lang.provoke1, lang.provoke2, lang.provoke3, 
@@ -789,121 +792,121 @@ def getTempo():
 
 
 #-----------------------------------------------------------------||||||||||||--
-class Animate:
-    """string animation
-    this points out that print displays immediatly only if 
-    when carriage return is encountered
-    print ignores \b, must use stdout
-    stdout.write display no result until after process
-    note: this does not work in IDLE
-    this is never called from within a cgi sessions, as cgi sessions
-    are always single threaded
-    """
-    def __init__(self, termObj=None, mode='normal'):
-        """setup frame rate"""
-        self.chars = ('  ', 
-                          ': ', 
-                          '::', 
-                          ' :',
-                          '  ',) 
-        # idle does not execute /b
-        # w/o erase, give warning message if process > tToWarn
-        self.mode = mode # normal or minimal
-        self.warnGiven   = 0 # boolean for if init warning has been given
-        self.tToWarn     = 4 # seconds before givimg message to usr
-        self.tMsgPeriod = 8 # seconds before givimg message after first
-        # keep time, need to be cleard after use
-        self.index = 0   # counts frames
-        self.tStart = 0.0 # holds start time 
-        self.tLastPeriod = 0.0# used to count chunks
-        self.strLast = '' # string printed in last frame
-        self.pollCount = 0 # number of times draw has been called, one per poll
-        self.pollModulo = 10 # number of polls per display
-            # higher numbers reduce quality of animation, but on terms that
-            # \b fakes, reduces amount of garbage on screen
-        # width is platform dependent
-        if termObj == None: # update termwidth
-            w = 80 # default
-        else:
-            h, w = termObj.size()
-            if termObj.sessionType in ['idle', 'cgi']: 
-                # idle and cgi never use threading, so minimal mode is not called
-                self.mode = 'minimal' # cant back space
-        self.w = w # may be overridden
-
-    def reset(self):
-        self.index = 0   
-        self.tStart = 0.0
-        self.tElap = 0.0
-        self.strLast = ''
-        self.warnGiven = 0 
-
-    def setStart(self):
-        "stores a time in seconds"
-        self.tStart = time.time()
-            
-    def clearFrame(self):
-        """attempt to erase the last line printed, including the return carriage
-        """
-        if self.tElap > self.tToWarn: # after 10 sec, give a warning
-            if os.name == 'mac':
-                # mac (os9 classic) does not measure whole line, but last str
-                w = len(self.strLast) + 1 # add return carriage
-            elif os.name == 'posix':
-                w = self.w
-            else:    # all windows flavors
-                w = self.w
-    
-            if self.mode == 'minimal':
-                pass # erase fails, skip
-            else:
-                if self.pollCount % self.pollModulo == 0:
-                    sys.stdout.write('\b' * w)
-                    sys.stdout.write(' '     * w)
-                    sys.stdout.write('\b' * w)
-
-    def printFrame(self):
-        """writes frame, advances counters"""
-        # dont do anything unitl after timeTowWarn
-        self.tElap = int(round((time.time() - self.tStart)))
-
-        if self.tElap > self.tToWarn: # after warning, give a warning
-            if self.mode == 'minimal':
-                if self.tElap > self.tToWarn and self.warnGiven == 0:
-                     # after 10 sec, give a warning
-                    print lang.msgPleaseWait
-                    self.warnGiven = 1 # only do once
-                    self.tLastPeriod = self.tElap # set as new period
-                elif self.warnGiven == 1: # second phase, give periodic
-                    if (self.tElap - self.tLastPeriod) >= self.tMsgPeriod:
-                        print lang.msgPleaseWait
-                        self.tLastPeriod = self.tElap # set as new period
-            else:
-                if self.pollCount % self.pollModulo == 0:
-                    char = self.chars[self.index % len(self.chars)] # mod gets char
-                    self.index = self.index + 1
-                    char = char + ' processing (%ss)' % self.tElap
-                    self.strLast = char # store for erasing on some plats
-                    print char # show whole screen
-
-    def advanceFrame(self):
-        "call after each poll to add to poll count"
-        self.pollCount = self.pollCount + 1
-
-    def play(self, totDur=5, frameRate=6):
-        """used to play a sequence of frames, rather than manually
-            calling
-        """
-        frameDur = 1.0 / frameRate # in seconds
-        self.setStart() # set start time
-        while 1:
-            self.printFrame()
-            time.sleep(frameDur)
-            self.clearFrame()
-            self.advanceFrame()
-            if self.tElap >= totDur:
-                break
-        self.reset() # clear counters
+# class Animate:
+#     """string animation
+#     this points out that print displays immediatly only if 
+#     when carriage return is encountered
+#     print ignores \b, must use stdout
+#     stdout.write display no result until after process
+#     note: this does not work in IDLE
+#     this is never called from within a cgi sessions, as cgi sessions
+#     are always single threaded
+#     """
+#     def __init__(self, termObj=None, mode='normal'):
+#         """setup frame rate"""
+#         self.chars = ('  ', 
+#                           ': ', 
+#                           '::', 
+#                           ' :',
+#                           '  ',) 
+#         # idle does not execute /b
+#         # w/o erase, give warning message if process > tToWarn
+#         self.mode = mode # normal or minimal
+#         self.warnGiven   = 0 # boolean for if init warning has been given
+#         self.tToWarn     = 4 # seconds before givimg message to usr
+#         self.tMsgPeriod = 8 # seconds before givimg message after first
+#         # keep time, need to be cleard after use
+#         self.index = 0   # counts frames
+#         self.tStart = 0.0 # holds start time 
+#         self.tLastPeriod = 0.0# used to count chunks
+#         self.strLast = '' # string printed in last frame
+#         self.pollCount = 0 # number of times draw has been called, one per poll
+#         self.pollModulo = 10 # number of polls per display
+#             # higher numbers reduce quality of animation, but on terms that
+#             # \b fakes, reduces amount of garbage on screen
+#         # width is platform dependent
+#         if termObj == None: # update termwidth
+#             w = 80 # default
+#         else:
+#             h, w = termObj.size()
+#             if termObj.sessionType in ['idle', 'cgi']: 
+#                 # idle and cgi never use threading, so minimal mode is not called
+#                 self.mode = 'minimal' # cant back space
+#         self.w = w # may be overridden
+# 
+#     def reset(self):
+#         self.index = 0   
+#         self.tStart = 0.0
+#         self.tElap = 0.0
+#         self.strLast = ''
+#         self.warnGiven = 0 
+# 
+#     def setStart(self):
+#         "stores a time in seconds"
+#         self.tStart = time.time()
+#             
+#     def clearFrame(self):
+#         """attempt to erase the last line printed, including the return carriage
+#         """
+#         if self.tElap > self.tToWarn: # after 10 sec, give a warning
+#             if os.name == 'mac':
+#                 # mac (os9 classic) does not measure whole line, but last str
+#                 w = len(self.strLast) + 1 # add return carriage
+#             elif os.name == 'posix':
+#                 w = self.w
+#             else:    # all windows flavors
+#                 w = self.w
+#     
+#             if self.mode == 'minimal':
+#                 pass # erase fails, skip
+#             else:
+#                 if self.pollCount % self.pollModulo == 0:
+#                     sys.stdout.write('\b' * w)
+#                     sys.stdout.write(' '     * w)
+#                     sys.stdout.write('\b' * w)
+# 
+#     def printFrame(self):
+#         """writes frame, advances counters"""
+#         # dont do anything unitl after timeTowWarn
+#         self.tElap = int(round((time.time() - self.tStart)))
+# 
+#         if self.tElap > self.tToWarn: # after warning, give a warning
+#             if self.mode == 'minimal':
+#                 if self.tElap > self.tToWarn and self.warnGiven == 0:
+#                      # after 10 sec, give a warning
+#                     print lang.msgPleaseWait
+#                     self.warnGiven = 1 # only do once
+#                     self.tLastPeriod = self.tElap # set as new period
+#                 elif self.warnGiven == 1: # second phase, give periodic
+#                     if (self.tElap - self.tLastPeriod) >= self.tMsgPeriod:
+#                         print lang.msgPleaseWait
+#                         self.tLastPeriod = self.tElap # set as new period
+#             else:
+#                 if self.pollCount % self.pollModulo == 0:
+#                     char = self.chars[self.index % len(self.chars)] # mod gets char
+#                     self.index = self.index + 1
+#                     char = char + ' processing (%ss)' % self.tElap
+#                     self.strLast = char # store for erasing on some plats
+#                     print char # show whole screen
+# 
+#     def advanceFrame(self):
+#         "call after each poll to add to poll count"
+#         self.pollCount = self.pollCount + 1
+# 
+#     def play(self, totDur=5, frameRate=6):
+#         """used to play a sequence of frames, rather than manually
+#             calling
+#         """
+#         frameDur = 1.0 / frameRate # in seconds
+#         self.setStart() # set start time
+#         while 1:
+#             self.printFrame()
+#             time.sleep(frameDur)
+#             self.clearFrame()
+#             self.advanceFrame()
+#             if self.tElap >= totDur:
+#                 break
+#         self.reset() # clear counters
 
 #-----------------------------------------------------------------||||||||||||--
 
@@ -925,9 +928,21 @@ def testStr(n=100, newLines=0):
     return ''.join(msg)
 
 
-if __name__ == '__main__':
-    pass
-
+#-----------------------------------------------------------------||||||||||||--
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
 
 
 #-----------------------------------------------------------------||||||||||||--
+if __name__ == '__main__':
+    from athenaCL.test import baseTest
+    baseTest.main(Test)
+
+
+
+

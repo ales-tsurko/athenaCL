@@ -431,7 +431,7 @@ Apple, Macintosh, Mac OS, and QuickTime are trademarks or registered trademarks 
 
     msgAPcurentAppPath    = 'current application path:\n%s\n'
     
-    msgCPauto                 = 'csound auto score render control set to %s.\n'
+    msgELauto                 = 'csound auto score render control set to %s.\n'
 
     msgAObadWidth             = 'the character width should be between 30 and 300. try again.\n'
     msgAObadName              = 'AthenaObject files must end with a ".xml" extension. try again.\n'
@@ -445,7 +445,7 @@ Apple, Macintosh, Mac OS, and QuickTime are trademarks or registered trademarks 
 
     msgAPdlgSelect            = 'active dialog visual method: %s.\nselect text, tk, or mac. (t, k, or m):'
     msgAPdlgConfirm       = 'dialog visual method changed to %s.\n'
-    msgAPgfxSelect            = 'active graphics format: %s.\nselect text, eps, tk, jpg, png. (t, e, k, j, or p):' # see imageTools.imageFormatParser 
+    msgAPgfxSelect            = 'active graphics format: %s.\nselect text, eps, tk, jpg, png. (t, e, k, j, or p):' 
     msgAPgfxConfirm       = 'graphics format changed to %s.\n'
     msgAPcursorTool       = 'cursor tool set to %s.\n'
     msgAPrefreshMode          = 'refresh mode set to %s.\n'

@@ -54,8 +54,8 @@ class TEmapCanvas:
             textureLib = ao.textureLib
             self.tiMapDict = tiMapDict
 
-        fontTitle = 'micro' #eval(update.getPref('gui', 'fontTitle'))
-        fontText     = 'micro' #eval(update.getPref('gui', 'fontText'))
+        fontTitle = 'micro'
+        fontText = 'micro' 
         COLORfgMain = update.getPref('gui', 'COLORfgMain')
         COLORfgMainFrame = update.getPref('gui', 'COLORfgMainFrame')  
         COLORfgAlt = update.getPref('gui', 'COLORfgAlt') 

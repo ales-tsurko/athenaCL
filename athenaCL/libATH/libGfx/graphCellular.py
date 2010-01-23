@@ -25,8 +25,8 @@ class CAmapCanvas:
         else:
             update = ao.external # rename update from AO
 
-        fontTitle = 'micro' #eval(update.getPref('gui', 'fontTitle'))
-        fontText     = 'micro' #eval(update.getPref('gui', 'fontText'))
+        fontTitle = 'micro' 
+        fontText = 'micro' 
         COLORfgMain = update.getPref('gui', 'COLORfgMain') 
         COLORbgMargin = update.getPref('gui', 'COLORbgMargin') 
         COLORbgGrid = update.getPref('gui', 'COLORbgGrid') 

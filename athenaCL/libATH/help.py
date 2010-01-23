@@ -382,15 +382,9 @@ class HelpDoc:
     ELr = 'ELr: EventList: Render: Renders the last event list created in the current session with the Csound application specified by APea.'    
     ELr_usage = 'elr'
 
-    #-----------------------------------------------------------------------||--
-    CPff = 'CPff: CsoundPreferences: FileFormat: Choose which audio file format (AIF, WAVE, or SoundDesignerII) is created by Csound.'   
-    CPff_usage = 'cpff format'
 
-    CPch = 'CPch: CsoundPreferences: Channels: Choose the number of audio channels used in creating the Csound orchestra. Channel options are mono, stereo, and quad (1, 2, and 4 channels).'     
-    CPch_usage = 'cpch channels'
-
-    CPauto = 'CPauto: CsoundPreferences: Auto Score Render Control: Turn on or off auto score render, causing athenaCL to automatically render (ELr) and hear (ELh) audio files every time a Csound score is created with ELn.'
-    CPauto_usage = 'cpauto'
+    ELauto = 'ELauto: EventList: Auto Render Control: Turn on or off auto rendering, causing athenaCL to automatically render (ELr) and hear (ELh) whenever an event list is created with ELn.'
+    ELauto_usage = 'elauto'
 
 
 
@@ -434,11 +428,25 @@ class HelpDoc:
     APdir = 'APdir: AthenaPreferences: Directories: Lets the user select or enter directories necessary for writing and searching files. Directories that can be entered are the "scratch" directory and the "user audio". The scratch directory is used for writing temporary files with automatically-generated file names. Commands such as SCh, PIh, and those that produce graphics (depending on format settings specified with APgfx) use this directory. The user audio directory is used within ParameterObjects that search for files. With such ParameterObjects, the user can specify any file within the specified directory simply by name. To find the the file\'s complete file path, all directories are recursively searched in both the user audio and the athenaCL/audio directories. Directories named "_exclude" will not be searched. If files in different nested directories do not have unique file names, correct file paths may not be found.'
     APdir_usage = 'apdir dirType filePath'
 
-    APcc = 'APcc: AthenaPreferences: Customize Cursor: Lets the user customize the cursor prompt tool by replacing any of the standard characters with any string. The user may optionally select to restore system defaults.'
-    APcc_usage = 'apcc "[" "]" "(" ")" "PI" "TI"'
+#     APcc = 'APcc: AthenaPreferences: Customize Cursor: Lets the user customize the cursor prompt tool by replacing any of the standard characters with any string. The user may optionally select to restore system defaults.'
+#     APcc_usage = 'apcc "[" "]" "(" ")" "PI" "TI"'
 
     APea = 'APea: AthenaPreferences: External Applications: Set the file path to external utility applications used by athenaCL. External applications can be set for Csound (csoundCommand) and for handling various media files: midi (midiPlayer), audio (audioPlayer), text (textReader), image (imageViewer), and postscript (psViewer).'
     APea_usage = 'apea appType filePath'
+
+
+
+#     CPff = 'CPff: CsoundPreferences: FileFormat: Choose which audio file format (AIF, WAVE, or SoundDesignerII) is created by Csound.'   
+#     CPff_usage = 'cpff format'
+# 
+#     CPch = 'CPch: CsoundPreferences: Channels: Choose the number of audio channels used in creating the Csound orchestra. Channel options are mono, stereo, and quad (1, 2, and 4 channels).'     
+#     CPch_usage = 'cpch channels'
+# 
+
+    APa = 'APa: AthenaPreferences: Audio: Set audio preferences.'
+    APa_usage = 'apa type value'
+
+
 
     #-----------------------------------------------------------------------||--
 
@@ -530,8 +538,8 @@ class HelpDoc:
     EO = 'EventOutput: Commands: Displays a list of all EventOutput commands.'
     EO_usage = 'eo'
     
-    CP = 'CsoundPreferences: Commands: Displays a list of all CsoundPreferences commands.'
-    CP_usage = 'cp'
+#     CP = 'CsoundPreferences: Commands: Displays a list of all CsoundPreferences commands.'
+#     CP_usage = 'cp'
 
     AO = 'AthenaObject: Commands: Displays a list of all AthenaObject commands.'
     AO_usage = 'ao'

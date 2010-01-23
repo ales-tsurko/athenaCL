@@ -53,7 +53,6 @@ from athenaCL.libATH import drawer
 from athenaCL.libATH import typeset
 from athenaCL.libATH import help
 from athenaCL.libATH import ioTools # needed for bkwdCompat object
-from athenaCL.libATH import prefTools
 from athenaCL.libATH import rhythm # needed for timing
 from athenaCL.libATH import language
 lang = language.LangObj()
@@ -65,6 +64,10 @@ from athenaCL.libATH import clone # needed for proc_AUtest
 from athenaCL.libATH import eventList
 
 _MOD = 'athenaObj.py'
+
+from athenaCL.libATH import prefTools
+reporter = prefTools.Reporter(_MOD)
+
 
 
 
@@ -144,12 +147,12 @@ class External:
 #         if os.name == 'mac': # macos 9
 #             self.prefsDir = self.libATHpath
 
-        if os.name == 'posix':
-            self.prefsDir = drawer.getud() # get active users dir
-        else: # win or other
-            self.prefsDir = drawer.getud()
-            if self.prefsDir == None: # cant use getcwd
-                self.prefsDir = self.libATHpath # used before and two versions 1.4.2
+#         if os.name == 'posix':
+#             self.prefsDir = drawer.getud() # get active users dir
+#         else: # win or other
+#             self.prefsDir = drawer.getud()
+#             if self.prefsDir == None: # cant use getcwd
+#                 self.prefsDir = self.libATHpath # used before and two versions 1.4.2
             
     #-----------------------------------------------------------------------||--
     def getCvsStat(self):
@@ -165,7 +168,7 @@ class External:
             logFileName = '.athenacl-log' # make hidden file
         else: # win or other
             logFileName = '.athenacl-log.txt'
-        self.logPath = os.path.join(self.prefsDir, logFileName)
+        self.logPath = os.path.join(drawer.getPrefsDir(), logFileName)
 
     def logWrite(self, dataLines):
         """for adding an error to= the error lig"""
@@ -271,32 +274,25 @@ class External:
     def updatePrefs(self, forcePath=None):
         """check for prefs, update and add if missing
         """
-        # watch for sesion type here; dont write files if cgi type
-        if os.name == 'mac':     
-            prefsFileName = 'athenaclrc.xml'
-        elif os.name == 'posix':
-            prefsFileName = '.athenaclrc' # make hidden file
-        else: # win or other
-            prefsFileName = '.athenaclrc.xml'
+        prefsFileName = drawer.getPrefsName()
 
         if forcePath != None:
-            self.prefsPath = forcePath # assign
-            self.prefDict = prefTools.getXmlPrefDict(self.prefsPath)
+            self.prefDict = prefTools.getXmlPrefDict(forcePath)
             self.prefDict = prefTools.updatePrefDict(self.prefDict, os.name)
-            prefTools.writePrefDict(self.prefsPath, self.prefDict)
+            prefTools.writePrefDict(drawer.getPrefsPath(), self.prefDict)
+
         elif self.sessionType != 'cgi': # cgi cant use any prefs
-            prefDirContent = os.listdir(self.prefsDir)
-            self.prefsPath = os.path.join(self.prefsDir, prefsFileName)
+            prefDirContent = os.listdir(drawer.getPrefsDir())
             createNewPrefs = 0
             if prefsFileName in prefDirContent:
-                self.prefDict = prefTools.getXmlPrefDict(self.prefsPath)
+                self.prefDict = prefTools.getXmlPrefDict(drawer.getPrefsPath())
                 self.prefDict = prefTools.updatePrefDict(self.prefDict, os.name)
-                prefTools.writePrefDict(self.prefsPath, self.prefDict)
+                prefTools.writePrefDict(drawer.getPrefsPath(), self.prefDict)
             else: # new prefs on first start, or after deleting
                 createNewPrefs = 1
             if createNewPrefs:
                 self.prefDict = prefTools.getDefaultDict(os.name)
-                prefTools.writePrefDict(self.prefsPath, self.prefDict)
+                prefTools.writePrefDict(drawer.getPrefsPath(), self.prefDict)
 
         elif self.sessionType == 'cgi': # if cgi session, only use pref dict
             self.prefDict = prefTools.getDefaultDict(os.name)
@@ -306,7 +302,7 @@ class External:
         from athenaCL.libATH import prefTools
         self.prefDict[category][key] = value
         if self.sessionType != 'cgi': # dont write if cgi
-            prefTools.writePrefDict(self.prefsPath, self.prefDict)
+            prefTools.writePrefDict(drawer.getPrefsPath(), self.prefDict)
 
     def getPref(self, category, key, evaluate=0):
         """returns value of a pref
@@ -401,7 +397,7 @@ class AthenaObject:
 
         # utility objects
         self.help = help.HelpDoc(self.termObj) # pass ref termObj
-        self.backward = ioTools.BackwardsCompat(self.debug)
+        self.backward = ioTools.BackwardsCompat()
 
         # data and objects saved with AO
         # ATHENA DATA
@@ -418,7 +414,11 @@ class AthenaObject:
         # CLONE DATA
         self.cloneLib = clone.CloneManager() # added post 1.3
         self.midiTempo = 120 # default value, changed with TEmidi, added 1.1
-        self.nchnls = 2  # default, saved w/ ao
+        
+        # these are stored here, with with project;
+        # audioFormat is stored in user prefs
+        self.audioChannels = 2  # default, saved w/ ao
+        self.audioRate = 44100  # default, saved w/ ao
 
         # this may be init from a pref; but loaded and stored in ao
         self.orcObj = None # initialized from setEventMode
@@ -481,24 +481,26 @@ class AthenaObject:
       'emCmd':('EventMode', 'EMls(list)', 'EMo(select)', 'EMv(view)',
                   'EMi(inst)',),
       'elCmd':('EventList', 'ELn(new)', 'ELw(save)', 
-                  'ELv(view)', 'ELh(hear)', 'ELr(render)',),
-      'cpCmd':('CsoundPreferences', 
-                  'CPff(format)', 'CPch(channel)', 'CPauto(auto)'),
+                  'ELv(view)', 'ELh(hear)', 'ELr(render)', 'ELauto(auto)'),
+#       'cpCmd':('CsoundPreferences', 
+#                   'CPff(format)', 'CPch(channel)'),
       'aoCmd':('AthenaObject', 'AOw(save)', 'AOl(load)', 'AOmg(merge)',
                   'AOrm(remove)',),
       'ahCmd':('AthenaHistory', 'AHls(list)', 'AHexe(execute)'),
       'auCmd':('AthenaUtility', 'AUsys(system)', 'AUdoc(docs)', 'AUup(update)',  
                   'AUbeat(beat)', 'AUpc(pitch)', 'AUmg(markov)', 'AUma(markov)', 
                   'AUca(automata)'),
-      'apCmd':('AthenaPreferences', 'APcurs(cursor)', 'APdlg(dialogs)',
-                  'APgfx(graphics)', 'APdir(directory)', 'APea(external)', 
-                  'APr(refresh)', 'APwid(width)', 'APcc(custom)' ),
+      'apCmd':('AthenaPreferences', 'APdir(directory)', 'APea(external)', 
+                  'APa(audio)', 'APgfx(graphics)', 
+                  'APcurs(cursor)', 'APdlg(dialogs)',
+                 
+                  'APr(refresh)', 'APwid(width)'),
         }
 
         self.cmdOrder = [None, 'piCmd', #'psCmd', 'pvCmd', 
                       None, 'tmCmd', 'tpCmd', 'tiCmd', 'tcCmd', 
                               'ttCmd', 'teCmd', 
-                      None, 'eoCmd', 'emCmd', 'elCmd', 'cpCmd', 
+                      None, 'eoCmd', 'emCmd', 'elCmd', 
                       None, 'apCmd', 'ahCmd', 'auCmd', 'aoCmd']
         # two-letter prefix for all athenaCL commands
         self.cmdPrefixes = [] # store w/ caps
@@ -573,7 +575,7 @@ class AthenaObject:
             if cmdName == None: # none is a divider
                 msg.append(lang.DIVIDER * w)
             else:
-                msg.append(typeset.formatEqCol('', self.cmdDict[cmdName], 18, 
+                msg.append(typeset.formatEqCol('', self.cmdDict[cmdName], 20, 
                                                         w, 'outLineMode'))
         return ''.join(msg)
 
@@ -933,8 +935,9 @@ class Interpreter:
         
         # update vars passed to command obj; sets command environ
         self._updateCmdEnviron()  # creates self.cmdEnviron
-        self.cursorToolConvert = self._getCursorToolConvert() # done once at init
-        self._updatePrompt('msg') # creates self.prompt
+        # done once at init
+        self.cursorToolConvert = self._getCursorToolConvert() 
+        self._updatePrompt() # creates self.prompt
         athTitle = '\n' + 'athenaCL %s (on %s via %s)\n' % (
                           self.athVersion, sys.platform, 
                           self.sessionType)
@@ -1205,12 +1208,19 @@ class Interpreter:
 
 
     #-----------------------------------------------------------------------||--
+
     def _getCursorToolConvert(self):
         """read prefs and return a conversion dictionary
         called on init of Interpreter"""
         # get a blank command object; myst be a AthenaPreferences
-        cmdObj = command.APcc(self.ao, self.cmdEnviron)
-        convert = cmdObj._apGetCursorToolConvert() # reads prefs
+        convert = {}
+        convert['['] = self.ao.external.getPref('athena','cursorToolLb')
+        convert[']'] = self.ao.external.getPref('athena','cursorToolRb')
+        convert['('] = self.ao.external.getPref('athena','cursorToolLp')
+        convert[')'] = self.ao.external.getPref('athena','cursorToolRp')
+        convert['PI'] = self.ao.external.getPref('athena','cursorToolP')
+        convert['TI'] = self.ao.external.getPref('athena','cursorToolT')
+
         convert['empty'] = self._cursorTool(convert) # adds fake
         return convert
  
@@ -1218,20 +1228,23 @@ class Interpreter:
         "need optional arg to build a default curos in _getCursor"
         if convert == None:
             convert = self.cursorToolConvert
-        left    = '%s%s%s' % (convert['['], convert['PI'], convert['('])
-        mid = '%s%s%s' % (convert[')'], convert['TI'], convert['('])
-        right = '%s%s' % (convert[')'], convert[']'])
-        return left + '%s' + mid + '%s' + right
+        post = []
+        post.append('%s%s%s' % (convert['['], convert['PI'], convert['(']))
+        post.append('%s')
+        post.append('%s%s%s' % (convert[')'], convert['TI'], convert['(']))
+        post.append('%s')
+        post.append('%s%s' % (convert[')'], convert[']']))
+        return ''.join(post)
 
-    def _updatePrompt(self, msg=None):
+    def _updatePrompt(self):
         """update prompt graphics; done each time command is called"""
         promptRoot = self.ao.promptSym
         # this used to get pref from file; get now from aoInfo
         cursTemplate = self._cursorTool()
-        if msg: # intial startup msg
-            cursTool = dialog.getSalutation(self.cursorToolConvert)
-        else: # update appearance
-            cursTool = cursTemplate % (self.ao.activePath, self.ao.activeTexture)       
+#         if msg: # intial startup msg
+#             cursTool = dialog.getSalutation(self.cursorToolConvert)
+#         else: # update appearance
+        cursTool = cursTemplate % (self.ao.activePath, self.ao.activeTexture)       
         if self.ao.aoInfo['cursorToolOption'] != 'cursorToolOff':
             self.prompt = '%s %s ' % (cursTool, promptRoot)
         else:
@@ -1404,32 +1417,39 @@ class Test(unittest.TestCase):
                 raise Exception('failed cmd (%s): %s' % (cmd, result))
 
     def testInterpreterTextures(self):
-
+        from athenaCL.libATH.libTM import texture
+        
         cmdListE = []
-        for texture in ['LineGroove']:
+        for i in range(len(texture.tmNames.values())):
+            tmName = texture.tmNames.values()[i]
+
+            if tmName == 'TimeSegment':
+                # TODO: time segment raise an error with
+                #TIcp t10 test2
+                continue
+
+            name = 't%s' % i
             cmdListE.append('EMo cn')
-            cmdListE.append('TMo %s' % texture)
-            cmdListE.append('TMv ')
-            cmdListE.append('TMls ')
-            cmdListE.append('TIn test1 3')
-            cmdListE.append('TIn test3 22')
-            cmdListE.append('TIcp test3  test4 test5 test6')
-            cmdListE.append('TIrm test4 test5 test6')
+            cmdListE.append('TMo %s' % tmName)
+            cmdListE.append('tin %s 3' % name)
+            cmdListE.append('TIcp %s test2' % name)
             cmdListE.append('TIls ')
-            cmdListE.append('TIo test3')
-            cmdListE.append('TIv ')
-            cmdListE.append('TIv test3')
-            cmdListE.append('TImute test1 test3')
+            cmdListE.append('TIo test2')
+            cmdListE.append('TIv test2')
+            cmdListE.append('TImute test2')
             cmdListE.append('TImode p   pcs')
             cmdListE.append('TImode y   set')
+            cmdListE.append('TIrm test2')
+            cmdListE.append('TIo %s' % name)
             cmdListE.append('TIe t  1.5, 3')
             cmdListE.append('TIe r  l, ((4,1,1),(8,1,1),(8,3,1))')
-            cmdListE.append('TIrm test1 test3')
 
         cmdListF = [
-        'TIn test1 3',
+        'TMv',
+        'TMls',
+        'EMo cn',
+        'tin test1 3',
         'TIn test2 80',
-        'TIn test3 22',
         'TEe b  "c", 120',
         'TEe a  "cg", "lu", .6, .7, .01',
         'TEv beat',
@@ -1439,19 +1459,16 @@ class Test(unittest.TestCase):
         'TTls ',
         'TTo NoiseLight',
         'TCn echoA',
-        'TCn echoB',
-        'TCn echoC',
-        'TCn echoD',
-        'TCcp echoD echoE',
+        'TCcp echoA echoB',
         'TCls ',
-        'TCrm echoC echoB',
+        'TCrm echoB',
         'TCe t fa,(c,10)',
         'TEmap ',
         'EMi ',
         'TPls ',
         'TPv sieve ',
-        'CPch 2',
-        'CPff a',
+      #  'CPch 2',
+       # 'CPff a',
         ]
         
         athInt = Interpreter('terminal')
@@ -1466,13 +1483,13 @@ class Test(unittest.TestCase):
         cmdList = [
         # do all test load files
         'AOl test01.xml',
-        # load each demo and make a score
-        'AOl demo03.xml',
-        'AOl demo05.xml',
+        #'AOl demo03.xml',
+        #'AOl demo05.xml',
         'AOmg demo01.xml',
         #AOdlg    
         'APwid 80',
         'APcurs',
+        'APcurs', # twice to toggle back
         'cmd',
         'help',
         'AUsys',

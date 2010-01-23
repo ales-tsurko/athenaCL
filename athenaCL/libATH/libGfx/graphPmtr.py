@@ -27,8 +27,8 @@ class _MapCanvas:
         # not sure this should be updated here...
         #update.updatePrefs() # get new settings
 
-        self.fontTitle = 'micro' #eval(update.getPref('gui', 'fontTitle'))
-        self.fontText = 'micro' #eval(update.getPref('gui', 'fontText'))
+        self.fontTitle = 'micro' 
+        self.fontText = 'micro' 
         self.COLORfgMain = update.getPref('gui', 'COLORfgMain') 
         self.COLORfgAlt = update.getPref('gui', 'COLORfgAlt') 
         self.COLORfgAbs = update.getPref('gui', 'COLORfgAbs') 

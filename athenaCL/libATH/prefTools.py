@@ -11,14 +11,14 @@
     
 import xml.dom.minidom
 import unittest, doctest
+import os, sys
 
+# limit imports here to only these two modules
 from athenaCL.libATH import drawer
 from athenaCL.libATH import xmlTools
-from athenaCL.libATH import imageTools # for updating old image names
 
 _MOD = 'prefTools.py'
 #-----------------------------------------------------------------||||||||||||--
-
 
 
 CSDOFF = 'csdOff'
@@ -42,12 +42,13 @@ def getCategoryDefaultDict(platform, category):
     it is necessary that keys start with the appropriate format strings
 
     >>> a = getCategoryDefaultDict('win', 'external')
-    >>> a['audioFileFormat']
+    >>> a['audioFormat']
     'wav'
     """
     # common to all, some may be chagned in patform specific below
     if category == 'external':
         catDict = {
+                      'audioFormat': 'aif', # this is a csound opt
                       'autoRenderOption': 'autoOff', # this is a csound opt
                       'csoundPath': '', # should be name csoundCommand...
                       'midiPlayerPath': '',
@@ -66,6 +67,8 @@ def getCategoryDefaultDict(platform, category):
                       'eventOutput': "('midiFile', 'xmlAthenaObject')",
                       'eventMode':'csoundNative', # startup value
                       'refreshMode': '1', # esObj refreshing
+                      'debug': '0', 
+
                       'cursorToolLb': '[',  
                       'cursorToolRb': ']',  
                       'cursorToolLp': '(',  
@@ -91,30 +94,17 @@ def getCategoryDefaultDict(platform, category):
                       'COLORtxUnit': '#8A7A6A',  #138,122,106
                      }
 
-    # platform dependent preferences
-#     if platform == 'mac': # refers mainly to macos9 mac
-#         if category == 'external':
-#             catDict['audioFileFormat'] = 'aif' 
-#             catDict['csoundCreatorCode'] = 'VRmi' 
-#         if category == 'athena':
-#             catDict['dlgVisualMethod'] = 'mac'
-#             catDict['gfxVisualMethod'] = 'tk' # tk on os9?
-#         if category == 'gui':
-#             catDict['fontTitle'] = "('helvetica', 9, 'normal')" 
-#             catDict['fontText'] = "('monaco', 9, 'normal')" 
     if platform == 'posix':
         if drawer.isDarwin():
             if category == 'external':
-                catDict['audioFileFormat'] = 'aif' 
                 catDict['csoundPath'] = '/usr/local/bin/csound'
                 catDict['midiPlayerPath'] = '/Applications/QuickTime Player.app'
                 catDict['audioPlayerPath'] = '/Applications/QuickTime Player.app'
                 catDict['textReaderPath'] = '' # will use system default
-                catDict['imageViewerPath'] = ''
-                catDict['psViewerPath'] = ''
+                catDict['imageViewerPath'] = '/Applications/Preview.app'
+                catDict['psViewerPath'] = '/Applications/Preview.app'
         else:
             if category == 'external':
-                catDict['audioFileFormat'] = 'aif' 
                 catDict['csoundPath'] = '/usr/local/bin/csound'
                 catDict['midiPlayerPath'] = 'playmidi'
                 catDict['audioPlayerPath'] = 'xmms'
@@ -126,19 +116,14 @@ def getCategoryDefaultDict(platform, category):
         if category == 'athena':
             catDict['dlgVisualMethod'] = 'text'
             catDict['gfxVisualMethod'] = 'png' # return to pil
-        if category == 'gui':
-            catDict['fontTitle'] = "('lucida', 10, 'normal')" 
-            catDict['fontText'] = "('lucidatypewriter', 10, 'normal')" 
 
     else: # win or other
         if category == 'external':
-            catDict['audioFileFormat'] = 'wav' 
+            catDict['audioFormat'] = 'wav' 
+
         if category == 'athena':
             catDict['dlgVisualMethod'] = 'text' # works w/n idle, console on win
             catDict['gfxVisualMethod'] = 'tk'
-        if category == 'gui':
-            catDict['fontTitle'] = "('helvetica', 7, 'normal')" 
-            catDict['fontText'] = "('courier', 8, 'normal')" 
 
     return catDict
 
@@ -147,7 +132,7 @@ def getDefaultDict(platform):
          when update prefs, checks default and provides missing value
 
     >>> a = getDefaultDict('win')
-    >>> a['external']['audioFileFormat']
+    >>> a['external']['audioFormat']
     'wav'
     """
     prefDict = {}
@@ -163,15 +148,17 @@ def updatePrefDict(oldPrefDict, platform):
     
     changes:
         csound group renamed to external group
-        fileFormat renamed audioFileFormat
+        fileFormat renamed audioFormat
     """
     defaultPrefDict = getDefaultDict(platform)
     categories = ['external', 'athena', 'gui']
+
     # if missing a category:
     if len(oldPrefDict.keys()) != len(defaultPrefDict.keys()):
         for category in defaultPrefDict.keys():
             if category not in oldPrefDict.keys():
                 oldPrefDict[category] = defaultPrefDict[category]
+
     for catName in categories: # check each key
         # provide backwards compat for changed category names 
         if catName not in oldPrefDict.keys():
@@ -193,7 +180,7 @@ def updatePrefDict(oldPrefDict, platform):
     # do specific name replacements and changes for backwards compat
     # options user may have selected
     x = oldPrefDict['athena']['gfxVisualMethod']
-    oldPrefDict['athena']['gfxVisualMethod'] = imageTools.imageFormatParser(x)
+    oldPrefDict['athena']['gfxVisualMethod'] = drawer.imageFormatParser(x)
 
     return oldPrefDict
 
@@ -232,11 +219,53 @@ def getXmlPrefDict(prefFilePath):
 
 
 
+class Reporter(object):
+    """object to store debug stats and print output
+    >>> a = Reporter()
+    """
+    def __init__(self, modName=None):
+        if modName == None:
+            modName = 'unknown'
+        self.modName = modName
+
+        self.status = self.debugStat()
+
+
+    def debugStat(self):
+        """Get the debug preference if available, otherwise zero
+        only do this once
+        """
+        fp = drawer.getPrefsPath()
+        if not os.path.exists(fp):
+            return 0
+        prefDict = getXmlPrefDict(fp)
+        return int(prefDict['athena']['debug'])
+    
+
+    def printDebug(self, msg):
+
+        if self.status <= 0:
+            return # do nothing
+    
+        if not drawer.isList(msg):
+            msg = [msg]
+    
+        post = []
+        post.append('%s:' % self.modName)
+        for part in msg:
+            partMsg = str(part)
+            if drawer.isList(part):
+                partMsg = partMsg.replace(' ', '')
+            post.append(partMsg)
+        post.append('\n')
+        sys.stderr.write(' '.join(post))
+
+
+
+
 
 
 #-----------------------------------------------------------------||||||||||||--
-
-
 class Test(unittest.TestCase):
     
     def runTest(self):

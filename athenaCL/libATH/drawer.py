@@ -354,6 +354,24 @@ def imageFormats():
     return available
 
 
+def imageFormatParser(usrStr):
+    """provide backward compat to older names
+
+    >>> imageFormatParser('jpeg')
+    'jpg'
+    """
+    ref = {
+        'jpg' : ['pil', 'jpeg', 'jpg', 'j'],
+        'png' : ['file', 'png', 'p'],
+        'tk'    : ['tk', 'tkinter', 'k'], # t reserved for text
+        'eps' : ['eps', 'ps', 'e'],
+        'text': ['text', 't'],
+            }
+    usrStr = selectionParse(usrStr, ref)
+    return usrStr # may be None
+    
+
+
 #-----------------------------------------------------------------||||||||||||--
 # evaluating and filtering paths to applications    
     
@@ -1348,8 +1366,52 @@ def restringulator(usrStr):
 
 
 #-----------------------------------------------------------------||||||||||||--
+# other utilities
+
+def getPrefsName():
+    if os.name == 'posix':
+        prefsFileName = '.athenaclrc' # make hidden file
+    else: # win or other
+        prefsFileName = '.athenaclrc.xml'
+    return prefsFileName
+
+def getPrefsDir():
+    if os.name == 'posix':
+        dir = os.environ['HOME']
+    else: # win or other
+        prefsFileName = '.athenaclrc.xml'
+
+        # try to use defined app data directory for preference file
+        # this is not available on all windows versions
+        if 'APPDATA' in os.environ.keys():
+            dir = os.environ['APPDATA']
+        elif ('USERPROFILE' in os.environ.keys() and
+            os.path.exists(os.path.join(
+            os.environ['USERPROFILE'], 'Application Data'))):
+            dir = os.path.join(os.environ['USERPROFILE'], 
+                               'Application Data')
+        else: # use home directory
+            dir = os.path.expanduser('~') 
+    return dir
 
 
+def getPrefsPath():
+    """
+    >>> post = getPrefsPath()
+    """
+    dir = getPrefsDir()
+    prefsFileName = getPrefsName()
+
+    if not os.path.exists(dir):
+        raise Exception('cannot write preference file to %s' % dir)
+
+    return os.path.join(dir, prefsFileName)
+
+
+
+
+
+#-----------------------------------------------------------------||||||||||||--
 class Test(unittest.TestCase):
     
     def runTest(self):
@@ -1399,9 +1461,6 @@ class Test(unittest.TestCase):
 
 
 #-----------------------------------------------------------------||||||||||||--
-
-
-
 if __name__ == '__main__':
     from athenaCL.test import baseTest
     baseTest.main(Test)

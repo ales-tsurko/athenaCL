@@ -2151,7 +2151,7 @@ class EventMode:
         converst from athenaCL representation to file extensions
         """
         # leave space after flag
-        usrFileFormat = self.ao.external.getPref('external','audioFileFormat')
+        usrFileFormat = self.ao.external.getPref('external','audioFormat')
         if    usrFileFormat == 'aif': return '.aif', '-A ' 
         elif usrFileFormat == 'wav': return '.wav', '-W ' 
         elif usrFileFormat == 'sd2': return '.sd2', ''
@@ -2174,7 +2174,7 @@ class EventMode:
         self.ref['audioName'] = self.ref['nameMusic'] + self.ref['audioExt']
         # extra data
         self.ref['version'] = self.ao.aoInfo['version']
-        self.ref['optionNchnls'] = self.ao.nchnls
+        self.ref['optionNchnls'] = self.ao.audioChannels
         self.ref['optionMidiTempo'] = self.ao.midiTempo
         
     def _absPath(self, ext):
@@ -2277,10 +2277,10 @@ class EventMode:
         # these are paths used for launching things from w/n athenacl
         self.ao.aoInfo['viewFP'] = self.ref['pathView'] # 
         self.ao.aoInfo['audioFP'] = self.ref['pathAudio']
-        self.ao.aoInfo['scoFP'] = self.ref['pathSco'] 
-        self.ao.aoInfo['orcFP'] = self.ref['pathOrc']
-        self.ao.aoInfo['batFP'] = self.ref['pathBat']
-        self.ao.aoInfo['csdFP'] = self.ref['pathCsd']
+        self.ao.aoInfo['fpSco'] = self.ref['pathSco'] 
+        self.ao.aoInfo['fpOrc'] = self.ref['pathOrc']
+        self.ao.aoInfo['fpBat'] = self.ref['pathBat']
+        self.ao.aoInfo['fpCsd'] = self.ref['pathCsd']
         self.ao.aoInfo['midFP'] = self.ref['pathMid']
         
     def _outputToPath(self, output):

@@ -10,6 +10,10 @@
 
 
 import copy, random
+import unittest, doctest
+
+
+
 from athenaCL.libATH import drawer
 from athenaCL.libATH import typeset
 from athenaCL.libATH import error
@@ -382,7 +386,7 @@ class Clone:
         """this only supplies names, which wil load defaults"""
         for i, cloneLabel in basePmtr.cloneLabel(self.clonePmtrNo, 1):
             # add arg list default if missing to pmtrQdict
-            if not self.pmtrQDict.has_key(cloneLabel):
+            if not cloneLabel in self.pmtrQDict.keys():
                 args = [self.clonePmtrNames[i],]
                 dummyObj = parameter.factory(args, 'clonePmtrObjs', self.refDict)
                 self.pmtrQDict[cloneLabel] = dummyObj.getArgs()
@@ -775,9 +779,9 @@ class CloneManager:
     #-----------------------------------------------------------------------||--
     def load(self, tName, cName, pmtrQDict, auxNo, auxFmt, mute=0):
         """initialize a clone object inside the appropriate texture label"""
-        if not self._tRef.has_key(tName):
+        if not tName in self._tRef.keys():
             self._tRef[tName] = {}
-        if self._tRef[tName].has_key(cName):
+        if cName in self._tRef[tName].keys():
             raise error.CloneError, 'clone name already exists'
         self._tRef[tName][cName] = Clone(cName, tName)
         self._tRef[tName][cName].load(pmtrQDict, auxNo, auxFmt, mute)
@@ -785,9 +789,9 @@ class CloneManager:
 
     def loadDefault(self, tName, cName, auxNo, auxFmt):
         """initialize a clone object inside the appropriate texture label"""
-        if not self._tRef.has_key(tName):
+        if not tName in self._tRef.keys():
             self._tRef[tName] = {}
-        if self._tRef[tName].has_key(cName):
+        if cName in self._tRef[tName].keys():
             raise error.CloneError, 'clone name already exists'
         self._tRef[tName][cName] = Clone(cName, tName)
         self._tRef[tName][cName].loadDefault(auxNo, auxFmt)
@@ -898,11 +902,23 @@ class Test:
         b.updatePmtrObj()
         print b.editPmtrObj('time', ('filterAdd', ('c', 120)))
 
+
+
+
+
+
+
+#-----------------------------------------------------------------||||||||||||--
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
+
+
+#-----------------------------------------------------------------||||||||||||--
 if __name__ == '__main__':
-    Test()
-
-
-
-
-
-
+    from athenaCL.test import baseTest
+    baseTest.main(Test)

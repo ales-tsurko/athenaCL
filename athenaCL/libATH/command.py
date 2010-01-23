@@ -52,70 +52,70 @@ except ImportError: # pil or tk may not be installed
 _MOD = 'command.py'
 
 #-----------------------------------------------------------------||||||||||||--
-try:
-    import threading
-except ImportError:
-    pass
+# try:
+#     import threading
+# except ImportError:
+#     pass
 
 
-class Future:
-    """future object of a new thread
-    based on code by David Perry, Python Cookbook
-    threading may note work on all plats, so imports are class level only
-    note: when creating a detached gui window with threading, a segmentation
-    error results when the gui window is closed; cmds that open gui windows
-    should use a single thread.
-    """
-    def __init__(self, func, *param):
-        
-        # threading conditionally loaded above
-        "constructor"
-        self.__done = 0
-        self.__result = None
-        self.__status = 'working'
-        self.__excpt = None
-        self.__C = threading.Condition()
-        # run the function in a separate thread
-        self.__T = threading.Thread(target=self.Wrapper, args=(func, param))
-        self.__T.setName('FutureThread')
-        self.__T.start()
-
-    def __repr__(self):
-        return '<Future at ' + hex(id(self)) + ':' + self.__status + '>'
-
-    def __call__(self):
-        #self.__C.acquire()
-        while self.__done == 0:
-            self.__C.wait()
-        #self.__C.release()
-        # if an exception was thrown, re raise
-        if self.__excpt: # not None
-            raise self.__excpt
-        result = copy.deepcopy(self.__result)
-        return result
-
-    def isDone(self):
-        return self.__done
-
-    def Wrapper(self, func, param):
-        # run the funtion, with housekeeping
-        #self.__C.acquire()
-        try:
-            self.__result = func(*param)
-        except Exception, e:
-            self.__excpt = e
-            self.__result = 'Exception raised within Future'
-        except: # unknown exception, cant get proper traceback info here
-            tbObj = sys.exc_info() # get traceback object 
-            # str(tbObj[0]) # class, name of exception
-            self.__excpt = str(tbObj[1]) # object, string about exception
-            self.__result = 'Exception raised within Future'
-        self.__done = 1
-        self.__status = 'complete' #repr(self.__result)
-        #self.__C.notify()
-        #self.__C.release()
-
-
+# class Future:
+#     """future object of a new thread
+#     based on code by David Perry, Python Cookbook
+#     threading may note work on all plats, so imports are class level only
+#     note: when creating a detached gui window with threading, a segmentation
+#     error results when the gui window is closed; cmds that open gui windows
+#     should use a single thread.
+#     """
+#     def __init__(self, func, *param):
+#         
+#         # threading conditionally loaded above
+#         "constructor"
+#         self.__done = 0
+#         self.__result = None
+#         self.__status = 'working'
+#         self.__excpt = None
+#         self.__C = threading.Condition()
+#         # run the function in a separate thread
+#         self.__T = threading.Thread(target=self.Wrapper, args=(func, param))
+#         self.__T.setName('FutureThread')
+#         self.__T.start()
+# 
+#     def __repr__(self):
+#         return '<Future at ' + hex(id(self)) + ':' + self.__status + '>'
+# 
+#     def __call__(self):
+#         #self.__C.acquire()
+#         while self.__done == 0:
+#             self.__C.wait()
+#         #self.__C.release()
+#         # if an exception was thrown, re raise
+#         if self.__excpt: # not None
+#             raise self.__excpt
+#         result = copy.deepcopy(self.__result)
+#         return result
+# 
+#     def isDone(self):
+#         return self.__done
+# 
+#     def Wrapper(self, func, param):
+#         # run the funtion, with housekeeping
+#         #self.__C.acquire()
+#         try:
+#             self.__result = func(*param)
+#         except Exception, e:
+#             self.__excpt = e
+#             self.__result = 'Exception raised within Future'
+#         except: # unknown exception, cant get proper traceback info here
+#             tbObj = sys.exc_info() # get traceback object 
+#             # str(tbObj[0]) # class, name of exception
+#             self.__excpt = str(tbObj[1]) # object, string about exception
+#             self.__result = 'Exception raised within Future'
+#         self.__done = 1
+#         self.__status = 'complete' #repr(self.__result)
+#         #self.__C.notify()
+#         #self.__C.release()
+# 
+# 
 
 
 #-----------------------------------------------------------------||||||||||||--
@@ -8628,18 +8628,18 @@ class ELr(Command):
         # these paths have nothing to do with what files are actually created
         # these paths are always created, regardless of success
         if csd:
-            csdPath = self.ao.aoInfo['csdFP']
+            csdPath = self.ao.aoInfo['fpCsd']
             if not os.path.isfile(csdPath):
                 return lang.msgELfileMoved % csdPath
         else:
-            scoPath = self.ao.aoInfo['scoFP']
-            orcPath = self.ao.aoInfo['orcFP']
+            scoPath = self.ao.aoInfo['fpSco']
+            orcPath = self.ao.aoInfo['fpOrc']
             if not os.path.isfile(scoPath):
                 return lang.msgELfileMoved % scoPath  
             if not os.path.isfile(orcPath):
                 return lang.msgELfileMoved % orcPath  
         # if csound event type was created, then all paths created will be filled
-        self.batPath = self.ao.aoInfo['batFP']
+        self.batPath = self.ao.aoInfo['fpBat']
         if not os.path.isfile(self.batPath):
             return lang.msgELfileMoved % self.batPath 
 
@@ -8699,7 +8699,7 @@ class ELh(Command):
 #         if os.name == 'mac': # must check that fp is in found
 #             if self.audioPath in self.fmtFound:
 #                 prefDict = self.ao.external.getPrefGroup('external')
-#                 audioTools.setMacAudioRsrc(prefDict['audioFileFormat'], 
+#                 audioTools.setMacAudioRsrc(prefDict['audioFormat'], 
 #                                                     self.audioPath, prefDict)
         if os.name == 'posix':
             pass
@@ -8748,116 +8748,15 @@ class ELv(Command):
         return msg
 
 
-#-----------------------------------------------------------------||||||||||||--
 
-
-#-----------------------------------------------------------------||||||||||||--
-
-class CPch(Command):
-    """set the value of the number of channels
-    """
-
-    def __init__(self, ao, cmdEnviron=None, args=''):
-        Command.__init__(self, ao, cmdEnviron, args)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'CPch'
-
-    def _csConvertChannels(self, usrStr):
-        """return an integer value"""
-        ref = {
-            '1' : ['1', 'm', 'mono'],
-            '2' : ['2', 's', 'stereo'],
-            '4' : ['4', 'q', 'quad'],
-                }
-        usrStr = drawer.selectionParse(usrStr, ref)
-        if usrStr != None:
-            usrStr = int(usrStr) # convert to int
-        return usrStr # may be None
-        
-    def _csGetChannels(self):
-        query = 'current number of channels: %s.\nselect mono, stereo, or quad. (1,2,4):' % self.ao.nchnls
-        while 1:
-            usrStr = dialog.askStr(query, self.termObj) 
-            if usrStr == None: return None
-            channels = self._csConvertChannels(usrStr)
-            if channels == None:
-                continue
-            else:
-                return channels
-
-    def gather(self):
-        args = self.args
-        self.channels = None
-        if args != '':
-            args = argTools.ArgOps(args) # no strip
-            self.channels = self._csConvertChannels(args.get(0,'end'))
-            if self.channels == None: return self._getUsage()
-        if self.channels == None:
-            self.channels = self._csGetChannels()
-            if self.channels == None: return lang.msgReturnCancel
-
-    def process(self):
-        self.ao.nchnls = self.channels
-
-    def log(self):
-        if self.gatherStatus and self.processStatus: # if complete
-            return '%s %s' % (self.cmdStr, self.channels) 
-
-    def display(self): 
-        msg = 'channels changed to %r.\n' % self.ao.nchnls
-        return msg
-
-class CPff(Command):
-    """set the values of the audio foile format
-    """
-
-    def __init__(self, ao, cmdEnviron=None, args=''):
-        Command.__init__(self, ao, cmdEnviron, args)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'CPff'
-
-    def _csGetFileFormat(self):
-        while 1:
-            csFileFormat = self.ao.external.getPref('external','audioFileFormat')
-            usrStr = dialog.askStr('current audio file format: %s.\nselect aif, wav, or sd2. (a, w, or s):' %   csFileFormat, self.termObj) 
-            if usrStr == None: return None
-            formatStr = audioTools.audioFormatParser(usrStr)
-            if usrStr == None: continue
-            else: return formatStr
-
-    def gather(self):
-        args = self.args
-        self.formatStr = None
-        if args != '':
-            args = argTools.ArgOps(args) # no strip
-            self.formatStr = audioTools.audioFormatParser(args.get(0,'end'))
-            if self.formatStr == None: return self._getUsage()
-        if self.formatStr == None:
-            self.formatStr = self._csGetFileFormat()
-            if self.formatStr == None: return lang.msgReturnCancel
-
-    def process(self):
-        self.ao.external.writePref('external', 'audioFileFormat', self.formatStr)
-
-    def log(self):
-        if self.gatherStatus and self.processStatus: # if complete
-            return '%s %s' % (self.cmdStr, self.formatStr) 
-
-    def display(self): 
-        msg = 'audio file format changed to %s.\n' % ( 
-                      self.ao.external.getPref('external', 'audioFileFormat'))
-        return msg
-
-class CPauto(Command):
+class ELauto(Command):
     """causes eln to auto render and hear a newly created score
     """
     def __init__(self, ao, cmdEnviron=None, args=''):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 
         self.gatherSwitch = 1 
-        self.cmdStr = 'CPauto'
+        self.cmdStr = 'ELauto'
 
     def gather(self):
         args = self.args
@@ -8885,7 +8784,9 @@ class CPauto(Command):
         else: self.valueStr = lang.OFF
 
     def display(self):
-        return lang.msgCPauto % self.valueStr
+        return lang.msgELauto % self.valueStr
+
+
 
 #-----------------------------------------------------------------||||||||||||--
 class _CommandAO(Command):
@@ -8931,9 +8832,13 @@ class _CommandAO(Command):
     def _aoLoadAthenaData(self, athenaData):
         """ load an athena dictionary into current athenaObject"""
         # version only written on output, not on load
-        self.ao.nchnls = copy.deepcopy(athenaData['nchnls']) # set at startup
+        # set at startup
+        self.ao.audioChannels = copy.deepcopy(athenaData['audioChannels']) 
+        self.ao.audioRate = copy.deepcopy(athenaData['audioRate']) 
+
         if athenaData['author'] != '': 
-            self.ao.author = copy.deepcopy(athenaData['author']) # set at startup
+            # set at startup
+            self.ao.author = copy.deepcopy(athenaData['author']) 
         self.ao.tniMode = copy.deepcopy(athenaData['tniMode']) 
         self.ao.setEventMode(athenaData['activeEventMode'])
         # will set local orchestra as well
@@ -8941,7 +8846,9 @@ class _CommandAO(Command):
     def _aoSaveAthenaData(self):
         """ save all athena data in a dictionary """
         athenaData = {}
-        athenaData['nchnls'] = self.ao.nchnls
+        athenaData['audioChannels'] = self.ao.audioChannels
+        athenaData['audioRate'] = self.ao.audioRate
+
         if self.ao.author == '': # only change if it has not been set
             try:
                 self.ao.author = os.environ['USER']
@@ -8976,7 +8883,6 @@ class _CommandAO(Command):
         """ save all path data in a dictionary """
         pathData = {}
         pathData['activePath'] = self.ao.activePath
-        #pathData['activeSetMeasure'] = self.ao.activeSetMeasure
         pathData['pathLib'] = {}
         if len(self.ao.pathLib.keys()) > 0: # paths exist
             for pathName in self.ao.pathLib.keys():
@@ -9156,6 +9062,20 @@ class _CommandAO(Command):
 
 class AOl(_CommandAO):
     """load an AthenaObject, replacing the current one
+
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> ao.setEventMode('m')
+
+    >>> a = AOl(ao, args='empty01.xml')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    >>> a = AOl(ao, args='empty02.xml')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
     """
     def __init__(self, ao, cmdEnviron=None, args=''):
         _CommandAO.__init__(self, ao, cmdEnviron, args)
@@ -9283,6 +9203,20 @@ class AOw(_CommandAO):
 class AOmg(_CommandAO):
     """load path and texture data into the local athenaObject
     must check for name conflicts
+
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> ao.setEventMode('m')
+
+    >>> a = AOl(ao, args='empty01.xml')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    >>> a = AOmg(ao, args='empty01.xml')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
     """
 
     def __init__(self, ao, cmdEnviron=None, args=''):
@@ -9336,6 +9270,15 @@ class AOmg(_CommandAO):
 
 class AOals(_CommandAO):
     """view internal attributes of athean object. hidden command
+
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> ao.setEventMode('m')
+
+    >>> a = AOals(ao, args='empty01.xml')
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
     """
 
     def __init__(self, ao, cmdEnviron=None, args=''):
@@ -9398,8 +9341,6 @@ class AOrm(_CommandAO):
         return {}
 
 #-----------------------------------------------------------------||||||||||||--
-
-
 class APdlg(Command):
     """toggles between dialog modes"""
 
@@ -9467,7 +9408,7 @@ class APgfx(Command):
             usrStr = dialog.askStr(lang.msgAPgfxSelect % dlgVisMet,
                                                   self.termObj) 
             if usrStr == None: return None
-            usrStr = imageTools.imageFormatParser(usrStr)
+            usrStr = drawer.imageFormatParser(usrStr)
             if usrStr == None: continue
             else: return usrStr
 
@@ -9476,7 +9417,7 @@ class APgfx(Command):
         self.formatStr = None
         if args != '':
             args = argTools.ArgOps(args) # no strip
-            self.formatStr = imageTools.imageFormatParser(args.get(0,'end'))
+            self.formatStr = drawer.imageFormatParser(args.get(0,'end'))
             if self.formatStr == None: return self._getUsage()
         if self.formatStr == None:
             self.formatStr = self._apGetGfxFmt()
@@ -9489,7 +9430,6 @@ class APgfx(Command):
         msg =    lang.msgAPgfxConfirm % self.ao.external.getPref(
                                                 'athena','gfxVisualMethod')
         return msg
-
 
 class APcurs(Command):
     """toggles between cursor modes"""
@@ -9548,95 +9488,95 @@ class APr(Command):
         return lang.msgAPrefreshMode % typeset.boolAsStr(curVal)
 
 
-class APcc(Command):
-    """allows user to set cursor tool character replacements
-        can also restore defaults
-    """
-
-    def __init__(self, ao, cmdEnviron=None, args=''):
-        Command.__init__(self, ao, cmdEnviron, args)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'APcc'
-
-    def _apGetCursorToolConvert(self):
-        "gets a dictionary of character conversions"
-        convert = {}
-        convert['['] = self.ao.external.getPref('athena','cursorToolLb')
-        convert[']'] = self.ao.external.getPref('athena','cursorToolRb')
-        convert['('] = self.ao.external.getPref('athena','cursorToolLp')
-        convert[')'] = self.ao.external.getPref('athena','cursorToolRp')
-        convert['PI'] = self.ao.external.getPref('athena','cursorToolP')
-        convert['TI'] = self.ao.external.getPref('athena','cursorToolT')
-        return convert # keys are defaults
-
-    def _apRestoreCursorToolConvert(self, convert={}):
-        if len(convert) == 0: # resotre defaults
-            convert = {}
-            convert['['] = '['
-            convert[']'] = ']'
-            convert['('] = '('
-            convert[')'] = ')'
-            convert['PI'] = 'PI'
-            convert['TI'] = 'TI'
-        self.ao.external.writePref('athena', 'cursorToolLb', convert['['])
-        self.ao.external.writePref('athena', 'cursorToolRb', convert[']'])
-        self.ao.external.writePref('athena', 'cursorToolLp', convert['('])
-        self.ao.external.writePref('athena', 'cursorToolRp', convert[')'])
-        self.ao.external.writePref('athena', 'cursorToolP', convert['PI'])
-        self.ao.external.writePref('athena', 'cursorToolT', convert['TI'])
-
-    def gather(self):
-        args = self.args
-
-        restore = None
-        charList = None
-        if args != '':
-            return self._getUsage()
-
-        if restore == None or charList == None:
-            query = 'restore default cursor tool characters?'
-            askUsr = dialog.askYesNo(query,1,self.termObj)
-            if askUsr == 1:
-                self.restore = 1
-
-            elif askUsr == -1:
-                return lang.msgReturnCancel
-            elif askUsr == 0:
-                self.restore = 0
-
-        if self.restore != 1:
-            # get chars from user
-            newConvert = {}
-            oldConvert = self._apGetCursorToolConvert()
-            keySort = oldConvert.keys()
-            keySort.sort()
-            for symType in keySort:
-                query = 'enter a string for "%s":' % symType
-                # get string w/o stripping white space
-                char = dialog.askStr(query, self.termObj, 0)
-                if char == None: # must interpret as ''
-                    char = ''
-                badChar = self._nameTest(char, ' ') # incl space
-                if badChar == None: # its okay
-                    newConvert[symType] = char
-                else:
-                    msg = 'bad character; using default.\n'  
-                    dialog.msgOut((lang.TAB + msg), self.termObj)
-                    newConvert[symType] = symType
-            self.newConvert = newConvert
-
-    def process(self):
-        if self.restore:
-            self._apRestoreCursorToolConvert() # restore
-        else:
-            self._apRestoreCursorToolConvert(self.newConvert)
-
-    def display(self): 
-        if self.restore:
-            return 'restore complete.\n' 
-        else:
-            return 'cursor tool customization complete.\n'  
+# class APcc(Command):
+#     """allows user to set cursor tool character replacements
+#         can also restore defaults
+#     """
+# 
+#     def __init__(self, ao, cmdEnviron=None, args=''):
+#         Command.__init__(self, ao, cmdEnviron, args)
+#         self.processSwitch = 1 # display only
+#         self.gatherSwitch = 1 # display only
+#         self.cmdStr = 'APcc'
+# 
+#     def _apGetCursorToolConvert(self):
+#         "gets a dictionary of character conversions"
+#         convert = {}
+#         convert['['] = self.ao.external.getPref('athena','cursorToolLb')
+#         convert[']'] = self.ao.external.getPref('athena','cursorToolRb')
+#         convert['('] = self.ao.external.getPref('athena','cursorToolLp')
+#         convert[')'] = self.ao.external.getPref('athena','cursorToolRp')
+#         convert['PI'] = self.ao.external.getPref('athena','cursorToolP')
+#         convert['TI'] = self.ao.external.getPref('athena','cursorToolT')
+#         return convert # keys are defaults
+# 
+#     def _apRestoreCursorToolConvert(self, convert={}):
+#         if len(convert) == 0: # resotre defaults
+#             convert = {}
+#             convert['['] = '['
+#             convert[']'] = ']'
+#             convert['('] = '('
+#             convert[')'] = ')'
+#             convert['PI'] = 'PI'
+#             convert['TI'] = 'TI'
+#         self.ao.external.writePref('athena', 'cursorToolLb', convert['['])
+#         self.ao.external.writePref('athena', 'cursorToolRb', convert[']'])
+#         self.ao.external.writePref('athena', 'cursorToolLp', convert['('])
+#         self.ao.external.writePref('athena', 'cursorToolRp', convert[')'])
+#         self.ao.external.writePref('athena', 'cursorToolP', convert['PI'])
+#         self.ao.external.writePref('athena', 'cursorToolT', convert['TI'])
+# 
+#     def gather(self):
+#         args = self.args
+# 
+#         restore = None
+#         charList = None
+#         if args != '':
+#             return self._getUsage()
+# 
+#         if restore == None or charList == None:
+#             query = 'restore default cursor tool characters?'
+#             askUsr = dialog.askYesNo(query,1,self.termObj)
+#             if askUsr == 1:
+#                 self.restore = 1
+# 
+#             elif askUsr == -1:
+#                 return lang.msgReturnCancel
+#             elif askUsr == 0:
+#                 self.restore = 0
+# 
+#         if self.restore != 1:
+#             # get chars from user
+#             newConvert = {}
+#             oldConvert = self._apGetCursorToolConvert()
+#             keySort = oldConvert.keys()
+#             keySort.sort()
+#             for symType in keySort:
+#                 query = 'enter a string for "%s":' % symType
+#                 # get string w/o stripping white space
+#                 char = dialog.askStr(query, self.termObj, 0)
+#                 if char == None: # must interpret as ''
+#                     char = ''
+#                 badChar = self._nameTest(char, ' ') # incl space
+#                 if badChar == None: # its okay
+#                     newConvert[symType] = char
+#                 else:
+#                     msg = 'bad character; using default.\n'  
+#                     dialog.msgOut((lang.TAB + msg), self.termObj)
+#                     newConvert[symType] = symType
+#             self.newConvert = newConvert
+# 
+#     def process(self):
+#         if self.restore:
+#             self._apRestoreCursorToolConvert() # restore
+#         else:
+#             self._apRestoreCursorToolConvert(self.newConvert)
+# 
+#     def display(self): 
+#         if self.restore:
+#             return 'restore complete.\n' 
+#         else:
+#             return 'cursor tool customization complete.\n'  
 
 
 
@@ -9884,6 +9824,182 @@ class APea(Command):
         return msg
 
 
+
+class APa(Command):
+    """set the value of the number of channels
+
+    channels and sampling rate are stored in atheanobj
+    file type is stored in preference file
+
+    >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> ao.setEventMode('m')
+
+    >>> a = APa(ao, args='f aif')    
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+    >>> post = a.log()
+
+    >>> a = APa(ao, args='ch 2')    
+    >>> ok, result = a.do()
+    >>> ok == True
+    True    
+
+    """
+    def __init__(self, ao, cmdEnviron=None, args=''):
+        Command.__init__(self, ao, cmdEnviron, args)
+        self.processSwitch = 1 # display only
+        self.gatherSwitch = 1 # display only
+        self.cmdStr = 'APa'
+
+    def _apConvertAudioPrefName(self, usrStr):
+        """
+        >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+        >>> ao.setEventMode('m')
+
+        >>> a = APa(ao, args='')
+        >>> a._apConvertAudioPrefName('format')
+        'audioFormat'
+        """
+        ref = {
+            'audioFormat'  : ['f', 'format', 'ff', 'type'],
+            'audioChannels' : ['c', 'ch', 'channel', 'channels'], 
+            'audioRate' : ['r', 'rate', 'sr'], 
+                }
+        usrStr = drawer.selectionParse(usrStr, ref)
+        return usrStr # may be None
+
+    def _apGetAudioPref(self):
+        query = 'select format, channels, or rate. (f,c,r):'
+        while 1:
+            usrStr = dialog.askStr(query, self.termObj) 
+            if usrStr == None: return None
+            post = self._apConvertAudioPrefName(usrStr)
+            if post == None:
+                continue
+            else:
+                return post
+
+    def _apConvertChannels(self, usrStr):
+        """return an integer value"""
+        ref = {
+            '1' : ['1', 'm', 'mono'],
+            '2' : ['2', 's', 'stereo'],
+            '4' : ['4', 'q', 'quad'],
+                }
+        usrStr = drawer.selectionParse(usrStr, ref)
+        if usrStr != None:
+            usrStr = int(usrStr) # convert to int
+        return usrStr # may be None
+        
+    def _apGetChannels(self):
+        query = 'current number of channels: %s.\nselect mono, stereo, or quad. (1,2,4):' % self.ao.audioChannels
+        while 1:
+            usrStr = dialog.askStr(query, self.termObj) 
+            if usrStr == None: return None
+            channels = self._apConvertChannels(usrStr)
+            if channels == None:
+                continue
+            else:
+                return channels
+
+    def _apGetFileFormat(self):
+        while 1:
+            audioFormat = self.ao.external.getPref('external','audioFormat')
+            usrStr = dialog.askStr('current audio file format: %s.\nselect aif, wav, or sd2. (a, w, or s):' %   audioFormat, self.termObj) 
+            if usrStr == None: return None
+            formatStr = audioTools.audioFormatParser(usrStr)
+            if usrStr == None: continue
+            else: return formatStr
+
+
+    def gather(self):
+        args = self.args
+
+        self.pref = None
+        self.prefValue = None
+
+        if args != '':
+            args = argTools.ArgOps(args) # no strip
+            self.pref = self._apConvertAudioPrefName(args.get(0))
+
+            if self.pref == None: return self._getUsage()
+
+            if self.pref == 'audioChannels':
+                self.prefValue = self._apConvertChannels(args.get(1,'end'))
+                if self.prefValue == None: return self._getUsage()
+            elif self.pref == 'audioRate':
+                self.prefValue = 44100
+            elif self.pref == 'audioFormat':
+                self.prefValue = audioTools.audioFormatParser(args.get(1,'end'))
+                if self.prefValue == None: return self._getUsage()
+
+        if self.pref == None:
+            self.pref = self._apGetAudioPref()
+            if self.pref == None: return lang.msgReturnCancel
+
+            if self.pref == 'audioChannels':
+                self.prefValue = self._apGetChannels()
+                if self.prefValue == None: return self._getUsage()
+            elif self.pref == 'audioRate':
+                self.prefValue = 44100
+            elif self.pref == 'audioFormat':
+                self.prefValue = self._apGetFileFormat()
+                if self.prefValue == None: return lang.msgReturnCancel
+
+
+    def process(self):
+        if self.pref == 'audioChannels':
+            self.ao.audioChannels = self.prefValue
+        elif self.pref == 'audioRate':
+            pass
+            #self.prefValue = 44100
+        elif self.pref == 'audioFormat':
+            self.ao.external.writePref('external', 'audioFormat', 
+                self.prefValue)
+
+    def log(self):
+        if self.gatherStatus and self.processStatus: # if complete
+            return '%s %s' % (self.pref, self.prefValue) 
+
+    def display(self): 
+        label = self.pref.replace('audio', '').lower()
+        msg = 'audio %s set to %r.\n' % (label, self.prefValue)
+        return msg
+
+# class CPff(Command):
+#     """set the values of the audio foile format
+#     """
+# 
+#     def __init__(self, ao, cmdEnviron=None, args=''):
+#         Command.__init__(self, ao, cmdEnviron, args)
+#         self.processSwitch = 1 # display only
+#         self.gatherSwitch = 1 # display only
+#         self.cmdStr = 'CPff'
+# 
+# 
+#     def gather(self):
+#         args = self.args
+#         self.formatStr = None
+#         if args != '':
+#             args = argTools.ArgOps(args) # no strip
+#             self.formatStr = audioTools.audioFormatParser(args.get(0,'end'))
+#             if self.formatStr == None: return self._getUsage()
+#         if self.formatStr == None:
+# 
+#     def process(self):
+#         self.ao.external.writePref('external', 'audioFormat', self.formatStr)
+# 
+#     def log(self):
+#         if self.gatherStatus and self.processStatus: # if complete
+#             return '%s %s' % (self.cmdStr, self.formatStr) 
+# 
+#     def display(self): 
+#         msg = 'audio file format changed to %s.\n' % ( 
+#                       self.ao.external.getPref('external', 'audioFormat'))
+#         return msg
+# 
+# 
 
 
 
@@ -10169,9 +10285,9 @@ class AUsys(Command):
         value = self.ao.external.getPref('external','autoRenderOption')                             
         entryLines.append(['EventMode auto render:', typeset.boolAsStr(value)])
 
-        entryLines.append(['audio channels:', self.ao.nchnls])
+        entryLines.append(['audio channels:', self.ao.audioChannels])
 
-        value = self.ao.external.getPref('external','audioFileFormat')
+        value = self.ao.external.getPref('external','audioFormat')
         entryLines.append(['audio file format:', value])
         entryLines.append(['midi tempo:', self.ao.midiTempo])
 
@@ -10184,7 +10300,7 @@ class AUsys(Command):
         entryLines.append(['refresh mode:', typeset.boolAsStr(value)])
 
         entryLines.append(['', '']) # draw line
-        entryLines.append(['preferences:', self.ao.external.prefsPath])
+        entryLines.append(['preferences:', drawer.getPrefsPath()])
         if self.ao.external.logCheck():
             entryLines.append(['log:', self.ao.external.logPath])
         value = self.ao.external.getPref('athena', 'fpScratchDir')
@@ -10654,11 +10770,11 @@ class EL_(_Menu):
         _Menu.__init__(self, ao, cmdEnviron, args)
         self.prefix = 'EL'
 
-class CP_(_Menu):
-    """menu command"""
-    def __init__(self, ao, cmdEnviron=None, args=''):
-        _Menu.__init__(self, ao, cmdEnviron, args)
-        self.prefix = 'CP'
+# class CP_(_Menu):
+#     """menu command"""
+#     def __init__(self, ao, cmdEnviron=None, args=''):
+#         _Menu.__init__(self, ao, cmdEnviron, args)
+#         self.prefix = 'CP'
 
 class AO_(_Menu):
     """menu command"""

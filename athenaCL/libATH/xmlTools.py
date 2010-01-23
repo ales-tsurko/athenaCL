@@ -4,12 +4,14 @@
 #
 # Authors:       Christopher Ariza
 #
-# Copyright:     (c) 2004-2006 Christopher Ariza
+# Copyright:     (c) 2004-2010 Christopher Ariza
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
 
 
 from athenaCL.libATH import drawer
+import unittest, doctest
+
 _MOD = 'xmlTools.py'
 
 #-----------------------------------------------------------------||||||||||||--
@@ -121,7 +123,6 @@ def pyToXml(parentName, name, dict, indent=1, levelManifest=[]):
     levelManifest is a list of labels for each dictionary level
         None will use the dictionary name as is
         pairs match TagName, DisplayName"""
-
     
     if levelManifest == [] or levelManifest[0] == None:
         levelMatch = {}
@@ -379,11 +380,17 @@ class Xsl:
 
 
 
-#-----------------------------------------------------------------||||||||||||--
-# testign
 
-class Test:
-    def __init__(self):
+#-----------------------------------------------------------------||||||||||||--
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
+
+    def testBasic(self):
         a = {'a':1,
               'b':2,
               'd':{'3':'recursion', 
@@ -401,10 +408,14 @@ class Test:
               'c':3}
 
         g = pyToXml('', 'test', a, 1, ['thingA', None, ('five', 'thingB')])
-        print ''.join(g)
 
-
-
+#-----------------------------------------------------------------||||||||||||--
 if __name__ == '__main__':
-    Test()
+    from athenaCL.test import baseTest
+    baseTest.main(Test)
+
+
+
+
+
 

@@ -145,24 +145,7 @@ def FloatToRGB(cellValue):
 # vetor here referes to a trademarked name
 # dynamic testing of available formats in drawer.imageFormats
 
-imageFormatNames = ['text', 'eps', 'tk', 'png', 'jpg']
 
-def imageFormatParser(usrStr):
-    """provide backward compat to older names
-
-    >>> imageFormatParser('jpeg')
-    'jpg'
-    """
-    ref = {
-        'jpg' : ['pil', 'jpeg', 'jpg', 'j'],
-        'png' : ['file', 'png', 'p'],
-        'tk'    : ['tk', 'tkinter', 'k'], # t reserved for text
-        'eps' : ['eps', 'ps', 'e'],
-        'text': ['text', 't'],
-            }
-    usrStr = drawer.selectionParse(usrStr, ref)
-    return usrStr # may be None
-    
 
         
     
