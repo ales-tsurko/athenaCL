@@ -25,7 +25,7 @@ lang = language.LangObj()
 class HarmonicAssembly(baseTexture.Texture):
     def __init__(self, name=None):
         """
-        >>> a = HarmonicAssembly('test')
+        #>>> a = HarmonicAssembly('test')
         """
         baseTexture.Texture.__init__(self, name) # init base class
         self.author = 'athenaCL native'

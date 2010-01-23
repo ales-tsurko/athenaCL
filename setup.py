@@ -264,13 +264,13 @@ def reportMan(optFink=0):
 #-----------------------------------------------------------------||||||||||||--
 # Each file name in files is interpreted relative to the setup.py script at the top of the package source distribution. No directory information from files is used to determine the final location of the installed file; only the name of the file is used.
 
-def _getSsdirPaths():
+def _getAudioPaths():
     """get list of file names found in the ssdir"""
-    fileList = os.listdir(os.path.join(_PKGDIR, 'libATH', 'ssdir'))
+    fileList = os.listdir(os.path.join(_PKGDIR, 'audio'))
     filterList = []
     for name in fileList:
         if name.endswith('.aif'):
-            filterList.append(os.path.join('libATH', 'ssdir', name))
+            filterList.append(os.path.join(_PKGDIR, 'audio', name))
     return filterList
 
 def _getDemoPaths():
@@ -308,7 +308,7 @@ def _getPackagesList():
              'athenaCL.libATH.osc', 
              'athenaCL.libATH.patterns', 
              'athenaCL.libATH.patterns.notification', 
-             'athenaCL.libATH.ssdir',#creates dir, not files
+             'athenaCL.audio',#creates dir, not files
              'athenaCL.libATH.sadir',#creates dir, not files
              )
     return pkg
@@ -366,10 +366,8 @@ def _pkgDataManager(argField):
         sitePkgAthena = os.path.join(osTools.findSitePackages(), 'athenaCL')          
         sitePkgDemo = os.path.join(sitePkgAthena, 'demo')
         sitePkgDocs = os.path.join(sitePkgAthena, 'docs')
-        sitePkgSsdir = os.path.join(sitePkgAthena, 'libATH', 'ssdir')
-        # sitePkgSadir = os.path.join(sitePkgAthena, 'libATH', 'sadir')
-        # arg data as passed to keyword
-        argData = [(sitePkgSsdir, _getSsdirPaths()),
+        sitePkgSsdir = os.path.join(sitePkgAthena, 'audio')
+        argData = [(sitePkgSsdir, _getAudioPaths()),
                       (sitePkgDemo, _getDemoPaths()),
                       (sitePkgDocs, _getDocsPaths())
                      ]
@@ -377,7 +375,7 @@ def _pkgDataManager(argField):
     # avoids problem with windows intaller getting wrong path
     elif methodForce == 'package_data':
         argData = {'athenaCL': 
-                      _getSsdirPaths() + _getDemoPaths() + _getDocsPaths()
+                      _getAudioPaths() + _getDemoPaths() + _getDocsPaths()
                      }
     return argData
 
@@ -453,7 +451,7 @@ def writeManifest(athenaDir):
         alt = '%s\n' % alt[1:]
         msgFilter.append(alt)       
     # non code files: these ar relative to athenaCL dir
-    for stub in _getSsdirPaths() + _getDemoPaths() + _getDocsPaths():
+    for stub in _getAudioPaths() + _getDemoPaths() + _getDocsPaths():
         msgFilter.append('%s\n' % stub)
     # write file
     dst = os.path.join(athenaDir, 'MANIFEST')

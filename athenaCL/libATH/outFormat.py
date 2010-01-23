@@ -8,6 +8,9 @@
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
 
+import unittest, doctest
+
+
 
 from athenaCL.libATH import drawer
 from athenaCL.libATH import language
@@ -36,6 +39,11 @@ outputFormatNames = {
 def outputFormatParser(typeName):
     """
     does not raise an error if no match: returns string as none
+
+    >>> outputFormatParser('mf')
+    'midiFile'
+    >>> outputFormatParser('af')
+    'audioFile'
     """
     parsed = drawer.acronymExpand(typeName, outputFormatNames)
     if parsed == None: pass
@@ -50,10 +58,14 @@ outputExportFormatNames = {
     'mc'      :'maxColl',
     }
 
-
 def outputExportFormatParser(typeName):
     """
     does not raise an error if no match: returns string as none
+
+    >>> outputExportFormatParser('af')
+    'audioFile'
+    >>> outputExportFormatParser('ts')
+    'textSpace'
     """
     parsed = drawer.acronymExpand(typeName, outputExportFormatNames)
     if parsed == None: pass
@@ -79,6 +91,9 @@ class _OutputFormat:
 #-----------------------------------------------------------------||||||||||||--
 class FormatAudioFile(_OutputFormat):
     def __init__(self):
+        """
+        >>> a = FormatAudioFile()
+        """
         _OutputFormat.__init__(self)
         self.name = 'audioFile'
         self.emKey = 'pathAudioSynth' 
@@ -89,6 +104,9 @@ class FormatAudioFile(_OutputFormat):
 #-----------------------------------------------------------------||||||||||||--
 class FormatCsoundOrchestra(_OutputFormat):
     def __init__(self):
+        """
+        >>> a = FormatCsoundOrchestra()
+        """
         _OutputFormat.__init__(self)
         self.name = 'csoundOrchestra'
         self.emKey = 'pathOrc'
@@ -98,6 +116,9 @@ class FormatCsoundOrchestra(_OutputFormat):
 #-----------------------------------------------------------------||||||||||||--
 class FormatCsoundScore(_OutputFormat):
     def __init__(self):
+        """
+        >>> a = FormatCsoundScore()
+        """
         _OutputFormat.__init__(self)
         self.name = 'csoundScore'
         self.emKey = 'pathSco'
@@ -108,6 +129,9 @@ class FormatCsoundScore(_OutputFormat):
 class FormatCsoundData(_OutputFormat):
     def __init__(self):
         _OutputFormat.__init__(self)
+        """
+        >>> a = FormatCsoundData()
+        """
         self.name = 'csoundData'
         self.emKey = 'pathCsd'
         self.doc = 'Csound XML unified file format'
@@ -116,6 +140,9 @@ class FormatCsoundData(_OutputFormat):
 #-----------------------------------------------------------------||||||||||||--
 class FormatCsoundBatch(_OutputFormat):
     def __init__(self):
+        """
+        >>> a = FormatCsoundBatch()
+        """
         _OutputFormat.__init__(self)
         self.name = 'csoundBatch'
         self.emKey = 'pathBat'
@@ -125,6 +152,9 @@ class FormatCsoundBatch(_OutputFormat):
 #-----------------------------------------------------------------||||||||||||--
 class FormatMidiFile(_OutputFormat):
     def __init__(self):
+        """
+        >>> a = FormatMidiFile()
+        """
         _OutputFormat.__init__(self)
         self.name = 'midiFile'
         self.emKey = 'pathMid'
@@ -134,14 +164,21 @@ class FormatMidiFile(_OutputFormat):
 #-----------------------------------------------------------------||||||||||||--
 class FormatTextSpace(_OutputFormat):
     def __init__(self):
+        """
+        >>> a = FormatTextSpace()
+        """
         _OutputFormat.__init__(self)
         self.name = 'textSpace'
         self.emKey = 'pathTxtSpace'
         self.doc = 'Space delimited event list'
         self.ext = '.space.txt'
-        #-----------------------------------------------------------------||||||||||||--
+
+#-----------------------------------------------------------------||||||||||||--
 class FormatTextTab(_OutputFormat):
     def __init__(self):
+        """
+        >>> a = FormatTextTab()
+        """
         _OutputFormat.__init__(self)
         self.name = 'textTab'
         self.emKey = 'pathTxtTab'
@@ -151,6 +188,9 @@ class FormatTextTab(_OutputFormat):
 #-----------------------------------------------------------------||||||||||||--
 class FormatMaxColl(_OutputFormat):
     def __init__(self):
+        """
+        >>> a = FormatMaxColl()
+        """
         _OutputFormat.__init__(self)
         self.name = 'maxColl'
         self.emKey = 'pathMaxColl'
@@ -160,6 +200,9 @@ class FormatMaxColl(_OutputFormat):
 #-----------------------------------------------------------------||||||||||||--
 class FormatAcToolbox(_OutputFormat):
     def __init__(self):
+        """
+        >>> a = FormatAcToolbox()
+        """
         _OutputFormat.__init__(self)
         self.name = 'acToolbox'
         self.emKey = 'pathAct'
@@ -169,6 +212,9 @@ class FormatAcToolbox(_OutputFormat):
 #-----------------------------------------------------------------||||||||||||--
 class FormatXmlAthenaObject(_OutputFormat):
     def __init__(self):
+        """
+        >>> a = FormatXmlAthenaObject()
+        """
         _OutputFormat.__init__(self)
         self.name = 'xmlAthenaObject'
         self.emKey = 'pathXml'
@@ -211,3 +257,21 @@ def factory(request):
         return reqArray[0]
     else:
         return reqArray
+
+
+
+#-----------------------------------------------------------------||||||||||||--
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
+
+
+#-----------------------------------------------------------------||||||||||||--
+if __name__ == '__main__':
+    from athenaCL.test import baseTest
+    baseTest.main(Test)
+

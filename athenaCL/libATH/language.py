@@ -365,7 +365,7 @@ Apple, Macintosh, Mac OS, and QuickTime are trademarks or registered trademarks 
     msgTInoDynEdit            = 'TIe %s' % ERROR + ' this texture has no dynamic texture parameters\n'
 
     msgTImodeChoose   = 'edit TI %s: Pitch, Polyphony, Silence, or PostMap Mode? (p, y, s, m):'
-    msgTImodePitchChoose      = TAB + 'current Pitch Mode: %s. enter new mode (sc, pcs, ps):'
+    msgTImodePitchChoose = TAB + 'current Pitch Mode: %s. enter new mode (sc, pcs, ps):'
     msgTImodePolyChoose   = TAB + 'current Polyphony Mode: %s. enter new mode (set, part):'
     msgTImodeSilenceChoose = TAB + 'current Silence Mode: %s. enter new mode (on, off):'
     msgTImodeMixChoose    = TAB + 'current PostMap Mode: %s. enter new mode (on, off):'
@@ -415,8 +415,8 @@ Apple, Macintosh, Mac OS, and QuickTime are trademarks or registered trademarks 
     msgEMnoOutput = TAB + 'no such format exists.\n'
 
 
-    msgELcreateFirst  = 'create an event list first. enter "ELn".\n'
-    msgELfileMoved    = 'the file (%s) cannot be found. enter "ELn" to create new EventList files.\n'
+    msgELcreateFirst = 'create an event list first. enter "ELn".\n'
+    msgELfileMoved = 'the file (%s) cannot be found. enter "ELn" to create new EventList files.\n'
     msgELnoScores   = 'too many rests: no events were created.\n'
     msgELviewInit = 'EventList view initiated: %s\n'
     msgELnameScore            = 'name an EventList. use a ".xml" extension:'
@@ -441,7 +441,7 @@ Apple, Macintosh, Mac OS, and QuickTime are trademarks or registered trademarks 
     msgAOnotXML               = TAB + 'this is not an AthenaObject xml document.\n'
     msgAOerrorXML             = TAB + 'unable to parse xml document.\n'
     msgAOnotAOdoc             = TAB + 'this is not an AthenaObject document.\n'
-    msgAOselAdirOrSdir    = 'select directory to set: scratch, ssdir, or sadir. (x, ss or sa):'
+    msgAOselAdirOrSdir = 'select directory to set: scratch or audio. (x or a):'
 
     msgAPdlgSelect            = 'active dialog visual method: %s.\nselect text, tk, or mac. (t, k, or m):'
     msgAPdlgConfirm       = 'dialog visual method changed to %s.\n'
@@ -451,19 +451,19 @@ Apple, Macintosh, Mac OS, and QuickTime are trademarks or registered trademarks 
     msgAPrefreshMode          = 'refresh mode set to %s.\n'
 
     #-----------------------------------------------------------------------||--
-    salutationAm0             = 'welcome'
-    salutationAm1             = 'good day.'
-    salutationAm2             = 'good morning.'
-    salutationPm1             = 'good afternoon.'
-    salutationPm2             = 'good evening.'
-    salutationPm3             = 'evening.'
-    salutationBirth       = 'athenaCL was first released on this day %s years ago.'
-    provoke1                      = 'nothing.'
-    provoke2                      = 'anything?'
-    provoke3                      = 'attempt a command?'
-    provoke4                      = 'try something.'
-    provoke5                      = 'empty?'
-    provoke6                      = 'still nothing.'
+    salutationAm0 = 'welcome'
+    salutationAm1 = 'good day.'
+    salutationAm2 = 'good morning.'
+    salutationPm1 = 'good afternoon.'
+    salutationPm2 = 'good evening.'
+    salutationPm3 = 'evening.'
+    salutationBirth  = 'athenaCL was first released on this day %s years ago.'
+    provoke1 = 'nothing.'
+    provoke2 = 'anything?'
+    provoke3 = 'attempt a command?'
+    provoke4 = 'try something.'
+    provoke5 = 'empty?'
+    provoke6 = 'still nothing.'
     admonish1                 = '%s does not make any sense.'
     admonish2                 = 'what is a %s?'
     admonish3                 = '%s is irrational.'
@@ -750,7 +750,7 @@ Apple, Macintosh, Mac OS, and QuickTime are trademarks or registered trademarks 
     #-----------------------------------------------------------------------||--
     # file pmtrObjects
     
-    docPoSs = "Given a list of file names (fileNameList), this Generator provides a complete file path to the file found within either the libATH/ssdir or the user-selected ssdir. %s" % _selectionStr
+    docPoSs = "Given a list of file names (fileNameList), this Generator provides a complete file path to the file found within either the athenaCL/audio or the user-selected audio directory. %s" % _selectionStr
     
     docPoAs = "Given a list of file names (fileNameList), this Generator provides a complete file path to the file found within either the libATH/sadir or the user-selected sadir. %s" % _selectionStr
     

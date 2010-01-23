@@ -23,7 +23,7 @@ lang = language.LangObj()
 class TimeFill(baseTexture.Texture):
     def __init__(self, name=None):
         """
-        >>> a = TimeFill('test')
+        >>> # a = TimeFill('test')
         """
         baseTexture.Texture.__init__(self, name) # init base class
         self.author = 'athenaCL native'

@@ -4,7 +4,7 @@
 #
 # Authors:       Christopher Ariza
 #
-# Copyright:     (c) 2004-2007 Christopher Ariza
+# Copyright:     (c) 2004-2010 Christopher Ariza
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
 
@@ -14,6 +14,7 @@
 # with the same interface
 
 import random, os, array, copy
+import unittest, doctest
 
 try:
     import aifc, audioop
@@ -42,23 +43,23 @@ def audioFormatParser(usrStr):
     
 
 #-----------------------------------------------------------------||||||||||||--
-def setMacAudioRsrc(fmt, audioPath, prefDict=None):
-    """for macos 9, necessary to set creator and type
-    of audio files. given a fmt and file path, this function
-    does all necessary processing to audio file"""
-    if fmt == None: # assume it is an aif
-        fmt = 'aif'
-    # get standard type codes
-    if fmt == 'aif': typeCode = 'AIFF'
-    elif fmt == 'wav':  typeCode = 'WAVE'
-    elif fmt in ['sd2', 'ircam']: typeCode = 'Sd2f'       
-    # get creator code, use qt on default
-    if prefDict != None and prefDict.has_key('audioPlayerCreatorCode'): 
-        # may be a complete file path, or a name
-        creatorCode = prefDict['audioPlayerCreatorCode'] 
-    else: #'TVOD' is QuickTime, 'auFM' is Peak  
-        creatorCode = 'TVOD' # quick time       
-    osTools.rsrcSetCreator(audioPath, creatorCode, typeCode)
+# def setMacAudioRsrc(fmt, audioPath, prefDict=None):
+#     """for macos 9, necessary to set creator and type
+#     of audio files. given a fmt and file path, this function
+#     does all necessary processing to audio file"""
+#     if fmt == None: # assume it is an aif
+#         fmt = 'aif'
+#     # get standard type codes
+#     if fmt == 'aif': typeCode = 'AIFF'
+#     elif fmt == 'wav':  typeCode = 'WAVE'
+#     elif fmt in ['sd2', 'ircam']: typeCode = 'Sd2f'       
+#     # get creator code, use qt on default
+#     if prefDict != None and prefDict.has_key('audioPlayerCreatorCode'): 
+#         # may be a complete file path, or a name
+#         creatorCode = prefDict['audioPlayerCreatorCode'] 
+#     else: #'TVOD' is QuickTime, 'auFM' is Peak  
+#         creatorCode = 'TVOD' # quick time       
+#     osTools.rsrcSetCreator(audioPath, creatorCode, typeCode)
 
 
 #-----------------------------------------------------------------||||||||||||--
@@ -892,7 +893,7 @@ class AudioFile:
         rangeMax = frames - length
         if rangeMax <= 0: 
             print _MOD, 'findShard: self.frames, length %s %s' % (
-                                                                            self.frames, length)
+                                                        self.frames, length)
             return None # skip
         frameRange = range(0, rangeMax)
         for i in range(0, maxAttempt):
@@ -1099,7 +1100,7 @@ def fileDur(srcPath):
 
 
 #-----------------------------------------------------------------||||||||||||--          
-def test():
+def TestOld():
     src = '/Volumes/ydisc/_sync/iport/shardSrc/'
     dst = '/Volumes/ydisc/_sync/iport/shardDst/shardBassB-136/'
 
@@ -1125,5 +1126,18 @@ def test():
 
 
 
+#-----------------------------------------------------------------||||||||||||--
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
+
+
+#-----------------------------------------------------------------||||||||||||--
 if __name__ == '__main__':
-    test()
+    from athenaCL.test import baseTest
+    baseTest.main(Test)
+

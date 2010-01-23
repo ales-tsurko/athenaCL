@@ -4,9 +4,12 @@
 #
 # Authors:       Christopher Ariza
 #
-# Copyright:     (c) 2004-2006 Christopher Ariza
+# Copyright:     (c) 2004-2010 Christopher Ariza
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
+
+import unittest, doctest
+
 
 from athenaCL.libATH.libPmtr import basePmtr
 from athenaCL.libATH import language
@@ -21,6 +24,8 @@ _MOD = 'cloneStatic.py'
 
 class TimeReferenceSource(basePmtr.StaticParameterClone):
     def __init__(self, args, refDict):
+        """
+        """
         # note: define type first for first arg check arg checking
         self.type = 'timeReferenceSource'
         self.doc = lang.docPoTrs
@@ -99,7 +104,20 @@ class _SwitchOnOff(basePmtr.StaticParameterClone):
 
 
 
+#-----------------------------------------------------------------||||||||||||--
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
 
+
+#-----------------------------------------------------------------||||||||||||--
+if __name__ == '__main__':
+    from athenaCL.test import baseTest
+    baseTest.main(Test)
 
 
 

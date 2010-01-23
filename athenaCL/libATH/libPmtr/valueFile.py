@@ -4,12 +4,15 @@
 #
 # Authors:       Christopher Ariza
 #
-# Copyright:     (c) 2001-2007 Christopher Ariza
+# Copyright:     (c) 2001-2010 Christopher Ariza
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
 
 
 import os
+import unittest, doctest
+
+
 from athenaCL.libATH import drawer
 from athenaCL.libATH import rhythm
 from athenaCL.libATH import language
@@ -106,9 +109,9 @@ class _FileChooser(basePmtr.Parameter):
         """dirs are passed with call, so we cant know if files are found
         until call is called"""
         if self.type == 'sampleSelect':
-            dirList = refDict['ssdr']
-        elif self.type == 'analysisSelect':
-            dirList = refDict['sadr']
+            dirList = refDict['fpAudioDirs']
+#         elif self.type == 'analysisSelect':
+#             dirList = refDict['sadr']
 
         # if more than 60s have passed, update dirs
         # always update on start (self.updatePathList == 1)
@@ -284,3 +287,18 @@ class ConstantFile(basePmtr.Parameter):
         self.currentValue = '"%s"' % self.filePath
         return self.currentValue
 
+
+#-----------------------------------------------------------------||||||||||||--
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
+
+
+#-----------------------------------------------------------------||||||||||||--
+if __name__ == '__main__':
+    from athenaCL.test import baseTest
+    baseTest.main(Test)

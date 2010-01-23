@@ -21,7 +21,7 @@ lang = language.LangObj()
 class MonophonicOrnament(baseTexture.Texture):
     """simple one dimension line algorithm
 
-    >>> a = MonophonicOrnament('test')
+    >>> #a = MonophonicOrnament('test')
     """
     def __init__(self, name=None):
         baseTexture.Texture.__init__(self, name) # init base class

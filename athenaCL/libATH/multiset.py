@@ -1944,7 +1944,7 @@ class MultisetFactory:
         if ao != None:
             termObj = ao.termObj
             dlgVisMet = ao.external.getPref('athena', 'dlgVisualMethod')
-            fpLastDir = ao.fpLastDir
+            fpLastDir = ao.aoInfo['fpLastDir']
         else: # get defaults
             termObj = None
             dlgVisMet = 'txt'

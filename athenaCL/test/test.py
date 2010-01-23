@@ -24,7 +24,7 @@ class ModuleGather(object):
     package. 
     '''
     def __init__(self):
-        from music21 import base
+
         self.dirParent = os.path.dirname(athenaObj.__file__)
         self.modulePaths = []    
         # skip interactive loader application

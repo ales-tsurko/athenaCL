@@ -43,8 +43,6 @@ from athenaCL.libATH.libTM import texture
 from athenaCL.libATH.libOrc import generalMidi
 # conditional imports that may fail but are not necessary
 try:
-    from athenaCL.libATH.libGfx import imageNetwork
-    from athenaCL.libATH.libGfx import imagePath
     from athenaCL.libATH.libGfx import graphPmtr
     from athenaCL.libATH.libGfx import graphEnsemble
     from athenaCL.libATH.libGfx import graphCellular
@@ -467,10 +465,10 @@ class Command:
                 return filePath
         else:
             possibleDirs = [] # all demo dirs
-            possibleDirs = possibleDirs + self.ao.external.demoDirList 
+            possibleDirs += self.ao.external.demoDirList 
             possibleDirs.append(self.ao.external.libATHpath)
-            possibleDirs.append(self.ao.fpLastDir)
-            possibleDirs.append(self.ao.fpLastDirSco)
+            possibleDirs.append(self.ao.aoInfo['fpLastDir'])
+            possibleDirs.append(self.ao.aoInfo['fpLastDirEventList'])
             dir = drawer.getcwd()
             if dir != None: possibleDirs.append(dir)
             for directory in possibleDirs:
@@ -494,7 +492,6 @@ class Command:
         """get a path for an application type; either parse
         a string and test, or get interactively; will chnage path if different
         appPathPref     = ('external', 'csoundPath')
-        appCreatorPref = ('external', 'csoundCreatorCode') # may be None
         """
         # get old path to compare before changing, may be ''
         # oldPath = self.ao.external.getPref(appPathPref[0], appPathPref[1])
@@ -515,8 +512,7 @@ class Command:
             appDialogError = 'this is not a %s application. try again.' % appType
             while 1:
                 dlgVisMet = self.ao.external.getPref('athena', 'dlgVisualMethod')
-                path, ok = dialog.promptGetFile(appDialogQuery, self.ao.fpLastDir, 
-                                                         'app', dlgVisMet, self.termObj)
+                path, ok = dialog.promptGetFile(appDialogQuery, self.ao.aoInfo['fpLastDir'],'app', dlgVisMet, self.termObj)
                 if (not ok or path == None or not os.path.exists(path)):
                     changeAppPath = 0    # dont change
                     break
@@ -585,10 +581,11 @@ class Command:
         # provide a dir if non given
         if dir == '' and forceDir != None: # if not
             # used to use getcwd here, but not sure this is a good idea?
-            if forceDir == 'fpLastDir' and self.ao.fpLastDir != '':
-                dir = self.ao.fpLastDir
-            elif forceDir == 'fpLastDirSco' and self.ao.fpLastDirSco != '':
-                dir = self.ao.fpLastDirSco
+            if forceDir == 'fpLastDir' and self.ao.aoInfo['fpLastDir'] != '':
+                dir = self.ao.aoInfo['fpLastDir']
+            elif (forceDir == 'fpLastDirEventList' and 
+                self.ao.aoInfo['fpLastDirEventList'] != ''):
+                dir = self.ao.aoInfo['fpLastDirEventList']
             # may want to get cwd here, as this is standard behaviour
             elif drawer.getcwd() != None: 
                 dir = drawer.getcwd()
@@ -628,13 +625,14 @@ class Command:
 
     def _validScratchDir(self):
         """use to set valid scratch dir; get from user if necessary"""
-        path = self.ao.external.getPref('athena','scratch')
+        path = self.ao.external.getPref('athena', 'fpScratchDir')
         if not os.path.isdir(path):
-            cmdObj = APdir(self.ao, self.cmdEnviron, '', {'name':'scratch'})
+            cmdObj = APdir(self.ao, self.cmdEnviron, '', 
+                          {'name':'fpScratchDir'})
             ok, msg = cmdObj.do() # will call gather, process, etcetera
         else: ok = 1
         if ok:
-            path = self.ao.external.getPref('athena','scratch')
+            path = self.ao.external.getPref('athena','fpScratchDir')
             return path
         else: return None
             
@@ -2042,7 +2040,7 @@ class q(quit):
 #         lclTimes['beatT'] = ('c', 90)
 #         # use current texture modulke, froce general midi, keep refresh
 #         t = texture.factory('DroneSustain', 'temp', self.scObj)
-#         t.loadDefault(0, p, self.ao.fpSSDR, self.ao.fpSADR, 
+#         t.loadDefault(0, p, self.ao.fpAudioDirs, self.ao.fpAudioAnalysisDirs, 
 #                                 lclTimes, 'generalMidi')
 #         self.emObj = eventList.factory('midi', self.ao)
 #         self.emObj.setRootPath(self.filePath)
@@ -4115,7 +4113,7 @@ class PIh(Command):
         lclTimes['beatT'] = ('c', 90)
         # use current texture module, ignore refresh status
         t = texture.factory(self.ao.activeTextureModule, 'temp')
-        t.loadDefault(0, p, self.ao.fpSSDR, self.ao.fpSADR, 
+        t.loadDefault(0, p, self.ao.aoInfo['fpAudioDirs'],
                                 lclTimes, 'generalMidi')
         self.emObj = eventList.factory('midi', self.ao)
         self.emObj.setRootPath(self.filePath)
@@ -5575,10 +5573,10 @@ class TPmap(_CommandTP):
     def display(self): 
         # note: this is an unconventional use of aoInfo
         # in the future, ssdr and sadr should be moved into aoInfo anyways
-        aoInfo = {'ssdr':self.ao.fpSSDR, 'sadr':self.ao.fpSADR}
+        aoInfo = self.ao.aoInfo['fpAudioDirs']
         if self._textDisplay: # this may override user preference
             splitSco = eventList.EventSequenceSplit(self.objBundle, 
-                                      self.eventListSplitFmt, self.events, 0, aoInfo)
+                    self.eventListSplitFmt, self.events, 0, aoInfo)
             splitSco.load('pre', 0) # 0 turns off string bypass
             for pmtr in splitSco.getKeys():
                 # xRelation will always be 'event' for parameter displays
@@ -5740,6 +5738,8 @@ class TIn(Command):
     of a texture created, uses last duration and tempo
 
     >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> ao.setEventMode('m')
+
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
@@ -5815,7 +5815,7 @@ class TIn(Command):
         # auxNo will be provided; if None, aux is taken from instrument
         # if given, will override aux provided from orchestra
         self.ao.textureLib[self.name].loadDefault(self.inst, pathObj,
-                                self.ao.fpSSDR, self.ao.fpSADR, 
+                                self.ao.aoInfo['fpAudioDirs'], 
                                 lclTimes, self.ao.orcObj.name, 
                                 self.auxNo, refresh)
         self.ao.activeTexture = self.name
@@ -5832,6 +5832,8 @@ class TIn(Command):
 class TIo(Command):
     """
     >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> ao.setEventMode('m')
+
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
@@ -5882,6 +5884,8 @@ class TImute(Command):
     """mutes the current texture
 
     >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> ao.setEventMode('m')
+
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
@@ -5947,6 +5951,8 @@ class TImode(Command):
     args: timode  modeChoice  modeValue
 
     >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> ao.setEventMode('m')
+
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
@@ -6122,6 +6128,8 @@ class TImidi(Command):
         work done mostly from within midiTools.py
 
     >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> ao.setEventMode('m')
+
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
@@ -6234,6 +6242,8 @@ class TIv(Command):
     """views the current texture, or name if provided with args
 
     >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> ao.setEventMode('m')
+
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
@@ -6290,6 +6300,8 @@ class TIe(Command):
     """eidits attributes of a texture
 
     >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> ao.setEventMode('m')
+
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
@@ -6391,6 +6403,8 @@ class TIe(Command):
 class TIls(Command):
     """
     >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> ao.setEventMode('m')
+
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
@@ -6450,6 +6464,8 @@ class TIls(Command):
 class TIrm(Command):
     """
     >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> ao.setEventMode('m')
+
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
@@ -6512,6 +6528,8 @@ class TIrm(Command):
 class TIcp(Command):
     """
     >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> ao.setEventMode('m')
+
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
@@ -6590,6 +6608,8 @@ class TIcp(Command):
 class TImv(Command):
     """
     >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> ao.setEventMode('m')
+
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
@@ -6658,6 +6678,8 @@ class TIdoc(Command):
     args can be the name of a different texture
 
     >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> ao.setEventMode('m')
+
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
@@ -6710,6 +6732,9 @@ class TIals(Command):
     """ list all attributes of a texture, a hidden command
 
     >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> ao.setEventMode('m')
+
+    >>> ao.setEventMode('m')
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
@@ -6758,6 +6783,7 @@ class TIals(Command):
 class TImap(Command):
     """
     >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> ao.setEventMode('m')
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
@@ -6817,6 +6843,8 @@ class TEe(Command):
     """edits all textures
 
     >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> ao.setEventMode('m')
+
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
@@ -6928,6 +6956,8 @@ class TEv(Command):
     """ensemble view, displays parallel attributes for all textures
 
     >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> ao.setEventMode('m')
+
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
@@ -7022,6 +7052,8 @@ class TEv(Command):
 class TEmap(Command):
     """
     >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> ao.setEventMode('m')
+
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
@@ -7102,6 +7134,8 @@ class TEmidi(Command):
     work done mostly from within midiTools.py
 
     >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> ao.setEventMode('m')
+
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
@@ -7173,6 +7207,8 @@ class TCn(Command):
     args: tcn  name  timeShift
 
     >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> ao.setEventMode('m')
+
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
@@ -7237,6 +7273,8 @@ class TCv(Command):
     """views the current clone, or name if provided with args
 
     >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> ao.setEventMode('m')
+
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
@@ -7304,6 +7342,8 @@ class TCv(Command):
 class TCo(Command):
     """
     >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> ao.setEventMode('m')
+
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
@@ -7362,6 +7402,8 @@ class TCmute(Command):
     """mutes the current clone
 
     >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> ao.setEventMode('m')
+
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
@@ -7432,6 +7474,8 @@ class TCls(Command):
     check for negative start times
 
     >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> ao.setEventMode('m')
+
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
@@ -7500,6 +7544,8 @@ class TCe(Command):
     """eidits attributes of a clone
 
     >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> ao.setEventMode('m')
+
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
@@ -7599,6 +7645,8 @@ class TCe(Command):
 class TCcp(Command):
     """
     >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> ao.setEventMode('m')
+
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
@@ -7684,6 +7732,8 @@ class TCcp(Command):
 class TCmap(Command):
     """
     >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> ao.setEventMode('m')
+
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
@@ -7747,6 +7797,8 @@ class TCdoc(Command):
     args can be the name of a different texture
 
     >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> ao.setEventMode('m')
+
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
@@ -7823,6 +7875,8 @@ class TCrm(Command):
         check for negative start times
 
     >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> ao.setEventMode('m')
+
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
@@ -7905,6 +7959,8 @@ class TCals(Command):
     """ list all attributes of a texture, a hidden command
 
     >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> ao.setEventMode('m')
+
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
@@ -7966,6 +8022,7 @@ class TCals(Command):
 class TTls(Command):
     """
     >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> ao.setEventMode('m')
 
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
@@ -8021,6 +8078,8 @@ class TTls(Command):
 class TTo(Command):
     """
     >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+    >>> ao.setEventMode('m')
+
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
@@ -8056,13 +8115,11 @@ class TTo(Command):
             if self.name == None: return self._getUsage()
         if self.name == None: # self.names are not translated
             query = lang.msgTTselectName % self.ao.activeTexture
-            self.name = self._chooseFromList(query, temperament.temperamentNames, 
-                                          'noCase', temperament.temperamentNameParser)
+            self.name = self._chooseFromList(query, temperament.temperamentNames, 'noCase', temperament.temperamentNameParser)
             if self.name == None: return lang.msgTTbadName
 
     def process(self): 
-        self.ao.textureLib[self.ao.activeTexture].updateTemperament(
-                                                                                 self.name)
+        self.ao.textureLib[self.ao.activeTexture].updateTemperament(self.name)
 
     def log(self):
         if self.gatherStatus and self.processStatus: # if complete
@@ -8445,15 +8502,15 @@ class ELn(Command):
         if self.args != '':
             self.args = argTools.ArgOps(self.args) # no strip
             self.scoPath = self._validWritePath(self.args.get(0,'end'), 
-                                      '.xml', 'fpLastDirSco')
+                                      '.xml', 'fpLastDirEventList')
             if self.scoPath == None: return self._getUsage()
             scoDir, scoName = os.path.split(self.scoPath)
 
         if self.scoPath == None:
-            if self.ao.fpLastDirSco in ['', None]:
-                defaultScoPath = self.ao.fpLastDir
+            if self.ao.aoInfo['fpLastDirEventList'] in ['', None]:
+                defaultScoPath = self.ao.aoInfo['fpLastDir']
             else:
-                defaultScoPath = self.ao.fpLastDirSco
+                defaultScoPath = self.ao.aoInfo['fpLastDirEventList']
             dlgVisMet = self.ao.external.getPref('athena', 'dlgVisualMethod')
             while 1: # to make sure you a get a .sco ending
                 self.scoPath, ok = dialog.promptPutFile(lang.msgELnameScore,
@@ -8464,7 +8521,7 @@ class ELn(Command):
                 else:
                     dialog.msgOut(lang.msgELbadScoreName, self.termObj)
                     continue
-        self.ao.fpLastDirSco = scoDir # this is a dir, not a path
+        self.ao.aoInfo['fpLastDirEventList'] = scoDir # this is a dir, not a path
             
         # if csound native, check the csound path with APea
         # this most be done w/ eln, as batch files are written their
@@ -8479,7 +8536,8 @@ class ELn(Command):
     def process(self): 
         self.report = []
         # update last paths
-        self.ao.external.writePref('athena', 'fpLastDirSco', self.ao.fpLastDirSco)                                            
+        self.ao.external.writePref('athena', 'fpLastDirEventList', 
+            self.ao.aoInfo['fpLastDirEventList'])                                            
         # create a score object, do score conversions
         # an orc object is created from activeEventMode inside emObj
         # do not store emObj
@@ -8638,12 +8696,12 @@ class ELh(Command):
 
     def process(self):
         # this file render prep should be done after EMr
-        if os.name == 'mac': # must check that fp is in found
-            if self.audioPath in self.fmtFound:
-                prefDict = self.ao.external.getPrefGroup('external')
-                audioTools.setMacAudioRsrc(prefDict['audioFileFormat'], 
-                                                    self.audioPath, prefDict)
-        elif os.name == 'posix':
+#         if os.name == 'mac': # must check that fp is in found
+#             if self.audioPath in self.fmtFound:
+#                 prefDict = self.ao.external.getPrefGroup('external')
+#                 audioTools.setMacAudioRsrc(prefDict['audioFileFormat'], 
+#                                                     self.audioPath, prefDict)
+        if os.name == 'posix':
             pass
         else: # win or other
             pass
@@ -8850,9 +8908,8 @@ class _CommandAO(Command):
         # test to see if pathname exists
         pathObj = self.ao.pathLib[pathName]  ## this is a reference, not a copy
         self.ao.textureLib[textureName].load(pmtrQDict, pathObj, polyphonyMode,
-                                                 temperamentName, pitchMode, auxNo,
-                                                 self.ao.fpSSDR, self.ao.fpSADR,
-                                            midiPgm, midiCh, mute, silenceMode, orcMapMode)
+           temperamentName, pitchMode, auxNo, self.ao.aoInfo['fpAudioDirs'],
+           midiPgm, midiCh, mute, silenceMode, orcMapMode)
                                                  
     def _piUpdateAllReferences(self):
         """clears all ref counts on paths and recounts all uses of a path"""
@@ -8902,7 +8959,7 @@ class _CommandAO(Command):
         """ load a path dictionary into current athenaObject
         """
         self.ao.activePath = copy.deepcopy(pathData['activePath'])
-        self.ao.activeSetMeasure = copy.deepcopy(pathData['activeSetMeasure'])
+        #self.ao.activeSetMeasure = copy.deepcopy(pathData['activeSetMeasure'])
         if replace == 'replace': 
             self.ao.pathLib = {}     # reinit path bin
         else: # a name check must make sure that no paths with same name exist
@@ -8919,7 +8976,7 @@ class _CommandAO(Command):
         """ save all path data in a dictionary """
         pathData = {}
         pathData['activePath'] = self.ao.activePath
-        pathData['activeSetMeasure'] = self.ao.activeSetMeasure
+        #pathData['activeSetMeasure'] = self.ao.activeSetMeasure
         pathData['pathLib'] = {}
         if len(self.ao.pathLib.keys()) > 0: # paths exist
             for pathName in self.ao.pathLib.keys():
@@ -9117,7 +9174,7 @@ class AOl(_CommandAO):
         if self.path == None:
             dlgVisMet = self.ao.external.getPref('athena', 'dlgVisualMethod')
             self.path, ok = dialog.promptGetFile(lang.msgAOselectFile, 
-                                 self.ao.fpLastDir, 'file', dlgVisMet, self.termObj)
+                                 self.ao.aoInfo['fpLastDir'], 'file', dlgVisMet, self.termObj)
             if ok != 1: return lang.msgReturnCancel
         # problem if path is still == None
             
@@ -9140,8 +9197,8 @@ class AOl(_CommandAO):
         # only after self.path + texture data are loaded
         self.timer.stop()
         # update last paths
-        self.ao.fpLastDir = os.path.dirname(self.path)
-        self.ao.external.writePref('athena', 'fpLastDir', self.ao.fpLastDir)
+        self.ao.aoInfo['fpLastDir'] = os.path.dirname(self.path)
+        self.ao.external.writePref('athena', 'fpLastDir', self.ao.aoInfo['fpLastDir'])
 
     def log(self):
         if self.gatherStatus and self.processStatus: # if complete
@@ -9181,7 +9238,7 @@ class AOw(_CommandAO):
             prompt = lang.msgAOnameFile
             while 1: ## to make sure you a get a .xml ending
                 self.path, ok = dialog.promptPutFile(prompt, 
-                              'ao.xml', self.ao.fpLastDir, 
+                              'ao.xml', self.ao.aoInfo['fpLastDir'], 
                               '*',  dlgVisMet, self.termObj)
                 if ok != 1:
                     return lang.msgReturnCancel
@@ -9210,8 +9267,8 @@ class AOw(_CommandAO):
         else: # win or other
             pass
         # update last paths
-        self.ao.fpLastDir = os.path.dirname(self.path)
-        self.ao.external.writePref('athena', 'fpLastDir', self.ao.fpLastDir)
+        self.ao.aoInfo['fpLastDir'] = os.path.dirname(self.path)
+        self.ao.external.writePref('athena', 'fpLastDir', self.ao.aoInfo['fpLastDir'])
 
     def log(self):
         if self.gatherStatus and self.processStatus: # if complete
@@ -9244,7 +9301,7 @@ class AOmg(_CommandAO):
         if self.path == None:
             dlgVisMet = self.ao.external.getPref('athena', 'dlgVisualMethod')
             self.path, ok = dialog.promptGetFile(lang.msgAOselectFile, 
-                          self.ao.fpLastDir, 'file', dlgVisMet, self.termObj)
+                          self.ao.aoInfo['fpLastDir'], 'file', dlgVisMet, self.termObj)
             if ok != 1: return lang.msgReturnCancel
 
     def process(self):
@@ -9265,8 +9322,8 @@ class AOmg(_CommandAO):
 
         self.timer.stop()
         # update last paths
-        self.ao.fpLastDir = os.path.dirname(self.path)
-        self.ao.external.writePref('athena', 'fpLastDir', self.ao.fpLastDir)
+        self.ao.aoInfo['fpLastDir'] = os.path.dirname(self.path)
+        self.ao.external.writePref('athena', 'fpLastDir', self.ao.aoInfo['fpLastDir'])
 
     def log(self):
         if self.gatherStatus and self.processStatus: # if complete
@@ -9633,7 +9690,7 @@ class APwid(Command):
 
 class APdir(Command):
 
-    def __init__(self, ao, cmdEnviron, args='', argForce=None):
+    def __init__(self, ao, cmdEnviron=None, args='', argForce=None):
         Command.__init__(self, ao, cmdEnviron, args)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only
@@ -9645,14 +9702,22 @@ class APdir(Command):
 
     def _updateTextureFilePaths(self):
         for name in self.ao.textureLib.keys():
-            self.ao.textureLib[name].updateFilePaths(self.ao.fpSSDR,
-                                                                  self.ao.fpSADR)
+            self.ao.textureLib[name].updateFilePaths(
+                self.ao.aoInfo['fpAudioDirs'])
 
     def _apConvertDirName(self, usrStr):
+        """
+        >>> from athenaCL import athenaObj; ao = athenaObj.AthenaObject()
+        >>> ao.setEventMode('m')
+
+        >>> a = APdir(ao, args='')
+        >>> a._apConvertDirName('ss')
+        'fpAudioDir'
+        """
         ref = {
-            'ssdir'  : ['ss', 'ssdir'],
-            'sadir'  : ['sa', 'sadir'],
-            'scratch' : ['c', 'x', 'scratch'], # must be perference key
+            'fpAudioDir'  : ['a', 'ss', 'ssdir', 'audio'],
+            #'sadir'  : ['sa', 'sadir'],
+            'fpScratchDir' : ['c', 'x', 'scratch'], # must be perference key
                 }
         usrStr = drawer.selectionParse(usrStr, ref)
         return usrStr # may be None
@@ -9671,7 +9736,7 @@ class APdir(Command):
             oldPath = self.ao.external.getPref('athena', ('%s' % name))
             dlgVisMet = self.ao.external.getPref('athena', 'dlgVisualMethod')
             path, ok = dialog.promptGetDir(('select a %s directory:\n' % name),
-                self.ao.fpLastDir, dlgVisMet, self.termObj)
+                self.ao.aoInfo['fpLastDir'], dlgVisMet, self.termObj)
             if ok != 1: # path canceled
                 return None
             elif os.path.isdir(path) != 1:  ## true if file is missing
@@ -9704,8 +9769,8 @@ class APdir(Command):
     def process(self):
         self.ao.external.writePref('athena', '%s' % self.name, self.dir)
         # must update local variable in athenaObject
-        self.ao.fpSSDR = self.ao.external.getFilePathSample()    
-        self.ao.fpSADR = self.ao.external.getFilePathAnalysis()
+        self.ao.aoInfo['fpAudioDirs'] = self.ao.external.getFilePathAudio()    
+        #self.ao.fpAudioAnalysisDirs = self.ao.external.getFilePathAnalysis()
         self._updateTextureFilePaths() # update ti objects
 
     def display(self): 
@@ -9770,10 +9835,7 @@ class APea(Command):
         # cases for each app class
         if appType == 'csoundCommand': # will be presented to the user
             appPathPref = ('external', 'csoundPath')
-            appCreatorPref = ('external', 'csoundCreatorCode')
-            if os.name == 'mac':     
-                appName = 'Csound' # name of app on platform, not app type
-            elif os.name == 'posix':
+            if os.name == 'posix':
                 appName = 'csound' 
             else: # win or other
                 appName = 'winsound.exe'
@@ -10089,7 +10151,7 @@ class AUsys(Command):
         entryLines.append(['os name, sys platform:', self.ao.osStr()])
         entryLines.append(['', '']) # draw line
         entryLines.append(['SC dictionary mode:', tniStat])
-        entryLines.append(['current SetMeasure:', self.ao.activeSetMeasure])
+        #entryLines.append(['current SetMeasure:', self.ao.activeSetMeasure])
         entryLines.append(['current PathInstance:', self.ao.activePath])
         entryLines.append(['total PI:', self._getNoPI()])
         entryLines.append(['current TextureModule:', self.ao.activeTextureModule])
@@ -10125,12 +10187,12 @@ class AUsys(Command):
         entryLines.append(['preferences:', self.ao.external.prefsPath])
         if self.ao.external.logCheck():
             entryLines.append(['log:', self.ao.external.logPath])
-        value = self.ao.external.getPref('athena','scratch')
+        value = self.ao.external.getPref('athena', 'fpScratchDir')
         entryLines.append(['user scratch:', value])
-        value = self.ao.external.getPref('athena','ssdir')
-        entryLines.append(['user ssdir:', value])
-        value = self.ao.external.getPref('athena','sadir')
-        entryLines.append(['user sadir:', value])
+        value = self.ao.external.getPref('athena','fpAudioDir')
+        entryLines.append(['user audio:', value])
+#         value = self.ao.external.getPref('athena','sadir')
+#         entryLines.append(['user sadir:', value])
 
         entryLines.append(['libATH:', self.ao.external.libATHpath])
         value = drawer.getcwd()

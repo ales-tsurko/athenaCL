@@ -25,7 +25,7 @@ lang = language.LangObj()
 class HarmonicShuffle(baseTexture.Texture):
     def __init__(self, name=None):
         """
-        >>> a = HarmonicShuffle('test')
+        #>>> a = HarmonicShuffle('test')
         """
         baseTexture.Texture.__init__(self, name) # init base class
         self.author = 'athenaCL native'

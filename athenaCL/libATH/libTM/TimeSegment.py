@@ -73,7 +73,7 @@ _MOD = 'TimeSegment.py'
 class TimeSegment(baseTexture.Texture):
     def __init__(self, name=None):
         """
-        >>> a = TimeSegment('test')
+        >>> #a = TimeSegment('test')
         """
         baseTexture.Texture.__init__(self, name) # init base class
         self.author = 'athenaCL native'

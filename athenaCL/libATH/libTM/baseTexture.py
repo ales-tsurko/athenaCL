@@ -9,6 +9,9 @@
 #-----------------------------------------------------------------||||||||||||--
 
 import copy
+import unittest, doctest
+
+
 from athenaCL.libATH import temperament
 from athenaCL.libATH import multiset
 
@@ -61,6 +64,8 @@ class Texture:
     def __init__(self, name=None):
         """init variables used only during score creation
             additional variable added later
+
+        >>> a = Texture()
         """
 #         if scObj == None:
 #             scObj = SC.SetClass()
@@ -105,7 +110,13 @@ class Texture:
         """convert a parameter number string into data 
         numbers are returned as numbers, strings as strings
         str, and cmd produce un-altered numbers
-        usr wil shift by appropriate values"""
+        usr wil shift by appropriate values
+
+        >>> a = Texture()
+        >>> a._pmtrNumberToUsr('3', 0)
+        '3'
+        """
+
         if drawer.isNum(pmtr):
             if style in ['str', 'cmd']:
                 return pmtr
@@ -124,7 +135,14 @@ class Texture:
         """translates user string to proper parameter key
         style = cmd uses parenthesis to show command name
             str provides simples string
-            usr provides aux/text numbers w/ aprop shift"""
+            usr provides aux/text numbers w/ aprop shift
+
+        >>> a = Texture()
+        >>> a.decodePmtrName('amp')
+        ('ampQ', '(a)mplitude')
+        >>> a.decodePmtrName('p')
+        ('path', '(p)ath')
+        """
         if usrStr == None: return None, ''
         p = drawer.strScrub(usrStr, 'lower')
         refNo = None # only used for aux, texture
@@ -318,12 +336,12 @@ class Texture:
         self.temperamentName = name
         self.temperamentObj = temperament.factory(self.temperamentName)
 
-    def updateFilePaths(self, fpSSDR, fpSADR):
+    def updateFilePaths(self, fpAudioDirs):
         """when file paths are changed by user, each texture object must have
         its file paths reset; this method provides this functionality
         """
-        self.fpSSDR = fpSSDR # list of paths to samples
-        self.fpSADR = fpSADR # list of paths to analysis
+        self.fpAudioDirs = fpAudioDirs # list of paths to samples
+        #self.fpAudioAnalysisDirs = fpAudioAnalysisDirs # list of paths to analysis
 
     #-----------------------------------------------------------------------||--
     def getRefDict(self, t=0):
@@ -344,8 +362,8 @@ class Texture:
         else: # get current value
             bpm = self.pmtrObjDict['beatT'].currentValue
         self.refDict['bpm'] = bpm
-        self.refDict['ssdr'] = self.fpSSDR
-        self.refDict['sadr'] = self.fpSADR
+        self.refDict['fpAudioDirs'] = self.fpAudioDirs
+        #self.refDict['sadr'] = self.fpAudioAnalysisDirs
         return self.refDict
 
     def getRefClone(self): # get reference data for clone creation
@@ -355,9 +373,10 @@ class Texture:
         refDict['auxFmt'] = self.getAuxOutputFmt()
         return refDict
 
+
     #-----------------------------------------------------------------------||--
     def load(self, pmtrQDict, pathObj, polyphonyMode, temperamentName, 
-                pitchMode, auxNo, fpSSDR, fpSADR, midiPgm, midiCh, mute=0, 
+                pitchMode, auxNo, fpAudioDirs, midiPgm, midiCh, mute=0, 
                 silenceMode=0, orcMapMode=1, refresh=1):
         """used for starting a texture from a pmtrQDict
         used when loading an athenaObject XML file
@@ -386,8 +405,8 @@ class Texture:
         self.mute = mute
 
         self.updateTemperament(self.temperamentName)
-        self.fpSSDR = fpSSDR # list of paths to samples
-        self.fpSADR = fpSADR # list of paths to analysis
+        self.fpAudioDirs = fpAudioDirs # list of paths to samples
+        #self.fpAudioAnalysisDirs = fpAudioAnalysisDirs # list of paths to analysis
         # done loading data
         # create internal objects
         self.pmtrObjDict['rhythmQ'] = parameter.factory(
@@ -422,7 +441,7 @@ class Texture:
             ok = self.score()
             assert ok
 
-    def loadDefault(self, inst, pathObj, fpSSDR=[], fpSADR=[], 
+    def loadDefault(self, inst, pathObj, fpAudioDirs=[], 
                             lclTimes=None, orcName='csoundNative', 
                             auxNo=None, refresh=1):
         """used to create a texture instance from default values, ie, when
@@ -477,7 +496,7 @@ class Texture:
         mute = 0
         # use main load function to load texture
         self.load(pmtrQDict, pathObj, polyphonyMode, temperamentName, 
-                     pitchMode, auxNo, fpSSDR, fpSADR, midiPgm, midiCh, 
+                     pitchMode, auxNo, fpAudioDirs, midiPgm, midiCh, 
                      mute, silenceMode, orcMapMode, refresh)
 
     #-----------------------------------------------------------------------||--
@@ -496,8 +515,8 @@ class Texture:
         midiPgm = copy.deepcopy(self.midiPgm)
         midiCh = copy.deepcopy(self.midiCh)
         mute = copy.deepcopy(self.mute)
-        fpSSDR = copy.deepcopy(self.fpSSDR)
-        fpSADR = copy.deepcopy(self.fpSADR)
+        fpAudioDirs = copy.deepcopy(self.fpAudioDirs)
+        #fpAudioAnalysisDirs = copy.deepcopy(self.fpAudioAnalysisDirs)
 
         from athenaCL.libATH.libTM import texture
         if name == None: # if no name givne, use this texture's name
@@ -505,7 +524,7 @@ class Texture:
         obj = texture.factory(self.tmName, name) 
         # use main load function to load texture
         obj.load(pmtrQDict, path, polyphonyMode, temperamentName, 
-                    pitchMode, auxNo, fpSSDR, fpSADR, midiPgm, midiCh, 
+                    pitchMode, auxNo, fpAudioDirs, midiPgm, midiCh, 
                     mute, silenceMode, orcMapMode)
         return obj
 
@@ -1320,15 +1339,23 @@ class Texture:
         return ok
 
 
+        
+#-----------------------------------------------------------------||||||||||||--
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
+
+
+
+
 #-----------------------------------------------------------------||||||||||||--
 
-class Test:
-    def __init__(self):
-        pass
-        
+
+
 if __name__ == '__main__':
-    Test()
-
-
-
-
+    from athenaCL.test import baseTest
+    baseTest.main(Test)

@@ -217,8 +217,6 @@ class Triangle(Function):
 
 
 #-----------------------------------------------------------------||||||||||||--
-
-
 class Test(unittest.TestCase):
     
     def runTest(self):

@@ -9,6 +9,7 @@
 #-----------------------------------------------------------------||||||||||||--
 
 import textwrap
+import unittest, doctest
 
 
 from athenaCL.libATH import drawer
@@ -27,7 +28,15 @@ lang = language.LangObj()
 def convertBoolCancel(usrData):
     """converts arg strings: on, off, or cancel
     or numbers 0, 1
-    get strings from language; check english for preferences"""
+    get strings from language; check english for preferences
+
+    >>> convertBoolCancel('y')
+    1
+    >>> convertBoolCancel('no')
+    0
+    >>> convertBoolCancel(-1)
+    -1
+    """
     if drawer.isNum(usrData):
         usrStr = str(int(round(usrData)))
     else:
@@ -67,7 +76,11 @@ def convertBoolCancel(usrData):
 
 def convertBool(usrData):
     """converts arg strings: on, off
-    cancel is not accepted"""
+    cancel is not accepted
+
+    >>> convertBool('y')
+    1
+    """
     val = convertBoolCancel(usrData)
     if val == -1: # if cancel is determined
         return None # report as nothing
@@ -75,7 +88,13 @@ def convertBool(usrData):
         return val
 
 def boolAsStr(controlData, style=None):
-    """return control data int as a ui string"""
+    """return control data int as a ui string
+    
+    >>> boolAsStr(1)
+    'on'
+    >>> boolAsStr(0)
+    'off'
+    """
     controlData = convertBoolCancel(controlData)
     if style == None:
         if controlData == 0:
@@ -90,7 +109,11 @@ def boolAsStr(controlData, style=None):
 # any data to str: here b/c it refs bool functions
 
 def sigDigMeasure(num):
-    """for a number, suggest a quantity of significant digits"""
+    """for a number, suggest a quantity of significant digits
+
+    >>> sigDigMeasure(3.2345)
+    2
+    """
     if drawer.isInt(num): return 0
     num = float(num)
     junk, floatPart = divmod((num), 1) # float will split into int, dec
@@ -131,7 +154,16 @@ def anyDataToStr(usrData, sigDig=None, seqBrace='tuple'):
     lists are recursive examined with the same function
     note: this will convert a list [] into a tuple representation
     depending on optional arg
-    will automatically remove space between comma-separated lists"""
+    will automatically remove space between comma-separated lists
+
+    >>> anyDataToStr('test')
+    'test'
+    >>> anyDataToStr([3, 'mixed', [3,4,5]])
+    '(3,mixed,(3,4,5))'
+    >>> anyDataToStr([2.35, ('a', (234, 34))])
+    '(2.35,(a,(234,34)))'
+
+    """
     if drawer.isStr(usrData):
         return usrData
     elif drawer.isInt(usrData):
@@ -158,7 +190,13 @@ def anyDataToStr(usrData, sigDig=None, seqBrace='tuple'):
         return repr(usrData)
 
 def timeRangeAsStr(tRange, format=''):
-    """provide the display of a time range;"""
+    """provide the display of a time range;
+
+    >>> timeRangeAsStr([3,2])
+    '3.0--2.0'
+    >>> timeRangeAsStr([8, 2])
+    '8.0--2.0'
+    """
     # allow none as tRange
     if tRange == None: # not known
         return '?--?'
@@ -181,7 +219,11 @@ def timeRangeAsStr(tRange, format=''):
 # used by both basePmtr and baseTexture
 
 def descriptionAsStr(docStr, delimit='\n', argStr=None, demoStr=None):
-    """format a descriptions string; add args if available"""
+    """format a descriptions string; add args if available
+
+    >>> descriptionAsStr('this is a test')
+    'Description: This is a test...'
+    """
     msg = []
     msg.append('Description: ')
     msg.append('%s%s' % (docStr[0].upper(), docStr[1:]))
@@ -326,6 +368,7 @@ def wrapText(msg, charW=40, indentW=0, wrapType='line'):
         usefill when presenting a long line of data that is broken
         into columns
     returns a string, not a list of strings
+
     """
     strIndex = 0
     startPosition = 0
@@ -676,5 +719,23 @@ def graphLabeledRuler(llabel, rlabel, charWidth=50, divisions=5,
     rulerStr = '%s%s%s' % (rulerStr[:startRightReplace], rlabel, 
                                   rulerStr[endRightReplace:])
     return rulerStr
+
+
+
 #-----------------------------------------------------------------||||||||||||--
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
+
+
+
+#-----------------------------------------------------------------||||||||||||--
+if __name__ == '__main__':
+    from athenaCL.test import baseTest
+    baseTest.main(Test)
+
 

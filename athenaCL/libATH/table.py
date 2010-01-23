@@ -4,11 +4,13 @@
 #
 # Authors:       Christopher Ariza
 #
-# Copyright:     (c) 2006 Christopher Ariza
+# Copyright:     (c) 2006-2010 Christopher Ariza
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
 
 import copy
+import unittest, doctest
+
 from athenaCL.libATH import drawer
 from athenaCL.libATH import unit
 _MOD = 'table.py'
@@ -99,6 +101,10 @@ tableMonoFormatRef = {
             }
 
 def monoFormatParser(usrStr):
+    """
+    >>> monoFormatParser('pcia')
+    'productColumnIndexActive'
+    """
     # only allow one-dimensional outputs
     ref = tableMonoFormatRef
     usrStr = drawer.selectionParse(usrStr, ref)
@@ -110,6 +116,15 @@ class Table:
     may be useful for other things
     requires unit.py conversions above; could be autonomous module"""
     def __init__(self, data, cellMin=None, cellMax=None):
+        """
+        >>> a = Table([[1,2,3], [4,5,6]])
+        >>> a.colCount
+        3
+        >>> a.rowCount
+        2
+        >>> len(a.outFmt)
+        65
+        """
         # store data table
         self.data = data
         self.colCount = len(data[0]) # all rows must be same size, colCoutn
@@ -127,7 +142,7 @@ class Table:
         self.outFmt = ['table', 
             'flatRowPair','flatColumnPair',
             'flatRowReflectPair', 'flatColumnReflectPair', 
-                            ] + tableMonoFormatRef.values()
+                            ] + tableMonoFormatRef.keys()
 
     def _rotate(self, data):
         """given data in a table, need to get
@@ -165,7 +180,10 @@ class Table:
         
     def _getMinMax(self, refSeries=None):
         """get a min Max if possible, combining supplied min, max if available
-        if a refSeries is available, use to find min and max"""      
+        if a refSeries is available, use to find min and max
+
+
+        """      
         if refSeries == []: refSeries = None        
         if self.cellMinMax != None: # if defined, always use
             minMax = self.cellMinMax
@@ -187,6 +205,10 @@ class Table:
         """ tage a segmetn from the 2d table datas
         width should not be negative
         norm: turn normalizing on or off; will change into list, even if an array
+
+        >>> a = Table([[1,2,3], [4,5,6]])
+        >>> a.extract('table', 1, 0, 1, 2)
+        [[1.0, 0.0, 0.5]]
         """
         fmt = fmt.lower() # lower for reading values
         if rowStart == None: rowStart = 0
@@ -289,21 +311,28 @@ class TestOld:
     def __init__(self):
         self.testTable()
         
+
+
+
+#-----------------------------------------------------------------||||||||||||--
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
+
     def testTable(self):
-        
         for test in [[[0,1,0,2],[1,1,2,1],[0,1,1,0],[1,0,2,0]],
-                         #[[0,1],[2,3],[4,5]], 
-                         #[[0,1,2,3,4], [5,6,7,8,9]]
+                         [[0,1],[2,3],[4,5]], 
+                         [[0,1,2,3,4], [5,6,7,8,9]]
                         ]:
             a = Table(test)
-            for fmt in a.outFmt:
-                for norm in range(1):
-                    print _MOD, drawer.listToStr(a.extract(fmt, norm)), '{%s}' % fmt
+            for fmtStr in a.outFmt:
+                post = a.extract(fmtStr, 0)
 
-
-
+#-----------------------------------------------------------------||||||||||||--
 if __name__ == '__main__':
-
-    TestOld()
-
-
+    from athenaCL.test import baseTest
+    baseTest.main(Test)

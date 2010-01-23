@@ -21,7 +21,7 @@ lang = language.LangObj()
 class LiteralHorizontal(baseTexture.Texture):
     """simple one dimension line algorithm
 
-    >>> a = LiteralHorizontal('test')
+    >>> #a = LiteralHorizontal('test')
     """
     def __init__(self, name=None):
         baseTexture.Texture.__init__(self, name) # init base class

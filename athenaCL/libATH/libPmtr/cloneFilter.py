@@ -4,12 +4,15 @@
 #
 # Authors:       Christopher Ariza
 #
-# Copyright:     (c) 2004-2007 Christopher Ariza
+# Copyright:     (c) 2004-2010 Christopher Ariza
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
 
 
 import copy
+import unittest, doctest
+
+
 from athenaCL.libATH import language
 lang = language.LangObj()
 from athenaCL.libATH import quantize
@@ -24,6 +27,8 @@ _MOD = 'cloneFilter.py'
 #-----------------------------------------------------------------||||||||||||--
 class Bypass(basePmtr.FilterParameter):
     def __init__(self, args, refDictArray):
+        """
+        """
         basePmtr.FilterParameter.__init__(self, args, refDictArray) 
         self.type = 'bypass'
         self.doc = lang.docPoB
@@ -51,6 +56,8 @@ class Bypass(basePmtr.FilterParameter):
 #-----------------------------------------------------------------||||||||||||--
 class OrderBackward(basePmtr.FilterParameter):
     def __init__(self, args, refDictArray):
+        """
+        """
         basePmtr.FilterParameter.__init__(self, args, refDictArray) 
         self.type = 'orderBackward'
         self.doc = lang.docPoOb
@@ -774,6 +781,20 @@ class FilterDivideAnchor(_FilterOperatorAnchor):
 
 
 
+#-----------------------------------------------------------------||||||||||||--
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
+
+
+#-----------------------------------------------------------------||||||||||||--
+if __name__ == '__main__':
+    from athenaCL.test import baseTest
+    baseTest.main(Test)
 
 
 

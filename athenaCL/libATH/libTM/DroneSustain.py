@@ -21,7 +21,7 @@ lang = language.LangObj()
 class DroneSustain(baseTexture.Texture):
     """simple one dimension line algorithm
 
-    >>> a = DroneSustain()
+    #>>> a = DroneSustain()
     """
     def __init__(self, name=None):
         baseTexture.Texture.__init__(self, name) # init base class

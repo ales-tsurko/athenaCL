@@ -57,11 +57,12 @@ def getCategoryDefaultDict(platform, category):
                       'psViewerPath': '',
                      }
     if category == 'athena':
-        catDict = {'fpLastDir': '', 
-                      'fpLastDirSco': '',
+        catDict = {
+                      'fpLastDir': '', 
+                      'fpLastDirEventList': '',
+                      'fpScratchDir': '', # used for writing temporary files
+                      'fpAudioDir': '',
                       'tLastVersionCheck': '',
-                      'scratchDir': '', # used for writing temporary files
-                      'audioDir': '',
                       'eventOutput': "('midiFile', 'xmlAthenaObject')",
                       'eventMode':'csoundNative', # startup value
                       'refreshMode': '1', # esObj refreshing

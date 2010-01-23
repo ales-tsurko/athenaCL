@@ -48,6 +48,8 @@ the Cmask original RNGs.
 '''
 
 import time, math
+import unittest, doctest
+
 import random as randomBuiltin
 # used to be this
 # _the_same = whrandom.whrandom() # returns an instances
@@ -382,94 +384,110 @@ class WeibullRandom(Generator):
 
 
 
-if __name__ == '__main__':
-     def testRandom(rng, begin, end, n, m):
-          counter = []
-          for i in range(m):
-                counter.append(0)
+#-----------------------------------------------------------------||||||||||||--
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
 
-          t = 0.0
-          step = (end - begin) / n
-          for i in range(n):
+    def _testRandom(self, rng, begin, end, n=1000, m=100):
+        counter = []
+        for i in range(m):
+            counter.append(0)
+        
+        t = 0.0
+        step = (end - begin) / n
+        for i in range(n):
+            try:
                 r = rng(t)
-                print r
-                for j in range(m-1, -1, -1):
-                     floor = j / float(m)
-                     ceil = (j+1)/float(m)
-                     if r >= floor and r < ceil:
-                          counter[j] = counter[j] + 1
-                          break
-                t += step
+            except TypeError:
+                r = rng() # no args
+            for j in range(m-1, -1, -1):
+                floor = j / float(m)
+                ceil = (j+1)/float(m)
+                if r >= floor and r < ceil:
+                    counter[j] = counter[j] + 1
+                    break
+            t += step
           #sum = 0
           #for j in range(m):
           #  sum += counter[j]
           #  print (j+1) / float(m), counter[j]/float(n)
 
-     #rng = UniformRandom()
-     #testRandom(rng, 10000, 100)
+    def testRandom(self):
+        rng = UniformRandom()
+        self._testRandom(rng, 100, 100)
+        
+        rng = LinearRandom()
+        self._testRandom(rng, 100, 100)
+        
+        rng = InverseLinearRandom()
+        self._testRandom(rng, 100, 100)
+        
+        rng = TriangularRandom()
+        self._testRandom(rng, 100, 100)
+        
+        rng = InverseTriangularRandom()
+        self._testRandom(rng, 100, 100)
+        
+        rng = ExponentialRandom(1.0)
+        self._testRandom(rng, 0.0, 20.0, 100, 100)
+        rng = ExponentialRandom(0.7)
+        self._testRandom(rng, 0.0, 20.0, 100, 100)
+        rng = ExponentialRandom(2.0)
+        self._testRandom(rng, 0.0, 20.0, 100, 100)
+             
+        rng = InverseExponentialRandom(1.0)
+        self._testRandom(rng, 0.0, 20.0, 100, 100)
+        rng = InverseExponentialRandom(0.7)
+        self._testRandom(rng, 0.0, 20.0, 100, 100)
+        rng = InverseExponentialRandom(2.0)
+        self._testRandom(rng, 0.0, 20.0, 100, 100)
+        
+        rng = BilateralExponentialRandom(1.0)
+        self._testRandom(rng, 0.0, 20.0, 100, 100)
+        rng = BilateralExponentialRandom(0.7)
+        self._testRandom(rng, 0.0, 20.0, 100, 100)
+        rng = BilateralExponentialRandom(2.0)
+        self._testRandom(rng, 0.0, 20.0, 100, 100)
+        
+        rng = GaussRandom(0.5, 0.2)
+        self._testRandom(rng, 0.0, 20.0, 100, 100)
+        rng = GaussRandom(0.5, 0.1)
+        self._testRandom(rng, 0.0, 20.0, 100, 100)
+        rng = GaussRandom(0.2, 0.2)
+        self._testRandom(rng, 0.0, 20.0, 100, 100)
 
-     #rng = LinearRandom()
-     #testRandom(rng, 10000, 100)
-
-     #rng = InverseLinearRandom()
-     #testRandom(rng, 10000, 100)
-
-     #rng = TriangularRandom()
-     #testRandom(rng, 10000, 100)
-
-     #rng = InverseTriangularRandom()
-     #testRandom(rng, 10000, 100)
-
-     #rng = ExponentialRandom(1.0)
-     #testRandom(rng, 0.0, 20.0, 10000, 100)
-     #rng = ExponentialRandom(0.7)
-     #testRandom(rng, 0.0, 20.0, 10000, 100)
-     #rng = ExponentialRandom(2.0)
-     #testRandom(rng, 0.0, 20.0, 10000, 100)
+        rng = CauchyRandom(0.5, 0.2)
+        self._testRandom(rng, 0.0, 20.0, 100, 100)
+        rng = CauchyRandom(0.5, 0.15)
+        self._testRandom(rng, 0.0, 20.0, 100, 100)
+        rng = CauchyRandom(0.2, 0.2)
+        self._testRandom(rng, 0.0, 20.0, 100, 100)
      
-     #rng = ReverseExponentialRandom(1.0)
-     #testRandom(rng, 0.0, 20.0, 10000, 100)
-     #rng = ReverseExponentialRandom(0.7)
-     #testRandom(rng, 0.0, 20.0, 10000, 100)
-     #rng = ReverseExponentialRandom(2.0)
-     #testRandom(rng, 0.0, 20.0, 10000, 100)
-
-     #rng = BilateralExponentialRandom(1.0)
-     #testRandom(rng, 0.0, 20.0, 10000, 100)
-     #rng = BilateralExponentialRandom(0.7)
-     #testRandom(rng, 0.0, 20.0, 10000, 100)
-     #rng = BilateralExponentialRandom(2.0)
-     #testRandom(rng, 0.0, 20.0, 10000, 100)
-
-     #rng = GaussRandom(0.5, 0.2)
-     #testRandom(rng, 0.0, 20.0, 10000, 100)
-     #rng = GaussRandom(0.5, 0.1)
-     #testRandom(rng, 0.0, 20.0, 10000, 100)
-     #rng = GaussRandom(0.2, 0.2)
-     #testRandom(rng, 0.0, 20.0, 10000, 100)
-
-     rng = CauchyRandom(0.5, 0.2)
-     testRandom(rng, 0.0, 20.0, 10000, 100)
-     rng = CauchyRandom(0.5, 0.15)
-     testRandom(rng, 0.0, 20.0, 10000, 100)
-     rng = CauchyRandom(0.2, 0.2)
-     testRandom(rng, 0.0, 20.0, 10000, 100)
-     
-     #rng = BetaRandom(0.2, 0.2)
-     #testRandom(rng, 0.0, 20.0, 10000, 100)
-     #rng = BetaRandom(0.6, 0.6)
-     #testRandom(rng, 0.0, 20.0, 10000, 100)
-     #rng = BetaRandom(0.1, 0.3)
-     #testRandom(rng, 0.0, 20.0, 10000, 100)
-     
-     #rng = WeibullRandom(0.5, 3.0)
-     #testRandom(rng, 0.0, 20.0, 10000, 100)
-     #rng = WeibullRandom(0.5, 5.0)
-     #testRandom(rng, 0.0, 20.0, 10000, 100)
-     #rng = WeibullRandom(0.5, 1.0)
-     #testRandom(rng, 0.0, 20.0, 10000, 100)
-     #rng = WeibullRandom(0.5, 0.3)
-     #testRandom(rng, 0.0, 20.0, 10000, 100)
+        rng = BetaRandom(0.2, 0.2)
+        self._testRandom(rng, 0.0, 20.0, 100, 100)
+        rng = BetaRandom(0.6, 0.6)
+        self._testRandom(rng, 0.0, 20.0, 100, 100)
+        rng = BetaRandom(0.1, 0.3)
+        self._testRandom(rng, 0.0, 20.0, 100, 100)
+             
+        rng = WeibullRandom(0.5, 3.0)
+        self._testRandom(rng, 0.0, 20.0, 100, 100)
+        rng = WeibullRandom(0.5, 5.0)
+        self._testRandom(rng, 0.0, 20.0, 100, 100)
+        rng = WeibullRandom(0.5, 1.0)
+        self._testRandom(rng, 0.0, 20.0, 100, 100)
+        rng = WeibullRandom(0.5, 0.3)
+        self._testRandom(rng, 0.0, 20.0, 100, 100)
 
 
-# end
+
+#-----------------------------------------------------------------||||||||||||--
+if __name__ == '__main__':
+    from athenaCL.test import baseTest
+    baseTest.main(Test)
+

@@ -1,3 +1,13 @@
+#-----------------------------------------------------------------||||||||||||--
+# Name:          miscellaneous.py
+#
+# Authors:       Christopher Ariza
+#
+# Copyright:     (c) 2004-2010 Christopher Ariza
+# Copyright      (c) 2000-2001, Maurizio Umberto Puxeddu
+# License:       GPL
+#-----------------------------------------------------------------||||||||||||--
+
 # miscellaneous.py
 # Object-oriented Music Description Environment
 # Copyright (C) 2000-2001, Maurizio Umberto Puxeddu
@@ -21,6 +31,9 @@
 # Attactor, Choice, StaticChoice are new in pmask.
 
 import math, copy, types
+import unittest, doctest
+
+
 from athenaCL.libATH.omde import rand # used for omdeRand
 omdeRand = rand
 from athenaCL.libATH.omde.functional import Function, Generator, make_function
@@ -481,69 +494,92 @@ class StaticChoice(Function):
 
 
 
+
+#-----------------------------------------------------------------||||||||||||--
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
+
+
+    def test2(self):
+        from athenaCL.libATH.omde.miscellaneous import Range
+        from athenaCL.libATH.omde.rand import UniformRandom
+        from athenaCL.libATH.omde.bpf import LinearSegment
+        
+        r = Range(-10, 10)
+        a = Accumulator(r, 'wrap', -100.0, 100.0)
+        
+        for i in range(1000):
+            post = i, r(), a(i)
+
+
+#     def test3(self):
+#         from athenaCL.libATH.omde.miscellaneous import Range
+#         from athenaCL.libATH.omde.rand import UniformRandom
+#         from athenaCL.libATH.omde.bpf import LinearSegment
+#         
+#         rng = UniformRandom()
+#         
+#         strength = LinearSegment([(0.0, 0.0), (1.0, 1.0), (2.0, 0.5)])
+#         
+#         upper = LinearSegment([(0.0, 300.0), (1.0, 350.0), (2.0, 200)])
+#         
+#         m = Mask(rng, 100, upper)
+#         q = Quantizer(m, 10.0, strength, 0.0)
+#         
+#         t = 0.0
+#         step = 0.001
+#         for i in range(2001):
+#             post = t, q(t)
+#             t = t + step
+#         
+#         a = Attractor(Range(100, 1000), [120.0, 160.0, 200.0, 400.0], 0.8, 1.0)
+#         t = 2.0
+#         step = 0.001
+#         for i in range(2001):
+#             post = t, a(t)
+#             t = t + step
+
+
+
+    def test4(self):           
+        from athenaCL.libATH.omde.miscellaneous import Range
+        from athenaCL.libATH.omde.rand import UniformRandom
+        from athenaCL.libATH.omde.bpf import LinearSegment
+        
+        
+        rng = UniformRandom()
+        
+        m = Mask(rng, 100, 300)
+        
+        t = 0.0
+        step = 0.001
+        for i in range(2000):
+            post = t, m(t)
+            t = t + step
+    
+#     def test5(self):
+#         from athenaCL.libATH.omde.miscellaneous import Range
+#         from athenaCL.libATH.omde.rand import UniformRandom
+#         from athenaCL.libATH.omde.bpf import LinearSegment
+#         
+#         
+#         s = {10:1.0, 20:2.0, 30:1.0}
+#         c = StaticChoice(s)
+#         statistics = {}
+#         for key in s.keys():
+#             statistics[key] = 0
+#         for i in range(100):
+#             v = c(0)
+#             statistics[v] += 1
+#         post = statistics
+
+
+#-----------------------------------------------------------------||||||||||||--
 if __name__ == '__main__':
-     from athenaCL.libATH.omde.miscellaneous import Range
-     from athenaCL.libATH.omde.rand import UniformRandom
-     from athenaCL.libATH.omde.bpf import LinearSegment
-
-     def test2():
-
-          r = Range(-10, 10)
-          a = Accumulator(r, 'wrap', -100.0, 100.0)
-     
-          for i in range(1000):
-                print i, r(i), a(i)
-
-     def test3():
-          rng = UniformRandom()
-
-          strength = LinearSegment([(0.0, 0.0), (1.0, 1.0), (2.0, 0.5)])
-
-          upper = LinearSegment([(0.0, 300.0), (1.0, 350.0), (2.0, 200)])
-
-          m = Mask(rng, 100, upper)
-          q = Quantizer(m, 10.0, strength, 0.0)
-
-          t = 0.0
-          step = 0.001
-          for i in range(2001):
-                print t, q(t)
-                t = t + step
-
-          a = Attractor(Range(100, 1000), [120.0, 160.0, 200.0, 400.0], 0.8, 1.0)
-          t = 2.0
-          step = 0.001
-          for i in range(2001):
-                print t, a(t)
-                t = t + step
-
-     def test4():           
-          rng = UniformRandom()
-
-          m = Mask(rng, 100, 300)
-          
-          t = 0.0
-          step = 0.001
-          for i in range(2000):
-                print t, m(t)
-                t = t + step
-
-     def test5():
-          s = {10:1.0, 20:2.0, 30:1.0}
-          c = StaticChoice(s)
-          statistics = {}
-          for key in s.keys():
-                statistics[key] = 0
-          for i in range(100):
-                v = c(0)
-                statistics[v] += 1
-          print statistics
-
-     #test2()
-     #test3()
-     test4()
-     #test5()
-
-
-
-# end
+    from athenaCL.test import baseTest
+    baseTest.main(Test)

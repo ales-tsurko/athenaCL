@@ -26,7 +26,7 @@ _MOD = 'IntervalExpansion.py'
 class IntervalExpansion(baseTexture.Texture):
     """simple one dimension line algorithm
 
-    >>> a = IntervalExpansion('test')
+    >>> #a = IntervalExpansion('test')
     """
     def __init__(self, name=None):
         baseTexture.Texture.__init__(self, name) # init base class

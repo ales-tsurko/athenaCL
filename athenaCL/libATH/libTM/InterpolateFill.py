@@ -56,7 +56,7 @@ lang = language.LangObj()
 class InterpolateFill(baseTexture.Texture):
     """linear interpolation between event points
 
-    >>> a = InterpolateFill('test')
+    #>>> a = InterpolateFill('test')
     """
     def __init__(self, name=None):
         baseTexture.Texture.__init__(self, name) # init base class

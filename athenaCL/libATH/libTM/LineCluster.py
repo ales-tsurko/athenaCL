@@ -22,7 +22,7 @@ _MOD = 'LineCluster.py'
 class LineCluster(baseTexture.Texture):
     """simple one dimension chord algorithm
 
-    >>> a = LineCluster('test')
+    #>>> a = LineCluster('test')
     """
     def __init__(self, name=None):
         baseTexture.Texture.__init__(self, name) # init base class

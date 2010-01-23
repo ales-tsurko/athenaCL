@@ -36,7 +36,7 @@ tCOMMONQ = ('inst', 'tRange', 'beatT', 'rhythmQ', 'fieldQ',
 # textures have sustain and accent fields tt textures do not
 cCOMMONQ = ('time', 'sus', 'acc', 'fieldQ', 'octQ', 'ampQ', 'panQ', )
 
-REFDICT_SIM = {'bpm':120, 'sadr':[], 'ssdr':[]}
+REFDICT_SIM = {'bpm':120, 'fpAudioDirs':[]}
 
 
 

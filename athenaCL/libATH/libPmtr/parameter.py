@@ -519,7 +519,6 @@ class Test(unittest.TestCase):
             refDict['bpm'] = 120
             refDict['stateCurrentChord'] = (0,1)
             refDict['stateCurrentPitchRaw'] = 0
-            #refDict['ssdr'] = ['/src/athenaCL/athenaCL/audio']
         post = obj.reprDoc()
         post = obj.checkArgs()
         post = obj.repr()

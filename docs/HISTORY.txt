@@ -4,25 +4,9 @@ athenaCL Version History
 ___________.________________.______.________________________________
 to do (user-level):
 
-store last-used tm
-
-add support for nyquist, chuck, and supercollider
-
-TPef (TPeg complete): export filter parameters
-
-APao: audio options w/ sub selection
-   used when writing audio files from TPeg/TPef and EOw
-   file format (replace CPff), sample format (not always active)
-   channels (repace CPch), sample rate (not always active)
 
 change APauto to ELauto
 
-provide EMv, output engine help, output format information
-
-problem with equal-valued pulses: exact overlap of duration end and event start
-   may cause some events to be dropped w/ some output systems
-
-create bio-feedback modeled system as a multi-agent climate control system
 
 TEmidi: renamed as TEbr (beat reference), TEtr (time ref), or TEref: 
    store parameterObjects for tempo and for time signature generation
@@ -31,6 +15,25 @@ TEmidi: renamed as TEbr (beat reference), TEtr (time ref), or TEref:
    would require changing ao.midiTempo
    musicXml and humdrum event list output possible with beat + tempo def
    beat + tempo def can be used to latch rt evaluation of generated scores
+
+APao: audio options w/ sub selection
+   used when writing audio files from TPeg/TPef and EOw
+   file format (replace CPff), sample format (not always active)
+   channels (repace CPch), sample rate (not always active)
+
+store last-used tm
+
+add support for nyquist, chuck, and supercollider
+
+TPef (TPeg complete): export filter parameters
+
+provide EMv, output engine help, output format information
+
+problem with equal-valued pulses: exact overlap of duration end and event start
+   may cause some events to be dropped w/ some output systems
+
+create bio-feedback modeled system as a multi-agent climate control system
+
 
 new csound instruments:
    vocode w/ pluck on output channels
@@ -56,7 +59,7 @@ check output type of po given to texture parameters like amp
 need to provide output type check for dyn pmtr objs in TMs
    define in manifest, check during update
 
-move file path information from fpSSDR into aoInfo dictionary
+move file path information from fpAudioDirs into aoInfo dictionary
    adjust TPmap's use of artificial aoInfo to pass paths to EventSeqeunceSplit
 
 TEmap drawing muted textures incorectly
@@ -88,16 +91,25 @@ object factory storing: optimize by keeping instances and copying?
 
 
 
+_.__.___________.___________________________._______________________
+2.0
+
+added test to all modules
+removed all SC and MC dependencies and functionality
+removed all AS functionality
+renamed a number of preferences
+dropped file compatibility before 1.3
+
+
+
+
 
 _.__.___________.___________________________._______________________
 1.4.9
 
-
-
 (sub-user level)
 
 fixed bug when using a comma-separated list to name a path that does not exist
-
 
 __________________________________________.___________________._____
 1.4.8 7 May 2008

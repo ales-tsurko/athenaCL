@@ -19,8 +19,6 @@ lang = language.LangObj()
 
 class DroneArticulate(baseTexture.Texture):
     """polyphonic vertical drone
-
-    >>> a = DroneArticulate('test')
     """
     def __init__(self, name=None):
         baseTexture.Texture.__init__(self, name) # init base class

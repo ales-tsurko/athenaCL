@@ -17,9 +17,9 @@ import unittest, doctest
 
 
 athVersion  = '2.0.0-beta'
-athBuild        = '2009.08.15'
+athBuild        = '2010.02.01'
 athRevision = 1 # for debian based versioning
-athDate     = '15 August 2009' # human readable version
+athDate     = '1 February 2010' # human readable version
 __version__ = athVersion
 __license__ = "GPL"
 
@@ -110,20 +110,6 @@ class External:
             temp = dialog.askStr(lang.msgReturnToExit, self.termObj)
             sys.exit()
 
-# this isi not necessary with new versions of python
-#         try: # check for XML abilities:
-#             import xml.dom.minidom
-#             doc = xml.dom.minidom.parseString("<doc>test.</doc>")        
-#         except: # xml.sax._exceptions.SAXReaderNotAvailable
-#             dialog.msgOut(lang.msgMissingXML, self.termObj)
-#             temp = dialog.askStr(lang.msgReturnToExit, self.termObj)
-#             sys.exit()
-        # create util objects
-
-
-        #self.scObj = SC.SetClass() 
-        #self.mcObj = MC.MapClass()
-
         # check for texture module directory, demo dirs
         libATHcontents = os.listdir(self.libATHpath)
         if 'libTM' in libATHcontents:
@@ -133,24 +119,15 @@ class External:
             dialog.msgOut(lang.msgMissingLibTM, self.termObj)
             temp = dialog.askStr(lang.msgReturnToExit, self.termObj)
             sys.exit()
-        # check for athena scripts folder
-        if 'libAS' in libATHcontents:
-            self.libASpath = os.path.join(self.libATHpath, 'libAS')
-            self.libASpath = drawer.pathScrub(self.libASpath)
-        else:
-            dialog.msgOut(lang.msgMissingLibAS, self.termObj)
-            temp = dialog.askStr(lang.msgReturnToExit, self.termObj)
-            sys.exit()
 
         # check for demo files
         self.demoDirList = []
         if 'demo' in topLevelContent:
             demoPath = os.path.join(self.topLevelDir, 'demo')
             self.demoDirList.append(drawer.pathScrub(demoPath))
-            # cvs versions will have a test dir in demo; check for this and add
-            if 'test' in os.listdir(demoPath):
-                demoTestPath = os.path.join(demoPath, 'test')
-                self.demoDirList.append(drawer.pathScrub(demoTestPath))
+
+            demoTestPath = os.path.join(self.topLevelDir, 'test', 'xml')
+            self.demoDirList.append(drawer.pathScrub(demoTestPath))
 
         if 'CVS' in topLevelContent: # check if there is a cvs dir
             self.cvsDirPresent = 1
@@ -278,7 +255,8 @@ class External:
         """if online, check current version
         returns None if not available"""
         try: # read number of chars lines 1.1.1.1000.10.10
-            webpage = urllib.urlopen(drawer.urlPrep(lang.msgVersionURL)).read(24)
+            webpage = urllib.urlopen(drawer.urlPrep(
+                lang.msgVersionURL)).read(24)
         except IOError, e: # cant get online
             webpage = None
         except: # all others
@@ -351,21 +329,20 @@ class External:
         return d
         
     #-----------------------------------------------------------------------||--
-    def getFilePathSample(self):
+    def getFilePathAudio(self):
         """returns a list of file paths for samples"""
-        ssdrPath = os.path.join(self.libATHpath, 'ssdir')
-        ssdrPath = drawer.pathScrub(ssdrPath)
-        ssdrPathUsr = self.getPref('athena', 'ssdir')
-        pathList = [ssdrPath, ssdrPathUsr]
-        return pathList
+        audioPath = os.path.join(self.topLevelDir, 'audio')
+        audioPath = drawer.pathScrub(audioPath)
+        userAudioPath = self.getPref('athena', 'fpAudioDir')
+        return [audioPath, userAudioPath]
 
-    def getFilePathAnalysis(self):
-        """returns a list of file paths for analysis"""
-        sadrPath = os.path.join(self.libATHpath, 'sadir')
-        sadrPath = drawer.pathScrub(sadrPath)
-        sadrPathUsr = self.getPref('athena', 'sadir')
-        pathList = [sadrPath, sadrPathUsr]
-        return pathList
+#     def getFilePathAnalysis(self):
+#         """returns a list of file paths for analysis"""
+#         sadrPath = os.path.join(self.libATHpath, 'sadir')
+#         sadrPath = drawer.pathScrub(sadrPath)
+#         sadrPathUsr = self.getPref('athena', 'sadir')
+#         pathList = [sadrPath, sadrPathUsr]
+#         return pathList
 
     def getVisualMethod(self, status='normal'):
         """checks to see if vis methods have been updated
@@ -387,8 +364,6 @@ class External:
 
 
 #-----------------------------------------------------------------||||||||||||--
-#-----------------------------------------------------------------||||||||||||--
-
 class AthenaObject:
     """methods for internal processsing of done with command objecst from 
     command.py
@@ -423,6 +398,7 @@ class AthenaObject:
         self.external.updateAll('on') # msgs on
         #self.external.reloadTextures()
         self.external.getVisualMethod('init') # prep, dont resolve
+
         # utility objects
         self.help = help.HelpDoc(self.termObj) # pass ref termObj
         self.backward = ioTools.BackwardsCompat(self.debug)
@@ -453,19 +429,23 @@ class AthenaObject:
                                 'csoundNative')
         # local information either (1) not saved in AO (2) temporary data or
         # (3) derived from file based preferences
-        # these might be better put in teh aoInfo dictionary?
-        self.fpSSDR = self.external.getFilePathSample()   # list of paths
-        self.fpSADR = self.external.getFilePathAnalysis() # list of paths
-        self.fpLastDir = self.external.getPref('athena', 'fpLastDir')
-        self.fpLastDirSco = self.external.getPref('athena', 'fpLastDirSco')
-        # determines how texture/clone editing happens
 
         # temporary session data, scoFP and others
         # stores outputs completed after ELn; can be used to determine what
         # files were actually made
         self.aoInfo = {} 
+
+         # list of paths: built in audio dir, and user-defined dir
+        self.aoInfo['fpAudioDirs'] = self.external.getFilePathAudio()  
+        #self.fpAudioDirs = self.external.getFilePathAudio()  
+        self.aoInfo['fpLastDir'] = self.external.getPref('athena', 'fpLastDir')
+        #self.fpLastDir = self.external.getPref('athena', 'fpLastDir')
+        self.aoInfo['fpLastDirEventList'] = self.external.getPref('athena', 
+                                     'fpLastDirEventList')
+        #self.fpLastDirEventList = self.external.getPref('athena', 'fpLastDirEventList')
+
         self.aoInfo['refreshMode'] = self.external.getPref('athena',
-                                                                  'refreshMode', 1)
+                                                   'refreshMode', 1)
         self.aoInfo['cursorToolOption'] = self.external.getPref('athena',
                                                      'cursorToolOption')
         self.aoInfo['version'] = self.athVersion
@@ -477,23 +457,11 @@ class AthenaObject:
         # this is directory of main commands presented to user
         # any other commands are considered hidden
         self.cmdDict = {
-#       'scCmd':('SetClass', 'SCv(view)', 'SCcm(comp)', 
-#                   'SCf(find)', 'SCs(search)', 'SCmode(mode)', 'SCh(hear)',),
-#       'smCmd':('SetMeasure',    
-#                   'SMls(list)', 'SMo(select)',),
-#       'mcCmd':('MapClass', 'MCv(view)', 'MCcm(comp)', 
-#                   'MCopt(optimum)', 'MCgrid(grid)', 'MCnet(network)'),
       'piCmd':('PathInstance', 'PIn(new)',      'PIcp(copy)', 
                   'PIrm(remove)','PIo(select)', 'PIv(view)', 
                   'PIe(edit)', 'PIdf(duration)', 'PIls(list)', 'PIh(hear)', 
                   'PIret(retro)', 
                   'PIrot(rot)', 'PIslc(slice)'),
-# 'PIopt(optimum)'
-#       'psCmd':('PathSet','PScma(compA)','PScmb(compB)'),
-#       'pvCmd':('PathVoice', 'PVn(new)', 'PVcp(copy)', 'PVrm(remove)',
-#                   'PVo(select)', 'PVv(view)',    'PVe(edit)',     
-#                   'PVls(list)', 
-#                   'PVan(analysis)', 'PVcm(compare)', 'PVauto(auto)'),
       'tmCmd':('TextureModule', 'TMo(select)', 'TMv(view)',                                  
                   'TMls(list)'),
       'tpCmd':('TextureParameter', 'TPls(list)', 'TPv(select)', 'TPmap(map)', 
@@ -518,7 +486,6 @@ class AthenaObject:
                   'CPff(format)', 'CPch(channel)', 'CPauto(auto)'),
       'aoCmd':('AthenaObject', 'AOw(save)', 'AOl(load)', 'AOmg(merge)',
                   'AOrm(remove)',),
-      'asCmd':('AthenaScript', 'ASexe(execute)',), # hidden!
       'ahCmd':('AthenaHistory', 'AHls(list)', 'AHexe(execute)'),
       'auCmd':('AthenaUtility', 'AUsys(system)', 'AUdoc(docs)', 'AUup(update)',  
                   'AUbeat(beat)', 'AUpc(pitch)', 'AUmg(markov)', 'AUma(markov)', 
@@ -785,6 +752,10 @@ class AthenaObject:
     # methods to maintain internal utility objects
 
     def setEventMode(self, usrStr, default=None):
+        """
+        >>> a = AthenaObject()
+        >>> a.setEventMode('m')
+        """
         #print _MOD, usrStr
         usrStr = eventList.eventModeParser(usrStr)
         # in the case that a bad eventMode was stored
@@ -799,6 +770,12 @@ class AthenaObject:
         """set the preference file to an arbitraray path
         this is used for automated image generation in documentation"""
         self.external.updatePrefs(filePath) # msgs on
+
+
+
+
+
+
 
 
 
@@ -1136,7 +1113,7 @@ class Interpreter:
 
     #-----------------------------------------------------------------------||--
     def cmdExecute(self, cmdList):
-        """used for athenaScripts, does many commands in a list
+        """used for processing a lost of commands, does many commands in a list
         a simple list of commands is executed one at a time
         called from self.cmdLoop
 
@@ -1183,22 +1160,22 @@ class Interpreter:
 
 
     #-----------------------------------------------------------------------||--
-    def runScript(self, name, scriptArgs=None):
-        """will run a script in libAS folder, or a complete path
-        if given (not implemented yet)"""
-        # this is experimental: seems to work
-        # see http://www.python.org/doc/current/lib/built-in-funcs.html
-        modImportStr = 'athenaCL.libATH.libAS.%s' % name
-        try:
-            name = __import__(modImportStr, globals(), locals(), [name,])
-        except ImportError:
-            print lang.WARN, 'no such module to import %s' % name
-            return None
-        scriptObj = name.Script(scriptArgs) #" % name)# call one instance
-        self.echo = 1
-        # stop value is not used here...
-        stop = self.cmdExecute(scriptObj.cmdList)
-        self.echo = 0
+#     def runScript(self, name, scriptArgs=None):
+#         """will run a script in libAS folder, or a complete path
+#         if given (not implemented yet)"""
+#         # this is experimental: seems to work
+#         # see http://www.python.org/doc/current/lib/built-in-funcs.html
+#         modImportStr = 'athenaCL.libATH.libAS.%s' % name
+#         try:
+#             name = __import__(modImportStr, globals(), locals(), [name,])
+#         except ImportError:
+#             print lang.WARN, 'no such module to import %s' % name
+#             return None
+#         scriptObj = name.Script(scriptArgs) #" % name)# call one instance
+#         self.echo = 1
+#         # stop value is not used here...
+#         stop = self.cmdExecute(scriptObj.cmdList)
+#         self.echo = 0
 
     #-----------------------------------------------------------------------||--
     #def preloop(self): pass
@@ -1397,6 +1374,158 @@ class Test(unittest.TestCase):
             
     def testDummy(self):
         self.assertEqual(True, True)
+
+
+    def testInterpreterPaths(self):
+
+        cmdListB = [
+        'PIn test1  5-4  3-4     2-5',
+        'PIn test2  (3,4,4,4,4) (3,3,3) (1,1,2,3)',
+        'PIn test3  8-3  (3,4,3)  7-5',
+        'PIv',
+        'PIcp test1  test4',
+        'PIrm test4',
+        'PIls',
+        'PIo test1',
+        ]
+
+        cmdListD = [
+        'PIret test1retro',
+        'PIrot test1retroRot     2',
+        'PIslc test1retroRotSlc  2,3',
+        'PIo test2',
+        # pvn
+        ]
+
+        athInt = Interpreter('terminal')
+        for cmd in cmdListB+cmdListD:
+            ok, result = athInt.cmd(cmd)
+            if not ok:
+                raise Exception('failed cmd (%s): %s' % (cmd, result))
+
+    def testInterpreterTextures(self):
+
+        cmdListE = []
+        for texture in ['LineGroove']:
+            cmdListE.append('EMo cn')
+            cmdListE.append('TMo %s' % texture)
+            cmdListE.append('TMv ')
+            cmdListE.append('TMls ')
+            cmdListE.append('TIn test1 3')
+            cmdListE.append('TIn test3 22')
+            cmdListE.append('TIcp test3  test4 test5 test6')
+            cmdListE.append('TIrm test4 test5 test6')
+            cmdListE.append('TIls ')
+            cmdListE.append('TIo test3')
+            cmdListE.append('TIv ')
+            cmdListE.append('TIv test3')
+            cmdListE.append('TImute test1 test3')
+            cmdListE.append('TImode p   pcs')
+            cmdListE.append('TImode y   set')
+            cmdListE.append('TIe t  1.5, 3')
+            cmdListE.append('TIe r  l, ((4,1,1),(8,1,1),(8,3,1))')
+            cmdListE.append('TIrm test1 test3')
+
+        cmdListF = [
+        'TIn test1 3',
+        'TIn test2 80',
+        'TIn test3 22',
+        'TEe b  "c", 120',
+        'TEe a  "cg", "lu", .6, .7, .01',
+        'TEv beat',
+        'TEv a',
+        'TIdoc test1',
+        'TIdoc test2',
+        'TTls ',
+        'TTo NoiseLight',
+        'TCn echoA',
+        'TCn echoB',
+        'TCn echoC',
+        'TCn echoD',
+        'TCcp echoD echoE',
+        'TCls ',
+        'TCrm echoC echoB',
+        'TCe t fa,(c,10)',
+        'TEmap ',
+        'EMi ',
+        'TPls ',
+        'TPv sieve ',
+        'CPch 2',
+        'CPff a',
+        ]
+        
+        athInt = Interpreter('terminal')
+        for cmd in cmdListE+cmdListF:
+            ok, result = athInt.cmd(cmd)
+            if not ok:
+                raise Exception('failed cmd (%s): %s' % (cmd, result))
+
+
+    def testInterpreterLoad(self):
+
+        cmdList = [
+        # do all test load files
+        'AOl test01.xml',
+        # load each demo and make a score
+        'AOl demo03.xml',
+        'AOl demo05.xml',
+        'AOmg demo01.xml',
+        #AOdlg    
+        'APwid 80',
+        'APcurs',
+        'cmd',
+        'help',
+        'AUsys',
+        ]
+
+        athInt = Interpreter('terminal')
+        for cmd in cmdList:
+            ok, result = athInt.cmd(cmd)
+            if not ok:
+                raise Exception('failed cmd (%s): %s' % (cmd, result))
+
+    def testInterpreterAthenaUtility(self):
+        cmdList = [
+        'AUca f{f}x{101}y{100} .89124 .01',
+        'AUca x{20} ru,0,20 ru,0,0.04',
+        'AUma 4 9 2 9 3 9 3 8 3 9 3 8 4 8 3 9 3 8 3 4 9 2 3 8 4 9',
+        'AUmg 120 0 a{0}b{1}:{a=3|b=8}',
+        ]
+
+        athInt = Interpreter('terminal')
+        for cmd in cmdList:
+            ok, result = athInt.cmd(cmd)
+            if not ok:
+                raise Exception('failed cmd (%s): %s' % (cmd, result))
+
+
+    def testInterpreterClone(self):
+        cmdList = [
+        'pin a 5|7|11,c1,c8',
+        'emo m',
+        'tmo lh',
+        'tin a 1',
+        'tie t 0,5',
+        'tie r loop,((8,1,+),(9,2,+)),rc',
+        
+        'tcn a',
+        # do a scaling, and a shift, to a part
+        'tce t pl,((fa,(c,5)),(fma,l,(c,.5)))',
+
+        'tce s1 ei',
+        
+        'tcn b',
+        'tce t pl,((fa,(c,10)),(fma,l,(c,1.25)))',
+        'tce s1 ti',
+        ]
+
+        athInt = Interpreter('terminal')
+        for cmd in cmdList:
+            ok, result = athInt.cmd(cmd)
+            if not ok:
+                raise Exception('failed cmd (%s): %s' % (cmd, result))
+
+
 
 #-----------------------------------------------------------------||||||||||||--
 if __name__ == '__main__':

@@ -4,7 +4,7 @@
 #
 # Authors:       Christopher Ariza
 #
-# Copyright:     (c) 2003-2009 Christopher Ariza
+# Copyright:     (c) 2003-2010 Christopher Ariza
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
 
@@ -12,6 +12,7 @@
 from __future__ import generators
 # standarind importas
 import copy, string, random
+import unittest, doctest
 
 
 # sets was added w/ python 2.3; w/ python 2.4, sets are built-in
@@ -64,6 +65,12 @@ def eratosthenes():
 
     to use this generator, create an instance and then call the .next() method
     on the instance
+
+    >>> a = eratosthenes()
+    >>> a.next()
+    2
+    >>> a.next()
+    3
     """
     D = {}  # map composite integers to primes witnessing their compositeness
     # D stores largest composite: prime, pairs
@@ -95,7 +102,11 @@ def eratosthenes():
 def rabinMiller(n):
     """based on an implementatioin found here:
     http://krenzel.info/?p=83
-    see also here: http://www.4dsolutions.net/ocn/numeracy2.html"""
+    see also here: http://www.4dsolutions.net/ocn/numeracy2.html
+
+    >>> rabinMiller(234)
+    0
+    """
     n = abs(n)
     if n in [2,3]: return 1
     m = n % 6 # if n (except 2 and 3) mod 6 is not 1 or 5, then n isn't prime
@@ -131,7 +142,12 @@ class PrimeSegment:
         """gets a segment of prime numbers
         min and length values are suggested; may not be relevant
         in final presentation
-        will accept negative values and wrap"""
+        will accept negative values and wrap
+
+        >>> a = PrimeSegment(3, 20)
+        >>> a()
+        [3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73]
+        """
         self.seg = []
         self.start = start
         self.length = length
@@ -216,6 +232,9 @@ def _gcd(a, b):
     """find the greatest common divisor of a,b
     i.e., greatest number that is a factor of both numbers
     euclides algorithm
+
+    >>> _gcd(20, 30)
+    10
     """
     # alt implementation
 
@@ -233,7 +252,11 @@ def _gcd(a, b):
     return abs(a)
 
 def _lcm(a, b):
-    """find lowest common multiple of a,b"""
+    """find lowest common multiple of a,b
+
+    >>> _lcm(30,20)
+    60
+    """
     # // forcers integer style division (no remainder)
     return abs(a*b) / _gcd(a,b) 
 
@@ -310,6 +333,9 @@ class Residual:
     this range of integers can be changed whenever the section os drawn
     """
     def __init__(self, m, shift=0, neg=0, z=None):
+        """
+        >>> a = Residual(3, 2)
+        """
         # get a default range, can be changed later
         # is an actual range and not start/end points b/c when producing a not (-)
         # it is easy to remove the mod,n from the range
@@ -350,6 +376,13 @@ class Residual:
         """get a residual subset of this modulus at this n
         within the integer range provided by z
         format can be 'int' or 'bin', for integer or binary
+
+
+        >>> a = Residual(3, 2)
+        >>> a.segment(3)
+        [2, 5, 8, 11, 14, 17, 20, 23, 26, 29, 32, 35, 38, 41, 44, 47, 50, 53, 56, 59, 62, 65, 68, 71, 74, 77, 80, 83, 86, 89, 92, 95, 98]
+        >>> a.segment(3, range(3,15))
+        [5, 8, 11, 14]
         """
         #print 'residual arg z', z
         if z == None: # z is temporary; if none
@@ -386,7 +419,12 @@ class Residual:
             raise TypeError, '%s not a valid sieve format string.' % format
 
     def period(self):
-        """period is M; obvious, but nice for completeness"""
+        """period is M; obvious, but nice for completeness
+
+        >>> a = Residual(3, 2)
+        >>> a.period()
+        3
+        """
         return self.m
 
     #-----------------------------------------------------------------------||--
@@ -398,7 +436,12 @@ class Residual:
         return Residual(m, shift, neg, self.z)
     
     def __call__(self, n=0, z=None, format=None):
-        "calls self.segment(); uses segFmt" # if z is None, uses self.z
+        """calls self.segment(); uses segFmt
+
+        >>> a = Residual(3, 2)
+        >>> a()
+        [2, 5, 8, 11, 14, 17, 20, 23, 26, 29, 32, 35, 38, 41, 44, 47, 50, 53, 56, 59, 62, 65, 68, 71, 74, 77, 80, 83, 86, 89, 92, 95, 98]
+        """ # if z is None, uses self.z
         #print 'residual', self.repr()
         return self.segment(n, z, format)
 
@@ -418,7 +461,12 @@ class Residual:
         return str
 
     def __str__(self):
-        """str representation using M(n+shift) style notation"""
+        """str representation using M(n+shift) style notation
+
+        >>> a = Residual(3, 2)
+        >>> str(a)
+        '3@2'
+        """
         return self.repr() #default style
 
     def __eq__(self, other):
@@ -471,6 +519,12 @@ class Residual:
         """&, produces an intersection of two Residual classes
         returns a new Residual class
         cannot be done if R under complementation
+
+        >>> a = Residual(3, 2)
+        >>> b = Residual(5, 1)
+        >>> c = a & b
+        >>> str(c)
+        '15@11'
         """
         if other.neg or self.neg:
             raise TypeError, 'complented Residual objects cannot be intersected'
@@ -542,6 +596,9 @@ class CompressionSeg:
 
     """
     def __init__(self, src, z=None):
+        """
+        >>> a = CompressionSeg([3,4,5,6,7,8])
+        """
         self.src = list(copy.deepcopy(src))
         self.src.sort()
         self.match = [] # already sorted from src
@@ -577,6 +634,12 @@ class CompressionSeg:
 
     #-----------------------------------------------------------------------||--
     def __call__(self):
+        """
+        >>> a = CompressionSeg([3,4,5,6,7,8])
+        >>> b = a()
+        >>> str(b[0])
+        '1@0'
+        """
         return self.residuals
 
     def __str__(self):
@@ -685,6 +748,11 @@ class Sieve:
     """create a sieve segment from a sieve logical string of any complexity
     """
     def __init__(self, usrStr, z=None):
+        """
+        >>> a = Sieve('3@11')
+        >>> b = Sieve('2&4&8|5')
+        >>> c = Sieve('(5|2)&4&8')
+        """
         self.LGROUP = '{'
         self.RGROUP = '}'
         self.AND = '&'
@@ -835,6 +903,13 @@ class Sieve:
 
     def __and__(self, other):
         """&, produces an intersection of two
+
+        >>> a = Sieve('3@11')
+        >>> b = Sieve('2&4&8|5')
+        >>> c = Sieve('(5|2)&4&8')
+        >>> d = a & b
+        >>> str(d)
+        '{2@0&4@0&8@0|5@0}&{3@2}'
         """
         dataSelf = self.dataStore()
         dataOther = other.dataStore()
@@ -846,7 +921,15 @@ class Sieve:
         return Sieve(usrStr, z)
 
     def __or__(self, other):
-        """|, produces a union """
+        """|, produces a union 
+
+        >>> a = Sieve('3@11')
+        >>> b = Sieve('2&4&8|5')
+        >>> c = Sieve('(5|2)&4&8')
+        >>> d = a | b
+        >>> str(d)
+        '{2@0&4@0&8@0|5@0}|{3@2}'
+        """
         dataSelf = self.dataStore()
         dataOther = other.dataStore()
 
@@ -1216,6 +1299,16 @@ class Sieve:
     #-----------------------------------------------------------------------||--
 
     def segment(self, state, n=0, z=None, format=None):
+        """
+        >>> a = Sieve('3@11')
+        >>> b = Sieve('2&4&8|5')
+        >>> c = Sieve('(5|2)&4&8')
+        >>> a.segment('exp')
+        [2, 5, 8, 11, 14, 17, 20, 23, 26, 29, 32, 35, 38, 41, 44, 47, 50, 53, 56, 59, 62, 65, 68, 71, 74, 77, 80, 83, 86, 89, 92, 95, 98]
+        >>> c.segment('cmp', format='wid')
+        [8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8]
+        """
+
         if z == None:
             z = self.z
         if format == None:
@@ -1246,7 +1339,7 @@ class Sieve:
         try:
             seg = eval(evalStr)
         except SyntaxError:
-            raise SyntaxError, 'badly formed logical string'
+            raise SyntaxError('badly formed logical string (%s)' % evalStr)
 
         seg = list(seg)
         seg.sort()
@@ -1266,6 +1359,16 @@ class Sieve:
         """two periods are possible; if residuals are the same
         for both exp and cmd, only one is calculated
         period only calculated the fist time this method is called
+
+        >>> a = Sieve('3@11')
+        >>> a.period()
+        3
+        >>> b = Sieve('2&4&8|5')
+        >>> b.period()
+        40
+        >>> c = Sieve('(5|2)&4&8')
+        >>> c.period()
+        40
         """
         if state == None:
             state = self.state
@@ -1300,6 +1403,10 @@ class Sieve:
         zStep is the size of each z used to cycle through all z
 
         this seems to only work properly for float and ineger sieves
+
+        >>> a = Sieve('3@11')
+        >>> a.collect(10, 100, 10, 'int')
+        [102, 105, 108, 111, 114, 117, 120, 123, 126, 129]
         """
         found = []
         p = zMinimum # starting value
@@ -1371,6 +1478,9 @@ class SievePitch:
     """
     
     def __init__(self, usrStr):
+        """
+        >>> a = SievePitch('4@7')
+        """
         self.psLower = None #'c3'
         self.psUpper = None #'c5' # default ps Range
         self.psOrigin = None # psLower # default
@@ -1432,7 +1542,12 @@ class SievePitch:
     def __call__(self):
         """return a sieve segment mapped to integer range b/n
         psLower and psUpper
-        note that @0 becomes psLower"""
+        note that @0 becomes psLower
+
+        >>> a = SievePitch('4@7&5@4')
+        >>> a()
+        [7]
+        """
         min = self.psLower.get('psReal')
         max = self.psUpper.get('psReal')
         # get integer range
@@ -1510,25 +1625,30 @@ class TestOld:
         "cleans a list"
         return str(l).replace(' ', '')[1:-1]
 
+
+
+#-----------------------------------------------------------------||||||||||||--
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
+
+
     def testIntersection(self):
-        print 'Testing Intersection'
         a = Residual(3)
         testArgs = [(3,6,2,5), (4,6,1,3), (5,4,3,2), ]
         for m1, m2, n1, n2 in testArgs:
             a = Residual(m1, n1)
             b = Residual(m2, n2)
-            print '\n', a, b
             c = a & b           # do intersection
-            print '\t', c
-            print '\t', self._clean(c())
-            print '\texpected list'
-            print '\t', self._clean(self.intersection(a(), b()))
 
 
     def testSieveParse(self):
         testArgs = ['-5 | 4 & 4sub3 & 6 | 4 & 4', 
                  '2 or 4 and 4 & 6 or 4 & 4', 
-                 '|5@2 |', 
                  3,
                  '3 and 4 or not 3,1 and 4,1 or not 3 and 4,2 or not 3,2 and 4,3',
                  (2,4,6,8),
@@ -1536,16 +1656,14 @@ class TestOld:
                     ]
         for arg in testArgs:
             testObj = Sieve(arg)
-            print
-            print testObj, '\nfrom: %s' % repr(testObj.usrStr)
-            print testObj(0, range(0, 30))
+            post = testObj(0, range(0, 30))
 
 
     def testSievePitch(self):
         testObj = SievePitch('-5 | 4 & 4sub3 & 6 , b3, f#4')
         testObj = SievePitch('-5 | 4 & 4sub3 & 6 ')
-        print testObj.psLower, testObj.psUpper
-        print testObj()
+        post = testObj.psLower, testObj.psUpper
+        post = testObj()
 
 
     def testTimePoint(self):
@@ -1558,52 +1676,42 @@ class TestOld:
                 (-8,-6,-4,-2,0,2,1),
                  ]
         for src in args:
-            print '\nsrc:', src
             obj = CompressionSeg(src)
-            print obj
-
-            print 'as sieve:'
             sObj = Sieve(str(obj))
-            print sObj
-            print sObj()
-
-
+            post = sObj()
 
     def testSieve(self):
         z = range(0,100)
-        print
         usrStr = '3@2 & 4@1 | 2@0 & 3@1 | 3@3 | -4@2'
         a = Sieve(usrStr, z)
-        print a
+        self.assertEqual(str(a), '3@2&4@1|2@0&3@1|3@0|-4@2')
 
-        print
         usrStr = '-(3@2 & -4@1 & -(12@3 | 12@8) | (-2@0 & 3@1 | (3@3)))'
         a = Sieve(usrStr, z)
-        print a
+        self.assertEqual(str(a), '-{3@2&-4@1&-{12@3|12@8}|{-2@0&3@1|{3@0}}}')
 
-        print
-        print 'example from Flint, on Psapha'
+
+        # 'example from Flint, on Psapha'
         usrStr = '[(8@0 | 8@1 | 8@7) & (5@1 | 5@3)] |   [(8@0 | 8@1 | 8@2) & 5@0] | [8@3 & (5@0 | 5@1 | 5@2 | 5@3 | 5@4)] | [8@4 & (5@0 | 5@1 | 5@2 | 5@3 | 5@4)] | [(8@5 | 8@6) & (5@2 | 5@3 | 5@4)] | (8@1 & 5@2) | (8@6 & 5@1)'
         a = Sieve(usrStr, z)
-        print a
+        self.assertEqual(str(a), '{{8@0|8@1|8@7}&{5@1|5@3}}|{{8@0|8@1|8@2}&5@0}|{8@3&{5@0|5@1|5@2|5@3|5@4}}|{8@4&{5@0|5@1|5@2|5@3|5@4}}|{{8@5|8@6}&{5@2|5@3|5@4}}|{8@1&5@2}|{8@6&5@1}')
 
-        print 
-        print 'major scale from FM, p197'
+        # 'major scale from FM, p197'
         usrStr = '(-3@2 & 4) | (-3@1 & 4@1) | (3@2 & 4@2) | (-3 & 4@3)'
         a = Sieve(usrStr, z)
-        print a
+        self.assertEqual(str(a), '{-3@2&4@0}|{-3@1&4@1}|{3@2&4@2}|{-3@0&4@3}')
 
-        print
-        print 'nomos alpha sieve'
+        # 'nomos alpha sieve'
         usrStr = '(-(13@3 | 13@5 | 13@7 | 13@9) & 11@2) | (-(11@4 | 11@8) & 13@9) | (13@0 | 13@1 | 13@6)'
         a = Sieve(usrStr, z)
-        print a
+        self.assertEqual(str(a), '{-{13@3|13@5|13@7|13@9}&11@2}|{-{11@4|11@8}&13@9}|{13@0|13@1|13@6}')
 
+
+
+#-----------------------------------------------------------------||||||||||||--
 if __name__ == '__main__':
-    x = TestOld()
-
-
-
+    from athenaCL.test import baseTest
+    baseTest.main(Test)
 
 
 

@@ -517,7 +517,7 @@ class EventSequenceSplit:
     
     arrays used for speed optimation of floating point values
     
-    need aoInfo such as ssdr and sadr to get file paths
+    need aoInfo to get audio paths
     this is not normally stored in ao.aoInfo, but packed here in command.py
 
     """
@@ -676,8 +676,8 @@ class EventSequenceSplit:
         refDict = basePmtr.REFDICT_SIM
         # merge with aoInfo if around
         if self.aoInfo != None: # fill blank entries
-            refDict['sadr'] = self.aoInfo['sadr'] # a list of paths
-            refDict['ssdr'] = self.aoInfo['ssdr']
+            #refDict['sadr'] = self.aoInfo['sadr'] # a list of paths
+            refDict['fpAudioDirs'] = self.aoInfo['fpAudioDirs']
         
         # these are the same; why have both?
         self.splitScore['time'] = range(0, self.nEvent)
@@ -2172,9 +2172,6 @@ class EventMode:
         self.ref['nameMusic'], x = osTools.extSplit(file) # lop off .sco
         self.ref['audioExt'], self.ref['audioFlag'] = self._getAudioFlags()
         self.ref['audioName'] = self.ref['nameMusic'] + self.ref['audioExt']
-        # csound creator only used for macos resources setting
-        self.ref['nameCsoundCreator'] = self.ao.external.getPref('external', 
-                                            'csoundCreatorCode') 
         # extra data
         self.ref['version'] = self.ao.aoInfo['version']
         self.ref['optionNchnls'] = self.ao.nchnls
@@ -2511,10 +2508,9 @@ class Test(unittest.TestCase):
         auxNo = 0
         midiPgm = 0
         midiCh = None
-        fpSSDR = ''
-        fpSADR = ''
-        textureObj.load(textureParameters, polyPath, polyphonyMode, temperamentName, 
-                     pitchMode, auxNo, fpSSDR, fpSADR, midiPgm, midiCh)
+        fpAudioDirs = ''
+        #fpAudioAnalysisDirs = ''
+        textureObj.load(textureParameters, polyPath, polyphonyMode, temperamentName, pitchMode, auxNo, fpAudioDirs, midiPgm, midiCh)
         ok = textureObj.score()
 
     def testRetrograde(self):

@@ -4,11 +4,13 @@
 #
 # Authors:       Christopher Ariza
 #
-# Copyright:     (c) 2006 Christopher Ariza
+# Copyright:     (c) 2006-2010 Christopher Ariza
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
 
 import copy
+import unittest, doctest
+
 _MOD = 'quantize.py'
 
 
@@ -37,7 +39,10 @@ class Quantizer:
 
     def __init__(self, looplimit=999):
         """grid is a finite list of values in a list; this values
-        will be continued in either direction if necessary"""
+        will be continued in either direction if necessary
+
+        >>> a = Quantizer()
+        """
         self.LOOPLIMIT = looplimit
         self.grid = None
         self.gridRetro = None
@@ -115,5 +120,22 @@ class Quantizer:
                 return gridPoint - deviate
             else: # grid point is below, bring up
                 return gridPoint + deviate
+
+
+#-----------------------------------------------------------------||||||||||||--
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
+
+
+#-----------------------------------------------------------------||||||||||||--
+if __name__ == '__main__':
+    from athenaCL.test import baseTest
+    baseTest.main(Test)
+
 
 

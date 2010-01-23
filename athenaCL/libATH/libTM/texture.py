@@ -4,9 +4,12 @@
 #
 # Authors:       Christopher Ariza
 #
-# Copyright:     (c) 2001-2007 Christopher Ariza
+# Copyright:     (c) 2001-2010 Christopher Ariza
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
+
+import unittest, doctest
+
 
 from athenaCL.libATH import drawer
 from athenaCL.libATH.libTM import baseTexture
@@ -59,6 +62,9 @@ tmObjs = tmNames.values()
 #-----------------------------------------------------------------||||||||||||--
 def tmTypeParser(typeName):
     """utility functions for parsing user strings of texture namess
+
+    >>> tmTypeParser('lv')
+    'LiteralVertical'
     """
     parsed = drawer.acronymExpand(typeName, tmNames)
     if parsed == None:
@@ -105,3 +111,24 @@ def doc(rawName):
     #docStr = getattr(objRef, '__doc__')
     #return docStr
     return obj.doc
+
+
+
+#-----------------------------------------------------------------||||||||||||--
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
+
+    def testFactory(self):
+        for key, name in tmNames.items():
+            post = factory(name)
+
+#-----------------------------------------------------------------||||||||||||--
+if __name__ == '__main__':
+    from athenaCL.test import baseTest
+    baseTest.main(Test)
+

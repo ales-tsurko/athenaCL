@@ -5,11 +5,13 @@
 #
 # Authors:       Christopher Ariza
 #
-# Copyright:     (c) 2003-2005 Christopher Ariza
+# Copyright:     (c) 2003-2010 Christopher Ariza
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
 
 import random
+import unittest, doctest
+
 from athenaCL.libATH import drawer
 from athenaCL.libATH import pitchTools
 
@@ -20,6 +22,9 @@ class Temperament:
     "parent class of all temperament classes"
 
     def __init__(self):
+        """
+        >>> a = Temperament()
+        """
         self.name = None
         self.doc = None
 
@@ -52,6 +57,9 @@ class Temperament:
 
 class TwelveEqual(Temperament):
     def __init__(self):
+        """
+        >>> a = TwelveEqual()
+        """
         Temperament.__init__(self)
         self.name = 'TwelveEqual'
         self.doc = 'Twelve tone equal temperament'
@@ -61,6 +69,9 @@ class TwelveEqual(Temperament):
 
 class Pythagorean(Temperament):
     def __init__(self):
+        """
+        >>> a = Pythagorean()
+        """
         Temperament.__init__(self)
         self.name = 'Pythagorean'
         self.doc = 'Static Pythagorean tuning'
@@ -86,6 +97,9 @@ class Pythagorean(Temperament):
 
 class Just(Temperament):
     def __init__(self):
+        """
+        >>> a = Just()
+        """
         Temperament.__init__(self)
         self.name = 'Just'
         self.doc = 'Static Just tuning'
@@ -111,6 +125,9 @@ class Just(Temperament):
 
 class MeanTone(Temperament):
     def __init__(self):
+        """
+        >>> a = MeanTone()
+        """
         Temperament.__init__(self)
         self.name = 'MeanTone'
         self.doc = 'Static Mean Tone tuning'
@@ -136,6 +153,9 @@ class MeanTone(Temperament):
 
 class Split24Lower(Temperament):
     def __init__(self):
+        """
+        >>> a = Split24Lower()
+        """
         Temperament.__init__(self)
         self.name = 'Split24Lower'
         self.doc = 'Lower half of a 24 tone equal tempered scale'
@@ -145,6 +165,9 @@ class Split24Lower(Temperament):
 
 class Split24Upper(Temperament):
     def __init__(self):
+        """
+        >>> a = Split24Upper()
+        """
         Temperament.__init__(self)
         self.name = 'Split24Upper'
         self.doc = 'Upper half of a 24 tone equal tempered scale'
@@ -154,6 +177,9 @@ class Split24Upper(Temperament):
 
 class Interleave24Even(Temperament):
     def __init__(self):
+        """
+        >>> a = Interleave24Even()
+        """
         Temperament.__init__(self)
         self.name = 'Interleave24Even'
         self.doc = 'Even steps of a 24 tone equal tempered scale'
@@ -163,6 +189,9 @@ class Interleave24Even(Temperament):
 
 class Interleave24Odd(Temperament):
     def __init__(self):
+        """
+        >>> a = Interleave24Odd()
+        """
         Temperament.__init__(self)
         self.name = 'Interleave24Odd'
         self.doc = 'Odd steps of a 24 tone equal tempered scale'
@@ -172,6 +201,9 @@ class Interleave24Odd(Temperament):
 
 class NoiseLight(Temperament):
     def __init__(self):
+        """
+        >>> a = NoiseLight()
+        """
         Temperament.__init__(self)
         self.name = 'NoiseLight'
         self.doc = 'Provide uniform random +/- 5 cent noise on each pitch'
@@ -183,6 +215,9 @@ class NoiseLight(Temperament):
 
 class NoiseMedium(Temperament):
     def __init__(self):
+        """
+        >>> a = NoiseMedium()
+        """
         Temperament.__init__(self)
         self.name = 'NoiseMedium'
         self.doc = 'Provide uniform random +/- 10 cent noise on each pitch'
@@ -194,6 +229,9 @@ class NoiseMedium(Temperament):
 
 class NoiseHeavy(Temperament):
     def __init__(self):
+        """
+        >>> a = NoiseHeavy()
+        """
         Temperament.__init__(self)
         self.name = 'NoiseHeavy'
         self.doc = 'Provide uniform random +/- 15 cent noise on each pitch'
@@ -249,13 +287,23 @@ def factory(rawArgs):
     
     
     
-    
-#-----------------------------------------------------------------||||||||||||--
-def TestOld():
-    for name in temperamentNames:
-        a = factory(name)
-        print a.name, ': ', a.doc
-        print [a(x) for x in range(0,12)]
 
+#-----------------------------------------------------------------||||||||||||--
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
+
+    def testBasic(self):
+        for name in temperamentNames:
+            a = factory(name)
+            post = [a(x) for x in range(0,12)]
+
+
+#-----------------------------------------------------------------||||||||||||--
 if __name__ == '__main__':
-    TestOld()
+    from athenaCL.test import baseTest
+    baseTest.main(Test)

@@ -9,11 +9,13 @@
 #                    Bob van der Poel
 #
 # Copyright:     (c) 2003-2006 Christopher Ariza
-#                    (c) 2002-2003 Bob van der Poel
+#                (c) 2002-2003 Bob van der Poel
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
 
 import copy
+import unittest, doctest
+
 _MOD = 'midiTools.py'
 
 
@@ -37,7 +39,9 @@ def decimalProgramChange(ch=0):
 #-----------------------------------------------------------------||||||||||||--
 # midi number packing routines.
 def intToWord(x):
-    """ Convert a 2 byte MSB LSB value. """
+    """ Convert a 2 byte MSB LSB value. 
+    
+    """
     x = int(x)
     return  chr(x>>8 & 0xff) + chr(x & 0xff)
 
@@ -279,7 +283,8 @@ class MidiTrack:
 
 class MidiScore:
     def __init__(self, trackList=None, fileName='athenaCL midi', tempo=120):
-        "auto assign channels if none are given"
+        """auto assign channels if none are given
+        """
         self.trackList = trackList
         self.maxCh = 16 # maximum channel assignment allowed
         self.mtrks = {} # dict lives here, pased it inst class for writting
@@ -371,42 +376,52 @@ class MidiScore:
         f.close() # close file
         
 
+
+
+
+#-----------------------------------------------------------------||||||||||||--
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
+
+    def testBasic(self):
+        # score format: sTime, dur, vel, mPcs, pan
+        scoreC =     ((0,     .5,    90,    60, 60),
+                      (.6,  .5,  90,    51, 60),
+                      (1,     .5,    120, 62, 60),
+                      (1.6, .5,  90,    69, 60),
+                      (2.5, .5,  90,    51, 60),
+                      (3.1, .5,  120, 62, 60),
+                      (3.5, .5,  90,    69, 60),
+                      )
+        scoreB =     ((0,        .75,    90,    80, 120),
+                      (.75,  .75,    90,    20, 120),
+                      (1.25,     .75,    120, 30, 120),
+                      (2,        .75,    90,    32, 120),
+                      (2.5,  .25,    90,    50, 120),
+                      (2.75,     .25,    120, 51, 120),
+                      (3,        .25,    90,    52, 120),
+                      (3.25,     .25, 126,  52, 120),
+                      (3.50,     .25,    10,    52, 120),
+                      (3.75,     .25,    20,    52, 110),
+                      (4,        .25,    30,    52, 80),
+                      (4.25,     .25,    50,    52, 60),
+                      (4.50,     .25,    60,    52, 40),
+                      (4.75,     .25,    80,    52, 20),
+                      (5,        2,  90,    52, 0),
+                      )
+        # trackName, pgmNumber, ch(optional), scoreEventMode
+        trackList = (('testA', 0, None, scoreC),
+                         ('testD', 0, None, scoreB),)
+        a = MidiScore(trackList)
+
+
 #-----------------------------------------------------------------||||||||||||--
 if __name__ == '__main__':
-    from athenaCL.libATH import osTools
-    # score format: sTime, dur, vel, mPcs, pan
-    scoreC =     ((0,     .5,    90,    60, 60),
-                  (.6,  .5,  90,    51, 60),
-                  (1,     .5,    120, 62, 60),
-                  (1.6, .5,  90,    69, 60),
-                  (2.5, .5,  90,    51, 60),
-                  (3.1, .5,  120, 62, 60),
-                  (3.5, .5,  90,    69, 60),
-                  )
-    scoreB =     ((0,        .75,    90,    80, 120),
-                  (.75,  .75,    90,    20, 120),
-                  (1.25,     .75,    120, 30, 120),
-                  (2,        .75,    90,    32, 120),
-                  (2.5,  .25,    90,    50, 120),
-                  (2.75,     .25,    120, 51, 120),
-                  (3,        .25,    90,    52, 120),
-                  (3.25,     .25, 126,  52, 120),
-                  (3.50,     .25,    10,    52, 120),
-                  (3.75,     .25,    20,    52, 110),
-                  (4,        .25,    30,    52, 80),
-                  (4.25,     .25,    50,    52, 60),
-                  (4.50,     .25,    60,    52, 40),
-                  (4.75,     .25,    80,    52, 20),
-                  (5,        2,  90,    52, 0),
-                  )
-    # trackName, pgmNumber, ch(optional), scoreEventMode
-    trackList = (('testA', 0, None, scoreC),
-                     ('testD', 0, None, scoreB),)
-    a = MidiScore(trackList)
-    testPath = osTools.tempFile('.mid')
-    print testPath
-    a.write(testPath) # writes in cwd
-
-
-
+    from athenaCL.test import baseTest
+    baseTest.main(Test)
 

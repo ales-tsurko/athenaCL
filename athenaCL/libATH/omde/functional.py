@@ -1,3 +1,13 @@
+#-----------------------------------------------------------------||||||||||||--
+# Name:          functional.py
+#
+# Authors:       Christopher Ariza
+#
+# Copyright:     (c) 2004-2010 Christopher Ariza
+# Copyright:     (c) 2000-2001, Maurizio Umberto Puxeddu
+# License:       GPL
+#-----------------------------------------------------------------||||||||||||--
+
 # functional.py
 
 # Object-oriented Music Definition Environment
@@ -17,10 +27,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-"""
-"""
 
+import unittest, doctest
 import copy
+
+
 
 class FunctionModel:
      """
@@ -515,4 +526,22 @@ def make_generator(object, t0=0.0):
           return object
      
      return ConstantGenerator(object)
+
+
+
+#-----------------------------------------------------------------||||||||||||--
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
+
+
+#-----------------------------------------------------------------||||||||||||--
+if __name__ == '__main__':
+    from athenaCL.test import baseTest
+    baseTest.main(Test)
+
 

@@ -22,7 +22,7 @@ _MOD = 'LiteralVertical.py'
 class LiteralVertical(baseTexture.Texture):
     """simple one dimension line algorithm
 
-    >>> a = LiteralVertical('test')
+    >>> #a = LiteralVertical('test')
     """
     def __init__(self, name=None):
         baseTexture.Texture.__init__(self, name) # init base class

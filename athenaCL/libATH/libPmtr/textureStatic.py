@@ -8,6 +8,9 @@
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
 
+import unittest, doctest
+
+
 from athenaCL.libATH import drawer
 from athenaCL.libATH import error
 from athenaCL.libATH.libPmtr import basePmtr
@@ -541,3 +544,17 @@ class InterpolationMethodControl(basePmtr.StaticParameterTexture):
 
 
 
+#-----------------------------------------------------------------||||||||||||--
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
+
+
+#-----------------------------------------------------------------||||||||||||--
+if __name__ == '__main__':
+    from athenaCL.test import baseTest
+    baseTest.main(Test)

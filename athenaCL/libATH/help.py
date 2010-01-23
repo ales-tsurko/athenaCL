@@ -142,7 +142,7 @@ class HelpDoc:
     PIals = 'PIals: PathInstance: Attribute List: Displays a listing of raw attributes of the selected Path.' 
     PIals_usage = 'pials'
 
-    PIo = 'PIo: PathInstance: Select: Select the active Path. Used for "PIret", "PIrot", "PIslc", "PScpa", "PScpb", and "TIn".'
+    PIo = 'PIo: PathInstance: Select: Select the active Path. Used for "PIret", "PIrot", "PIslc", and "TIn".'
     PIo_usage = 'pio name'
 
     PIv = 'PIv: PathInstance: View: Displays all properties of the active Path.'    
@@ -166,8 +166,8 @@ class HelpDoc:
     PIslc = 'PIslc: PathInstance: Slice: Creates a new Path from a slice of the active Path. All PathVoices are preserved in the new Path.'  
     PIslc_usage = 'pislc name positionStart,positionEnd'
 
-    PIopt = 'PIopt: PathInstance: Optimize: Creates a new Path from a voice-leading optimization of the active Path. All pitch groups will be transposed to an optimized transposition, and a new PathVoice will be created with optimized voice leadings. Note: PathVoices are not preserved in the new Path.'       
-    PIopt_usage = 'piopt name'
+#     PIopt = 'PIopt: PathInstance: Optimize: Creates a new Path from a voice-leading optimization of the active Path. All pitch groups will be transposed to an optimized transposition, and a new PathVoice will be created with optimized voice leadings. Note: PathVoices are not preserved in the new Path.'       
+#     PIopt_usage = 'piopt name'
     
     PIh = 'PIh: PathInstance: Hear: Creates a temporary Texture with the active Path and the active TextureModule, and uses this Texture to write a short sample EventList as a temporary MIDI file. %s If possible, this file is opened and presented to the user.' % _scratchDir
     PIh_usage = 'pih'
@@ -431,7 +431,7 @@ class HelpDoc:
     APgfx = 'APgfx: AthenaPreferences: Graphics: Toggle between different graphic output formats. All modes may not be available on every platform or Python installation. %s' % _gfxCommand
     APgfx_usage = 'apgfx dialogMode'
 
-    APdir = 'APdir: AthenaPreferences: Directories: Lets the user select or enter directories necessary for writing and searching files. Directories that can be entered are the "scratch" directory, the "user ssdir", and the "user sadir". The scratch directory is used for writing temporary files with automatically-generated file names. Commands such as SCh, PIh, and those that produce graphics (depending on format settings specified with APgfx) use this directory. The user ssdir and sadir are used within ParameterObjects that search for files. With such ParameterObjects, the user can specify any file within the specified directory simply by name. To find the the file\'s complete file path, all directories are recursively searched in both the user ssdir and the libATH/ssdir. Directories named "_exclude" will not be searched. If files in different nested directories do not have unique file names, correct file paths may not be found.'
+    APdir = 'APdir: AthenaPreferences: Directories: Lets the user select or enter directories necessary for writing and searching files. Directories that can be entered are the "scratch" directory and the "user audio". The scratch directory is used for writing temporary files with automatically-generated file names. Commands such as SCh, PIh, and those that produce graphics (depending on format settings specified with APgfx) use this directory. The user audio directory is used within ParameterObjects that search for files. With such ParameterObjects, the user can specify any file within the specified directory simply by name. To find the the file\'s complete file path, all directories are recursively searched in both the user audio and the athenaCL/audio directories. Directories named "_exclude" will not be searched. If files in different nested directories do not have unique file names, correct file paths may not be found.'
     APdir_usage = 'apdir dirType filePath'
 
     APcc = 'APcc: AthenaPreferences: Customize Cursor: Lets the user customize the cursor prompt tool by replacing any of the standard characters with any string. The user may optionally select to restore system defaults.'
@@ -454,8 +454,8 @@ class HelpDoc:
 
     #-----------------------------------------------------------------------||--
 
-    ASexe = 'ASexe: AthenaScript: Execute: Runs an AthenaScript if found in the libATH/libAS directory. Not for general use.'    
-    ASexe_usage = 'asexe [scriptName]'
+#     ASexe = 'ASexe: AthenaScript: Execute: Runs an AthenaScript if found in the libATH/libAS directory. Not for general use.'    
+#     ASexe_usage = 'asexe [scriptName]'
 
     #-----------------------------------------------------------------------||--
 
@@ -502,10 +502,11 @@ class HelpDoc:
 
     PI = 'PathInstance: Commands: Displays a list of all PathInstance commands.'
     PI_usage = 'pi'
-    PS = 'PathSet: Commands: Displays a list of all PathSet commands.'
-    PS_usage = 'ps'
-    PV = 'PathVoice: Commands: Displays a list of all PathVoice commands.'
-    PV_usage = 'pv'
+
+#     PS = 'PathSet: Commands: Displays a list of all PathSet commands.'
+#     PS_usage = 'ps'
+#     PV = 'PathVoice: Commands: Displays a list of all PathVoice commands.'
+#     PV_usage = 'pv'
 
     TM = 'TextureModule: Commands: Displays a list of all TextureModule commands.'
     TM_usage = 'tm'

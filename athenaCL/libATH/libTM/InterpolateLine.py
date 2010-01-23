@@ -56,7 +56,7 @@ class InterpolateLine(baseTexture.Texture):
     """
     def __init__(self, name=None):
         """
-        >>> a = InterpolateLine('test')
+        #>>> a = InterpolateLine('test')
         """
         baseTexture.Texture.__init__(self, name) # init base class
         self.author = 'athenaCL native'
