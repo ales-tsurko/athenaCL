@@ -69,12 +69,12 @@ def getCategoryDefaultDict(platform, category):
                       'refreshMode': '1', # esObj refreshing
                       'debug': '0', 
 
-                      'cursorToolLb': '[',  
-                      'cursorToolRb': ']',  
+                      'cursorToolLb': '..',  
+                      'cursorToolRb': '..',  
                       'cursorToolLp': '(',  
                       'cursorToolRp': ')',  
-                      'cursorToolP' : 'PI',  
-                      'cursorToolT' : 'TI',  
+                      'cursorToolP' : 'pi',  
+                      'cursorToolT' : 'ti',  
                       'cursorToolOption': 'cursorToolOn',
                       }
     if category == 'gui':

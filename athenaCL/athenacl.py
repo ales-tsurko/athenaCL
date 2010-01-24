@@ -5,7 +5,7 @@
 #
 # Authors:       Christopher Ariza
 #
-# Copyright:     (c) 2001-2006 Christopher Ariza
+# Copyright:     (c) 2001-2010 Christopher Ariza
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
 import sys, os
@@ -16,12 +16,12 @@ try: import libATH #assume we are in package dir
 except ImportError:
     try: from athenaCL import libATH
     except ImportError: print 'athenaCL package cannot be found'; sys.exit()
-libPath = libATH.__path__[0] # list, get first item
-if os.path.isabs(libPath) != 1: #relative path, add cwd
-    libPath = os.path.abspath(libPath)
-_PKGDIR = os.path.dirname(libPath)
-_OUTDIR = os.path.dirname(_PKGDIR)
-if _OUTDIR not in sys.path: sys.path.append(_OUTDIR)
+fpLibATH = libATH.__path__[0] # list, get first item
+if os.path.isabs(fpLibATH) != 1: #relative path, add cwd
+    fpLibATH = os.path.abspath(fpLibATH)
+fpSrcDir = os.path.dirname(fpLibATH)
+fpPackageDir = os.path.dirname(fpSrcDir)
+if fpPackageDir not in sys.path: sys.path.append(fpPackageDir)
 #-----------------------------------------------------------------||||||||||||--
 
 from athenaCL.libATH import dialog
@@ -37,6 +37,7 @@ _MOD = 'athenacl.py'
 IDLE_ACTIVE = drawer.isIdle()
 #print _MOD, 'idle active:', IDLE_ACTIVE
 
+print sys.path
 
 #-----------------------------------------------------------------||||||||||||--
 # reference for all flags and doc strings for each

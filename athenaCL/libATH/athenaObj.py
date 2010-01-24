@@ -37,12 +37,12 @@ __license__ = "GPL"
 #     except ImportError: print 'athenaCL package cannot be found.'; sys.exit()
 # 
 # 
-# libPath = libATH.__path__[0] # list, get first item
-# if os.path.isabs(libPath) != 1: #relative path, add cwd
-#     libPath = os.path.abspath(libPath)
-# _PKGDIR = os.path.dirname(libPath)
-# _OUTDIR = os.path.dirname(_PKGDIR)
-# if _OUTDIR not in sys.path: sys.path.append(_OUTDIR)
+# fpLibATH = libATH.__path__[0] # list, get first item
+# if os.path.isabs(fpLibATH) != 1: #relative path, add cwd
+#     fpLibATH = os.path.abspath(fpLibATH)
+# fpSrcDir = os.path.dirname(fpLibATH)
+# fpPackageDir = os.path.dirname(fpSrcDir)
+# if fpPackageDir not in sys.path: sys.path.append(fpPackageDir)
 
 
 try: 
@@ -53,11 +53,11 @@ except ImportError:
         sys.stdout.write('athenaCL package cannot be found.\n')
         sys.exit()
 
-libPathTM = libTM.__path__[0] # list, get first item
-libPath = os.path.dirname(libPathTM) # libATH dir
-_PKGDIR = os.path.dirname(libPath) # athenaCL dir
-_OUTDIR = os.path.dirname(_PKGDIR) # athenacl dir
-if _OUTDIR not in sys.path: sys.path.append(_OUTDIR)
+fpLibATHTM = libTM.__path__[0] # list, get first item
+fpLibATH = os.path.dirname(fpLibATHTM) # libATH dir
+fpSrcDir = os.path.dirname(fpLibATH) # athenaCL dir
+fpPackageDir = os.path.dirname(fpSrcDir) # athenacl dir
+if fpPackageDir not in sys.path: sys.path.append(fpPackageDir)
 
 
 
@@ -120,7 +120,7 @@ class External:
         checks for libATH, libATH/libTM, libATH/libAS
         verbose does not currently do anything
         """
-        self.topLevelDir = _PKGDIR # global from mod loading, athenaCL package dir
+        self.topLevelDir = fpSrcDir # global from mod loading, athenaCL package dir
         topLevelContent = os.listdir(self.topLevelDir) # check 'libATH' directory   
         if 'libATH' in topLevelContent:
              self.libATHpath = os.path.join(self.topLevelDir,'libATH')

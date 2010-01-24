@@ -850,10 +850,10 @@ def findAthenaPath():
         try: from athenaCL import libATH
         except ImportError: # if n a subdirectory of athena
             return findSubDir('athenaCL') # none if found, otherwise path    
-    libPath = libATH.__path__[0] # list, get first item
-    if os.path.isabs(libPath) != 1: #relative path, add cwd
-        libPath = os.path.abspath(libPath)
-    return os.path.dirname(libPath)
+    fpLibATH = libATH.__path__[0] # list, get first item
+    if os.path.isabs(fpLibATH) != 1: #relative path, add cwd
+        fpLibATH = os.path.abspath(fpLibATH)
+    return os.path.dirname(fpLibATH)
 
 def findManPath(group=1, altSys=None):
     """on unix opperating systems find man path for given group
