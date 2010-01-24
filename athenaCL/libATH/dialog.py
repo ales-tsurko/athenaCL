@@ -109,10 +109,8 @@ def askStr(query, termObj=None, strip=1):
     """
     if termObj != None:
         sessionType = termObj.sessionType
-        parentGUI = termObj.parentGUI
     else:
         sessionType = 'terminal'
-        parentGUI = None
     # TypeError raised when object.readline() returned non-string
     try:
         answer = rawInput(query, termObj)
@@ -131,10 +129,8 @@ def askYesNoCancel(query, defaultSel=1, termObj=None):
     """
     if termObj != None:
         sessionType = termObj.sessionType
-        parentGUI = termObj.parentGUI
     else:
         sessionType = 'terminal'
-        parentGUI = None
     # need to fix query before appending
     query = _fixQuery(query)
     qString = query + '(y, n, or cancel): '
@@ -160,10 +156,8 @@ def askYesNo(query, defaultSel=1, termObj=None):
     """
     if termObj != None:
         sessionType = termObj.sessionType
-        parentGUI = termObj.parentGUI
     else:
         sessionType = 'terminal'
-        parentGUI = None
     query = _fixQuery(query)
     qString = query + '(y or n): '
     if sessionType in ['terminal', 'idle', 'gui-tk']:

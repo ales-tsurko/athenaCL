@@ -5,9 +5,6 @@ ___________.________________.______.________________________________
 to do (user-level):
 
 
-change APauto to ELauto
-
-
 TEmidi: renamed as TEbr (beat reference), TEtr (time ref), or TEref: 
    store parameterObjects for tempo and for time signature generation
    tempo can only be updated once per measure
@@ -16,24 +13,24 @@ TEmidi: renamed as TEbr (beat reference), TEtr (time ref), or TEref:
    musicXml and humdrum event list output possible with beat + tempo def
    beat + tempo def can be used to latch rt evaluation of generated scores
 
-APao: audio options w/ sub selection
-   used when writing audio files from TPeg/TPef and EOw
-   file format (replace CPff), sample format (not always active)
-   channels (repace CPch), sample rate (not always active)
+global shared parameter objects that are stored in a dictionary
+each parameter obj can have a role, with default roles given for 
+tempoReference, meterReferenceNumerator, meterReferenceDenominator
+store in a dictionary with noId, role, pmtr string
+TextureGlobal (TGls, TGn, TGe, TGrm)
 
 store last-used tm
 
-add support for nyquist, chuck, and supercollider
 
-TPef (TPeg complete): export filter parameters
 
 provide EMv, output engine help, output format information
 
+TPef (TPeg complete): export filter parameters
+
+add support for nyquist, chuck, and supercollider
+
 problem with equal-valued pulses: exact overlap of duration end and event start
    may cause some events to be dropped w/ some output systems
-
-create bio-feedback modeled system as a multi-agent climate control system
-
 
 new csound instruments:
    vocode w/ pluck on output channels
@@ -46,11 +43,6 @@ new PO:
 ____.______________.____________.___________________________________
 to do (sub-user level):
 
-change all exceptions to ues Exception("message") syntax (py3k)
-
-replace all has_key() methods with in operator (py3k, good for 2.2+)
-
-replace all instances of print with print() (py3k)
 
 add WAV support to audioTools.py with wave module
 permit turning off path voice calculations
@@ -77,13 +69,7 @@ event mode for arbitrary midi controllers as aux values
 Csound 5: render scores from within python
    conditional import csnd.py; may need to add to sys.path
 
-MCv: seems to be a bug in listed output maps
-there may be a bug with PVv by which map indexes that do not exist given
-   as keys
-
 create bundle, in folders, rather than top-level files
-
-global shared parameter objects
 
 allow support for SCORE style rhythm notation
 
@@ -92,14 +78,17 @@ object factory storing: optimize by keeping instances and copying?
 
 
 _.__.___________.___________________________._______________________
-2.0
+2.0.0
 
 added test to all modules
 removed all SC and MC dependencies and functionality
 removed all AS functionality
 renamed a number of preferences
 dropped file compatibility before 1.3
-
+renamed CPauto to ELauto
+removed APcc
+consolidated CPff and CPch comamnds into APao command
+changed/added AthenaObj attributes: audioFormat, audioRate
 
 
 
@@ -270,7 +259,7 @@ EMv improved to provide output output format information
 fixed bug that accepted bad command names and raise an error
 fixed bug when bad comand-line args given to TIe
 preferences added for text, image, audio, midi, and ps applications
-changed external.fileFormat pref to external.audioFileFormat
+changed external.fileFormat pref to external.audioFormat
 
 ___________.______________________________________________._________
 1.4.1: 18 August 2005

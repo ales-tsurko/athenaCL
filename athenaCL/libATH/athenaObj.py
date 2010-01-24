@@ -16,7 +16,7 @@ import sys, os, time, random, traceback, httplib, urllib
 import unittest, doctest
 
 
-athVersion  = '2.0.0-beta'
+athVersion  = '2.0.0a1'
 athBuild        = '2010.02.01'
 athRevision = 1 # for debian based versioning
 athDate     = '1 February 2010' # human readable version
@@ -53,11 +53,13 @@ except ImportError:
         sys.stdout.write('athenaCL package cannot be found.\n')
         sys.exit()
 
-fpLibATHTM = libTM.__path__[0] # list, get first item
-fpLibATH = os.path.dirname(fpLibATHTM) # libATH dir
+fpLibTM = libTM.__path__[0] # list, get first item
+fpLibATH = os.path.dirname(fpLibTM) # libATH dir
 fpSrcDir = os.path.dirname(fpLibATH) # athenaCL dir
 fpPackageDir = os.path.dirname(fpSrcDir) # athenacl dir
 if fpPackageDir not in sys.path: sys.path.append(fpPackageDir)
+
+
 
 
 
@@ -120,21 +122,21 @@ class External:
         checks for libATH, libATH/libTM, libATH/libAS
         verbose does not currently do anything
         """
-        self.topLevelDir = fpSrcDir # global from mod loading, athenaCL package dir
-        topLevelContent = os.listdir(self.topLevelDir) # check 'libATH' directory   
-        if 'libATH' in topLevelContent:
-             self.libATHpath = os.path.join(self.topLevelDir,'libATH')
-             self.libATHpath = drawer.pathScrub(self.libATHpath)
+        self.fpSrcDir = fpSrcDir # global from mod loading, athenaCL package dir
+        srcDirContent = os.listdir(self.fpSrcDir) # check 'libATH' directory   
+        if 'libATH' in srcDirContent:
+             self.fpLibATH = os.path.join(self.fpSrcDir,'libATH')
+             self.fpLibATH = drawer.pathScrub(self.fpLibATH)
         else:
             dialog.msgOut(lang.msgMissingLibATH, self.termObj)
             temp = dialog.askStr(lang.msgReturnToExit, self.termObj)
             sys.exit()
 
         # check for texture module directory, demo dirs
-        libATHcontents = os.listdir(self.libATHpath)
+        libATHcontents = os.listdir(self.fpLibATH)
         if 'libTM' in libATHcontents:
-            self.libTMpath = os.path.join(self.libATHpath, 'libTM')
-            self.libTMpath = drawer.pathScrub(self.libTMpath)
+            self.fpLibTM = os.path.join(self.fpLibATH, 'libTM')
+            self.fpLibTM = drawer.pathScrub(self.fpLibTM)
         else:
             dialog.msgOut(lang.msgMissingLibTM, self.termObj)
             temp = dialog.askStr(lang.msgReturnToExit, self.termObj)
@@ -142,34 +144,36 @@ class External:
 
         # check for demo files
         self.demoDirList = []
-        if 'demo' in topLevelContent:
-            demoPath = os.path.join(self.topLevelDir, 'demo')
+        if 'demo' in srcDirContent:
+            demoPath = os.path.join(self.fpSrcDir, 'demo')
             self.demoDirList.append(drawer.pathScrub(demoPath))
 
-            demoTestPath = os.path.join(self.topLevelDir, 'test', 'xml')
+            demoTestPath = os.path.join(self.fpSrcDir, 'test', 'xml')
             self.demoDirList.append(drawer.pathScrub(demoTestPath))
 
-        if 'CVS' in topLevelContent: # check if there is a cvs dir
+        if 'CVS' in srcDirContent: # check if there is a cvs dir
             self.cvsDirPresent = 1
         else:
             self.cvsDirPresent = 0
 
-        if 'docs' in topLevelContent: # get docs path
-            self.docsPath = os.path.join(self.topLevelDir, 'docs')
-            self.docsPath = drawer.pathScrub(self.docsPath)
+        # a docs dir is only found in athenaCL dir in distribution
+        # package
+        if 'docs' in srcDirContent: # get docs path
+            self.fpDocsDir = os.path.join(self.fpSrcDir, 'docs')
+            self.fpDocsDir = drawer.pathScrub(self.fpDocsDir)
         else:
-            self.docsPath = None
+            self.fpDocsDir = None
 
         # assign a dir in which to write pref/log files
 #         if os.name == 'mac': # macos 9
-#             self.prefsDir = self.libATHpath
+#             self.prefsDir = self.fpLibATH
 
 #         if os.name == 'posix':
 #             self.prefsDir = drawer.getud() # get active users dir
 #         else: # win or other
 #             self.prefsDir = drawer.getud()
 #             if self.prefsDir == None: # cant use getcwd
-#                 self.prefsDir = self.libATHpath # used before and two versions 1.4.2
+#                 self.prefsDir = self.fpLibATH # used before and two versions 1.4.2
             
     #-----------------------------------------------------------------------||--
     def getCvsStat(self):
@@ -344,14 +348,14 @@ class External:
     #-----------------------------------------------------------------------||--
     def getFilePathAudio(self):
         """returns a list of file paths for samples"""
-        audioPath = os.path.join(self.topLevelDir, 'audio')
+        audioPath = os.path.join(self.fpSrcDir, 'audio')
         audioPath = drawer.pathScrub(audioPath)
         userAudioPath = self.getPref('athena', 'fpAudioDir')
         return [audioPath, userAudioPath]
 
 #     def getFilePathAnalysis(self):
 #         """returns a list of file paths for analysis"""
-#         sadrPath = os.path.join(self.libATHpath, 'sadir')
+#         sadrPath = os.path.join(self.fpLibATH, 'sadir')
 #         sadrPath = drawer.pathScrub(sadrPath)
 #         sadrPathUsr = self.getPref('athena', 'sadir')
 #         pathList = [sadrPath, sadrPathUsr]
@@ -384,7 +388,7 @@ class AthenaObject:
     athenaCmd.py wraps and exposes methods of this class
     """
 
-    def __init__(self, termObj=None, debug=0):
+    def __init__(self, termObj=None):
         """creates all attributes of the athenaObject
         update object handles finding all modules and creating util objects
         command.py operates upon these attributes and sub-objects
@@ -403,7 +407,6 @@ class AthenaObject:
 
         # defaut terminal handler, from Interpreter
         self.termObj = self._configTerminal(termObj) 
-        self.debug = debug # debug option
 
         # possible session types are 'terminal', 'idle', 'cgi';
         # these methods initializes external modules and resources
@@ -570,7 +573,7 @@ class AthenaObject:
         """Provide a default Terminal if not provided
         """
         if termObj == None:
-            return Terminal('terminal', None)
+            return Terminal('terminal')
         else:
             return termObj
 
@@ -809,13 +812,12 @@ class Terminal:
     self.termLive determines if the term is in a unix that can get size
     if not, returs default width
     """
-    def __init__(self, sessionType='terminal', parentGUI=None):
+    def __init__(self, sessionType='terminal'):
         """possible session types are 'terminal', 'idle', 'cgi'
 
         >>> a = Terminal()
         """
         self.sessionType = sessionType
-        self.parentGUI = parentGUI # keep for gui management
         # try to import readline
         try: import readline
         except ImportError: pass # not available on every platform       
@@ -915,28 +917,21 @@ class Interpreter:
         0: quite output: nothign returned
         1: return msg, no warning
         2: return msg, give warnings, errors, 
-        3: debug mode: very verbose 
-
-    debug option passed to all commands; used to remove error checking
-        changes some processing in order to provide more accurate errors.
 
     >>> a = Interpreter()
     """
 
-    def __init__(self, sessionType='terminal', threadAble=0, 
-        verbose=0, debug=0):
+    def __init__(self, sessionType='terminal', verbose=0):
 
         # instance of athenaObj class, where all athena processing takes place
         self.sessionType = sessionType # can be: terminal, idle, Tkinter, cgi
         self.verbose = verbose # determine output level
-        self.debug = debug # turn on debugging mode
         # sets echoing of command lines; prints commands
         # this is used when scripting and you want to see what commands are fired
         self.echo = 0 
         # create objects
-        self.parentGUI = None # used to be used; no longer, but kept incase
-        self.termObj = Terminal(self.sessionType, self.parentGUI)
-        self.ao = AthenaObject(self.termObj, self.debug)
+        self.termObj = Terminal(self.sessionType)
+        self.ao = AthenaObject(self.termObj)
         self.athVersion = self.ao.athVersion
         self.athBuild = self.ao.athBuild
         # special handling for threads
@@ -950,9 +945,6 @@ class Interpreter:
         self._emptyCount = 0 # count empty lines returned
         self._blankCount = 0 # count blank lines returned
         
-        # update vars passed to command obj; sets command environ
-        self._updateCmdEnviron()  # creates self.cmdEnviron
-        # done once at init
         self.cursorToolConvert = self._getCursorToolConvert() 
         self._updatePrompt() # creates self.prompt
         athTitle = '\n' + 'athenaCL %s (on %s via %s)\n' % (
@@ -973,15 +965,14 @@ class Interpreter:
 
     #-----------------------------------------------------------------------||--
 
-    def _updateCmdEnviron(self):
-        "passed to command objects for interperter prefs"
-        self.cmdEnviron = {}
-        #self.cmdEnviron['threadAble'] = self.threadAble
-        #self.cmdEnviron['pollDur'] = self.pollDur
-        self.cmdEnviron['verbose'] = self.verbose
-        self.cmdEnviron['debug'] = self.debug
+#     def _updateCmdEnviron(self):
+#         "passed to command objects for interperter prefs"
+#         self.cmdEnviron = {}
+#         #self.cmdEnviron['threadAble'] = self.threadAble
+#         #self.cmdEnviron['pollDur'] = self.pollDur
+#         self.cmdEnviron['verbose'] = self.verbose
 
-    def _getFunc(self, cmd):
+    def _getCmdClass(self, cmd):
         """gets a reference to command object; this may get modules that
         are imported into the command module; this is a problem"""
         # some cmds strings cannot be properly filtered unles directly avoided
@@ -1053,17 +1044,16 @@ class Interpreter:
         >>> a._cmd('q confirm')
         -1
         """
-        self._updateCmdEnviron() # update vars passed to command obj
         splitLine = self._lineCmdArgSplit(line)
         if splitLine == None:
             self._emptyline()
             return None
         cmd, arg = splitLine
-        func = self._getFunc(cmd)
+        func = self._getCmdClass(cmd)
         if func == None: return self._default(line)
         self._clearCount() # clears cmd blank/bad counting
         try: # execute function, manage threads
-            cmdObj = func(self.ao, self.cmdEnviron, arg)
+            cmdObj = func(self.ao, arg, verbose=self.verbose)
             ok, result = cmdObj.do() # returns a dict if a subCmd, otherwise str
             if result == None: # no msg returned; nothing to report
                 stop = None
@@ -1093,7 +1083,6 @@ class Interpreter:
         >>> a.cmd('pin', 'a 3')[0]
         1
         """
-        self._updateCmdEnviron() # update vars passed to command obj
         if arg == None: # no args, assume cmd needs to be split
             splitLine = self._lineCmdArgSplit(line)
             if splitLine == None: return 0, "no command given"
@@ -1103,11 +1092,11 @@ class Interpreter:
         # cmdCorrect called here; this is done in cmdExecute and not in _cmd
         # as this is a public method, however, this may be necessary here
         cmd = self.ao.cmdCorrect(cmd)
-        func = self._getFunc(cmd)
+        func = self._getCmdClass(cmd)
         if func == None: return 0, "no command given"
 
         try: # execute function, manage threads
-            cmdObj = func(self.ao, self.cmdEnviron, arg)
+            cmdObj = func(self.ao, arg, verbose=self.verbose)
             ok, result = cmdObj.do() # no out on resutl here
         except: # print error message
             # stop = None # must be assigned on error; no longer in use
@@ -1179,23 +1168,6 @@ class Interpreter:
         #self.postloop()
 
 
-    #-----------------------------------------------------------------------||--
-#     def runScript(self, name, scriptArgs=None):
-#         """will run a script in libAS folder, or a complete path
-#         if given (not implemented yet)"""
-#         # this is experimental: seems to work
-#         # see http://www.python.org/doc/current/lib/built-in-funcs.html
-#         modImportStr = 'athenaCL.libATH.libAS.%s' % name
-#         try:
-#             name = __import__(modImportStr, globals(), locals(), [name,])
-#         except ImportError:
-#             print lang.WARN, 'no such module to import %s' % name
-#             return None
-#         scriptObj = name.Script(scriptArgs) #" % name)# call one instance
-#         self.echo = 1
-#         # stop value is not used here...
-#         stop = self.cmdExecute(scriptObj.cmdList)
-#         self.echo = 0
 
     #-----------------------------------------------------------------------||--
     #def preloop(self): pass
@@ -1267,29 +1239,6 @@ class Interpreter:
         else:
             self.prompt = '%s ' % (promptRoot)
 
-    #-----------------------------------------------------------------------||--
-#     def _testThreads(self, force=0):
-#         """testing if threading modules are available
-#         cgi threads are always single-threaded
-#         """
-#         if force == 0 or self.sessionType in ['cgi', 'idle']:
-#             status = 0 # turn off
-#         else:
-#             status = 1
-#             if os.name == 'mac':
-#                 pass
-#             elif os.name == 'posix':
-#                 try: import threading
-#                 except ImportError: status = 0
-#             else: # all win flavors
-#                 status = 1
-#                 # threads work fine in win, but even when not in idle
-#                 # the animation trick does not do /b correctly
-#         if status == 0: # no threading
-#             msg = 'threading off' # need leading space
-#         elif status == 1:
-#             msg ='threading active' # need leading space
-#         return status, msg
 
     def toggleEcho(self):
         """flips echo status on and off"""

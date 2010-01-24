@@ -35,16 +35,13 @@ from athenaCL.libATH import athenaObj
 _MOD = 'athenacl.py'
 # check if in idle; this file may call this file again (under idle) and thus
 IDLE_ACTIVE = drawer.isIdle()
-#print _MOD, 'idle active:', IDLE_ACTIVE
 
-print sys.path
+
 
 #-----------------------------------------------------------------||||||||||||--
 # reference for all flags and doc strings for each
 flagsRef = {('-s',) : 'Takes an argument to determine athenaCL session type: options include "terminal", "idle", "cgi". Default is "terminal".',
                 ('-e',) : 'Any single athenaCL command line string can be provided following this flag, to be executed at startup. Any number of these flags can be used to execute multiple commands.',
-                ('-T',) : 'Force multi-threaded opperation on.',
-                ('-D',) : 'Debug mode: turns threading and error masking off.',
                 ('-q',) : 'Causes athenaCL to provide no text output.',
  ('-v','--version') : 'Display athenaCL version information.',
     ('-h', '--help') : 'Display help text.',}
@@ -72,8 +69,6 @@ def helpMsg(athVersionStr, flagsRef):
         
 sessionType = None # set to none on default
 exit = 0 # used to get infor and exit immediatly
-threadAble = 0   # default is off #better for debugging
-debug = 0 # default is off
 verbose = 1 # standard is 1 (0 through 3)
 cmdList = None
 
@@ -88,10 +83,6 @@ for argPair in parsedArgs:
             if option in ['terminal', 'idle', 'cgi']: # cgi just for test
                 sessionType = option
             else: sessionType = None # get default
-    elif argPair[0] == '-T': 
-        threadAble = 1 # force threads on
-    elif argPair[0] == '-D': 
-        debug = 1 # go into debug mode
     elif argPair[0] == '-e': 
         if cmdList == None: cmdList = []
         cmdList.append(argPair[1])
@@ -106,23 +97,19 @@ for argPair in parsedArgs:
         
 if exit: sys.exit() # help, version, exit after command function
 
+
+
 # command flag over-rides
 if IDLE_ACTIVE: # regardless of platform, always force these options
-    threadAble = 0 # threading should be off
     sessionType = 'terminal' # session shold look like a terminal
 else: # idle not active, get default session if not set
-    if os.name in ['mac', 'posix']:
+    if os.name == 'posix':
         if sessionType == None: sessionType = 'terminal'
     else: # all win plats
         if sessionType == None: # not already selected
             if dialog.askYesNo('start athenacl in IDLE?'):
                 sessionType = 'idle'
             else: sessionType = 'terminal'
-
-# post arg overrides:
-if debug:
-    threadAble = 0 # force threads off
-    verbose = 3 # force all messages and debugging messages
 
 
 
@@ -152,15 +139,15 @@ def launchIdle():
         return None
     #temp = dialog.askStr(lang.msgReturnToExit)
 
-def launch(sessionType, threadAble, verbose, debug, cmdList):
+def launch(sessionType, verbose, cmdList):
     # general launch procedure
-    interp = athenaObj.Interpreter(sessionType, threadAble, verbose, debug)
+    interp = athenaObj.Interpreter(sessionType, verbose)
     interp.cmdLoop(cmdList)
         
 #-----------------------------------------------------------------||||||||||||--
 # start sessions
 if sessionType == 'terminal':
-    launch(sessionType, threadAble, verbose, debug, cmdList)      
+    launch(sessionType, verbose, cmdList)      
 elif sessionType == 'idle': # only for loading from cmd line
     launchIdle() # will start session as 'terminal force'
 

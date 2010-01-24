@@ -132,7 +132,7 @@ class MCnetCanvas:
         # of a window is determined by the number of textures         
 
         if cmdObj == None:
-            from athenaCL import athenaObj # update need for color prefs
+            from athenaCL.libATH import athenaObj # update need for color prefs
             update = athenaObj.External()
             update.updateAll('noMessages')
             ao = athenaObj.AthenaObject()
@@ -146,8 +146,8 @@ class MCnetCanvas:
             #update.updatePrefs() # get new settings
             mcObj = cmdObj.mcObj
 
-        fontTitle = 'micro' #eval(update.getPref('gui', 'fontTitle'))
-        fontText     = 'micro' #eval(update.getPref('gui', 'fontText'))
+        fontTitle = 'micro' 
+        fontText = 'micro' 
         COLORfgMain = update.getPref('gui', 'COLORfgMain') 
         COLORfgAlt = update.getPref('gui', 'COLORfgAlt') 
         COLORbgMargin = update.getPref('gui', 'COLORbgMargin') 

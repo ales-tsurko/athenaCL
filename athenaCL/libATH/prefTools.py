@@ -227,9 +227,7 @@ class Reporter(object):
         if modName == None:
             modName = 'unknown'
         self.modName = modName
-
         self.status = self.debugStat()
-
 
     def debugStat(self):
         """Get the debug preference if available, otherwise zero

@@ -28,7 +28,6 @@ _MOD = 'ioTools.py'
 from athenaCL.libATH import prefTools
 reporter = prefTools.Reporter(_MOD)
 
-
 #-----------------------------------------------------------------||||||||||||--
 # take an xml doc and convert into structured dictionaries
 
@@ -235,7 +234,6 @@ class BackwardsCompat:
             self.aData['audioRate'] = 44100
 
     #-----------------------------------------------------------------------||--
-
     def process(self, aData, pData, tData):
         """main methods for providing backwards compat for global changes
         operates on raw python data lists, not on built objects

@@ -26,7 +26,7 @@ class PVviewCanvas:
         # bar height is the height of texture in pixels. the total height of a
         # of a window is determined by the number of textures         
         if ao == None:
-            from athenaCL import athenaObj # update need for color prefs
+            from athenaCL.libATH import athenaObj # update need for color prefs
             update = athenaObj.External()
             update.updateAll('noMessages')
             pcsPath = [(4,3,10),(1,5,4,3),(2,11,4),(7,5,3)]
@@ -46,8 +46,8 @@ class PVviewCanvas:
                 mapDict = pathLib[activePath].voiceLib[
                                 pathLib[activePath].activeVoice]['maps']
 
-        fontTitle = 'micro' #eval(update.getPref('gui', 'fontTitle'))
-        fontText     = 'micro' #eval(update.getPref('gui', 'fontText'))
+        fontTitle = 'micro' 
+        fontText = 'micro' 
         COLORfgMain = update.getPref('gui', 'COLORfgMain') 
         COLORbgMargin = update.getPref('gui', 'COLORbgMargin') 
         COLORbgGrid = update.getPref('gui', 'COLORbgGrid') 

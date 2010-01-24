@@ -306,19 +306,28 @@ class Version:
         >>> a = Version('3.25')
         Traceback (most recent call last):
         VersionException: cannot process version number 3.25
+        >>> a = Version('3.25.3a5')
+        >>> a.betaTag
+        'a5'
         """
         vList = vStr.split('.')
         if len(vList) >= 3:
             a, b, c = vList[0], vList[1], vList[2]
-            # c may have a -beta tag on it, must remove
-            cTest = c.split('-') # get first item before
-            if len(cTest) >= 2:
-                c, self.betaTag = cTest[0], cTest[1]
+
+            # c may have a -beta tag on it, or aX: must remove
+            if '-' in c:
+                cRemain = c.split('-')[0] 
+                self.betaTag = c.split('-')[1] 
+            elif 'a' in c:
+                cRemain = c.split('a')[0] 
+                self.betaTag = 'a' + c.split('a')[1] # get second item
+            elif 'b' in c:
+                cRemain = c.split('b')[0] 
+                self.betaTag = 'b' + c.split('b')[1] # get second item
             else:
-                c = cTest[0]
+                cRemain = c
                 self.betaTag = None
-            # assign all to point
-            self.point = int(a), int(b), int(c)
+            self.point = int(a), int(b), int(cRemain) # assign all to point
         else:
             raise VersionException('cannot process version number %s' % vStr)
 
@@ -363,35 +372,44 @@ class Version:
         >>> b = Version('3.6.0')
         >>> a == b  
         False
-        """
 
+        >>> a = Version('2.0.0')
+        >>> b = Version('2.0.0a3')
+        >>> a == b  
+        False
+        """
         if other == None: return False
         if self.date == None or other.date == None:
-            if self.point == other.point: return True
+            if self.point == other.point:
+                if self.betaTag == other.betaTag:
+                    return True
+                else: return False
             else: return False
         else: # both have date
             if self.point == other.point:
                 if self.date == other.date:
-                    return True
+                    if self.betaTag == other.betaTag:
+                        return True
             return False
 
-    def __ne__(self, other):
-        """only compare date if both have set date
 
-        >>> a = Version('3.25.5')
-        >>> b = Version('3.6.0')
-        >>> a != b  
-        True
-        """
-        if other == None: return 1
-        if self.date == None or other.date == None:
-            if self.point != other.point: return True
-            else: return False
-        else: # both have date
-            if self.point != other.point:
-                if self.date != other.date:
-                    return True
-            return False
+#     def __ne__(self, other):
+#         """only compare date if both have set date
+# 
+#         >>> a = Version('3.25.5')
+#         >>> b = Version('3.6.0')
+#         >>> a != b  
+#         True
+#         """
+#         if other == None: return 1
+#         if self.date == None or other.date == None:
+#             if self.point != other.point: return True
+#             else: return False
+#         else: # both have date
+#             if self.point != other.point:
+#                 if self.date != other.date:
+#                     return True
+#             return False
 
     def __lt__(self, other):
         """only compare date if both have set date
@@ -401,66 +419,73 @@ class Version:
         >>> a < b  
         True
         """
+
+        # TODO: comparisons here do not look at betaTag
+        # this needs to be fixed
+    
+
         if self.date == None or other.date == None:
-            if self.point < other.point: return True
-            else: return False
+            if self.point < other.point:
+                return True
+            else:
+                return False
         else: 
             if self.point <= other.point: # lt or equal
                 if self.date < other.date:
                     return True
             return False
 
-    def __le__(self, other):
-        """only compare date if both have set date
-
-        >>> a = Version('3.25.5')
-        >>> b = Version('4.6.0')
-        >>> a <= b  
-        True
-        """
-        if self.date == None or other.date == None:
-            if self.point <= other.point: return True
-            else: return False
-        else: 
-            if self.point <= other.point:
-                if self.date <= other.date:
-                    return True
-            return False
-
-    def __gt__(self, other):
-        """only compare date if both have set date
-
-        >>> a = Version('3.25.5')
-        >>> b = Version('4.6.0')
-        >>> b > a  
-        True
-        """
-        if self.date == None or other.date == None:
-            if self.point > other.point: return True
-            else: return False
-        else: 
-            if self.point >= other.point: # gt or equal
-                if self.date > other.date:
-                    return True
-            return False
-
-    def __ge__(self, other):
-        """only compare date if both have set date
-
-        >>> a = Version('3.25.5')
-        >>> b = Version('4.6.0')
-        >>> b >= a  
-        True
-        """
-        if self.date == None or other.date == None:
-            if self.point >= other.point: return True
-            else: return False
-        else: 
-            if self.point >= other.point:
-                if self.date >= other.date:
-                    return True
-            return False
-    
+#     def __le__(self, other):
+#         """only compare date if both have set date
+# 
+#         >>> a = Version('3.25.5')
+#         >>> b = Version('4.6.0')
+#         >>> a <= b  
+#         True
+#         """
+#         if self.date == None or other.date == None:
+#             if self.point <= other.point: return True
+#             else: return False
+#         else: 
+#             if self.point <= other.point:
+#                 if self.date <= other.date:
+#                     return True
+#             return False
+# 
+#     def __gt__(self, other):
+#         """only compare date if both have set date
+# 
+#         >>> a = Version('3.25.5')
+#         >>> b = Version('4.6.0')
+#         >>> b > a  
+#         True
+#         """
+#         if self.date == None or other.date == None:
+#             if self.point > other.point: return True
+#             else: return False
+#         else: 
+#             if self.point >= other.point: # gt or equal
+#                 if self.date > other.date:
+#                     return True
+#             return False
+# 
+#     def __ge__(self, other):
+#         """only compare date if both have set date
+# 
+#         >>> a = Version('3.25.5')
+#         >>> b = Version('4.6.0')
+#         >>> b >= a  
+#         True
+#         """
+#         if self.date == None or other.date == None:
+#             if self.point >= other.point: return True
+#             else: return False
+#         else: 
+#             if self.point >= other.point:
+#                 if self.date >= other.date:
+#                     return True
+#             return False
+#     
 
 
 
