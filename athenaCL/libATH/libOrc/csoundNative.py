@@ -5,11 +5,14 @@
 #
 # Authors:       Christopher Ariza
 #
-# Copyright:     (c) 2001-2008 Christopher Ariza
+# Copyright:     (c) 2001-2010 Christopher Ariza
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
 
 import time
+import unittest, doctest
+
+
 from athenaCL.libATH import drawer
 from athenaCL.libATH import language
 from athenaCL.libATH import pitchTools
@@ -20,6 +23,9 @@ from athenaCL.libATH.libOrc import baseOrc
 class CsoundNative(baseOrc.Orchestra):
     """built-in csound instruments"""
     def __init__(self):
+        """
+        >>> a = CsoundNative()
+        """
         baseOrc.Orchestra.__init__(self)
 
         self.name = 'csoundNative'
@@ -125,7 +131,12 @@ nchnls = 4
 
     #-----------------------------------------------------------------------||--
     def instNoValid(self, iNo):
-        """test if an instrument number is valid"""
+        """test if an instrument number is valid
+
+        >>> a = CsoundNative()
+        >>> a.instNoValid(3)
+        1
+        """
         if drawer.isInt(iNo) and iNo in self._instrNumbers:
             return 1
         else:
@@ -160,6 +171,11 @@ nchnls = 4
         """buildes a string of an entire orchestra
         provides proper header and output sections based on 
         number of channels
+
+        >>> a = CsoundNative()
+        >>> a.constructOrc(2, [3,4,5])
+        >>> len(a.srcStr)
+        4418
         """
         self.noChannels = noChannels
         msg = []
@@ -186,6 +202,10 @@ nchnls = 4
         """returns a dictionary of instrNo : (Name, pNo, pInfo)
         has data for all instruments
         pmtrFields includes 6 default values
+
+        >>> a = CsoundNative()
+        >>> a.getInstInfo(3)
+        ({3: ('sineDrone', 6, {})}, [3])
         """
         if iNo == None:
             instrList = self.instNoList() # use method
@@ -201,7 +221,12 @@ nchnls = 4
         return instInfoDict, instrList
 
     def getInstPreset(self, iNo, auxNo=None):
-        """returns a dictionary of default values for one instrument"""
+        """returns a dictionary of default values for one instrument
+    
+        >>> a = CsoundNative()
+        >>> a.getInstPreset(6)
+        {'auxQ0': ('c', 0.5), 'auxQ1': ('c', 0.5), 'auxQ2': ('c', 10000), 'auxQ3': ('c', 400), 'auxQ4': ('c', 1)}
+        """
         instrObj = self._getInstObj(iNo)
         presetDict = instrObj.getPresetDict() # converts to aux0 fist pos
         return presetDict
@@ -217,7 +242,12 @@ nchnls = 4
 
     def getInstPmtrInfo(self, iNo, pmtrNo):
         """for specified inst, pmtrNo, return pmtr info
-        parameter numbers start at 0"""
+        parameter numbers start at 0
+
+        >>> a = CsoundNative()
+        >>> a.getInstPmtrInfo(6, 3)
+        'low-pass filter end cutoff frequency in Hz'
+        """
         instrObj = self._getInstObj(iNo)
         # numbers are shifted by pmtrCountDefault
         # this orchestra uses 'pmtr' instead of 'auxQ'
@@ -240,9 +270,19 @@ nchnls = 4
     # 90 dB = 31622.764 (abs max around 32767)
 
     def _postMapPs(self, iNo, val):
+        """
+        >>> a = CsoundNative()
+        >>> a._postMapPs(6, 3)
+        8.0...
+        """
         return pitchTools.psToPch(val)
         
     def _postMapAmp(self, iNo, val, orcMapMode=1):
+        """
+        >>> a = CsoundNative()
+        >>> a._postMapAmp(6, .5)
+        45.0
+        """
         # get max/min amp value form inst, as well as scale factor
         instrObj = self._getInstObj(iNo)
         ampMax = float(instrObj.postMapAmp[1])
@@ -253,6 +293,11 @@ nchnls = 4
         return val
         
     def _postMapPan(self, iNo, val, orcMapMode=1):
+        """
+        >>> a = CsoundNative()
+        >>> a._postMapPan(6, .5)
+        0.5
+        """
         if orcMapMode: # optional map
             pass # values are expected b/n 0 and 1
         # always limit: modulo 1    
@@ -8696,3 +8741,17 @@ instr %s
 
 
 
+#-----------------------------------------------------------------||||||||||||--
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
+
+
+#-----------------------------------------------------------------||||||||||||--
+if __name__ == '__main__':
+    from athenaCL.test import baseTest
+    baseTest.main(Test)

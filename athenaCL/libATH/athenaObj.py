@@ -16,8 +16,8 @@ import sys, os, time, random, traceback, httplib, urllib
 import unittest, doctest
 
 
-athVersion  = '2.0.0a1'
-athBuild        = '2010.02.01'
+athVersion = '2.0.0a1'
+athBuild = '2010.02.01'
 athRevision = 1 # for debian based versioning
 athDate     = '1 February 2010' # human readable version
 __version__ = athVersion
@@ -92,7 +92,7 @@ reporter = prefTools.Reporter(_MOD)
 
 
 #-----------------------------------------------------------------||||||||||||--
-class External:
+class External(object):
     """used to remaintain remote files used by the AthenaObject
     handles preferences (stored in xml) and error log files
     also reloads textures, gets path preferences, orchestra files
@@ -158,11 +158,11 @@ class External:
 
         # a docs dir is only found in athenaCL dir in distribution
         # package
-        if 'docs' in srcDirContent: # get docs path
-            self.fpDocsDir = os.path.join(self.fpSrcDir, 'docs')
-            self.fpDocsDir = drawer.pathScrub(self.fpDocsDir)
+        if 'doc' in srcDirContent: # get docs path
+            self.fpDocDir = os.path.join(self.fpSrcDir, 'doc')
+            self.fpDocDir = drawer.pathScrub(self.fpDocDir)
         else:
-            self.fpDocsDir = None
+            self.fpDocDir = None
 
         # assign a dir in which to write pref/log files
 #         if os.name == 'mac': # macos 9
@@ -381,7 +381,7 @@ class External:
 
 
 #-----------------------------------------------------------------||||||||||||--
-class AthenaObject:
+class AthenaObject(object):
     """methods for internal processsing of done with command objecst from 
     command.py
     includes internal functions for processing objects
@@ -805,7 +805,7 @@ class AthenaObject:
 
 #-----------------------------------------------------------------||||||||||||--
 # this term handling thanks in part to avkutil.py
-class Terminal:
+class Terminal(object):
     """terminal management.
     represents basic screen presentation issues, even w/o a tty
     size - return height, width of the terminal
@@ -909,7 +909,7 @@ class Terminal:
 #-----------------------------------------------------------------||||||||||||--
 # this Interpreter is based on Python cmd.py
 
-class Interpreter:
+class Interpreter(object):
     """command line envonment to interact with athenaObj.py
     useful for developing parameter objects and textures
     

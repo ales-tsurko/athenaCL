@@ -28,7 +28,7 @@ class ModuleGather(object):
         self.dirParent = os.path.dirname(athenaObj.__file__)
         self.modulePaths = []    
         # skip interactive loader application
-        self.moduleSkip = ['athenacl.py', 'test.py']
+        self.moduleSkip = ['athenacl.py', 'test.py', '__init__.py']
         self.pathSkip = []
         self._walk()
 

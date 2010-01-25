@@ -5,9 +5,12 @@
 #
 # Authors:       Christopher Ariza
 #
-# Copyright:     (c) 2004-2006 Christopher Ariza
+# Copyright:     (c) 2004-2010 Christopher Ariza
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
+
+import unittest, doctest
+
 
 from athenaCL.libATH import drawer
 from athenaCL.libATH import language
@@ -15,6 +18,7 @@ lang = language.LangObj()
 
 from athenaCL.libATH.libOrc import csoundNative
 from athenaCL.libATH.libOrc import csoundExternal
+from athenaCL.libATH.libOrc import superColliderNative
 from athenaCL.libATH.libOrc import generalMidi
 from athenaCL.libATH.libOrc import baseOrc
 
@@ -25,6 +29,7 @@ orcNames = {
     'cs'      :'csoundSilence',
     'gm'      :'generalMidi',
     'gmp'     :'generalMidiPercussion',
+    'scn'     :'superColliderNative',
     }
 
 # orcIncompat delcared in baseOrc and included as internal attribute
@@ -54,6 +59,8 @@ def factory(orcName):
         return csoundExternal.CsoundSilence()
     elif orcName == 'csoundExternal':
         return csoundExternal.CsoundExternal()
+    elif orcName == 'superColliderNative':
+        return superColliderNative.SuperColliderNative()
     else:
         raise ValueError, 'bad orchestra name: %s' % orcName
 
@@ -76,6 +83,28 @@ class Test:
     
             a.constructOrc()
 
-if __name__ == '__main__':
-    Test()
+#-----------------------------------------------------------------||||||||||||--
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
 
+    def testBuild(self):
+        for orcName in orcNames.keys():
+            a = factory(orcName)
+            post = a.name
+            post = a.getInstInfo()
+            if a.instNoList() != None:
+                for iNo in a.instNoList():
+                    post = str(iNo).ljust(4), a.getInstName(iNo)
+                    post = a.getInstPreset(iNo)
+            a.constructOrc()
+
+#-----------------------------------------------------------------||||||||||||--
+
+if __name__ == '__main__':
+    from athenaCL.test import baseTest
+    baseTest.main(Test)

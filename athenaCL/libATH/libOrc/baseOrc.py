@@ -11,7 +11,7 @@
 from athenaCL.libATH import drawer
 _MOD = 'baseOrc.py'
 
-class Orchestra:
+class Orchestra(object):
     """subclass from which all orchestas inherit
     provides representation of an orchestra, including what instruments
     are available, instrument defaults
@@ -37,7 +37,7 @@ class Orchestra:
         """return a list of instrument numbers; if
         a list is not availabe, return None
         if format is specified 'user', return in a  user readable format"""
-        return self.instrNumbers
+        return self._instrNumbers
         
     def constructOrc(self, noChannels=2, instList=None):
         """returns string of orchestra, if file based"""
@@ -115,6 +115,9 @@ class Orchestra:
         if orcMapMode:
             val = val % 1.0 # modulo around 1
         return val
+
+
+
 
 
 #-----------------------------------------------------------------||||||||||||--

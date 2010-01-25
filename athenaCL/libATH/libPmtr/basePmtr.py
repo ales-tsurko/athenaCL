@@ -240,7 +240,7 @@ class Selector(object):
 
 
 #-----------------------------------------------------------------||||||||||||--
-class Parameter:
+class Parameter(object):
     """base class for all pmtr objects
     
     parameter objects are very broady construed; can be any of a number of things
@@ -1052,21 +1052,21 @@ def retrogradeParser(str):
 #-----------------------------------------------------------------||||||||||||--
 # test just selector here
 
-def TestOld():
-    colTest = [[3,2,54], ['test'], ['234', 56, 'dfg', 3], [100,200], range(0,20)]
-    for col in colTest:
-        for control in ['randomChoice', 'randomWalk', 'randomPermutate',
-                             'orderedCyclic', 'orderedOscillate']:
-            print _MOD, 'selector test:', control, col
-            a = Selector(col, control)
-            print [a() for x in range(10)]
-            newCol = random.choice(colTest)
-            a.update(newCol)
-            print _MOD, 'selector test: post update', control, newCol
-            print [a() for x in range(10)]
-            a.reset()
-            print [a() for x in range(10)]
-            print
+# def TestOld():
+#     colTest = [[3,2,54], ['test'], ['234', 56, 'dfg', 3], [100,200], range(0,20)]
+#     for col in colTest:
+#         for control in ['randomChoice', 'randomWalk', 'randomPermutate',
+#                              'orderedCyclic', 'orderedOscillate']:
+#             print _MOD, 'selector test:', control, col
+#             a = Selector(col, control)
+#             print [a() for x in range(10)]
+#             newCol = random.choice(colTest)
+#             a.update(newCol)
+#             print _MOD, 'selector test: post update', control, newCol
+#             print [a() for x in range(10)]
+#             a.reset()
+#             print [a() for x in range(10)]
+#             print
 
 
 

@@ -288,19 +288,19 @@ class Clone:
         self.pmtrQDict = copy.deepcopy(pmtrQDict)
 
         self.pmtrObjDict['time'] = parameter.factory(self.pmtrQDict['time'],
-                                                                    'filterPmtrObjs')
+                                                      'filterPmtrObjs')
         self.pmtrObjDict['sus'] = parameter.factory(self.pmtrQDict['sus'],
-                                                                    'filterPmtrObjs')
+                                                      'filterPmtrObjs')
         self.pmtrObjDict['acc'] = parameter.factory(self.pmtrQDict['acc'],
-                                                                    'filterPmtrObjs')
+                                                         'filterPmtrObjs')
         self.pmtrObjDict['fieldQ'] = parameter.factory(self.pmtrQDict['fieldQ'],
-                                                                    'filterPmtrObjs')
+                                                        'filterPmtrObjs')
         self.pmtrObjDict['octQ'] = parameter.factory(self.pmtrQDict['octQ'],
-                                                                    'filterPmtrObjs')
+                                                          'filterPmtrObjs')
         self.pmtrObjDict['ampQ'] = parameter.factory(self.pmtrQDict['ampQ'],
-                                                                    'filterPmtrObjs')
+                                                         'filterPmtrObjs')
         self.pmtrObjDict['panQ'] = parameter.factory(self.pmtrQDict['panQ'],
-                                                                    'filterPmtrObjs')
+                                                     'filterPmtrObjs')
 
         for auxLabel in basePmtr.auxLabel(self.auxNo):
             self.pmtrObjDict[auxLabel] = parameter.factory( 
@@ -310,7 +310,7 @@ class Clone:
         for cloneLabel in self.cloneLabels: # load object into textPmtr object
             args = self.pmtrQDict[cloneLabel]
             self.pmtrObjDict[cloneLabel] = parameter.factory(args, 
-                                                    'clonePmtrObjs', self.refDict)
+                                      'clonePmtrObjs', self.refDict)
 
     def _defaultPmtrArg(self):
         """get basic pmtr used as default"""

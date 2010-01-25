@@ -121,7 +121,7 @@ class LangEn:
     msgAth = 'athenaCL'
     msgAthURL = 'www.athenacl.org'
     msgAthDocURL = 'www.flexatone.net/athenaDocs/'
-    msgAthSfURL = 'www.sourceforge.net/projects/athenacl'
+    msgAthDeveloperURL = 'http://code.google.com/p/athenacl/'
     msgAuthor = 'Christopher Ariza'
     msgAuthorEmail = 'ariza@flexatone.net'
     msgBugReport = 'athenacl-development@lists.sourceforge.net'
@@ -477,6 +477,9 @@ Apple, Macintosh, Mac OS, and QuickTime are trademarks or registered trademarks 
     docOeAudioFile = 'Translates events to audio samples, and writes an audio file. Each event\'s amplitude is scaled between -1 and 1. Event timing and other event parameter data are stripped. Compatible with all Orchestras.'
     
     docOeCsoundNative = 'Translates events to a Csound score for use with the native Csound orchestra. All event parameters are retained. Compatible only with the CsoundNative Orchestra.'
+
+    docOeSuperColliderTask = 'Translates events to a SuperCollider task process file for use with the native SuperCollider orchestra. All event parameters are retained. Compatible only with the SuperColliderNative Orchestra.'
+
     
     docOeCsoundExternal = 'Translates events to a Csound score for use with an external orchestra. Event parameters instrument number, start time, and duration are always the first three parameters. Additional event parameters taken from auxiliary parameters. Compatible with all Orchestras.'
     

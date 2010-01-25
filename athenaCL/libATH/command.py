@@ -12,10 +12,6 @@
 import sys, os, time, random, copy
 import unittest, doctest
 
-
-
-#-----------------------------------------------------------------||||||||||||--
-
 from athenaCL.libATH import argTools
 from athenaCL.libATH import audioTools
 from athenaCL.libATH import automata
@@ -55,7 +51,7 @@ _MOD = 'command.py'
 
 
 #-----------------------------------------------------------------||||||||||||--
-class Command:
+class Command(object):
     """parent class for all athenacl commands
     commands can be two types: a normal command, and a subCmd
     a normal command does process and returns a display; display methods exist
@@ -6084,7 +6080,7 @@ class ELh(Command):
         msg = []
         
         # all outputs that produce an audio file
-        self.audioPath = self.ao.aoInfo['audioFP']
+        self.audioPath = self.ao.aoInfo['fpAudio']
         if 'csoundData' in outComplete or 'csoundScore' in outComplete:
             if os.path.isfile(self.audioPath):  #if file found
                 self.fmtFound.append(self.audioPath)
@@ -6092,7 +6088,7 @@ class ELh(Command):
                 msg.append(lang.msgELaudioMoved % self.audioPath)
     
         # only midi file prodiuces an output
-        self.midPath = self.ao.aoInfo['midFP']
+        self.midPath = self.ao.aoInfo['fpMidi']
         if 'midiFile' in outComplete:
             if os.path.isfile(self.midPath):     #if file found
                 self.fmtFound.append(self.midPath)
@@ -6138,7 +6134,7 @@ class ELv(Command):
         outComplete = self.ao.aoInfo['outComplete']
         if outComplete == []:
             return lang.msgELcreateFirst
-        self.viewPath = self.ao.aoInfo['viewFP']
+        self.viewPath = self.ao.aoInfo['fpView']
         if not os.path.isfile(self.viewPath):   #if not a rela file
             return lang.msgELfileMoved % self.viewPath
 
@@ -7490,11 +7486,11 @@ class AUdoc(Command):
         import webbrowser # only w/ python 2.3 and later...
         manName = 'athenaclManual.htm'
         dst = 'online'
-        if self.ao.external.fpDocsDir != None:
-            if manName in os.listdir(self.ao.external.fpDocsDir):
+        if self.ao.external.fpDocDir != None:
+            if manName in os.listdir(self.ao.external.fpDocDir):
                 dst = 'local'
         if dst == 'local':
-            url = drawer.urlPrep(os.path.join(self.ao.external.fpDocsDir,
+            url = drawer.urlPrep(os.path.join(self.ao.external.fpDocDir,
                                                          manName), 'file')
             msg = 'local documentation opened.\n'
         elif dst == 'online':

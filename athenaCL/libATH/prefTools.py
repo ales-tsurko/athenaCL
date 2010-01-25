@@ -22,9 +22,9 @@ _MOD = 'prefTools.py'
 
 
 CSDOFF = 'csdOff'
-CSDON    = 'csdOn'
+CSDON  = 'csdOn'
 CSTOFF = 'cstOff'
-CSTON    = 'cstOn'
+CSTON  = 'cstOn'
 AIF = 'AIF'
 WAV = 'WAV'
 AUTOOFF = 'autoOff'
@@ -69,10 +69,10 @@ def getCategoryDefaultDict(platform, category):
                       'refreshMode': '1', # esObj refreshing
                       'debug': '0', 
 
-                      'cursorToolLb': '..',  
-                      'cursorToolRb': '..',  
-                      'cursorToolLp': '(',  
-                      'cursorToolRp': ')',  
+                      'cursorToolLb': '',  
+                      'cursorToolRb': '',  
+                      'cursorToolLp': '{',  
+                      'cursorToolRp': '}',  
                       'cursorToolP' : 'pi',  
                       'cursorToolT' : 'ti',  
                       'cursorToolOption': 'cursorToolOn',

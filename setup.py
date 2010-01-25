@@ -188,7 +188,7 @@ def copyMan(athenaDir, sudoFound=None):
     reporter.printDebug('copying manual-page file')
     manDir = osTools.findManPath(info.MANGROUP) # assumes group 1 of man pages
     if manDir == None: return None
-    src = os.path.join(athenaDir, 'docs', info.MANFILE)
+    src = os.path.join(athenaDir, 'doc', info.MANFILE)
     dst = os.path.join(manDir, info.MANFILE)
     osTools.cpSudo(src, dst, sudoFound)
 
@@ -216,57 +216,7 @@ def reportMan():
         reporter.printDebug('no athenacl manual-page exists (%s)' % dst)
 
 
-
-
 #-----------------------------------------------------------------||||||||||||--
-# either do a distutils or build compile modules manually
-# alternative:
-# dont install into site-packages
-# instead, simply create a athenaCL.pth file in site-packages, 
-# given the path to the location of the athenaCL folder...
-
-# building distribution commands w/ dist utils
-# find formats here: python setup.py bdist --help-formats
-
-# this is a pure module distribution
-# distribution root: the top-level directory of your source tree (or source distribution); the directory where setup.py exists. Generally setup.py will be run from this directory.   
-
-# can change the build directory with this option:
-# --dist-dir 
-
-# python setup.py bdist_mpkg --zipdist
-# python setup.py bdist_wininst
-
-#-----------------------------------------------------------------||||||||||||--
-# Each file name in files is interpreted relative to the setup.py script at the top of the package source distribution. No directory information from files is used to determine the final location of the installed file; only the name of the file is used.
-
-# def _getAudioPaths():
-#     """get list of file names found in the ssdir"""
-#     fileList = os.listdir(os.path.join(fpSrcDir, 'audio'))
-#     filterList = []
-#     for name in fileList:
-#         if name.endswith('.aif'):
-#             filterList.append(os.path.join(fpSrcDir, 'audio', name))
-#     return filterList
-# 
-# def _getDemoPaths():
-#     """get list of file names found in the demo dir"""
-#     fileList = os.listdir(os.path.join(fpSrcDir, 'demo'))
-#     filterList = []
-#     for name in fileList:
-#         if name.endswith('.xml') or name.endswith('.txt'):
-#             filterList.append(os.path.join('demo', name))
-#     return filterList
-# 
-# def _getDocsPaths():
-#     """get list of file names found in the doc dir"""
-#     #fileList = os.listdir(os.path.join(fpSrcDir, 'docs'))
-#     filterList = []
-# #     for name in fileList:
-# #         if name in ['athenacl.1', ]:
-# #             filterList.append(os.path.join('docs', name))
-#     return filterList
-
 def _getPackagesList():
     """list of all packages, delimited by period"""
     pkg = (  'athenaCL', 
@@ -348,6 +298,8 @@ def runDisutils(bdistType):
         package_data = {'athenaCL' : ['audio/*.aif',
                                       'demo/*.xml',
                                       'demo/*.txt',
+                                      'doc/*.txt',
+                                      'doc/*.pdf',
                                      ]}
     ) # close setup args
     
@@ -362,44 +314,11 @@ def writeManifestTemplate(fpPackageDir):
     dst = os.path.join(fpPackageDir, 'MANIFEST.in')
     msg = []
     msg.append('global-include *.txt *.aif *.pdf')
+    msg.append('prune buildDoc dist')
+
     f = open(dst, 'w')
     f.writelines(msg)
     f.close()
-
-
-# def writeManifest(athenaDir):
-#     """write the manifst file for preparing a source distribution
-#     this file needs to be in the same directory as setup.py
-#     name a relative path, form the athenaCL dir, for each file"""
-#     reporter.printDebug('writing manifest file')
-# 
-#     msg = [] # join with returns
-#     outDir = os.path.dirname(athenaDir)
-#     # enter as complete plats first
-#     for stub in _getPackagesList():
-#         path = os.path.join(outDir, stub.replace('.', os.sep))
-#         for name in os.listdir(path):
-#             if name.endswith('.py'): # only get py files
-#                 msg.append(os.path.join(path, name))
-#     # remove lead to athenacl dir to make relative from setup.py level
-#     msgFilter = []
-#     for path in msg:
-#         alt = path.replace(athenaDir, '')
-#         alt = '%s\n' % alt[1:]
-#         msgFilter.append(alt)       
-#     # non code files: these ar relative to athenaCL dir
-#     for stub in _getAudioPaths() + _getDemoPaths() + _getDocsPaths():
-#         msgFilter.append('%s\n' % stub)
-#     # write file
-#     dst = os.path.join(athenaDir, 'MANIFEST')
-#     if os.path.exists(dst):
-#         print _MOD, 'manifest file cannot be written (file in the way)'
-#     else:
-#         f = open(dst, 'w')
-#         f.writelines(msgFilter)
-#         f.close()
-
-
 
 
 

@@ -1,7 +1,7 @@
 athenaCL Version History
 
 
-___________.________________.______.________________________________
+_________________________________.______.___________________________
 to do (user-level):
 
 
@@ -40,7 +40,7 @@ new PO:
    convert a rhythm parameter object to envelops w/ fixed attach/rel?
    both have bpm supplied by an argument
 
-____.______________.____________.___________________________________
+_____________________.____..________________________________________
 to do (sub-user level):
 
 
@@ -59,7 +59,7 @@ TEmap drawing muted textures incorectly
    color error seems to be in clone 
 
 
-____________________________________________________________________
+.______________________________________.____________________________
 to investigate:
 
 double masks
@@ -77,7 +77,7 @@ object factory storing: optimize by keeping instances and copying?
 
 
 
-_.__.___________.___________________________._______________________
+_________._______________________________________________________.__
 2.0.0
 
 added test to all modules
@@ -93,14 +93,14 @@ changed/added AthenaObj attributes: audioFormat, audioRate
 
 
 
-_.__.___________.___________________________._______________________
+___._.__________._.___________________________._____________________
 1.4.9
 
 (sub-user level)
 
 fixed bug when using a comma-separated list to name a path that does not exist
 
-__________________________________________.___________________._____
+.____________._______.______________.__________________________.__._
 1.4.8 7 May 2008
 
 (summary)
@@ -118,7 +118,7 @@ added SampleAndHold PO
 fixed error in Accumulator; now init value is the first value output
 fixed bug in some CsoundNative instruments under Csound 5
 
-______________.__________________________________________.__._______
+____________._______________________________________________________
 1.4.7 8 September 2007
 
 (summary)
@@ -132,7 +132,7 @@ checked all uses of except for possible syntax error
 all string exceptions converted to objects
 AUup asks first before checking for updates
 
-_________________.__________________________________________________
+________.____________..____________________________________________.
 1.4.6 10 August 2007
 
 (summary)
@@ -162,14 +162,14 @@ removed xlist.py and roughness.py
 updated cgi-based bug-reporting system
 improved audio file rendering
 
-__________________________________________________._________________
+____________________.____________________________________.__________
 1.4.5 22 September 2006
 
 fixed error prohibiting EventLists from clones based on muted textures
 AUca will accept command line arguments without mutation values
 1 new ParameterObject: operatorCongruence
 
-_______________________._____________.__.___._______________________
+_.______________________.____________________________________.____._
 1.4.4 10 April 2006
 1.4.4 28 March 2006
 
@@ -213,7 +213,7 @@ fixed Texture pmtrQ dicts with more aux values than necessary
 fixed error in gaRhythm when source rhythm has only 2 or fewer pulses
 fixed error of bad paths given with sampleSelect and analysisSelect
 
-_._____________.______._.___________________________________________
+_____._____._______.__________.______________.______________________
 1.4.3: 10 January 2006
 
 (user level)
@@ -231,7 +231,7 @@ added Csound instruments:  240, 241
 pyflakes used for source clean-up
 changed location of windows preference file: now in users application data
 
-.______________________._______________._________________________.__
+._________________._______.______.___.____________________._________
 1.4.2: 16 December 2005
 
 (user level)
@@ -261,7 +261,7 @@ fixed bug when bad comand-line args given to TIe
 preferences added for text, image, audio, midi, and ps applications
 changed external.fileFormat pref to external.audioFormat
 
-___________.______________________________________________._________
+____________________________.________.._________________________.___
 1.4.1: 18 August 2005
 
 (user level)
@@ -281,7 +281,7 @@ changed EventListSplit to use array.array when possible
 added writeBuffer() to EventListSplit 
 fixed tk dialog errors caused by bad default directories
 
-________________________________.___________________________________
+__________________________._________________________________________
 1.4.0: 6 June 2005
 
 (user-level):
@@ -305,7 +305,7 @@ improved MC.py getUserMap method, fixed bugs
 CPapp bug fixed when trying to cancel a path
 fixed occasional error reading pitch octave values during Multiset creation
 
-___________________________________________________________.________
+_________________________________________.__________________________
 1.3.0: 14 February 2005
 
 EL (EventList) commands added (ELn/ELw now used to create scores, CSsco dropped)
@@ -345,7 +345,7 @@ SC.py, polyPath: support creating Paths sets w/ microtones
 pitchTools.py: support fq-based object creation
 
    
-_________.________________________________._______________________._
+_._____________.___________________.________________________________
 1.2.2: 30 August 2004
 
 fixed Pie, replace, error that caused string to be assigned instead of set.
@@ -369,7 +369,7 @@ fixed bug in AUpc when providing a capital pitch name
 fixed irrational command logging for failed TIe and TEe commands
 PVe bug contained 
 
-___________._________________________.__._._________________________
+_______________.__________________________________._________________
 1.2.1: 10 June 2004
 
 new rhythm parameter object added: convertSecond
@@ -385,7 +385,7 @@ PVview, MCnet, TEmap, caMap all replace tk/pil dependent files
 APgfx added to adjust graphics preferences
 AUup checks for new versions of athenaCL; auto checks every 7 days at startup
 
-_____._________________________________________________.___.________
+________________._________________.__.._____________________________
 1.2.0: 30 January 2004
 
 pulseSieve, valueSieve: new parameter objects built w/ sieves
@@ -411,7 +411,7 @@ MonophonicOrnament uses gauss dist for amp and dur noise
 user ssdir checked and works
 partial matching for all selection comamnds (TIo, TTo, PEo, PIo)
 
-_____________.________________________..__________________._._______
+__________________._________________________________________________
 1.1.0: 4 September 2003
 
 CSd writting improved for all platforms
@@ -440,7 +440,7 @@ animated progress bar for long commands
 PIe now supports inversion as edit
 all macfs calls changed to look for Carbon modules
 
-____.___________________________.____.______.____________.__________
+_____________________._______________________.______________________
 1.0.22: 10 March 2003
 
 created new command heading: AthenaPreferences
@@ -451,7 +451,7 @@ fixed bug in text-version of directory chooser
 added optional arg to sampleSelect to choose ordered or random selection
 mac osx aquaFront added to cvs: aqua gui front end to Terminal
 
-_____________________.___________.__________________________________
+________________._____________________________.________________.____
 1.0.21: 9 January 2003
 
 three new TextureModules added:
@@ -479,7 +479,7 @@ athenaCL Tutorial Manual now composed in SGML and rendered with DocBook
 tools/books/manual added to store manual files and build tools
 demo06.xml added
 
-_____________._______.____________._____._______________.___________
+________.______.______________________________._____________________
 1.0.20: 19 November 2002
 
 three guitar instruments added: i50, i51, i52
@@ -491,7 +491,7 @@ renamed ath.py to athenacl.py
 renamed athenaCL.py to athenaCmd.py
 info.py added to tools to create fink .info and man page
 
-____________._________________________._____.______________________.
+_____________.__._____________________________________.___.________.
 1.0.19: 21 October 2002
 
 can now enter sets with pitch names: a, b#, g--
@@ -505,7 +505,7 @@ sort PEls
 improve TTls to show tuning values
 Tutorial 5 added to documentation
 
-.____________________________________________________________.______
+_____________._________________________________._______.__________._
 1.0.18: 2 October 2002
 
 fixed minor bug in TCn and PIopt
@@ -515,7 +515,7 @@ all calls to cloneObj within athenaObj now use proper class interface
 command line arguments accepted for all TC commands
 demo05.xml added with many GArthm examples
 
-____________.___________________________________________________..__
+____._____.________________.__________________._____________________
 1.0.17: 9 September 2002
 
 all commands now have command line functionality
@@ -525,7 +525,7 @@ TIpmtr added to view documentation for instruments and parameters
 texture modules now have variable options, set with TIe
 updated README.txt to include proper use of setup.py
 
-_______._______________________________.____________________________
+_______________._______________._______.____________________________
 1.0.16: 24 August 2002
 
 all tables now properly scale and wrap depending on screen size
@@ -542,7 +542,7 @@ updates to all graphs (SCcm, PScma, PScmb)
 gui's available checked at startup
 athenaObj.py cleaned up considerably
 
-.__________._____________________________________________._________.
+_________________________________________________________________.__
 1.0.15: 2 August 2002
 
 preferences and tunings now stored as XML files
@@ -564,7 +564,7 @@ GArthm range bug in mutation algorithm fixed
 term() object created to get screen width on termios systems
 CLdialogs, AOcmd, help: all use screen width if available
 
-____________________________________________________________________
+_______________________________._____._____________________.________
 1.0.14: 1 July 2002
 
 SC database is completed, all sets and all vectors now available
@@ -579,7 +579,7 @@ updated doc strings for LineGroove and LineCluster
 fixed bug introduced with parameter objects in TIlse
 omde directory added for future integration
 
-__.____________________________________.____._______.________._.____
+________________.________.________________.__________________.______
 1.0.13: 26 February 2002
 
 TMpmtr objects now can all use abbreviations ('bg' for basketGen)
@@ -590,7 +590,7 @@ tempotool.py added
 when using TIe tempo can now be entered by tapping the keyboard
 CSauto command added: automatically render and hear scores after CSsco
 
-._______________________________________.___________________________
+__._________________________________________________________________
 1.0.12: 4 February 2002
 
 PVview: tk gui display of path voices
@@ -605,7 +605,7 @@ AOcursor tool redesigned a bit.
 instr 30: a sample playback instrument
 ATHssdir added to store samples
 
-_____________________.____________________..___.___________.________
+______________________________.___._________________.______.________
 1.0.10: 17 January 2002
 
 AOmg again fully functional
@@ -618,7 +618,7 @@ all 'copy' commands changed from "c" to "cp"
 TImv and PImv added as hidden commands. used by AOmg
 AOcurs added to turn cursor tool on/off. saved in ATHprefs file
 
-___________.____________________.___________________________________
+____________________________________________________________________
 1.0.09: 28 November 2001
 
 CSh added: open (and hear) audio files rendered with CSr.
@@ -629,7 +629,7 @@ rhythm object "gaRhtyhm" now accepts arguments for crossover, mutation, and elit
 TIv and PIv now accept command-line name arguments
 new demo files: demoAO3, demoAO4
 
-_______________________.______._______________.___________._________
+________________________________________________________________.___
 1.0.08: 15 November 2001
 
 TextureClones greatly expanded with TCclass module.
@@ -642,7 +642,7 @@ AOls added to view raw AO attributes
 CSv added to open  last-created-score as a text file.
 microtones now supported as TI field transpositions
 
-________.__________..__.______________________________..____________
+__________________________________________._________________________
 1.0.07: 30 October 2001
 
 CSd: create a csound .csd files
@@ -650,7 +650,7 @@ rhythm objects implemented for TIs
 GArthm (genetic algorithm rhythms) available as TI rhythm objects
 "ATHprefs" now stores all csound and python preferences
 
-_______._________._______________________.__________________________
+________________________________________________.___________..______
 1.0.06: 25 September 2001
 
 CSr: automatically render in Csound
@@ -659,7 +659,7 @@ balance and uniformity sorting algorithm updated
 CSpath now called CSapp
 more new instruments
 
-____________________.____________..______.______.___________._______
+____________._______________________.___.______________.___.______._
 1.0.05: 10 September 2001
 
 PIopt added.
@@ -669,7 +669,7 @@ CSff added to select file formats
 fixed bug in AOw
 four new instruments added to ATHorc.orc
 
-_____.______________________.__________._________.__________________
+_____________.________________________________________________._____
 1.0.04: 31 August 2001
 
 added MCopt and MCgrid commands added
@@ -680,7 +680,7 @@ ChordHits now LineCluster, and working
 CS, for Csound, commands added
 AOmk now CSsco. TMinst now CSi
 
-___.__________________._________________.___________________._______
+________________________.____________________________.____._________
 1.0.03: 18 August 2001
 
 added PVauto command
@@ -688,14 +688,14 @@ athenaIDLE.py now for all platforms
 configIDLE info and files added
 integer bug in TIe beatT fixed.
 
-_.__________________________________________________________________
+___.____________.____._________________.__.__________________.______
 1.0.02: 15 August 2001
 
 added PIe command, by both transposition and replacement
 Non-mac users with Tk installed now have gui file-dialogs.
 athenaIDLE.py added to make loading athenaCL in IDLE easier.
 
-________________________________________________.___________________
+__________________________________________________________._________
 1.0.01: 4 August 2001
 
 completely updated Paths into complex objects
@@ -704,35 +704,35 @@ all view and list displays updated
 large sclae restructruing of AthenaObject
 first release of the athenaCL Tutorial Manual
 
-__________________._____.___.______._.______________________________
+_________________________________________.________________..___.____
 0.14.08: 15 July 2001
 
 fixed bug when loading files on Windows.
 SC.py has been rebuilt in a more efficient data structure.
 updates to all SC functions, inclduing SCv.
 
-________._____________________________________._____________________
+_._________________.__________________________________._.___________
 0.14.07: 6 July 2001
 
 fixed bug in TI copy.
 TI copy now copies a texture's start and end times and beat time.
 MultiPath will now be referred to as PathMulti
 
-_____________________________________________________________.______
+__________.________________.__________.___._________________________
 0.14.06: 24 June 2001
 
 first multiplatform release: MacOs, Windows, and Unix all supported.
 Tkinter GUI is dropped for completely portable command-line interface.
 
-___________.___________.___________________.________________________
+_________________________________________________.__________________
 0.13.10: 3 May 2001
 
-_._________________________________________________.______________._
+_________________.____________._____________________________________
 0.13.09: 16 April 2001
 
 first public release as "Athena M.09", presented at the 2001 Society for Electro Acoustic Music in the United States (SEAMUS) National Conference
 
-________.___________________________________._______________________
+_____._______._________.________________.___________________________
 
 0.13.08: 28 February 2001
 0.12.02: 24 January 2000

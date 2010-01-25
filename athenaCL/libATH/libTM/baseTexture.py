@@ -53,7 +53,7 @@ class ClockRegion:
 
 
 #-----------------------------------------------------------------||||||||||||--
-class Texture:
+class Texture(object):
     """inherited by all textures: all common variables for all textures
     utility and loading functions    
     a texture has 3 parameter sources: default, aux, and texture

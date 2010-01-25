@@ -17,6 +17,7 @@ from athenaCL.libATH import language
 lang = language.LangObj()
 
 
+# output formats are selected from the EvenOutput commands
 # all output formats; not all are available on allplatforms
 # independent of orchestra selection methods
 # outputs are not the same as outputEngines (some engines handle multiple
@@ -27,6 +28,7 @@ outputFormatNames = {
     'cs'      :'csoundScore',
     'cd'      :'csoundData', # csd file; cant select, determined by csound prefs
     'cb'      :'csoundBatch',# batch file for csound processing
+    'sct'     :'superColliderTask',
     'mf'      :'midiFile',
     'ts'      :'textSpace',
     'tt'      :'textTab',
@@ -76,7 +78,7 @@ def outputExportFormatParser(typeName):
     
 #-----------------------------------------------------------------||||||||||||--
 
-class _OutputFormat:
+class _OutputFormat(object):
 
     def __init__(self):
         self.doc = None # raw doc strings appear in command EMv displays
@@ -149,6 +151,20 @@ class FormatCsoundBatch(_OutputFormat):
         self.doc = 'Platform specific script or batch file'
         self.ext = '.bat'
         
+
+#-----------------------------------------------------------------||||||||||||--
+class FormatSuperColliderTask(_OutputFormat):
+    def __init__(self):
+        """
+        >>> a = FormatSuperColliderTask()
+        """
+        _OutputFormat.__init__(self)
+        self.name = 'scScd'
+        self.emKey = 'pathScScd'
+        self.doc = 'SuperCollider task data format'
+        self.ext = '.scd'
+
+
 #-----------------------------------------------------------------||||||||||||--
 class FormatMidiFile(_OutputFormat):
     def __init__(self):
@@ -230,7 +246,6 @@ class FormatXmlAthenaObject(_OutputFormat):
 
 
 #-----------------------------------------------------------------||||||||||||--
-
 def factory(request):
 
     # all will get all ouput formats
