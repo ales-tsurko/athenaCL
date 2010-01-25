@@ -30,12 +30,19 @@ from athenaCL.libATH.libOrc import generalMidi
 from athenaCL.libATH.omde import bpf # needed for interpolation
 
 _MOD = 'baseTexture.py'
+from athenaCL.libATH import prefTools
+environment = prefTools.Environment(_MOD)
 
 
 
 #-----------------------------------------------------------------||||||||||||--
 class ClockRegion:
     def __init__(self, tStart, tEnd):
+        """
+        >>> a = ClockRegion(0, 20)
+        >>> a.repr()
+        '0:20 (20)'
+        """
         if tStart >= tEnd:
             raise ValueError
         self.tStart = tStart
@@ -67,9 +74,6 @@ class Texture(object):
 
         >>> a = Texture()
         """
-#         if scObj == None:
-#             scObj = SC.SetClass()
-#         self.scObj = scObj
         self.name = name
         self.doc = None # from subclass
         self.mute = 0
@@ -309,22 +313,23 @@ class Texture(object):
         always call at beginnign of texture"""
         self.stateCurrentTime = None
         self.stateSetTime = None
-        self.stateCurrentChord = None # pitches, depending pitch mode (set, space)
+        # pitches, depending pitch mode (set, space)
+        self.stateCurrentChord = None 
         self.stateCurrentMultiset = None # object
         self.stateCurrentPitchRaw = None # pitch space, from chord, data
         self.stateCurrentPitchObj = None # pitch object
         self.stateCurrentPitchPost = None # pitch post transposition, temperament
         self._clockReset()
     
-    def _updatePolyMode(self):
-        """always call with update Path info"""
-        if self.path.voiceType != 'part': # cant make part
-            self.polyphonyMode = 'set'
-        else:    # can make vl parts
-            self.polyphonyMode = 'part'
+#     def _updatePolyMode(self):
+#         """always call with update Path info"""
+#         if self.path.voiceType != 'part': # cant make part
+#             self.polyphonyMode = 'set'
+#         else:    # can make vl parts
+#             self.polyphonyMode = 'part'
 
     def updatePathInfo(self):
-        self._updatePolyMode()
+        #self._updatePolyMode()
         self._clockUpdate()
 
     def updateTemperament(self, name): # assing particular tuning
@@ -375,8 +380,9 @@ class Texture(object):
 
 
     #-----------------------------------------------------------------------||--
-    def load(self, pmtrQDict, pathObj, polyphonyMode, temperamentName, 
-                pitchMode, auxNo, fpAudioDirs, midiPgm, midiCh, mute=0, 
+    def load(self, pmtrQDict, pathObj, temperamentName, 
+                pitchMode, auxNo, fpAudioDirs, midiPgm=None, 
+                midiCh=None, mute=0, 
                 silenceMode=0, orcMapMode=1, refresh=1):
         """used for starting a texture from a pmtrQDict
         used when loading an athenaObject XML file
@@ -391,7 +397,7 @@ class Texture(object):
         self.pmtrObjDict['tRange'] = parameter.factory(self.pmtrQDict['tRange'])
         self.pmtrObjDict['beatT'] = parameter.factory(self.pmtrQDict['beatT'])
         # this is either 'sc', 'pcs', or 'ps'
-        self.polyphonyMode = polyphonyMode
+        #self.polyphonyMode = polyphonyMode
         self.temperamentName = temperamentName
         self.pitchMode = pitchMode 
         self.silenceMode = silenceMode
@@ -410,7 +416,7 @@ class Texture(object):
         # done loading data
         # create internal objects
         self.pmtrObjDict['rhythmQ'] = parameter.factory(
-                                          self.pmtrQDict['rhythmQ'], 'rthmPmtrObjs') 
+                          self.pmtrQDict['rhythmQ'], 'rthmPmtrObjs') 
         self.pmtrObjDict['fieldQ'] = parameter.factory(self.pmtrQDict['fieldQ'])
         self.pmtrObjDict['octQ'] = parameter.factory(self.pmtrQDict['octQ'])
         self.pmtrObjDict['ampQ'] = parameter.factory(self.pmtrQDict['ampQ'])
@@ -476,7 +482,7 @@ class Texture(object):
         # standard defaults on all new textures
         #auxNo = instInfo[inst][1] - 6 # remove default 6 pmtrs
         pitchMode = 'ps' # pitch space is default    
-        polyphonyMode   = ''    # 'set' or 'part'; auto updated
+        #polyphonyMode  = ''    # 'set' or 'part'; auto updated
         silenceMode = 0 # default not to calculate silences
         orcMapMode = 1 # default on: scale for orc dependent values
         temperamentName = 'TwelveEqual'
@@ -495,7 +501,7 @@ class Texture(object):
             
         mute = 0
         # use main load function to load texture
-        self.load(pmtrQDict, pathObj, polyphonyMode, temperamentName, 
+        self.load(pmtrQDict, pathObj, temperamentName, 
                      pitchMode, auxNo, fpAudioDirs, midiPgm, midiCh, 
                      mute, silenceMode, orcMapMode, refresh)
 
@@ -506,7 +512,7 @@ class Texture(object):
 
         path = self.path # ref, not a copy
         pmtrQDict = copy.deepcopy(self.pmtrQDict)
-        polyphonyMode = copy.deepcopy(self.polyphonyMode)
+        #polyphonyMode = copy.deepcopy(self.polyphonyMode)
         temperamentName = copy.deepcopy(self.temperamentName)
         pitchMode = copy.deepcopy(self.pitchMode) 
         silenceMode = copy.deepcopy(self.silenceMode) 
@@ -523,7 +529,7 @@ class Texture(object):
             name = self.name
         obj = texture.factory(self.tmName, name) 
         # use main load function to load texture
-        obj.load(pmtrQDict, path, polyphonyMode, temperamentName, 
+        obj.load(pmtrQDict, path, temperamentName, 
                     pitchMode, auxNo, fpAudioDirs, midiPgm, midiCh, 
                     mute, silenceMode, orcMapMode)
         return obj
@@ -649,8 +655,8 @@ class Texture(object):
         headList = []
         headList.append('TI: %s, TM: %s, TC: %i, TT: %s\n' % (self.name, 
             self.tmName, extData['cloneNo'], self.temperamentName))
-        headList.append('pitchMode: %s, polyMode: %s, ' % ( # no return 
-                         self.getPitchMode(), self.polyphonyMode))
+        headList.append('pitchMode: %s, ' % ( # no return 
+                         self.getPitchMode()))
         headList.append('silenceMode: %s, postMapMode: %s\n' % ( 
                          typeset.boolAsStr(self.silenceMode),
                          typeset.boolAsStr(self.orcMapMode)))
@@ -885,7 +891,8 @@ class Texture(object):
         
         oldPmtrDict = copy.deepcopy(self.pmtrQDict)
         # update aux no
-        print lang.WARN, 'new Texture auxiliary value %s' % self.auxNo
+        environment.printDebug([lang.WARN, 
+            'new Texture auxiliary value %s' % self.auxNo])
 
         # remove old aux values 
         for auxLabel in basePmtr.auxLabel(oldAuxNo):
@@ -991,7 +998,7 @@ class Texture(object):
             oldData = self.path
             newData = pmtrValue
         elif (p in ('ampQ', 'panQ', 'fieldQ', 'octQ', 'beatT', 'tRange', 'inst',
-                        'rhythmQ') or p[:4] in ['auxQ', 'dynQ'] or p[:5]=='textQ'):
+            'rhythmQ') or p[:4] in ['auxQ', 'dynQ'] or p[:5]=='textQ'):
             if p[:4] == 'auxQ':
                 if p not in basePmtr.auxLabel(self.auxNo):
                     return 0, 'no such auxiliary label'

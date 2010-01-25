@@ -24,7 +24,7 @@ class PolyPath:
     def __init__(self, name='test'):
         self.name = name
 
-        self.voiceType = 'none'
+        #self.voiceType = 'none'
         # voice types:
         # 'none' the size of any pcs is > 6
         # 'map' has at least one set of maps, all sixes == or < 6

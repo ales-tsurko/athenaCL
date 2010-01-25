@@ -46,7 +46,8 @@ except ImportError: # pil or tk may not be installed
     pass
 
 _MOD = 'command.py'
-
+from athenaCL.libATH import prefTools
+environment = prefTools.Environment(_MOD)
 
 
 
@@ -1693,8 +1694,7 @@ class PIv(Command):
         nameToView = self.nameToView
 
         msg = []
-        msg.append('PI: %s, voiceType: %s\n' % (nameToView,
-                      self.ao.pathLib[nameToView].voiceType))
+        msg.append('PI: %s\n' % (nameToView))
         entryLines = []
         dataList = ['psPath',]
         dataList = dataList + self.ao.pathLib[nameToView].reprList('psPath')
@@ -2529,7 +2529,7 @@ class PIh(Command):
         # provide a list of textures to process
         # turn off refreshing for faster processing`
         ok, msg, outComplete = self.emObj.process([t], [], 0)
-        self.pathMidi = self.emObj.ref['pathMid']
+        self.pathMidi = self.emObj.outFormatToFilePath('midiFile')
 
     def display(self): 
         msg = []
@@ -2956,7 +2956,7 @@ class TPmap(_CommandTP):
         for subLib, usrDataEval in self.argBundle:
             #print _MOD, 'subLib, usrdataEval', subLib, usrDataEval
             if pmtrCount >= self.noPmtrObjs:
-                print lang.WARN, 'too many parameter objects given'
+                environment.printDebug([lang.WARN, 'too many parameter objects given'])
                 break
             try:
                 obj = parameter.factory(usrDataEval, subLib)
@@ -3378,7 +3378,7 @@ class TImode(Command):
         """converts strings to pitch or poly mode"""
         ref = {
             'p' : ['pitch', 'p'],
-            'y' : ['polyphony', 'y'],
+         #   'y' : ['polyphony', 'y'],
             's' : ['silence', 's'],
             'm' : ['map', 'm', 'postmap', 'pm'],
                 }
@@ -3413,7 +3413,7 @@ class TImode(Command):
             return self._tiTestNameExists()
         t = self.ao.textureLib[self.ao.activeTexture]
         currentPitchMode = t.getPitchMode() # this does a string conversion
-        currentPolyMode = t.polyphonyMode
+        #currentPolyMode = t.polyphonyMode
         currentSilenceMode = t.silenceMode
         currentOrcMapMode = t.orcMapMode
 
@@ -3493,13 +3493,13 @@ class TImode(Command):
 
         if self.modeChoice == 'p':
             self.ao.textureLib[name].pitchMode = self.modeValue
-        elif self.modeChoice == 'y':
-            if self.modeValue == 'part':
-                p = self.ao.textureLib[name].path
-                pSizeType = p.voiceType
-                if pSizeType != 'part':
-                    return lang.msgTInoPolyModePath % p.name
-            self.ao.textureLib[name].polyphonyMode = self.modeValue
+#         elif self.modeChoice == 'y':
+#             if self.modeValue == 'part':
+#                 p = self.ao.textureLib[name].path
+#                 pSizeType = p.voiceType
+#                 if pSizeType != 'part':
+#                     return lang.msgTInoPolyModePath % p.name
+#             self.ao.textureLib[name].polyphonyMode = self.modeValue
         elif self.modeChoice == 's':
             self.ao.textureLib[name].silenceMode = self.modeValue
         elif self.modeChoice == 'm':
@@ -3514,9 +3514,9 @@ class TImode(Command):
         if self.modeChoice == 'p':
             modeStr = t.getPitchMode()
             return 'Pitch Mode changed to %s\n' % modeStr
-        elif self.modeChoice == 'y':
-            modeStr = t.polyphonyMode 
-            return 'Polyphony Mode changed to %s\n' % self.modeValue     
+#         elif self.modeChoice == 'y':
+#             modeStr = t.polyphonyMode 
+#             return 'Polyphony Mode changed to %s\n' % self.modeValue     
         elif self.modeChoice == 's':
             modeStr = t.silenceMode 
             return 'Silence Mode changed to %s\n' % typeset.boolAsStr(
@@ -5883,13 +5883,6 @@ class ELn(Command):
         # only difference w/ elw
         self.refresh = 1
 
-#     def _tiMuteList(self):
-#         """get a list of textures that are muted"""
-#         muteList = []
-#         for name in self.ao.textureLib.keys():
-#             if self.ao.textureLib[name].mute:
-#                 muteList.append(name)
-#         return muteList
 
     def gather(self): 
         if self._tiTestExistance() != None: #check existance
@@ -5924,7 +5917,9 @@ class ELn(Command):
                 else:
                     dialog.msgOut(lang.msgELbadScoreName, self.termObj)
                     continue
-        self.ao.aoInfo['fpLastDirEventList'] = scoDir # this is a dir, not a path
+
+        # this is a dir, not a path
+        self.ao.aoInfo['fpLastDirEventList'] = scoDir 
             
         # if csound native, check the csound path with APea
         # this most be done w/ eln, as batch files are written their
@@ -5956,8 +5951,9 @@ class ELn(Command):
             return '%s %s' % (lang.msgELnoScores, msg)
         # writing an athenaobj happens outside of the eventmode
         if 'xmlAthenaObject' in outRequest:
-            pathXml = emObj.ref['pathXml']
-            cmdObj = AOw(self.ao, self.pathXml, 'quite')
+            # getting pathe here from EventMode object
+            pathXml = emObj.outFormatToFilePath('xmlAthenaObject')
+            cmdObj = AOw(self.ao, pathXml, 'quite')
             ok, result = cmdObj.do()
             outComplete.append('xmlAthenaObject')
             self.report.append('%s\n' % pathXml)
@@ -6200,7 +6196,7 @@ class _CommandAO(Command):
     #-----------------------------------------------------------------------||--
     # methods for loading and files
     
-    def _tiLoad(self, textureName, textureModName, pathName, polyphonyMode, 
+    def _tiLoad(self, textureName, textureModName, pathName, 
                     temperamentName, pitchMode, auxNo, pmtrQDict, 
                     midiPgm, midiCh, mute, silenceMode, orcMapMode):
         """this method is needs to load a texture from dry parameter list
@@ -6211,7 +6207,7 @@ class _CommandAO(Command):
                                                      textureName)
         # test to see if pathname exists
         pathObj = self.ao.pathLib[pathName]  ## this is a reference, not a copy
-        self.ao.textureLib[textureName].load(pmtrQDict, pathObj, polyphonyMode,
+        self.ao.textureLib[textureName].load(pmtrQDict, pathObj,
            temperamentName, pitchMode, auxNo, self.ao.aoInfo['fpAudioDirs'],
            midiPgm, midiCh, mute, silenceMode, orcMapMode)
                                                  
@@ -6312,7 +6308,7 @@ class _CommandAO(Command):
                 t = textureData['textureLib'][textureName]
                 pathName = copy.deepcopy(t['pathName'])
                 tmName = copy.deepcopy(t['tmName'])
-                polyphonyMode = copy.deepcopy(t['polyphonyMode'])
+                #polyphonyMode = copy.deepcopy(t['polyphonyMode'])
                 temperamentName = copy.deepcopy(t['temperamentName'])
                 pitchMode = copy.deepcopy(t['pitchMode'])
                 silenceMode = copy.deepcopy(t['silenceMode'])
@@ -6323,7 +6319,7 @@ class _CommandAO(Command):
                 midiCh = copy.deepcopy(t['midiCh'])
                 mute = copy.deepcopy(t['mute'])
                 self._tiLoad(textureName, tmName, pathName, 
-                                 polyphonyMode, temperamentName, pitchMode, auxNo, 
+                                 temperamentName, pitchMode, auxNo, 
                                  pmtrQDict, midiPgm, midiCh, mute, 
                                  silenceMode, orcMapMode)
         if replace == 'replace':
@@ -6359,7 +6355,7 @@ class _CommandAO(Command):
                 t = textureData['textureLib'][tName]
                 t['pathName'] = self.ao.textureLib[tName].path.name
                 t['tmName'] = self.ao.textureLib[tName].tmName
-                t['polyphonyMode'] = self.ao.textureLib[tName].polyphonyMode
+                #t['polyphonyMode'] = self.ao.textureLib[tName].polyphonyMode
                 t['temperamentName'] = self.ao.textureLib[tName].temperamentName
                 t['midiPgm'] = self.ao.textureLib[tName].midiPgm
                 t['midiCh']  = self.ao.textureLib[tName].midiCh
@@ -6537,7 +6533,7 @@ class AOw(_CommandAO):
     uses _aoSave methods to create dictionaries w/ an xml shape
     these dictionaries are then passed to ioTools
     """
-    def __init__(self, ao, args='', verbose='normal'):
+    def __init__(self, ao, args='', verbose='normal', **keywords):
         _CommandAO.__init__(self, ao, args, **keywords)
         self.processSwitch = 1 # display only
         self.gatherSwitch = 1 # display only

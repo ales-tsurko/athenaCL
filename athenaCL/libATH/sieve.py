@@ -36,6 +36,9 @@ from athenaCL.libATH import unit
 from athenaCL.libATH import rhythm
 _MOD = 'sieve.py'
 
+from athenaCL.libATH import prefTools
+environment = prefTools.Environment(_MOD)
+
 
 
 
@@ -1298,7 +1301,7 @@ class Sieve:
 
     #-----------------------------------------------------------------------||--
 
-    def segment(self, state, n=0, z=None, format=None):
+    def segment(self, state=None, n=0, z=None, format=None):
         """
         >>> a = Sieve('3@11')
         >>> b = Sieve('2&4&8|5')
@@ -1309,6 +1312,8 @@ class Sieve:
         [8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8]
         """
 
+        if state == None:
+            state = self.state
         if z == None:
             z = self.z
         if format == None:
@@ -1383,19 +1388,20 @@ class Sieve:
         return self.segment(self.state, n, z, format)
 
 
-    def _segmentConvert(self, format, seg, z):
-        """convert integer to various formats"""
-        if format in ['bin', 'binary']:
-            return unit.discreteBinaryPad(seg, z)
-        elif format in ['unit']:
-            return unit.unitNormRange(seg, z)
-        elif format in ['wid', 'width']: # difference always equal to m
-            wid = [self.m] * (len(seg)-1) # one shorter than segment
-            return wid
-        elif format in ['int', 'integer']: # int, integer
-            return seg
-        else:
-            raise TypeError, '%s not a valid sieve format string.' % format
+# this method is not used anywhere
+#     def _segmentConvert(self, format, seg, z):
+#         """convert integer to various formats"""
+#         if format in ['bin', 'binary']:
+#             return unit.discreteBinaryPad(seg, z)
+#         elif format in ['unit']:
+#             return unit.unitNormRange(seg, z)
+#         elif format in ['wid', 'width']: # difference always equal to m
+#             wid = [self.m] * (len(seg)-1) # one shorter than segment
+#             return wid
+#         elif format in ['int', 'integer']: # int, integer
+#             return seg
+#         else:
+#             raise TypeError, '%s not a valid sieve format string.' % format
 
     def collect(self, n, zMinimum, length, format, zStep=100):
         """collect a segment to meet a desired length for the segment
@@ -1467,8 +1473,6 @@ class Sieve:
 
 
 
-
-#-----------------------------------------------------------------||||||||||||--
 #-----------------------------------------------------------------||||||||||||--
 # high level utility obj
 
@@ -1487,7 +1491,9 @@ class SievePitch:
         self.sieveLogStr = '' # logical sieve string
         # this may raise various exceptions including
         # error.PitchSyntaxError, SyntaxError
+        self.sieveObj = None
         self._parseUsrStr(usrStr)
+
 
     def _parseUsrStr(self, usrStr):
         """when entering a pitch sieve, the logical argument
@@ -1495,6 +1501,10 @@ class SievePitch:
         8(n+4)|6(n+5)|4(n+1), c3, c8 # no commas can be used elsewhere
         provide defaults if no range is given
         range can be given w/ letter names, as well as ps class number 0 = c4
+
+        >>> a = SievePitch('4@7')
+        >>> a._parseUsrStr('13@3|13@6|13@9, c2, c7')
+        
         """
         psLower = None
         psUpper = None
@@ -1506,11 +1516,16 @@ class SievePitch:
         for element in strList:
             element = element.strip()
             if element != '':
-                if i == 0:  self.sieveLogStr = element
-                if i == 1: psLower = element
-                if i == 2: psUpper = element
-                if i == 3: psOrigin = element
-                if i == 4: eld = element
+                if i == 0: 
+                    self.sieveLogStr = element
+                if i == 1: 
+                    psLower = element
+                if i == 2: 
+                    psUpper = element
+                if i == 3: 
+                    psOrigin = element
+                if i == 4: 
+                    eld = element
             i = i + 1
         if self.sieveLogStr == '': # nothing was assigned to it
             return None
@@ -1527,17 +1542,18 @@ class SievePitch:
             self.psOrigin = pitchTools.Pitch(psOrigin)
         else: # use psLower value
             self.psOrigin = pitchTools.Pitch(self.psLower.get('psName'), 'psName')
+
         # scalable eld not yet implemented
         if eld != None:
             self.eld = drawer.strToNum(eld, 'num', .00001, 100) # min, max
             if self.eld == None: # out fo range
                 self.eld = 1
-        else: self.eld = 1 # default
+        else: 
+            self.eld = 1 # default
         
         # create sieve ovject; this may raise exceptions
         self.sieveObj = Sieve(self.sieveLogStr)
             
-
 
     def __call__(self):
         """return a sieve segment mapped to integer range b/n
@@ -1547,36 +1563,46 @@ class SievePitch:
         >>> a = SievePitch('4@7&5@4')
         >>> a()
         [7]
+
+        >>> a = SievePitch('13@3|13@6|13@9, c1, c10, 1')
+        >>> a()
+        [-35, -32, -29, -22, -19, -16, -9, -6, -3, 4, 7, 10, 17, 20, 23, 30, 33, 36, 43, 46, 49, 56, 59, 62, 69, 72]
+
+
+        >>> a = SievePitch('3@0, c4, c5, c4, .5')
+        >>> a.eld
+        0.5
+        >>> a()
+        [0, 1.5, 3.0, 4.5, 6.0, 7.5, 9.0, 10.5, 12.0]
+        >>> a = SievePitch('3@0, c4, c5, c#4, .5')
+        >>> a()
+        [0.5, 2.0, 3.5, 5.0, 6.5, 8.0, 9.5, 11.0]
         """
         min = self.psLower.get('psReal')
         max = self.psUpper.get('psReal')
+        z = range(int(min), int(max+1))
+        n = self.psOrigin.get('psReal') # shift origin
+
         # get integer range
         if self.eld == 1:
-            z = range(int(min), int(max+1))
-            n = self.psOrigin.get('psReal') # shift origin
             sieveSeg = self.sieveObj(n, z) # make value negative
+
         else: # microtonal eld
-            unitList = unit.unitNormStep(self.eld, min, max)
+            # returns all posisble values in this range
+            valList = unit.unitNormStep(self.eld, min, max, normalized=False)
+            #environment.printDebug(valList)
+
             # this z will not be shifted
             # need to get list of apropriate size
-            #z = range(int(min), (int(min) + len(unitList))) 
-            z = range(0, len(unitList)) 
-            #n = self.psOrigin.get('psReal') # shift origin
-            # need to find how steps are between 0 and origin w/ eld
-            shiftList = unit.unitNormStep(self.eld, int(min), 
-                                                    self.psOrigin.get('psReal'))
+            z = range(0, len(valList)) 
             
-            # this does not work right yet...
-            # cant get n to match to expected values
-            #if self.psOrigin.get('psReal') < int(min):
-            #    n = -len(shiftList)
-            #else:
-            #    n = len(shiftList)
-            n = 0
-            
-            # get a unit segment
-            unitSeg = self.sieveObj(n, z, 'unit')
-            sieveSeg = unit.denormList(unitSeg, min, max)
+            # get a binary segment
+            binSeg = self.sieveObj(n, z, 'bin')
+            sieveSeg = []
+            # when there is activity on the unitSeg, return the value
+            for i in range(len(binSeg)):
+                if binSeg[i] == 1:
+                    sieveSeg.append(valList[i])
             
         return sieveSeg
 
@@ -1679,6 +1705,7 @@ class Test(unittest.TestCase):
             obj = CompressionSeg(src)
             sObj = Sieve(str(obj))
             post = sObj()
+
 
     def testSieve(self):
         z = range(0,100)

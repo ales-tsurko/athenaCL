@@ -992,7 +992,7 @@ class FilterParameter(Parameter):
     w/ various aux pmtrs that may use strings
 
     both general purpose and rhythm parameter objects can 
-    be used (rhythm parameter objects on return use the dur value to change
+    be used (rhythm parameter objects on use the dur value to change
     offsets, while sustain is a separate parameter for clonse)
     """
 
@@ -1008,7 +1008,8 @@ class FilterParameter(Parameter):
 
     def __call__(self, valueArray, tArray=None, refDictArray=None):
         """refDict here is created in clone score method by taking data
-        from the esObj, simulating compatibility w/ general pmtr objects"""
+        from the esObj, simulating compatibility w/ general pmtr objects
+        """
         pass
 
 

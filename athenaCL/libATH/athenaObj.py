@@ -83,9 +83,8 @@ from athenaCL.libATH import clone # needed for proc_AUtest
 from athenaCL.libATH import eventList
 
 _MOD = 'athenaObj.py'
-
 from athenaCL.libATH import prefTools
-reporter = prefTools.Reporter(_MOD)
+environment = prefTools.Environment(_MOD)
 
 
 
@@ -906,6 +905,12 @@ class Terminal(object):
         self.defaultH = height
 
 
+
+
+
+
+
+
 #-----------------------------------------------------------------||||||||||||--
 # this Interpreter is based on Python cmd.py
 
@@ -964,14 +969,6 @@ class Interpreter(object):
             dialog.msgOut(msg, self.termObj)
 
     #-----------------------------------------------------------------------||--
-
-#     def _updateCmdEnviron(self):
-#         "passed to command objects for interperter prefs"
-#         self.cmdEnviron = {}
-#         #self.cmdEnviron['threadAble'] = self.threadAble
-#         #self.cmdEnviron['pollDur'] = self.pollDur
-#         self.cmdEnviron['verbose'] = self.verbose
-
     def _getCmdClass(self, cmd):
         """gets a reference to command object; this may get modules that
         are imported into the command module; this is a problem"""
@@ -1014,25 +1011,36 @@ class Interpreter(object):
         >>> a._lineCmdArgSplit('pin a 2,3,4')
         ('pin', 'a 2,3,4')
         """
+        if drawer.isList(line): # accept lists of strings
+            lineNew = [str(part) for part in line]
+            line = ' '.join(lineNew)
+
         line = line.strip()
-        if not line: return None
+        if not line:
+            return None
         elif line[0] == '?':
             line = 'help ' + line[1:]
         elif line[0] == '!':
             line = 'shell ' + line[1:]
         i = 0
+
         # extract command from args, assuming that all cmds use identchars
         while i < len(line) and line[i] in lang.IDENTCHARS:
             i = i + 1
+
         cmd, arg = line[:i], line[i:].strip()
-        if cmd in self.ao.cmdPrefixes: # special sc commands
+        if cmd in self.ao.cmdPrefixes: 
+            # special menu command need an added character
             cmd = cmd + '_'
+
         return cmd, arg
 
 
     #-----------------------------------------------------------------------||--
     def _cmd(self, line):
-        """does actual processing of each command, adding do prefix
+        """Internal command loop command exectuion
+
+        does actual processing of each command, adding do prefix
         separates args from command
         all commands pass through this method, inner most try/except loop
         sub commands provide data dictionaries that are then processed in
@@ -1049,11 +1057,11 @@ class Interpreter(object):
             self._emptyline()
             return None
         cmd, arg = splitLine
-        func = self._getCmdClass(cmd)
-        if func == None: return self._default(line)
+        cmdClassName = self._getCmdClass(cmd)
+        if cmdClassName == None: return self._default(line)
         self._clearCount() # clears cmd blank/bad counting
-        try: # execute function, manage threads
-            cmdObj = func(self.ao, arg, verbose=self.verbose)
+        try: # execute cmdClassNametion, manage threads
+            cmdObj = cmdClassName(self.ao, arg, verbose=self.verbose)
             ok, result = cmdObj.do() # returns a dict if a subCmd, otherwise str
             if result == None: # no msg returned; nothing to report
                 stop = None
@@ -1063,16 +1071,22 @@ class Interpreter(object):
             else: # it is a subCmd, must be a dictionary result
                 stop = self._proc(cmdObj, result) # do processing on result
             if cmdObj.cmdStr != 'quit': # no history for quit
-                self._historyAdd(cmdObj.log()) #log may return none if incomplete
+                self._historyAdd(cmdObj.log()) #log may return none
         except: # print error message for all exceptions
+            # TODO: could restore previous AthenaObject here to
+            # remove the chance of damagin error
             tbObj = sys.exc_info() # get traceback object
             stop = None # must be assigned on error
             self._errorReport(cmd, arg, tbObj) # writes log file
             self.out(lang.msgAthObjError)
         return stop
 
-    def cmd(self, line, arg=None):
-        """give cmdline, or cmd + arg; cmdline will be split if arg == None
+    def cmd(self, line, arg=None, *arguments, **keywords):
+        """Public interface for exucting commands.
+
+        errorMode is a keyuword aregument; can be exception or return
+
+        give cmdline, or cmd + arg; cmdline will be split if arg == None
         good for calling a single command from cgi, or external interpreter
         return output as string, not printed
         does not log errors, does not keep a history
@@ -1080,32 +1094,75 @@ class Interpreter(object):
         returns a status flag, and msg string
 
         >>> a = Interpreter()
-        >>> a.cmd('pin', 'a 3')[0]
+        >>> a.cmd('pin', 'a 3', errorMode='return')[0]
         1
+
+        >>> a = Interpreter()
+        >>> post = a.cmd('pin a 3')
+        >>> post.startswith('PI a added to PathInstances')
+        True
+
+        >>> a = Interpreter()
+        >>> post = a.cmd('pin', 'a', '3')
+        >>> post.startswith('PI a added to PathInstances')
+        True
         """
+
+        errorMode = 'exception' # default
+        if 'errorMode' in keywords.keys():
+            errorMode = keywords['errorMode']            
+
         if arg == None: # no args, assume cmd needs to be split
             splitLine = self._lineCmdArgSplit(line)
-            if splitLine == None: return 0, "no command given"
+            if splitLine == None:
+                if errorMode == 'exception':
+                    raise Exception('no command given')
+                elif errorMode == 'return':
+                    return 0, "no command given"
             cmd, arg = splitLine
         else: # args are given, so line is command name
             cmd = line
+            # add any additional arguments added individually
+            if len(arguments) > 0:
+                argsExtra = [str(part) for part in arguments]
+                arg = arg + ' ' + ' '.join(argsExtra)
+
         # cmdCorrect called here; this is done in cmdExecute and not in _cmd
         # as this is a public method, however, this may be necessary here
         cmd = self.ao.cmdCorrect(cmd)
-        func = self._getCmdClass(cmd)
-        if func == None: return 0, "no command given"
+        cmdClassName = self._getCmdClass(cmd)
 
-        try: # execute function, manage threads
-            cmdObj = func(self.ao, arg, verbose=self.verbose)
-            ok, result = cmdObj.do() # no out on resutl here
-        except: # print error message
-            # stop = None # must be assigned on error; no longer in use
-            #self.out(self._errorReport(cmd))
-            traceback.print_exc() # print teaceback, dont log error
-            result = 'error occured'
-            ok = 0
-        return ok, result
+        environment.printDebug(['cmd, args', cmd, arg])
 
+        if errorMode == 'exception':
+            if cmdClassName == None:
+                raise Exception("no command given")
+            result = 'no additional cmd message'
+            try: # execute cmdClassNametion, manage threads
+                cmdObj = cmdClassName(self.ao, arg, verbose=self.verbose)
+                ok, result = cmdObj.do() # no out on resutl here
+                if not ok:
+                    raise Exception('command level error: %s' % result)
+            except Exception: 
+                #exc.args = (exc.args[0].append(result)) + list(exc.args[1:])
+                raise # raise the same Exception
+            return result
+
+        elif errorMode == 'return':
+            if cmdClassName == None:
+                return 0, "no command given"
+            try: # execute cmdClassNametion, manage threads
+                cmdObj = cmdClassName(self.ao, arg, verbose=self.verbose)
+                ok, result = cmdObj.do() # no out on resutl here
+            except: # print error message
+                # stop = None # must be assigned on error; no longer in use
+                #self.out(self._errorReport(cmd))
+                traceback.print_exc() # print teaceback, dont log error
+                result = 'error occured'
+                ok = 0
+            return ok, result
+        else: 
+            raise Exception('bad error mode')
 
 
     #-----------------------------------------------------------------------||--
@@ -1122,8 +1179,11 @@ class Interpreter(object):
 
     #-----------------------------------------------------------------------||--
     def cmdExecute(self, cmdList):
-        """used for processing a lost of commands, does many commands in a list
-        a simple list of commands is executed one at a time
+        """Proess a list of commands.
+
+        Used for processing multiple comamnds when separated by semicolon.
+
+        A list of commands is executed one at a time
         called from self.cmdLoop
 
         >>> a = Interpreter()
@@ -1378,7 +1438,7 @@ class Test(unittest.TestCase):
 
         athInt = Interpreter('terminal')
         for cmd in cmdListB+cmdListD:
-            ok, result = athInt.cmd(cmd)
+            ok, result = athInt.cmd(cmd, errorMode='return')
             if not ok:
                 raise Exception('failed cmd (%s): %s' % (cmd, result))
 
@@ -1404,7 +1464,6 @@ class Test(unittest.TestCase):
             cmdListE.append('TIv test2')
             cmdListE.append('TImute test2')
             cmdListE.append('TImode p   pcs')
-            cmdListE.append('TImode y   set')
             cmdListE.append('TIrm test2')
             cmdListE.append('TIo %s' % name)
             cmdListE.append('TIe t  1.5, 3')
@@ -1439,7 +1498,7 @@ class Test(unittest.TestCase):
         
         athInt = Interpreter('terminal')
         for cmd in cmdListE+cmdListF:
-            ok, result = athInt.cmd(cmd)
+            ok, result = athInt.cmd(cmd, errorMode='return')
             if not ok:
                 raise Exception('failed cmd (%s): %s' % (cmd, result))
 
@@ -1461,9 +1520,9 @@ class Test(unittest.TestCase):
         'AUsys',
         ]
 
-        athInt = Interpreter('terminal')
+        athInt = Interpreter('cgi')
         for cmd in cmdList:
-            ok, result = athInt.cmd(cmd)
+            ok, result = athInt.cmd(cmd, errorMode='return')
             if not ok:
                 raise Exception('failed cmd (%s): %s' % (cmd, result))
 
@@ -1477,7 +1536,7 @@ class Test(unittest.TestCase):
 
         athInt = Interpreter('terminal')
         for cmd in cmdList:
-            ok, result = athInt.cmd(cmd)
+            ok, result = athInt.cmd(cmd, errorMode='return')
             if not ok:
                 raise Exception('failed cmd (%s): %s' % (cmd, result))
 
@@ -1504,7 +1563,7 @@ class Test(unittest.TestCase):
 
         athInt = Interpreter('terminal')
         for cmd in cmdList:
-            ok, result = athInt.cmd(cmd)
+            ok, result = athInt.cmd(cmd, errorMode='return')
             if not ok:
                 raise Exception('failed cmd (%s): %s' % (cmd, result))
 

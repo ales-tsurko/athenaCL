@@ -22,7 +22,8 @@ from athenaCL.libATH import typeset
 
 from athenaCL.libATH.libPmtr import basePmtr
 _MOD = 'cloneFilter.py'
-#-----------------------------------------------------------------||||||||||||--
+
+
 
 #-----------------------------------------------------------------||||||||||||--
 class Bypass(basePmtr.FilterParameter):
@@ -78,7 +79,14 @@ class OrderBackward(basePmtr.FilterParameter):
         return '%s' % (self.type)
 
     def __call__(self, valArray, tArray, refDictArray):
-        """reverse values"""
+        """reverse values
+
+        for some reason this test does not run when running all tests
+        >>> #from athenaCL.libATH.libPmtr import cloneFilter
+        >>> #a = cloneFilter.OrderBackward('', {})
+        >>> #a([3,4,5], [0,1,2], {})
+        [5, 4, 3]
+        """
         self.currentValue = copy.copy(valArray)
         self.currentValue.reverse()
         return self.currentValue
@@ -278,7 +286,7 @@ class FilterFunnelBinary(basePmtr.FilterParameter):
                               'parameterObject: first boundary', 
                               'parameterObject: second boundary']
         self.argDefaults = ['u',('bpl', 'e', 's', ((0,0),(120,1))), 
-                                        ('ws','e',60,0,.5,0),('wc','e',90,0,.5,1),]
+                           ('ws','e',60,0,.5,0),('wc','e',90,0,.5,1),]
         self.argDemos = [ ['m', ('c', .2), ('bpl','e','l',((0,0),(60,.5))),
                                       ('bpl','e','l',((0,1),(60,.5))),],     
                                 ]
@@ -790,6 +798,12 @@ class Test(unittest.TestCase):
     def testDummy(self):
         self.assertEqual(True, True)
 
+    
+    def testBasic(self):
+        pass
+        #a = OrderBackward('', {})
+        #self.assertEqual(a([3,4,5], [0,1,2], {}), [5, 4, 3])
+        
 
 #-----------------------------------------------------------------||||||||||||--
 if __name__ == '__main__':

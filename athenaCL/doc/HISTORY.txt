@@ -16,6 +16,8 @@ TEmidi: renamed as TEbr (beat reference), TEtr (time ref), or TEref:
 global shared parameter objects that are stored in a dictionary
 each parameter obj can have a role, with default roles given for 
 tempoReference, meterReferenceNumerator, meterReferenceDenominator
+need to have a generator to determine tempoSampleRate (intervals in which new tempos are drawn)
+
 store in a dictionary with noId, role, pmtr string
 TextureGlobal (TGls, TGn, TGe, TGrm)
 
@@ -61,6 +63,12 @@ TEmap drawing muted textures incorectly
 
 .______________________________________.____________________________
 to investigate:
+
+add two parameter objects to each texture, setting upper and lower pitch space boundaries. this might be used to map pitches within dynamic boundaries after path selection, octave, and transposition controls are employed
+
+not sure what to do when values are not within boundary: may need a new texture mode to configure this: limiting at boundary is not good, as this destroys the pitch strucutre; better is to do an octave shift, perhaps
+
+
 
 double masks
 

@@ -22,8 +22,7 @@ from athenaCL.libATH import osTools
 _MOD = 'info.py'
 
 from athenaCL.libATH import prefTools
-reporter = prefTools.Reporter(_MOD)
-reporter.status = 1 # force printing on regardless of debug pref
+environment = prefTools.Environment(_MOD)
 
 # bbedit man page in man1, assume this is good.
 MANGROUP = 1 # man1 (general) or man7 (miscellaneous) seem best
@@ -57,7 +56,7 @@ class InfoManager:
         else: # this will fail, but usefull for getting info
             raise ValueError('bad path')
 
-        reporter.printDebug(fpDocDir)
+        environment.printWarn(fpDocDir)
         self.fpDocDir = fpDocDir
         
         self.athVersion  = athenaObj.__version__
@@ -84,7 +83,7 @@ class InfoManager:
     def historyScrub(self):
 
         path = os.path.join(self.fpDocDir, 'HISTORY.txt')
-        reporter.printDebug(['history updated', path])
+        environment.printWarn(['history updated', path])
         f = open(path)
         msg = f.readlines()
         f.close()
@@ -96,7 +95,7 @@ class InfoManager:
             newMsg.append(line)
             
         if len(msg) != len(newMsg):
-            reporter.printDebug('old, new', len(msg), len(newMsg))
+            environment.printWarn('old, new', len(msg), len(newMsg))
             raise ValueError
       
         f = open(path, 'w')
@@ -508,7 +507,7 @@ VII. CREDITS and ACKNOWLEDGMENTS:
 
         # need to get flags from athenacl.py w/o falling into
         # interactive session; do this by adding to sys.argv
-        reporter.printDebug('updating man page')
+        environment.printWarn('updating man page')
         
         # this will start an interepreter instance when run
         sys.argv.append('-e quit confirm')

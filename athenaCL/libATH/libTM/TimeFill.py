@@ -11,13 +11,14 @@
 import copy
 import unittest, doctest
 
-
-from athenaCL.libATH.libTM import baseTexture
-from athenaCL.libATH.libPmtr import basePmtr
 from athenaCL.libATH import pitchTools
 from athenaCL.libATH import unit
 from athenaCL.libATH import language
 lang = language.LangObj()
+
+from athenaCL.libATH.libTM import baseTexture
+from athenaCL.libATH.libPmtr import basePmtr
+
 
 
 class TimeFill(baseTexture.Texture):
@@ -85,7 +86,7 @@ class TimeFill(baseTexture.Texture):
 
             # create a generator to get pitches from chord as index values
             selectorChordPos = basePmtr.Selector(range(len(chordCurrent)),
-                                                             textPitchSelectorControl)
+                                              textPitchSelectorControl)
             # real set start is always the formal start time here
             tCurrent = copy.deepcopy(tStartSet)
             tStartSetReal = copy.deepcopy(tStartSet)
@@ -145,6 +146,13 @@ class Test(unittest.TestCase):
             
     def testDummy(self):
         self.assertEqual(True, True)
+
+
+    def testBasic(self):
+        pass
+
+        # again, get TypeError: unbound method __init__() must be called with Texture instance as first argument
+        #a = TimeFill()
 
 
 #-----------------------------------------------------------------||||||||||||--

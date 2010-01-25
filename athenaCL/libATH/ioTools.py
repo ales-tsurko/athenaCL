@@ -26,7 +26,7 @@ import xml.dom.minidom
 
 _MOD = 'ioTools.py'
 from athenaCL.libATH import prefTools
-reporter = prefTools.Reporter(_MOD)
+environment = prefTools.Environment(_MOD)
 
 #-----------------------------------------------------------------||||||||||||--
 # take an xml doc and convert into structured dictionaries
@@ -132,7 +132,7 @@ class BackwardsCompat:
             if drawer.isStr(arg[1]): # can assume that this is a t/e string
                 return arg
             newArgs = [arg[0], 't'] + list(arg[1:])  
-            reporter.printDebug(['changed args:', arg, 'to:', newArgs])
+            environment.printDebug(['changed args:', arg, 'to:', newArgs])
             return newArgs
         else:
             return arg
@@ -158,7 +158,7 @@ class BackwardsCompat:
                 arg = t['textureLib'][tName]['pmtrQDict'][pmtrKey]   
                 newArgs = tuple(self._recursiveUpdate(arg))
                 if newArgs != arg: # a change has been made
-                    reporter.printDebug(['changed args:', arg, 'to:', newArgs])
+                    environment.printDebug(['changed args:', arg, 'to:', newArgs])
                     t['textureLib'][tName]['pmtrQDict'][pmtrKey] = newArgs
                 # do alterations to textureStatic and cloneStatic names
                 # these will always be given with full names
@@ -172,7 +172,7 @@ class BackwardsCompat:
                     if arg[0] == src:
                         newArgs = [dst] + list(arg[1:]) # make new list
                         t['textureLib'][tName]['pmtrQDict'][pmtrKey] = tuple(newArgs)
-                        reporter.printDebug(['replaced:', src, dst])
+                        environment.printDebug(['replaced:', src, dst])
 
 
 
@@ -193,7 +193,7 @@ class BackwardsCompat:
                         else: new = 'randomChoice' 
                         newArgs = [dst, new] # make new list
                         t['textureLib'][tName]['pmtrQDict'][pmtrKey] = tuple(newArgs)
-                        reporter.printDebug(['replaced:', src, arg[1], dst, new])
+                        environment.printDebug(['replaced:', src, arg[1], dst, new])
 
     def _pre145_cleanExtraAux(self):
         """correct a possible error where, when going from a larger to a 
@@ -209,7 +209,7 @@ class BackwardsCompat:
                 if pmtrKey not in auxLabelValid: # not a valid auxq
                     if pmtrKey[:4] == 'auxQ': # if it looks like an auxq
                         del t['textureLib'][tName]['pmtrQDict'][pmtrKey]
-                        reporter.printDebug(['removed extra auxQ:', pmtrKey])
+                        environment.printDebug(['removed extra auxQ:', pmtrKey])
         # clear extra clone aux as well
         for cName in t['cloneLib'].keys():
             auxNo = t['cloneLib'][cName]['auxNo']
@@ -219,7 +219,7 @@ class BackwardsCompat:
                 if pmtrKey not in auxLabelValid: # not a valid auxq
                     if pmtrKey[:4] == 'auxQ': # if it looks like an auxq
                         del t['cloneLib'][cName]['pmtrQDict'][pmtrKey]
-                        reporter.printDebug(['removed extra auxQ:', pmtrKey])
+                        environment.printDebug(['removed extra auxQ:', pmtrKey])
                         
                 
     def _pre200_basic(self):
@@ -247,21 +247,21 @@ class BackwardsCompat:
         # pre 1.4.0
         boundary = argTools.Version('1.4.0')
         if self.fileVersionObj < boundary:
-            reporter.printDebug('pre %s update necessary.' % str(boundary))
+            environment.printDebug('pre %s update necessary.' % str(boundary))
             self._pre140_pmtrObjUpdates()
 
         # pre 1.4.5 ; was 1.4.4, but had to increment to catch old errors
         # v. 1.4.5 may not exists
         boundary = argTools.Version('1.4.5')
         if self.fileVersionObj < boundary:
-            reporter.printDebug('pre %s update necessary.' % str(boundary))
+            environment.printDebug('pre %s update necessary.' % str(boundary))
             self._pre144_pmtrObjUpdates()
             self._pre145_cleanExtraAux()
 
         # pre 2.0
         boundary = argTools.Version('2.0.0')
         if self.fileVersionObj < boundary:
-            reporter.printDebug('pre %s update necessary.' % str(boundary))
+            environment.printDebug('pre %s update necessary.' % str(boundary))
             self._pre200_basic()
 
         # return data

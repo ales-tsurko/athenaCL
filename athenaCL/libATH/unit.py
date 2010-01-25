@@ -13,6 +13,8 @@ import unittest, doctest
 
 from athenaCL.libATH import drawer
 _MOD = 'unit.py'
+
+
 #-----------------------------------------------------------------||||||||||||--
 # unit interval tools
 
@@ -23,7 +25,6 @@ class UnitException(Exception):
 
 
 #-----------------------------------------------------------------||||||||||||--
-
 def seriesMinMax(series):
     """given any list of numbers, return e min and e max
     must convert to list to allow sorting of array or other sequence objects
@@ -129,17 +130,32 @@ def unitNormEqual(parts):
         unit.append(1) # make last an integer, add manually
         return unit
         
-def unitNormStep(step, a=0, b=1):
+def unitNormStep(step, a=0, b=1, normalized=True):
     """given a step size and an a/b min/max range, calculate number of parts
     to fill step through inclusive a,b
     then return a unit interval list of values necessary to cover region
 
+    Note that returned values are by default normalized within the unit interval.
+
     >>> unitNormStep(.5, 0, 1)
     [0.0, 0.5, 1]
+
     >>> unitNormStep(.5, -1, 1)
     [0.0, 0.25, 0.5, 0.75, 1]
+
+    >>> unitNormStep(.5, -1, 1, normalized=False)
+    [-1, -0.5, 0.0, 0.5, 1.0]
+
+    >>> post = unitNormStep(.25, 0, 20)
+    >>> len(post)
+    81
+    >>> post = unitNormStep(.25, 0, 20, normalized=False)
+    >>> len(post)
+    81
+
     """
-    if a == b: return [] # no range, return boundary
+    if a == b: 
+        return [] # no range, return boundary
     if a < b: 
         min = a
         max = b
@@ -148,11 +164,17 @@ def unitNormStep(step, a=0, b=1):
         max = a
     # find number of parts necessary
     count = 0 # will count last, so dont count min at begining
+    values = []
     x = min
     while x <= max:
-      x = x + step
-      count = count + 1
-    return unitNormEqual(count)
+        values.append(x) # do before incrementing
+        x += step
+        count += 1
+
+    if normalized:
+        return unitNormEqual(count)
+    else:
+        return values
         
 def unitNormProportion(series):
     """normalize values w/n unit interval, where max is determined

@@ -25,6 +25,9 @@ from athenaCL.libATH.libPmtr import basePmtr
 from athenaCL.libATH.omde import bpf # needed for interpolation
 
 _MOD = 'eventList.py'
+from athenaCL.libATH import prefTools
+environment = prefTools.Environment(_MOD)
+
 
 #-----------------------------------------------------------------||||||||||||--
 # eventModes have a single, default orc object that they work wiht
@@ -724,7 +727,7 @@ class EventSequenceSplit:
                     # append data values
                     self.splitScore[label].append(pObj(t, refDict)) 
             elif lib in ['filterPmtrObjs']:
-                # create a dummy ref dict array
+                # create a dummy fpRef dict array
                 refDictArray = [refDict] * self.nEvent
                 # first element in srcObj list must be a general pmtr obj
                 valArray = self.splitScore[self.srcObj[0][0]] # this gets label
@@ -905,7 +908,7 @@ class Performer(object):
         self.polySeq[tName]['esObj'] = t.getScore() # store esObj copy
         self.polySeq[tName]['mute'] = t.mute
         self.polySeq[tName]['className'] = t.__module__
-        self.polySeq[tName]['orcObj'] = t.getOrc() # ref to obj
+        self.polySeq[tName]['orcObj'] = t.getOrc() # fpRef to obj
         self.polySeq[tName]['inst'] = t.getInst() # get inst number
         self.polySeq[tName]['midiPgm'] = t.midiPgm
         self.polySeq[tName]['midiCh'] = t.midiCh # this is from 1 to 16
@@ -1015,7 +1018,7 @@ class Performer(object):
 # as no 'pitch' or 'pan' values are used, and no inst info is needed
 
 class _OutputEngine:
-    def __init__(self, emObj, ref, ao):
+    def __init__(self, emObj, fpRef, ao):
         """output engines: convert polySeq objects into files or streams?
         output engines are respoonsible for writing certain filestypes
         two engines cannot be used tt write the same filetype (.sco)
@@ -1029,20 +1032,24 @@ class _OutputEngine:
         for example, the text engine will always use the orc specified by em
         contrarywise, the csoundNative engine will always use its default orc
         
-        ref is a ref dictionary with system value and strings needed in 
+        fpRef is a fpRef dictionary with system value and strings needed in 
         processign; this is necessary to avoid passing an athenaObject to the 
         output object
-        ref contains file paths for all necessary format based on str
-        changes are made to ref to pass paths back to athenaObject
+        fpRef contains file paths for all necessary format based on str
+        changes are made to fpRef to pass paths back to athenaObject
         
         engines store and modify a copy of a user provided outRequest
         engines may remove values from this list during _writePre
         if an engine is called with and empty outRequest, provide minimum
         
         write method does not deal w/ athenaObj, only with:
-        ref (for paths) perfObj (passed with the write() method)          
+        fpRef (for paths) perfObj (passed with the write() method)          
         """
-        self.ref = ref
+
+        # TODO: rename fpRef
+        self.fpRef = fpRef
+
+
         self.emObj = emObj # name of eventMode that is using this engine
         self.ao = ao
 
@@ -1118,7 +1125,7 @@ class _OutputEngine:
                 # see if tOrc is incompatabible w/ this Engine
                 # inst may not be valid, but still work (midi files are an ex)
                 if tOrcObj.name in self.orcIncompat:
-                    print lang.WARN, 'texture %s (instrument %s, orchestra %s) incompatible with OutputEngine orchestra %s; change EventMode or edit instrument.' % (t, inst, tOrcObj.name, self.orcObj.name)
+                    environment.printWarn([lang.WARN, 'texture %s (instrument %s, orchestra %s) incompatible with OutputEngine orchestra %s; change EventMode or edit instrument.' % (t, inst, tOrcObj.name, self.orcObj.name)])
                 else: # use this texture anyways                  
                     self.compatNames.append(t)
                     if inst not in self.compatInsts: 
@@ -1135,7 +1142,7 @@ class _OutputEngine:
         pass
     
     def _writePost(self):
-        """update paths in ref as necessary"""
+        """update paths in fpRef as necessary"""
         pass
         
     def write(self, polySeq, outRequest=[]):
@@ -1188,7 +1195,16 @@ class _OutputEngine:
         
     #-----------------------------------------------------------------------||--
     # string and data processing conversion
-    
+
+
+    def _outFormatToFilePath(self, outFormatName):
+        """
+        This looks to theis fpRf; it could also look at EventMode
+        """
+        return self.fpRef[self.emObj.outFormatObjects[outFormatName].emKey]
+
+
+
     def _fmtHeadSco(self, headStr='', prepend=''):
         scoHead = []
         scoHead.append('%sathenaCL %s\n' % (prepend, self.ao.aoInfo['version']))
@@ -1499,13 +1515,13 @@ class _OutputEngine:
 
 #-----------------------------------------------------------------||||||||||||--
 class EngineAudioFile(_OutputEngine):
-    def __init__(self, emObj, ref, ao):
+    def __init__(self, emObj, fpRef, ao):
         """
         >>> from athenaCL.libATH import athenaObj
         >>> ao = athenaObj.AthenaObject()
         >>> a = EngineAudioFile('generalMidi', {}, ao)
         """
-        _OutputEngine.__init__(self, emObj, ref, ao) # provide event name
+        _OutputEngine.__init__(self, emObj, fpRef, ao) # provide event name
         self.name = 'EngineAudioFile'
         self.doc = lang.docOeAudioFile
         # compatable with all orchestras
@@ -1547,13 +1563,11 @@ class EngineAudioFile(_OutputEngine):
     def _translatePoly(self):
         """set self.polySeqStr w/ complet orc from self.polySeq
         """
-
-        outFormatObj = self.emObj.outFormatObjects['audioFile']
-
         try: # aiff tools may not be available on a given platform
             # will raise an import error
             # may need to delete old file here
-            self.aObj = audioTools.AudioFile(self.ref[outFormatObj.emKey], 1)
+            self.aObj = audioTools.AudioFile(
+                self._outFormatToFilePath('audioFile'), 1)
         except (ImportError, IOError):
             return 0 # failure
 
@@ -1579,22 +1593,20 @@ class EngineAudioFile(_OutputEngine):
         """ """
         ok = self._translatePoly() # wil write file
         if ok:
-            outFormatObj = self.emObj.outFormatObjects['audioFile']
-
             self.outComplete.append('audioFile')
-            self.ref['fpOutputView'] = self.ref[outFormatObj.emKey]
+            self.fpRef['fpOutputView'] = self._outFormatToFilePath('audioFile')
 
 
 #-----------------------------------------------------------------||||||||||||--
 class EngineSuperColliderTask(_OutputEngine):
-    def __init__(self, emObj, ref, ao):
+    def __init__(self, emObj, fpRef, ao):
         """
         >>> from athenaCL.libATH import athenaObj
         >>> ao = athenaObj.AthenaObject()
         >>> a = EngineSuperColliderTask('superColliderNative', {}, ao)
         >>> post = a.doc
         """
-        _OutputEngine.__init__(self, emObj, ref, ao) # provide event name
+        _OutputEngine.__init__(self, emObj, fpRef, ao) # provide event name
         self.name = 'EngineSuperColliderTask'
         self.doc = lang.docOeSuperColliderTask
         # define orcs that are not compatible w/ this engine
@@ -1646,28 +1658,24 @@ class EngineSuperColliderTask(_OutputEngine):
         msg.append(self.orcObj.srcStr)
         msg.append(self.polySeqStr)
 
-        outFormatObj = self.emObj.outFormatObjects['superColliderTask']
-        f = open(self.ref[outFormatObj.emKey] , 'w')
+        f = open(self._outFormatToFilePath('superColliderTask'), 'w')
         f.write(''.join(msg))
-        f.close()    
-
+        f.close()
         self.outComplete.append('superColliderTask')
-
             
     def _write(self):
         """translate and write all files """
         self._translatePoly()
         # update orcObj.srcStr
         # instList may have instruments not compatiable with this orchestra?
-        self.orcObj.constructOrc(self.ref['audioChannels'], self.compatInsts)
+        self.orcObj.constructOrc(self.fpRef['audioChannels'], self.compatInsts)
         self._writeScScd()
 
     def _writePost(self):
         """post writing updates as necessary
         self.outComplete set above"""
-
-        outFormatObj = self.emObj.outFormatObjects['superColliderTask']
-        self.ref['fpOutputView'] = self.ref[outFormatObj.emKey]
+        self.fpRef['fpOutputView'] = self._outFormatToFilePath(
+                                     'superColliderTask')
 
 
 
@@ -1675,13 +1683,13 @@ class EngineSuperColliderTask(_OutputEngine):
 
 #-----------------------------------------------------------------||||||||||||--
 class EngineCsoundNative(_OutputEngine):
-    def __init__(self, emObj, ref, ao):
+    def __init__(self, emObj, fpRef, ao):
         """
         >>> from athenaCL.libATH import athenaObj
         >>> ao = athenaObj.AthenaObject()
         >>> a = EngineCsoundNative('generalMidi', {}, ao)
         """
-        _OutputEngine.__init__(self, emObj, ref, ao) # provide event name
+        _OutputEngine.__init__(self, emObj, fpRef, ao) # provide event name
         self.name = 'EngineCsoundNative'
         self.doc = lang.docOeCsoundNative
         # define orcs that are not compatible w/ this engine
@@ -1699,51 +1707,44 @@ class EngineCsoundNative(_OutputEngine):
         """creates a .bat string, and a plain list of render options
         there seems to be an error now in the windows version of this now"""
         
-        outFormatObj = self.emObj.outFormatObjects['csoundOrchestra']
-
         if os.name == 'posix':
             audioDirFlag = '' # not used
             # quotes optional
-            audioPathFlag = '\"-o' + self.ref['fpOutputAudio'] + '\" ' 
+            audioPathFlag = '\"-o' + self.fpRef['fpOutputAudio'] + '\" ' 
             # could change dir or try to set env variables here...
-            batFileHead = '#! /bin/sh \n%s ' % self.ref['fpCsoundBinary']
+            batFileHead = '#! /bin/sh \n%s ' % self.fpRef['fpCsoundBinary']
         else: # win or other
             audioDirFlag = '' # not used
             # quotes req on win; not sure if space after 0 is req
-            audioPathFlag = '\"-o' + self.ref['fpOutputAudio'] + '\" '  
-            batFileHead = '@ECHO off\nc:\ncd %s\n%s ' % (self.ref['fpCsoundBinaryDir'],self.ref['fnCsoundBinary'])
+            audioPathFlag = '\"-o' + self.fpRef['fpOutputAudio'] + '\" '  
+            batFileHead = '@ECHO off\nc:\ncd %s\n%s ' % (self.fpRef['fpCsoundBinaryDir'],self.fpRef['fnCsoundBinary'])
 
         renderOpt = ('-m2 '+ # msg level. Sum 1=amps, 2=out-of-range, 4=warnings
             '-d ' + # suppress all displays (-d) (ascii displays -g)
-            self.ref['audioFlag'] +               
+            self.fpRef['audioFlag'] +               
             '-b1024 ' + # sample frames (or -kprds) per sound I/O buffer, was 8192
             '-B1024 ' + # samples per hardware sound I/O buffer, was 8192
             audioDirFlag +   # Sound File Directory (mac only)
             audioPathFlag)   # other plats use full path here
 
         if csd: 
-            outFormatObj = self.emObj.outFormatObjects['csoundData']
-            pathOpt =  '\"' + self.ref[outFormatObj.emKey] + '\" '
+            pathOpt = '\"' + self._outFormatToFilePath('csoundData') + '\" '
         else: # no csd, use orc and sco path
-            outFormatOrc = self.emObj.outFormatObjects['csoundOrchestra']
-            outFormatSco = self.emObj.outFormatObjects['csoundScore']
-
-            pathOpt = ('\"' + self.ref[outFormatOrc.emKey] + '\" ' + '\"' + 
-                      self.ref[outFormatSco.emKey] + '\"\n')
+            pathOpt = ('\"' + self._outFormatToFilePath('csoundOrchestra') + 
+                '\" ' + '\"' + 
+                self._outFormatToFilePath('csoundScore') + '\"\n')
         batStr = (batFileHead + renderOpt + pathOpt)
         return batStr, renderOpt # needed for csd
 
     def _writeBat(self, csd):
         """writes a bat file"""
-        outFormatObj = self.emObj.outFormatObjects['csoundBatch']
-
         batStr, renderOpt = self._genCommandStr(csd)
-        f = open(self.ref[outFormatObj.emKey] , 'w')     
+        f = open(self._outFormatToFilePath('csoundBatch') , 'w')     
         f.write(batStr)
         f.close()       
 
         if os.name == 'posix':        
-            os.chmod(self.ref['pathBat'], 0755) #makes executable (744=rwxr--r--) 
+            os.chmod(self.fpRef['pathBat'], 0755) #makes executable (744=rwxr--r--) 
         else: # win or other
             pass
         self.outComplete.append('csoundBatch')
@@ -1761,9 +1762,6 @@ class EngineCsoundNative(_OutputEngine):
         xmlHead = '<?xml version="1.0"?>\n' # add?
         msg = []
         msg.append('<CsoundSynthesizer>\n\n')
-#         if os.name == 'mac':
-#             optStr = "%s/n%s/n%s/n/n%s" % ('<MacOptions>', 2, 1, 
-#                      '-b64 -A -s -m0 -K -B0 -Lstdin </MacOptions>')
 
         optStr = '<CsOptions>\n' + csdOptions + '\n\n' + '</CsOptions>\n'
         msg.append(optStr)
@@ -1773,8 +1771,7 @@ class EngineCsoundNative(_OutputEngine):
                                               '</CsScore>'))
         msg.append('</CsoundSynthesizer>\n')
 
-        outFormatObj = self.emObj.outFormatObjects['csoundData']
-        f = open(self.ref[outFormatObj.emKey] , 'w')
+        f = open(self._outFormatToFilePath('csoundData'), 'w')
         f.writelines(msg)
         f.close()    
         self.outComplete.append('csoundData')
@@ -1808,15 +1805,18 @@ class EngineCsoundNative(_OutputEngine):
         self.polySeqStr = ''.join(msg)
 
     def _writeSco(self):
-        f = open(self.ref['pathSco'], 'w')
+        outFormatObj = self.emObj.outFormatObjects['csoundScore']
+        f = open(self.fpRef[outFormatObj.emKey], 'w')
         f.write(self.polySeqStr)      
         f.close()   
         self.outComplete.append('csoundScore')
 
     def _writeOrc(self):
         """write orchestra already constructed in _write Method"""
-        assert self.orcObj.srcStr != None
-        f = open(self.ref['pathOrc'], 'w')
+        if self.orcObj.srcStr == None:
+            raise Exception('orchestra object has no source string')
+        outFormatObj = self.emObj.outFormatObjects['csoundOrchestra']
+        f = open(self.fpRef[outFormatObj.emKey], 'w')
         f.write(self.orcObj.srcStr)   
         f.close()   
         self.outComplete.append('csoundOrchestra')
@@ -1837,7 +1837,7 @@ class EngineCsoundNative(_OutputEngine):
         self._translatePoly()
         # update orcObj.srcStr
         # instList may have instruments not compatiable with this orchestra?
-        self.orcObj.constructOrc(self.ref['audioChannels'], self.compatInsts)
+        self.orcObj.constructOrc(self.fpRef['audioChannels'], self.compatInsts)
         if 'csoundBatch' in self.outRequest:
             if 'csoundData' in self.outRequest:
                 self._writeBat(1)
@@ -1849,8 +1849,8 @@ class EngineCsoundNative(_OutputEngine):
         else: # if csd, dont do score and orc
             if 'csoundScore' in self.outRequest:
                 self._writeSco()
-                outFormatObj = self.emObj.outFormatObjects['csoundScore']
-                self.ref['fpOutputView'] = self.ref[outFormatObj.emKey]
+                self.fpRef['fpOutputView'] = self._outFormatToFilePath(
+                                         'csoundScore')
             if 'csoundOrchestra' in self.outRequest:
                 self._writeOrc()
 
@@ -1859,23 +1859,22 @@ class EngineCsoundNative(_OutputEngine):
         self.outComplete set above"""
 
         if 'csoundData' in self.outComplete:
-            outFormatObj = self.emObj.outFormatObjects['csoundData']
-            self.ref['fpOutputView'] = self.ref[outFormatObj.emKey]
+            self.fpRef['fpOutputView'] = self._outFormatToFilePath('csoundData')
         else:
             if 'csoundScore' in self.outComplete:
-                outFormatObj = self.emObj.outFormatObjects['csoundScore']
-                self.ref['fpOutputView'] = self.ref[outFormatObj.emKey]
+                self.fpRef['fpOutputView'] = self._outFormatToFilePath(
+                                          'csoundScore')
 
 
 #-----------------------------------------------------------------||||||||||||--
 class EngineCsoundExternal(_OutputEngine):
-    def __init__(self, emObj, ref, ao):
+    def __init__(self, emObj, fpRef, ao):
         """
         >>> from athenaCL.libATH import athenaObj
         >>> ao = athenaObj.AthenaObject()
         >>> a = EngineCsoundExternal('generalMidi', {}, ao)
         """
-        _OutputEngine.__init__(self, emObj, ref, ao) # provide event name
+        _OutputEngine.__init__(self, emObj, fpRef, ao) # provide event name
         self.name = 'EngineCsoundExternal'
         self.doc = lang.docOeCsoundExternal
         # compatable with all orchestras
@@ -1910,25 +1909,23 @@ class EngineCsoundExternal(_OutputEngine):
     def _write(self):
         """ """
         self._translatePoly()
-        outFormatObj = self.emObj.outFormatObjects['csoundScore']
-
-        f = open(self.ref[outFormatObj.emKey], 'w')
+        f = open(self._outFormatToFilePath('csoundScore'), 'w')
         f.write(self.polySeqStr)      
         f.close()   
         self.outComplete.append('csoundScore')
-        self.ref['fpOutputView'] = self.ref['pathSco']
+        self.fpRef['fpOutputView'] = self._outFormatToFilePath('csoundScore')
                 
                 
                 
 #-----------------------------------------------------------------||||||||||||--
 class EngineCsoundSilence(_OutputEngine):
-    def __init__(self, emObj, ref, ao):
+    def __init__(self, emObj, fpRef, ao):
         """
         >>> from athenaCL.libATH import athenaObj
         >>> ao = athenaObj.AthenaObject()
         >>> a = EngineCsoundSilence('generalMidi', {}, ao)
         """
-        _OutputEngine.__init__(self, emObj, ref, ao) # provide event name
+        _OutputEngine.__init__(self, emObj, fpRef, ao) # provide event name
         self.name = 'EngineCsoundSilence'
         self.doc = lang.docOeCsoundSilence      
         # not compatable w/ any other orchestras
@@ -1965,13 +1962,11 @@ class EngineCsoundSilence(_OutputEngine):
     def _write(self):
         """ """
         self._translatePoly()
-        outFormatObj = self.emObj.outFormatObjects['csoundScore']
-
-        f = open(self.ref[outFormatObj.emKey], 'w')
+        f = open(self._outFormatToFilePath('csoundScore'), 'w')
         f.write(self.polySeqStr)      
         f.close()   
         self.outComplete.append('csoundScore')
-        self.ref['fpOutputView'] = self.ref[outFormatObj.emKey]
+        self.fpRef['fpOutputView'] = self._outFormatToFilePath('csoundScore')
 
 
 #-----------------------------------------------------------------||||||||||||--
@@ -1989,13 +1984,13 @@ class EngineMaxColl(_OutputEngine):
     usefull for importing into a coll in max/msp
     note: always uses a midi orchestra
     """
-    def __init__(self, emObj, ref, ao):
+    def __init__(self, emObj, fpRef, ao):
         """
         >>> from athenaCL.libATH import athenaObj
         >>> ao = athenaObj.AthenaObject()
         >>> a = EngineMaxColl('generalMidi', {}, ao)
         """
-        _OutputEngine.__init__(self, emObj, ref, ao) # provide event name
+        _OutputEngine.__init__(self, emObj, fpRef, ao) # provide event name
         self.name = 'EngineMaxColl'
         self.doc = lang.docOeMaxColl
         self.trackList = []
@@ -2038,26 +2033,24 @@ class EngineMaxColl(_OutputEngine):
             fileLines.append('%s, %s;\n' % (partNo, scoStr))
             partNo = partNo + 1 # no limit on index no
 
-        outFormatObj = self.emObj.outFormatObjects['maxColl']
-        f = open(self.ref[outFormatObj.emKey], 'w')
+        f = open(self._outFormatToFilePath('maxColl'), 'w')
         f.write(''.join(fileLines))
         f.close()     
         self.outComplete.append('maxColl')
         
     def _writePost(self):
-        outFormatObj = self.emObj.outFormatObjects['maxColl']
-        self.ref['fpOutputView'] = self.ref[outFormatObj.emKey]
+        self.fpRef['fpOutputView'] = self._outFormatToFilePath('maxColl')
 
 #-----------------------------------------------------------------||||||||||||--
 class EngineMidiFile(_OutputEngine):
     """writes a midi file"""
-    def __init__(self, emObj, ref, ao):
+    def __init__(self, emObj, fpRef, ao):
         """
         >>> from athenaCL.libATH import athenaObj
         >>> ao = athenaObj.AthenaObject()
         >>> a = EngineMidiFile('generalMidi', {}, ao)
         """
-        _OutputEngine.__init__(self, emObj, ref, ao) # provide event name
+        _OutputEngine.__init__(self, emObj, fpRef, ao) # provide event name
         self.name = 'EngineMidiFile'
         self.doc = lang.docOeMidiFile
         # define orcs that are not compatible w/ this engine
@@ -2089,30 +2082,30 @@ class EngineMidiFile(_OutputEngine):
 
     def _write(self):
         """ """
-        assert 'midiFile' in self.outRequest
-        self._translatePoly()
-        midiObj = midiTools.MidiScore(self.trackList, self.ref['fnOutputPrime'],
-                                                self.ref['optionMidiTempo'])
+        if 'midiFile' not in self.outRequest:
+            raise Exception('called without specification in outRequest')
 
-        outFormatObj = self.emObj.outFormatObjects['midiFile']
-        midiObj.write(self.ref[outFormatObj.emKey])
+        self._translatePoly()
+
+        # TODO: get midi tempo from athenaObejct
+        midiObj = midiTools.MidiScore(self.trackList, self.fpRef['fnOutputPrime'], self.fpRef['optionMidiTempo'])
+        midiObj.write(self._outFormatToFilePath('midiFile'))
         self.outComplete.append('midiFile')
         
     def _writePost(self):
-        outFormatObj = self.emObj.outFormatObjects['midiFile']
-        self.ref['fpOutputView'] = self.ref[outFormatObj.emKey]
+        self.fpRef['fpOutputView'] = self._outFormatToFilePath('midiFile')
 
 
 #-----------------------------------------------------------------||||||||||||--
 class EngineAcToolbox(_OutputEngine):
     """writes a midi file"""
-    def __init__(self, emObj, ref, ao):
+    def __init__(self, emObj, fpRef, ao):
         """
         >>> from athenaCL.libATH import athenaObj
         >>> ao = athenaObj.AthenaObject()
         >>> a = EngineAcToolbox('generalMidi', {}, ao)
         """
-        _OutputEngine.__init__(self, emObj, ref, ao) # provide event name
+        _OutputEngine.__init__(self, emObj, fpRef, ao) # provide event name
         self.name = 'EngineAcToolbox'
         self.doc = lang.docOeAcToolbox
         # define orcs that are not compatible w/ this engine
@@ -2167,7 +2160,7 @@ class EngineAcToolbox(_OutputEngine):
         self.codeList.append('(setf *convert-from-old-midi-format* nil)\n')
         sectionList = [] # store section names for parallel section
         completeDur = 0 # does this need to be filled?
-        musicName = self.ref['fnOutputPrime']
+        musicName = self.fpRef['fnOutputPrime']
         for tName in self.compatNames:
             tDict = self.polySeq[tName]
             orcMapMode = tDict['orcMapMode']
@@ -2194,19 +2187,18 @@ class EngineAcToolbox(_OutputEngine):
         
     def _write(self):
         """ """
-        assert 'acToolbox' in self.outRequest
+        if 'acToolbox' not in self.outRequest:
+            raise Exception('bas format request')
+
         self._translatePoly()
-
-        outFormatObj = self.emObj.outFormatObjects['acToolbox']
-
-        f = open(self.ref[outFormatObj.emKey], 'w')
+        f = open(self._outFormatToFilePath('acToolbox'), 'w')
         f.writelines(self.codeList)
         f.close()
 
         if os.name == 'posix':
             if drawer.isDarwin(): # try only if darwin
                 try:
-                    osTools.rsrcSetCreator(self.ref['pathAct'], 'ACTP', 'ACEX')
+                    osTools.rsrcSetCreator(self.fpRef['pathAct'], 'ACTP', 'ACEX')
                 except ImportError: pass # do nothing 
         else: pass # win or other
         self.outComplete.append('acToolbox')
@@ -2217,13 +2209,13 @@ class EngineAcToolbox(_OutputEngine):
 
 #-----------------------------------------------------------------||||||||||||--
 class EngineText(_OutputEngine):
-    def __init__(self, emObj, ref, ao):
+    def __init__(self, emObj, fpRef, ao):
         """
         >>> from athenaCL.libATH import athenaObj
         >>> ao = athenaObj.AthenaObject()
         >>> a = EngineText('generalMidi', {}, ao)
         """
-        _OutputEngine.__init__(self, emObj, ref, ao) # provide event name
+        _OutputEngine.__init__(self, emObj, fpRef, ao) # provide event name
         self.name = 'EngineText'
         self.doc = lang.docOeText
         self.orcIncompat = [] # compat w/ all orchestras
@@ -2257,16 +2249,13 @@ class EngineText(_OutputEngine):
 
     def _write(self):
         """ """
-        #print _MOD, 'calling text engine write method'
         for out in self.outRequest:
             if out in ['textTab', 'textSpace']:
-                outFormatObj = self.emObj.outFormatObjects[out]
-
                 if out == 'textTab':
                     self._translatePoly('\t')
                 if out == 'textSpace':
                     self._translatePoly(' ')
-                fp = self.ref[outFormatObj.emKey]
+                fp = self._outFormatToFilePath(out)
             else:
                 continue # cannot process anything else
 
@@ -2274,7 +2263,7 @@ class EngineText(_OutputEngine):
             f.write(self.polySeqStr)      
             f.close()   
             self.outComplete.append(out)
-            self.ref['fpOutputView'] = fp
+            self.fpRef['fpOutputView'] = fp
 
 
 
@@ -2308,7 +2297,7 @@ class EventMode(object):
         self.ao = ao
         # not necessary to store perfObj, as created only w/ process method
         #self.perfObj = None # will be made w/ call
-        self.ref = {} # dictionary of path names
+        self.fpRef = {} # dictionary of path names
         #no longer done at init, but w/ process
         #self._updateOrc()
         self.fpOutputPrime = None # assigned w/ method
@@ -2318,7 +2307,7 @@ class EventMode(object):
         for key in outFormat.outputFormatNames.values():
             self.outFormatObjects[key] = outFormat.factory(key)
         
-        # all ref keys used by engines to write files on process runs                            
+        # all fpRef keys used by engines to write files on process runs                            
         #self.keyWritePaths = ['pathAudioSynth', 'pathSco', 'pathBat', 'pathOrc',
         #    'pathXml', 'pathMid', 'pathCsd', 'pathMaxColl', 'pathTxtTab',
         #    'pathTxtSpace']
@@ -2364,17 +2353,17 @@ class EventMode(object):
             raise Exception('cannot process paths without a root path')
         # name music is just the file name, no path, no extensions
         dir, file = os.path.split(self.fpOutputPrime)
-        self.ref['fnOutputPrime'], x = osTools.extSplit(file) # lop off .sco
-        self.ref['audioExt'], self.ref['audioFlag'] = self._getAudioFormatExt()
-        self.ref['audioName'] = self.ref['fnOutputPrime'] + self.ref['audioExt']
+        self.fpRef['fnOutputPrime'], x = osTools.extSplit(file) # lop off .sco
+        self.fpRef['audioExt'], self.fpRef['audioFlag'] = self._getAudioFormatExt()
+        self.fpRef['audioName'] = self.fpRef['fnOutputPrime'] + self.fpRef['audioExt']
         # extra data
-        self.ref['audioChannels'] = self.ao.audioChannels
-        self.ref['optionMidiTempo'] = self.ao.midiTempo
+        self.fpRef['audioChannels'] = self.ao.audioChannels
+        self.fpRef['optionMidiTempo'] = self.ao.midiTempo
         
     def _buildPathPrime(self, ext):
         "builds the appropriate path from an extension"
-        path = os.path.join(self.ref['fpOutputDirPrime'], 
-                            (self.ref['fnOutputPrime'] + ext))
+        path = os.path.join(self.fpRef['fpOutputDirPrime'], 
+                            (self.fpRef['fnOutputPrime'] + ext))
         return path
                                                                         
     def _initRefPaths(self):
@@ -2391,30 +2380,31 @@ class EventMode(object):
 
         # get data for convenience
         # this was not used: removed
-        #self.ref['pathUsr'] = self.fpOutputPrime # store usr path
+        #self.fpRef['pathUsr'] = self.fpOutputPrime # store usr path
 
-        self.ref['fpOutputDirPrime'], fileName = os.path.split(
+        self.fpRef['fpOutputDirPrime'], fileName = os.path.split(
                                       self.fpOutputPrime)
-        #dirRoot = self.ref['fpOutputDirPrime']
-        #nameMusic = self.ref['fnOutputPrime']
+        #dirRoot = self.fpRef['fpOutputDirPrime']
+        #nameMusic = self.fpRef['fnOutputPrime']
         # update all path names
         # these need to be done here so that output objects do not over-write
         # used for csound output after rendering
-        self.ref['fpOutputAudio'] = self._buildPathPrime(self.ref['audioExt'])
+        self.fpRef['fpOutputAudio'] = self._buildPathPrime(self.fpRef['audioExt'])
 
         # this automatically loads all paths in output formats
         for fmtObj in self.outFormatObjects.values():
-            self.ref[fmtObj.emKey] = self._buildPathPrime(fmtObj.ext)
+            self.fpRef[fmtObj.emKey] = self._buildPathPrime(fmtObj.ext)
 
         # assigned to after processing
-        self.ref['fpOutputView'] = None # set in write() method of subclass
+        self.fpRef['fpOutputView'] = None # set in write() method of subclass
         # needed for csound processing
-        self.ref['fpCsoundBinary'] = self.ao.external.getPref('external',
+        self.fpRef['fpCsoundBinary'] = self.ao.external.getPref('external',
                 'csoundPath')
-        dirCsound, exeCsound = os.path.split(self.ref['fpCsoundBinary'])
-        self.ref['fpCsoundBinaryDir'] = dirCsound
+        dirCsound, exeCsound = os.path.split(self.fpRef['fpCsoundBinary'])
+        self.fpRef['fpCsoundBinaryDir'] = dirCsound
         # must get from path
-        self.ref['fnCsoundBinary'] = exeCsound
+        self.fpRef['fnCsoundBinary'] = exeCsound
+
 
     #-----------------------------------------------------------------------||--
     def _engineAllocate(self, outRequest):
@@ -2470,49 +2460,49 @@ class EventMode(object):
         # instantiate necessary objects
         engineLib = {}
         for engine in engineRequest:
-            mod = eval(engine) # all take self.ref on init
+            mod = eval(engine) # all take self.fpRef on init
             # supply reference to EventMode
             # supply athena object
-            engineLib[engine] = mod(self, self.ref, ao=self.ao)
+            engineLib[engine] = mod(self, self.fpRef, ao=self.ao)
         return engineLib
 
 
-    def _outputToPath(self, output):
+    def outFormatToFilePath(self, outFormatName):
         """if formats are known, return what paths were written
-        TODO: this should translate from outFormat.py
-
         """
-        if output == 'audioFile': 
-            path = self.ref['pathAudioSynth']
-        elif output == 'midiFile': 
-            path = self.ref['pathMid']
-        elif output == 'csoundBatch': 
-            path = self.ref['pathBat'] #self.batPath
-        elif output == 'csoundScore': 
-            path = self.ref['pathSco'] #self.scoPath
-        elif output == 'csoundOrchestra': 
-            path = self.ref['pathOrc'] #self.orcPath
-        elif output == 'csoundData': 
-            path = self.ref['pathCsd'] #self.csdPath
-        elif output == 'superColliderTask': 
-            path = self.ref['pathScScd'] #self.csdPath
-        elif output == 'maxColl': 
-            path = self.ref['pathMaxColl'] #self.txtPath
-        elif output == 'textSpace': 
-            path = self.ref['pathTxtSpace'] #self.csdPath
-        elif output == 'textTab': 
-            path = self.ref['pathTxtTab'] #self.txtPath
-        elif output == 'acToolbox': 
-            path = self.ref['pathAct'] #self.txtPath
-        else:
-            raise ValueError, 'bad output given: %s' % output 
-        return path
+        return self.fpRef[self.outFormatObjects[outFormatName].emKey]
+
+#         if output == 'audioFile': 
+#             path = self.fpRef['pathAudioSynth']
+#         elif output == 'midiFile': 
+#             path = self.fpRef['pathMid']
+#         elif output == 'csoundBatch': 
+#             path = self.fpRef['pathBat'] #self.batPath
+#         elif output == 'csoundScore': 
+#             path = self.fpRef['pathSco'] #self.scoPath
+#         elif output == 'csoundOrchestra': 
+#             path = self.fpRef['pathOrc'] #self.orcPath
+#         elif output == 'csoundData': 
+#             path = self.fpRef['pathCsd'] #self.csdPath
+#         elif output == 'superColliderTask': 
+#             path = self.fpRef['pathScScd'] #self.csdPath
+#         elif output == 'maxColl': 
+#             path = self.fpRef['pathMaxColl'] #self.txtPath
+#         elif output == 'textSpace': 
+#             path = self.fpRef['pathTxtSpace'] #self.csdPath
+#         elif output == 'textTab': 
+#             path = self.fpRef['pathTxtTab'] #self.txtPath
+#         elif output == 'acToolbox': 
+#             path = self.fpRef['pathAct'] #self.txtPath
+#         else:
+#             raise ValueError, 'bad output given: %s' % output 
+#         return path
 
 
     #-----------------------------------------------------------------------||--
     # post processing updates
-    def _updateAthenaObjectInfo(self, ref):
-        """get ref to aoInfo dict, update last paths
+    def _updateAthenaObjectInfo(self, fpRef):
+        """get fpRef to aoInfo dict, update last paths
         need to reassign to instance variable in order to get updated data
             from external objects (output objects)
         viewPath is the file to view, may be a score, csd, or text file
@@ -2525,32 +2515,32 @@ class EventMode(object):
 
         >>> # cannot yet test this as need a polySeqObject
         >>> # engineLib[engineName].write([], outRequest) 
-        >>> # a._updateAthenaObjectInfo(engineLib[engineName].ref)
+        >>> # a._updateAthenaObjectInfo(engineLib[engineName].fpRef)
         """
         # add list to preivous
-        self.ref = ref
-        # fromat of aoPrefs not the same as ref
+        self.fpRef = fpRef
+        # fromat of aoPrefs not the same as fpRef
         # these are paths used for launching things from w/n athenacl
-        self.ao.aoInfo['fpView'] = self.ref['fpOutputView']
+        self.ao.aoInfo['fpView'] = self.fpRef['fpOutputView']
         # this is an audio file to open after elr calls
-        self.ao.aoInfo['fpAudio'] = self.ref['fpOutputAudio']
+        self.ao.aoInfo['fpAudio'] = self.fpRef['fpOutputAudio']
 
-        self.ao.aoInfo['fpSco'] = self.ref['pathSco'] 
-        self.ao.aoInfo['fpOrc'] = self.ref['pathOrc']
-        self.ao.aoInfo['fpBat'] = self.ref['pathBat']
-        self.ao.aoInfo['fpCsd'] = self.ref['pathCsd']
-        self.ao.aoInfo['fpMidi'] = self.ref['pathMid']
+        self.ao.aoInfo['fpSco'] = self.fpRef['pathSco'] 
+        self.ao.aoInfo['fpOrc'] = self.fpRef['pathOrc']
+        self.ao.aoInfo['fpBat'] = self.fpRef['pathBat']
+        self.ao.aoInfo['fpCsd'] = self.fpRef['pathCsd']
+        self.ao.aoInfo['fpMidi'] = self.fpRef['pathMid']
 
-        self.ao.aoInfo['fpScScd'] = self._outputToPath('superColliderTask')
+        self.ao.aoInfo['fpScScd'] = self.outFormatToFilePath('superColliderTask')
         
 
     def _getReport(self):
         self.outComplete.sort()
         msg = []
-        msg.append('%sEventList %s complete:\n' % (lang.TAB, self.ref['fnOutputPrime']))
+        msg.append('%sEventList %s complete:\n' % (lang.TAB, self.fpRef['fnOutputPrime']))
         # formats returned will be complete output strings
         for output in self.outComplete:
-            msg.append('%s\n' % self._outputToPath(output))
+            msg.append('%s\n' % self.outFormatToFilePath(output))
         return ''.join(msg)
 
     #-----------------------------------------------------------------------||--
@@ -2579,7 +2569,7 @@ class EventMode(object):
         # get all write paths from all possible output formats
         for fmtObj in self.outFormatObjects.values():
             # emKey attribute is names used here
-            msg.append(self.ref[fmtObj.emKey])
+            msg.append(self.fpRef[fmtObj.emKey])
         return msg
         
     def _docEngine(self, engine):
@@ -2632,7 +2622,7 @@ class EventMode(object):
         # get the em orc for this em mode
         if style in [None]:
             return self._docUser(usrOutRequest)
-        if style in ['ref']:
+        if style in ['fpRef']:
             return self._docReference(usrOutRequest)
         
         
@@ -2679,16 +2669,16 @@ class EventMode(object):
         # to local texture based texture orcObj
         for engineName in engineLib.keys():
             try: # will write orchestra if necessary 
-                # only pass a ref to the polySeq to the engine
+                # only pass a fpRef to the polySeq to the engine
                 engineLib[engineName].write(perfObj.polySeq, outRequest) 
                 self.outComplete = (self.outComplete + 
                                    engineLib[engineName].outComplete)
             except (IOError, OSError), e:
                 ok = 0
                 msg.append(e)
-            # get ref data from engine
+            # get fpRef data from engine
             # this redundant: it does not really need to be done each time
-            self._updateAthenaObjectInfo(engineLib[engineName].ref) 
+            self._updateAthenaObjectInfo(engineLib[engineName].fpRef) 
         # update paths for athenaobject
         if ok:
             return ok, self._getReport(), self.outComplete
@@ -2756,14 +2746,14 @@ class Test(unittest.TestCase):
         textureParameters['beatT']   = ('c', 30)
         
         pitchMode = 'ps'
-        polyphonyMode = '' 
+        #polyphonyMode = '' 
         temperamentName = '12equal' 
         auxNo = 0
         midiPgm = 0
         midiCh = None
         fpAudioDirs = ''
         #fpAudioAnalysisDirs = ''
-        textureObj.load(textureParameters, polyPath, polyphonyMode, temperamentName, pitchMode, auxNo, fpAudioDirs, midiPgm, midiCh)
+        textureObj.load(textureParameters, polyPath, temperamentName, pitchMode, auxNo, fpAudioDirs, midiPgm, midiCh)
         ok = textureObj.score()
 
     def testRetrograde(self):

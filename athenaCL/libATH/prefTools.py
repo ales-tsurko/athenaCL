@@ -11,6 +11,7 @@
     
 import xml.dom.minidom
 import unittest, doctest
+import tempfile
 import os, sys
 
 # limit imports here to only these two modules
@@ -219,15 +220,15 @@ def getXmlPrefDict(prefFilePath):
 
 
 
-class Reporter(object):
+class Environment(object):
     """object to store debug stats and print output
-    >>> a = Reporter()
+    >>> a = Environment()
     """
     def __init__(self, modName=None):
         if modName == None:
             modName = 'unknown'
         self.modName = modName
-        self.status = self.debugStat()
+        self.debug = self.debugStat()
 
     def debugStat(self):
         """Get the debug preference if available, otherwise zero
@@ -239,15 +240,23 @@ class Reporter(object):
         prefDict = getXmlPrefDict(fp)
         return int(prefDict['athena']['debug'])
     
+    def getScratchFilePath(self):
+        """Get the scratch preference if available, otherwise return
+        None
+        """
+        fp = drawer.getPrefsPath()
+        if not os.path.exists(fp):
+            return None
+        prefDict = getXmlPrefDict(fp)
+        fp = prefDict['athena']['fpScratchDir']
+        if fp == '':
+            return None
+        else:
+            return fp
 
-    def printDebug(self, msg):
-
-        if self.status <= 0:
-            return # do nothing
-    
+    def _formatMsg(self, msg):
         if not drawer.isList(msg):
             msg = [msg]
-    
         post = []
         post.append('%s:' % self.modName)
         for part in msg:
@@ -256,7 +265,62 @@ class Reporter(object):
                 partMsg = partMsg.replace(' ', '')
             post.append(partMsg)
         post.append('\n')
-        sys.stderr.write(' '.join(post))
+        return ' '.join(post)
+    
+    def printWarn(self, msg):
+        """always print
+        """
+        sys.stderr.write(self._formatMsg(msg))
+
+    def printDebug(self, msg):
+        if self.debug <= 0:
+            return # do nothing    
+        else:
+            sys.stderr.write(self._formatMsg(msg))
+
+
+    def getTempFile(self, suffix=''):
+        '''Return a file path to a temporary file with the specified suffix
+        '''
+        fpSrc = getScratchFilePath()
+        if fpSrc == None:
+            if common.getPlatform() != 'win':
+                fd, fp = tempfile.mkstemp(suffix=suffix) 
+                if isinstance(fd, int):
+                    pass # see comment below
+                else:
+                    fd.close()
+            else:
+                if sys.hexversion < 0x02030000:
+                    raise Exception("cannot create temporary file")
+                else:
+                    tf = tempfile.NamedTemporaryFile(suffix=suffix)
+                    fp = tf.name
+                    tf.close()
+        else:
+            if not os.path.exists(fpSrc):    
+                raise Exception('user-specified scratch directory (%s) does not exists.' % fpSrc)
+            if common.getPlatform() != 'win':
+                fd, fp = tempfile.mkstemp(dir=fpSrc, suffix=suffix)
+                if isinstance(fd, int):
+                    # on MacOS, fd returns an int, like 3, when this is called
+                    # in some context (specifically, programmatically in a 
+                    # TestExternal class. the fp is still valid and works
+                    pass
+                else:
+                    fd.close() 
+            else: # win
+                if sys.hexversion < 0x02030000:
+                    raise Exception("cannot create temporary file")
+                else:
+                    tf = tempfile.NamedTemporaryFile(dir=fpSrc, 
+                                suffix=suffix)
+                    fp = tf.name
+                    tf.close()
+
+        self.printDebug(['temporary file:', fp])
+        return fp
+
 
 
 

@@ -4,7 +4,7 @@
 #
 # Authors:       Christopher Ariza
 #
-# Copyright:     (c) 2001-2007 Christopher Ariza
+# Copyright:     (c) 2001-2010 Christopher Ariza
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
 
@@ -24,7 +24,6 @@ from athenaCL.libATH import language
 lang = language.LangObj()
 
 _MOD = 'clone.py'
-#-----------------------------------------------------------------||||||||||||--
 #-----------------------------------------------------------------||||||||||||--
 
 
@@ -102,7 +101,12 @@ class Clone:
         """translates user string to proper parameter key
         style = cmd uses parenthesis to show command name
             str provides simples string
-            usr provides aux/text numbers w/ aprop shift"""
+            usr provides aux/text numbers w/ aprop shift
+
+        >>> a = Clone()
+        >>> a.decodePmtrName('c')
+        ('acc', 'a(c)cent')
+        """
         if usrStr == None: return None, ''
         p = drawer.strScrub(usrStr, 'lower')
         refNo = None # only used for aux, texture
@@ -152,7 +156,11 @@ class Clone:
 
 
     def findCloneStaticLabel(self, usrStr):
-        """find proper label for clone static options"""
+        """find proper label for clone static options
+
+        >>> a = Clone()
+
+        """
         if usrStr not in self.cloneLabels:
             # try to match by parameter obj name
             usrStr = drawer.strScrub(usrStr, 'lower')
@@ -318,7 +326,11 @@ class Clone:
 
     def loadDefault(self, auxNo, auxFmt):
         """create an empty clone dict
-        note: no refershing of event is done here; just loads parameters obs"""
+        note: no refershing of event is done here; just loads parameters obs
+
+        >>> a = Clone()
+        >>> a.loadDefault(3, 'num')
+        """
         # defaults do not come from anywhere else...
         self.auxNo = auxNo
         pmtrQDict = {}
@@ -400,13 +412,15 @@ class Clone:
             try:
                 self.pmtrObjDict[pmtrName] = parameter.factory(args, 
                                                   'clonePmtrObjs', refDict)
-            except error.ParameterObjectSyntaxError, msg: # initialization errors
+            except error.ParameterObjectSyntaxError, msg: 
+                # initialization errors
                 return 0, 'incorrect arguments: %s' % msg
         else:
             try:
                 self.pmtrObjDict[pmtrName] = parameter.factory(args,
-                                                         'filterPmtrObjs', refDict)
-            except error.ParameterObjectSyntaxError, msg: # initialization errors
+                                           'filterPmtrObjs', refDict)
+            except error.ParameterObjectSyntaxError, msg: 
+                # initialization errors
                 return 0, 'incorrect arguments: %s' % msg
         # check for errors
         if self.pmtrObjDict[pmtrName] == None: # failure to match object type
@@ -620,21 +634,27 @@ class Clone:
         """take a texure-style refDict and convert it into a refDictArray
         a new esObj must be supplied; cannot process internal esObj
         more than once
+
+        Note that refDict array has at a minimum a specification for 
+        the BPM of each note.
         """
         # should check that it has events
         self.esObj = esObj.copy() # dont assume this is a copy
-        assert len(self.esObj) > 0
+        if len(self.esObj) == 0:
+            raise Exception('no events in EventSequence object')
 
         for pmtrName in self.pmtrQDict.keys():
             if pmtrName[:6] != 'cloneQ': # check texture options
                 # reset all necessary variables before scoring
                 self.pmtrObjDict[pmtrName].reset() 
         bpmArray = self.esObj.getArray('bpm')
+
         self.refDictArray = []
         for val in bpmArray: # use refDict from texture to create a new refArray
             eventDict = copy.deepcopy(refDictTexture)
             eventDict['bpm'] = val
             self.refDictArray.append(eventDict)
+
         # update event object
         self.esObj.updatePre()
 
@@ -890,23 +910,6 @@ class CloneManager:
             return self._tRefCurrent[tName]
 
 
-#-----------------------------------------------------------------||||||||||||--
-class Test:
-    def __init__(self):
-        a = Clone('test', 'parentTest')
-        a.loadDefault(3)
-        print a.repr('full')
-
-        b = a.copy()
-        
-        b.updatePmtrObj()
-        print b.editPmtrObj('time', ('filterAdd', ('c', 120)))
-
-
-
-
-
-
 
 #-----------------------------------------------------------------||||||||||||--
 class Test(unittest.TestCase):
@@ -916,6 +919,24 @@ class Test(unittest.TestCase):
             
     def testDummy(self):
         self.assertEqual(True, True)
+
+    def testBasic(self):
+        a = Clone('test', 'parentTest')
+        a.loadDefault(3, 'num')
+        post = a.repr('full')
+
+        b = a.copy()
+        b.updatePmtrObj()
+        post = b.editPmtrObj('time', ('filterAdd', ('c', 120)), {})
+
+
+    def testCloneParameterObjects(self):
+        from athenaCL.libATH.libPmtr import cloneFilter
+        #a = cloneFilter.Bypass('', [])
+
+        # TODO: getting this error when trying to run this test
+        # TypeError: unbound method __init__() must be called with FilterParameter instance as first argument (got Bypass instance instead)
+
 
 
 #-----------------------------------------------------------------||||||||||||--
