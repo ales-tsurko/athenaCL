@@ -4,7 +4,7 @@
 #
 # Authors:       Christopher Ariza
 #
-# Copyright:     (c) 2001-2008 Christopher Ariza
+# Copyright:     (c) 2001-2010 Christopher Ariza
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
 
@@ -25,6 +25,9 @@ from athenaCL.libATH.libPmtr import basePmtr
 
 
 _MOD = 'valueSingleOmde.py'
+from athenaCL.libATH import prefTools
+environment = prefTools.Environment(_MOD)
+
 
 #-----------------------------------------------------------------||||||||||||--
 
@@ -494,13 +497,14 @@ class _BreakPoint(basePmtr.Parameter):
         ok, msg = self._checkRawArgs()
         if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
 
-        self.step = self._stepControlParser(self.args[0]) # raises except on error
-        self.loop = self._loopControlParser(self.args[1]) # raises except on error
+        # raises except on error
+        self.step = self._stepControlParser(self.args[0]) 
+        self.loop = self._loopControlParser(self.args[1]) 
 
         self.points = self.args[2]
         ok, msg = self._scrubPoints() # not sure what to do if it fails
         if ok != 1:
-            raise error.ParameterObjectSyntaxError, msg
+            raise error.ParameterObjectSyntaxError(msg)
 
         self.exp = 1 # only used in power
         if len(self.args) >= 4:
@@ -550,7 +554,9 @@ class _BreakPoint(basePmtr.Parameter):
             return 0, 'no valid point pairs given.'
         elif len(scrubPoints) == 1: # add an extra point one unit away
             scrubPoints.append((scrubPoints[0][0]+1, scrubPoints[0][1]))
+
         self.points = scrubPoints       
+        #environment.printDebug(['_scrubPoints, start, end', rawPoints, self.points])
         return 1, '' # all good 
 
     def _setObj(self):
@@ -593,7 +599,7 @@ class _BreakPoint(basePmtr.Parameter):
         self.currentValue = self.obj(t) # no ref dict needed; omde object
         # increment after value returned
         if self.step == 'event': # if use steps, not time
-            self.i = self.i + 1
+            self.i += 1
         return self.currentValue
 
 class BreakPointLinear(_BreakPoint):
@@ -604,8 +610,7 @@ class BreakPointLinear(_BreakPoint):
         self.argDefaults = self.argDefaults[:3]
         self.argNames = ['stepString', 'edgeString', 'pointList',]
         self.argDemos = [['e','s',((12,.3),(18,.9),(24,.2),(48,.6))],
-                              ['e','l',
-                              ((0,.3),(10,.3),(11,.8),(25,.75),(26,.5),(45,.5),
+                  ['e','l',((0,.3),(10,.3),(11,.8),(25,.75),(26,.5),(45,.5),
                               (37,.35),(42,.7))],
                              ]
         self.doc = lang.docPoBpl
@@ -618,8 +623,8 @@ class BreakPointPower(_BreakPoint):
         self.argNames = ['stepString', 'edgeString', 'pointList', 'exponent']
         self.argDemos = [['e','l',
             ((0,.2),(10,1),(20,.8),(30,.5),(40,.2),(45,1),(50,0),(55,1)),
-                             3.5],
-                              ['e','s',((12,.3),(18,.9),(24,.8),(48,.2)),-4],
+                        3.5],
+                         ['e','s',((12,.3),(18,.9),(24,.8),(48,.2)),-4],
                              ]
         self.doc = lang.docPoBpp
         self._setObj()
@@ -640,6 +645,10 @@ class BreakPointHalfCosine(_BreakPoint):
         self._setObj()
 
 class BreakPointFlat(_BreakPoint):
+    """Note that this PO may return non-intuitive results, as it tries
+    to create flag segments between two points; if there are only two
+    points given, even if different, the result will be a constant value.
+    """
     def __init__(self, args, refDict):
         _BreakPoint.__init__(self, args, refDict) # call base init
         self.type = 'breakPointFlat'

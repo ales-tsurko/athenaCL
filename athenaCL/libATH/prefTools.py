@@ -272,10 +272,14 @@ class Environment(object):
         """
         sys.stderr.write(self._formatMsg(msg))
 
-    def printDebug(self, msg):
+    def printDebug(self, msg, *arguments):
         if self.debug <= 0:
             return # do nothing    
         else:
+            if not drawer.isList(msg):
+                msg = [msg]
+            if len(arguments) > 0:
+                msg += arguments
             sys.stderr.write(self._formatMsg(msg))
 
 

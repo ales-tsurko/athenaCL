@@ -14,8 +14,12 @@
 import math
 import unittest, doctest
 
-
 from athenaCL.libATH.omde.functional import Function, FunctionModel
+
+_MOD = 'bpf.py'
+from athenaCL.libATH import prefTools
+environment = prefTools.Environment(_MOD)
+
 
 
 #-----------------------------------------------------------------||||||||||||--
@@ -41,13 +45,14 @@ class BPF(Function):
         
         >>> a = BPF([(0,1), (100, 20)])
         """
+
         Function.__init__(self)
         self.pairs = [(float(x), float(y)) for x,y in pairs]
-        
+
         self._check_pairs()
         
         if len(self.pairs) < 2:
-            raise ValueError, 'Two few pairs (%d)' % len(self.pairs)
+            raise ValueError('Two few pairs (%d)' % len(self.pairs))
         
         self.xStart, junk = self.pairs[0] # x value of first
         self.xEnd, junk = self.pairs[-1] # x value of last
@@ -103,7 +108,8 @@ class BPF(Function):
         for (time1, value1) in self.pairs: # find next set of points
             if t < time1: break
             time0, value0 = time1, value1
-        
+        #environment.printDebug('pre interpolate', t, time0, value0, time1, value1)
+
         return self.interpolate(t, time0, value0, time1, value1)
     
     def interpolate(self, time, time0, value0, time1, value1):

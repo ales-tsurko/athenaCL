@@ -2939,7 +2939,7 @@ class TPmap(_CommandTP):
             # get lib by looking at the first parameter object given
             lib = parameter.pmtrNameToPmtrLib(args.get(1))
             lib = self._tpConvertLibType(lib) # only certain libs are spported
-            if lib == None: return self._getUsage('cannot access parameter ojbect from %s' % args.get(1))
+            if lib == None: return self._getUsage('cannot access parameter object from %s' % args.get(1))
 
             bundle, self.eventListSplitFmt, noPmtrObjs = self._tpGetBundleFmt(
                                                         lib)
