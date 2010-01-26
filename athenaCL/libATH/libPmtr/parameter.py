@@ -224,8 +224,6 @@ filterPmtrNames = {
 
 
 #-----------------------------------------------------------------||||||||||||--
-
-# cannot store all parameters, as key classes may happen between libraries
 genPmtrObjs = genPmtrNames.values() # values are class names
 rthmPmtrObjs = rthmPmtrNames.values()
 textPmtrObjs = textPmtrNames.values()
@@ -252,8 +250,6 @@ pmtrLibNames = {
     'f' : 'filterPmtrObjs',
     }
     
-    
-    
 #-----------------------------------------------------------------||||||||||||--
 # parameter objects to add:
 
@@ -261,8 +257,6 @@ pmtrLibNames = {
 # including amp, pan, oct, field, bpm, 
 # embed a filter parameter object to allow processing this value?
 # can be used, as a filter processes all values at once...
-# what if read from the parameter this this is in ?
-# this a paradox...
 
 # interpolate, fade, or morph?
 # need a way to move b/n two things
@@ -273,8 +267,6 @@ pmtrLibNames = {
 
 # binary realizations: take numbers and convert to binary
 # read 1/0 from this realization as a list, seletor to read from position
-
-
 
 #-----------------------------------------------------------------||||||||||||--
 
@@ -311,6 +303,29 @@ def pmtrLibTitle(libName):
         raise ValueError, 'bad parameter library provided: %s' % libName
     return '%s %s' % (name, 'ParameterObject')
 
+
+def pmtrLibNameToDict(libName):
+    """get a sorted list of names from a lib name
+
+    >>> pmtrLibNameToDict('filterPmtrObjs')
+    {'fp': 'filterPower', 'fq': 'filterQuantize', 'fa': 'filterAdd', 'mf': 'maskFilter', 'fd': 'filterDivide', 'fm': 'filterMultiply', 'fda': 'filterDivideAnchor', 'b': 'bypass', 'ob': 'orderBackward', 'ffb': 'filterFunnelBinary', 'r': 'replace', 'msf': 'maskScaleFilter', 'or': 'orderRotate', 'pl': 'pipeLine', 'fma': 'filterMultiplyAnchor'}
+
+    """
+    if libName == 'genPmtrObjs':
+        data = genPmtrNames
+    elif libName == 'rthmPmtrObjs':
+        data = rthmPmtrNames
+    elif libName == 'textPmtrObjs':
+        data = textPmtrNames
+    elif libName == 'clonePmtrObjs':
+        data = clonePmtrNames
+    elif libName == 'filterPmtrObjs':
+        data = filterPmtrNames
+    else:
+        raise ValueError, 'bad parameter library provided: %s' % libName
+
+    return data
+
 def pmtrLibList(libName):
     """get a sorted list of names from a lib name
 
@@ -329,12 +344,41 @@ def pmtrLibList(libName):
         data = filterPmtrObjs
     else:
         raise ValueError, 'bad parameter library provided: %s' % libName
+
     data = list(data)
     data.sort()
     return data
 
-
 #-----------------------------------------------------------------||||||||||||--
+def pmtrNameToPmtrLib(pmtrName):
+    """For a given PO name, return the appropriate library key.
+    Return None if no match
+
+    >>> pmtrNameToPmtrLib('ru')
+    'genPmtrObjs'
+    >>> pmtrNameToPmtrLib('basketgen')
+    'genPmtrObjs'
+    >>> pmtrNameToPmtrLib('filterDivideAnchor')
+    'filterPmtrObjs'
+    >>> pmtrNameToPmtrLib('ru,0,1') # permit accepting full definitons
+    'genPmtrObjs'
+
+    """
+    pmtrName = drawer.strScrub(pmtrName, 'lower', rm=[' '])
+    if ',' in pmtrName: # if a comma
+        pmtrName = pmtrName.split(',')[0] # just get first, strip args
+    found = None
+    for libName in pmtrLibNames.values():
+        pmtrNamesDict = pmtrLibNameToDict(libName)
+        for key, value in pmtrNamesDict.items():
+            if pmtrName == key.lower() or pmtrName == value.lower():
+                found = libName
+                break
+    return found
+    
+    
+
+
 def pmtrTypeParser(typeName, libName='genPmtrObjs'):
     """utility functions for parsing user paramter strings into proper
     parameter names. accepts short names and long names, regardless of case
@@ -350,11 +394,11 @@ def pmtrTypeParser(typeName, libName='genPmtrObjs'):
     >>> pmtrTypeParser('gr', None)
     'gaRhythm'
     """
-    assert typeName != None 
+    if typeName == None:
+        raise Exception('got a type name of none')
     #print _MOD, 'pmtrTypeParser', typeName, libName
 
-    usrStr = copy.deepcopy(typeName)
-    usrStr = drawer.strScrub(usrStr, 'lower')
+    usrStr = drawer.strScrub(typeName, 'lower')
     # get all parameter names in a dictionary
     if libName == 'genPmtrObjs':
         pmtrNames = genPmtrNames
@@ -370,7 +414,8 @@ def pmtrTypeParser(typeName, libName='genPmtrObjs'):
         pmtrNames = allPmtrNames
 
     else:
-        raise error.ParameterObjectSyntaxError, 'no parameter library named: %r' % usrStr
+        raise error.ParameterObjectSyntaxError, 'no parameter library named: %r' % libName
+
     for key in pmtrNames.keys():
         className = pmtrNames[key]
         if usrStr == key:

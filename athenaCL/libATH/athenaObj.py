@@ -16,9 +16,8 @@ import sys, os, time, random, traceback, httplib, urllib
 import unittest, doctest
 
 
-athVersion = '2.0.0a1'
+athVersion = '2.0.0a2'
 athBuild = '2010.02.01'
-athRevision = 1 # for debian based versioning
 athDate     = '1 February 2010' # human readable version
 __version__ = athVersion
 __license__ = "GPL"

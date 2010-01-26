@@ -506,9 +506,8 @@ def strScrub(usrStr, case=None, rm=[]):
         else:
             raise ValueError, 'bad case type given'
     usrStr = usrStr.strip()
-    if rm != []:
-        for char in rm:
-            usrStr = usrStr.replace(char, '')
+    for char in rm:
+        usrStr = usrStr.replace(char, '')
     return usrStr
 
 def strStripAlpha(usrStr):            

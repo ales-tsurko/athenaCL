@@ -231,7 +231,7 @@ class HelpDoc:
     TPv_usage = 'tpv [name]'
 
     TPmap = 'TPmap: TextureParameter: Map: Displays a graphical map of any ParameterObject. User must supply parameter library name, the number of events to be calculated, and appropriate parameter arguments. %s' % _gfxCommand  
-    TPmap_usage = 'tpmap library events arguments'
+    TPmap_usage = 'tpmap events arguments'
 
     # this my be incomplete
     TPeg = 'TPeg: TextureParameter: Export Generator: Export ParameterObject data as a file; file type available are audioFile, maxColl, textSpace, and textTab.'    

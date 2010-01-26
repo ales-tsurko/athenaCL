@@ -2693,6 +2693,13 @@ class _CommandTP(Command):
                       'filterPmtrObjs',) #'clonePmtrObjs')
 
     def _tpConvertLibType(self, usrStr):
+        """Only provide access to three main types
+
+        >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
+        >>> a = _CommandTP(ao)
+        >>> a._tpConvertLibType('genPmtrObjs')
+        'genPmtrObjs'
+        """
         try:
             usrStr = parameter.pmtrLibParser(usrStr)
         except ValueError: # no such parameter
@@ -2702,6 +2709,8 @@ class _CommandTP(Command):
         return usrStr
 
     def _tpGetLibType(self):
+        """Needed for interactive form of TPmap command
+        """
         libNames = 'Generator, Rhythm, or Filter. (g, r, f)'
         query = 'select a library: %s:' % libNames
         while 1:
@@ -2712,6 +2721,9 @@ class _CommandTP(Command):
             else: return lib # either l or m 
 
     def _tpGetBundleFmt(self, lib):
+        """For a given library, determine the number and types of POs that 
+        are necessary to create an image 
+        """
         if lib == 'filterPmtrObjs':
             bundle = ('genPmtrObjs', 'filterPmtrObjs')
             eventListSplitFmt = 'pf'
@@ -2725,7 +2737,7 @@ class _CommandTP(Command):
             eventListSplitFmt = 'pg'
             noPmtrObjs = 1
         else: # an error
-            return None
+            raise Exception('cannot accept library of type: %s' % lib)
         return bundle, eventListSplitFmt, noPmtrObjs
 
     def _tpGetExportFormat(self):
@@ -2896,7 +2908,7 @@ class TPmap(_CommandTP):
     TODO: library should not be a required argument
 
     >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
-    >>> a = TPmap(ao, args='tpmap g 120 ru,0,1')
+    >>> a = TPmap(ao, args='120 ru,0,1')
     """
     def __init__(self, ao, args='', **keywords):
         _CommandTP.__init__(self, ao, args, **keywords)
@@ -2906,6 +2918,11 @@ class TPmap(_CommandTP):
         self.cmdStr = 'TPmap'
 
     def gather(self): 
+        """
+        >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
+        >>> a = TPmap(ao, args='120 ru,0,1')
+        >>> a.gather()
+        """
         args = self.args
         lib = None
         self.events = None
@@ -2914,17 +2931,27 @@ class TPmap(_CommandTP):
 
         if args != '':
             args = argTools.ArgOps(args) # no strip
-            lib = self._tpConvertLibType(args.get(0))
-            if lib == None: return self._getUsage()
-            self.events = drawer.strToNum(args.get(1), 'int')
-            if self.events == None: return self._getUsage()
-            bundle, self.eventListSplitFmt, noPmtrObjs = self._tpGetBundleFmt(lib)
-            pos = 2
+            #lib = self._tpConvertLibType(args.get(0))
+            #if lib == None: return self._getUsage()
+            self.events = drawer.strToNum(args.get(0), 'int')
+            if self.events == None: return self._getUsage('number of events cannot be determined')
+
+            # get lib by looking at the first parameter object given
+            lib = parameter.pmtrNameToPmtrLib(args.get(1))
+            lib = self._tpConvertLibType(lib) # only certain libs are spported
+            if lib == None: return self._getUsage('cannot access parameter ojbect from %s' % args.get(1))
+
+            bundle, self.eventListSplitFmt, noPmtrObjs = self._tpGetBundleFmt(
+                                                        lib)
+            if bundle == None: return self._getUsage('cannot determine library')
+
+            pos = 1
             for subLib in bundle:
                 usrDataEval, msg = self._tiEvalUsrStr(args.get(pos), None)
                 if usrDataEval == None: return self._getUsage(msg)
                 self.argBundle.append((subLib, usrDataEval))
-                pos = pos + 1
+                pos += 1
+
             # allow an optional final argument for abs file path
             self.fp = args.get(pos) # may return None
             if self.fp != None and not os.path.isabs(self.fp):

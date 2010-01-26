@@ -60,12 +60,12 @@ class InfoManager:
         self.fpDocDir = fpDocDir
         
         self.athVersion  = athenaObj.__version__
-        self.athRevision = athenaObj.athRevision
+        #self.athRevision = athenaObj.athRevision
 
         # info file for fink packages
-        self.fnInfo = 'athenacl-%s-%s.info' % (self.athVersion,
-                                                     self.athRevision)
-        self.fpInfo = os.path.join(self.fpDocDir, self.fnInfo)
+        #self.fnInfo = 'athenacl-%s-%s.info' % (self.athVersion,
+        #                                             self.athRevision)
+        #self.fpInfo = os.path.join(self.fpDocDir, self.fnInfo)
 
         # bbedit man page in man1, assume this is good.
         self.manGroup = MANGROUP 
