@@ -1130,7 +1130,7 @@ class Interpreter(object):
         # as this is a public method, however, this may be necessary here
         cmd = self.ao.cmdCorrect(cmd)
         cmdClassName = self._getCmdClass(cmd)
-        environment.printDebug(['cmd, args', cmd, arg])
+        #environment.printDebug(['cmd, args', cmd, arg])
 
         if errorMode == 'exception':
             if cmdClassName == None:
@@ -1139,7 +1139,7 @@ class Interpreter(object):
             try: # execute cmdClassNametion, manage threads
                 cmdObj = cmdClassName(self.ao, arg, verbose=self.verbose)
                 ok, result = cmdObj.do() # no out on resutl here
-                environment.printDebug(['ok, result', ok, result])
+                #environment.printDebug(['ok, result', ok, result])
                 if not ok or lang.ERROR in result:
                     raise Exception('command level error: %s' % result)
             except Exception: 

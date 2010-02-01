@@ -531,12 +531,12 @@ class Command(object):
             return path
         else: return None
             
-    def _validScratchEvent(self):
+    def _validScratchFp(self, ext='.xml'):
         """provide a valid xml file name
         return None on error"""
         path = self._validScratchDir()
         if path == None: return None
-        else: return os.path.join(path, osTools.tempFileName('.xml'))
+        else: return os.path.join(path, osTools.tempFileName(ext))
          
     def _validGfxSetup(self):
         """check if the user preference scratch is a good dir
@@ -555,15 +555,15 @@ class Command(object):
             path = None # not needed for tk
         # check format and resources available
         if fmt == 'tk' and not imageTools.TK:
-            print lang.WARN, lang.msgGfxTkError
+            environment.printWarn([lang.WARN, lang.msgGfxTkError])
             ok = 0
         # check if we are in idle and gfx is tk: this will not work
         if fmt == 'tk' and drawer.isIdle():
-            print lang.WARN, lang.msgGfxIdleError
+            environment.printWarn([lang.WARN, lang.msgGfxIdleError])
             ok = 0
         # see if pil module is available 
         if fmt in ['jpg', 'png'] and not imageTools.PIL:
-            print lang.WARN, lang.msgGfxPilError
+            environment.printWarn([lang.WARN, lang.msgGfxPilError])
             ok = 0
                     
         if ok: # get to get path again as set w/ APdir command
@@ -977,7 +977,7 @@ class Command(object):
                 # if 'midiPercussion' event mode, must also create a path   
                 if self.ao.activeEventMode == 'midiPercussion':
                     if t.getInstOrcName() == 'generalMidiPercussion':
-                        print _MOD, 'creating and updating path'
+                        environment.printWarn('creating and updating path')
                         pRef = self._piAutoCreateMidiPercussion(t.getInst())
                         # must update path as well
                         ok, msg = t.editPmtrObj('path', pRef, refresh)
@@ -2511,7 +2511,7 @@ class PIh(Command):
         if self._piTestExistance() != None: #check existance
             return self._piTestExistance()
         self.pName = self.ao.activePath
-        self.filePath = self._validScratchEvent()    
+        self.filePath = self._validScratchFp() # return None on error
         if self.filePath == None: return lang.msgReturnCancel
         
     def process(self):
@@ -3120,14 +3120,14 @@ class TPeg(_CommandTP):
             self.objBundle.append((titleStr, subLib, obj))
 
         self.splitSco = eventList.EventSequenceSplit(self.objBundle, 
-                                              self.eventListSplitFmt, self.events)
+                            self.eventListSplitFmt, self.events)
         self.splitSco.load()
         self.pathList = []
         # get out object
         self.outObj = outFormat.factory(self.fmt)
 
         if self.outObj.name in ['maxColl']: # maxColl
-            print _MOD, 'not yet implemented'
+            environment.printWarn(['not yet implemented'])
         elif self.outObj.name in ['textSpace', 'textTab']: # textSpace, textTab
             if self.fp == None:
                 self.fp = osTools.tempFile(self.outObj.ext)
@@ -5597,8 +5597,7 @@ class _CommandEO(Command):
         for usrStr in fmtList:
             valStr = outFormat.outputFormatParser(usrStr)
             if valStr == None: #error
-                pass # just skip it
-                print lang.WARN, 'bad output format given: %s' % usrStr
+                environment.printWarn([lang.WARN, 'bad output format given: %s' % usrStr])
                 continue
             if valStr not in prefList: # filter to remove redundancies
                 prefList.append(valStr)

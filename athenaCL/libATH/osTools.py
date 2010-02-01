@@ -20,6 +20,9 @@ lang = language.LangObj()
 # do not import any higher level modules here
 
 _MOD = 'osTools.py'
+from athenaCL.libATH import prefTools
+environment = prefTools.Environment(_MOD)
+
 
 #-----------------------------------------------------------------||||||||||||--
 # extensions are expected to be stored with a leading .
@@ -89,29 +92,26 @@ def localtimeStamp(sigDig=6):
     "returns a string with spaced 0s, can varry signif digits"
     return gmtimeStamp(sigDig, 'local')
 
-def tempDir():
+def tempDir(tempPath='/Volumes/xdisc/_scratch'):
     "get a temp directory"
-    # dir to write temp files within
-    # used in many scripts to do temp work
-    tempPath = '/Volumes/xdisc/_scratch'
     if not os.path.exists(tempPath): # use temp dir if doesnt exist
         tempPath = tempfile.mkdtemp()
-        print lang.WARN, 'using %s as scratch directory' % tempPath
+        environment.printWarn([lang.WARN, 'using %s as scratch directory' % tempPath])
     return tempPath
 
 def tempFileName(ext):
     return gmtimeStamp() + ext
 
-def tempFile(ext='.txt'):
+def tempFile(ext='.txt', fpDir=''):
     """make temp file in temp dir, otherwise get standard temp file
     branch by platform and do different things here
     """
-    tempDir = '/Volumes/xdisc/_scratch'
-    if not os.path.exists(tempDir): # use temp file
+    fpDir = tempDir(fpDir)
+    if not os.path.exists(fpDir): # use temp file
         tempPath = tempfile.mktemp(ext)
     else:
         tempName = gmtimeStamp() + ext
-        tempPath = os.path.join(tempDir, tempName)
+        tempPath = os.path.join(fpDir, tempName)
     return tempPath
 
 #-----------------------------------------------------------------||||||||||||--

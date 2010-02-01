@@ -461,7 +461,7 @@ class Texture(object):
             
         # often defined with orc but not required
         if not pmtrQDict.has_key('ampQ'): # if missing amp
-            pmtrQDict['ampQ'] = ('constant', .9)
+            pmtrQDict['ampQ'] = 'rb,.4,.4,.7,.9'
         if not pmtrQDict.has_key('panQ'): # if missing
             pmtrQDict['panQ'] = ('constant', .5)
         if not pmtrQDict.has_key('octQ'): # if missing
@@ -469,7 +469,7 @@ class Texture(object):
         if not pmtrQDict.has_key('fieldQ'): # if missing
             pmtrQDict['fieldQ'] = ('constant', 0)
         if not pmtrQDict.has_key('rhythmQ'): # if missing
-            pmtrQDict['rhythmQ'] = ('loop', ((4,1,1),(4,1,1),(4,5,1)))
+            pmtrQDict['rhythmQ'] = 'pt,(c,4),(bg,rp,(1,1,2,3)),(c,1),(c,.75)'
 
         pmtrQDict['inst']     = ('staticInst', inst, orcName) # default value
         if lclTimes == None: # no local time info avail

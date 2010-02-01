@@ -4,7 +4,7 @@
 #
 # Authors:       Christopher Ariza
 #
-# Copyright:     (c) 2001-2009 Christopher Ariza
+# Copyright:     (c) 2001-2010 Christopher Ariza
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
 
@@ -226,7 +226,7 @@ class Environment(object):
     """
     def __init__(self, modName=None):
         if modName == None:
-            modName = 'unknown'
+            modName = _MOD # set to this module
         self.modName = modName
         self.debug = self.debugStat()
 
@@ -285,16 +285,19 @@ class Environment(object):
 
     def getTempFile(self, suffix=''):
         '''Return a file path to a temporary file with the specified suffix
+    
+        This uses the directory set as a preference if possible.
+
         '''
-        fpSrc = getScratchFilePath()
+        fpSrc = self.getScratchFilePath()
         if fpSrc == None:
-            if common.getPlatform() != 'win':
+            if os.name == 'posix':
                 fd, fp = tempfile.mkstemp(suffix=suffix) 
                 if isinstance(fd, int):
                     pass # see comment below
                 else:
                     fd.close()
-            else:
+            else: # win
                 if sys.hexversion < 0x02030000:
                     raise Exception("cannot create temporary file")
                 else:
@@ -304,7 +307,7 @@ class Environment(object):
         else:
             if not os.path.exists(fpSrc):    
                 raise Exception('user-specified scratch directory (%s) does not exists.' % fpSrc)
-            if common.getPlatform() != 'win':
+            if os.name == 'posix':
                 fd, fp = tempfile.mkstemp(dir=fpSrc, suffix=suffix)
                 if isinstance(fd, int):
                     # on MacOS, fd returns an int, like 3, when this is called

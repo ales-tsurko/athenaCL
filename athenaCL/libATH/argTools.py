@@ -197,17 +197,34 @@ class ArgOps:
     
     def __init__(self, argStr, stripComma='noStrip'):
         """
-        >>> a = ArgOps('test')
+        >>> a = ArgOps('test 1 2 3')
+        >>> a.get(2)
+        '2'
+        >>> a.get(2, evaluate=True)
+        2
+        >>> b = ArgOps(['test', 1, 2, 3])
+        >>> b.get(2)
+        2
+        >>> b.get(2, evaluate=True)
+        2
+        >>> b.get(1, sumRange=True) # will realize values as strings
+        '123'
+
         """
-        self.argStr = argStr.strip() # clear trailing white space
-        self.argList = argStr.split() # split w/ spces
+        if drawer.isList(argStr): # accept alread partitioned lists
+            self.argList = argStr
+        else:
+            argStr = argStr.strip() # clear trailing white space
+            self.argList = argStr.split() # will split b/n or more spaces
+
         # strip trailing comma
         if stripComma != 'noStrip':
             counter = 0
             for entry in self.argList:
-                if entry[-1] == ',': # only remove comma of last line
+                # only remove comma of last line
+                if len(entry) > 1 and entry[-1] == ',': 
                     self.argList[counter] = entry[:-1]
-                counter = counter + 1
+                counter += 1
 
     def get(self, index, sumRange='single', evaluate='off', addSpace='noSpace'):
         """returns args as strings
@@ -231,24 +248,33 @@ class ArgOps:
         if len(self.argList) == 0: return None
         if index >= len(self.argList): return None
 
-        if sumRange == 'single':
+        if sumRange in ['single', False]:
             output = self.argList[index]
-        elif sumRange == 'end':
+        elif sumRange in ['end', True]:
             output = []
             for i in range(index, len(self.argList)):
-                output.append(self.argList[i])
-            if addSpace != 'noSpace': # add space
+                if not drawer.isStr(self.argList[i]): # coerce into str for now
+                    output.append(str(self.argList[i]))
+                else:
+                    output.append(self.argList[i])
+            if addSpace not in ['noSpace']: # add space
                 output = ' '.join(output)
             else:
                 output = ''.join(output)
-                
-        if evaluate == 'off':
+        else:
+            raise Exception('bad sum range argument: %s' % sumRange)
+
+
+        if evaluate in ['off', False]:
             return output
         else:
-            try:
-                return eval(output)
-            except: # should report this error in a better fashion
-                return None
+            if drawer.isStr(output):
+                try:
+                    return eval(output)
+                except: # should report this error in a better fashion
+                    return None
+            else: # already evalauted
+                return output
 
     def list(self, index, sumRange='single', evaluate='off'):
         """returns args as a list of strings

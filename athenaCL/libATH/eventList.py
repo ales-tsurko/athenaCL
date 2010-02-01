@@ -1386,6 +1386,38 @@ class _OutputEngine:
         msg.append('\n')
         return ''.join(msg), label # returns string
 
+
+    def _translateSuperColliderNativeStr(self, orcMapMode, esObj):
+        """
+        """
+        el = esObj.list() # get event list
+        orderList = ['inst', 'time', 'sus', 'amp', 'ps', 'pan']
+        for i in range(0, len(el[0]['aux'])): # just get first event
+            orderList.append(i)
+        label = self._strLabel(orderList, ' ', ';')
+        inst = el[0]['inst'] # get inst from first event
+        msg = []
+        for event in el:
+            if event['acc'] == 0: continue # do not write rests         
+            msg.append(self._strValue(event['inst'], 4, 1, 'i'))
+            msg.append(self._strValue(event['time'], 12, 8))
+            msg.append(self._strValue(event['sus'], 12, 8))
+            
+            val = self.orcObj.postMap(inst, 'amp', event['amp'], orcMapMode)
+            msg.append(self._strValue(val, 10, 6))
+            
+            val = self.orcObj.postMap(inst, 'ps', event['ps'], orcMapMode)
+            msg.append(self._strValue(val, 10, 6)) 
+
+            val = self.orcObj.postMap(inst, 'pan', event['pan'], orcMapMode)
+            msg.append(self._strValue(val, 10, 6))
+            
+            for i in range(0, len(event['aux'])):
+                msg.append(self._strValue(event['aux'][i], 10, 6))
+            msg.append(self._fmtComment(event['comment']))
+        return ''.join(msg), label # returns string
+
+
     #-----------------------------------------------------------------------||--
     def _translateMidiList(self, orcMapMode, esObj):
         """mid list is a short list of data
@@ -1611,7 +1643,8 @@ class EngineSuperColliderTask(_OutputEngine):
         self.doc = lang.docOeSuperColliderTask
         # define orcs that are not compatible w/ this engine
         # this engine can only use its own orc
-        self.orcIncompat = ['csoundExternal', 'csoundSilence', 'generalMidi',
+        self.orcIncompat = ['csoundExternal', 'csoundNative', 
+                            'csoundSilence', 'generalMidi',
                             'generalMidiPercussion']
         self.outAvailable = ['superColliderTask']
         # min out should be score, orc, bat; csd is an option
@@ -1622,6 +1655,9 @@ class EngineSuperColliderTask(_OutputEngine):
 
     def _translatePoly(self):
         """set self.polySeqStr w/ complet orc from self.polySeq
+
+        TODO: it seems tha tmost engines can share the same _translatePoly      
+        method: this should be moved to the base class
         """
         msg = []
         # may pass instrument list here to get only fTables
@@ -1635,14 +1671,16 @@ class EngineSuperColliderTask(_OutputEngine):
             if not tDict['mute']:
                 msg.append(self._fmtHeadTexture(className, tName, '//'))
                 esObj = tDict['esObj']
-                data, label = self._translateCsoundNativeStr(orcMapMode, esObj)
+                data, label = self._translateSuperColliderNativeStr(orcMapMode, 
+                                                                esObj)
                 msg.append(label)
                 msg.append(data)
             for cName in self.polySeq[tName]['TC']:
                 if not tDict['TC'][cName]['mute']:
                     msg.append(self._fmtHeadClone(className, tName, cName, '//'))
                     esObj = tDict['TC'][cName]['esObj']
-                    data, label = self._translateCsoundNativeStr(orcMapMode, esObj)
+                    data, label = self._translateSuperColliderNativeStr(
+                                  orcMapMode, esObj)
                     msg.append(label)
                     msg.append(data)
         self.polySeqStr = ''.join(msg)
