@@ -33,7 +33,9 @@ class SuperColliderNative(baseOrc.Orchestra):
         self.name = 'superColliderNative'
         self.srcStr = None # string representation for writing
 
-        self._instrNumbers = [0]
+        self._instrNumbers = [0,
+                              10,
+                             ]
         
         # on initialization, load a dictionary of objects for use
         self._instrObjDict = {}
@@ -219,6 +221,7 @@ s.sendSynthDef("%s");
 
 
 #-----------------------------------------------------------------||||||||||||--
+# instruments 0 through 9 are unpitched percussion
 class Inst0(InstrumentSuperCollider):
     def __init__(self):
         """
@@ -250,26 +253,22 @@ class Inst0(InstrumentSuperCollider):
         self.author = 'athenaCL native' # attribution
 
         self.orcCode = """
-   arg sus, ampMax, pan, attackPercent, releasePercent, cfMidi; 
-   var env, amp, gate, panPos, sigPrePan;
-   panPos = (pan*2)-1; // convert from 0 to 1 to -1 to 1
+   arg sus, amp, pan, attackPercent, releasePercent, cfMidi;
+   var env, ampEnvl, gate, panPos, sigPrePan;
+   panPos = (pan*2)-1; 
    gate = Line.ar(1, 0, sus, doneAction: 2);
-   env = Env.perc(sus*attackPercent, sus*releasePercent, ampMax, -4);
-   amp = EnvGen.kr(env, gate);
-   sigPrePan = LPF.ar(WhiteNoise.ar(amp), cfMidi.midicps);
+   env = Env.perc(sus*attackPercent, sus*releasePercent, amp, -4);
+   ampEnvl = EnvGen.kr(env, gate);
+   sigPrePan = LPF.ar(WhiteNoise.ar(ampEnvl), cfMidi.midicps);
 """
 
     def pmtrToOrcName(self, pmtr):
         """Translate from native pmtr names to score pmtr names
         """
-        if pmtr == 'inst':
+        if pmtr in ['sus', 'pan', 'amp']:
+            return pmtr
+        elif pmtr == 'inst':
             return self.name
-        elif pmtr == 'sus':
-            return 'sus'
-        elif pmtr == 'amp':
-            return 'ampMax'
-        elif pmtr == 'pan':
-            return 'pan'
         elif pmtr == 'pmtr7':
             return 'attackPercent'
         elif pmtr == 'pmtr8':
@@ -278,6 +277,63 @@ class Inst0(InstrumentSuperCollider):
             return 'cfMidi'
         else:
             raise Exception('canot translate parameter %s' % pmtr)
+
+
+#-----------------------------------------------------------------||||||||||||--
+# instruments 10 through 19 are pitched percussion
+class Inst10(InstrumentSuperCollider):
+    def __init__(self):
+        """
+        >>> a = Inst10()
+        """
+        InstrumentSuperCollider.__init__(self)
+
+        self.instNo = 10
+        self.name = 'electroKick'
+        self.info = 'A basic elctronic kick.'
+        self.postMapAmp = (0, 1, 'linear') # assume amps not greater tn 1
+
+        self.pmtrInfo = {
+          'pmtr7'   : 'envelope ratio',
+          'pmtr8'   : 'frequency decay',
+          }
+          
+        self.pmtrDefault = {
+          'panQ'   : ('rb', .2, .2, 0, 1),
+          'pmtr7'   : ('bg', 'rc', [3, 2, 1]),
+          'pmtr8'   : ('bg', 'rc', [.02, .05]),
+          }
+        self.auxNo = len(self.pmtrInfo.keys())
+        self.pmtrFields = self.pmtrCountDefault + self.auxNo
+        self.pmtrFieldNames = ['sus', 'amp', 'pan', 'ps'] + self.pmtrInfo.keys()
+
+        self.author = 'athenaCL native' # attribution
+
+        self.orcCode = """
+    arg ps= -10, sus=0.5, amp=1, pan=0.5, envlRatio=3, fqDecay=0.02;
+    var fqEnvl, ampEnvl, sigPrePan, panPos, pitchMidi;
+    pitchMidi = ps + 60;
+    panPos = (pan*2)-1; // convert from 0 to 1 to -1 to 1
+    fqEnvl = EnvGen.kr(Env([envlRatio, 1], [fqDecay], \exp), 1) * pitchMidi.midicps;
+    ampEnvl = EnvGen.kr(Env.perc(0.05, sus, amp), 1, doneAction: 2);
+    sigPrePan = SinOsc.ar(fqEnvl, 0.5pi, ampEnvl);
+"""
+
+    def pmtrToOrcName(self, pmtr):
+        """Translate from native pmtr names to score pmtr names
+        """
+        if pmtr in ['sus', 'pan', 'amp', 'ps']:
+            return pmtr
+        elif pmtr == 'inst':
+            return self.name
+        elif pmtr == 'pmtr7':
+            return 'envlRatio'
+        elif pmtr == 'pmtr8':
+            return 'fqDecay'
+        else:
+            raise Exception('canot translate parameter %s' % pmtr)
+
+
 
 #-----------------------------------------------------------------||||||||||||--
 class Test(unittest.TestCase):
