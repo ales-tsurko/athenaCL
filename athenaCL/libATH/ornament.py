@@ -4,11 +4,14 @@
 #
 # Authors:       Christopher Ariza
 #
-# Copyright:     (c) 2003-2006 Christopher Ariza
+# Copyright:     (c) 2003-2010 Christopher Ariza
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
 
 import copy
+import unittest, doctest
+
+
 from athenaCL.libATH import drawer
 from athenaCL.libATH import language
 lang = language.LangObj() 
@@ -16,6 +19,8 @@ from athenaCL.libATH.libPmtr import parameter
 from athenaCL.libATH import pitchTools
 
 _MOD = 'ornament.py'
+from athenaCL.libATH import prefTools
+environment = prefTools.Environment(_MOD)
 
 #-----------------------------------------------------------------||||||||||||--
 
@@ -79,7 +84,7 @@ def extractNeighbors(pitchGroup, baseNote, scales=None):
                 # print _MOD, 'found rounded match'
         if idx == None:
             idx = 0
-            print _MOD, 'no match between base pitch and collected pitches'
+            environment.printDebug('no match between base pitch and collected pitches')
         
     idxL = idx - 1 # lower neighbor
     if idxL == -1: # wrap index around 
@@ -407,7 +412,6 @@ class Ornament:
         else: # non given, but note used
             pitchGroup = self.refDict['stateCurrentChord']
 
-        #print _MOD, pitchGroup, psBase
 
         refScales, lowerUpper = extractNeighbors(pitchGroup, psBase)
         pcContourDict = mapNeighbors(refScales, psBase, contourForm)
@@ -437,7 +441,7 @@ class Ornament:
             for entry in contourForm: # treat scale step as microtone scaler
                 # must do transposition after converting to PCH
                 if entry * microTone > entry * 2:
-                    print lang.WARN, 'microtone large (%s)' % (entry * microTone)
+                    environment.printWarn([lang.WARN, 'microtone large (%s)' % (entry * microTone)])
                 trans = (transCurrent + (entry * microTone))
                 psReal = pitchTools.psToTempered(psBase, octCurrent, 
                                       self.temperamentObj, trans)
@@ -482,14 +486,12 @@ class Ornament:
         are irrational.
         """
         if totOrnDur > rhythmBase:
-            print 'ERROR: pos: %s, baseT: %s, ornT: %s' % (ornPos, 
-                                                                    rhythmBase, totOrnDur)
+            environment.printDebug(['ERROR: pos: %s, baseT: %s, ornT: %s' % (ornPos, rhythmBase, totOrnDur)])
             # ornament can never be longer than the rhythm base
             raise ValueError, 'ornament time is longer than base note'
 
         if tCurrent - totOrnDur < 0 and ornPos == 'anticipate':
-            print 'anticipate ornament starts at negative time, mangling to attack'
-            #print 'pos: %s, baseT: %s, ornT: %s' % (ornPos, rhythmBase, totOrnDur)
+            environment.printDebug(['anticipate ornament starts at negative time, mangling to attack'])
             ornPos = 'attack'
 
         if ornPos == 'release':
@@ -624,9 +626,8 @@ class Ornament:
                     break # dotn add any more durations
 
         if totOrnDur > estOrnDurFraction * 1.25:
-            print lang.WARN, 'ornament duration is very long'
-            print 'totOrnDur: %s, estOrnDurFraction: %s' % (totOrnDur,
-                                                                         estOrnDurFraction)
+            environment.printWarn([lang.WARN, 'ornament duration is very long'])
+            environment.printDebug(['totOrnDur: %s, estOrnDurFraction: %s' % (totOrnDur, estOrnDurFraction)])
         return totOrnDur, durList
 
     #-----------------------------------------------------------------------||--
@@ -750,40 +751,47 @@ class Ornament:
 
 
 
-#-----------------------------------------------------------------||||||||||||--
 
-class test:
-    def __init__(self):
-        self.ornObj = Ornament({},{})
-        self.testDistributions()
-        #self.testTimeEngine()
+
+
+
+
+#-----------------------------------------------------------------||||||||||||--
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
 
     def testDistributions(self):
+        self.ornObj = Ornament({},{})
         for dur in [.1, 10, 100, 1000, 100000]:
             for x in range(0, 4):
-                print self.ornObj._addDurNoise(dur, .03)
+                post = self.ornObj._addDurNoise(dur, .03)
 
     def testTimeEngine(self):
+        self.ornObj = Ornament({},{})
         ornNotePcent = .5
         testCount = 0
-        durations = [2.3, 20, 5.8, 4000, .01, .0005]
-        for tCurrent in [0, 100, 1000, 10000]:
+        durations = [2.3, 20, 400, .01, .0005]
+        for tCurrent in [0, 100, 1000]:
             for name in self.ornObj.ornKeys:
                 for ornPos in ['attack', 'release', 'anticipate']:
                     for rhythmBase in durations:
                         estOrnDurFraction = rhythmBase * ornNotePcent 
                         presetDict = self.ornObj._getOrnLibrary(name, ornPos, 'path')
-                        totOrnDur, durList = self.ornObj._getOrnDurStyle(presetDict, 
-                                                                                estOrnDurFraction)
+                        totOrnDur, durList = self.ornObj._getOrnDurStyle(
+                                presetDict, estOrnDurFraction)
                         posTimes = self.ornObj._setOrnPos(ornPos, rhythmBase, 
-                                                                     tCurrent, totOrnDur)       
+                                            tCurrent, totOrnDur)       
                         durBase, tBaseStart, tBaseEnd, tOrnStart, tOrnEnd = posTimes
-                        testCount = testCount + 1
-        print '%s timeEngine tests completed' % testCount
+                        testCount += 1
 
-
+#-----------------------------------------------------------------||||||||||||--
 if __name__ == '__main__':
-    testObj = test()
-    print 'done'
+    from athenaCL.test import baseTest
+    baseTest.main(Test)
 
 

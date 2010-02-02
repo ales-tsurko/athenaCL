@@ -4,12 +4,14 @@
 #
 # Authors:       Christopher Ariza
 #
-# Copyright:     (c) 2004-2006 Christopher Ariza
+# Copyright:     (c) 2004-2010 Christopher Ariza
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
 
 
 import string
+import unittest, doctest
+
 from athenaCL.libATH import typeset
 _MOD = 'fontLibrary.py'
 
@@ -3113,20 +3115,29 @@ class FontBitMap:
 
 
 
-def test():
-    for font in ['micro', 'macro', 'poster', 'capital', 'double']:
-        obj = FontBitMap('testing ', font)
-        for char in string.letters + string.digits:
-        #for char in string.punctuation + string.letters + string.digits:
-            char = obj.getChar(char)
-            char = obj._shaveChar(char)
-            obj._printChar(char)
+#-----------------------------------------------------------------||||||||||||--
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
 
+    def testBasic(self):
+        for font in ['micro', 'macro', 'poster', 'capital']:
+            obj = FontBitMap('testing ', font)
+            for char in string.letters + string.digits:
+            #for char in string.punctuation + string.letters + string.digits:
+                char = obj.getChar(char)
+                char = obj._shaveChar(char)
+                #obj._printChar(char)
+
+
+#-----------------------------------------------------------------||||||||||||--
 if __name__ == '__main__':
-    test()
-
-
-
+    from athenaCL.test import baseTest
+    baseTest.main(Test)
 
 
 

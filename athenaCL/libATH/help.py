@@ -5,9 +5,12 @@
 #
 # Authors:       Christopher Ariza
 #
-# Copyright:     (c) 2001-2006 Christopher Ariza
+# Copyright:     (c) 2001-2010 Christopher Ariza
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
+
+import unittest, doctest
+
 
 from athenaCL.libATH import language
 from athenaCL.libATH import typeset
@@ -563,8 +566,8 @@ class HelpDoc:
         # this is treated as a private variable to avoid being presented
         # as a help topic
         self.__glossIndex = {
-        '_formatMap' : {'title': 'MapClass', 
-                             'syn': ['mapclass', 'maping', 'straus', 'voiceleading']},
+#         '_formatMap' : {'title': 'MapClass', 
+#                'syn': ['mapclass', 'maping', 'straus', 'voiceleading']},
         '_formatSieve' : {'title': 'Xenakis Sieves', 
                              'syn': ['xenakis', 'sieve']},
         '_formatPitch' : {'title': 'Pitch Formats', 
@@ -572,11 +575,11 @@ class HelpDoc:
         '_formatMarkov' : {'title': 'Markov Notation', 
                              'syn': ['transition', 'markov']},
         '_formatAudacity' : {'title': 'Audacity Files', 
-                             'syn': ['spectrum', 'frequency analysis', 'fq']},
+                           'syn': ['spectrum', 'frequency analysis', 'fq']},
         '_pitchGroups' : {'title': 'Pitch Groups', 
-                             'syn': ['set', 'sieve', 'groups', 'forte', 'setclass']},
+                'syn': ['set', 'sieve', 'groups', 'forte', 'setclass']},
         '_formatPulse' : {'title': 'Pulse and Rhythm', 
-                             'syn': ['pulse', 'rhythm', 'beat', 'groove', 'duration']},                             
+                  'syn': ['pulse', 'rhythm', 'beat', 'groove', 'duration']},                             
         'r' : {'title': 'Credits', 
                  'syn': ['credits', 'copyright', 'athena']},
         'c' : {'title': 'Copyright', 
@@ -718,7 +721,7 @@ class HelpDoc:
         bufList      = [1, 1]
         justList         = ['l','l']
         table = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
-                                     bufList, justList, self.termObj, 'oneColumn')
+                            bufList, justList, self.termObj, 'oneColumn')
         msg.append('%s\n' % table)
         
         return ''.join(msg)
@@ -730,6 +733,28 @@ class HelpDoc:
 
 
 
+
+#-----------------------------------------------------------------||||||||||||--
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
+
+    def testBasic(self):
+        a = HelpDoc()
+        for cmd in a.listCmdDoc(): # get all commands
+            post = a.reprUsage(cmd)
+            post = a.reprCmd(cmd)
+            post = a.searchRef(cmd)
+
+
+#-----------------------------------------------------------------||||||||||||--
+if __name__ == '__main__':
+    from athenaCL.test import baseTest
+    baseTest.main(Test)
 
 
 

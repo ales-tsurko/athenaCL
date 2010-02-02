@@ -548,6 +548,8 @@ def strExtractNum(usrStr, optAccept=''):
 
     >>> strExtractNum('sdf2349dfg3234')
     ('23493234', 'sdfdfg')
+    >>> strExtractNum('pmtr3')
+    ('3', 'pmtr')
     """
     numbers = list(string.digits) + list(optAccept)
     usrStr = strScrub(usrStr)

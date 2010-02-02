@@ -4,19 +4,22 @@
 #
 # Authors:       Christopher Ariza
 #
-# Copyright:     (c) 2005 Christopher Ariza
+# Copyright:     (c) 2005-2010 Christopher Ariza
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
 
 
 
 import math
-
+import unittest, doctest
 
 
 #-----------------------------------------------------------------||||||||||||--
 def _fibonacciNumber(goldenUpper, goldenLower, i):
     """return i-th number in the Fibonacci series
+
+    >>> _fibonacciNumber(15,9,1)
+    64.0
     """ 
     i = i + 1
     n = ((math.pow(goldenUpper, i) - math.pow(goldenLower, i)) /
@@ -30,6 +33,12 @@ def fibonacciSeries(j, k):
     Return Fiboacci terms from 0 to n-1.
     fibonacciSeries(j, k)
     Return Fibonacci terms from j to k-1
+
+    >>> fibonacciSeries(10, 20)
+    [89.0, 144.0, 233.0, 377.0, 610.0, 987.0, 1597.0, 2584.0, 4181.0, 6765.0]
+
+    >>> fibonacciSeries(2, 20)
+    [2.0, 3.0, 5.0, 8.0, 13.0, 21.0, 34.0, 55.0, 89.0, 144.0, 233.0, 377.0, 610.0, 987.0, 1597.0, 2584.0, 4181.0, 6765.0]
     """
     goldenUpper = (1.0 + math.sqrt(5.0)) / 2.0
     goldenLower = (1.0 - math.sqrt(5)) / 2.0
@@ -160,23 +169,34 @@ class Lorenz:
 
 
 
+
 #-----------------------------------------------------------------||||||||||||--
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
+
+    def testBasic(self):
+        a = Henon()
+        b = Lorenz()
+        for obj in [a, b]:
+            for i in range(500):
+                out = obj()
+                if len(out) == 2:
+                    x, y = out
+                    post = str(x).ljust(20), str(y).ljust(20)
+                elif len(out) == 3:      
+                    x, y, z = out
+                    post = str(x).ljust(20), str(y).ljust(20), str(z).ljust(20)
+            
 
 
-if __name__ == "__main__":
-    a = Henon()
-    b = Lorenz()
-    for obj in [a, b]:
-        print '\n', obj.__class__
-        for i in range(500):
-            out = obj()
-            if len(out) == 2:
-                x, y = out
-                print str(x).ljust(20), str(y).ljust(20)
-            elif len(out) == 3:      
-                x, y, z = out
-                print str(x).ljust(20), str(y).ljust(20), str(z).ljust(20)
-        
+#-----------------------------------------------------------------||||||||||||--
+if __name__ == '__main__':
+    from athenaCL.test import baseTest
+    baseTest.main(Test)
 
 
-# end

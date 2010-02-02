@@ -5,12 +5,11 @@
 #
 # Authors:       Christopher Ariza
 #
-# Copyright:     (c) 2003-2007 Christopher Ariza
+# Copyright:     (c) 2003-2010 Christopher Ariza
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
-
-
 import sys, os, re, random, time, sndhdr
+import unittest, doctest
 
 from athenaCL.libATH import dialog
 from athenaCL.libATH import drawer
@@ -535,7 +534,6 @@ class RenameStereo:
         print ''        
 
 #-----------------------------------------------------------------||||||||||||--
-
 class BundleFiles:
     """gathers all extra athenacl files, except the audio file,
         and places them in a dir with the same name as the files"""
@@ -614,8 +612,6 @@ class BundleAudio:
 
 
 #-----------------------------------------------------------------||||||||||||--
-
-
 class ProofSheet:
     "parent class for proof sheets"
     def __init__(self, dirPath):
@@ -1099,9 +1095,6 @@ class LinkSheet(ProofSheet):
 
 
 #-----------------------------------------------------------------||||||||||||--
-
-
-
 class CompareDir:
     """compares two directories recursively and returns a report"""
     def __init__(self, args):
@@ -1555,10 +1548,8 @@ class Profiler:
 
 
 #-----------------------------------------------------------------||||||||||||--
-#-----------------------------------------------------------------||||||||||||--
-
 # run tests
-class test:
+class TestOld:
     def __init__(self):
         # create scratch dirs and populate with files
         self._dcPopulateDir()
@@ -1659,3 +1650,22 @@ class test:
             result = self._randFilePopulate(a, b)
             if result == None:
                 break # no more paths left
+
+
+
+#-----------------------------------------------------------------||||||||||||--
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
+
+
+#-----------------------------------------------------------------||||||||||||--
+if __name__ == '__main__':
+    from athenaCL.test import baseTest
+    baseTest.main(Test)
+
+

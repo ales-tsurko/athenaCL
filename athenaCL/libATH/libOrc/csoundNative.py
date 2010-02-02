@@ -156,7 +156,7 @@ nchnls = 4
         msg.append((';%s\n\n' % time.asctime(time.localtime())))
         return ''.join(msg)
 
-    def _getInstObj(self, iNo):
+    def getInstObj(self, iNo):
         if iNo in self._instrObjDict.keys(): # already loaded
             return self._instrObjDict[iNo] # call attribute of module to get object
         else:
@@ -194,7 +194,7 @@ nchnls = 4
             if not self.instNoValid(number):
                 print lang.WARN, 'instrument %i not available.' % number
                 continue
-            instrObj = self._getInstObj(number)
+            instrObj = self.getInstObj(number)
             msg.append(instrObj.buildInstrDef(noChannels))
         self.srcStr = ''.join(msg)
 
@@ -214,7 +214,7 @@ nchnls = 4
         #self.instrObjDict = {} # this used to store inst obj data
         instInfoDict = {}
         for number in instrList:
-            instrObj = self._getInstObj(number)
+            instrObj = self.getInstObj(number)
             instInfoDict[number] = (instrObj.name, 
                                             instrObj.pmtrFields,
                                             instrObj.pmtrInfo)
@@ -227,17 +227,17 @@ nchnls = 4
         >>> a.getInstPreset(6)
         {'auxQ0': ('c', 0.5), 'auxQ1': ('c', 0.5), 'auxQ2': ('c', 10000), 'auxQ3': ('c', 400), 'auxQ4': ('c', 1)}
         """
-        instrObj = self._getInstObj(iNo)
+        instrObj = self.getInstObj(iNo)
         presetDict = instrObj.getPresetDict() # converts to aux0 fist pos
         return presetDict
 
     def getInstName(self, iNo):
         'returns a string of name'
-        instrObj = self._getInstObj(iNo)
+        instrObj = self.getInstObj(iNo)
         return instrObj.name
 
     def getInstAuxNo(self, iNo):
-        instrObj = self._getInstObj(iNo)
+        instrObj = self.getInstObj(iNo)
         return instrObj.auxNo
 
     def getInstPmtrInfo(self, iNo, pmtrNo):
@@ -248,7 +248,7 @@ nchnls = 4
         >>> a.getInstPmtrInfo(6, 3)
         'low-pass filter end cutoff frequency in Hz'
         """
-        instrObj = self._getInstObj(iNo)
+        instrObj = self.getInstObj(iNo)
         # numbers are shifted by pmtrCountDefault
         # this orchestra uses 'pmtr' instead of 'auxQ'
         key = 'pmtr%s' % (pmtrNo + 1 + instrObj.pmtrCountDefault)
@@ -284,7 +284,7 @@ nchnls = 4
         45.0
         """
         # get max/min amp value form inst, as well as scale factor
-        instrObj = self._getInstObj(iNo)
+        instrObj = self.getInstObj(iNo)
         ampMax = float(instrObj.postMapAmp[1])
         if orcMapMode: # optional map; allow values greater then 1
             val = val * ampMax # temp: assume max amp of 90

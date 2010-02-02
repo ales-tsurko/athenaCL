@@ -1207,11 +1207,12 @@ class _OutputEngine:
 
     def _fmtHeadSco(self, headStr='', prepend=''):
         scoHead = []
-        scoHead.append('%sathenaCL %s\n' % (prepend, self.ao.aoInfo['version']))
-        scoHead.append('%s%s\n' % (prepend, lang.msgAthURL))
+        scoHead.append('%s athenaCL %s\n' % (prepend,
+                        self.ao.aoInfo['version']))
+        scoHead.append('%s %s\n' % (prepend, lang.msgAthURL))
         timeStr = time.asctime(time.localtime())
-        scoHead.append('%s%s\n' % (prepend, timeStr))
-        scoHead.append('%soutput generator: %s (orchestra: %s)\n\n' % (prepend, 
+        scoHead.append('%s %s\n' % (prepend, timeStr))
+        scoHead.append('%s output generator: %s (orchestra: %s)\n\n' % (prepend, 
             self.name, self.orcObj.name))
         if headStr != '':
             scoHead.append(headStr)
@@ -1234,10 +1235,11 @@ class _OutputEngine:
         return ''.join(commentStr)
 
     def _fmtHeadTexture(self, className, tName, prepend=''):
-        return '%sTM(%s), TI(%s)\n' % (prepend, className, tName)
+        return '%s TM(%s), TI(%s)\n' % (prepend, className, tName)
 
     def _fmtHeadClone(self, className, tName, cName, prepend=''):
-        return '%sTM(%s), TI(%s), TC(%s)\n' % (prepend, className, tName, cName)
+        return '%s TM(%s), TI(%s), TC(%s)\n' % (prepend, className, 
+                tName, cName)
         
     def _fmtTitleTexture(self, musicName, tName):
         """used for naming ac toolbox sections"""
@@ -1391,30 +1393,28 @@ class _OutputEngine:
         """
         """
         el = esObj.list() # get event list
-        orderList = ['inst', 'time', 'sus', 'amp', 'ps', 'pan']
-        for i in range(0, len(el[0]['aux'])): # just get first event
-            orderList.append(i)
-        label = self._strLabel(orderList, ' ', ';')
-        inst = el[0]['inst'] # get inst from first event
+        label = ''
         msg = []
         for event in el:
-            if event['acc'] == 0: continue # do not write rests         
-            msg.append(self._strValue(event['inst'], 4, 1, 'i'))
-            msg.append(self._strValue(event['time'], 12, 8))
-            msg.append(self._strValue(event['sus'], 12, 8))
-            
-            val = self.orcObj.postMap(inst, 'amp', event['amp'], orcMapMode)
-            msg.append(self._strValue(val, 10, 6))
-            
-            val = self.orcObj.postMap(inst, 'ps', event['ps'], orcMapMode)
-            msg.append(self._strValue(val, 10, 6)) 
+            self.instObj = self.orcObj.getInstObj(event['inst'])
 
-            val = self.orcObj.postMap(inst, 'pan', event['pan'], orcMapMode)
-            msg.append(self._strValue(val, 10, 6))
-            
-            for i in range(0, len(event['aux'])):
-                msg.append(self._strValue(event['aux'][i], 10, 6))
-            msg.append(self._fmtComment(event['comment']))
+            if event['acc'] == 0: continue # do not write rests         
+
+            msg.append('s.sendBundle(%s, \n' % event['time'])
+            msg.append("""\t["/s_new", "%s", -1, 1, 0, \n""" % 
+                       (self.instObj.pmtrToOrcName('inst')))
+            args = []
+            for arg in self.instObj.pmtrFieldNames:
+                args.append('"%s"' % self.instObj.pmtrToOrcName(arg))
+                if 'pmtr' not in arg:
+                    args.append("%s" % event[arg])
+                else:
+                    i = int(drawer.strExtractNum(arg)[0]) # first value is num
+                    i = i - self.instObj.pmtrCountDefault - 1
+                    args.append("%s" % event['aux'][i])                    
+            msg.append(', '.join(args))
+            msg.append(']);\n')
+            #msg.append(self._fmtComment(event['comment'], delimit='//'))
         return ''.join(msg), label # returns string
 
 
@@ -1651,12 +1651,11 @@ class EngineSuperColliderTask(_OutputEngine):
         self.outMin = ['superColliderTask']
         # outComplete, pathComplete defined in parent
         self.polySeqStr = None # score as single, format specific string
-                
 
     def _translatePoly(self):
         """set self.polySeqStr w/ complet orc from self.polySeq
 
-        TODO: it seems tha tmost engines can share the same _translatePoly      
+        TODO: it seems that most engines can share the same _translatePoly      
         method: this should be moved to the base class
         """
         msg = []
@@ -1664,6 +1663,8 @@ class EngineSuperColliderTask(_OutputEngine):
         # for specific instruments
         headStr = ''
         msg.append(self._fmtHeadSco(headStr, '//'))
+        msg.append("t = Task({ ")
+
         for tName in self.compatNames:
             tDict = self.polySeq[tName]
             orcMapMode = tDict['orcMapMode']
@@ -1683,6 +1684,8 @@ class EngineSuperColliderTask(_OutputEngine):
                                   orcMapMode, esObj)
                     msg.append(label)
                     msg.append(data)
+
+        msg.append("}, TempoClock.default);\nt.start;\n")
         self.polySeqStr = ''.join(msg)
 
 
@@ -1693,8 +1696,13 @@ class EngineSuperColliderTask(_OutputEngine):
         uses score in self.polySeqStr
         """
         msg = []
+        msg.append("""( // start main
+s = Server.local; 
+s.boot;
+""")
         msg.append(self.orcObj.srcStr)
-        msg.append(self.polySeqStr)
+        msg.append(self.polySeqStr) 
+        msg.append(') // end main')
 
         f = open(self._outFormatToFilePath('superColliderTask'), 'w')
         f.write(''.join(msg))
