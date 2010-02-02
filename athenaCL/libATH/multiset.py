@@ -29,7 +29,7 @@ TNMAX = setTables.TNMAX     # dictionary
 TNIMAX = setTables.TNIMAX  # ref dictionary
 TNREF = setTables.TNREF     # ref dcitionary
 SCREF = setTables.SCREF     # ref dcitionary
-forte = setTables.forte     # classic forte table
+FORTE = setTables.FORTE     # classic forte table
 
 #-----------------------------------------------------------------||||||||||||--
 
@@ -149,7 +149,7 @@ def findNormalT(pcSet, setMatrix=None):
 
     """
     if setMatrix == None: # use forte as default
-        setMatrix = forte
+        setMatrix = FORTE
     MONADscTuple = (1,1,0)
 
     # check for bad data
@@ -294,16 +294,16 @@ def forteToSc(card, index, inversion=-2):
     # if_no inversion is supplied, acts as if_in Tn/i classification
              
     if inversion <= -2 or inversion >= 2 or inversion == 0:
-        if forte[scCard][scIndex][2][1] == 0 :      
+        if FORTE[scCard][scIndex][2][1] == 0 :      
         # has inversion that is non-redundant (variant)
             scInv = 1
         else: scInv = 0
     if inversion == -1:
-        if forte[scCard][scIndex][2][1] == 0 :
+        if FORTE[scCard][scIndex][2][1] == 0 :
             scInv = -1
         else: scInv = 0
     if inversion == 1:
-        if forte[scCard][scIndex][2][1] == 0 :
+        if FORTE[scCard][scIndex][2][1] == 0 :
             scInv = 1   
         else: scInv = 0
 
@@ -397,7 +397,7 @@ def forteToZData(rawForte):
     (6, 17, 1)
     """       
     scTuple = tupleToSc(rawForte)
-    zVal = forte[scTuple[0]][scTuple[1]][3] # gets z relation val
+    zVal = FORTE[scTuple[0]][scTuple[1]][3] # gets z relation val
     # z val is index of relative z relation
     if zVal == 0:
         return None

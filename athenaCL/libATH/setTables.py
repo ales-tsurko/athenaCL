@@ -152,9 +152,9 @@ t24 = ((0,1,3,4,6,8), (2,3,3,3,3,1), (1,0,0,0,0,0,0,0), (46)) #6-24
 t25 = ((0,1,3,5,6,8), (2,3,3,2,4,1), (1,0,0,0,0,0,0,0), (47)) #6-25
 t26 = ((0,1,3,5,7,8), (2,3,2,3,4,1), (1,1,0,0,0,0,0,0), (48)) #6-26
 t27 = ((0,1,3,4,6,9), (2,2,5,2,2,2), (1,0,0,1,0,1,1,0), (0) ) #6-27
-t28 = ((0,1,3,5,6,9), (2,2,4,3,2,2), (1,1,1,1,0,0,0,0), (49)) #6-28 forte inv eq
+t28 = ((0,1,3,5,6,9), (2,2,4,3,2,2), (1,1,1,1,0,0,0,0), (49)) #6-28 
 t29 = ((0,1,3,6,8,9), (2,2,4,2,3,2), (1,1,0,0,0,0,0,0), (50)) #6- d29
-t30 = ((0,1,3,6,7,9), (2,2,4,2,2,3), (2,0,0,2,0,2,2,0), (0) ) #6-30 forte inv eq
+t30 = ((0,1,3,6,7,9), (2,2,4,2,2,3), (2,0,0,2,0,2,2,0), (0) ) #6-30 
 t31 = ((0,1,3,5,8,9), (2,2,3,4,3,1), (1,0,0,0,0,1,0,0), (0) ) #6-31
 t32 = ((0,2,4,5,7,9), (1,4,3,2,5,0), (1,1,0,0,1,1,0,0), (0) ) #6-32 C 
 t33 = ((0,2,3,5,7,9), (1,4,3,2,4,1), (1,0,0,0,0,1,0,0), (0) ) #6-33
@@ -262,8 +262,6 @@ octachord = (t0, t1, t2, t3, t4, t5, t6, t7, t8, t9,
 t10, t11, t12, t13, t14, t15, t16, t17, t18, t19,   
 t20, t21, t22, t23, t24, t25, t26, t27, t28, t29)
 
-
-
 t0   = (0,) 
 t1   = ((0,1,2,3,4,5,6,7,8),  (8,7,6,6,6,3), (1,1,0,0,0,0,0,0), (0)) #9-1
 t2   = ((0,1,2,3,4,5,6,7,9),  (7,7,7,6,6,3), (1,0,0,0,0,0,0,0), (0)) #9-2
@@ -299,7 +297,7 @@ dodecachord = (t0, t1)
 
 
 #-----------------------------------------------------------------||||||||||||--
-forte = (0, monad, diad, trichord, tetrachord, pentachord, hexachord, septachord, octachord, nonachord, decachord, undecachord, dodecachord)
+FORTE = (0, monad, diad, trichord, tetrachord, pentachord, hexachord, septachord, octachord, nonachord, decachord, undecachord, dodecachord)
 
 
 # to access the data for a single form, use:
@@ -307,1450 +305,1437 @@ forte = (0, monad, diad, trichord, tetrachord, pentachord, hexachord, septachord
 #         [number(forte)] = 3
 #         [data(0=pitches, 1=ICV, 2=invariance vector (morris), 3 = Z-relation)]
 #             [element in list]               
-# forte[4][11][2][1] = 0 :: has inversion that is non-redundant (variant)
-# forte[4][11][2][1] = 1 :: has inversion that is redundant (invariant)
+# FORTE[4][11][2][1] = 0 :: has inversion that is non-redundant (variant)
+# FORTE[4][11][2][1] = 1 :: has inversion that is redundant (invariant)
 #-----------------------------------------------------------------||||||||||||--
 
 
 #cardinality 1
-card_1 ={(1 , 0) :(forte[1][1][0], #1
-                         forte[1][1][2], #var
-                         forte[1][1][1], #icv
+card_1 ={(1 , 0) :(FORTE[1][1][0], #1
+                         FORTE[1][1][2], #var
+                         FORTE[1][1][1], #icv
                          ),
             }
-
 #cardinality 2
-card_2 ={(1 , 0) :(forte[2][1][0], #2
-                         forte[2][1][2], #var
-                         forte[2][1][1], #icv
+card_2 ={(1 , 0) :(FORTE[2][1][0], #2
+                         FORTE[2][1][2], #var
+                         FORTE[2][1][1], #icv
                          ),
-            (2 , 0) :(forte[2][2][0], #3
-                         forte[2][2][2], #var
-                         forte[2][2][1], #icv
+            (2 , 0) :(FORTE[2][2][0], #3
+                         FORTE[2][2][2], #var
+                         FORTE[2][2][1], #icv
                          ),
-            (3 , 0) :(forte[2][3][0], #4
-                         forte[2][3][2], #var
-                         forte[2][3][1], #icv
+            (3 , 0) :(FORTE[2][3][0], #4
+                         FORTE[2][3][2], #var
+                         FORTE[2][3][1], #icv
                          ),
-            (4 , 0) :(forte[2][4][0], #5
-                         forte[2][4][2], #var
-                         forte[2][4][1], #icv
+            (4 , 0) :(FORTE[2][4][0], #5
+                         FORTE[2][4][2], #var
+                         FORTE[2][4][1], #icv
                          ),
-            (5 , 0) :(forte[2][5][0], #6
-                         forte[2][5][2], #var
-                         forte[2][5][1], #icv
+            (5 , 0) :(FORTE[2][5][0], #6
+                         FORTE[2][5][2], #var
+                         FORTE[2][5][1], #icv
                          ),
-            (6 , 0) :(forte[2][6][0], #7
-                         forte[2][6][2], #var
-                         forte[2][6][1], #icv
+            (6 , 0) :(FORTE[2][6][0], #7
+                         FORTE[2][6][2], #var
+                         FORTE[2][6][1], #icv
                          ),
             }
-
-#+++++++++++++++++
 #cardinality 3
-card_3 ={(1 , 0) :(forte[3][1][0], #8
-                         forte[3][1][2], #var
-                         forte[3][1][1], #icv
+card_3 ={(1 , 0) :(FORTE[3][1][0], #8
+                         FORTE[3][1][2], #var
+                         FORTE[3][1][1], #icv
                          ),
-            (2 , 1) :(forte[3][2][0], #9
-                         forte[3][2][2], #var
-                         forte[3][2][1], #icv
+            (2 , 1) :(FORTE[3][2][0], #9
+                         FORTE[3][2][2], #var
+                         FORTE[3][2][1], #icv
                          ),
             (2 ,-1) :((0,2,3), #10
-                         forte[3][2][2], #var
-                         forte[3][2][1], #icv
+                         FORTE[3][2][2], #var
+                         FORTE[3][2][1], #icv
                          ),
-            (3 , 1) :(forte[3][3][0], #11
-                         forte[3][3][2], #var
-                         forte[3][3][1], #icv
+            (3 , 1) :(FORTE[3][3][0], #11
+                         FORTE[3][3][2], #var
+                         FORTE[3][3][1], #icv
                          ),
             (3 ,-1) :((0,3,4), #12
-                         forte[3][3][2], #var
-                         forte[3][3][1], #icv
+                         FORTE[3][3][2], #var
+                         FORTE[3][3][1], #icv
                          ),
-            (4 , 1) :(forte[3][4][0], #13
-                         forte[3][4][2], #var
-                         forte[3][4][1], #icv
+            (4 , 1) :(FORTE[3][4][0], #13
+                         FORTE[3][4][2], #var
+                         FORTE[3][4][1], #icv
                          ),
             (4 ,-1) :((0,4,5), #14
-                         forte[3][4][2], #var
-                         forte[3][4][1], #icv
+                         FORTE[3][4][2], #var
+                         FORTE[3][4][1], #icv
                          ),
-            (5 , 1) :(forte[3][5][0], #15
-                         forte[3][5][2], #var
-                         forte[3][5][1], #icv
+            (5 , 1) :(FORTE[3][5][0], #15
+                         FORTE[3][5][2], #var
+                         FORTE[3][5][1], #icv
                          ),
             (5 ,-1) :((0,5,6), #16
-                         forte[3][5][2], #var
-                         forte[3][5][1], #icv
+                         FORTE[3][5][2], #var
+                         FORTE[3][5][1], #icv
                          ),
-            (6 , 0) :(forte[3][6][0], #17
-                         forte[3][6][2], #var
-                         forte[3][6][1], #icv
+            (6 , 0) :(FORTE[3][6][0], #17
+                         FORTE[3][6][2], #var
+                         FORTE[3][6][1], #icv
                          ),
-            (7 , 1) :(forte[3][7][0], #18
-                         forte[3][7][2], #var
-                         forte[3][7][1], #icv
+            (7 , 1) :(FORTE[3][7][0], #18
+                         FORTE[3][7][2], #var
+                         FORTE[3][7][1], #icv
                          ),
             (7 ,-1) :((0,3,5), #19
-                         forte[3][7][2], #var
-                         forte[3][7][1], #icv
+                         FORTE[3][7][2], #var
+                         FORTE[3][7][1], #icv
                          ),
-            (8 , 1) :(forte[3][8][0], #20
-                         forte[3][8][2], #var
-                         forte[3][8][1], #icv
+            (8 , 1) :(FORTE[3][8][0], #20
+                         FORTE[3][8][2], #var
+                         FORTE[3][8][1], #icv
                          ),
             (8 ,-1) :((0,4,6), #21
-                         forte[3][8][2], #var
-                         forte[3][8][1], #icv
+                         FORTE[3][8][2], #var
+                         FORTE[3][8][1], #icv
                          ),
-            (9 , 0) :(forte[3][9][0], #22
-                         forte[3][9][2], #var
-                         forte[3][9][1], #icv
+            (9 , 0) :(FORTE[3][9][0], #22
+                         FORTE[3][9][2], #var
+                         FORTE[3][9][1], #icv
                          ),
-            (10, 0) :(forte[3][10][0], #23
-                         forte[3][10][2], #var
-                         forte[3][10][1], #icv
+            (10, 0) :(FORTE[3][10][0], #23
+                         FORTE[3][10][2], #var
+                         FORTE[3][10][1], #icv
                          ),
-            (11, 1) :(forte[3][11][0], #24
-                         forte[3][11][2], #var
-                         forte[3][11][1], #icv
+            (11, 1) :(FORTE[3][11][0], #24
+                         FORTE[3][11][2], #var
+                         FORTE[3][11][1], #icv
                          ),
             (11,-1) :((0,4,7), #25
-                         forte[3][11][2], #var
-                         forte[3][11][1], #icv
+                         FORTE[3][11][2], #var
+                         FORTE[3][11][1], #icv
                          ),
-            (12, 0) :(forte[3][12][0], #26
-                         forte[3][12][2], #var
-                         forte[3][12][1], #icv
+            (12, 0) :(FORTE[3][12][0], #26
+                         FORTE[3][12][2], #var
+                         FORTE[3][12][1], #icv
                          ),
             }
-
 #cardinality 4
-card_4 ={(1 , 0) :(forte[4][1][0], #27
-                         forte[4][1][2], #var
-                         forte[4][1][1], #icv
+card_4 ={(1 , 0) :(FORTE[4][1][0], #27
+                         FORTE[4][1][2], #var
+                         FORTE[4][1][1], #icv
                          ),
-            (2 , 1) :(forte[4][2][0], #28
-                         forte[4][2][2], #var
-                         forte[4][2][1], #icv
+            (2 , 1) :(FORTE[4][2][0], #28
+                         FORTE[4][2][2], #var
+                         FORTE[4][2][1], #icv
                          ),
             (2 ,-1) :((0,2,3,4), #29
-                         forte[4][2][2], #var
-                         forte[4][2][1], #icv
+                         FORTE[4][2][2], #var
+                         FORTE[4][2][1], #icv
                          ),
-            (3 , 0) :(forte[4][3][0], #30
-                         forte[4][3][2], #var
-                         forte[4][3][1], #icv
+            (3 , 0) :(FORTE[4][3][0], #30
+                         FORTE[4][3][2], #var
+                         FORTE[4][3][1], #icv
                          ),
-            (4 , 1) :(forte[4][4][0], #31
-                         forte[4][4][2], #var
-                         forte[4][4][1], #icv
+            (4 , 1) :(FORTE[4][4][0], #31
+                         FORTE[4][4][2], #var
+                         FORTE[4][4][1], #icv
                          ),
             (4 ,-1) :((0,3,4,5), #32
-                         forte[4][4][2], #var
-                         forte[4][4][1], #icv
+                         FORTE[4][4][2], #var
+                         FORTE[4][4][1], #icv
                          ),
-            (5 , 1) :(forte[4][5][0], #33
-                         forte[4][5][2], #var
-                         forte[4][5][1], #icv
+            (5 , 1) :(FORTE[4][5][0], #33
+                         FORTE[4][5][2], #var
+                         FORTE[4][5][1], #icv
                          ),
             (5 ,-1) :((0,4,5,6), #34
-                         forte[4][5][2], #var
-                         forte[4][5][1], #icv
+                         FORTE[4][5][2], #var
+                         FORTE[4][5][1], #icv
                          ),
-            (6 , 0) :(forte[4][6][0], #35
-                         forte[4][6][2], #var
-                         forte[4][6][1], #icv
+            (6 , 0) :(FORTE[4][6][0], #35
+                         FORTE[4][6][2], #var
+                         FORTE[4][6][1], #icv
                          ),
-            (7 , 0) :(forte[4][7][0], #36
-                         forte[4][7][2], #var
-                         forte[4][7][1], #icv
+            (7 , 0) :(FORTE[4][7][0], #36
+                         FORTE[4][7][2], #var
+                         FORTE[4][7][1], #icv
                          ),
-            (8 , 0) :(forte[4][8][0], #37
-                         forte[4][8][2], #var
-                         forte[4][8][1], #icv
+            (8 , 0) :(FORTE[4][8][0], #37
+                         FORTE[4][8][2], #var
+                         FORTE[4][8][1], #icv
                          ),
-            (9 , 0) :(forte[4][9][0], #38
-                         forte[4][9][2], #var
-                         forte[4][9][1], #icv
+            (9 , 0) :(FORTE[4][9][0], #38
+                         FORTE[4][9][2], #var
+                         FORTE[4][9][1], #icv
                          ),
-            (10, 0) :(forte[4][10][0], #39
-                         forte[4][10][2], #var
-                         forte[4][10][1], #icv
+            (10, 0) :(FORTE[4][10][0], #39
+                         FORTE[4][10][2], #var
+                         FORTE[4][10][1], #icv
                          ),
-            (11, 1) :(forte[4][11][0], #40
-                         forte[4][11][2], #var
-                         forte[4][11][1], #icv
+            (11, 1) :(FORTE[4][11][0], #40
+                         FORTE[4][11][2], #var
+                         FORTE[4][11][1], #icv
                          ),
             (11,-1) :((0,2,4,5), #41
-                         forte[4][11][2], #var
-                         forte[4][11][1], #icv
+                         FORTE[4][11][2], #var
+                         FORTE[4][11][1], #icv
                          ),
-            (12, 1) :(forte[4][12][0], #42
-                         forte[4][12][2], #var
-                         forte[4][12][1], #icv
+            (12, 1) :(FORTE[4][12][0], #42
+                         FORTE[4][12][2], #var
+                         FORTE[4][12][1], #icv
                          ),
             (12,-1) :((0,3,4,6), #43
-                         forte[4][12][2], #var
-                         forte[4][12][1], #icv
+                         FORTE[4][12][2], #var
+                         FORTE[4][12][1], #icv
                          ),
-            (13, 1) :(forte[4][13][0], #44
-                         forte[4][13][2], #var
-                         forte[4][13][1], #icv
+            (13, 1) :(FORTE[4][13][0], #44
+                         FORTE[4][13][2], #var
+                         FORTE[4][13][1], #icv
                          ),
             (13,-1) :((0,3,5,6), #45
-                         forte[4][13][2], #var
-                         forte[4][13][1], #icv
+                         FORTE[4][13][2], #var
+                         FORTE[4][13][1], #icv
                          ),
-            (14, 1) :(forte[4][14][0], #46
-                         forte[4][14][2], #var
-                         forte[4][14][1], #icv
+            (14, 1) :(FORTE[4][14][0], #46
+                         FORTE[4][14][2], #var
+                         FORTE[4][14][1], #icv
                          ),
             (14,-1) :((0,4,5,7), #47
-                         forte[4][14][2], #var
-                         forte[4][14][1], #icv
+                         FORTE[4][14][2], #var
+                         FORTE[4][14][1], #icv
                          ),
-            (15, 1) :(forte[4][15][0], #48
-                         forte[4][15][2], #var
-                         forte[4][15][1], #icv
+            (15, 1) :(FORTE[4][15][0], #48
+                         FORTE[4][15][2], #var
+                         FORTE[4][15][1], #icv
                          ),
             (15,-1) :((0,2,5,6), #49
-                         forte[4][15][2], #var
-                         forte[4][15][1], #icv
+                         FORTE[4][15][2], #var
+                         FORTE[4][15][1], #icv
                          ),
-            (16, 1) :(forte[4][16][0], #50
-                         forte[4][16][2], #var
-                         forte[4][16][1], #icv
+            (16, 1) :(FORTE[4][16][0], #50
+                         FORTE[4][16][2], #var
+                         FORTE[4][16][1], #icv
                          ),
             (16,-1) :((0,2,6,7), #51
-                         forte[4][16][2], #var
-                         forte[4][16][1], #icv
+                         FORTE[4][16][2], #var
+                         FORTE[4][16][1], #icv
                          ),
-            (17, 0) :(forte[4][17][0], #52
-                         forte[4][17][2], #var
-                         forte[4][17][1], #icv
+            (17, 0) :(FORTE[4][17][0], #52
+                         FORTE[4][17][2], #var
+                         FORTE[4][17][1], #icv
                          ),
-            (18, 1) :(forte[4][18][0], #53
-                         forte[4][18][2], #var
-                         forte[4][18][1], #icv
+            (18, 1) :(FORTE[4][18][0], #53
+                         FORTE[4][18][2], #var
+                         FORTE[4][18][1], #icv
                          ),
             (18,-1) :((0,3,6,7), #54
-                         forte[4][18][2], #var
-                         forte[4][18][1], #icv
+                         FORTE[4][18][2], #var
+                         FORTE[4][18][1], #icv
                          ),
-            (19, 1) :(forte[4][19][0], #55
-                         forte[4][19][2], #var
-                         forte[4][19][1], #icv
+            (19, 1) :(FORTE[4][19][0], #55
+                         FORTE[4][19][2], #var
+                         FORTE[4][19][1], #icv
                          ),
             (19,-1) :((0,4,7,8), #56
-                         forte[4][19][2], #var
-                         forte[4][19][1], #icv
+                         FORTE[4][19][2], #var
+                         FORTE[4][19][1], #icv
                          ),
-            (20, 0) :(forte[4][20][0], #57
-                         forte[4][20][2], #var
-                         forte[4][20][1], #icv
+            (20, 0) :(FORTE[4][20][0], #57
+                         FORTE[4][20][2], #var
+                         FORTE[4][20][1], #icv
                          ),
-            (21, 0) :(forte[4][21][0], #58
-                         forte[4][21][2], #var
-                         forte[4][21][1], #icv
+            (21, 0) :(FORTE[4][21][0], #58
+                         FORTE[4][21][2], #var
+                         FORTE[4][21][1], #icv
                          ),
-            (22, 1) :(forte[4][22][0], #59
-                         forte[4][22][2], #var
-                         forte[4][22][1], #icv
+            (22, 1) :(FORTE[4][22][0], #59
+                         FORTE[4][22][2], #var
+                         FORTE[4][22][1], #icv
                          ),
             (22,-1) :((0,3,5,7), #60
-                         forte[4][22][2], #var
-                         forte[4][22][1], #icv
+                         FORTE[4][22][2], #var
+                         FORTE[4][22][1], #icv
                          ),
-            (23, 0) :(forte[4][23][0], #61
-                         forte[4][23][2], #var
-                         forte[4][23][1], #icv
+            (23, 0) :(FORTE[4][23][0], #61
+                         FORTE[4][23][2], #var
+                         FORTE[4][23][1], #icv
                          ),
-            (24, 0) :(forte[4][24][0], #62
-                         forte[4][24][2], #var
-                         forte[4][24][1], #icv
+            (24, 0) :(FORTE[4][24][0], #62
+                         FORTE[4][24][2], #var
+                         FORTE[4][24][1], #icv
                          ),
-            (25, 0) :(forte[4][25][0], #63
-                         forte[4][25][2], #var
-                         forte[4][25][1], #icv
+            (25, 0) :(FORTE[4][25][0], #63
+                         FORTE[4][25][2], #var
+                         FORTE[4][25][1], #icv
                          ),
-            (26, 0) :(forte[4][26][0], #64
-                         forte[4][26][2], #var
-                         forte[4][26][1], #icv
+            (26, 0) :(FORTE[4][26][0], #64
+                         FORTE[4][26][2], #var
+                         FORTE[4][26][1], #icv
                          ),
-            (27, 1) :(forte[4][27][0], #65
-                         forte[4][27][2], #var
-                         forte[4][27][1], #icv
+            (27, 1) :(FORTE[4][27][0], #65
+                         FORTE[4][27][2], #var
+                         FORTE[4][27][1], #icv
                          ),
             (27,-1) :((0,3,6,8), #66
-                         forte[4][27][2], #var
-                         forte[4][27][1], #icv
+                         FORTE[4][27][2], #var
+                         FORTE[4][27][1], #icv
                          ),
-            (28, 0) :(forte[4][28][0], #67
-                         forte[4][28][2], #var
-                         forte[4][28][1], #icv
+            (28, 0) :(FORTE[4][28][0], #67
+                         FORTE[4][28][2], #var
+                         FORTE[4][28][1], #icv
                          ),
-            (29, 1) :(forte[4][29][0], #68
-                         forte[4][29][2], #var
-                         forte[4][29][1], #icv
+            (29, 1) :(FORTE[4][29][0], #68
+                         FORTE[4][29][2], #var
+                         FORTE[4][29][1], #icv
                          ),
             (29,-1) :((0,4,6,7), #69
-                         forte[4][29][2], #var
-                         forte[4][29][1], #icv
+                         FORTE[4][29][2], #var
+                         FORTE[4][29][1], #icv
                          ),
             }
-
 #cardinality 5
-card_5 ={(1 , 0) :(forte[5][1][0], #70
-                         forte[5][1][2], #var
-                         forte[5][1][1], #icv
+card_5 ={(1 , 0) :(FORTE[5][1][0], #70
+                         FORTE[5][1][2], #var
+                         FORTE[5][1][1], #icv
                          ),
-            (2 , 1) :(forte[5][2][0], #71
-                         forte[5][2][2], #var
-                         forte[5][2][1], #icv
+            (2 , 1) :(FORTE[5][2][0], #71
+                         FORTE[5][2][2], #var
+                         FORTE[5][2][1], #icv
                          ),
             (2 ,-1) :((0,2,3,4,5), #72
-                         forte[5][2][2], #var
-                         forte[5][2][1], #icv
+                         FORTE[5][2][2], #var
+                         FORTE[5][2][1], #icv
                          ),
-            (3 , 1) :(forte[5][3][0], #73
-                         forte[5][3][2], #var
-                         forte[5][3][1], #icv
+            (3 , 1) :(FORTE[5][3][0], #73
+                         FORTE[5][3][2], #var
+                         FORTE[5][3][1], #icv
                          ),
             (3 ,-1) :((0,1,3,4,5), #74
-                         forte[5][3][2], #var
-                         forte[5][3][1], #icv
+                         FORTE[5][3][2], #var
+                         FORTE[5][3][1], #icv
                          ),
-            (4 , 1) :(forte[5][4][0], #75
-                         forte[5][4][2], #var
-                         forte[5][4][1], #icv
+            (4 , 1) :(FORTE[5][4][0], #75
+                         FORTE[5][4][2], #var
+                         FORTE[5][4][1], #icv
                          ),
             (4 ,-1) :((0,3,4,5,6), #76
-                         forte[5][4][2], #var
-                         forte[5][4][1], #icv
+                         FORTE[5][4][2], #var
+                         FORTE[5][4][1], #icv
                          ),
-            (5 , 1) :(forte[5][5][0], #77
-                         forte[5][5][2], #var
-                         forte[5][5][1], #icv
+            (5 , 1) :(FORTE[5][5][0], #77
+                         FORTE[5][5][2], #var
+                         FORTE[5][5][1], #icv
                          ),
             (5 ,-1) :((0,4,5,6,7), #78
-                         forte[5][5][2], #var
-                         forte[5][5][1], #icv
+                         FORTE[5][5][2], #var
+                         FORTE[5][5][1], #icv
                          ),
-            (6 , 1) :(forte[5][6][0], #79
-                         forte[5][6][2], #var
-                         forte[5][6][1], #icv
+            (6 , 1) :(FORTE[5][6][0], #79
+                         FORTE[5][6][2], #var
+                         FORTE[5][6][1], #icv
                          ),
             (6 ,-1) :((0,1,4,5,6), #80
-                         forte[5][6][2], #var
-                         forte[5][6][1], #icv
+                         FORTE[5][6][2], #var
+                         FORTE[5][6][1], #icv
                          ),
-            (7 , 1) :(forte[5][7][0], #81
-                         forte[5][7][2], #var
-                         forte[5][7][1], #icv
+            (7 , 1) :(FORTE[5][7][0], #81
+                         FORTE[5][7][2], #var
+                         FORTE[5][7][1], #icv
                          ),
             (7 ,-1) :((0,1,5,6,7), #82
-                         forte[5][7][2], #var
-                         forte[5][7][1], #icv
+                         FORTE[5][7][2], #var
+                         FORTE[5][7][1], #icv
                          ),
-            (8 , 0) :(forte[5][8][0], #83
-                         forte[5][8][2], #var
-                         forte[5][8][1], #icv
+            (8 , 0) :(FORTE[5][8][0], #83
+                         FORTE[5][8][2], #var
+                         FORTE[5][8][1], #icv
                          ),
-            (9 , 1) :(forte[5][9][0], #84
-                         forte[5][9][2], #var
-                         forte[5][9][1], #icv
+            (9 , 1) :(FORTE[5][9][0], #84
+                         FORTE[5][9][2], #var
+                         FORTE[5][9][1], #icv
                          ),
             (9 ,-1) :((0,2,4,5,6), #85
-                         forte[5][9][2], #var
-                         forte[5][9][1], #icv
+                         FORTE[5][9][2], #var
+                         FORTE[5][9][1], #icv
                          ),
-            (10, 1) :(forte[5][10][0], #86
-                         forte[5][10][2], #var
-                         forte[5][10][1], #icv
+            (10, 1) :(FORTE[5][10][0], #86
+                         FORTE[5][10][2], #var
+                         FORTE[5][10][1], #icv
                          ),
             (10,-1) :((0,2,3,5,6), #87
-                         forte[5][10][2], #var
-                         forte[5][10][1], #icv
+                         FORTE[5][10][2], #var
+                         FORTE[5][10][1], #icv
                          ),
-            (11, 1) :(forte[5][11][0], #88
-                         forte[5][11][2], #var
-                         forte[5][11][1], #icv
+            (11, 1) :(FORTE[5][11][0], #88
+                         FORTE[5][11][2], #var
+                         FORTE[5][11][1], #icv
                          ),
             (11,-1) :((0,3,4,5,7), #89
-                         forte[5][11][2], #var
-                         forte[5][11][1], #icv
+                         FORTE[5][11][2], #var
+                         FORTE[5][11][1], #icv
                          ),
-            (12, 0) :(forte[5][12][0], #90
-                         forte[5][12][2], #var
-                         forte[5][12][1], #icv
+            (12, 0) :(FORTE[5][12][0], #90
+                         FORTE[5][12][2], #var
+                         FORTE[5][12][1], #icv
                          ),
-            (13, 1) :(forte[5][13][0], #91
-                         forte[5][13][2], #var
-                         forte[5][13][1], #icv
+            (13, 1) :(FORTE[5][13][0], #91
+                         FORTE[5][13][2], #var
+                         FORTE[5][13][1], #icv
                          ),
             (13,-1) :((0,4,6,7,8), #92
-                         forte[5][13][2], #var
-                         forte[5][13][1], #icv
+                         FORTE[5][13][2], #var
+                         FORTE[5][13][1], #icv
                          ),
-            (14, 1) :(forte[5][14][0], #93
-                         forte[5][14][2], #var
-                         forte[5][14][1], #icv
+            (14, 1) :(FORTE[5][14][0], #93
+                         FORTE[5][14][2], #var
+                         FORTE[5][14][1], #icv
                          ),
             (14,-1) :((0,2,5,6,7), #94
-                         forte[5][14][2], #var
-                         forte[5][14][1], #icv
+                         FORTE[5][14][2], #var
+                         FORTE[5][14][1], #icv
                          ),
-            (15, 0) :(forte[5][15][0], #95
-                         forte[5][15][2], #var
-                         forte[5][15][1], #icv
+            (15, 0) :(FORTE[5][15][0], #95
+                         FORTE[5][15][2], #var
+                         FORTE[5][15][1], #icv
                          ),
-            (16, 1) :(forte[5][16][0], #96
-                         forte[5][16][2], #var
-                         forte[5][16][1], #icv
+            (16, 1) :(FORTE[5][16][0], #96
+                         FORTE[5][16][2], #var
+                         FORTE[5][16][1], #icv
                          ),
             (16,-1) :((0,3,4,6,7), #97
-                         forte[5][16][2], #var
-                         forte[5][16][1], #icv
+                         FORTE[5][16][2], #var
+                         FORTE[5][16][1], #icv
                          ),
-            (17, 0) :(forte[5][17][0], #98
-                         forte[5][17][2], #var
-                         forte[5][17][1], #icv
+            (17, 0) :(FORTE[5][17][0], #98
+                         FORTE[5][17][2], #var
+                         FORTE[5][17][1], #icv
                          ),
-            (18, 1) :(forte[5][18][0], #99
-                         forte[5][18][2], #var
-                         forte[5][18][1], #icv
+            (18, 1) :(FORTE[5][18][0], #99
+                         FORTE[5][18][2], #var
+                         FORTE[5][18][1], #icv
                          ),
             (18,-1) :((0,2,3,6,7), #100
-                         forte[5][18][2], #var
-                         forte[5][18][1], #icv
+                         FORTE[5][18][2], #var
+                         FORTE[5][18][1], #icv
                          ),
-            (19, 1) :(forte[5][19][0], #101
-                         forte[5][19][2], #var
-                         forte[5][19][1], #icv
+            (19, 1) :(FORTE[5][19][0], #101
+                         FORTE[5][19][2], #var
+                         FORTE[5][19][1], #icv
                          ),
             (19,-1) :((0,1,4,6,7), #102
-                         forte[5][19][2], #var
-                         forte[5][19][1], #icv
+                         FORTE[5][19][2], #var
+                         FORTE[5][19][1], #icv
                          ),
-            (20, 1) :(forte[5][20][0], #103
-                         forte[5][20][2], #var
-                         forte[5][20][1], #icv
+            (20, 1) :(FORTE[5][20][0], #103
+                         FORTE[5][20][2], #var
+                         FORTE[5][20][1], #icv
                          ),
             (20,-1) :((0,1,5,7,8), #104
-                         forte[5][20][2], #var
-                         forte[5][20][1], #icv
+                         FORTE[5][20][2], #var
+                         FORTE[5][20][1], #icv
                          ),
-            (21, 1) :(forte[5][21][0], #105
-                         forte[5][21][2], #var
-                         forte[5][21][1], #icv
+            (21, 1) :(FORTE[5][21][0], #105
+                         FORTE[5][21][2], #var
+                         FORTE[5][21][1], #icv
                          ),
             (21,-1) :((0,3,4,7,8), #106
-                         forte[5][21][2], #var
-                         forte[5][21][1], #icv
+                         FORTE[5][21][2], #var
+                         FORTE[5][21][1], #icv
                          ),
-            (22, 0) :(forte[5][22][0], #107
-                         forte[5][22][2], #var
-                         forte[5][22][1], #icv
+            (22, 0) :(FORTE[5][22][0], #107
+                         FORTE[5][22][2], #var
+                         FORTE[5][22][1], #icv
                          ),
-            (23, 1) :(forte[5][23][0], #108
-                         forte[5][23][2], #var
-                         forte[5][23][1], #icv
+            (23, 1) :(FORTE[5][23][0], #108
+                         FORTE[5][23][2], #var
+                         FORTE[5][23][1], #icv
                          ),
             (23,-1) :((0,2,4,5,7), #109
-                         forte[5][23][2], #var
-                         forte[5][23][1], #icv
+                         FORTE[5][23][2], #var
+                         FORTE[5][23][1], #icv
                          ),
-            (24, 1) :(forte[5][24][0], #110
-                         forte[5][24][2], #var
-                         forte[5][24][1], #icv
+            (24, 1) :(FORTE[5][24][0], #110
+                         FORTE[5][24][2], #var
+                         FORTE[5][24][1], #icv
                          ),
             (24,-1) :((0,2,4,6,7), #111
-                         forte[5][24][2], #var
-                         forte[5][24][1], #icv
+                         FORTE[5][24][2], #var
+                         FORTE[5][24][1], #icv
                          ),
-            (25, 1) :(forte[5][25][0], #112
-                         forte[5][25][2], #var
-                         forte[5][25][1], #icv
+            (25, 1) :(FORTE[5][25][0], #112
+                         FORTE[5][25][2], #var
+                         FORTE[5][25][1], #icv
                          ),
             (25,-1) :((0,3,5,6,8), #113
-                         forte[5][25][2], #var
-                         forte[5][25][1], #icv
+                         FORTE[5][25][2], #var
+                         FORTE[5][25][1], #icv
                          ),
-            (26, 1) :(forte[5][26][0], #114
-                         forte[5][26][2], #var
-                         forte[5][26][1], #icv
+            (26, 1) :(FORTE[5][26][0], #114
+                         FORTE[5][26][2], #var
+                         FORTE[5][26][1], #icv
                          ),
             (26,-1) :((0,3,4,6,8), #115
-                         forte[5][26][2], #var
-                         forte[5][26][1], #icv
+                         FORTE[5][26][2], #var
+                         FORTE[5][26][1], #icv
                          ),
-            (27, 1) :(forte[5][27][0], #116
-                         forte[5][27][2], #var
-                         forte[5][27][1], #icv
+            (27, 1) :(FORTE[5][27][0], #116
+                         FORTE[5][27][2], #var
+                         FORTE[5][27][1], #icv
                          ),
             (27,-1) :((0,3,5,7,8), #117
-                         forte[5][27][2], #var
-                         forte[5][27][1], #icv
+                         FORTE[5][27][2], #var
+                         FORTE[5][27][1], #icv
                          ),
-            (28, 1) :(forte[5][28][0], #118
-                         forte[5][28][2], #var
-                         forte[5][28][1], #icv
+            (28, 1) :(FORTE[5][28][0], #118
+                         FORTE[5][28][2], #var
+                         FORTE[5][28][1], #icv
                          ),
             (28,-1) :((0,2,5,6,8), #119
-                         forte[5][28][2], #var
-                         forte[5][28][1], #icv
+                         FORTE[5][28][2], #var
+                         FORTE[5][28][1], #icv
                          ),
-            (29, 1) :(forte[5][29][0], #120
-                         forte[5][29][2], #var
-                         forte[5][29][1], #icv
+            (29, 1) :(FORTE[5][29][0], #120
+                         FORTE[5][29][2], #var
+                         FORTE[5][29][1], #icv
                          ),
             (29,-1) :((0,2,5,7,8), #121
-                         forte[5][29][2], #var
-                         forte[5][29][1], #icv
+                         FORTE[5][29][2], #var
+                         FORTE[5][29][1], #icv
                          ),
-            (30, 1) :(forte[5][30][0], #122
-                         forte[5][30][2], #var
-                         forte[5][30][1], #icv
+            (30, 1) :(FORTE[5][30][0], #122
+                         FORTE[5][30][2], #var
+                         FORTE[5][30][1], #icv
                          ),
             (30,-1) :((0,2,4,7,8), #123
-                         forte[5][30][2], #var
-                         forte[5][30][1], #icv
+                         FORTE[5][30][2], #var
+                         FORTE[5][30][1], #icv
                          ),
-            (31, 1) :(forte[5][31][0], #124
-                         forte[5][31][2], #var
-                         forte[5][31][1], #icv
+            (31, 1) :(FORTE[5][31][0], #124
+                         FORTE[5][31][2], #var
+                         FORTE[5][31][1], #icv
                          ),
             (31,-1) :((0,3,6,8,9), #125
-                         forte[5][31][2], #var
-                         forte[5][31][1], #icv
+                         FORTE[5][31][2], #var
+                         FORTE[5][31][1], #icv
                          ),
-            (32, 1) :(forte[5][32][0], #126
-                         forte[5][32][2], #var
-                         forte[5][32][1], #icv
+            (32, 1) :(FORTE[5][32][0], #126
+                         FORTE[5][32][2], #var
+                         FORTE[5][32][1], #icv
                          ),
             (32,-1) :((0,3,5,8,9), #127
-                         forte[5][32][2], #var
-                         forte[5][32][1], #icv
+                         FORTE[5][32][2], #var
+                         FORTE[5][32][1], #icv
                          ),
-            (33, 0) :(forte[5][33][0], #128
-                         forte[5][33][2], #var
-                         forte[5][33][1], #icv
+            (33, 0) :(FORTE[5][33][0], #128
+                         FORTE[5][33][2], #var
+                         FORTE[5][33][1], #icv
                          ),
-            (34, 0) :(forte[5][34][0], #129
-                         forte[5][34][2], #var
-                         forte[5][34][1], #icv
+            (34, 0) :(FORTE[5][34][0], #129
+                         FORTE[5][34][2], #var
+                         FORTE[5][34][1], #icv
                          ),
-            (35, 0) :(forte[5][35][0], #130
-                         forte[5][35][2], #var
-                         forte[5][35][1], #icv
+            (35, 0) :(FORTE[5][35][0], #130
+                         FORTE[5][35][2], #var
+                         FORTE[5][35][1], #icv
                          ),
-            (36, 1) :(forte[5][36][0], #131
-                         forte[5][36][2], #var
-                         forte[5][36][1], #icv
+            (36, 1) :(FORTE[5][36][0], #131
+                         FORTE[5][36][2], #var
+                         FORTE[5][36][1], #icv
                          ),
             (36,-1) :((0,3,5,6,7), #132
-                         forte[5][36][2], #var
-                         forte[5][36][1], #icv
+                         FORTE[5][36][2], #var
+                         FORTE[5][36][1], #icv
                          ),
-            (37, 0) :(forte[5][37][0], #133
-                         forte[5][37][2], #var
-                         forte[5][37][1], #icv
+            (37, 0) :(FORTE[5][37][0], #133
+                         FORTE[5][37][2], #var
+                         FORTE[5][37][1], #icv
                          ),
-            (38, 1) :(forte[5][38][0], #134
-                         forte[5][38][2], #var
-                         forte[5][38][1], #icv
+            (38, 1) :(FORTE[5][38][0], #134
+                         FORTE[5][38][2], #var
+                         FORTE[5][38][1], #icv
                          ),
             (38,-1) :((0,3,6,7,8), #135
-                         forte[5][38][2], #var
-                         forte[5][38][1], #icv
+                         FORTE[5][38][2], #var
+                         FORTE[5][38][1], #icv
                          ),
             }
-
 #cardinality 6
-card_6 ={(1 , 0) :(forte[6][1][0], #136
-                         forte[6][1][2], #var
-                         forte[6][1][1], #icv
+card_6 ={(1 , 0) :(FORTE[6][1][0], #136
+                         FORTE[6][1][2], #var
+                         FORTE[6][1][1], #icv
                          ),
-            (2 , 1) :(forte[6][2][0], #137
-                         forte[6][2][2], #var
-                         forte[6][2][1], #icv
+            (2 , 1) :(FORTE[6][2][0], #137
+                         FORTE[6][2][2], #var
+                         FORTE[6][2][1], #icv
                          ),
             (2 ,-1) :((0,2,3,4,5,6), #138
-                         forte[6][2][2], #var
-                         forte[6][2][1], #icv
+                         FORTE[6][2][2], #var
+                         FORTE[6][2][1], #icv
                          ),
-            (3 , 1) :(forte[6][3][0], #139
-                         forte[6][3][2], #var
-                         forte[6][3][1], #icv
+            (3 , 1) :(FORTE[6][3][0], #139
+                         FORTE[6][3][2], #var
+                         FORTE[6][3][1], #icv
                          ),
             (3 ,-1) :((0,1,3,4,5,6), #140
-                         forte[6][3][2], #var
-                         forte[6][3][1], #icv
+                         FORTE[6][3][2], #var
+                         FORTE[6][3][1], #icv
                          ),
-            (4 , 0) :(forte[6][4][0], #141
-                         forte[6][4][2], #var
-                         forte[6][4][1], #icv
+            (4 , 0) :(FORTE[6][4][0], #141
+                         FORTE[6][4][2], #var
+                         FORTE[6][4][1], #icv
                          ),
-            (5 , 1) :(forte[6][5][0], #142
-                         forte[6][5][2], #var
-                         forte[6][5][1], #icv
+            (5 , 1) :(FORTE[6][5][0], #142
+                         FORTE[6][5][2], #var
+                         FORTE[6][5][1], #icv
                          ),
             (5 ,-1) :((0,1,4,5,6,7), #143
-                         forte[6][5][2], #var
-                         forte[6][5][1], #icv
+                         FORTE[6][5][2], #var
+                         FORTE[6][5][1], #icv
                          ),
-            (6 , 0) :(forte[6][6][0], #144
-                         forte[6][6][2], #var
-                         forte[6][6][1], #icv
+            (6 , 0) :(FORTE[6][6][0], #144
+                         FORTE[6][6][2], #var
+                         FORTE[6][6][1], #icv
                          ),
-            (7 , 0) :(forte[6][7][0], #145
-                         forte[6][7][2], #var
-                         forte[6][7][1], #icv
+            (7 , 0) :(FORTE[6][7][0], #145
+                         FORTE[6][7][2], #var
+                         FORTE[6][7][1], #icv
                          ),
-            (8 , 0) :(forte[6][8][0], #146
-                         forte[6][8][2], #var
-                         forte[6][8][1], #icv
+            (8 , 0) :(FORTE[6][8][0], #146
+                         FORTE[6][8][2], #var
+                         FORTE[6][8][1], #icv
                          ),
-            (9 , 1) :(forte[6][9][0], #147
-                         forte[6][9][2], #var
-                         forte[6][9][1], #icv
+            (9 , 1) :(FORTE[6][9][0], #147
+                         FORTE[6][9][2], #var
+                         FORTE[6][9][1], #icv
                          ),
             (9 ,-1) :((0,2,4,5,6,7), #148
-                         forte[6][9][2], #var
-                         forte[6][9][1], #icv
+                         FORTE[6][9][2], #var
+                         FORTE[6][9][1], #icv
                          ),
-            (10, 1) :(forte[6][10][0], #149
-                         forte[6][10][2], #var
-                         forte[6][10][1], #icv
+            (10, 1) :(FORTE[6][10][0], #149
+                         FORTE[6][10][2], #var
+                         FORTE[6][10][1], #icv
                          ),
             (10,-1) :((0,2,3,4,6,7), #150
-                         forte[6][10][2], #var
-                         forte[6][10][1], #icv
+                         FORTE[6][10][2], #var
+                         FORTE[6][10][1], #icv
                          ),
-            (11, 1) :(forte[6][11][0], #151
-                         forte[6][11][2], #var
-                         forte[6][11][1], #icv
+            (11, 1) :(FORTE[6][11][0], #151
+                         FORTE[6][11][2], #var
+                         FORTE[6][11][1], #icv
                          ),
             (11,-1) :((0,2,3,5,6,7), #152
-                         forte[6][11][2], #var
-                         forte[6][11][1], #icv
+                         FORTE[6][11][2], #var
+                         FORTE[6][11][1], #icv
                          ),
-            (12, 1) :(forte[6][12][0], #153
-                         forte[6][12][2], #var
-                         forte[6][12][1], #icv
+            (12, 1) :(FORTE[6][12][0], #153
+                         FORTE[6][12][2], #var
+                         FORTE[6][12][1], #icv
                          ),
             (12,-1) :((0,1,3,5,6,7), #154
-                         forte[6][12][2], #var
-                         forte[6][12][1], #icv
+                         FORTE[6][12][2], #var
+                         FORTE[6][12][1], #icv
                          ),
-            (13, 0) :(forte[6][13][0], #155
-                         forte[6][13][2], #var
-                         forte[6][13][1], #icv
+            (13, 0) :(FORTE[6][13][0], #155
+                         FORTE[6][13][2], #var
+                         FORTE[6][13][1], #icv
                          ),
-            (14, 1) :(forte[6][14][0], #156
-                         forte[6][14][2], #var
-                         forte[6][14][1], #icv
+            (14, 1) :(FORTE[6][14][0], #156
+                         FORTE[6][14][2], #var
+                         FORTE[6][14][1], #icv
                          ),
             (14,-1) :((0,3,4,5,7,8), #157
-                         forte[6][14][2], #var
-                         forte[6][14][1], #icv
+                         FORTE[6][14][2], #var
+                         FORTE[6][14][1], #icv
                          ),
-            (15, 1) :(forte[6][15][0], #158
-                         forte[6][15][2], #var
-                         forte[6][15][1], #icv
+            (15, 1) :(FORTE[6][15][0], #158
+                         FORTE[6][15][2], #var
+                         FORTE[6][15][1], #icv
                          ),
             (15,-1) :((0,3,4,6,7,8), #159
-                         forte[6][15][2], #var
-                         forte[6][15][1], #icv
+                         FORTE[6][15][2], #var
+                         FORTE[6][15][1], #icv
                          ),
-            (16, 1) :(forte[6][16][0], #160
-                         forte[6][16][2], #var
-                         forte[6][16][1], #icv
+            (16, 1) :(FORTE[6][16][0], #160
+                         FORTE[6][16][2], #var
+                         FORTE[6][16][1], #icv
                          ),
             (16,-1) :((0,2,3,4,7,8), #161
-                         forte[6][16][2], #var
-                         forte[6][16][1], #icv
+                         FORTE[6][16][2], #var
+                         FORTE[6][16][1], #icv
                          ),
-            (17, 1) :(forte[6][17][0], #162
-                         forte[6][17][2], #var
-                         forte[6][17][1], #icv
+            (17, 1) :(FORTE[6][17][0], #162
+                         FORTE[6][17][2], #var
+                         FORTE[6][17][1], #icv
                          ),
             (17,-1) :((0,1,4,6,7,8), #163
-                         forte[6][17][2], #var
-                         forte[6][17][1], #icv
+                         FORTE[6][17][2], #var
+                         FORTE[6][17][1], #icv
                          ),
-            (18, 1) :(forte[6][18][0], #164
-                         forte[6][18][2], #var
-                         forte[6][18][1], #icv
+            (18, 1) :(FORTE[6][18][0], #164
+                         FORTE[6][18][2], #var
+                         FORTE[6][18][1], #icv
                          ),
             (18,-1) :((0,1,3,6,7,8), #165
-                         forte[6][18][2], #var
-                         forte[6][18][1], #icv
+                         FORTE[6][18][2], #var
+                         FORTE[6][18][1], #icv
                          ),
-            (19, 1) :(forte[6][19][0], #166
-                         forte[6][19][2], #var
-                         forte[6][19][1], #icv
+            (19, 1) :(FORTE[6][19][0], #166
+                         FORTE[6][19][2], #var
+                         FORTE[6][19][1], #icv
                          ),
             (19,-1) :((0,1,4,5,7,8), #167
-                         forte[6][19][2], #var
-                         forte[6][19][1], #icv
+                         FORTE[6][19][2], #var
+                         FORTE[6][19][1], #icv
                          ),
-            (20, 0) :(forte[6][20][0], #168
-                         forte[6][20][2], #var
-                         forte[6][20][1], #icv
+            (20, 0) :(FORTE[6][20][0], #168
+                         FORTE[6][20][2], #var
+                         FORTE[6][20][1], #icv
                          ),
-            (21, 1) :(forte[6][21][0], #169
-                         forte[6][21][2], #var
-                         forte[6][21][1], #icv
+            (21, 1) :(FORTE[6][21][0], #169
+                         FORTE[6][21][2], #var
+                         FORTE[6][21][1], #icv
                          ),
             (21,-1) :((0,2,4,5,6,8), #170
-                         forte[6][21][2], #var
-                         forte[6][21][1], #icv
+                         FORTE[6][21][2], #var
+                         FORTE[6][21][1], #icv
                          ),
-            (22, 1) :(forte[6][22][0], #171
-                         forte[6][22][2], #var
-                         forte[6][22][1], #icv
+            (22, 1) :(FORTE[6][22][0], #171
+                         FORTE[6][22][2], #var
+                         FORTE[6][22][1], #icv
                          ),
             (22,-1) :((0,2,4,6,7,8), #172
-                         forte[6][22][2], #var
-                         forte[6][22][1], #icv
+                         FORTE[6][22][2], #var
+                         FORTE[6][22][1], #icv
                          ),
-            (23, 0) :(forte[6][23][0], #173
-                         forte[6][23][2], #var
-                         forte[6][23][1], #icv
+            (23, 0) :(FORTE[6][23][0], #173
+                         FORTE[6][23][2], #var
+                         FORTE[6][23][1], #icv
                          ),
-            (24, 1) :(forte[6][24][0], #174
-                         forte[6][24][2], #var
-                         forte[6][24][1], #icv
+            (24, 1) :(FORTE[6][24][0], #174
+                         FORTE[6][24][2], #var
+                         FORTE[6][24][1], #icv
                          ),
             (24,-1) :((0,2,4,5,7,8), #175
-                         forte[6][24][2], #var
-                         forte[6][24][1], #icv
+                         FORTE[6][24][2], #var
+                         FORTE[6][24][1], #icv
                          ),
-            (25, 1) :(forte[6][25][0], #176
-                         forte[6][25][2], #var
-                         forte[6][25][1], #icv
+            (25, 1) :(FORTE[6][25][0], #176
+                         FORTE[6][25][2], #var
+                         FORTE[6][25][1], #icv
                          ),
             (25,-1) :((0,2,3,5,7,8), #177
-                         forte[6][25][2], #var
-                         forte[6][25][1], #icv
+                         FORTE[6][25][2], #var
+                         FORTE[6][25][1], #icv
                          ),
-            (26, 0) :(forte[6][26][0], #178
-                         forte[6][26][2], #var
-                         forte[6][26][1], #icv
+            (26, 0) :(FORTE[6][26][0], #178
+                         FORTE[6][26][2], #var
+                         FORTE[6][26][1], #icv
                          ),
-            (27, 1) :(forte[6][27][0], #179
-                         forte[6][27][2], #var
-                         forte[6][27][1], #icv
+            (27, 1) :(FORTE[6][27][0], #179
+                         FORTE[6][27][2], #var
+                         FORTE[6][27][1], #icv
                          ),
             (27,-1) :((0,3,5,6,8,9), #180
-                         forte[6][27][2], #var
-                         forte[6][27][1], #icv
+                         FORTE[6][27][2], #var
+                         FORTE[6][27][1], #icv
                          ),
-            (28, 0) :(forte[6][28][0], #181
-                         forte[6][28][2], #var
-                         forte[6][28][1], #icv
+            (28, 0) :(FORTE[6][28][0], #181
+                         FORTE[6][28][2], #var
+                         FORTE[6][28][1], #icv
                          ),
-            (29, 0) :(forte[6][29][0], #182
-                         forte[6][29][2], #var
-                         forte[6][29][1], #icv
+            (29, 0) :(FORTE[6][29][0], #182
+                         FORTE[6][29][2], #var
+                         FORTE[6][29][1], #icv
                          ),
-            (30, 1) :(forte[6][30][0], #183
-                         forte[6][30][2], #var
-                         forte[6][30][1], #icv
+            (30, 1) :(FORTE[6][30][0], #183
+                         FORTE[6][30][2], #var
+                         FORTE[6][30][1], #icv
                          ),
             (30,-1) :((0,2,3,6,8,9), #184
-                         forte[6][30][2], #var
-                         forte[6][30][1], #icv
+                         FORTE[6][30][2], #var
+                         FORTE[6][30][1], #icv
                          ),
-            (31, 1) :(forte[6][31][0], #185
-                         forte[6][31][2], #var
-                         forte[6][31][1], #icv
+            (31, 1) :(FORTE[6][31][0], #185
+                         FORTE[6][31][2], #var
+                         FORTE[6][31][1], #icv
                          ),
             (31,-1) :((0,1,4,6,8,9), #186
-                         forte[6][31][2], #var
-                         forte[6][31][1], #icv
+                         FORTE[6][31][2], #var
+                         FORTE[6][31][1], #icv
                          ),
-            (32, 0) :(forte[6][32][0], #187
-                         forte[6][32][2], #var
-                         forte[6][32][1], #icv
+            (32, 0) :(FORTE[6][32][0], #187
+                         FORTE[6][32][2], #var
+                         FORTE[6][32][1], #icv
                          ),
-            (33, 1) :(forte[6][33][0], #188
-                         forte[6][33][2], #var
-                         forte[6][33][1], #icv
+            (33, 1) :(FORTE[6][33][0], #188
+                         FORTE[6][33][2], #var
+                         FORTE[6][33][1], #icv
                          ),
             (33,-1) :((0,2,4,6,7,9), #189
-                         forte[6][33][2], #var
-                         forte[6][33][1], #icv
+                         FORTE[6][33][2], #var
+                         FORTE[6][33][1], #icv
                          ),
-            (34, 1) :(forte[6][34][0], #190
-                         forte[6][34][2], #var
-                         forte[6][34][1], #icv
+            (34, 1) :(FORTE[6][34][0], #190
+                         FORTE[6][34][2], #var
+                         FORTE[6][34][1], #icv
                          ),
             (34,-1) :((0,2,4,6,8,9), #191
-                         forte[6][34][2], #var
-                         forte[6][34][1], #icv
+                         FORTE[6][34][2], #var
+                         FORTE[6][34][1], #icv
                          ),
-            (35, 0) :(forte[6][35][0], #192
-                         forte[6][35][2], #var
-                         forte[6][35][1], #icv
+            (35, 0) :(FORTE[6][35][0], #192
+                         FORTE[6][35][2], #var
+                         FORTE[6][35][1], #icv
                          ),
-            (36, 1) :(forte[6][36][0], #193
-                         forte[6][36][2], #var
-                         forte[6][36][1], #icv
+            (36, 1) :(FORTE[6][36][0], #193
+                         FORTE[6][36][2], #var
+                         FORTE[6][36][1], #icv
                          ),
             (36,-1) :((0,3,4,5,6,7), #194
-                         forte[6][36][2], #var
-                         forte[6][36][1], #icv
+                         FORTE[6][36][2], #var
+                         FORTE[6][36][1], #icv
                          ),
-            (37, 0) :(forte[6][37][0], #195
-                         forte[6][37][2], #var
-                         forte[6][37][1], #icv
+            (37, 0) :(FORTE[6][37][0], #195
+                         FORTE[6][37][2], #var
+                         FORTE[6][37][1], #icv
                          ),
-            (38, 0) :(forte[6][38][0], #196
-                         forte[6][38][2], #var
-                         forte[6][38][1], #icv
+            (38, 0) :(FORTE[6][38][0], #196
+                         FORTE[6][38][2], #var
+                         FORTE[6][38][1], #icv
                          ),
-            (39, 1) :(forte[6][39][0], #197
-                         forte[6][39][2], #var
-                         forte[6][39][1], #icv
+            (39, 1) :(FORTE[6][39][0], #197
+                         FORTE[6][39][2], #var
+                         FORTE[6][39][1], #icv
                          ),
             (39,-1) :((0,3,4,5,6,8), #198
-                         forte[6][39][2], #var
-                         forte[6][39][1], #icv
+                         FORTE[6][39][2], #var
+                         FORTE[6][39][1], #icv
                          ),
-            (40, 1) :(forte[6][40][0], #199
-                         forte[6][40][2], #var
-                         forte[6][40][1], #icv
+            (40, 1) :(FORTE[6][40][0], #199
+                         FORTE[6][40][2], #var
+                         FORTE[6][40][1], #icv
                          ),
             (40,-1) :((0,3,5,6,7,8), #200
-                         forte[6][40][2], #var
-                         forte[6][40][1], #icv
+                         FORTE[6][40][2], #var
+                         FORTE[6][40][1], #icv
                          ),
-            (41, 1) :(forte[6][41][0], #201
-                         forte[6][41][2], #var
-                         forte[6][41][1], #icv
+            (41, 1) :(FORTE[6][41][0], #201
+                         FORTE[6][41][2], #var
+                         FORTE[6][41][1], #icv
                          ),
             (41,-1) :((0,2,5,6,7,8), #202
-                         forte[6][41][2], #var
-                         forte[6][41][1], #icv
+                         FORTE[6][41][2], #var
+                         FORTE[6][41][1], #icv
                          ),
-            (42, 0) :(forte[6][42][0], #203
-                         forte[6][42][2], #var
-                         forte[6][42][1], #icv
+            (42, 0) :(FORTE[6][42][0], #203
+                         FORTE[6][42][2], #var
+                         FORTE[6][42][1], #icv
                          ),
-            (43, 1) :(forte[6][43][0], #204
-                         forte[6][43][2], #var
-                         forte[6][43][1], #icv
+            (43, 1) :(FORTE[6][43][0], #204
+                         FORTE[6][43][2], #var
+                         FORTE[6][43][1], #icv
                          ),
             (43,-1) :((0,2,3,6,7,8), #205
-                         forte[6][43][2], #var
-                         forte[6][43][1], #icv
+                         FORTE[6][43][2], #var
+                         FORTE[6][43][1], #icv
                          ),
-            (44, 1) :(forte[6][44][0], #206
-                         forte[6][44][2], #var
-                         forte[6][44][1], #icv
+            (44, 1) :(FORTE[6][44][0], #206
+                         FORTE[6][44][2], #var
+                         FORTE[6][44][1], #icv
                          ),
             (44,-1) :((0,3,4,7,8,9), #207
-                         forte[6][44][2], #var
-                         forte[6][44][1], #icv
+                         FORTE[6][44][2], #var
+                         FORTE[6][44][1], #icv
                          ),
-            (45, 0) :(forte[6][45][0], #208
-                         forte[6][45][2], #var
-                         forte[6][45][1], #icv
+            (45, 0) :(FORTE[6][45][0], #208
+                         FORTE[6][45][2], #var
+                         FORTE[6][45][1], #icv
                          ),
-            (46, 1) :(forte[6][46][0], #209
-                         forte[6][46][2], #var
-                         forte[6][46][1], #icv
+            (46, 1) :(FORTE[6][46][0], #209
+                         FORTE[6][46][2], #var
+                         FORTE[6][46][1], #icv
                          ),
             (46,-1) :((0,3,5,7,8,9), #210
-                         forte[6][46][2], #var
-                         forte[6][46][1], #icv
+                         FORTE[6][46][2], #var
+                         FORTE[6][46][1], #icv
                          ),
-            (47, 1) :(forte[6][47][0], #211
-                         forte[6][47][2], #var
-                         forte[6][47][1], #icv
+            (47, 1) :(FORTE[6][47][0], #211
+                         FORTE[6][47][2], #var
+                         FORTE[6][47][1], #icv
                          ),
             (47,-1) :((0,2,5,7,8,9), #212
-                         forte[6][47][2], #var
-                         forte[6][47][1], #icv
+                         FORTE[6][47][2], #var
+                         FORTE[6][47][1], #icv
                          ),
-            (48, 0) :(forte[6][48][0], #213
-                         forte[6][48][2], #var
-                         forte[6][48][1], #icv
+            (48, 0) :(FORTE[6][48][0], #213
+                         FORTE[6][48][2], #var
+                         FORTE[6][48][1], #icv
                          ),
-            (49, 0) :(forte[6][49][0], #214
-                         forte[6][49][2], #var
-                         forte[6][49][1], #icv
+            (49, 0) :(FORTE[6][49][0], #214
+                         FORTE[6][49][2], #var
+                         FORTE[6][49][1], #icv
                          ),
-            (50, 0) :(forte[6][50][0], #215
-                         forte[6][50][2], #var
-                         forte[6][50][1], #icv
+            (50, 0) :(FORTE[6][50][0], #215
+                         FORTE[6][50][2], #var
+                         FORTE[6][50][1], #icv
                          ),
             }
-
 #cardinality 7
-card_7 ={(1 , 0) :(forte[7][1][0], #216
-                         forte[7][1][2], #var
-                         forte[7][1][1], #icv
+card_7 ={(1 , 0) :(FORTE[7][1][0], #216
+                         FORTE[7][1][2], #var
+                         FORTE[7][1][1], #icv
                          ),
-            (2 , 1) :(forte[7][2][0], #217
-                         forte[7][2][2], #var
-                         forte[7][2][1], #icv
+            (2 , 1) :(FORTE[7][2][0], #217
+                         FORTE[7][2][2], #var
+                         FORTE[7][2][1], #icv
                          ),
             (2 ,-1) :((0,2,3,4,5,6,7), #218
-                         forte[7][2][2], #var
-                         forte[7][2][1], #icv
+                         FORTE[7][2][2], #var
+                         FORTE[7][2][1], #icv
                          ),
-            (3 , 1) :(forte[7][3][0], #219
-                         forte[7][3][2], #var
-                         forte[7][3][1], #icv
+            (3 , 1) :(FORTE[7][3][0], #219
+                         FORTE[7][3][2], #var
+                         FORTE[7][3][1], #icv
                          ),
             (3 ,-1) :((0,3,4,5,6,7,8), #220
-                         forte[7][3][2], #var
-                         forte[7][3][1], #icv
+                         FORTE[7][3][2], #var
+                         FORTE[7][3][1], #icv
                          ),
-            (4 , 1) :(forte[7][4][0], #221
-                         forte[7][4][2], #var
-                         forte[7][4][1], #icv
+            (4 , 1) :(FORTE[7][4][0], #221
+                         FORTE[7][4][2], #var
+                         FORTE[7][4][1], #icv
                          ),
             (4 ,-1) :((0,1,3,4,5,6,7), #222
-                         forte[7][4][2], #var
-                         forte[7][4][1], #icv
+                         FORTE[7][4][2], #var
+                         FORTE[7][4][1], #icv
                          ),
-            (5 , 1) :(forte[7][5][0], #223
-                         forte[7][5][2], #var
-                         forte[7][5][1], #icv
+            (5 , 1) :(FORTE[7][5][0], #223
+                         FORTE[7][5][2], #var
+                         FORTE[7][5][1], #icv
                          ),
             (5 ,-1) :((0,1,2,4,5,6,7), #224
-                         forte[7][5][2], #var
-                         forte[7][5][1], #icv
+                         FORTE[7][5][2], #var
+                         FORTE[7][5][1], #icv
                          ),
-            (6 , 1) :(forte[7][6][0], #225
-                         forte[7][6][2], #var
-                         forte[7][6][1], #icv
+            (6 , 1) :(FORTE[7][6][0], #225
+                         FORTE[7][6][2], #var
+                         FORTE[7][6][1], #icv
                          ),
             (6 ,-1) :((0,1,4,5,6,7,8), #226
-                         forte[7][6][2], #var
-                         forte[7][6][1], #icv
+                         FORTE[7][6][2], #var
+                         FORTE[7][6][1], #icv
                          ),
-            (7 , 1) :(forte[7][7][0], #227
-                         forte[7][7][2], #var
-                         forte[7][7][1], #icv
+            (7 , 1) :(FORTE[7][7][0], #227
+                         FORTE[7][7][2], #var
+                         FORTE[7][7][1], #icv
                          ),
             (7 ,-1) :((0,1,2,5,6,7,8), #228
-                         forte[7][7][2], #var
-                         forte[7][7][1], #icv
+                         FORTE[7][7][2], #var
+                         FORTE[7][7][1], #icv
                          ),
-            (8 , 0) :(forte[7][8][0], #229
-                         forte[7][8][2], #var
-                         forte[7][8][1], #icv
+            (8 , 0) :(FORTE[7][8][0], #229
+                         FORTE[7][8][2], #var
+                         FORTE[7][8][1], #icv
                          ),
-            (9 , 1) :(forte[7][9][0], #230
-                         forte[7][9][2], #var
-                         forte[7][9][1], #icv
+            (9 , 1) :(FORTE[7][9][0], #230
+                         FORTE[7][9][2], #var
+                         FORTE[7][9][1], #icv
                          ),
             (9 ,-1) :((0,2,4,5,6,7,8), #231
-                         forte[7][9][2], #var
-                         forte[7][9][1], #icv
+                         FORTE[7][9][2], #var
+                         FORTE[7][9][1], #icv
                          ),
-            (10, 1) :(forte[7][10][0], #232
-                         forte[7][10][2], #var
-                         forte[7][10][1], #icv
+            (10, 1) :(FORTE[7][10][0], #232
+                         FORTE[7][10][2], #var
+                         FORTE[7][10][1], #icv
                          ),
             (10,-1) :((0,3,5,6,7,8,9), #233
-                         forte[7][10][2], #var
-                         forte[7][10][1], #icv
+                         FORTE[7][10][2], #var
+                         FORTE[7][10][1], #icv
                          ),
-            (11, 1) :(forte[7][11][0], #234
-                         forte[7][11][2], #var
-                         forte[7][11][1], #icv
+            (11, 1) :(FORTE[7][11][0], #234
+                         FORTE[7][11][2], #var
+                         FORTE[7][11][1], #icv
                          ),
             (11,-1) :((0,2,3,4,5,7,8), #235
-                         forte[7][11][2], #var
-                         forte[7][11][1], #icv
+                         FORTE[7][11][2], #var
+                         FORTE[7][11][1], #icv
                          ),
-            (12, 0) :(forte[7][12][0], #236
-                         forte[7][12][2], #var
-                         forte[7][12][1], #icv
+            (12, 0) :(FORTE[7][12][0], #236
+                         FORTE[7][12][2], #var
+                         FORTE[7][12][1], #icv
                          ),
-            (13, 1) :(forte[7][13][0], #237
-                         forte[7][13][2], #var
-                         forte[7][13][1], #icv
+            (13, 1) :(FORTE[7][13][0], #237
+                         FORTE[7][13][2], #var
+                         FORTE[7][13][1], #icv
                          ),
             (13,-1) :((0,2,3,4,6,7,8), #238
-                         forte[7][13][2], #var
-                         forte[7][13][1], #icv
+                         FORTE[7][13][2], #var
+                         FORTE[7][13][1], #icv
                          ),
-            (14, 1) :(forte[7][14][0], #239
-                         forte[7][14][2], #var
-                         forte[7][14][1], #icv
+            (14, 1) :(FORTE[7][14][0], #239
+                         FORTE[7][14][2], #var
+                         FORTE[7][14][1], #icv
                          ),
             (14,-1) :((0,1,3,5,6,7,8), #240
-                         forte[7][14][2], #var
-                         forte[7][14][1], #icv
+                         FORTE[7][14][2], #var
+                         FORTE[7][14][1], #icv
                          ),
-            (15, 0) :(forte[7][15][0], #241
-                         forte[7][15][2], #var
-                         forte[7][15][1], #icv
+            (15, 0) :(FORTE[7][15][0], #241
+                         FORTE[7][15][2], #var
+                         FORTE[7][15][1], #icv
                          ),
-            (16, 1) :(forte[7][16][0], #242
-                         forte[7][16][2], #var
-                         forte[7][16][1], #icv
+            (16, 1) :(FORTE[7][16][0], #242
+                         FORTE[7][16][2], #var
+                         FORTE[7][16][1], #icv
                          ),
             (16,-1) :((0,3,4,6,7,8,9), #243
-                         forte[7][16][2], #var
-                         forte[7][16][1], #icv
+                         FORTE[7][16][2], #var
+                         FORTE[7][16][1], #icv
                          ),
-            (17, 0) :(forte[7][17][0], #244
-                         forte[7][17][2], #var
-                         forte[7][17][1], #icv
+            (17, 0) :(FORTE[7][17][0], #244
+                         FORTE[7][17][2], #var
+                         FORTE[7][17][1], #icv
                          ),
-            (18, 1) :(forte[7][18][0], #245
-                         forte[7][18][2], #var
-                         forte[7][18][1], #icv
+            (18, 1) :(FORTE[7][18][0], #245
+                         FORTE[7][18][2], #var
+                         FORTE[7][18][1], #icv
                          ),
             (18,-1) :((0,1,4,6,7,8,9), #246
-                         forte[7][18][2], #var
-                         forte[7][18][1], #icv
+                         FORTE[7][18][2], #var
+                         FORTE[7][18][1], #icv
                          ),
-            (19, 1) :(forte[7][19][0], #247
-                         forte[7][19][2], #var
-                         forte[7][19][1], #icv
+            (19, 1) :(FORTE[7][19][0], #247
+                         FORTE[7][19][2], #var
+                         FORTE[7][19][1], #icv
                          ),
             (19,-1) :((0,2,3,6,7,8,9), #248
-                         forte[7][19][2], #var
-                         forte[7][19][1], #icv
+                         FORTE[7][19][2], #var
+                         FORTE[7][19][1], #icv
                          ),
-            (20, 1) :(forte[7][20][0], #249
-                         forte[7][20][2], #var
-                         forte[7][20][1], #icv
+            (20, 1) :(FORTE[7][20][0], #249
+                         FORTE[7][20][2], #var
+                         FORTE[7][20][1], #icv
                          ),
             (20,-1) :((0,1,2,5,7,8,9), #250
-                         forte[7][20][2], #var
-                         forte[7][20][1], #icv
+                         FORTE[7][20][2], #var
+                         FORTE[7][20][1], #icv
                          ),
-            (21, 1) :(forte[7][21][0], #251
-                         forte[7][21][2], #var
-                         forte[7][21][1], #icv
+            (21, 1) :(FORTE[7][21][0], #251
+                         FORTE[7][21][2], #var
+                         FORTE[7][21][1], #icv
                          ),
             (21,-1) :((0,1,4,5,7,8,9), #252
-                         forte[7][21][2], #var
-                         forte[7][21][1], #icv
+                         FORTE[7][21][2], #var
+                         FORTE[7][21][1], #icv
                          ),
-            (22, 0) :(forte[7][22][0], #253
-                         forte[7][22][2], #var
-                         forte[7][22][1], #icv
+            (22, 0) :(FORTE[7][22][0], #253
+                         FORTE[7][22][2], #var
+                         FORTE[7][22][1], #icv
                          ),
-            (23, 1) :(forte[7][23][0], #254
-                         forte[7][23][2], #var
-                         forte[7][23][1], #icv
+            (23, 1) :(FORTE[7][23][0], #254
+                         FORTE[7][23][2], #var
+                         FORTE[7][23][1], #icv
                          ),
             (23,-1) :((0,2,4,5,6,7,9), #255
-                         forte[7][23][2], #var
-                         forte[7][23][1], #icv
+                         FORTE[7][23][2], #var
+                         FORTE[7][23][1], #icv
                          ),
-            (24, 1) :(forte[7][24][0], #256
-                         forte[7][24][2], #var
-                         forte[7][24][1], #icv
+            (24, 1) :(FORTE[7][24][0], #256
+                         FORTE[7][24][2], #var
+                         FORTE[7][24][1], #icv
                          ),
             (24,-1) :((0,2,4,6,7,8,9), #257
-                         forte[7][24][2], #var
-                         forte[7][24][1], #icv
+                         FORTE[7][24][2], #var
+                         FORTE[7][24][1], #icv
                          ),
-            (25, 1) :(forte[7][25][0], #258
-                         forte[7][25][2], #var
-                         forte[7][25][1], #icv
+            (25, 1) :(FORTE[7][25][0], #258
+                         FORTE[7][25][2], #var
+                         FORTE[7][25][1], #icv
                          ),
             (25,-1) :((0,2,3,5,6,7,9), #259
-                         forte[7][25][2], #var
-                         forte[7][25][1], #icv
+                         FORTE[7][25][2], #var
+                         FORTE[7][25][1], #icv
                          ),
-            (26, 1) :(forte[7][26][0], #260
-                         forte[7][26][2], #var
-                         forte[7][26][1], #icv
+            (26, 1) :(FORTE[7][26][0], #260
+                         FORTE[7][26][2], #var
+                         FORTE[7][26][1], #icv
                          ),
             (26,-1) :((0,2,4,5,6,8,9), #261
-                         forte[7][26][2], #var
-                         forte[7][26][1], #icv
+                         FORTE[7][26][2], #var
+                         FORTE[7][26][1], #icv
                          ),
-            (27, 1) :(forte[7][27][0], #262
-                         forte[7][27][2], #var
-                         forte[7][27][1], #icv
+            (27, 1) :(FORTE[7][27][0], #262
+                         FORTE[7][27][2], #var
+                         FORTE[7][27][1], #icv
                          ),
             (27,-1) :((0,2,4,5,7,8,9), #263
-                         forte[7][27][2], #var
-                         forte[7][27][1], #icv
+                         FORTE[7][27][2], #var
+                         FORTE[7][27][1], #icv
                          ),
-            (28, 1) :(forte[7][28][0], #264
-                         forte[7][28][2], #var
-                         forte[7][28][1], #icv
+            (28, 1) :(FORTE[7][28][0], #264
+                         FORTE[7][28][2], #var
+                         FORTE[7][28][1], #icv
                          ),
             (28,-1) :((0,2,3,4,6,8,9), #265
-                         forte[7][28][2], #var
-                         forte[7][28][1], #icv
+                         FORTE[7][28][2], #var
+                         FORTE[7][28][1], #icv
                          ),
-            (29, 1) :(forte[7][29][0], #266
-                         forte[7][29][2], #var
-                         forte[7][29][1], #icv
+            (29, 1) :(FORTE[7][29][0], #266
+                         FORTE[7][29][2], #var
+                         FORTE[7][29][1], #icv
                          ),
             (29,-1) :((0,2,3,5,7,8,9), #267
-                         forte[7][29][2], #var
-                         forte[7][29][1], #icv
+                         FORTE[7][29][2], #var
+                         FORTE[7][29][1], #icv
                          ),
-            (30, 1) :(forte[7][30][0], #268
-                         forte[7][30][2], #var
-                         forte[7][30][1], #icv
+            (30, 1) :(FORTE[7][30][0], #268
+                         FORTE[7][30][2], #var
+                         FORTE[7][30][1], #icv
                          ),
             (30,-1) :((0,1,3,5,7,8,9), #269
-                         forte[7][30][2], #var
-                         forte[7][30][1], #icv
+                         FORTE[7][30][2], #var
+                         FORTE[7][30][1], #icv
                          ),
-            (31, 1) :(forte[7][31][0], #270
-                         forte[7][31][2], #var
-                         forte[7][31][1], #icv
+            (31, 1) :(FORTE[7][31][0], #270
+                         FORTE[7][31][2], #var
+                         FORTE[7][31][1], #icv
                          ),
             (31,-1) :((0,2,3,5,6,8,9), #271
-                         forte[7][31][2], #var
-                         forte[7][31][1], #icv
+                         FORTE[7][31][2], #var
+                         FORTE[7][31][1], #icv
                          ),
-            (32, 1) :(forte[7][32][0], #272
-                         forte[7][32][2], #var
-                         forte[7][32][1], #icv
+            (32, 1) :(FORTE[7][32][0], #272
+                         FORTE[7][32][2], #var
+                         FORTE[7][32][1], #icv
                          ),
             (32,-1) :((0,1,3,5,6,8,9), #273
-                         forte[7][32][2], #var
-                         forte[7][32][1], #icv
+                         FORTE[7][32][2], #var
+                         FORTE[7][32][1], #icv
                          ),
-            (33, 0) :(forte[7][33][0], #274
-                         forte[7][33][2], #var
-                         forte[7][33][1], #icv
+            (33, 0) :(FORTE[7][33][0], #274
+                         FORTE[7][33][2], #var
+                         FORTE[7][33][1], #icv
                          ),
-            (34, 0) :(forte[7][34][0], #275
-                         forte[7][34][2], #var
-                         forte[7][34][1], #icv
+            (34, 0) :(FORTE[7][34][0], #275
+                         FORTE[7][34][2], #var
+                         FORTE[7][34][1], #icv
                          ),
-            (35, 0) :(forte[7][35][0], #276
-                         forte[7][35][2], #var
-                         forte[7][35][1], #icv
+            (35, 0) :(FORTE[7][35][0], #276
+                         FORTE[7][35][2], #var
+                         FORTE[7][35][1], #icv
                          ),
-            (36, 1) :(forte[7][36][0], #277
-                         forte[7][36][2], #var
-                         forte[7][36][1], #icv
+            (36, 1) :(FORTE[7][36][0], #277
+                         FORTE[7][36][2], #var
+                         FORTE[7][36][1], #icv
                          ),
             (36,-1) :((0,2,3,5,6,7,8), #278
-                         forte[7][36][2], #var
-                         forte[7][36][1], #icv
+                         FORTE[7][36][2], #var
+                         FORTE[7][36][1], #icv
                          ),
-            (37, 0) :(forte[7][37][0], #279
-                         forte[7][37][2], #var
-                         forte[7][37][1], #icv
+            (37, 0) :(FORTE[7][37][0], #279
+                         FORTE[7][37][2], #var
+                         FORTE[7][37][1], #icv
                          ),
-            (38, 1) :(forte[7][38][0], #280
-                         forte[7][38][2], #var
-                         forte[7][38][1], #icv
+            (38, 1) :(FORTE[7][38][0], #280
+                         FORTE[7][38][2], #var
+                         FORTE[7][38][1], #icv
                          ),
             (38,-1) :((0,1,3,4,6,7,8), #281
-                         forte[7][38][2], #var
-                         forte[7][38][1], #icv
+                         FORTE[7][38][2], #var
+                         FORTE[7][38][1], #icv
                          ),
             }
-
 #cardinality 8
-card_8 ={(1 , 0) :(forte[8][1][0], #282
-                         forte[8][1][2], #var
-                         forte[8][1][1], #icv
+card_8 ={(1 , 0) :(FORTE[8][1][0], #282
+                         FORTE[8][1][2], #var
+                         FORTE[8][1][1], #icv
                          ),
-            (2 , 1) :(forte[8][2][0], #283
-                         forte[8][2][2], #var
-                         forte[8][2][1], #icv
+            (2 , 1) :(FORTE[8][2][0], #283
+                         FORTE[8][2][2], #var
+                         FORTE[8][2][1], #icv
                          ),
             (2 ,-1) :((0,2,3,4,5,6,7,8), #284
-                         forte[8][2][2], #var
-                         forte[8][2][1], #icv
+                         FORTE[8][2][2], #var
+                         FORTE[8][2][1], #icv
                          ),
-            (3 , 0) :(forte[8][3][0], #285
-                         forte[8][3][2], #var
-                         forte[8][3][1], #icv
+            (3 , 0) :(FORTE[8][3][0], #285
+                         FORTE[8][3][2], #var
+                         FORTE[8][3][1], #icv
                          ),
-            (4 , 1) :(forte[8][4][0], #286
-                         forte[8][4][2], #var
-                         forte[8][4][1], #icv
+            (4 , 1) :(FORTE[8][4][0], #286
+                         FORTE[8][4][2], #var
+                         FORTE[8][4][1], #icv
                          ),
             (4 ,-1) :((0,1,3,4,5,6,7,8), #287
-                         forte[8][4][2], #var
-                         forte[8][4][1], #icv
+                         FORTE[8][4][2], #var
+                         FORTE[8][4][1], #icv
                          ),
-            (5 , 1) :(forte[8][5][0], #288
-                         forte[8][5][2], #var
-                         forte[8][5][1], #icv
+            (5 , 1) :(FORTE[8][5][0], #288
+                         FORTE[8][5][2], #var
+                         FORTE[8][5][1], #icv
                          ),
             (5 ,-1) :((0,1,2,4,5,6,7,8), #289
-                         forte[8][5][2], #var
-                         forte[8][5][1], #icv
+                         FORTE[8][5][2], #var
+                         FORTE[8][5][1], #icv
                          ),
-            (6 , 0) :(forte[8][6][0], #290
-                         forte[8][6][2], #var
-                         forte[8][6][1], #icv
+            (6 , 0) :(FORTE[8][6][0], #290
+                         FORTE[8][6][2], #var
+                         FORTE[8][6][1], #icv
                          ),
-            (7 , 0) :(forte[8][7][0], #291
-                         forte[8][7][2], #var
-                         forte[8][7][1], #icv
+            (7 , 0) :(FORTE[8][7][0], #291
+                         FORTE[8][7][2], #var
+                         FORTE[8][7][1], #icv
                          ),
-            (8 , 0) :(forte[8][8][0], #292
-                         forte[8][8][2], #var
-                         forte[8][8][1], #icv
+            (8 , 0) :(FORTE[8][8][0], #292
+                         FORTE[8][8][2], #var
+                         FORTE[8][8][1], #icv
                          ),
-            (9 , 0) :(forte[8][9][0], #293
-                         forte[8][9][2], #var
-                         forte[8][9][1], #icv
+            (9 , 0) :(FORTE[8][9][0], #293
+                         FORTE[8][9][2], #var
+                         FORTE[8][9][1], #icv
                          ),
-            (10, 0) :(forte[8][10][0], #294
-                         forte[8][10][2], #var
-                         forte[8][10][1], #icv
+            (10, 0) :(FORTE[8][10][0], #294
+                         FORTE[8][10][2], #var
+                         FORTE[8][10][1], #icv
                          ),
-            (11, 1) :(forte[8][11][0], #295
-                         forte[8][11][2], #var
-                         forte[8][11][1], #icv
+            (11, 1) :(FORTE[8][11][0], #295
+                         FORTE[8][11][2], #var
+                         FORTE[8][11][1], #icv
                          ),
             (11,-1) :((0,2,4,5,6,7,8,9), #296
-                         forte[8][11][2], #var
-                         forte[8][11][1], #icv
+                         FORTE[8][11][2], #var
+                         FORTE[8][11][1], #icv
                          ),
-            (12, 1) :(forte[8][12][0], #297
-                         forte[8][12][2], #var
-                         forte[8][12][1], #icv
+            (12, 1) :(FORTE[8][12][0], #297
+                         FORTE[8][12][2], #var
+                         FORTE[8][12][1], #icv
                          ),
             (12,-1) :((0,2,3,4,5,6,8,9), #298
-                         forte[8][12][2], #var
-                         forte[8][12][1], #icv
+                         FORTE[8][12][2], #var
+                         FORTE[8][12][1], #icv
                          ),
-            (13, 1) :(forte[8][13][0], #299
-                         forte[8][13][2], #var
-                         forte[8][13][1], #icv
+            (13, 1) :(FORTE[8][13][0], #299
+                         FORTE[8][13][2], #var
+                         FORTE[8][13][1], #icv
                          ),
             (13,-1) :((0,2,3,5,6,7,8,9), #300
-                         forte[8][13][2], #var
-                         forte[8][13][1], #icv
+                         FORTE[8][13][2], #var
+                         FORTE[8][13][1], #icv
                          ),
-            (14, 1) :(forte[8][14][0], #301
-                         forte[8][14][2], #var
-                         forte[8][14][1], #icv
+            (14, 1) :(FORTE[8][14][0], #301
+                         FORTE[8][14][2], #var
+                         FORTE[8][14][1], #icv
                          ),
             (14,-1) :((0,2,3,4,5,7,8,9), #302
-                         forte[8][14][2], #var
-                         forte[8][14][1], #icv
+                         FORTE[8][14][2], #var
+                         FORTE[8][14][1], #icv
                          ),
-            (15, 1) :(forte[8][15][0], #303
-                         forte[8][15][2], #var
-                         forte[8][15][1], #icv
+            (15, 1) :(FORTE[8][15][0], #303
+                         FORTE[8][15][2], #var
+                         FORTE[8][15][1], #icv
                          ),
             (15,-1) :((0,1,3,5,6,7,8,9), #304
-                         forte[8][15][2], #var
-                         forte[8][15][1], #icv
+                         FORTE[8][15][2], #var
+                         FORTE[8][15][1], #icv
                          ),
-            (16, 1) :(forte[8][16][0], #305
-                         forte[8][16][2], #var
-                         forte[8][16][1], #icv
+            (16, 1) :(FORTE[8][16][0], #305
+                         FORTE[8][16][2], #var
+                         FORTE[8][16][1], #icv
                          ),
             (16,-1) :((0,1,2,4,6,7,8,9), #306
-                         forte[8][16][2], #var
-                         forte[8][16][1], #icv
+                         FORTE[8][16][2], #var
+                         FORTE[8][16][1], #icv
                          ),
-            (17, 0) :(forte[8][17][0], #307
-                         forte[8][17][2], #var
-                         forte[8][17][1], #icv
+            (17, 0) :(FORTE[8][17][0], #307
+                         FORTE[8][17][2], #var
+                         FORTE[8][17][1], #icv
                          ),
-            (18, 1) :(forte[8][18][0], #308
-                         forte[8][18][2], #var
-                         forte[8][18][1], #icv
+            (18, 1) :(FORTE[8][18][0], #308
+                         FORTE[8][18][2], #var
+                         FORTE[8][18][1], #icv
                          ),
             (18,-1) :((0,1,3,4,6,7,8,9), #309
-                         forte[8][18][2], #var
-                         forte[8][18][1], #icv
+                         FORTE[8][18][2], #var
+                         FORTE[8][18][1], #icv
                          ),
-            (19, 1) :(forte[8][19][0], #310
-                         forte[8][19][2], #var
-                         forte[8][19][1], #icv
+            (19, 1) :(FORTE[8][19][0], #310
+                         FORTE[8][19][2], #var
+                         FORTE[8][19][1], #icv
                          ),
             (19,-1) :((0,1,3,4,5,7,8,9), #311
-                         forte[8][19][2], #var
-                         forte[8][19][1], #icv
+                         FORTE[8][19][2], #var
+                         FORTE[8][19][1], #icv
                          ),
-            (20, 0) :(forte[8][20][0], #312
-                         forte[8][20][2], #var
-                         forte[8][20][1], #icv
+            (20, 0) :(FORTE[8][20][0], #312
+                         FORTE[8][20][2], #var
+                         FORTE[8][20][1], #icv
                          ),
-            (21, 0) :(forte[8][21][0], #313
-                         forte[8][21][2], #var
-                         forte[8][21][1], #icv
+            (21, 0) :(FORTE[8][21][0], #313
+                         FORTE[8][21][2], #var
+                         FORTE[8][21][1], #icv
                          ),
-            (22, 1) :(forte[8][22][0], #314
-                         forte[8][22][2], #var
-                         forte[8][22][1], #icv
+            (22, 1) :(FORTE[8][22][0], #314
+                         FORTE[8][22][2], #var
+                         FORTE[8][22][1], #icv
                          ),
             (22,-1) :((0,2,4,5,7,8,9,10), #315
-                         forte[8][22][2], #var
-                         forte[8][22][1], #icv
+                         FORTE[8][22][2], #var
+                         FORTE[8][22][1], #icv
                          ),
-            (23, 0) :(forte[8][23][0], #316
-                         forte[8][23][2], #var
-                         forte[8][23][1], #icv
+            (23, 0) :(FORTE[8][23][0], #316
+                         FORTE[8][23][2], #var
+                         FORTE[8][23][1], #icv
                          ),
-            (24, 0) :(forte[8][24][0], #317
-                         forte[8][24][2], #var
-                         forte[8][24][1], #icv
+            (24, 0) :(FORTE[8][24][0], #317
+                         FORTE[8][24][2], #var
+                         FORTE[8][24][1], #icv
                          ),
-            (25, 0) :(forte[8][25][0], #318
-                         forte[8][25][2], #var
-                         forte[8][25][1], #icv
+            (25, 0) :(FORTE[8][25][0], #318
+                         FORTE[8][25][2], #var
+                         FORTE[8][25][1], #icv
                          ),
-            (26, 0) :(forte[8][26][0], #319
-                         forte[8][26][2], #var
-                         forte[8][26][1], #icv
+            (26, 0) :(FORTE[8][26][0], #319
+                         FORTE[8][26][2], #var
+                         FORTE[8][26][1], #icv
                          ),
-            (27, 1) :(forte[8][27][0], #320
-                         forte[8][27][2], #var
-                         forte[8][27][1], #icv
+            (27, 1) :(FORTE[8][27][0], #320
+                         FORTE[8][27][2], #var
+                         FORTE[8][27][1], #icv
                          ),
             (27,-1) :((0,2,3,5,6,8,9,10), #321
-                         forte[8][27][2], #var
-                         forte[8][27][1], #icv
+                         FORTE[8][27][2], #var
+                         FORTE[8][27][1], #icv
                          ),
-            (28, 0) :(forte[8][28][0], #322
-                         forte[8][28][2], #var
-                         forte[8][28][1], #icv
+            (28, 0) :(FORTE[8][28][0], #322
+                         FORTE[8][28][2], #var
+                         FORTE[8][28][1], #icv
                          ),
-            (29, 1) :(forte[8][29][0], #323
-                         forte[8][29][2], #var
-                         forte[8][29][1], #icv
+            (29, 1) :(FORTE[8][29][0], #323
+                         FORTE[8][29][2], #var
+                         FORTE[8][29][1], #icv
                          ),
             (29,-1) :((0,2,3,4,6,7,8,9), #324
-                         forte[8][29][2], #var
-                         forte[8][29][1], #icv
+                         FORTE[8][29][2], #var
+                         FORTE[8][29][1], #icv
                          ),
             }
-
 #cardinality 9
-card_9 ={(1 , 0) :(forte[9][1][0], #325
-                         forte[9][1][2], #var
-                         forte[9][1][1], #icv
+card_9 ={(1 , 0) :(FORTE[9][1][0], #325
+                         FORTE[9][1][2], #var
+                         FORTE[9][1][1], #icv
                          ),
-            (2 , 1) :(forte[9][2][0], #326
-                         forte[9][2][2], #var
-                         forte[9][2][1], #icv
+            (2 , 1) :(FORTE[9][2][0], #326
+                         FORTE[9][2][2], #var
+                         FORTE[9][2][1], #icv
                          ),
             (2 ,-1) :((0,2,3,4,5,6,7,8,9), #327
-                         forte[9][2][2], #var
-                         forte[9][2][1], #icv
+                         FORTE[9][2][2], #var
+                         FORTE[9][2][1], #icv
                          ),
-            (3 , 1) :(forte[9][3][0], #328
-                         forte[9][3][2], #var
-                         forte[9][3][1], #icv
+            (3 , 1) :(FORTE[9][3][0], #328
+                         FORTE[9][3][2], #var
+                         FORTE[9][3][1], #icv
                          ),
             (3 ,-1) :((0,1,3,4,5,6,7,8,9), #329
-                         forte[9][3][2], #var
-                         forte[9][3][1], #icv
+                         FORTE[9][3][2], #var
+                         FORTE[9][3][1], #icv
                          ),
-            (4 , 1) :(forte[9][4][0], #330
-                         forte[9][4][2], #var
-                         forte[9][4][1], #icv
+            (4 , 1) :(FORTE[9][4][0], #330
+                         FORTE[9][4][2], #var
+                         FORTE[9][4][1], #icv
                          ),
             (4 ,-1) :((0,1,2,4,5,6,7,8,9), #331
-                         forte[9][4][2], #var
-                         forte[9][4][1], #icv
+                         FORTE[9][4][2], #var
+                         FORTE[9][4][1], #icv
                          ),
-            (5 , 1) :(forte[9][5][0], #332
-                         forte[9][5][2], #var
-                         forte[9][5][1], #icv
+            (5 , 1) :(FORTE[9][5][0], #332
+                         FORTE[9][5][2], #var
+                         FORTE[9][5][1], #icv
                          ),
             (5 ,-1) :((0,1,2,3,5,6,7,8,9), #333
-                         forte[9][5][2], #var
-                         forte[9][5][1], #icv
+                         FORTE[9][5][2], #var
+                         FORTE[9][5][1], #icv
                          ),
-            (6 , 0) :(forte[9][6][0], #334
-                         forte[9][6][2], #var
-                         forte[9][6][1], #icv
+            (6 , 0) :(FORTE[9][6][0], #334
+                         FORTE[9][6][2], #var
+                         FORTE[9][6][1], #icv
                          ),
-            (7 , 1) :(forte[9][7][0], #335
-                         forte[9][7][2], #var
-                         forte[9][7][1], #icv
+            (7 , 1) :(FORTE[9][7][0], #335
+                         FORTE[9][7][2], #var
+                         FORTE[9][7][1], #icv
                          ),
             (7 ,-1) :((0,2,3,5,6,7,8,9,10), #336
-                         forte[9][7][2], #var
-                         forte[9][7][1], #icv
+                         FORTE[9][7][2], #var
+                         FORTE[9][7][1], #icv
                          ),
-            (8 , 1) :(forte[9][8][0], #337
-                         forte[9][8][2], #var
-                         forte[9][8][1], #icv
+            (8 , 1) :(FORTE[9][8][0], #337
+                         FORTE[9][8][2], #var
+                         FORTE[9][8][1], #icv
                          ),
             (8 ,-1) :((0,2,3,4,6,7,8,9,10), #338
-                         forte[9][8][2], #var
-                         forte[9][8][1], #icv
+                         FORTE[9][8][2], #var
+                         FORTE[9][8][1], #icv
                          ),
-            (9 , 0) :(forte[9][9][0], #339
-                         forte[9][9][2], #var
-                         forte[9][9][1], #icv
+            (9 , 0) :(FORTE[9][9][0], #339
+                         FORTE[9][9][2], #var
+                         FORTE[9][9][1], #icv
                          ),
-            (10, 0) :(forte[9][10][0], #340
-                         forte[9][10][2], #var
-                         forte[9][10][1], #icv
+            (10, 0) :(FORTE[9][10][0], #340
+                         FORTE[9][10][2], #var
+                         FORTE[9][10][1], #icv
                          ),
-            (11, 1) :(forte[9][11][0], #341
-                         forte[9][11][2], #var
-                         forte[9][11][1], #icv
+            (11, 1) :(FORTE[9][11][0], #341
+                         FORTE[9][11][2], #var
+                         FORTE[9][11][1], #icv
                          ),
             (11,-1) :((0,1,3,4,5,7,8,9,10), #342
-                         forte[9][11][2], #var
-                         forte[9][11][1], #icv
+                         FORTE[9][11][2], #var
+                         FORTE[9][11][1], #icv
                          ),
-            (12, 0) :(forte[9][12][0], #343
-                         forte[9][12][2], #var
-                         forte[9][12][1], #icv
+            (12, 0) :(FORTE[9][12][0], #343
+                         FORTE[9][12][2], #var
+                         FORTE[9][12][1], #icv
                          ),
             }
-
 #cardinality 10
-card_10 ={(1 , 0) :(forte[10][1][0], #344
-                         forte[10][1][2], #var
-                         forte[10][1][1], #icv
+card_10 ={(1 , 0) :(FORTE[10][1][0], #344
+                         FORTE[10][1][2], #var
+                         FORTE[10][1][1], #icv
                          ),
-            (2 , 0) :(forte[10][2][0], #345
-                         forte[10][2][2], #var
-                         forte[10][2][1], #icv
+            (2 , 0) :(FORTE[10][2][0], #345
+                         FORTE[10][2][2], #var
+                         FORTE[10][2][1], #icv
                          ),
-            (3 , 0) :(forte[10][3][0], #346
-                         forte[10][3][2], #var
-                         forte[10][3][1], #icv
+            (3 , 0) :(FORTE[10][3][0], #346
+                         FORTE[10][3][2], #var
+                         FORTE[10][3][1], #icv
                          ),
-            (4 , 0) :(forte[10][4][0], #347
-                         forte[10][4][2], #var
-                         forte[10][4][1], #icv
+            (4 , 0) :(FORTE[10][4][0], #347
+                         FORTE[10][4][2], #var
+                         FORTE[10][4][1], #icv
                          ),
-            (5 , 0) :(forte[10][5][0], #348
-                         forte[10][5][2], #var
-                         forte[10][5][1], #icv
+            (5 , 0) :(FORTE[10][5][0], #348
+                         FORTE[10][5][2], #var
+                         FORTE[10][5][1], #icv
                          ),
-            (6 , 0) :(forte[10][6][0], #349
-                         forte[10][6][2], #var
-                         forte[10][6][1], #icv
+            (6 , 0) :(FORTE[10][6][0], #349
+                         FORTE[10][6][2], #var
+                         FORTE[10][6][1], #icv
                          ),
             }
-
 #cardinality 11
-card_11 ={(1 , 0) :(forte[11][1][0], #350
-                         forte[11][1][2], #var
-                         forte[11][1][1], #icv
+card_11 ={(1 , 0) :(FORTE[11][1][0], #350
+                         FORTE[11][1][2], #var
+                         FORTE[11][1][1], #icv
                          ),
             }
-
-#+++++++++++++++++
 #cardinality 12
-card_12 ={(1 , 0) :(forte[12][1][0], #351
-                         forte[12][1][2], #var
-                         forte[12][1][1], #icv
+card_12 ={(1 , 0) :(FORTE[12][1][0], #351
+                         FORTE[12][1][2], #var
+                         FORTE[12][1][1], #icv
                          ),
             }
 
@@ -2508,7 +2493,7 @@ SCREF= {(1, 1,    0)     : {"name":("monad","singleton", "unison")},
 
 def testDummy(self):
     """
-    >>> a = forte
+    >>> a = FORTE
     """
     pass
 
@@ -2554,10 +2539,10 @@ class Test(unittest.TestCase):
         for setSize, setCount in TNIMAX.items(): # look at tni structures
             if setSize == 0: continue
             for i in range(1, setCount+1):
-                self.assertEqual(len(forte[setSize][1]), 4)
+                self.assertEqual(len(FORTE[setSize][1]), 4)
             # must subtract one b/c all groups contain a zero set to pad
             # index values
-            self.assertEqual(len(forte[setSize])-1, setCount)
+            self.assertEqual(len(FORTE[setSize])-1, setCount)
         
 
 #-----------------------------------------------------------------||||||||||||--

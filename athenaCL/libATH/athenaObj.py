@@ -16,7 +16,7 @@ import sys, os, time, random, traceback, httplib, urllib
 import unittest, doctest
 
 
-athVersion = '2.0.0a2'
+athVersion = '2.0.0a4'
 athBuild = '2010.02.01'
 athDate     = '1 February 2010' # human readable version
 __version__ = athVersion

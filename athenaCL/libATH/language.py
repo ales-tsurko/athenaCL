@@ -126,13 +126,12 @@ class LangEn:
     msgAuthorEmail = 'ariza@flexatone.net'
     msgBugReport = 'athenacl-development@lists.sourceforge.net'
 
-
     msgCgiDomain = 'www.flexatone.net:80'
     msgCgiURL = '/cgi-bin/py/flexNet/software/q.cgi' #?stateNext=8'
     msgVersionURL = 'www.flexatone.net/athenaCL/version.txt'
     msgAthDownloadURL = 'www.flexatone.net/athena.html#athenaDownload'
-    # common file path to a tar file; add version number
-    msgAthDownloadTar = 'http://www.flexatone.net/athenaCL/athenaCL.tar.gz'
+    # common file path to a tar file; insert version number
+    msgAthDownloadTar = 'http://athenacl.googlecode.com/files/athenaCL-%s.tar.gz'
 
     msgAthIntro = 'Enter "cmd" to see all commands. For help enter "?".\nEnter "c" for copyright, "w" for warranty, "r" for credits.\n'
     
