@@ -36,8 +36,7 @@ from athenaCL.libATH import osTools
 from athenaCL.libATH import info
 
 from athenaCL.libATH import prefTools
-reporter = prefTools.Reporter(_MOD)
-reporter.status = 1 # force printing on regardless of debug pref
+environment = prefTools.Environment(_MOD)
 
 
 #-----------------------------------------------------------------||||||||||||--
@@ -63,7 +62,7 @@ except ImportError: pass
 #     """a pth file named athenaCL.pth can be placed in site-packages
 #     to give the path to the outer dir (not athenaCL dir), 
 #     allowing easy imports w/o having to move files..."""
-#     reporter.printDebug('writing pth file')
+#     environment.printWarn('writing pth file')
 #     # get dir outside of athenaCL dir
 #     # allows from athenaCL.libATH import ...
 #     msg = '%s\n' % os.path.dirname(athenaDir)
@@ -73,16 +72,16 @@ except ImportError: pass
 #         f.write(msg)
 #         f.close()
 #     except IOError: 
-#         reporter.printDebug(lang.msgFileIoError % dst)
+#         environment.printWarn(lang.msgFileIoError % dst)
 # 
 # def removePthLoader(sudoFound=None):
 #     """remove old pth loader"""
-#     reporter.printDebug('removing outdated pth file')
+#     environment.printWarn('removing outdated pth file')
 #     dst = os.path.join(osTools.findSitePackages(), 'athenaCL.pth')
 #     if os.path.exists(dst):
 #         osTools.rmSudo(dst, sudoFound)
 #     else:
-#         reporter.printDebug('no pth file exists')
+#         environment.printWarn('no pth file exists')
 #         
 # def reportPthLoader(sudoFound=None):
 #     """remove old pth loader"""
@@ -92,9 +91,9 @@ except ImportError: pass
 #         f = open(dst)
 #         msg = f.read()
 #         f.close()
-#         reporter.printDebug('pth contents:', msg.strip())
+#         environment.printWarn('pth contents:', msg.strip())
 #     else:
-#         reporter.printDebug('no pth file exists')
+#         environment.printWarn('no pth file exists')
 #         
         
 #-----------------------------------------------------------------||||||||||||--          
@@ -107,7 +106,7 @@ def writeUnixLauncher(pathLaunchScript, pathShellScript, optInstallTool=0,
     pathShellScript is the path to the shell script to be written\
     if optInstallTool == 2; case were to assume already root
     """
-    reporter.printDebug('writing launcher script:\n%s' % pathLaunchScript)
+    environment.printWarn('writing launcher script:\n%s' % pathLaunchScript)
     pythonExe = sys.executable
     # get name of shell script
     dir, name = os.path.split(pathShellScript)
@@ -139,7 +138,7 @@ def writeUnixLauncher(pathLaunchScript, pathShellScript, optInstallTool=0,
         f.close()
         osTools.chmod(775, pathShellScript)
     except IOError:
-        reporter.printDebug(lang.msgFileIoError % pathShellScript)
+        environment.printWarn(lang.msgFileIoError % pathShellScript)
 
     # optionally move this script to /usr/local/bin
     if optInstallTool >= 1: # install tool into /usr/local/bin
@@ -160,32 +159,32 @@ def writeUnixLauncher(pathLaunchScript, pathShellScript, optInstallTool=0,
 
 def removeUnixLauncher(sudoFound=None):
     """only remove if it is found within /usr/local/bin"""
-    reporter.printDebug('removing athenacl unix launcher')
+    environment.printWarn('removing athenacl unix launcher')
     
     dst = osTools.findAthBinPath()
     if os.path.exists(dst):
         osTools.rmSudo(dst, sudoFound)
     else:
-        reporter.printDebug('no athenacl unix launcher exists (%s)' % dst)
+        environment.printWarn('no athenacl unix launcher exists (%s)' % dst)
             
 def reportUnixLauncher():
     """only remove if it is found within /usr/local/bin"""  
     dst = osTools.findAthBinPath()
     if os.path.exists(dst):
-        reporter.printDebug(['athenacl unix launcher exists:', dst])
+        environment.printWarn(['athenacl unix launcher exists:', dst])
         f = open(dst)
         msg = f.read()
         f.close()
-        reporter.printDebug(['launcher contents:', msg.strip()])
+        environment.printWarn(['launcher contents:', msg.strip()])
     else:
-        reporter.printDebug('no athenacl unix launcher exists (%s)' % dst)
+        environment.printWarn('no athenacl unix launcher exists (%s)' % dst)
         
         
 #-----------------------------------------------------------------||||||||||||--
 def copyMan(athenaDir, sudoFound=None):
     """if install tool == 1, use sudo
     if install tool == 2, assume already root"""
-    reporter.printDebug('copying manual-page file')
+    environment.printWarn('copying manual-page file')
     manDir = osTools.findManPath(info.MANGROUP) # assumes group 1 of man pages
     if manDir == None: return None
     src = os.path.join(athenaDir, 'doc', info.MANFILE)
@@ -194,7 +193,7 @@ def copyMan(athenaDir, sudoFound=None):
 
 def removeMan(sudoFound=None):
     """removing man file"""
-    reporter.printDebug('removing manual-page file')
+    environment.printWarn('removing manual-page file')
     manDir = osTools.findManPath(info.MANGROUP) # assumes group 1 of man pages
     if manDir == None: return None
 
@@ -202,18 +201,18 @@ def removeMan(sudoFound=None):
     if os.path.exists(dst):
         osTools.rmSudo(dst, sudoFound)
     else:
-        reporter.printDebug('no athenacl manual-page exists (%s)' % dst)
+        environment.printWarn('no athenacl manual-page exists (%s)' % dst)
 
 def reportMan():
     manDir = osTools.findManPath(info.MANGROUP) # assumes group 1 of man pages
     if manDir == None:
-        reporter.printDebug('no manual directory found')
+        environment.printWarn('no manual directory found')
         return None
     dst = os.path.join(manDir, info.MANFILE)
     if os.path.exists(dst):
-        reporter.printDebug(['man path exists:', dst])
+        environment.printWarn(['man path exists:', dst])
     else:
-        reporter.printDebug('no athenacl manual-page exists (%s)' % dst)
+        environment.printWarn('no athenacl manual-page exists (%s)' % dst)
 
 
 #-----------------------------------------------------------------||||||||||||--
@@ -265,21 +264,20 @@ def removeDisutils(sudoFound=None):
     if os.path.exists(sitePkgAthena):
         osTools.rmSudo(sitePkgAthena, sudoFound)
     else:
-        reporter.printDebug('no distutuls install')
+        environment.printWarn('no distutuls install')
 
 def reportDisutils(sudoFound=None):
     # get site-packages dirs absolute file path
     sitePkgAthena = os.path.join(osTools.findSitePackages(), 'athenaCL')      
     if os.path.exists(sitePkgAthena):
-        reporter.printDebug(['distutuls install:', sitePkgAthena])
+        environment.printWarn(['distutuls install:', sitePkgAthena])
     else:
-        reporter.printDebug('no distutuls install')
+        environment.printWarn('no distutuls install')
 
 
 def runDisutils(bdistType):
-    print 'here'
     if bdistType == 'bdist_egg':
-        print 'using setuptools'
+        print('using setuptools')
         from setuptools import setup
     else:
         from distutils.core import setup
@@ -293,7 +291,7 @@ def runDisutils(bdistType):
         license = lang.msgLicenseName, 
         url = drawer.urlPrep(lang.msgAthURL),
         classifiers = _getClassifiers(),
-        download_url = lang.msgAthDownloadTar,
+        download_url = lang.msgAthDownloadTar % athVersion,
         packages = _getPackagesList(), # first is 'athenaCL'   
         package_data = {'athenaCL' : ['audio/*.aif',
                                       'demo/*.xml',
@@ -313,7 +311,7 @@ def writeManifestTemplate(fpPackageDir):
     osTools.rm(os.path.join(fpPackageDir, 'MANIFEST')) 
     dst = os.path.join(fpPackageDir, 'MANIFEST.in')
     msg = []
-    msg.append('global-include *.txt *.aif *.pdf')
+    msg.append('global-include *.txt *.aif *.pdf\n')
     msg.append('prune buildDoc dist')
 
     f = open(dst, 'w')
@@ -332,7 +330,7 @@ athVersion = athenaObj.__version__
 # _fpPackageDir should be path to athenaCL directory
 _fpPackageDir = os.getcwd() # this is a default, must be in the athenaCL dir when called
 if _fpPackageDir != fpSrcDir:
-    reporter.printDebug('cwd (%s) is not the athenaCL src directory (%s)' % (_fpPackageDir, fpSrcDir))
+    environment.printWarn('cwd (%s) is not the athenaCL src directory (%s)' % (_fpPackageDir, fpSrcDir))
 
 # most options here are only for unix plats
 optWriteManifestTemplate = 0
@@ -415,7 +413,7 @@ for argPair in parsedArgs:
 #-----------------------------------------------------------------||||||||||||--
 # main platform specific branck
 
-reporter.printDebug('active athenaCL package directory: %s' % _fpPackageDir)
+environment.printWarn('active athenaCL package directory: %s' % _fpPackageDir)
 
 if os.name == 'posix': # create launch script
     if (optWriteLauncher or optInstallMan or optRemoveLauncher 
@@ -453,7 +451,7 @@ else: # all windows flavors
 #if optWritePthLoader: writePthLoader(_fpPackageDir)
 
 if optReport:
-    reporter.printDebug('athenaCL setup.py report')
+    environment.printWarn('athenaCL setup.py report')
     reportDisutils()
     reportUnixLauncher()
     reportMan()

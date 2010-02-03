@@ -3,9 +3,9 @@ athenaCL is free software, distributed under the GNU General Public License.
 
 www.athenacl.org
 
-___._________________________._____________________________.________
-athenaCL 2.0.0a4
-1 February 2010
+___________________________________________.________________________
+athenaCL 2.0.0a6
+3 February 2010
 This document contains the following information:
 
 I. Platform Dependencies
@@ -21,7 +21,7 @@ V. Documentation
 VI. Contact Information
 VII. Credits and Acknowledgments
 
-______________________________________________________._____________
+____________________._.______________________________________.__.___
 I. PLATFORM DEPENDENCIES:
 
 athenaCL is distributed as executable cross-platform source-code. Platform-specific distributions and installers are provided for convenience. Make sure you have downloaded the correct archive for your platform:
@@ -38,7 +38,7 @@ Windows (any)
 http://www.flexatone.net/athenaCL/athenaCL.exe
 
 
-____________.____________________._____.____________________________
+__________________________________________._________________________
 II. SOFTWARE DEPENDENCIES:
 
 athenaCL requires Python 2.5 to 2.6. Python 3.0 and better is not yet supported. There is no athenaCL binary: athenaCL interactive sessions run inside a Python interpreter. Python is free and runs on every platform. No additional software is required for basic athenaCL operation. Download Python here:
@@ -50,7 +50,7 @@ http://www.csounds.com
 athenaCL produces images with various Python-based graphic output systems. These output systems include the Python TkInter GUI library and the Python Image Library (PIL), and may require additional Python software. Most Python distributions include TkInter (MacOS systems may require additional configuration); PIL is easily added to Python. Download PIL here:
 http://www.pythonware.com/products/pil/
 
-____________________._____________._______.______.__________________
+_______________._______.___________________.________________________
 IIIa. QUICK-START DISTRIBUTIONS:
 
 All Platforms
@@ -63,7 +63,7 @@ UNIX, Command Line Environments, Macintosh MacOS X:
 
 For more information and additional installation options, see below.
 
-_______.____________._______.___.____.______________________________
+_________.____________._______________________________._____._______
 IIIb. QUICK-START INSTALLERS:
 
 Python Prompt
@@ -78,7 +78,7 @@ Windows Installer (exe)
 
 For more information and additional installation options, see below.
 
-.________.__________._______________________________________________
+_________________________________._________________________________.
 IVa. INSTALLATION:
 
 Two installation methods are available: (1) placing the athenaCL directory wherever desired, or (2) installing the athenaCL source into the Python library with the Python Distribution Utilities (distutils). Both permit using athenaCL as an interactive application and as a library imported in Python.
@@ -87,7 +87,7 @@ Installing athenaCL consist of running the file "setup.py", a script that perfor
 
 The setup.py script can take arguments to perform optional installation procedures. (1) the "tool" argument, on UNIX and MacOS X systems, will install a command-line utility launcher, "athenacl," as well as a corresponding man page. (2) the "install" argument, on all platforms, will perform a Python distutils installation into the Python site-packages directory. (3) the "uninstall" option will remove all athenaCL installation files and directories.
 
-___________________________________________________________________.
+____________________________________________________________________
 IVb. athenaCL VIA COMMAND LINE INTERFACE (CLI):
 
 installing:
@@ -111,7 +111,7 @@ launching with the athenaCL tool:
 launching with the athenaCL tool and /usr/local/bin in PATH:
     5. % athenacl
 
-______._____________________________________________________________
+___________________________________________________._.______________
 IVc. athenaCL VIA PYTHON INTERPRETER APPLICATION (PIA):
 
 installing:
@@ -123,7 +123,7 @@ installing:
 launching:
     5. double-click "athenacl.py"
 
-_________._______________.___________________________.______________
+_________________________________________________.__________________
 IVd. athenaCL VIA IDLE:
 
 installing:
@@ -139,7 +139,7 @@ launching on Windows:
 launching from the command line interface:
     5. % python athenacl.py -s idle
 
-___.________________________________________________._.________.___.
+_______________________________________________.____________________
 IVe. athenaCL VIA PYTHON PROMPT (PP)
 
 If the athenaCL setup.py script has been successfully completed, Python should already by aware of the location of the current athenaCL installation. If the athenaCL setup.py script has not been properly run, the directory containing athenaCL must be manually added to the Python sys.path:
@@ -150,13 +150,13 @@ If the athenaCL setup.py script has been successfully completed, Python should a
 launching:
     3. >>> import athenaCL.athenacl
 
-____.____________________________.______.____.______________________
+____________________________________________._______________________
 V. DOCUMENTATION:
 
 For complete documentation, tutorials, and reference, see the athenaCL Tutorial Manual:
 www.flexatone.net/athenaDocs/
 
-_________________________.__________________________________________
+__________..____________________________________________.______.____
 VI. CONTACT INFORMATION:
 
 Send questions, comments, and bug reports to:
@@ -164,7 +164,7 @@ athenacl-development@lists.sourceforge.net
 athenaCL development is hosted at GoogleCode:
 http://code.google.com/p/athenacl/
 
-___________._________________________________.______________________
+________.______________________________._________________._________.
 VII. CREDITS and ACKNOWLEDGMENTS:
 
 athenaCL was created and is maintained by Christopher Ariza. Numerous generator ParameterObjects based in part on the Object-oriented Music Definition Environment (OMDE/pmask), Copyright 2000-2001 Maurizio Umberto Puxemdu; Cmask was created by Andre Bartetzki. The Command Line Interpreter is based in part on cmd.py; the module textwrap.py is by Greg Ward; both are distributed with Python, Copyright 2001-2003 Python Software Foundation. The fractional noise implementation in dice.py, Audacity spectrum importing, and dynamic ParameterObject boundaries are based in part on implementations by Paul Berg. The module genetic.py is based in part on code by Robert Rowe. The module midiTools.py is based in part on code by Bob van der Poel. The module chaos.py is based in part on code by Hans Mikelson. The module permutate.py is based in part on code by Ulrich Hoffman. Pitch class set names provided in part by Larry Solomon. The Rabin-Miller Primality Test is based in part on an implementation by Stephen Krenzel. The mpkg installer is generated with py2app (bdist_mpkg) by Bob Ippolito. Python language testing done with PyChecker (by Neal Norwitz Copyright 2000-2001 MetaSlash Inc.) and pyflakes (by Phil Frost Copyright 2005 Divmod Inc.). Thanks to the following people for suggestions and feedback: Paul Berg, Per Bergqvist, Marc Demers, Ryan Dorin, Elizabeth Hoffman, Anthony Kozar, Paula Matthusen, Robert Rowe, Jonathan Saggau, and Jesse Sklar. Thanks also to the many users who have submitted anonymous bug-reports.

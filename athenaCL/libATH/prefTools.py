@@ -128,14 +128,23 @@ def getCategoryDefaultDict(platform, category):
 
     return catDict
 
-def getDefaultDict(platform):
+def getDefaultPrefDict(platform=None):
     """ gets all catgtegories for a given platform
          when update prefs, checks default and provides missing value
 
-    >>> a = getDefaultDict('win')
+    >>> a = getDefaultPrefDict('win')
     >>> a['external']['audioFormat']
     'wav'
+    >>> a = getDefaultPrefDict()
+    >>> a['athena']['debug']
+    '0'
     """
+    if platform == None:
+        if os.name == 'posix':
+            platform = 'posix'
+        else:
+            platform = 'win'
+
     prefDict = {}
     prefDict['external'] = getCategoryDefaultDict(platform, 'external')
     prefDict['athena'] = getCategoryDefaultDict(platform, 'athena')
@@ -151,7 +160,7 @@ def updatePrefDict(oldPrefDict, platform):
         csound group renamed to external group
         fileFormat renamed audioFormat
     """
-    defaultPrefDict = getDefaultDict(platform)
+    defaultPrefDict = getDefaultPrefDict(platform)
     categories = ['external', 'athena', 'gui']
 
     # if missing a category:
@@ -196,26 +205,35 @@ def writePrefDict(prefFilePath, prefDict):
     f.writelines(msg)
     f.close()
 
-def getXmlPrefDict(prefFilePath):  
+def getXmlPrefDict(prefFilePath=None):  
     """open an xml pref file and return a dictionary
+    if prefFilePath == None, return a default
+
+    >>> a = getXmlPrefDict(None)
+    >>> a['athena']['debug']
+    '0'
     """
     doc = None
-    f = open(prefFilePath, 'r') 
-    try:
-        doc = xml.dom.minidom.parse(f)
-    # this may be bad, but there could be many errors:
-    # xml.parsers.expat.ExpatError
-    # xml.sax._exceptions.SAXParseException
-    # not worth the risk; just get new prefs
-    except: # catch all exceptions
-        # cant parse the preference files
+    if prefFilePath != None:
+        f = open(prefFilePath, 'r') 
+        try:
+            doc = xml.dom.minidom.parse(f)
+        # this may be bad, but there could be many errors:
+        # xml.parsers.expat.ExpatError
+        # xml.sax._exceptions.SAXParseException
+        # not worth the risk; just get new prefs
+        except: # catch all exceptions
+            # cant parse the preference files
+            doc = None
+        finally:
+            f.close() 
+    else:
         doc = None
-    f.close() 
     if doc != None:
         procData = xmlTools.xmlToPy(doc)
         return procData['preferences']
     else: # cant load this data, get new data
-        return {} # will fice an updates of all prefs
+        return getDefaultPrefDict() 
 
 
 
@@ -233,22 +251,35 @@ class Environment(object):
     def debugStat(self):
         """Get the debug preference if available, otherwise zero
         only do this once
+
+        >>> a = Environment()
+        >>> post = a.debugStat()
         """
         fp = drawer.getPrefsPath()
         if not os.path.exists(fp):
             return 0
         prefDict = getXmlPrefDict(fp)
-        return int(prefDict['athena']['debug'])
+        # if fp is not found, this should return a default
+        try:
+            return int(prefDict['athena']['debug'])
+        except: # catch all: this cannot crash
+            return 0
     
     def getScratchFilePath(self):
         """Get the scratch preference if available, otherwise return
         None
+
+        >>> a = Environment()
+        >>> post = a.getScratchFilePath()
         """
         fp = drawer.getPrefsPath()
         if not os.path.exists(fp):
             return None
         prefDict = getXmlPrefDict(fp)
-        fp = prefDict['athena']['fpScratchDir']
+        try:
+            fp = prefDict['athena']['fpScratchDir']
+        except: # catch all
+            fp = ''
         if fp == '':
             return None
         else:

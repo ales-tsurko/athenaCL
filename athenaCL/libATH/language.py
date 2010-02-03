@@ -144,11 +144,11 @@ class LangEn:
     msgAthDescMini = "polyphonic, poly-paradigm algorithmic music composition in an interactive command-line environment"
     
     # normal subtitle
-    msgAthDescShort       = """\
+    msgAthDescShort = """\
 modular, polyphonic, poly-paradigm algorithmic music composition in a cross-platform interactive command-line environment."""
 
-    msgAthDescLong            = """\
-The athenaCL system is an open-source, object-oriented composition tool written in Python. The system can be scripted and embedded, and includes integrated instrument libraries, post-tonal and microtonal pitch modeling tools, multiple-format graphical outputs, and musical output in Csound, MIDI, audio file, XML, and text formats."""
+    msgAthDescLong = """\
+The athenaCL system is an open-source, object-oriented composition tool written in Python. The system can be scripted and embedded, and includes integrated instrument libraries, post-tonal and microtonal pitch modeling tools, multiple-format graphical outputs, and musical output in Csound, SuperCollider, MIDI, audio file, XML, and text formats."""
 
     
     # sf net limits to only 254 characters, also for fink desc detail

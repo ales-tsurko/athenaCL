@@ -16,34 +16,22 @@ import sys, os, time, random, traceback, httplib, urllib
 import unittest, doctest
 
 
-athVersion = '2.0.0a4'
-athBuild = '2010.02.01'
-athDate     = '1 February 2010' # human readable version
+athVersion = '2.0.0a6'
+athBuild = '2010.02.03'
+athDate     = '3 February 2010' # human readable version
 __version__ = athVersion
 __license__ = "GPL"
-
 
 
 
 # athenaObj.py needs correct dir information for writing
 # a file (prefs) and loading demos, and opening .xml and and other resources 
 # External is sometimes called by itself, needs to find correct paths
-# this checks for correct path access, attempts to mangle sys.path to fix
+# this checks for correct path access, attempts to mangle sys.path to fix 
+# imports if necssary
+
+
 #-----------------------------------------------------------------||||||||||||--
-# try: import libATH #assume we are in package dir
-# except ImportError:
-#     try: from athenaCL import libATH
-#     except ImportError: print 'athenaCL package cannot be found.'; sys.exit()
-# 
-# 
-# fpLibATH = libATH.__path__[0] # list, get first item
-# if os.path.isabs(fpLibATH) != 1: #relative path, add cwd
-#     fpLibATH = os.path.abspath(fpLibATH)
-# fpSrcDir = os.path.dirname(fpLibATH)
-# fpPackageDir = os.path.dirname(fpSrcDir)
-# if fpPackageDir not in sys.path: sys.path.append(fpPackageDir)
-
-
 try: 
     import libTM #assume we are in libATH
 except ImportError:
@@ -310,11 +298,11 @@ class External(object):
             else: # new prefs on first start, or after deleting
                 createNewPrefs = 1
             if createNewPrefs:
-                self.prefDict = prefTools.getDefaultDict(os.name)
+                self.prefDict = prefTools.getDefaultPrefDict(os.name)
                 prefTools.writePrefDict(drawer.getPrefsPath(), self.prefDict)
 
         elif self.sessionType == 'cgi': # if cgi session, only use pref dict
-            self.prefDict = prefTools.getDefaultDict(os.name)
+            self.prefDict = prefTools.getDefaultPrefDict(os.name)
 
     def writePref(self, category, key, value):
         """writes new value or pref file"""

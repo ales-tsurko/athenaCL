@@ -19,8 +19,7 @@ from athenaCL.libATH import info
 _MOD = 'dist.py'
 
 from athenaCL.libATH import prefTools
-reporter = prefTools.Reporter(_MOD)
-reporter.status = 1 # force printing on regardless of debug pref
+environment = prefTools.Environment(_MOD)
 
 
 class Distributor(object):
@@ -30,6 +29,8 @@ class Distributor(object):
         self.fpTar = None
 
         self.fpDistDir = os.path.join(athenaObj.fpPackageDir, 'dist')
+        self.fpBuildDir = os.path.join(athenaObj.fpPackageDir, 'build')
+
         self._updatePaths()
 
     def _updateDocs(self):
@@ -56,8 +57,8 @@ class Distributor(object):
 
         for fn in [self.fpEgg, self.fpWin, self.fpTar]:
             if fn == None:
-                raise Exception('missing fn path')
-            reporter.printDebug(fn)
+                environment.printWarn('missing fn path')
+            environment.printWarn(fn)
 
 
     def build(self):
@@ -70,6 +71,10 @@ class Distributor(object):
         os.system('cd %s; python setup.py sdist' % 
                     athenaObj.fpPackageDir)
         self._updatePaths()
+
+        # remove build dir
+        environment.printWarn('removing %s' % self.fpBuildDir)
+        os.system('rm -r %s' % self.fpBuildDir)
 
 
     def _uploadPyPi(self):
@@ -89,10 +94,10 @@ class Distributor(object):
         elif fp.endswith('.egg'):
             labels = ['OpSys-All', 'Featured', 'Type-Archive']
     
-        reporter.printDebug(['starting GoogleCode upload of:', fp])
+        environment.printWarn(['starting GoogleCode upload of:', fp])
         status, reason, url = googlecode_upload.upload_find_auth(fp, 
                         project, summary, labels, user)
-        reporter.printDebug([status, reason])
+        environment.printWarn([status, reason])
 
     def upload(self):    
         self._uploadPyPi()
