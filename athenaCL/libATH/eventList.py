@@ -2607,7 +2607,8 @@ class EventMode(object):
 
         """
         if fpOutputPrime == None: 
-            fpOutputPrime = drawer.tempFile() # gets txt temp file
+            #fpOutputPrime = drawer.tempFile() # gets txt temp file
+            fpOutputPrime = environment.getTempFile('.txt')
         self.fpOutputPrime = fpOutputPrime
         self._initRefNames()
         self._initRefPaths()

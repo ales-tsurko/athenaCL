@@ -362,7 +362,8 @@ def tempFile(ext='.txt', fpDir=''):
     """make temp file in temp dir, otherwise get standard temp file
     branch by platform and do different things here
 
-    note: compare with developing method in prefTools.py
+    NOTE: do not use this unless absolutely necessary
+    use method in Environment in prefTools
     """
     fpDir = tempDir(fpDir)
     if not os.path.exists(fpDir): # use temp file

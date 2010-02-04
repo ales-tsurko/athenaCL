@@ -3141,7 +3141,8 @@ class TPeg(_CommandTP):
             environment.printWarn(['not yet implemented'])
         elif self.outObj.name in ['textSpace', 'textTab']: # textSpace, textTab
             if self.fp == None:
-                self.fp = drawer.tempFile(self.outObj.ext)
+                self.fp = environment.getTempFile(self.outObj.ext)
+                #self.fp = drawer.tempFile(self.outObj.ext)
             if self.outObj.name == 'textSpace':
                 self.splitSco.writeTable(self.fp, ' ')
             elif self.outObj.name == 'textTab':
@@ -3150,7 +3151,8 @@ class TPeg(_CommandTP):
         # write audio file
         elif self.outObj.name in ['audioFile']: # use .aif, but use pref later
             if self.fp == None:
-                self.fp = drawer.tempFile(self.outObj.ext)
+                self.fp = environment.getTempFile(self.outObj.ext)
+                #self.fp = drawer.tempFile(self.outObj.ext)
             self.splitSco.writeBuffer(self.fp)
             self.pathList.append(self.fp)
 
