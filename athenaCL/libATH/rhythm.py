@@ -115,6 +115,10 @@ class Pulse:
         can also be an int or float, becoming a single pulse and being dynamic
         if two data elements, assumes div/mod
         three is complete tuple
+
+        >>> a = Pulse('3,1')
+        >>> a
+        (3,1,+)
         """
         # valid forms as strings and attributes
         self.forms = ('dur', 'triple', 'acc', 'sus') # 'str' fromat not complete

@@ -1,5 +1,5 @@
 #-----------------------------------------------------------------||||||||||||--
-# Name:          SC.py
+# Name:          multiset.py
 # Purpose:       utility functions and SC object for all set class operations.
 #
 # Authors:       Christopher Ariza
@@ -31,10 +31,13 @@ TNREF = setTables.TNREF     # ref dcitionary
 SCREF = setTables.SCREF     # ref dcitionary
 FORTE = setTables.FORTE     # classic forte table
 
-#-----------------------------------------------------------------||||||||||||--
+
+_MOD = 'multiset.py'
+from athenaCL.libATH import prefTools
+environment = prefTools.Environment(_MOD)
 
 
-_MOD = 'SC.py'
+
 #-----------------------------------------------------------------||||||||||||--
 
 # these function are depreciated here
@@ -287,7 +290,7 @@ def forteToSc(card, index, inversion=-2):
         else: scIndex = index
 
     if boundError:
-        print _MOD, 'SC boundary error', card, index, inversion
+        environment.printWarn(['boundary error', card, index, inversion])
         return None
     # check fr proper inversion status useing variance vector
     # if_no inv give fr a set, 0 or 1 is suplied, never -1
@@ -766,7 +769,8 @@ class Multiset:
         """
         normData = findNormalT(self._access('psReal'))
         if normData == None: # an erro has happend
-            print 'SC.py: _update: problem w/', self._access('psReal')
+            environment.printDebug(['_update: problem w/',
+                                    self._access('psReal')])
             raise error.MultisetError
         self._scTriple, self.tRef = normData
         # this was removed as redundant
@@ -1188,24 +1192,24 @@ def getPitch(termObj=None, read=None):
 
 
 
-class TestOld:
-    def __init__(self):
-        self.testMultisetData()
-
-    def testMultisetData(self):
-        demo = ((2,-5,3,5),(3.06,4.25,8.002),(34,),
-                    (7,9,4,5,6,4,3,2,4,5,3,3,3))
-        for set in demo:
-            obj = Multiset(set)
-            print '\n', obj, len(obj), obj.get('card')
-            for form in obj.forms:
-                print form, obj.repr(form)
-                print getattr(obj, form)
-
-    def testMultisetTrans(self):
-        pass
-
-
+# class TestOld:
+#     def __init__(self):
+#         self.testMultisetData()
+# 
+#     def testMultisetData(self):
+#         demo = ((2,-5,3,5),(3.06,4.25,8.002),(34,),
+#                     (7,9,4,5,6,4,3,2,4,5,3,3,3))
+#         for set in demo:
+#             obj = Multiset(set)
+#             print '\n', obj, len(obj), obj.get('card')
+#             for form in obj.forms:
+#                 print form, obj.repr(form)
+#                 print getattr(obj, form)
+# 
+#     def testMultisetTrans(self):
+#         pass
+# 
+# 
 
     
 #-----------------------------------------------------------------||||||||||||--

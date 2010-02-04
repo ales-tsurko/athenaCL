@@ -817,7 +817,7 @@ class PilCanvas(_CanvasBase):
         #del self.c # not sure if this is necessary
         if filePath == None:
             ext = '.%s' % self.subFmt
-            filePath = osTools.tempFile(ext) # jpg/png       
+            filePath = drawer.tempFile(ext) # jpg/png       
         if self.transp != None: # transparency not working
             self.imageObj.save(filePath, transparency=self.transp)
         else: #determine format from name
@@ -830,10 +830,10 @@ class PilCanvas(_CanvasBase):
         """dir provides a directory to write a file w/ auto-gen name"""
         if dir != None: # get path
             ext = '.%s' % self.subFmt
-            filePath = os.path.join(dir, osTools.tempFileName(ext))
+            filePath = os.path.join(dir, drawer.tempFileName(ext))
         else:
             ext = '.%s' % self.subFmt
-            filePath = osTools.tempFile(ext) # jpg/png       
+            filePath = drawer.tempFile(ext) # jpg/png       
         self.write(filePath, 1, prefDict)
         #if self.subFmt == 'jpg': # gets defaul pil format, which is jpeg
         #    self.imageObj.show() # used to use show, but sometimes fails
@@ -1196,7 +1196,7 @@ gsave %s 1 1 scale grestore
     
     def write(self, filePath=None, openMedia=1, prefDict=None):
         if filePath == None:
-            filePath = osTools.tempFile('.eps')               
+            filePath = drawer.tempFile('.eps')               
         f = open(filePath, 'w')
         f.writelines(''.join(self.c) + self._tailStr())
         f.close
@@ -1208,9 +1208,9 @@ gsave %s 1 1 scale grestore
         """show action is to write file"""
         if dir != None: # get path
             ext = '.eps'
-            filePath = os.path.join(dir, osTools.tempFileName(ext))
+            filePath = os.path.join(dir, drawer.tempFileName(ext))
         else:
-            filePath = osTools.tempFile('.eps') # jpg/png    
+            filePath = drawer.tempFile('.eps') # jpg/png    
         self.write(filePath, 1, prefDict)
 
 

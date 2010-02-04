@@ -520,7 +520,14 @@ class Command(object):
             return None
 
     def _validScratchDir(self):
-        """use to set valid scratch dir; get from user if necessary"""
+        """use to set valid scratch dir; get from user if necessary
+
+        note that if this is called and the scratch directory
+        is not set, an interactive prompt will begin
+
+        TODO: use of this method should be phased out; instead
+        temp files should be created if the scratch dir is not set
+        """
         path = self.ao.external.getPref('athena', 'fpScratchDir')
         if not os.path.isdir(path):
             cmdObj = APdir(self.ao, '', argForce={'name':'fpScratchDir'})
@@ -531,18 +538,21 @@ class Command(object):
             return path
         else: return None
             
-    def _validScratchFp(self, ext='.xml'):
-        """provide a valid xml file name
-        return None on error"""
-        path = self._validScratchDir()
-        if path == None: return None
-        else: return os.path.join(path, osTools.tempFileName(ext))
+#     def _validScratchFp(self, ext='.xml'):
+#         """provide a valid xml file name
+#         return None on error"""
+#         path = self._validScratchDir()
+#         if path == None: return None
+#         else: return os.path.join(path, drawer.tempFileName(ext))
          
     def _validGfxSetup(self):
         """check if the user preference scratch is a good dir
         get dir if not set
         check format compatabilities
-        returns ok, and dir path"""
+        returns ok, and dir path
+
+        TODO: needs to be updated to use new method of getting temp files
+        """
         fmt = self._validGfxPreference() # checks is pref fmt is available
         if fmt == None: return 0, fmt, None # error 
         # check scratch dir for methods that write files
@@ -2511,7 +2521,8 @@ class PIh(Command):
         if self._piTestExistance() != None: #check existance
             return self._piTestExistance()
         self.pName = self.ao.activePath
-        self.filePath = self._validScratchFp() # return None on error
+        self.filePath = environment.getTempFile('.xml')
+        #self.filePath = self._validScratchFp() # return None on error
         if self.filePath == None: return lang.msgReturnCancel
         
     def process(self):
@@ -2905,7 +2916,7 @@ class TPv(_CommandTP):
 
 class TPmap(_CommandTP):
     """
-    TODO: library should not be a required argument
+    TODO: update method of getting temporary files
 
     >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> a = TPmap(ao, args='120 ru,0,1')
@@ -3130,7 +3141,7 @@ class TPeg(_CommandTP):
             environment.printWarn(['not yet implemented'])
         elif self.outObj.name in ['textSpace', 'textTab']: # textSpace, textTab
             if self.fp == None:
-                self.fp = osTools.tempFile(self.outObj.ext)
+                self.fp = drawer.tempFile(self.outObj.ext)
             if self.outObj.name == 'textSpace':
                 self.splitSco.writeTable(self.fp, ' ')
             elif self.outObj.name == 'textTab':
@@ -3139,7 +3150,7 @@ class TPeg(_CommandTP):
         # write audio file
         elif self.outObj.name in ['audioFile']: # use .aif, but use pref later
             if self.fp == None:
-                self.fp = osTools.tempFile(self.outObj.ext)
+                self.fp = drawer.tempFile(self.outObj.ext)
             self.splitSco.writeBuffer(self.fp)
             self.pathList.append(self.fp)
 
@@ -5590,7 +5601,7 @@ class _CommandEO(Command):
         if format == 'data':
             return prefData # return as list of strings
         elif format == 'str':
-            return drawer.listScrub(prefData, None, 'rmQuote')
+            return drawer.listScrub(prefData, space='keep', quote='rmQuote')
 
     def _emSetOuptutFormats(self, fmtList):
         prefList = []
@@ -5929,20 +5940,25 @@ class ELn(Command):
             scoDir, scoName = os.path.split(self.scoPath)
 
         if self.scoPath == None:
-            if self.ao.aoInfo['fpLastDirEventList'] in ['', None]:
-                defaultScoPath = self.ao.aoInfo['fpLastDir']
-            else:
-                defaultScoPath = self.ao.aoInfo['fpLastDirEventList']
-            dlgVisMet = self.ao.external.getPref('athena', 'dlgVisualMethod')
-            while 1: # to make sure you a get a .sco ending
-                self.scoPath, ok = dialog.promptPutFile(lang.msgELnameScore,
-                    'ath.xml',  defaultScoPath, '.xml', dlgVisMet, self.termObj)
-                if ok != 1: return lang.msgReturnCancel
-                scoDir, scoName = os.path.split(self.scoPath)
-                if scoName[-4:] == '.xml': break
-                else:
-                    dialog.msgOut(lang.msgELbadScoreName, self.termObj)
-                    continue
+            self.scoPath = environment.getTempFile('.xml')
+            if self.scoPath == None: return lang.msgReturnCancel
+            scoDir, scoName = os.path.split(self.scoPath)
+
+# remove to use temporary files
+#             if self.ao.aoInfo['fpLastDirEventList'] in ['', None]:
+#                 defaultScoPath = self.ao.aoInfo['fpLastDir']
+#             else:
+#                 defaultScoPath = self.ao.aoInfo['fpLastDirEventList']
+#             dlgVisMet = self.ao.external.getPref('athena', 'dlgVisualMethod')
+#             while 1: # to make sure you a get a .sco ending
+#                 self.scoPath, ok = dialog.promptPutFile(lang.msgELnameScore,
+#                     'ath.xml',  defaultScoPath, '.xml', dlgVisMet, self.termObj)
+#                 if ok != 1: return lang.msgReturnCancel
+#                 scoDir, scoName = os.path.split(self.scoPath)
+#                 if scoName[-4:] == '.xml': break
+#                 else:
+#                     dialog.msgOut(lang.msgELbadScoreName, self.termObj)
+#                     continue
 
         # this is a dir, not a path
         self.ao.aoInfo['fpLastDirEventList'] = scoDir 
@@ -6974,7 +6990,7 @@ class APdir(Command):
         # by other commands, here, the do() method of Command
         # argForce gives a quasi interactive nature
         if 'argForce' in keywords.keys():
-            self.argForce = argForce
+            self.argForce = keywords['argForce']
         else:
             self.argForce = None
 

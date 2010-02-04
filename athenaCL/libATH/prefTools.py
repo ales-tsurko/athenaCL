@@ -265,25 +265,31 @@ class Environment(object):
         except: # catch all: this cannot crash
             return 0
     
-    def getScratchFilePath(self):
+    def getScratchDirPath(self):
         """Get the scratch preference if available, otherwise return
         None
 
+        Note: this reads from file on each load; this not be efficient
+
         >>> a = Environment()
-        >>> post = a.getScratchFilePath()
+        >>> post = a.getScratchDirPath()
         """
         fp = drawer.getPrefsPath()
         if not os.path.exists(fp):
             return None
         prefDict = getXmlPrefDict(fp)
         try:
-            fp = prefDict['athena']['fpScratchDir']
+            fpScratch = prefDict['athena']['fpScratchDir']
         except: # catch all
-            fp = ''
-        if fp == '':
+            fpScratch = ''
+        if not os.path.exists(fpScratch) or not os.path.isdir(fpScratch): 
+            self.printWarn('scratch directory preference set to a non existing directory: %s' % fpScratch)
+            fpScratch = '' # do not pass forward        
+        # final return
+        if fpScratch == '':
             return None
         else:
-            return fp
+            return fpScratch
 
     def _formatMsg(self, msg):
         if not drawer.isList(msg):
@@ -314,14 +320,15 @@ class Environment(object):
             sys.stderr.write(self._formatMsg(msg))
 
 
-    def getTempFile(self, suffix=''):
+    def getTempFile(self, suffix='', fileNameTimeStamp=True):
         '''Return a file path to a temporary file with the specified suffix
     
         This uses the directory set as a preference if possible.
 
+        Ths always returns as file path, whether or not a pref is set
         '''
-        fpSrc = self.getScratchFilePath()
-        if fpSrc == None:
+        fpSrc = self.getScratchDirPath() 
+        if fpSrc == None: # if it does not exist or cannot be found
             if os.name == 'posix':
                 fd, fp = tempfile.mkstemp(suffix=suffix) 
                 if isinstance(fd, int):
@@ -337,25 +344,29 @@ class Environment(object):
                     tf.close()
         else:
             if not os.path.exists(fpSrc):    
+                # cannot continue at all w/o this directory
                 raise Exception('user-specified scratch directory (%s) does not exists.' % fpSrc)
-            if os.name == 'posix':
-                fd, fp = tempfile.mkstemp(dir=fpSrc, suffix=suffix)
-                if isinstance(fd, int):
-                    # on MacOS, fd returns an int, like 3, when this is called
-                    # in some context (specifically, programmatically in a 
-                    # TestExternal class. the fp is still valid and works
-                    pass
-                else:
-                    fd.close() 
-            else: # win
-                if sys.hexversion < 0x02030000:
-                    raise Exception("cannot create temporary file")
-                else:
-                    tf = tempfile.NamedTemporaryFile(dir=fpSrc, 
-                                suffix=suffix)
-                    fp = tf.name
-                    tf.close()
 
+            # option to generate file name with a time stamp
+            # and place in the scratch dir
+            if fileNameTimeStamp == True:
+                fp = os.path.join(fpSrc, drawer.tempFileName(suffix))
+            else:
+                if os.name == 'posix':
+                    fd, fp = tempfile.mkstemp(dir=fpSrc, suffix=suffix)
+                    if isinstance(fd, int):
+                        # on MacOS, fd returns an int, like 3, when called
+                        pass
+                    else:
+                        fd.close() 
+                else: # win
+                    if sys.hexversion < 0x02030000:
+                        raise Exception("cannot create temporary file")
+                    else:
+                        tf = tempfile.NamedTemporaryFile(dir=fpSrc, 
+                                    suffix=suffix)
+                        fp = tf.name
+                        tf.close()
         self.printDebug(['temporary file:', fp])
         return fp
 

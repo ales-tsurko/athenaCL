@@ -5,7 +5,7 @@
 # Authors:       Christopher Ariza
 #
 # Copyright:     (c) 2001-2010 Christopher Ariza
-# License:       GPL
+# License:       LGPL
 #-----------------------------------------------------------------||||||||||||--
 
 import unittest, doctest

@@ -1052,8 +1052,8 @@ class _OutputEngine:
 
         self.emObj = emObj # name of eventMode that is using this engine
         self.ao = ao
-
-        self.orcIncompat = [] # define orc sources tt are incompat w/ this engine
+        # define orc sources tt are incompat w/ this engine
+        self.orcIncompat = [] 
         self.orcObj = None # define name of orc used in converting mix vals
         # output data
         self.outComplete = [] # outpout formats that were written
@@ -1741,7 +1741,7 @@ class EngineCsoundNative(_OutputEngine):
         # define orcs that are not compatible w/ this engine
         # this engine can only use its own orc
         self.orcIncompat = ['csoundExternal', 'csoundSilence', 'generalMidi',
-                                  'generalMidiPercussion']
+                            'generalMidiPercussion', 'superColliderNative']
         self.outAvailable = ['csoundOrchestra', 'csoundBatch', 
                                         'csoundData', 'csoundScore']
         # min out should be score, orc, bat; csd is an option
@@ -2324,7 +2324,11 @@ class EngineText(_OutputEngine):
 
 #-----------------------------------------------------------------||||||||||||--
 class EventMode(object):
-    """this object handles multiple output methods, selecting
+    """EventModes are defined by this class, where an EventMode sets up
+    one ore more Engine to render an output.
+
+
+    this object handles multiple output methods, selecting
     which can output when, reporting the results
     Performance object is created here as well
     
@@ -2339,7 +2343,9 @@ class EventMode(object):
     """
     def __init__(self, ao, name):
         self.name = eventModeParser(name) # needed to get default orc update
-        if self.name == None: raise ValueError, 'no such EventMode: %s' % name
+        if self.name == None: 
+            raise ValueError, 'no such EventMode: %s' % name
+
         self.ao = ao
         # not necessary to store perfObj, as created only w/ process method
         #self.perfObj = None # will be made w/ call
@@ -2483,11 +2489,12 @@ class EventMode(object):
             engineRequest.append('EngineCsoundExternal')
 
         # last option: a simple output request, regardless of event mode
-        elif 'superColliderTask' in outRequest:
+#         elif 'superColliderTask' in outRequest:
+        elif self.name == 'superColliderNative':
             engineRequest.append('EngineSuperColliderTask')
 
-        if self.name == 'csoundNative':
-            engineRequest.append('EngineCsoundNative')
+#         if self.name == 'csoundNative':
+#             engineRequest.append('EngineCsoundNative')
 
         # do compatible types, possible with many formats
         # compatible types are not dependent on auxillary numbers
@@ -2600,7 +2607,7 @@ class EventMode(object):
 
         """
         if fpOutputPrime == None: 
-            fpOutputPrime = osTools.tempFile() # gets txt temp file
+            fpOutputPrime = drawer.tempFile() # gets txt temp file
         self.fpOutputPrime = fpOutputPrime
         self._initRefNames()
         self._initRefPaths()

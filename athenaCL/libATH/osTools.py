@@ -46,73 +46,76 @@ knownEXT = (imageEXT + audioEXT + videoEXT + dataEXT +
                 
 #-----------------------------------------------------------------||||||||||||--
 # utility functions for naming, getting files
+# moved to drawer.py
 
-def gmtimeStr():
-    """get a gm time string in a nice format"""
-    raw = time.gmtime()
-    asc = time.asctime(raw)
-    asc = asc.replace(' ', ' ') # removie double spaces
-    asc = asc.split(' ')
-    msg = '%s, %s %s %s %s GMT' % (asc[0], raw[2], asc[1],
-                                             raw[0], asc[3])
-    return msg
-    
-
-def localtimeStr():
-    """get a gm time string in a nice format"""
-    raw = time.localtime()
-    asc = time.asctime(raw)
-    asc = asc.replace(' ', ' ') # removie double spaces
-    asc = asc.split(' ')
-    msg = '%s, %s %s %s %s EST' % (asc[0], raw[2], asc[1],
-                                             raw[0], asc[3])
-    return msg
-
-def gmtimeStamp(sigDig=6, zone='gmt'):
-    "returns a string with spaced 0s, can varry signif digits"
-    if zone == 'gmt':
-        timeTuple = list(time.gmtime()) # get time tuple
-    else: # if local
-        timeTuple = list(time.localtime()) # get time tuple
-    if sigDig > 0:
-        timeTuple = timeTuple[0:sigDig] # just get first 6 elements
-    else: # remove from the front
-        timeTuple = timeTuple[abs(sigDig):6] # just get first 6 elements
-    strName = ''
-    for entry in timeTuple:
-        if entry <= 9: # small nums perceed with 0
-            strName = strName + '.0%s' % str(entry)
-        else:
-            strName = strName + '.%s' % str(entry)
-    strName = strName[1:] # remove leading .
-    return strName
-
-
-def localtimeStamp(sigDig=6):
-    "returns a string with spaced 0s, can varry signif digits"
-    return gmtimeStamp(sigDig, 'local')
-
-def tempDir(tempPath='/Volumes/xdisc/_scratch'):
-    "get a temp directory"
-    if not os.path.exists(tempPath): # use temp dir if doesnt exist
-        tempPath = tempfile.mkdtemp()
-        environment.printWarn([lang.WARN, 'using %s as scratch directory' % tempPath])
-    return tempPath
-
-def tempFileName(ext):
-    return gmtimeStamp() + ext
-
-def tempFile(ext='.txt', fpDir=''):
-    """make temp file in temp dir, otherwise get standard temp file
-    branch by platform and do different things here
-    """
-    fpDir = tempDir(fpDir)
-    if not os.path.exists(fpDir): # use temp file
-        tempPath = tempfile.mktemp(ext)
-    else:
-        tempName = gmtimeStamp() + ext
-        tempPath = os.path.join(fpDir, tempName)
-    return tempPath
+# def gmtimeStr():
+#     """get a gm time string in a nice format"""
+#     raw = time.gmtime()
+#     asc = time.asctime(raw)
+#     asc = asc.replace(' ', ' ') # removie double spaces
+#     asc = asc.split(' ')
+#     msg = '%s, %s %s %s %s GMT' % (asc[0], raw[2], asc[1],
+#                                              raw[0], asc[3])
+#     return msg
+#     
+# 
+# def localtimeStr():
+#     """get a gm time string in a nice format"""
+#     raw = time.localtime()
+#     asc = time.asctime(raw)
+#     asc = asc.replace(' ', ' ') # removie double spaces
+#     asc = asc.split(' ')
+#     msg = '%s, %s %s %s %s EST' % (asc[0], raw[2], asc[1],
+#                                              raw[0], asc[3])
+#     return msg
+# 
+# def gmtimeStamp(sigDig=6, zone='gmt'):
+#     "returns a string with spaced 0s, can varry signif digits"
+#     if zone == 'gmt':
+#         timeTuple = list(time.gmtime()) # get time tuple
+#     else: # if local
+#         timeTuple = list(time.localtime()) # get time tuple
+#     if sigDig > 0:
+#         timeTuple = timeTuple[0:sigDig] # just get first 6 elements
+#     else: # remove from the front
+#         timeTuple = timeTuple[abs(sigDig):6] # just get first 6 elements
+#     strName = ''
+#     for entry in timeTuple:
+#         if entry <= 9: # small nums perceed with 0
+#             strName = strName + '.0%s' % str(entry)
+#         else:
+#             strName = strName + '.%s' % str(entry)
+#     strName = strName[1:] # remove leading .
+#     return strName
+# 
+# 
+# def localtimeStamp(sigDig=6):
+#     "returns a string with spaced 0s, can varry signif digits"
+#     return gmtimeStamp(sigDig, 'local')
+# 
+# def tempDir(tempPath='/Volumes/xdisc/_scratch'):
+#     "get a temp directory"
+#     if not os.path.exists(tempPath): # use temp dir if doesnt exist
+#         tempPath = tempfile.mkdtemp()
+#         environment.printWarn([lang.WARN, 'using %s as scratch directory' % tempPath])
+#     return tempPath
+# 
+# def tempFileName(ext):
+#     return gmtimeStamp() + ext
+# 
+# def tempFile(ext='.txt', fpDir=''):
+#     """make temp file in temp dir, otherwise get standard temp file
+#     branch by platform and do different things here
+# 
+#     note: compare with developing method in prefTools.py
+#     """
+#     fpDir = tempDir(fpDir)
+#     if not os.path.exists(fpDir): # use temp file
+#         tempPath = tempfile.mktemp(ext)
+#     else:
+#         tempName = gmtimeStamp() + ext
+#         tempPath = os.path.join(fpDir, tempName)
+#     return tempPath
 
 #-----------------------------------------------------------------||||||||||||--
 # messagge formatting for standard output

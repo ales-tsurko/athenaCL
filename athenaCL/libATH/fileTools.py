@@ -1039,7 +1039,7 @@ class AudioSheet(ProofSheet):
 
 class LinkSheet(ProofSheet):
     def __init__(self, args):
-        writeDir = osTools.tempDir()
+        writeDir = drawer.tempDir()
         ProofSheet.__init__(self, writeDir)
         self.title = 'LinkSheet'
         self.url = drawer.urlPrep(args[0], 'http')
@@ -1468,7 +1468,7 @@ class CompareDir:
 def profileStr(methodStr):
     import pstats
     import profile
-    statFile = osTools.tempFile('.stat.txt')         
+    statFile = drawer.tempFile('.stat.txt')         
     profile.bias = 2.02479752025e-05
     profile.run(methodStr, statFile)
     proStats = pstats.Stats(statFile)
@@ -1517,7 +1517,7 @@ class Profiler:
         if methodStr == None:
             methodStr = 'self.test()'
         if statFile == None:
-            statFile = osTools.tempFile('.stat')
+            statFile = drawer.tempFile('.stat')
         
         if recalibrate == True:
             calibrationNum = self.calibrator()
@@ -1632,8 +1632,8 @@ class TestOld:
             return None, None
 
     def _dcPopulateDir(self):
-        self.dirA = os.path.join(osTools.tempDir(), '__A')
-        self.dirB = os.path.join(osTools.tempDir(), '__B')
+        self.dirA = os.path.join(drawer.tempDir(), '__A')
+        self.dirB = os.path.join(drawer.tempDir(), '__B')
         if os.path.exists(self.dirA):
             osTools.rm(self.dirA)
         if os.path.exists(self.dirB):
