@@ -16,9 +16,9 @@ import sys, os, time, random, traceback, httplib, urllib
 import unittest, doctest
 
 
-athVersion = '2.0.0a6'
-athBuild = '2010.02.03'
-athDate     = '3 February 2010' # human readable version
+athVersion = '2.0.0a7'
+athBuild = '2010.02.04'
+athDate     = '4 February 2010' # human readable version
 __version__ = athVersion
 __license__ = "GPL"
 
@@ -45,8 +45,6 @@ fpLibATH = os.path.dirname(fpLibTM) # libATH dir
 fpSrcDir = os.path.dirname(fpLibATH) # athenaCL dir
 fpPackageDir = os.path.dirname(fpSrcDir) # athenacl dir
 if fpPackageDir not in sys.path: sys.path.append(fpPackageDir)
-
-
 
 
 
@@ -359,7 +357,8 @@ class External(object):
         if status == 'init':
             self.visualMethod = None # set to none, but dont update until called
         else: # checks guis: a speed clog on startup
-            if self.visualMethod == None: # done only if set to none, once per sess
+            # done only if set to none, once per sess
+            if self.visualMethod == None: 
                 self.visualMethod = drawer.imageFormats()
             return self.visualMethod
 

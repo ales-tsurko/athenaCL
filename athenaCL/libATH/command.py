@@ -519,24 +519,24 @@ class Command(object):
         else: # set as pref but not available
             return None
 
-    def _validScratchDir(self):
-        """use to set valid scratch dir; get from user if necessary
-
-        note that if this is called and the scratch directory
-        is not set, an interactive prompt will begin
-
-        TODO: use of this method should be phased out; instead
-        temp files should be created if the scratch dir is not set
-        """
-        path = self.ao.external.getPref('athena', 'fpScratchDir')
-        if not os.path.isdir(path):
-            cmdObj = APdir(self.ao, '', argForce={'name':'fpScratchDir'})
-            ok, msg = cmdObj.do() # will call gather, process, etcetera
-        else: ok = 1
-        if ok:
-            path = self.ao.external.getPref('athena','fpScratchDir')
-            return path
-        else: return None
+#     def _validScratchDir(self):
+#         """use to set valid scratch dir; get from user if necessary
+# 
+#         note that if this is called and the scratch directory
+#         is not set, an interactive prompt will begin
+# 
+#         TODO: use of this method should be phased out; instead
+#         temp files should be created if the scratch dir is not set
+#         """
+#         path = self.ao.external.getPref('athena', 'fpScratchDir')
+#         if not os.path.isdir(path):
+#             cmdObj = APdir(self.ao, '', argForce={'name':'fpScratchDir'})
+#             ok, msg = cmdObj.do() # will call gather, process, etcetera
+#         else: ok = 1
+#         if ok:
+#             path = self.ao.external.getPref('athena','fpScratchDir')
+#             return path
+#         else: return None
             
 #     def _validScratchFp(self, ext='.xml'):
 #         """provide a valid xml file name
@@ -551,18 +551,18 @@ class Command(object):
         check format compatabilities
         returns ok, and dir path
 
-        TODO: needs to be updated to use new method of getting temp files
         """
         fmt = self._validGfxPreference() # checks is pref fmt is available
         if fmt == None: return 0, fmt, None # error 
         # check scratch dir for methods that write files
         if fmt in ['jpg', 'png', 'eps']:              
-            path = self._validScratchDir()
-            if path == None: ok = 0 # failed
-            else: ok = 1 # path is good
+            # scratch dir can be None if not yet set; 
+            # temp file will be created in image tools methods
+            fpScratchDir = environment.getScratchDirPath()
+            ok = 1 # fpScratchDir is good
         else: # formats taht dont write files
             ok = 1 # okay for graphics, scratch dir not needed
-            path = None # not needed for tk
+            fpScratchDir = None # not needed for tk
         # check format and resources available
         if fmt == 'tk' and not imageTools.TK:
             environment.printWarn([lang.WARN, lang.msgGfxTkError])
@@ -576,8 +576,8 @@ class Command(object):
             environment.printWarn([lang.WARN, lang.msgGfxPilError])
             ok = 0
                     
-        if ok: # get to get path again as set w/ APdir command
-            return ok, fmt, path # path is a directory
+        if ok: # get to get fpScratchDir again as set w/ APdir command
+            return ok, fmt, fpScratchDir # fpScratchDir is a directory
         else: # not okay
             return ok, fmt, None
 

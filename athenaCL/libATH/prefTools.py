@@ -283,7 +283,7 @@ class Environment(object):
         except: # catch all
             fpScratch = ''
         if not os.path.exists(fpScratch) or not os.path.isdir(fpScratch): 
-            self.printWarn('scratch directory preference set to a non existing directory: %s' % fpScratch)
+            self.printWarn('scratch directory preference set to a non-directory: %s' % fpScratch)
             fpScratch = '' # do not pass forward        
         # final return
         if fpScratch == '':

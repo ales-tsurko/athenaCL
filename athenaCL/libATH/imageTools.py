@@ -20,6 +20,8 @@ from athenaCL.libATH import fontLibrary
 from athenaCL.libATH import osTools
 
 _MOD = 'imageTools.py'
+from athenaCL.libATH import prefTools
+environment = prefTools.Environment(_MOD)
 
 
 #-----------------------------------------------------------------||||||||||||--
@@ -817,7 +819,9 @@ class PilCanvas(_CanvasBase):
         #del self.c # not sure if this is necessary
         if filePath == None:
             ext = '.%s' % self.subFmt
-            filePath = drawer.tempFile(ext) # jpg/png       
+            filePath = environment.getTempFile(ext)
+            #filePath = drawer.tempFile(ext) # jpg/png       
+
         if self.transp != None: # transparency not working
             self.imageObj.save(filePath, transparency=self.transp)
         else: #determine format from name
@@ -833,7 +837,8 @@ class PilCanvas(_CanvasBase):
             filePath = os.path.join(dir, drawer.tempFileName(ext))
         else:
             ext = '.%s' % self.subFmt
-            filePath = drawer.tempFile(ext) # jpg/png       
+            filePath = environment.getTempFile(ext)
+            #filePath = drawer.tempFile(ext) # jpg/png       
         self.write(filePath, 1, prefDict)
         #if self.subFmt == 'jpg': # gets defaul pil format, which is jpeg
         #    self.imageObj.show() # used to use show, but sometimes fails
@@ -1196,7 +1201,8 @@ gsave %s 1 1 scale grestore
     
     def write(self, filePath=None, openMedia=1, prefDict=None):
         if filePath == None:
-            filePath = drawer.tempFile('.eps')               
+            #filePath = drawer.tempFile('.eps')    
+            filePath = environment.getTempFile('.eps')           
         f = open(filePath, 'w')
         f.writelines(''.join(self.c) + self._tailStr())
         f.close
@@ -1210,11 +1216,11 @@ gsave %s 1 1 scale grestore
             ext = '.eps'
             filePath = os.path.join(dir, drawer.tempFileName(ext))
         else:
-            filePath = drawer.tempFile('.eps') # jpg/png    
+            #filePath = drawer.tempFile('.eps') # jpg/png    
+            filePath = environment.getTempFile('.eps')
         self.write(filePath, 1, prefDict)
 
 
-#-----------------------------------------------------------------||||||||||||--
 #-----------------------------------------------------------------||||||||||||--
 # factory returns an object
 def Canvas(fmt, w, h, bg='#000000', name='image', master=None, transp=None):
@@ -1237,7 +1243,6 @@ def Canvas(fmt, w, h, bg='#000000', name='image', master=None, transp=None):
 
 
 
-#-----------------------------------------------------------------||||||||||||--
 #-----------------------------------------------------------------||||||||||||--
 class ProcessGraphCoordData:
     """process data into a bit map data format
