@@ -19,6 +19,10 @@ lang = language.LangObj()
 # this module is higher than drawer, lower than dialog
 # like drawer, but imports langauge
 
+_MOD = 'typeset.py'
+from athenaCL.libATH import prefTools
+environment = prefTools.Environment(_MOD)
+
 
 
 
@@ -571,12 +575,24 @@ def formatVariCol(headerKey, entryLines, minWidthList, bufList=[],
     return msgFinal
 
 
-def formatEqCol(header, entries, minColWidth, charWidth=70,
-                             outLine='off'):
+def formatEqCol(header, entries, minColWidth, charWidth=70, outLine=False):
     """takes a list and prints colums based on a minimum width
     two modes:
     outLine: prints each new line of a group indented
     off: prints normal columns
+
+    >>> formatEqCol('test', ['a', 'b'], 10, charWidth=10)
+    'test\\n..........\\na         \\nb         \\n'
+    >>> formatEqCol('test', ['a', 'b'], 10, charWidth=10, outLine=True)
+    'test\\n..........\\na         \\n          b         \\n'
+    >>> formatEqCol('test', ['a'], 10, charWidth=10)
+    'test\\n..........\\na         \\n'
+    >>> formatEqCol('test', 'a', 10, charWidth=10)
+    'test\\n..........\\na         \\n'
+    >>> formatEqCol('test', '', 10, charWidth=10)
+    'test\\n..........\\n\\n'
+    >>> formatEqCol('', '', 10, charWidth=10)
+    '\\n'
     """
     if header == '':
         ruler = ''
@@ -588,9 +604,15 @@ def formatEqCol(header, entries, minColWidth, charWidth=70,
     if ruler != '':
         msg.append((ruler * charWidth) + '\n')
 
-    (entryPerLine, junk) = divmod(charWidth, minColWidth)
+    if minColWidth <= 0: # will cause div by zero error
+        environment.printDebug('minColWidth set to zero; auto correcting') 
+        minColWidth = 10 # a common default
+
+    entryPerLine, junk = divmod(charWidth, minColWidth)
     if (entryPerLine * minColWidth) > charWidth:
         entryPerLine = entryPerLine - 1
+    if entryPerLine <= 0:
+        entryPerLine = 1 # has to be greater than 0
     # if not a pefect match, columns need extra padding
     if (entryPerLine * minColWidth) != charWidth:
         surplus = charWidth - (entryPerLine * minColWidth)
@@ -602,7 +624,7 @@ def formatEqCol(header, entries, minColWidth, charWidth=70,
         if col == 0:
             msg.append('\n')
             # outline mode indents all entry after first entry of each group
-            if outLine != 'off': ## only if special mode is desired
+            if outLine: # only if special mode is desired
                 if cmd != entries[0]: # if not the first
                     whiteSpace = ' ' * minColWidth
                     msg.append(whiteSpace)
@@ -728,10 +750,15 @@ class Test(unittest.TestCase):
     def runTest(self):
         pass
             
-    def testDummy(self):
-        self.assertEqual(True, True)
+    def testFormatEqCol(self):
+        material = [['test'], ['a', 'b']]
+        minColWidth = range(0, 20, 5)
+        charWidth = range(0, 20, 5)
 
-
+        for m in material:
+            for mcw in minColWidth:
+                for cw in charWidth:
+                    post = formatEqCol('', m, mcw, cw) # could return zero div
 
 #-----------------------------------------------------------------||||||||||||--
 if __name__ == '__main__':

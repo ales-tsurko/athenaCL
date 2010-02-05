@@ -75,7 +75,6 @@ class Command(object):
         >>> a = Command(ao)
         >>> post = a.do()
         """
-        
         self.ao = ao
         self.termObj = self.ao.termObj
         #self.scObj = self.ao.external.scObj
@@ -383,14 +382,12 @@ class Command(object):
     #-----------------------------------------------------------------------||--
     # high level string parsing or interactive path assignment
     
-    def _selectAppPath(self, usrStr, appType, appName, 
-                             appPathPref, appCreatorPref):
+    def _selectAppPath(self, usrStr, appType, appName, appPathPref):
         """get a path for an application type; either parse
         a string and test, or get interactively; will chnage path if different
         appPathPref     = ('external', 'csoundPath')
         """
-        # get old path to compare before changing, may be ''
-        # oldPath = self.ao.external.getPref(appPathPref[0], appPathPref[1])
+        #environment.printDebug(['_selectAppPath:', usrStr])
         path = None
         if usrStr != None: # raw command arg string
             usrStr = drawer.pathScrub(usrStr) # scrub, expand, links
@@ -419,20 +416,7 @@ class Command(object):
         if changeAppPath and path != None:
             self.ao.external.writePref(appPathPref[0], appPathPref[1],
                                                 drawer.pathScrub(path))
-        # sys/dep informatinon
-        if os.name == 'mac' and appCreatorPref != None:  
-            try:
-                changeCreatorCode = 1
-                creator, type = osTools.rsrcGetCreator(path)
-            except:
-                changeCreatorCode = 0
-            if changeCreatorCode: # mac os 9 needs creator code
-                self.ao.external.writePref(appCreatorPref[0], 
-                                                    appCreatorPref[1], creator)
-        elif os.name == 'posix': pass
-        else: pass # all win flavors
-
-        # return path after change`
+        # return path after change
         ok = 1
         if changeAppPath:
             return path, ok
@@ -1464,13 +1448,13 @@ class help(Command):
             msg.append(lang.msgDocBrowser)
             msg.append(lang.msgDocHead)
             msg.append(lang.DIVIDER * w)
-            msg.append(typeset.formatEqCol('', cmdsDoc, 10, w, 'off'))
+            msg.append(typeset.formatEqCol('', cmdsDoc, 10, w))
             if len(helpTopics) > 0:
                 msg.append(lang.DIVIDER * w)
-                msg.append(typeset.formatEqCol('', helpTopics, 10, w, 'off'))
+                msg.append(typeset.formatEqCol('', helpTopics, 10, w))
             if len(cmdsUndoc) > 0:
                 msg.append(lang.DIVIDER * w)
-                msg.append(typeset.formatEqCol('', cmdsUndoc, 10, w, 'off'))
+                msg.append(typeset.formatEqCol('', cmdsUndoc, 10, w))
             return ''.join(msg)
 
 
@@ -1626,7 +1610,7 @@ class PIn(Command):
         self.name = None
         self.dataList = None
         if args != '':
-            args = argTools.ArgOps(args, 'stripComma')
+            args = argTools.ArgOps(args, stripComma=True)
             self.name = args.get(0)
             if self.name == None: return self._getUsage()
             if self._nameTest(self.name) != None:
@@ -2093,7 +2077,7 @@ class PIcp(Command):
         if self._piTestExistance() != None: #check existance
             return self._piTestExistance()
         if args != '':
-            args = argTools.ArgOps(args, 'stripComma')
+            args = argTools.ArgOps(args, stripComma=True)
             msg = []
             self.oldName = drawer.inList(args.get(0), self.ao.pathLib.keys())
             if self.oldName == None: return self._getUsage()
@@ -2173,7 +2157,7 @@ class PIrm(Command):
         if self._piTestExistance() != None: #check existance
             return self._piTestExistance()
         if args != '':
-            args = argTools.ArgOps(args, 'stripComma')
+            args = argTools.ArgOps(args, stripComma=True)
             msg = []
             if args.list(0, 'end') != None:
                 for name in args.list(0, 'end'):
@@ -2309,7 +2293,7 @@ class PImv(Command):
             return self._piTestNameExists()
 
         if args != '':
-            args = argTools.ArgOps(args, 'stripComma')
+            args = argTools.ArgOps(args, stripComma=True)
             oldPathName = drawer.inList(args.get(0), self.ao.pathLib.keys())
             if oldPathName == None: return self._getUsage()
             newPathName = args.get(1)
@@ -2358,7 +2342,7 @@ class PIret(Command):
             return self._piTestNameExists()
         newName = None
         if args != '':
-            args = argTools.ArgOps(args, 'stripComma')
+            args = argTools.ArgOps(args, stripComma=True)
             newName = args.get(0)
         if newName == None:
             query = 'name this retrograde of path %s:' % self.ao.activePath
@@ -2412,7 +2396,7 @@ class PIrot(Command):
         self.length = len(self.ao.pathLib[self.oldName])
 
         if args != '':
-            args = argTools.ArgOps(args, 'stripComma')
+            args = argTools.ArgOps(args, stripComma=True)
             self.newName = args.get(0)
             if self.newName == None: return self._getUsage()
             self.rotZero = args.get(1, 'single', 'eval')
@@ -2474,7 +2458,7 @@ class PIslc(Command):
         self.newName = None
         self.sl = None
         if args != '':
-            args = argTools.ArgOps(args, 'stripComma')
+            args = argTools.ArgOps(args, stripComma=True)
             self.newName = args.get(0)
             if self.newName == None or self.newName == self.oldName:
                 return self._getUsage()
@@ -3364,7 +3348,7 @@ class TImute(Command):
         if self._tiTestNameExists(self.ao.activeTexture) != None: # check name
             return self._tiTestNameExists(self.ao.activeTexture)
         if args != '':
-            args = argTools.ArgOps(args, 'stripComma')
+            args = argTools.ArgOps(args, stripComma=True)
             if args.list(0, 'end') != None: # if supplied
                 for name in args.list(0, 'end'):
                     self.mList.append(name)
@@ -3460,7 +3444,7 @@ class TImode(Command):
         modeChoice = None
         modeValue = None
         if args != '':
-            args = argTools.ArgOps(args, 'stripComma')
+            args = argTools.ArgOps(args, stripComma=True)
             modeChoice = self._tiConvertMode(args.get(0))
             if modeChoice == None: return self._getUsage()
             if modeChoice == 'p':
@@ -3642,7 +3626,7 @@ class TImidi(Command):
         pmtrChoice = None
         pmtrValue = None
         if args != '':
-            args = argTools.ArgOps(args, 'stripComma')
+            args = argTools.ArgOps(args, stripComma=True)
             pmtrChoice = self._tiConvertMidiPmtr(args.get(0))
             if pmtrChoice == None: return self._getUsage()
             if pmtrChoice == 'p':
@@ -3932,7 +3916,7 @@ class TIrm(Command):
         if self._tiTestExistance() != None: #check existance
             return self._tiTestExistance()
         if args != '':
-            args = argTools.ArgOps(args, 'stripComma')
+            args = argTools.ArgOps(args, stripComma=True)
             if args.list(0, 'end') != None: # if supplied
                 for name in args.list(0, 'end'):
                     name = drawer.inList(name, self.ao.textureLib.keys())
@@ -4012,7 +3996,7 @@ class TIcp(Command):
         if self._tiTestExistance() != None: #check existance
             return self._tiTestExistance()
         if args != '':
-            args = argTools.ArgOps(args, 'stripComma')
+            args = argTools.ArgOps(args, stripComma=True)
             self.oldName = drawer.inList(args.get(0), 
                                 self.ao.textureLib.keys())
             if self.oldName == None: return self._getUsage()
@@ -4094,7 +4078,7 @@ class TImv(Command):
             return self._tiTestNameExists()
 
         if args != '':
-            args = argTools.ArgOps(args, 'stripComma')
+            args = argTools.ArgOps(args, stripComma=True)
             self.oldTextName = drawer.inList(args.get(0), 
                                      self.ao.textureLib.keys())
             if self.oldTextName == None: return self._getUsage()
@@ -4434,7 +4418,7 @@ class TEv(Command):
         decodePmtrName = self.ao.textureLib[self.ao.activeTexture].decodePmtrName
 
         if args != '':
-            args = argTools.ArgOps(args, 'stripComma')
+            args = argTools.ArgOps(args, stripComma=True)
             p, label = decodePmtrName(args.get(0), 'str')
             if p == None: return self._getUsage()
         else:
@@ -4619,7 +4603,7 @@ class TEmidi(Command):
             return self._tiTestExistance()
         pmtrValue = None
         if args != '':
-            args = argTools.ArgOps(args, 'stripComma')
+            args = argTools.ArgOps(args, stripComma=True)
             pmtrValue = self._teCheckTempo(args.get(0)) # get number
             if pmtrValue == None: return self._getUsage()
         if pmtrValue == None:
@@ -4886,7 +4870,7 @@ class TCmute(Command):
             return self._tcTestExistance(self.tName)
 
         if args != '':
-            args = argTools.ArgOps(args, 'stripComma')
+            args = argTools.ArgOps(args, stripComma=True)
             if args.list(0, 'end') != None: # if supplied
                 for name in args.list(0, 'end'):
                     self.mList.append(name)
@@ -5136,7 +5120,7 @@ class TCcp(Command):
             return self._tcTestExistance(self.tName)
             
         if args != '':
-            args = argTools.ArgOps(args, 'stripComma')
+            args = argTools.ArgOps(args, stripComma=True)
             self.oldName = drawer.inList(args.get(0), 
                                 self.ao.cloneLib.cNames(self.tName))
             if self.oldName == None: return self._getUsage()
@@ -5364,7 +5348,7 @@ class TCrm(Command):
             return self._tcTestExistance(tiName)
 
         if args != '': # removes all in list
-            args = argTools.ArgOps(args, 'stripComma')
+            args = argTools.ArgOps(args, stripComma=True)
             if args.list(0, 'end') != None: # if supplied
                 for name in args.list(0, 'end'):
                     name = drawer.inList(name, self.ao.cloneLib.cNames(tiName))
@@ -5633,7 +5617,7 @@ class EOo(_CommandEO):
         self.update = 0
 
         if args != '':
-            args = argTools.ArgOps(args, 'stripComma')
+            args = argTools.ArgOps(args, stripComma=True)
             argList = args.list(0,'end') # args.list will get a list
             if argList == None: return self._getUsage()
             for fmt in argList:
@@ -5681,7 +5665,7 @@ class EOrm(_CommandEO):
         self.update = 0
 
         if args != '':
-            args = argTools.ArgOps(args, 'stripComma')
+            args = argTools.ArgOps(args, stripComma=True)
             argList = args.list(0,'end') # args.list will get a list
             if argList == None: return self._getUsage()
             for fmt in argList:
@@ -5768,7 +5752,7 @@ class EMo(Command):
         args = self.args
         self.modeVal = None
         if args != '':
-            args = argTools.ArgOps(args, 'stripComma')
+            args = argTools.ArgOps(args, stripComma=True)
             modeStr = args.get(0,'end')
             if modeStr == None: return self._getUsage()
             self.modeVal = self._elConvertMode(modeStr)
@@ -6207,7 +6191,7 @@ class ELauto(Command):
         # store current value
         self.curValue = self.ao.external.getPref('external','autoRenderOption')
         if args != '':
-            args = argTools.ArgOps(args, 'stripComma')
+            args = argTools.ArgOps(args, stripComma=True)
             msg = args.get(0,'end')
             if msg == None: return self._getUsage()
             self.value = typeset.convertBool(msg) # will handly off/on
@@ -6910,7 +6894,7 @@ class APr(Command):
         args = self.args
         self.modeVal = None
         if args != '':
-            args = argTools.ArgOps(args, 'stripComma')
+            args = argTools.ArgOps(args, stripComma=True)
             modeStr = args.get(0,'end')
             if modeStr == None: return self._getUsage()
             self.modeVal = typeset.convertBool(modeStr)
@@ -7107,6 +7091,7 @@ class APea(Command):
             else: return appType 
 
     def gather(self):
+        #environment.printDebug(['raw args', self.args])
         args = self.args    
         args = argTools.ArgOps(args) # no strip
 
@@ -7121,12 +7106,11 @@ class APea(Command):
         if args.get(0) != None:
             appType = self._apConvertAppType(args.get(0))
             if appType == None: return self._getUsage()
-        else:                   
-            appType = self._apGetAppType()
+        else: 
+            appType = self._apGetAppType() # interactive command
             if appType == None: return lang.msgReturnCancel
             
         # not used for all cases, this is default
-        appCreatorPref = None
         appName = None # not necessary in all cases
         # cases for each app class
         if appType == 'csoundCommand': # will be presented to the user
@@ -7137,27 +7121,25 @@ class APea(Command):
                 appName = 'winsound.exe'
         elif appType == 'midiPlayer': # will be presented to the user
             appPathPref = ('external', 'midiPlayerPath')
-            appCreatorPref = ('external', 'midiPlayerCreatorCode')
         elif appType == 'audioPlayer': # will be presented to the user
             appPathPref = ('external', 'audioPlayerPath')
-            appCreatorPref = ('external', 'audioPlayerCreatorCode')
         elif appType == 'textReader': # will be presented to the user
             appPathPref = ('external', 'textReaderPath')
-            appCreatorPref = ('external', 'textReaderCreatorCode')
         elif appType == 'imageViewer': # will be presented to the user
             appPathPref = ('external', 'imageViewerPath')
-            appCreatorPref = ('external', 'imageViewerCreatorCode')
         elif appType == 'psViewer': # will be presented to the user
             appPathPref = ('external', 'psViewerPath')
-            appCreatorPref = ('external', 'psViewerCreatorCode')
-        else: raise ValueError
+        else: 
+            raise Exception('unknown appType requested: %s' % appType)
         
         # get old path to present to user in interactive mode         
-        if args.get(1, 'end') != None: # args have already been converted above
-            path = args.get(1, 'end')
+        # args have already been converted above
+        if args.get(1, sumRange=True) != None: 
+            path = args.get(1, sumRange=True, keepSpace=True)
+            #environment.printDebug(['arg path received', path])
             if os.path.exists(path):
-                path, ok = self._selectAppPath(path, appType, appName,
-                                                         appPathPref, appCreatorPref)                 
+                path, ok = self._selectAppPath(path, appType, appName, 
+                                               appPathPref)                 
             else: return self._getUsage()
             if path == None: return self._getUsage() # also failure          
             
@@ -7165,8 +7147,7 @@ class APea(Command):
             oldPath = self.ao.external.getPref(appPathPref[0], appPathPref[1])
             if oldPath == '': oldPath = 'none' # give string to show user       
             dialog.msgOut(lang.msgAPcurentAppPath % oldPath, self.termObj) 
-            path, ok = self._selectAppPath(None, appType, appName,       
-                                                     appPathPref, appCreatorPref)                             
+            path, ok = self._selectAppPath(None, appType, appName, appPathPref)                             
             if path == None: return lang.msgReturnCancel
       
         self.path = path        

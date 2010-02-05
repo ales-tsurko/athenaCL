@@ -45,6 +45,16 @@ def getCategoryDefaultDict(platform, category):
     >>> a = getCategoryDefaultDict('win', 'external')
     >>> a['audioFormat']
     'wav'
+    >>> a = getCategoryDefaultDict('win', 'athena')
+    >>> a['dlgVisualMethod']
+    'text'
+    >>> a['gfxVisualMethod']
+    'tk'
+    >>> a = getCategoryDefaultDict('posix', 'athena')
+    >>> a['dlgVisualMethod']
+    'text'
+    >>> a['gfxVisualMethod']
+    'png'
     """
     # common to all, some may be chagned in patform specific below
     if category == 'external':
@@ -84,14 +94,11 @@ def getCategoryDefaultDict(platform, category):
                       'COLORfgMainFrame': '#6E6E6E', #110,110,110
                       'COLORfgAlt': '#3C3C3C',          #60,60,60
                       'COLORfgAltFrame': '#5A5A5A', #90,90,90
-
                       'COLORbgMargin': '#2A2A2A', #42,42,42
                       'COLORbgGrid': '#202020', #32,32,32
                       'COLORbgAbs': '#000000',      #backmost
-
                       'COLORtxTitle': '#9F9F9F', #'#9A9A9A', #154,154,154
                       'COLORtxLabel': '#7C7C7C', #124,124,124
-                      #past: 847564 (132,117,100)
                       'COLORtxUnit': '#8A7A6A',  #138,122,106
                      }
 
@@ -112,7 +119,6 @@ def getCategoryDefaultDict(platform, category):
                 catDict['textReaderPath'] = 'more' # will use system default
                 catDict['imageViewerPath'] = 'imagemagick'
                 catDict['psViewerPath'] = 'gs'
-
         # common for all posix
         if category == 'athena':
             catDict['dlgVisualMethod'] = 'text'
@@ -121,7 +127,6 @@ def getCategoryDefaultDict(platform, category):
     else: # win or other
         if category == 'external':
             catDict['audioFormat'] = 'wav' 
-
         if category == 'athena':
             catDict['dlgVisualMethod'] = 'text' # works w/n idle, console on win
             catDict['gfxVisualMethod'] = 'tk'

@@ -233,7 +233,7 @@ Apple, Macintosh, Mac OS, and QuickTime are trademarks or registered trademarks 
     msgBadNameLength = TAB + 'this name is too long. try again:\n'
     msgUnknownCmd = 'unknown command. enter "cmd" to see all commands.\n'   
     msgFileError = 'a bad file path has been selected; try to write files in a better location.\n'
-    msgFileIoError = 'i/o error occurred while trying to write %s.'
+    msgFileIoError = 'error occurred while trying to write %s.'
     msgPlatformError = 'this command is not available on %s platforms.\n'
 
     msgGfxTkError = 'install Tk in Python for tk graphic output.'

@@ -705,12 +705,12 @@ def launch(pathExe):
     media files should use open below
     used for launching .bat files in elr commands as well"""
     failFlag = None
-    if os.name == 'mac': # FUTURE: elr should launch csd file?
-        import findertools
-        try: findertools.launch(pathExe)
-        except: failFlag = 'failed'
-        del findertools  
-    elif os.name == 'posix':
+#     if os.name == 'mac': # FUTURE: elr should launch csd file?
+#         import findertools
+#         try: findertools.launch(pathExe)
+#         except: failFlag = 'failed'
+#         del findertools  
+    if os.name == 'posix':
         try:
             exitStatus = os.system(pathExe) 
             # if not equal to zero an exit error has occured
@@ -741,11 +741,18 @@ def openMedia(path, prefDict=None):
     will assume that path is to a media file, rather than an exe
     for executable scripts, use launch
     if prefDict is provided, will get app path from there
-    keys in this disc must start w/ media type; image, audio, midi, text, ps"""
+    keys in this disc must start w/ media type; image, audio, midi, text, ps
+
+
+    TODO: this should be updated to use application preferences 
+    stored in prefTools.py, not here
+    """
     path = drawer.pathScrub(path)
     dir, name = os.path.split(path)
     name, ext = extSplit(name)
 
+    # this should be as method of a the pref tools
+    # pref object/dict, or a function in this module or drawer
     if ext in imageEXT: fileType = 'image'
     elif ext in audioEXT: fileType = 'audio'
     elif ext in videoEXT: fileType = 'video'
@@ -757,14 +764,14 @@ def openMedia(path, prefDict=None):
     app = None # default nothing
     
     if prefDict == None and fileType != None: # get default apps
-        if os.name == 'mac': pass # rely on system
-        elif os.name == 'posix':
+#         if os.name == 'mac': pass # rely on system
+        if os.name == 'posix':
             if drawer.isDarwin(): # assume sys default for most
                 if fileType in ['audio', 'midi', 'video']: 
                     app = '/Applications/QuickTime Player.app'
             else: # other unix
                 if fileType   == 'text' : app = 'more'
-                elif fileType == 'audio': app = 'xmms'       #'play' should work too
+                elif fileType == 'audio': app = 'xmms' #'play' should work too
                 elif fileType == 'midi' : app = 'playmidi' #
                 elif fileType == 'image': app = 'imagemagick'
                 elif fileType == 'ps': app = 'gs'   
@@ -772,16 +779,18 @@ def openMedia(path, prefDict=None):
             pass # rely on system
     elif fileType != None: # get from prefDict
         for key in prefDict.keys():
-            # match by filetype string leading key and path
+            # match by filetype string leading key and path string
             if key.startswith(fileType) and 'path' in key.lower(): 
                 app = prefDict[key] # may be a complete file path, or a name
 
-    if app == '': app = None # if given as empty, convert to none
-    elif not drawer.isApp(app): app = None # if not an app any more, drop
+    if app == '': 
+        app = None # if given as empty, convert to none
+    elif not drawer.isApp(app): 
+        app = None # if not an app any more, drop
 
-    if os.name == 'mac':     # os9
-        cmdExe = '%s' % path # on mac, just launch txt file, rely on pref
-    elif os.name == 'posix':
+#     if os.name == 'mac':     # os9
+#         cmdExe = '%s' % path # on mac, just launch txt file, rely on pref
+    if os.name == 'posix':
         if drawer.isDarwin():
             if app == None: # no app use system default 
                 cmdExe = 'open "%s"' % path 
@@ -854,9 +863,11 @@ def findAthenaPath():
         except ImportError: # if n a subdirectory of athena
             return findSubDir('athenaCL') # none if found, otherwise path    
     fpLibATH = libATH.__path__[0] # list, get first item
-    if os.path.isabs(fpLibATH) != 1: #relative path, add cwd
+    if not os.path.isabs(fpLibATH): #relative path, add cwd
         fpLibATH = os.path.abspath(fpLibATH)
     return os.path.dirname(fpLibATH)
+
+
 
 def findManPath(group=1, altSys=None):
     """on unix opperating systems find man path for given group

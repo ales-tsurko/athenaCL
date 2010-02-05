@@ -18,11 +18,12 @@ from athenaCL.libATH import drawer
 from athenaCL.libATH import typeset
 
 _MOD = 'argTools.py'
+from athenaCL.libATH import prefTools
+environment = prefTools.Environment(_MOD)
 
 
 
 #-----------------------------------------------------------------||||||||||||--
-
 def parseFlags(argv, flags, posStart=1, spaceLimit=0):
     """Parse flags as given form the command line.
 
@@ -110,7 +111,6 @@ def parseFlags(argv, flags, posStart=1, spaceLimit=0):
 
 
 #-----------------------------------------------------------------||||||||||||--
-
 def strongType(usrArgs, argTypes, defaultArgs=[], argCountOffset=0):
     """Argument checking tool.
 
@@ -195,7 +195,7 @@ class ArgOps:
     this arg lists only use positional values; not flags are permitted
     optional argument may follow required ones"""
     
-    def __init__(self, argStr, stripComma='noStrip'):
+    def __init__(self, argStr, stripComma=False):
         """
         >>> a = ArgOps('test 1 2 3')
         >>> a.get(2)
@@ -210,6 +210,13 @@ class ArgOps:
         >>> b.get(1, sumRange=True) # will realize values as strings
         '123'
 
+        >>> b = ArgOps('test, stip, comma', stripComma=True)
+        >>> b.get(0)
+        'test'
+        >>> b = ArgOps('test, stip, comma', stripComma=False)
+        >>> b.get(0)
+        'test,'
+
         """
         if drawer.isList(argStr): # accept alread partitioned lists
             self.argList = argStr
@@ -218,7 +225,8 @@ class ArgOps:
             self.argList = argStr.split() # will split b/n or more spaces
 
         # strip trailing comma
-        if stripComma != 'noStrip':
+        #if stripComma != 'noStrip':
+        if stripComma:
             counter = 0
             for entry in self.argList:
                 # only remove comma of last line
@@ -226,10 +234,10 @@ class ArgOps:
                     self.argList[counter] = entry[:-1]
                 counter += 1
 
-    def get(self, index, sumRange='single', evaluate='off', addSpace='noSpace'):
+    def get(self, index, sumRange=False, evaluate=False, keepSpace=False):
         """returns args as strings
         sum range allowes gather all space-delimited arg positions into one arg
-        addSpace can be used to remove spaces (default) or keep
+        keepSpace can be used to remove spaces (default) or keep
             this is necessary when taking all values 
         if no arg exists for a given index, returns None on error or no arg
 
@@ -242,11 +250,23 @@ class ArgOps:
         3
         >>> a.get(1, sumRange='end')
         'a3'
-        >>> a.get(1, sumRange='end', addSpace='space')
+        >>> a.get(1, sumRange='end', keepSpace='space')
         'a 3'
+
+        >>> b = ArgOps('apea mp /Applications/QuickTime Player.app')
+        >>> b.get(0)
+        'apea'
+        >>> b.get(1)
+        'mp'
+        >>> b.get(2, sumRange=False)
+        '/Applications/QuickTime'
+        >>> b.get(2, sumRange=True, keepSpace=False)
+        '/Applications/QuickTimePlayer.app'
+        >>> b.get(2, sumRange=True, keepSpace=True)
+        '/Applications/QuickTime Player.app'
         """
-        if len(self.argList) == 0: return None
-        if index >= len(self.argList): return None
+        if len(self.argList) == 0 or index >= len(self.argList):
+            return None
 
         if sumRange in ['single', False]:
             output = self.argList[index]
@@ -257,13 +277,13 @@ class ArgOps:
                     output.append(str(self.argList[i]))
                 else:
                     output.append(self.argList[i])
-            if addSpace not in ['noSpace']: # add space
+            #environment.printDebug([output])
+            if keepSpace not in [False, 'noSpace']: # add space
                 output = ' '.join(output)
-            else:
+            else: # if false
                 output = ''.join(output)
         else:
             raise Exception('bad sum range argument: %s' % sumRange)
-
 
         if evaluate in ['off', False]:
             return output
@@ -276,33 +296,37 @@ class ArgOps:
             else: # already evalauted
                 return output
 
-    def list(self, index, sumRange='single', evaluate='off'):
+    def list(self, index, sumRange=False, evaluate=False):
         """returns args as a list of strings
         index: arg number to start with
-        sumRange: either single (only the index given)
-            or end (from index to end of args)
+        sumRange: either False (only the index given)
+            or True (from index to end of args)
         evaluate: when on, evaluates each member of resultant list
 
         >>> a = ArgOps('tin a 3')
         >>> a.list(1)
         ['a']
-        >>> a.list(0, sumRange='end')
+        >>> a.list(0, sumRange=True)
         ['tin', 'a', '3']
+        >>> a.list(0, sumRange=False)
+        ['tin']
         """
         if len(self.argList) == 0:
             return None
         if index >= len(self.argList):
             return None
 
-        if sumRange == 'single':
+        if sumRange in ['single', False]:
             output = [self.argList[index],]
-        elif sumRange == 'end':
+        elif sumRange in ['end', True]:
             output = []
-
             for i in range(index, len(self.argList)):
                 output.append(self.argList[i])
+        else:
+            raise Exception('bad sum range argument: %s' % sumRange)
+
         # final changes and returns
-        if evaluate == 'off':
+        if evaluate in ['off', False]:
             return output
         else: # evaluate each member of the list, not entire    list
             for i in range(0,len(output)):

@@ -10,33 +10,33 @@
 #-----------------------------------------------------------------||||||||||||--
 import sys, os
 
-
 #-----------------------------------------------------------------||||||||||||--
-try: import libATH #assume we are in package dir
+try: 
+    import libATH #assume we are in package dir
 except ImportError:
-    try: from athenaCL import libATH
-    except ImportError: print 'athenaCL package cannot be found'; sys.exit()
+    try: from athenaCL import libATH # if sys.path setup right
+    except ImportError: 
+        sys.stdout.write('athenaCL package cannot be found.\n')
+        sys.exit()
 fpLibATH = libATH.__path__[0] # list, get first item
-if os.path.isabs(fpLibATH) != 1: #relative path, add cwd
+if not os.path.isabs(fpLibATH): #relative path, add cwd
     fpLibATH = os.path.abspath(fpLibATH)
 fpSrcDir = os.path.dirname(fpLibATH)
 fpPackageDir = os.path.dirname(fpSrcDir)
 if fpPackageDir not in sys.path: sys.path.append(fpPackageDir)
-#-----------------------------------------------------------------||||||||||||--
 
+#-----------------------------------------------------------------||||||||||||--
 from athenaCL.libATH import dialog
 from athenaCL.libATH import argTools
 from athenaCL.libATH import language
+lang = language.LangObj()
 from athenaCL.libATH import drawer
 from athenaCL.libATH import osTools
-lang = language.LangObj()
 from athenaCL.libATH import athenaObj
 
 _MOD = 'athenacl.py'
 # check if in idle; this file may call this file again (under idle) and thus
 IDLE_ACTIVE = drawer.isIdle()
-
-
 
 #-----------------------------------------------------------------||||||||||||--
 # reference for all flags and doc strings for each
@@ -66,7 +66,6 @@ def helpMsg(athVersionStr, flagsRef):
     return ''.join(msg)      
         
 #-----------------------------------------------------------------||||||||||||--
-        
 sessionType = None # set to none on default
 exit = 0 # used to get infor and exit immediatly
 verbose = 1 # standard is 1 (0 through 3)
@@ -95,9 +94,8 @@ for argPair in parsedArgs:
         dialog.msgOut(helpMsg(athVersionStr, flagsRef))
         exit = 1 # exit after print help
         
-if exit: sys.exit() # help, version, exit after command function
-
-
+if exit: 
+    sys.exit() # help, version, exit after command function
 
 # command flag over-rides
 if IDLE_ACTIVE: # regardless of platform, always force these options
@@ -110,8 +108,6 @@ else: # idle not active, get default session if not set
             if dialog.askYesNo('start athenacl in IDLE?'):
                 sessionType = 'idle'
             else: sessionType = 'terminal'
-
-
 
 #-----------------------------------------------------------------||||||||||||--
 def launchIdle():
@@ -151,6 +147,5 @@ if sessionType == 'terminal':
 elif sessionType == 'idle': # only for loading from cmd line
     launchIdle() # will start session as 'terminal force'
 
-#sys.exit()
 
 

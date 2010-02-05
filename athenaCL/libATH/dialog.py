@@ -257,12 +257,11 @@ def _textGetDirectory(prompt='select a directory: ', sampleDir='',
         header = '%s' % currentDir #delete extra space here
 
         if termObj == None: # update termwidth
-            termWidth = 80 # default
+            termWidth = 70 # default
         else:
             h, termWidth = termObj.size()
 
-        msg = typeset.formatEqCol(header, cwdContents, maxLength, 
-                                        termWidth, 'off')
+        msg = typeset.formatEqCol(header, cwdContents, maxLength, termWidth)
         msgOut((msg + prompt), termObj) # dont want extra return
         usrStr = askStr(lang.msgMenuChangeDir, termObj)
         finalPath = '' # keep empty until cmds parsed

@@ -15,22 +15,17 @@
 import sys, os, time, random, traceback, httplib, urllib
 import unittest, doctest
 
-
 athVersion = '2.0.0a7'
 athBuild = '2010.02.04'
 athDate     = '4 February 2010' # human readable version
 __version__ = athVersion
 __license__ = "GPL"
 
-
-
 # athenaObj.py needs correct dir information for writing
 # a file (prefs) and loading demos, and opening .xml and and other resources 
 # External is sometimes called by itself, needs to find correct paths
 # this checks for correct path access, attempts to mangle sys.path to fix 
 # imports if necssary
-
-
 #-----------------------------------------------------------------||||||||||||--
 try: 
     import libTM #assume we are in libATH
@@ -45,9 +40,6 @@ fpLibATH = os.path.dirname(fpLibTM) # libATH dir
 fpSrcDir = os.path.dirname(fpLibATH) # athenaCL dir
 fpPackageDir = os.path.dirname(fpSrcDir) # athenacl dir
 if fpPackageDir not in sys.path: sys.path.append(fpPackageDir)
-
-
-
 
 #-----------------------------------------------------------------||||||||||||--
 from athenaCL.libATH import argTools
@@ -70,9 +62,6 @@ from athenaCL.libATH import eventList
 _MOD = 'athenaObj.py'
 from athenaCL.libATH import prefTools
 environment = prefTools.Environment(_MOD)
-
-
-
 
 
 #-----------------------------------------------------------------||||||||||||--
@@ -252,7 +241,7 @@ class External(object):
                 print dataLines[0]
                 self._logDelete() # delete old log
             else:
-                print 'http error:', response.status
+                environment.printWarn(['http error:', response.status])
 
             conn.close() 
             return 1
@@ -581,7 +570,7 @@ class AthenaObject(object):
                 msg.append(lang.DIVIDER * w)
             else:
                 msg.append(typeset.formatEqCol('', self.cmdDict[cmdName], 20, 
-                                                        w, 'outLineMode'))
+                                                        w, outLine=True))
         return ''.join(msg)
 
     def cmdCorrect(self, line):
@@ -594,19 +583,42 @@ class AthenaObject(object):
         'TIls'
         >>> a.cmdCorrect('TILS')
         'TIls'
+        >>> a.cmdCorrect('TILS extra Command MAY be 3 4 5 345,1.234,345')
+        'TIls extra Command MAY be 3 4 5 345,1.234,345'
+        >>> a.cmdCorrect('aol A file With caps')
+        'AOl A file With caps'
+        >>> a.cmdCorrect('tin BLOB 234')
+        'TIn BLOB 234'
+        >>> a.cmdCorrect('apEA mp /Applications/QuickTime Player.app')
+        'APea mp /Applications/QuickTime Player.app'
+        >>> a.cmdCorrect('apea mp /Applications/QuickTime Player.app')
+        'APea mp /Applications/QuickTime Player.app'
+        >>> a.cmdCorrect('tin     BLOB      234   23.235')
+        'TIn     BLOB      234   23.235'
         """
         if line == None:
             return None
         line = line.strip()
-        if len(line) <= 1: return line
+        if len(line) <= 1: # short command get no change?
+            return line
+
         # if first two letters lower case, make upper
-        prefix  = line[:2].upper()
-        postfix = line[2:].lower()
+        if ' ' not in line: # no spaces or extra args
+            prefix = line[:2].upper()
+            postfix = line[2:].lower()
+            postarg = ''
+        else:
+            lineSplit = line.split(' ')
+            cmdStr = lineSplit[0] # must be first
+            prefix = cmdStr[:2].upper()
+            postfix = cmdStr[2:].lower()
+            # need leading space, need to return to a singel string
+            postarg = ' ' + ' '.join(lineSplit[1:]) # all the rest
+            
         if prefix in self.cmdPrefixes: #check for lower case
             newPrefix = prefix
-            line = newPrefix + postfix
-        else: # line stays the same
-            newPrefix = prefix 
+            line = newPrefix + postfix + postarg
+        # otherwise line stays the same
         return line
 
     def cmdManifest(self):
@@ -996,6 +1008,9 @@ class Interpreter(object):
         ('help', 'test')
         >>> a._lineCmdArgSplit('pin a 2,3,4')
         ('pin', 'a 2,3,4')
+
+        >>> a._lineCmdArgSplit('pin TEST CAPS')
+        ('pin', 'TEST CAPS')
         """
         if drawer.isList(line): # accept lists of strings
             lineNew = [str(part) for part in line]
@@ -1013,11 +1028,9 @@ class Interpreter(object):
         # extract command from args, assuming that all cmds use identchars
         while i < len(line) and line[i] in lang.IDENTCHARS:
             i = i + 1
-
         cmd, arg = line[:i], line[i:].strip()
         if cmd in self.ao.cmdPrefixes: 
-            # special menu command need an added character
-            cmd = cmd + '_'
+            cmd = cmd + '_' # special menu command need an added character
 
         return cmd, arg
 
@@ -1044,7 +1057,8 @@ class Interpreter(object):
             return None
         cmd, arg = splitLine
         cmdClassName = self._getCmdClass(cmd)
-        if cmdClassName == None: return self._default(line)
+        if cmdClassName == None: 
+            return self._default(line)
         self._clearCount() # clears cmd blank/bad counting
         try: # execute cmdClassNametion, manage threads
             cmdObj = cmdClassName(self.ao, arg, verbose=self.verbose)
@@ -1107,8 +1121,7 @@ class Interpreter(object):
                     return 0, "no command given"
             cmd, arg = splitLine
         else: # args are given, so line is command name
-            cmd = line
-            # add any additional arguments added individually
+            cmd = line # add any additional arguments added individually
             if len(arguments) > 0:
                 argsExtra = [str(part) for part in arguments]
                 arg = arg + ' ' + ' '.join(argsExtra)
@@ -1178,7 +1191,8 @@ class Interpreter(object):
         >>> a.cmdExecute(['pin a 3-4', 'tin b 0'])
         """
         for cmdLine in cmdList:
-            if cmdLine == None: continue
+            if cmdLine == None: 
+                continue
             cmdLine = self.ao.cmdCorrect(cmdLine)
             if self.echo: # no echo if set to quite
                 self.out(('%s %s\n' % (self.ao.promptSym, cmdLine)))
