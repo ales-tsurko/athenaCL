@@ -7012,6 +7012,9 @@ class APdir(Command):
             else: return formatStr
 
     def _apGetDir(self, name):
+        # TODO: convert the name to a proper string to present to the user
+        # need a module-level way to convert preference values to 
+        # user strings
         while 1:
             oldPath = self.ao.external.getPref('athena', ('%s' % name))
             dlgVisMet = self.ao.external.getPref('athena', 'dlgVisualMethod')

@@ -15,9 +15,9 @@
 import sys, os, time, random, traceback, httplib, urllib
 import unittest, doctest
 
-athVersion = '2.0.0a7'
-athBuild = '2010.02.04'
-athDate     = '4 February 2010' # human readable version
+athVersion = '2.0.0a9'
+athBuild = '2010.02.08'
+athDate     = '8 February 2010' # human readable version
 __version__ = athVersion
 __license__ = "GPL"
 
@@ -1207,12 +1207,7 @@ class Interpreter(object):
         gets input from user in a loop; adds the cmd to cmdList
         calls self.cmdExecute to do work, not self.cmd
         """
-        #self.preloop()
         self.out(self.intro)
-         # do only of cmdList is empty, and session not cgi
-        if cmdList == None and self.sessionType not in ['cgi']:
-            if self.ao.timeSinceLastVersionCheck() >= self.versionCheckWait:
-                cmdList = ['AUup'] # add version check command at startup
         stop = None
         while not stop:
             if cmdList == None:
@@ -1227,13 +1222,10 @@ class Interpreter(object):
             if cmdList != None:
                 cmdList = None # clear command list
                 self.echo = 0
-        #self.postloop()
 
 
 
     #-----------------------------------------------------------------------||--
-    #def preloop(self): pass
-    #def postloop(self): pass
     def _clearCount(self):
         """clear cmd counts"""
         self._emptyCount = 0 # clear

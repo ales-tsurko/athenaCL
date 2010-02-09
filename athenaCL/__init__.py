@@ -9,7 +9,10 @@
 #-----------------------------------------------------------------||||||||||||--
 
 
-
+# this works but has the side effect that other imports, such as
+# from athenaCL import libATH
+# also start interactive sessions
+# thus, this is not used
 
 # print('calling athenaCL/__init__.py')
 # 

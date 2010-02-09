@@ -8,7 +8,7 @@ class Script(script.AthenaScript):
 
     def __init__(self, scriptArgs):
         script.AthenaScript.__init__(self, scriptArgs)
-        testPath = os.path.join(osTools.tempDir(), '__test__.xml')
+        testPath = os.path.join(drawer.tempDir(), '__test__.xml')
         self.cmdList = (
         'pin a 5|7|11,c1,c8',
         'tmo lh',

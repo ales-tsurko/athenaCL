@@ -11,7 +11,7 @@ class Script(script.AthenaScript):
         self.cmdList = self._buildCmdList(self.scriptArgs)
 
     def _buildCmdList(self, scriptArgs):    
-        testAo  = os.path.join(osTools.tempDir(), '__test__.xml')
+        testAo  = os.path.join(drawer.tempDir(), '__test__.xml')
         testSco = testAo # use same name
         setMeasureNames = scriptArgs['setMeasureNames']
         textureNames = scriptArgs['textureNames']

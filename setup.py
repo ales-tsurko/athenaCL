@@ -13,10 +13,11 @@
 import sys, os
 
 #-----------------------------------------------------------------||||||||||||--
-try: import libATH #assume we are in package dir
-except ImportError:
-    try: from athenaCL import libATH
-    except ImportError: print 'athenaCL package cannot be found'; sys.exit()
+try: 
+    from athenaCL import libATH
+except ImportError: 
+    print('athenaCL package cannot be found')
+    sys.exit()
 fpLibATH = libATH.__path__[0] # list, get first item
 if not os.path.isabs(fpLibATH): #relative path, add cwd
     fpLibATH = os.path.abspath(fpLibATH)
@@ -24,7 +25,6 @@ fpSrcDir = os.path.dirname(fpLibATH) # athenaCL dir
 fpPackageDir = os.path.dirname(fpSrcDir) # outer dir tt contains athenaCL dir
 if fpPackageDir not in sys.path: sys.path.append(fpPackageDir)
 #-----------------------------------------------------------------||||||||||||--
-_MOD = 'setup.py'
 
 from athenaCL.libATH import dialog
 from athenaCL.libATH import athenaObj
@@ -35,6 +35,7 @@ lang = language.LangObj()
 from athenaCL.libATH import osTools
 from athenaCL.libATH import info
 
+_MOD = 'setup.py'
 from athenaCL.libATH import prefTools
 environment = prefTools.Environment(_MOD)
 
@@ -45,11 +46,6 @@ try: import bdist_mpkg
 except ImportError: pass
 
 
-# can use this to automatically upload to pypi
-# setup.py bdist_egg upload
-
-
-
 #-----------------------------------------------------------------||||||||||||--
 # assume right permission for writing in the pth destination
 
@@ -58,43 +54,42 @@ except ImportError: pass
 # and, most will install in site-packages, so .pth is not necessary
 
 
-# def writePthLoader(athenaDir):
-#     """a pth file named athenaCL.pth can be placed in site-packages
-#     to give the path to the outer dir (not athenaCL dir), 
-#     allowing easy imports w/o having to move files..."""
-#     environment.printWarn('writing pth file')
-#     # get dir outside of athenaCL dir
-#     # allows from athenaCL.libATH import ...
-#     msg = '%s\n' % os.path.dirname(athenaDir)
-#     dst = os.path.join(osTools.findSitePackages(), 'athenaCL.pth')
-#     try:
-#         f = open(dst, 'w')      
-#         f.write(msg)
-#         f.close()
-#     except IOError: 
-#         environment.printWarn(lang.msgFileIoError % dst)
-# 
-# def removePthLoader(sudoFound=None):
-#     """remove old pth loader"""
-#     environment.printWarn('removing outdated pth file')
-#     dst = os.path.join(osTools.findSitePackages(), 'athenaCL.pth')
-#     if os.path.exists(dst):
-#         osTools.rmSudo(dst, sudoFound)
-#     else:
-#         environment.printWarn('no pth file exists')
-#         
-# def reportPthLoader(sudoFound=None):
-#     """remove old pth loader"""
-#     dst = os.path.join(osTools.findSitePackages(), 'athenaCL.pth')
-#     if os.path.exists(dst):
-#         print _MOD, 'pth file exists: %s' % dst
-#         f = open(dst)
-#         msg = f.read()
-#         f.close()
-#         environment.printWarn('pth contents:', msg.strip())
-#     else:
-#         environment.printWarn('no pth file exists')
-#         
+def writePthLoader(fpPackageDir):
+    """a pth file named athenaCL.pth can be placed in site-packages
+    to give the path to the outer dir (not athenaCL dir), 
+    allowing easy imports w/o having to move files..."""
+    environment.printWarn('writing pth file')
+    # get dir outside of athenaCL dir
+    msg = '%s\n' % fpPackageDir
+    dst = os.path.join(osTools.findSitePackages(), 'athenaCL.pth')
+    try:
+        f = open(dst, 'w')      
+        f.write(msg)
+        f.close()
+    except IOError: 
+        environment.printWarn(lang.msgFileIoError % dst)
+
+def removePthLoader(sudoFound=None):
+    """remove old pth loader"""
+    environment.printWarn('removing outdated pth file')
+    dst = os.path.join(osTools.findSitePackages(), 'athenaCL.pth')
+    if os.path.exists(dst):
+        osTools.rmSudo(dst, sudoFound)
+    else:
+        environment.printWarn('no pth file exists')
+        
+def reportPthLoader(sudoFound=None):
+    """remove old pth loader"""
+    dst = os.path.join(osTools.findSitePackages(), 'athenaCL.pth')
+    if os.path.exists(dst):
+        environment.printWarn('pth file exists: %s' % dst)
+        f = open(dst)
+        msg = f.read()
+        f.close()
+        environment.printWarn(['pth contents:', msg.strip()])
+    else:
+        environment.printWarn('no pth file exists')
+        
         
 #-----------------------------------------------------------------||||||||||||--          
 def writeUnixLauncher(pathLaunchScript, pathShellScript, optInstallTool=0,
@@ -128,6 +123,7 @@ def writeUnixLauncher(pathLaunchScript, pathShellScript, optInstallTool=0,
         permissionError = 0
     except IOError:
         permissionError = 1
+
     if permissionError: # try to change mod of parent dir
         dir, name = os.path.split(pathShellScript)
         osTools.chmodSudo(775, dir, sudoFound)
@@ -247,16 +243,6 @@ def _getClassifiers():
              ]
     return classifiers
      
-# def _pkgDataManager():
-#     """there are 2 methods to install data files; package_data is best, 
-#     but is only defined for python 2.4 and later; this will check
-#     and provide the necessary arguments to distutils depending on python        
-#     version"""
-#     argData = {'athenaCL': 
-#               _getAudioPaths() + _getDemoPaths() + _getDocsPaths()
-#                      }
-#     return argData
-
     
 def removeDisutils(sudoFound=None):
     # get site-packages dirs absolute file path
@@ -323,31 +309,30 @@ def writeManifestTemplate(fpPackageDir):
 
 #-----------------------------------------------------------------||||||||||||--
 # module level operations, for when called without args
-# defaults
-
 athVersion = athenaObj.__version__
 
 # _fpPackageDir should be path to athenaCL directory
-_fpPackageDir = os.getcwd() # this is a default, must be in the athenaCL dir when called
-if _fpPackageDir != fpSrcDir:
+# must be in the athenaCL dir when called
+_fpPackageDir = os.getcwd() 
+if _fpPackageDir != fpPackageDir:
     environment.printWarn('cwd (%s) is not the athenaCL src directory (%s)' % (_fpPackageDir, fpSrcDir))
 
 # most options here are only for unix plats
 optWriteManifestTemplate = 0
 optRemoveDist = 0 
 optInstallDist = 0 
-#optRemovePthLoader = 1 # always remove, may have changed locations
-#optWritePthLoader = 1
+optRemovePthLoader = 0 # always remove, may have changed locations
+optWritePthLoader = 0
 optRemoveLauncher = 0 
 optWriteLauncher = 0 
 optInstallTool = 0
 optRemoveMan = 0 
 optInstallMan = 0 
 optReport = 0
-optBdistType = None
+optBdistType = None # default needed when calling runDisutils()
 
 flags = ['-o','build', 'tool', 'install', 'bdist', 'uninstall', 
-            'report', 'man', 'sdist', 'register', 'bdist_mpkg',
+            'report', 'man', 'pth', 'sdist', 'register', 'bdist_mpkg',
             'bdist_rpm', 'bdist_deb', 'bdist_wininst', 'bdist_egg']
 parsedArgs = argTools.parseFlags(sys.argv, flags)
 
@@ -361,67 +346,51 @@ for argPair in parsedArgs:
                 _fpPackageDir = tempPath
 
     elif argPair[0] == 'tool': # installs a loader script
-        optInstallDist = 0 # do a distutils install
-        #optWritePthLoader = 1
         optWriteLauncher = 1 # write launchers to athenaCL src dir
         optInstallTool = 1 # adds athenacl to /usr/local/bin
         optInstallMan = 1 # installls man page in bin
 
-    elif argPair[0] == 'build': # do nothing, turn off defaults
-        pass
-        #optWritePthLoader = 0
-        #optRemovePthLoader = 0 
-
     elif argPair[0] == 'report': # do nothing, turn off defaults
-        #optWritePthLoader = 0
-        #optRemovePthLoader = 0 
         optReport = 1
 
+    elif argPair[0] == 'pth': # do nothing but install man
+        optRemovePthLoader = 1 # always remove, may have changed locations
+        optWritePthLoader = 1
+
     elif argPair[0] == 'man': # do nothing but install man
-        #optWritePthLoader = 0
-        #optRemovePthLoader = 0 
         optInstallMan = 1
 
     elif argPair[0] == 'install': # site packages install
         optInstallDist = 1 # do a distutils install
-        #optWritePthLoader = 0 # never write pth if doing a distutils install
-        # write launchers to athenaCL src dir after distutil
-        optWriteLauncher = 1 
-        optInstallTool = 1 # 2 if this is done in root
-        optInstallMan = 1 # installls man page in bin
 
+    # for building distributions on the way out
     elif argPair[0] in ['bdist', 'sdist', 'register', 'bdist_mpkg',
                         'bdist_rpm', 'bdist_deb', 'bdist_wininst',
                         'bdist_egg']:
         optBdistType = argPair[0]
         optWriteManifestTemplate = 1
         optInstallDist = 1 # not a distutils install, call setup method
-        #optWritePthLoader = 0
-        #optRemovePthLoader = 0 # dont remove, not an install
 
     elif argPair[0] == 'uninstall':
-        optInstallDist = 0 
         optRemoveDist = 1
-        #optRemovePthLoader = 1 # always remove, may have changed locations
-        #optWritePthLoader = 0
-        optWriteLauncher = 0 
+        optRemovePthLoader = 1 # always remove, may have changed locations
         optRemoveLauncher = 1 
-        optInstallTool = 0
         optRemoveMan = 1
-        optInstallMan = 0 
         
 #-----------------------------------------------------------------||||||||||||--
-# main platform specific branck
-
+# main platform specific branch
 environment.printWarn('active athenaCL package directory: %s' % _fpPackageDir)
+
+if optWriteManifestTemplate: 
+    writeManifestTemplate(_fpPackageDir)
 
 if os.name == 'posix': # create launch script
     if (optWriteLauncher or optInstallMan or optRemoveLauncher 
         or optRemoveDist or optRemoveMan):
         sudoFound = drawer.isSudo() # always detect once, pass to other methods
-    if optWriteManifestTemplate: writeManifestTemplate(_fpPackageDir)
-    if optRemoveDist: removeDisutils(sudoFound)
 
+    if optRemoveDist: 
+        removeDisutils(sudoFound)
     if optInstallDist:
         # update athena directory to site-packages
         _fpSrcDir = runDisutils(optBdistType) 
@@ -430,6 +399,7 @@ if os.name == 'posix': # create launch script
 
     if optRemoveLauncher:
         removeUnixLauncher(sudoFound)
+
     if optWriteLauncher: # will determine optInstallTool 
         # move to /usr/local/bin depending on install too option
         # create launcher script
@@ -437,8 +407,10 @@ if os.name == 'posix': # create launch script
         pathShellScript = os.path.join(_fpSrcDir, 'athenacl') 
         writeUnixLauncher(pathLaunchScript, pathShellScript, 
                                 optInstallTool, sudoFound)
-    #if optRemoveMan: removeMan(sudoFound)
-    #if optInstallMan: copyMan(_fpPackageDir, sudoFound)
+    if optRemoveMan: 
+        removeMan(sudoFound)
+    if optInstallMan: 
+        copyMan(_fpPackageDir, sudoFound)
 
 else: # all windows flavors
     if optRemoveDist:
@@ -447,13 +419,17 @@ else: # all windows flavors
         # update athena directory to site-packages
         _fpSrcDir = runDisutils(optBdistType) 
 
-#if optRemovePthLoader: removePthLoader()
-#if optWritePthLoader: writePthLoader(_fpPackageDir)
+if optRemovePthLoader: 
+    removePthLoader()
+if optWritePthLoader: 
+    writePthLoader(_fpPackageDir)
 
 if optReport:
     environment.printWarn('athenaCL setup.py report')
     reportDisutils()
     reportUnixLauncher()
     reportMan()
-    #reportPthLoader()
+    reportPthLoader()
 
+
+environment.printWarn('complete\n')

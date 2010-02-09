@@ -706,13 +706,13 @@ Apple, Macintosh, Mac OS, and QuickTime are trademarks or registered trademarks 
     docPoRt = 'Provides random numbers between 0 and 1 within a triangular distribution. %s Note: values are distributed more strongly toward the mean of min and max.' % _scaleCommon
     docPoRit = 'Provides random numbers between 0 and 1 within an inverse triangular distribution. %s Note: values are distributed more strongly away from the mean of min and max.' % _scaleCommon
     
-    docPoRe = 'Provides random numbers between 0 and 1 within an exponential distribution. %s Lambda values should be between 0 and 1. Lambda values control the spread of values; larger values increase the probability of events near the minimum.' % _scaleCommon
-    docPoRie = 'Provides random numbers between 0 and 1 within an inverse exponential distribution. %s' % _scaleCommon
+    docPoRe = 'Provides random numbers between 0 and 1 within an exponential distribution. %s Lambda values should be greater than 0. Lambda values control the spread of values; larger values (such as 10) increase the probability of events near the minimum.' % _scaleCommon
+    docPoRie = 'Provides random numbers between 0 and 1 within an inverse exponential distribution. Lambda values control the spread of values; larger values (such as 10) increase the probability of events near the maximum. %s' % _scaleCommon
     docPoRbe = 'Provides random numbers between 0 and 1 within a bilateral exponential distribution. %s' % _scaleCommon
     
     docPoRg = 'Provides random numbers between 0 and 1 within a Gaussian distribution. %s Note: suggested values: mu = 0.5, sigma = 0.1.' % _scaleCommon
     docPoRc = 'Provides random numbers between 0 and 1 within a Cauchy distribution. %s Note: suggested values: alpha = 0.1, mu = 0.5.' % _scaleCommon
-    docPoRb = 'Provides random numbers between 0 and 1 within a Beta distribution. %s Note: alpha and beta values should be between 0 and 1; small alpha values increase the probability of events on the lower boundary; small beta values increase the probability of events on the upper boundary.' % _scaleCommon
+    docPoRb = 'Provides random numbers between 0 and 1 within a Beta distribution. %s Alpha and beta values should be between 0 and 1; small alpha and beta values (such as 0.1) increase the probability of events at the boundaries.' % _scaleCommon
     docPoRw = 'Provides random numbers between 0 and 1 within a Weibull distribution. %s Note: suggested values: alpha = 0.5, beta = 2.0.' % _scaleCommon
 
 

@@ -444,7 +444,7 @@ class Test:
         a.setIdentification(id)
         a.setMeasures(measureList)
 
-        fp = osTools.tempFile('.xml')
+        fp = drawer.tempFile('.xml')
         print fp
         a.write(fp)
         

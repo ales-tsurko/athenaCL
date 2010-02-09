@@ -30,6 +30,8 @@ class Distributor(object):
 
         self.fpDistDir = os.path.join(athenaObj.fpPackageDir, 'dist')
         self.fpBuildDir = os.path.join(athenaObj.fpPackageDir, 'build')
+        self.fpEggInfo = os.path.join(athenaObj.fpPackageDir,
+                        'athenaCL.egg-info')
 
         self._updatePaths()
 
@@ -72,7 +74,9 @@ class Distributor(object):
                     athenaObj.fpPackageDir)
         self._updatePaths()
 
-        # remove build dir
+        # remove build dir, egg-info dir
+        environment.printWarn('removing %s' % self.fpEggInfo)
+        os.system('rm -r %s' % self.fpEggInfo)
         environment.printWarn('removing %s' % self.fpBuildDir)
         os.system('rm -r %s' % self.fpBuildDir)
 
