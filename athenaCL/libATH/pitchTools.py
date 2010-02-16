@@ -237,8 +237,8 @@ def pchTransposer(pchSrc, transposition):
     return _joinPch(tTriple)
 
 #-----------------------------------------------------------------||||||||||||--
-
 # inversion utilities
+
 def psInverter(value, axis=0):
     """do a pitch space inversion, where axis is any value, and value
     is returned shifted the same distance below/above
@@ -380,12 +380,19 @@ def midiToPs(midiInt):
     return midiInt - 60 
 
 def midiToNoteName(midiInt):
+    """
+    >>> midiToNoteName(69)
+    'A4'
+    """
     psReal = midiToPs(midiInt)
     return psToNoteName(psReal)
 
 def midiToFq(midiInt):
     """convert a midiInt to fq; midi values are not floating point
     most of the time
+
+    >>> midiToFq(60)
+    261.625565...
     """
     psInt = midiToPs(midiInt)
     fq = psToFq(psInt)
@@ -404,7 +411,12 @@ def psToMidi(psReal, limit='limit'):
     return midiPc
     
 def psToNoteName(psReal):
-    """figure out a way to show microtones
+    """Convert pitch space to a note name
+
+    >>> psToNoteName(0.5)
+    'C~4'
+    >>> psToNoteName(10)
+    'A#4'
     """
     oct, pc, micro = splitPsReal(psReal)
     pc = int(pc)
@@ -474,7 +486,13 @@ def psToMusicXml(psReal):
 
 
 def psToFq(psReal):
-    """convert a midiInt to fq; handles floating point microtones"""
+    """convert a midiInt to fq; handles floating point microtones
+
+    >>> psToFq(0.0)
+    261.6255...
+    >>> psToFq(9.0)
+    440.0
+    """
     # this is an accurate fq basis: 1.0594630943593
     # 440 == psReal 9; when 9 is suplied, numerator must be 0, == 440
     # http://www.music.mcgill.ca/~gary/307/week3/audio.html
@@ -539,8 +557,12 @@ def fqToNoteName(fq):
 
 
 def fqHarmonicSeries(base, size):
-    """generate a harmonic series based of the base fq, and for as many
-    as specified by the size value"""
+    """generate a harmonic series based off of the base fq, and for as many
+    as specified by the size value
+
+    >>> fqHarmonicSeries(200, 10)
+    [200, 400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000]
+    """
     post = [] # include base (fundamental is first harmonic)
     for x in range(size):
         post.append(base*(x+1))

@@ -75,7 +75,13 @@ def psSetTransposer(chord, trans):
     return tuple(newSet)
     
 def pcInverter(nrmlSet):
-    """returns the inversion of a chord (list of pitches in normal form)"""
+    """returns the inversion of a chord (list of pitches in normal form)
+
+    >>> pcInverter((0,4,7))
+    (0, 3, 7)
+    >>> pcInverter((5,6,8))
+    (0, 2, 3)
+    """
     tempSet = []
     invertSet = []
     for pitch in nrmlSet:
@@ -165,7 +171,8 @@ def findNormalT(pcSet, setMatrix=None):
     # check for unusual data
     if drawer.isNum(pcSet): # its a single number
         pcVal = pitchTools.roundMicro(pcSet)
-        return MONADscTuple, (pcVal % 12) # second number is transposition from 0
+        # second number is transposition from 0
+        return MONADscTuple, (pcVal % 12)
     if len(pcSet) == 1:  #filter out monad!
         pcVal = pitchTools.roundMicro(pcSet[0])
         return MONADscTuple, (pcVal % 12)
@@ -194,11 +201,11 @@ def findNormalT(pcSet, setMatrix=None):
     rotIndices = range(0, card)
     foundIndex = None                #control variable
     for rot in rotIndices:
-        r        = rot # dont need to add 1? + 1
+        r = rot # dont need to add 1? + 1
         rotSet = chord[r:card] + chord[0:r]
         dif  = rotSet[0]
-        pSet     = pcSetTransposer(rotSet, -dif)
-        iSet     = tuple(pcInverter(pSet))
+        pSet = pcSetTransposer(rotSet, -dif)
+        iSet = tuple(pcInverter(pSet))
         maxRange = len(setMatrix[card])
         # check all sets of given card for match
         for index in range(1, maxRange):     # start with 1, not zero
@@ -208,11 +215,11 @@ def findNormalT(pcSet, setMatrix=None):
             testSet = tuple(setMatrix[card][index][0])  
             if iSet == testSet:
                 foundIndex = index
-                foundInv      = 'B'      #nt sure yet if 1 or 0
+                foundInv = 'B'      #nt sure yet if 1 or 0
                 break 
             elif pSet == testSet:
                 foundIndex = index
-                foundInv      = 'A'      #nt sure yet if 1 or 0 
+                foundInv = 'A'      #nt sure yet if 1 or 0 
                 break
         if foundIndex != None:
             break
