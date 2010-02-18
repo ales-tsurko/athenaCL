@@ -4,7 +4,7 @@
 #
 # Authors:       Christopher Ariza
 #
-# Copyright:     (c) 2001-2007 Christopher Ariza
+# Copyright:     (c) 2001-2010 Christopher Ariza
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
 
@@ -33,22 +33,27 @@ _MOD = 'parameter.py'
 # full pmtr names are the name of the object in the module file
 # though first character is caped
 genPmtrNames = {
-    # original (pre 1.1) parameter objects
-    'bg' :'basketGen',
-    'c'  :'constant',
-    'cg' :'cyclicGen',
+    # data access
+    'pr' :'pathRead',
     'ss' :'sampleSelect',
-    'as' :'analysisSelect',
-    # general pmtr objects
-    'bs' :'basketSelect', # given a fixed list, use unit interval vals to select
+    'as' :'analysisSelect', # likely remove
     'ds' :'directorySelect',
     'cf' :'constantFile', # provide a file path as a constant
     # output conversion to a different type format or display
     'tf' :'typeFormat',
-    'oo' :'oneOver', # any value over one
-    #'cp' :'convertPulse' # convert a pulse to seconds, or convert rhythm po to g
-    # data access
-    'pr' :'pathRead',
+
+    # general pmtr objects
+    'c'  :'constant',
+    'cg' :'cyclicGen',
+    'bg' :'basketGen',
+    'bs' :'basketSelect', # given a fixed list, use unit interval vals to select
+    'bf' :'basketFill',
+    'bfs':'basketFillSelect', # combine basket fill and basket select
+    # the idea of basketInterval, or selecting values until an interval has been
+    # completed, is good, but is duplicated by the breakGraph parameter objects
+
+    #'cp' :'convertPulse' # convert a pulse to seconds
+
     # numerical
     'fs' :'fibonacciSeries',
     'vs' :'valueSieve',
@@ -88,7 +93,7 @@ genPmtrNames = {
     'sah' :'sampleAndHold', # only call generator when trigger is met
 
     # python raw code tools
-    #'lc': 'listComprehension',  provide a list comprehension expression?
+    #'lc': 'listComprehension', provide a list comprehension expression?
 
     # 8 wave types
     'ws' :'waveSine',
@@ -123,7 +128,6 @@ genPmtrNames = {
     'egu' : 'envelopeGeneratorUnit', # convert gen to unit envelope
     'ega' : 'envelopeGeneratorAdsr', # convert gen to adsr
 
-
     # break point functions
     'bpl':'breakPointLinear',
     'bpp':'breakPointPower',
@@ -144,6 +148,8 @@ genPmtrNames = {
     'od' :'operatorDivide',
     'op' :'operatorPower',
     'oc' :'operatorCongruence', # moduls
+    'oo' :'oneOver', # any value over one
+
     # formerly hidden
     'sr' :'staticRange',
     'si' :'staticInst',
@@ -154,18 +160,18 @@ rthmPmtrNames = {
     # for len(k), define unique pulses for values, use ca grid to gen
     # exclude continuous; have accent value produced by a generator po
     #'cr' : 'caRhythm', # binary interpretation?
-    'cs'    :'convertSecond',
+    'cs' :'convertSecond',
     'cst' :'convertSecondTriple',
-    'pt'    :'pulseTriple',
-    'ba'    :'binaryAccent',
-    'gr'    :'gaRhythm', 
+    'pt' :'pulseTriple',
+    'ba' :'binaryAccent',
+    'gr' :'gaRhythm', 
     'l' :'loop',
-    'ps'    :'pulseSieve',
-    'rs'    :'rhythmSieve',
+    'ps' :'pulseSieve',
+    'rs' :'rhythmSieve',
     'irg' :'iterateRhythmGroup',
     'irw' :'iterateRhythmWindow',
     'irh' :'iterateRhythmHold',
-    'mp'    :'markovPulse', # directly specify markov string
+    'mp' :'markovPulse', # directly specify markov string
     'mra' :'markovRhythmAnalysis', 
     }
     
@@ -642,6 +648,15 @@ class Test(unittest.TestCase):
         self._parameterRunner(factory(args), 10)
 
         args = ('basketGen', 'rp', (230, 12, 'green'))
+        self._parameterRunner(factory(args), 10)
+
+
+    def testBasketFill(self):
+        args = ('basketFill', 'oc', ['ru',0,1], 10)
+        self._parameterRunner(factory(args), 10)
+
+    def testBasketFill(self):
+        args = ('basketFillSelect', ['ru',0,1], 10, ['ru',0,1])
         self._parameterRunner(factory(args), 10)
 
 

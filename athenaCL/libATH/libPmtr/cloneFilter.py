@@ -38,7 +38,7 @@ class Bypass(basePmtr.FilterParameter):
         self.argDefaults = []
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
         # will raise exception on error
         self.outputFmt = ('num', 'str') # declare outputFmt as num by default
         self.inputFmt = ('num', 'str') # declare outputFmt as num by default
@@ -67,7 +67,7 @@ class OrderBackward(basePmtr.FilterParameter):
         self.argDefaults = []
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
         # will raise exception on error
         self.outputFmt = ('num', 'str') # declare outputFmt as num by default
         self.inputFmt = ('num', 'str') # declare outputFmt as num by default
@@ -103,7 +103,7 @@ class OrderRotate(basePmtr.FilterParameter):
         self.argDefaults = [40]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
         # will raise exception on error
         self.outputFmt = ('num', 'str') # declare outputFmt as num by default
         self.inputFmt = ('num', 'str') # declare outputFmt as num by default
@@ -135,7 +135,7 @@ class PipeLine(basePmtr.FilterParameter):
         self.argDefaults = [[['or', 40], ['ob']]]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
         # will raise exception on error
         self.outputFmt = 'num' # declare outputFmt as num by default
         self.inputFmt = ['num', 'str'] # declare outputFmt as num by default
@@ -206,7 +206,7 @@ class FilterQuantize(basePmtr.FilterParameter):
                              ]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
         # will raise exception on error
         self.outputFmt = 'num' # declare outputFmt as num by default
         self.inputFmt = ['num'] # declare outputFmt as num by default
@@ -292,7 +292,7 @@ class FilterFunnelBinary(basePmtr.FilterParameter):
                                 ]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
         # will raise exception on error
         self.outputFmt = 'num' # declare outputFmt as num by default
         self.inputFmt = ['num'] # declare outputFmt as num by default
@@ -359,7 +359,7 @@ class MaskFilter(basePmtr.FilterParameter):
         self.argDemos = []
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
         # will raise exception on error
         self.outputFmt = 'num' # declare outputFmt as num by default
         self.inputFmt = ['num'] # declare outputFmt as num by default
@@ -420,7 +420,7 @@ class MaskScaleFilter(basePmtr.FilterParameter):
         self.argDemos = []
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
         # will raise exception on error
         self.outputFmt = 'num' # declare outputFmt as num by default
         self.inputFmt = ['num'] # declare outputFmt as num by default
@@ -480,7 +480,7 @@ class Replace(basePmtr.FilterParameter):
         self.argDefaults = [('ru', 0, 1)]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
         # will raise exception on error
         self.outputFmt = 'num' # declare outputFmt as num by default
         self.inputFmt = ['num', 'str'] # declare outputFmt as num by default
@@ -531,7 +531,7 @@ class _FilterOperator(basePmtr.FilterParameter):
         self.argDefaults = [('ws', 'e', 30, 0, 0, 1)]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
         # will raise exception on error
         self.outputFmt = 'num' # declare outputFmt as num by default
         self.inputFmt = 'num' # declare outputFmt as num by default
@@ -661,7 +661,7 @@ class _FilterOperatorAnchor(basePmtr.FilterParameter):
         self.argDefaults = ['lower', ('wc', 'e', 30, 0, 0, 1)]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
         # will raise exception on error
         self.outputFmt = 'num' # declare outputFmt as num by default
         self.inputFmt = 'num' # declare outputFmt as num by default

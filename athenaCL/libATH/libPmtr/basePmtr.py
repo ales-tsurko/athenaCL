@@ -93,9 +93,8 @@ class Selector(object):
     """
     
     # selection methods to add:
-    # orderReverse
-    # randomFirst ? (favor first, beta)
-    # randomLast ? (favor last, beta)
+    # randomFirst ? (favor first, exponential)
+    # randomLast ? (favor last, exponential)
     # randomEdges ? (favor edges)
     # randomCenter ? (favor center, gausian distribution)
     
@@ -106,9 +105,9 @@ class Selector(object):
         self.ref = []
         self.status = 0 # check if values are available, updated w/ set list
         self._setList() # copy rawList to list
-        #print _MOD, self.src, self.ref, self.control
+        self._resetIndex()
+
         self.scratch = [] # will be populated if needed
-        self._i = 0 # current position
         # this is a list of indexes to move through in order
         self._direction = [] # used in oscillate
         self._updateDirectionIndex()
@@ -121,8 +120,10 @@ class Selector(object):
                 self.ref.append(entry.copy())
             else:
                 self.ref.append(copy.deepcopy(entry))
-        if len(self.ref) == 0: self.status = 0
-        else: self.status = 1
+        if len(self.ref) == 0: 
+            self.status = 0
+        else: 
+            self.status = 1
 
     def getStatus(self):
         "used to check if values are set or not"
@@ -147,9 +148,15 @@ class Selector(object):
             post.reverse() # second half of range
             self._direction = self._direction + post
             
+    def _resetIndex(self):
+        if self.control == 'orderedCyclicRetrograde':
+            self._i = len(self.ref) - 1
+        else:
+            self._i = 0 # current position
+
     def reset(self):
         self.scratch = [] # will be populated if needed
-        self._i = 0
+        self._resetIndex()
 
     def update(self, src):
         "update the list; if it is a different size, reset index"
@@ -191,7 +198,16 @@ class Selector(object):
         if self._i == len(self.ref):
             self._i = 0
         select = self.ref[self._i]
-        self._i = self._i + 1
+        self._i += 1
+        return select
+
+    def _orderedCyclicRetrograde(self):
+        """move through list of items in reverse order"""
+        if len(self.ref) == 1:  return self.ref[0]
+        if self._i < 0:
+            self._i = len(self.ref) - 1 # max index
+        select = self.ref[self._i]
+        self._i -= 1
         return select
 
     def _orderedOscillate(self):
@@ -221,6 +237,10 @@ class Selector(object):
         >>> c = Selector([3,4,5], 'randomChoice')
         >>> d = Selector([3,4,5], 'randomWalk')
         >>> e = Selector([3,4,5], 'orderedOscillate')
+
+        >>> f = Selector([3,4,5], 'orderedCyclicRetrograde')
+        >>> f(), f(), f(), f()
+        (5, 4, 3, 5)
         """
         # emergency check
         if len(self.ref) == 0:
@@ -233,6 +253,8 @@ class Selector(object):
             return self._randomPermutate()
         elif self.control == 'orderedCyclic':
             return self._orderedCyclic()
+        elif self.control == 'orderedCyclicRetrograde':
+            return self._orderedCyclicRetrograde()
         elif self.control == 'orderedOscillate':
             return self._orderedOscillate()
         else:
@@ -295,7 +317,9 @@ class Parameter(object):
         # defined below
         self._argNameRef = {
             'selectionString' : ['randomChoice', 'randomWalk', 
-                'randomPermutate', 'orderedCyclic', 'orderedOscillate'],
+                'randomPermutate', 'orderedCyclic', 'orderedCyclicRetrograde',
+                'orderedOscillate',
+                ],
             'articulationString': ['attack', 'sustain'],
             'anchorString' : ['lower', 'upper', 'average', 'median'],
             'directionString' : ['upDown', 'downUp', 'up', 'down'],
@@ -549,6 +573,7 @@ class Parameter(object):
             'randomWalk' : ['rw'],
             'randomPermutate' : ['rp'],
             'orderedCyclic' : ['oc', '1'],
+            'orderedCyclicRetrograde' : ['ocr',],
             'orderedOscillate' : ['oo'],
                 }
         usrStr = drawer.selectionParse(usrStr, ref)

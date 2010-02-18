@@ -46,7 +46,7 @@ class _FileChooser(basePmtr.Parameter):
         
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
 
         self.dirList = [] # used to look for changes
         self.filePathList = [] # updated on __call__
@@ -183,7 +183,7 @@ class DirectorySelect(basePmtr.Parameter):
         self.argDefaults = ['.', 'aif', 'rw']
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
 
         self.dirPath = ''
         self.fileExt = '' # can start w/ period or not
@@ -265,7 +265,7 @@ class ConstantFile(basePmtr.Parameter):
         self.argDefaults = [''] # no default possible
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
         self.filePath = drawer.pathScrub(self.args[0])
 
     def checkArgs(self):

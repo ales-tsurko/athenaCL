@@ -39,7 +39,7 @@ class BinaryAccent(basePmtr.RhythmParameter):
         self.priority = 9 # rhythm gets top priority
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
 
         self.currentPulse = None # init value, used in getCurrentRhythm
         try:
@@ -98,7 +98,7 @@ class GaRhythm(basePmtr.RhythmParameter):
         self.priority = 9 # rhythm gets top priority
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
 
         # args = [rObj, crossoverRate, mutationRate, percentElite]
         self.currentPulse = None # init value, used in getCurrentRhythm
@@ -107,7 +107,7 @@ class GaRhythm(basePmtr.RhythmParameter):
         # must check rhythm before instantiating genome
         if len(self.rObj) <= 2:
             msg = 'pulse list error: supply a rhythm of 3 or more pulses'
-            raise error.ParameterObjectSyntaxError, msg # report error
+            raise error.ParameterObjectSyntaxError(msg) # report error
             
         # exapnd rhythms without rests
         #self.rObj = self._expandRhythm(self.rObj)
@@ -120,7 +120,7 @@ class GaRhythm(basePmtr.RhythmParameter):
         self.popSize = self.args[5]
         if self.popSize < 2:
             msg = 'population size must be 2 or greater'
-            raise error.ParameterObjectSyntaxError, msg # report error
+            raise error.ParameterObjectSyntaxError(msg) # report error
 
         try:
             self.genome = genetic.Genome(self.popSize, self.rObj.get('triple'),
@@ -199,7 +199,7 @@ class Loop(basePmtr.RhythmParameter):
         self.priority = 9 # rhythm gets top priority
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
 
         self.currentPulse = None # init value, used in getCurrentRhythm
         try:
@@ -250,7 +250,7 @@ class ConvertSecond(basePmtr.RhythmParameter):
         self.priority = 9 # rhythm gets top priority
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
 
         self.currentPulse = None # init value, used in getCurrentRhythm
         # might be good to calculate a proper rhyhm object with given tempo
@@ -303,7 +303,7 @@ class ConvertSecondTriple(basePmtr.RhythmParameter):
         self.priority = 9 # rhythm gets top priority
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if not ok: raise error.ParameterObjectSyntaxError, msg # report error
+        if not ok: raise error.ParameterObjectSyntaxError(msg) # report error
 
         self.currentPulse = None # init value, used in getCurrentRhythm
         # might be good to calculate a proper rhyhm object with given tempo
@@ -372,7 +372,7 @@ class PulseTriple(basePmtr.RhythmParameter):
         self.priority = 9 # rhythm gets top priority
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if not ok: raise error.ParameterObjectSyntaxError, msg # report error
+        if not ok: raise error.ParameterObjectSyntaxError(msg) # report error
 
         self.currentPulse = None # init value, used in getCurrentRhythm
         # will raise error 
@@ -447,7 +447,7 @@ class PulseSieve(basePmtr.RhythmParameter):
         self.priority = 9 # rhythm gets top priority
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
         
         self.currentPulse = None # init value, used in getCurrentRhythm     
         self.length = abs(int(round(self.args[1])))
@@ -538,7 +538,7 @@ class RhythmSieve(basePmtr.RhythmParameter):
         self.priority = 9 # rhythm gets top priority
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
         
         self.currentPulse = None # init value, used in getCurrentRhythm     
         self.length = abs(int(round(self.args[1])))
@@ -618,7 +618,7 @@ class MarkovPulse(basePmtr.RhythmParameter):
                                  ('c', 0)]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
         
         self.markovObj = markov.Transition() # creat obj w/o loading
         try:
@@ -688,7 +688,7 @@ class MarkovRhythmAnalysis(basePmtr.RhythmParameter):
                                     'oc'), 12, 2, ('cg','u',0,2,.25)]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
 
         self.srcObj = self._loadSub(self.args[0], 'rthmPmtrObjs')
         self.pulseCount = self.args[1]
@@ -786,7 +786,7 @@ class IterateRhythmGroup(basePmtr.RhythmParameter):
                                     'oc'),('bg','rc',(-3,1,-1,5))]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
 
         self.valueBuffer = [] # grouped values that must be used before expelling
         self.rthmObj = self._loadSub(self.args[0], 'rthmPmtrObjs')
@@ -868,7 +868,7 @@ class IterateRhythmWindow(basePmtr.RhythmParameter):
                  'oc']
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
 
         self.valueBuffer = [] # values g selected 
 
@@ -972,7 +972,7 @@ class IterateRhythmHold(basePmtr.RhythmParameter):
                              
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
 
         self.srcObj = self._loadSub(self.args[0], 'rthmPmtrObjs')   
         self.sizeObj = self._loadSub(self.args[1], 'genPmtrObjs')   

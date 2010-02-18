@@ -37,7 +37,7 @@ class TimeReferenceSource(basePmtr.StaticParameterClone):
         self.argNames = ['name: cloneTime, textureTime']
         # check raw arguments for number, typtimeDelaye
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
         self.args[0] = self._selectTimeRefParser(self.args[0])
         # must call update switches to fill internal dictionary
         self._updateSwitches()
@@ -59,7 +59,7 @@ class RetrogradeMethodToggle(basePmtr.StaticParameterClone):
         self.argNames = ['name: timeInverse, eventInverse, off',]
         # check raw arguments for number, typtimeDelaye
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
         self.args[0] = self._selectRetrogradeParser(self.args[0])
         # must call update switches to fill internal dictionary
         self._updateSwitches()
@@ -85,7 +85,7 @@ class _SwitchOnOff(basePmtr.StaticParameterClone):
         self.argNames = ['onOff',]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
         # will raise exception on error
         self.args[0] = self._onOffParser(self.args[0])
         # must call update switches to fill internal dictionary

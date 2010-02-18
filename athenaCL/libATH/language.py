@@ -590,8 +590,12 @@ Apple, Macintosh, Mac OS, and QuickTime are trademarks or registered trademarks 
     
     docPoBg = 'Chooses values from a user-supplied list (valueList). Values can be strings or numbers. %s' % _selectionStr
 
-    docPoBs = 'Chooses values from a user-supplied list (valueList). Values can be strings or numbers. Values are choosen from the list with values within the unit interval produced by an embedded ParameterObject. Values that exceed the unit interval are limited within the unit interval. '
-    
+    docPoBs = 'Chooses values from a user-supplied list (valueList). Values can be strings or numbers. Values are choosen from the list with values within the unit interval produced by an embedded ParameterObject. Values that exceed the unit interval are limited within the unit interval.'
+
+    docPoBf = 'Chooses values from a ParameterObject generated list of values. The number of values generated is determined by the valueCount integer. Valuse are generated only at initialization. %s' % _selectionStr
+
+    docPoBfs = 'Chooses values from a ParameterObject generated list of values. The number of values generated is determined by the valueCount integer. Valuse are generated only at initialization. Values are choosen from the list with values within the unit interval produced by an embedded ParameterObject. Values that exceed the unit interval are limited within the unit interval.'
+
     docPoSl = 'Produces a Xenakis sieve as a raw, variable format sieve segment list. A z is defined by the range of integers from zMin to zMax. Depending on format type, the resulting segment can be given as an integer, width, unit, or binary segment. %s' % _selectionStr
     
     docPoVs = '%s %s %s %s' % (_sieveHeader, _normalizedList, 

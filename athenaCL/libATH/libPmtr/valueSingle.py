@@ -31,6 +31,8 @@ from athenaCL.libATH.libPmtr import basePmtr
 from athenaCL.libATH.libOrc import orc
 
 _MOD = 'valueSingle.py'
+from athenaCL.libATH import prefTools
+environment = prefTools.Environment(_MOD)
 
 #-----------------------------------------------------------------||||||||||||--
 # hidden basePmtr.Parameter objects for controlling instrument and time range
@@ -48,7 +50,7 @@ class StaticInst(basePmtr.Parameter):
         self.argDefaults = [3, 'csoundNative']
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
         self.hidden = 1 # hidden from user creation 
         self.inst = self.args[0]
         self.orcName = self.args[1]
@@ -70,9 +72,20 @@ class StaticInst(basePmtr.Parameter):
         self.currentValue = self.inst
         return self.currentValue
 
+
 #-----------------------------------------------------------------||||||||||||--
+# note that this might be modified to take PulstTriples
+# this might be defined as new group of ParameterObjects form which the user
+# can select?
+
 class StaticRange(basePmtr.Parameter):
     def __init__(self, args, refDict):
+        '''
+        >>> from athenaCL.libATH.libPmtr import valueSingle
+        >>> a = valueSingle.StaticRange([[10,20]], {})
+        >>> a()
+        [10, 20]
+        '''
         basePmtr.Parameter.__init__(self, args, refDict) # call base init
         self.type = 'staticRange'
         self.doc = lang.docPoSr
@@ -81,7 +94,7 @@ class StaticRange(basePmtr.Parameter):
         self.argDefaults = [(0,20)]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
         self.hidden = 1 # hidden from user creation 
         self.tRange = self.args[0]
         self.tStart = self.args[0][0]
@@ -109,7 +122,6 @@ class StaticRange(basePmtr.Parameter):
 
 
 #-----------------------------------------------------------------||||||||||||--
-# original (pre 1.1) basePmtr.Parameter objects
 
 class CyclicGen(basePmtr.Parameter):
     # note: directions strings used be preceded by 'linear' but
@@ -117,6 +129,12 @@ class CyclicGen(basePmtr.Parameter):
     # may want to add support for a dynamic increment value
     # and variable min and max?
     def __init__(self, args, refDict):
+        '''
+        >>> from athenaCL.libATH.libPmtr import valueSingle
+        >>> a = valueSingle.CyclicGen(['ud', 0, 10, .2], {})
+        >>> a()
+        0.20000...
+        '''
         basePmtr.Parameter.__init__(self, args, refDict) # call base init
         self.type = 'cyclicGen'
         self.doc = lang.docPoCg
@@ -127,7 +145,7 @@ class CyclicGen(basePmtr.Parameter):
                              ]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
         self.directionSrc = self._directionParser(self.args[0]) # amy raise error
         self.direction = copy.copy(self.directionSrc)
         self.min = self.args[1]
@@ -187,6 +205,12 @@ class CyclicGen(basePmtr.Parameter):
 #-----------------------------------------------------------------||||||||||||--
 class Constant(basePmtr.Parameter):
     def __init__(self, args, refDict):
+        '''
+        >>> from athenaCL.libATH.libPmtr import valueSingle
+        >>> a = valueSingle.Constant([3], {})
+        >>> a() 
+        3
+        '''
         basePmtr.Parameter.__init__(self, args, refDict) # call base init
         self.type = 'constant'
         self.doc = lang.docPoC
@@ -195,7 +219,7 @@ class Constant(basePmtr.Parameter):
         self.argDefaults = [0]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
         self.value = self.args[0]
 
     def checkArgs(self):
@@ -210,10 +234,13 @@ class Constant(basePmtr.Parameter):
 
 #-----------------------------------------------------------------||||||||||||--
 class BasketGen(basePmtr.Parameter):
-    # most values used here are constants; it might be necessary to have a
-    # basket of parameter objects? or better to design as necessary for each
-    # generator?
     def __init__(self, args, refDict):
+        '''
+        >>> from athenaCL.libATH.libPmtr import valueSingle
+        >>> a = valueSingle.BasketGen(['oc', [1,2,3]], {})
+        >>> a()
+        1
+        '''
         basePmtr.Parameter.__init__(self, args, refDict) # call base init
         self.type = 'basketGen'
         self.doc = lang.docPoBg
@@ -225,7 +252,7 @@ class BasketGen(basePmtr.Parameter):
                              ]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
 
         if drawer.isList(self.args[1]): 
             self.list = list(self.args[1])
@@ -251,6 +278,184 @@ class BasketGen(basePmtr.Parameter):
         return self.currentValue
 
 #-----------------------------------------------------------------||||||||||||--
+class BasketFill(basePmtr.Parameter):
+    def __init__(self, args, refDict):
+        '''
+        >>> from athenaCL.libATH.libPmtr import valueSingle
+        >>> a = valueSingle.BasketFill(['oc', 3, 20], {})
+        Traceback (most recent call last):
+        ParameterObjectSyntaxError: wrong type of data...
+
+        >>> a = valueSingle.BasketFill(['oc', ['bg', 'oc', [3,100]], 20], {})
+        >>> a.repr()
+        'basketFill, orderedCyclic, (basketGen, orderedCyclic, (3,100)), 20'
+        >>> a()
+        3
+        '''
+        basePmtr.Parameter.__init__(self, args, refDict) # call base init
+        self.type = 'basketFill'
+        self.doc = lang.docPoBf
+        self.argTypes = ['str', 'list', 'int']
+        self.argNames = ['selectionString', 
+                         'parameterObject: source Generator',
+                         'valueCount']
+        self.argDefaults = ['oc', ['ru',0,1], 10]
+        self.argDemos = []
+        # check raw arguments for number, type
+        ok, msg = self._checkRawArgs()
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
+        
+        self.control = self._selectorParser(self.args[0]) # raises exception
+        self.fillObj = self._loadSub(self.args[1], 'genPmtrObjs') 
+        self.valueCount = abs(self.args[2])
+        if self.valueCount == 0: self.valueCount = 1 # correct bad arg
+        # do processing on init
+        self.basket = []
+        for t in range(self.valueCount):
+            self.basket.append(self.fillObj(t, refDict))
+        # create selector to store and access values
+        self.selector = basePmtr.Selector(self.basket, self.control)
+
+    def checkArgs(self):
+        if len(self.basket) == 0:
+            return 0, 'list must have more than 0 items.'
+        ok, msg = self.fillObj.checkArgs() # check storead po
+        if not ok: return 0, msg
+        return 1, '' 
+
+    def repr(self, format=''):
+        return '%s, %s, (%s), %s' % (self.type, self.control, 
+            self.fillObj.repr(format), self.valueCount)
+
+    def reset(self):
+        self.selector.reset()
+        self.fillObj.reset() # this is not necesary
+
+    def __call__(self, t=None, refDict=None):
+        self.currentValue = self.selector()
+        return self.currentValue
+
+
+#-----------------------------------------------------------------||||||||||||--
+class BasketFillSelect(basePmtr.Parameter):
+    # given a list, select w/ unit control
+    def __init__(self, args, refDict):
+        '''
+        >>> from athenaCL.libATH.libPmtr import valueSingle
+        >>> a = valueSingle.BasketFillSelect([['ru',0,1], 3, ['ru',0,1]], {})
+        >>> a.repr()
+        'basketFillSelect, (randomUniform, (constant, 0), (constant, 1)), 3, (randomUniform, (constant, 0), (constant, 1))'
+        >>> a = valueSingle.BasketFillSelect([['bg','oc',[20,30]], 2, ['bg', 'oc', [.2,.8]]], {})
+        >>> a()
+        20
+        >>> a()
+        30
+        '''
+        basePmtr.Parameter.__init__(self, args, refDict) # call base init
+        self.type = 'basketFillSelect'
+        self.doc = lang.docPoBfs
+        self.argTypes = ['list', 'int', 'list']
+        self.argNames = ['parameterObject: source Generator',
+                         'valueCount',
+                         'parameterObject: selection Generator']
+
+        self.argDefaults = [['ru',0,1], 10, ['rb',.2,.2,0,1]]
+        self.argDemos = []
+                             
+        # check raw arguments for number, type
+        ok, msg = self._checkRawArgs()
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
+
+        self.fillObj = self._loadSub(self.args[0], 'genPmtrObjs') 
+        self.valueCount = abs(self.args[1])
+        if self.valueCount == 0: self.valueCount = 1 # correct bad arg
+        # do processing on init
+        self.basket = []
+        for t in range(self.valueCount):
+            self.basket.append(self.fillObj(t, refDict))
+        # configure selector
+        self.unitSelectObj = self._loadSub(self.args[2], 'genPmtrObjs') 
+        self.valueBoundary = unit.unitBoundaryEqual(len(self.basket))
+        #environment.printDebug([self.basket, self.valueBoundary])
+
+    def checkArgs(self):
+        if len(self.basket) == 0:
+            return 0, 'list must have more than 0 items.'
+        ok, msg = self.fillObj.checkArgs() # check storead po
+        if not ok: return 0, msg
+        ok, msg = self.unitSelectObj.checkArgs()
+        if not ok: return 0, msg    
+        return 1, '' 
+
+    def repr(self, format=''):
+        fillObjStr = self.fillObj.repr(format)
+        unitSelectStr = self.unitSelectObj.repr(format)
+        return '%s, (%s), %s, (%s)' % (self.type, fillObjStr, self.valueCount, 
+                                       unitSelectStr)
+
+    def reset(self):
+        self.fillObj.reset()
+        self.unitSelectObj.reset()
+
+    def __call__(self, t=None, refDict=None):
+        # get value w/n unit interval, de-map from arptition
+        pos = unit.unitBoundaryPos(unit.limit(self.unitSelectObj(t, refDict)),
+                                            self.valueBoundary)
+        self.currentValue = self.basket[pos]
+        return self.currentValue
+
+#-----------------------------------------------------------------||||||||||||--
+class BasketSelect(basePmtr.Parameter):
+    # given a list, select w/ unit control
+    def __init__(self, args, refDict):
+        basePmtr.Parameter.__init__(self, args, refDict) # call base init
+        self.type = 'basketSelect'
+        self.doc = lang.docPoBs
+        self.argTypes = [['list', 'num'], 'list']
+        self.argNames = ['valueList', 
+                         'parameterObject: selection Generator']
+
+        self.argDefaults = [(1,2,3,4,5,6,7,8,9),('rb',.2,.2,('bpl','e','s',((0,.4),(120,0))),('bpl','e','s',((0,.6),(120,1))))]
+        self.argDemos = []
+                             
+        # check raw arguments for number, type
+        ok, msg = self._checkRawArgs()
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
+
+        if drawer.isList(self.args[0]): 
+            self.list = list(self.args[0])
+        else: self.list = [self.args[0],]
+
+        self.unitSelectObj = self._loadSub(self.args[1], 'genPmtrObjs') 
+        self.valueBoundary = unit.unitBoundaryEqual(len(self.list))
+
+    def checkArgs(self):
+        if len(self.list) == 0:
+            return 0, 'list must have more than 0 items.'
+        ok, msg = self.unitSelectObj.checkArgs()
+        if not ok: return 0, msg    
+        return 1, '' 
+
+    def repr(self, format=''):
+        unitSelectStr = self.unitSelectObj.repr(format)
+        return '%s, %s, (%s),' % (self.type, self._scrubList(self.list),
+                                          unitSelectStr)
+
+    def reset(self):
+        self.unitSelectObj.reset()
+
+    def __call__(self, t=None, refDict=None):
+        # get value w/n unit interval, de-map from arptition
+        pos = unit.unitBoundaryPos(unit.limit(self.unitSelectObj(t, refDict)),
+                                            self.valueBoundary)
+        self.currentValue = self.list[pos]
+        return self.currentValue
+
+
+
+
+
+#-----------------------------------------------------------------||||||||||||--
 class SieveList(basePmtr.Parameter):
     def __init__(self, args, refDict):
         basePmtr.Parameter.__init__(self, args, refDict) # call base init
@@ -263,7 +468,7 @@ class SieveList(basePmtr.Parameter):
         self.argDefaults = ['3|4', -12, 12, 'int', 'oc']
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
 
         try: self.sieveObj = sieve.Sieve(self.args[0])
         except AttributeError: raise error.ParameterObjectSyntaxError, 'sieve creation failed'
@@ -332,7 +537,7 @@ class ValueSieve(basePmtr.Parameter):
                               ]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
 
         try: self.sieveObj = sieve.Sieve(self.args[0])
         except AttributeError: raise error.ParameterObjectSyntaxError, 'sieve creation failed'
@@ -396,7 +601,7 @@ class SieveFunnel(basePmtr.Parameter):
                               'parameterObject: fill value generator']
         self.argDefaults = ['3|4', 24, 0, 1, ('ru', 0, 1),]
         self.argDemos = [['5|13',14,('ws','e',60,0,0,.25),
-                                             ('ws','e',60,0,.75,1), ('ru',0,1)],
+                           ('ws','e',60,0,.75,1), ('ru',0,1)],
                               ['13@5|13@7|13@11',20,
                                             ('a',0,('ws','e',30,1,-.75,1.75)),
                                             ('bpp','e','l',((0,100),(160,20)),2),
@@ -404,7 +609,7 @@ class SieveFunnel(basePmtr.Parameter):
                              ]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
 
         try: self.sieveObj = sieve.Sieve(self.args[0])
         except AttributeError: raise error.ParameterObjectSyntaxError, 'sieve creation failed'
@@ -479,7 +684,7 @@ class ListPrime(basePmtr.Parameter):
 
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
 
         self.start = self.args[0]
         self.length = self.args[1]
@@ -538,7 +743,7 @@ class ValuePrime(basePmtr.Parameter):
                               ]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
 
         self.start = self.args[0]
         self.length = self.args[1]
@@ -615,7 +820,7 @@ class CaList(basePmtr.Parameter):
                                 ]
         # check raw arguments for number, typed
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
 
         rule = self.args[1]
         if drawer.isNum(rule): rule = ('c', rule)
@@ -693,7 +898,7 @@ class CaValue(basePmtr.Parameter):
                              ]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
 
         rule = self.args[1]
         if drawer.isNum(rule): rule = ('c', rule)
@@ -780,7 +985,7 @@ class PathRead(basePmtr.Parameter):
         self.argDefaults = ['forte']
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
         self.formatNames = ['forte', 'mason', 'fq', 'ps', 'midi', 'pch', 'name']
         # adjust arg names to embed string selection choices
         self.argNames[0] = self.argNames[0] + ':' + ','.join(self.formatNames)       
@@ -847,7 +1052,7 @@ class LogisticMap(basePmtr.Parameter):
                              ]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
 
         self.xInit = self.args[0]
         self.x = copy.copy(self.args[0]) # init value
@@ -915,7 +1120,7 @@ class HenonBasket(basePmtr.Parameter):
                              ]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
 
         self.xInit = self.args[0]
         self.yInit = self.args[1]
@@ -1011,7 +1216,7 @@ class LorenzBasket(basePmtr.Parameter):
                              ]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
 
         self.xInit = self.args[0]
         self.yInit = self.args[1]
@@ -1112,7 +1317,7 @@ class Noise(basePmtr.Parameter):
                              ]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
         
         ref = {
             0 : ['white', 'w'],
@@ -1171,7 +1376,7 @@ class Accumulator(basePmtr.Parameter):
                              ]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
 
         # note: the first value will not be the init unless the pmtrObj
         # returns 0 as its first value
@@ -1223,7 +1428,7 @@ class TypeFormat(basePmtr.Parameter):
                              ]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
 
         # may raise exception
         self.format = self._typeFormatParser(self.args[0])
@@ -1284,7 +1489,7 @@ class Mask(basePmtr.Parameter):
                                 ]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
 
         # will raise exceptio on error
         self.boundaryMethod = self._boundaryParser(self.args[0]) 
@@ -1343,7 +1548,7 @@ class MaskReject(basePmtr.Parameter):
                                 ]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
 
         # will raise exceptio on error
         self.boundaryMethod = self._boundaryParser(self.args[0]) 
@@ -1395,7 +1600,7 @@ class MaskScale(basePmtr.Parameter):
         self.argDemos = []
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
 
         self.genObj = self._loadSub(self.args[0], 'genPmtrObjs')
         self.valueCount = int(self.args[1])
@@ -1471,7 +1676,7 @@ class FunnelBinary(basePmtr.Parameter):
                                 ]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
 
         # will raise exceptio on error
         self.thresholdMatch = self._thresholdMatchParser(self.args[0]) 
@@ -1518,17 +1723,13 @@ class FunnelBinary(basePmtr.Parameter):
 #-----------------------------------------------------------------||||||||||||--
 class IterateWindow(basePmtr.Parameter):
     # iterator: selects from multiple parameter objects 
-    # there might be a need for a related parameter object ath allows the user
-    # to specify a series of parameter objects, and then a series of values
-    # selected from each of these parameter objects; this is related to this
-    # similar to AC Toolbox 'select-generator-by-number'
     def __init__(self, args, refDict):
         basePmtr.Parameter.__init__(self, args, refDict) # call base init
         self.type = 'iterateWindow'
         self.doc = lang.docPoIw
         self.argTypes = ['list', 'list', 'str']
         self.argNames = ['parameterObjectList: a list of Generators', 
-                              'parameterObject: generate or skip control Generator', 
+                    'parameterObject: generate or skip control Generator', 
                               'selectionString']
         
         self.argDefaults = [(('ru',0,1),('wt','e',30,0,0,1)),
@@ -1539,7 +1740,7 @@ class IterateWindow(basePmtr.Parameter):
                              ]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
 
         self.valueBuffer = [] # values g selected 
 
@@ -1628,7 +1829,7 @@ class IterateGroup(basePmtr.Parameter):
                               ]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
 
         self.valueBuffer = [] # grouped values that must be used before expelling
         self.genObj = self._loadSub(self.args[0], 'genPmtrObjs')
@@ -1685,9 +1886,9 @@ class IterateHold(basePmtr.Parameter):
         self.doc = lang.docPoIh
         self.argTypes = ['list', 'list', 'list', 'str']
         self.argNames = ['parameterObject: source Generator', 
-                              'parameterObject: size Generator', 
-                              'parameterObject: refresh count Generator', 
-                              'selectionString']
+                         'parameterObject: size Generator', 
+                         'parameterObject: refresh count Generator', 
+                         'selectionString']
 
         self.argDefaults = [('ru',0,1),('bg','rc',[2,3,4]),
                                                  ('bg','oc',[12,24]),'oc']
@@ -1697,7 +1898,7 @@ class IterateHold(basePmtr.Parameter):
                              
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
 
         self.srcObj = self._loadSub(self.args[0], 'genPmtrObjs')      
         self.sizeObj = self._loadSub(self.args[1], 'genPmtrObjs')   
@@ -1778,7 +1979,7 @@ class IterateCross(basePmtr.Parameter):
                              ]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
 
         self.genObjOne = self._loadSub(self.args[0], 'genPmtrObjs')
         self.genObjTwo = self._loadSub(self.args[1], 'genPmtrObjs')
@@ -1839,7 +2040,7 @@ class IterateSelect(basePmtr.Parameter):
                              
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
 
         self.srcObj = self._loadSub(self.args[0], 'genPmtrObjs')      
         self.sizeObj = self._loadSub(self.args[1], 'genPmtrObjs')   
@@ -1913,53 +2114,6 @@ class IterateSelect(basePmtr.Parameter):
         return self.currentValue
 
 
-#-----------------------------------------------------------------||||||||||||--
-class BasketSelect(basePmtr.Parameter):
-    # given a list, select w/ unit control
-    def __init__(self, args, refDict):
-        basePmtr.Parameter.__init__(self, args, refDict) # call base init
-        self.type = 'basketSelect'
-        self.doc = lang.docPoBs
-        self.argTypes = [['list', 'num'], 'list']
-        self.argNames = ['valueList', 
-                              'parameterObject: selection Generator']
-
-        self.argDefaults = [(1,2,3,4,5,6,7,8,9),('rb',.2,.2,('bpl','e','s',((0,.4),(120,0))),('bpl','e','s',((0,.6),(120,1))))]
-        self.argDemos = []
-                             
-        # check raw arguments for number, type
-        ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
-
-        if drawer.isList(self.args[0]): 
-            self.list = list(self.args[0])
-        else: self.list = [self.args[0],]
-
-        self.unitSelectObj = self._loadSub(self.args[1], 'genPmtrObjs') 
-        self.valueBoundary = unit.unitBoundaryEqual(len(self.list))
-
-    def checkArgs(self):
-        if len(self.list) == 0:
-            return 0, 'list must have more than 0 items.'
-        ok, msg = self.unitSelectObj.checkArgs()
-        if not ok: return 0, msg    
-        return 1, '' 
-
-    def repr(self, format=''):
-        unitSelectStr = self.unitSelectObj.repr(format)
-        return '%s, %s, (%s),' % (self.type, self._scrubList(self.list),
-                                          unitSelectStr)
-
-    def reset(self):
-        self.unitSelectObj.reset()
-
-    def __call__(self, t=None, refDict=None):
-        # get value w/n unit interval, de-map from arptition
-        pos = unit.unitBoundaryPos(unit.limit(self.unitSelectObj(t, refDict)),
-                                            self.valueBoundary)
-        self.currentValue = self.list[pos]
-        return self.currentValue
-
 
 
 
@@ -1988,7 +2142,7 @@ class SampleAndHold(basePmtr.Parameter):
 
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
 
         self.valueBuffer = None # init value
         self.thresholdGate = None # init value
@@ -2090,7 +2244,7 @@ class Quantize(basePmtr.Parameter):
                                 ]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
 
         self.gridRefObj = self._loadSub(self.args[0], 'genPmtrObjs')
         self.stepGenObj = self._loadSub(self.args[1], 'genPmtrObjs')
@@ -2166,7 +2320,7 @@ class MarkovValue(basePmtr.Parameter):
                                 ]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
         
         self.markovObj = markov.Transition() # creat obj w/o loading
         try:
@@ -2232,7 +2386,7 @@ class MarkovGeneratorAnalysis(basePmtr.Parameter):
                              ]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
 
         self.srcObj = self._loadSub(self.args[0], 'genPmtrObjs')
         self.valueCount = self.args[1]
@@ -2325,7 +2479,7 @@ class FibonacciSeries(basePmtr.Parameter):
                              ]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
 
         self.start = int(self.args[0])
         self.length = int(self.args[1])
@@ -2392,7 +2546,7 @@ class _Operator(basePmtr.Parameter):
         self.argDefaults = [('ws','e',30,0,0,1), ('a',.5,('c',.025))]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
 
         self.pmtrObjA = self._loadSub(self.args[0], 'genPmtrObjs')
         self.pmtrObjB = self._loadSub(self.args[1], 'genPmtrObjs')
@@ -2509,7 +2663,7 @@ class OneOver(basePmtr.Parameter):
         self.argDefaults = [('ws','e',30,0,.5,2)]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
 
         self.pmtrObj = self._loadSub(self.args[0], 'genPmtrObjs')
 

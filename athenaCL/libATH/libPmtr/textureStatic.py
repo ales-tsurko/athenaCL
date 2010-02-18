@@ -32,7 +32,7 @@ class ParallelMotionList(basePmtr.StaticParameterTexture):
         self.argDefaults = [[], .0]
         # check raw arguments for number, typtimeDelaye
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
         # must call update switches to fill internal dictionary
         self._updateSwitches()
 
@@ -61,7 +61,7 @@ class OrnamentLibrarySelect(basePmtr.StaticParameterTexture):
         self.argDefaults = ['diatonicGroupA']
         # check raw arguments for number, typtimeDelaye
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
         # update available library names?
         # must call update switches to fill internal dictionary
         self._updateSwitches()
@@ -90,7 +90,7 @@ class OrnamentMaxDensity(basePmtr.StaticParameterTexture):
         self.argNames = ['percent',]
         # check raw arguments for number, typtimeDelaye
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
         # must call update switches to fill internal dictionary
         self._updateSwitches()
 
@@ -118,7 +118,7 @@ class MaxTimeOffset(basePmtr.StaticParameterTexture):
         self.argDefaults = [.025]
         # check raw arguments for number, typtimeDelaye
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
         # must call update switches to fill internal dictionary
         self._updateSwitches()
 
@@ -142,7 +142,7 @@ class TotalEventCount(basePmtr.StaticParameterTexture):
         self.argDefaults = [20]
         # check raw arguments for number, typtimeDelaye
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
         # must call update switches to fill internal dictionary
         self._updateSwitches()
 
@@ -166,7 +166,7 @@ class _Selector(basePmtr.StaticParameterTexture):
         self.argNames = ['selectionString',]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
         # will raise exception on error
         self.args[0] = self._selectorParser(self.args[0])
         # must call update switches to fill internal dictionary
@@ -204,7 +204,7 @@ class _SwitchOnOff(basePmtr.StaticParameterTexture):
         self.argNames = ['onOff',]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
         # will raise exception on error
         self.args[0] = self._onOffParser(self.args[0])
         # must call update switches to fill internal dictionary
@@ -266,7 +266,7 @@ class _SwitchLevelMonophonic(basePmtr.StaticParameterTexture):
         self.argNames = ['level: set, event',]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
         # will raise exception on error
         self.args[0] = self._selectLevelMonophonicParser(self.args[0])
         # must call update switches to fill internal dictionary
@@ -305,7 +305,7 @@ class _SwitchLevelPolyphonic(basePmtr.StaticParameterTexture):
         self.argNames = ['level: set, event, voice',]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
         # will raise exception on error
         self.args[0] = self._selectLevelPolyphonicParser(self.args[0])
         # must call update switches to fill internal dictionary
@@ -344,7 +344,7 @@ class _SwitchLevelFrame(basePmtr.StaticParameterTexture):
         self.argNames = ['level: event, frame',]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
         # will raise exception on error
         self.args[0] = self._selectLevelFrameParser(self.args[0])
         # must call update switches to fill internal dictionary
@@ -378,7 +378,7 @@ class LevelEventPartition(basePmtr.StaticParameterTexture):
         self.argDefaults = ['path',]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
         # will raise exception on error
         self.args[0] = self._selectLevelPartitionParser(self.args[0])
         # must call update switches to fill internal dictionary
@@ -413,7 +413,7 @@ class EventDensityPartition(basePmtr.StaticParameterTexture):
         self.argDefaults = ['duration',]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
         # will raise exception on error
         self.args[0] = self._selectDensityPartitionParser(self.args[0])
         # must call update switches to fill internal dictionary
@@ -448,7 +448,7 @@ class LevelEventCount(basePmtr.StaticParameterTexture):
         self.argDefaults = ['segment',]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
         # will raise exception on error
         self.args[0] = self._selectLevelEventCountParser(self.args[0])
         # must call update switches to fill internal dictionary
@@ -483,7 +483,7 @@ class TotalSegmentCount(basePmtr.StaticParameterTexture):
         self.argDefaults = [10]
         # check raw arguments for number, typtimeDelaye
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
         # must call update switches to fill internal dictionary
         self._updateSwitches()
 
@@ -506,7 +506,7 @@ class InterpolationMethodControl(basePmtr.StaticParameterTexture):
         self.argDefaults = ['linear',]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError, msg # report error
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
         # will raise exception on error
         self.args[0] = self._interpolationMethodControlParser(self.args[0])
         # must call update switches to fill internal dictionary

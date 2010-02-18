@@ -24,6 +24,9 @@ from athenaCL.libATH import language
 lang = language.LangObj()
 
 _MOD = 'clone.py'
+from athenaCL.libATH import prefTools
+environment = prefTools.Environment(_MOD)
+
 #-----------------------------------------------------------------||||||||||||--
 
 
@@ -835,11 +838,18 @@ class CloneManager:
         return self._tRef[tName][cName].mute
 
     def delete(self, tName, cName=None):
-        if cName == None: # delete all of a textures clones
-            del self._tRef[tName]
-            del self._tRefCurrent[tName]
+        if cName == None: # delete all of a texture's clones
+            if tName in self._tRef.keys():
+                del self._tRef[tName]
+                del self._tRefCurrent[tName]
+            else: # this should not happen
+                environLocal.printDebug['attempting to remove clone from texture %s not stored in tRef' % tName]
         else:
-            del self._tRef[tName][cName]
+            if tName in self._tRef.keys():
+                del self._tRef[tName][cName]
+            else: # this should not happen
+                environLocal.printDebug['attempting to remove clone from texture %s not stored in tRef' % tName]
+
             if self._tRefCurrent[tName] == cName:
                 self._tRefCurrent[tName] = '' # nothing selected
 
