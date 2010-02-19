@@ -484,7 +484,9 @@ Apple, Macintosh, Mac OS, and QuickTime are trademarks or registered trademarks 
     
     docOeCsoundSilence = 'Translates Texture and Clone events to a Csound score for use with the Csound Silence system by Michael Goggins. Event parameters follow a standard number and order. Standard panning control applied to x pan event parameter. Compatible only with the CsoundSilence Orchestra.' 
     
-    docOeMaxColl = 'Translates events to a Max coll object data format for use inside Max/MSP. All values are converted to MIDI integer values. Events, for each Texture or Clone, are stored as triples of MIDI pitch, MIDI velocity, and event time span. All events for Textures or Clones are labeled with numbered keys, starting from 1. Compatible with all Orchestras; GeneralMidi Orchestra will be used for event postMap conversions.'
+#     docOeMaxColl = 'Translates events to a Max coll object data format for use inside Max/MSP. All values are converted to MIDI integer values. Events, for each Texture or Clone, are stored as triples of MIDI pitch, MIDI velocity, and event time span. All events for Textures or Clones are labeled with numbered keys, starting from 1. Compatible with all Orchestras; GeneralMidi Orchestra will be used for event postMap conversions.'
+
+    docOePDArray = 'Translates all event parameter streams to individual PureData (PD) arrays. Such arrays can be read from at the control or audio rate from within PD using tabread and related objects. Compatible with all Orchestras.'
     
     # note: find out what type of midi file
     docOeMidiFile = 'Translates events to a standard (type 1) MIDI file. Compatible with all Orchestras; in all cases events are translated with the GeneralMidi Orchestra.'

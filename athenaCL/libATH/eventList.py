@@ -58,6 +58,7 @@ outputEngineNames = [
     'EngineCsoundExternal', # .sco only 
     'EngineSuperColliderTask',
 #    'EngineMaxColl',
+    'EnginePureDataArray',
     'EngineAcToolbox',
     'EngineMidiFile',
     'EngineText',
@@ -139,6 +140,9 @@ def selectOutEngineOrc(emName, oeName):
         return 'csoundExternal'   
     elif oeName == 'EngineSuperColliderTask':
         return 'superColliderNative'   
+    elif oeName == 'EnginePureDataArray':
+        return 'generic'
+
 #     elif oeName == 'EngineMaxColl':
 #         # maxColl assumes midi values for all parameters
 #         return 'generalMidi'
@@ -1482,33 +1486,34 @@ class _OutputEngine:
         return dataList
 
 
-    def _translateCollList(self, orcMapMode, esObj):
-        """coll data must be integers; uses midi values"""
-        el = esObj.list() # get event list
-        inst = el[0]['inst'] # get inst from first event
-        intList = []
-        i = 0
-        for event in el:
-            if event['acc'] == 0: continue # do not write rests         
-            # dur is calculated as distane between start times
-            # as max/msp players are monophonic
-            if i != len(el) - 1: # not last:
-                eventNext = el[i+1]
-                tSpan = eventNext['time'] - event['time'] # next minus this
-            else: # last event
-                tSpan = event['sus'] # no next, use dur
-            # convert time to ms ints not s
-            tSpan = int(round(tSpan * 1000))
-            midiVel = self.orcObj.postMap(inst, 'amp', event['amp'], orcMapMode)
-            #midiVel = self._ampToMidiVel(event['amp'], esObj.meta('ampMax'))
-            midiPs = self.orcObj.postMap(inst, 'ps', event['ps'], orcMapMode)
-            #midiPs = pitchTools.psToMidi(event['ps'], 'limit')
-            midiPan = self.orcObj.postMap(inst, 'pan', event['pan'], orcMapMode)
-            #midiPan = self._panToMidiPan(event['pan']) 
-            # dont sub tuple
-            intList.append('%s %s %s ' % (midiPs, midiVel, tSpan))
-            i = i + 1
-        return intList
+
+#     def _translateCollList(self, orcMapMode, esObj):
+#         """coll data must be integers; uses midi values"""
+#         el = esObj.list() # get event list
+#         inst = el[0]['inst'] # get inst from first event
+#         intList = []
+#         i = 0
+#         for event in el:
+#             if event['acc'] == 0: continue # do not write rests         
+#             # dur is calculated as distane between start times
+#             # as max/msp players are monophonic
+#             if i != len(el) - 1: # not last:
+#                 eventNext = el[i+1]
+#                 tSpan = eventNext['time'] - event['time'] # next minus this
+#             else: # last event
+#                 tSpan = event['sus'] # no next, use dur
+#             # convert time to ms ints not s
+#             tSpan = int(round(tSpan * 1000))
+#             midiVel = self.orcObj.postMap(inst, 'amp', event['amp'], orcMapMode)
+#             #midiVel = self._ampToMidiVel(event['amp'], esObj.meta('ampMax'))
+#             midiPs = self.orcObj.postMap(inst, 'ps', event['ps'], orcMapMode)
+#             #midiPs = pitchTools.psToMidi(event['ps'], 'limit')
+#             midiPan = self.orcObj.postMap(inst, 'pan', event['pan'], orcMapMode)
+#             #midiPan = self._panToMidiPan(event['pan']) 
+#             # dont sub tuple
+#             intList.append('%s %s %s ' % (midiPs, midiVel, tSpan))
+#             i = i + 1
+#         return intList
 
     #-----------------------------------------------------------------------||--
     def _translateTextDelimitStr(self, orcMapMode, esObj, delimit='\t'):
@@ -2021,6 +2026,169 @@ class EngineCsoundSilence(_OutputEngine):
 
 
 #-----------------------------------------------------------------||||||||||||--
+class EnginePureDataArray(_OutputEngine):
+    """write all data into PD arrays
+    """
+    def __init__(self, emObj, fpRef, ao):
+        """
+
+
+#N canvas 100 100 900 300 10;
+# x,y windo start, x,y, window end; last value is font size!
+
+# this is name, x size, float, and then data represenation type: 3 is points
+#X array    this_array!     200       float       3;
+
+#X coords 0 1 100 -1 200 140 1;
+
+# 0 / 100 is the x range # max should be size
+# 200 is the x size: x range and size need to be the same
+# this should be twice the x size so that 2 px are given to each data point
+
+# 1 / -1 is the y range
+# 140 is the y size; this is the visual height in pixels
+
+
+#X restore 10 40 graph;
+# x, y for upper left corner
+
+
+        """
+        _OutputEngine.__init__(self, emObj, fpRef, ao) # provide event name
+        self.name = 'EnginePureDataArray'
+        self.doc = lang.docOePDArray
+
+        self.msg = []
+
+        self.orcIncompat = [] # all orchestras compatable
+        self.outAvailable = ['pureDataArray']
+        self.outMin = ['pureDataArray']
+
+
+    def _getArrayValues(self, dataList):
+        '''
+        >>> a = EnginePureDataArray(None, None, None)
+        >>> a._getArrayValues([-0.62857, -0.657141, -0.667856])
+        '-0.62857 -0.657141 -0.667856'
+        '''
+        msg = []
+        for value in dataList:
+            msg.append('%s' % round(value, 7))
+
+        return ' '.join(msg)
+
+    def _getArrayDef(self, name, dataList, vCount):
+        '''Vertical count determines what position this is in the list of arrays; should start at zero
+
+        >>> a = EnginePureDataArray(None, None, None)
+        >>> print(a._getArrayDef('test', [-0.62, -0.651, -0.66], 0))
+        #N canvas 0 0 450 300 (subpatch) 0;
+        #X array test 3 float 3;
+        #A -0.62 -0.651 -0.66;
+        #X coords 0 1 3 -1 6 80 1;
+        #X restore 10 40 graph;
+
+        >>> print(a._getArrayDef('testAlt', [-2, 0, 3, 1.5], 1))
+        #N canvas 0 0 450 300 (subpatch) 0;
+        #X array testAlt 4 float 3;
+        #A -2.0 0.0 3.0 1.5;
+        #X coords 0 3 4 -2 8 80 1;
+        #X restore 10 140 graph;
+        '''
+        vPresentation = 80 # vertical presentation size
+
+        yPosInit = 40
+        yPosShift = 100
+
+        dataSize = len(dataList)
+        dataMin = int(round(min(dataList)))
+        if dataMin > 0:
+            dataMin = 0
+        dataMax = int(round(max(dataList)))
+        if dataMax < 1:
+            dataMax = 1
+
+        msg = []
+        # these values do not seemt be important
+        msg.append('#N canvas 0 0 450 300 (subpatch) 0;')
+        # set name here, as well as data point size
+        msg.append('#X array %s %s float 3;' % (name, dataSize))
+        msg.append('#A %s;' % self._getArrayValues(dataList))
+        msg.append('#X coords 0 %s %s %s %s %s 1;' % (dataMax,
+                dataSize, dataMin, dataSize*2, vPresentation))
+        # final posittioning of object
+        msg.append('#X restore 10 %s graph;' % (yPosInit + (yPosShift*vCount)))
+
+        return '\n'.join(msg)
+
+    def _insertPatchHeader(self, arrayDefs):
+        '''
+        >>> a = EnginePureDataArray(None, None, None)
+        >>> defs = a._getArrayDef('test', [-0.62, -0.651, -0.66], 0)
+        >>> post = a._insertPatchHeader(defs)
+        '''
+        msg = []
+        # this sets the overal canvas size and initial window position
+        msg.append('#N canvas 100 100 900 300 10;')
+        msg += arrayDefs
+        return '\n'.join(msg)
+
+    def _translatePDArray(self, esObj, pmtrName):
+        """get data for one parameter at a time parameter"""
+        el = esObj.list() # get event list
+        i = 0
+        post = []
+        for event in el:
+            if event['acc'] == 0: continue # do not write rests         
+            post.append(event[pmtrName])
+            i = i + 1
+        return post
+
+    def _translatePoly(self):
+        """tramslates a athenaCL score to midi score format as defined                  
+        elsewhere
+        """
+        msg = []
+        # define parameters to gather from esObj
+        pmtrList = ['amp', 'ps', 'pan'] 
+        vShift = 0
+        for tName in self.compatNames:
+            tDict = self.polySeq[tName]
+
+            if not tDict['mute']:
+                esObj = tDict['esObj']
+                for pmtrName in pmtrList:
+                    dataList = self._translatePDArray(esObj, pmtrName)
+                    msg.append(self._getArrayDef('%s-%s' % (tName, pmtrName),
+                                dataList, vShift))
+                    vShift += 1
+
+            for cName in tDict['TC'].keys():
+                if not tDict['TC'][cName]['mute']:
+                    esObj = tDict['TC'][cName]['esObj']
+                    for pmtrName in pmtrList:
+                        dataList = self._translatePDArray(esObj, pmtrName)
+                        msg.append(self._getArrayDef('%s-%s-%s' % (tName, cName, pmtrName), dataList, vShift))
+                        vShift += 1
+        self.msg = msg
+
+    def _write(self):
+        """ """
+        if 'pureDataArray' not in self.outRequest:
+            raise Exception('output engine called without being in output request')
+
+        self._translatePoly()
+        self.msg = self._insertPatchHeader(self.msg)
+
+        f = open(self._outFormatToFilePath('pureDataArray'), 'w')
+        f.write(self.msg)
+        f.close()     
+        self.outComplete.append('pureDataArray')
+        
+    def _writePost(self):
+        self.fpRef['fpOutputView'] = self._outFormatToFilePath('pureDataArray')
+
+#-----------------------------------------------------------------||||||||||||--
 # max coll is being removed
 
 # class EngineMaxColl(_OutputEngine):
@@ -2505,10 +2673,13 @@ class EventMode(object):
         # compatible types are not dependent on auxillary numbers
         if self.name in ['midi', 'midiPercussion'] or 'midiFile' in outRequest:
             engineRequest.append('EngineMidiFile')
+
         # check for output requests that have an engine
         # but are not eventModes
 #         if 'maxColl' in outRequest:
 #             engineRequest.append('EngineMaxColl')
+        if 'pureDataArray' in outRequest:
+            engineRequest.append('EnginePureDataArray')
         if 'textTab' in outRequest or 'textSpace' in outRequest:
             engineRequest.append('EngineText')
         if 'acToolbox' in outRequest:

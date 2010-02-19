@@ -33,6 +33,7 @@ outputFormatNames = {
     'ts'      :'textSpace',
     'tt'      :'textTab',
 #    'mc'      :'maxColl',
+    'pda'     :'pureDataArray',
     'xao'     :'xmlAthenaObject',
     'at'      :'acToolbox', # textures and clones as sections
     }
@@ -55,7 +56,7 @@ outputExportFormatNames = {
     'af'      :'audioFile',
     'ts'      :'textSpace',
     'tt'      :'textTab',
-#    'mc'      :'maxColl',
+    'pda'     :'pureDataArray',
     }
 
 def outputExportFormatParser(typeName):
@@ -210,6 +211,19 @@ class FormatTextTab(_OutputFormat):
 #         self.emKey = 'pathMaxColl'
 #         self.doc = 'Max coll object data format'
 #         self.ext = '.max.txt'
+
+#-----------------------------------------------------------------||||||||||||--
+class FormatPureDataArray(_OutputFormat):
+    def __init__(self):
+        """
+        >>> a = FormatPureDataArray()
+        """
+        _OutputFormat.__init__(self)
+        self.name = 'pureDataArray'
+        self.emKey = 'pathPureDataArray'
+        self.doc = 'PureData (PD) patch with defined arrays'
+        self.ext = '.pd'
+
 
 #-----------------------------------------------------------------||||||||||||--
 class FormatAcToolbox(_OutputFormat):

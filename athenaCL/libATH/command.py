@@ -5587,7 +5587,8 @@ class _CommandEO(Command):
         if format == 'data':
             return prefData # return as list of strings
         elif format == 'str':
-            return drawer.listScrub(prefData, space='keep', quote='rmQuote')
+            # using grammar version here without connector
+            return drawer.listToStrGrammar(prefData, None)
 
     def _emSetOuptutFormats(self, fmtList):
         prefList = []
