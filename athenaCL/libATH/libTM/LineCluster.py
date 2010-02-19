@@ -37,6 +37,15 @@ class LineCluster(baseTexture.Texture):
 
     def _scoreMain(self):
         """creates score
+
+        >>> from athenaCL.libATH.libTM import texture
+        >>> ti = texture.factory('LineCluster')
+        >>> ti.tmName == 'LineCluster'
+        True
+        >>> ti.loadDefault()
+        >>> ti.score() == True
+        True
+
         """
         # texture-wide PATH/PITCH elements
         # texture-wide time elements

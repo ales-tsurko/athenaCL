@@ -85,6 +85,14 @@ class InterpolateLine(baseTexture.Texture):
 
     def _scoreMain(self):
         """creates score
+
+        >>> from athenaCL.libATH.libTM import texture
+        >>> ti = texture.factory('InterpolateLine')
+        >>> ti.tmName == 'InterpolateLine'
+        True
+        >>> ti.loadDefault()
+        >>> ti.score() == True
+        True
         """
         # texture-wide time elements
         inst = self.getInst()

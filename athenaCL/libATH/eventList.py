@@ -57,7 +57,7 @@ outputEngineNames = [
     'EngineCsoundSilence', # .sco only 
     'EngineCsoundExternal', # .sco only 
     'EngineSuperColliderTask',
-    'EngineMaxColl',
+#    'EngineMaxColl',
     'EngineAcToolbox',
     'EngineMidiFile',
     'EngineText',
@@ -139,9 +139,9 @@ def selectOutEngineOrc(emName, oeName):
         return 'csoundExternal'   
     elif oeName == 'EngineSuperColliderTask':
         return 'superColliderNative'   
-    elif oeName == 'EngineMaxColl':
-        # macColl assumes midi values for all parameters
-        return 'generalMidi'
+#     elif oeName == 'EngineMaxColl':
+#         # maxColl assumes midi values for all parameters
+#         return 'generalMidi'
 
     # treate acToolbox the same as midiFile
     elif oeName in ['EngineMidiFile', 'EngineAcToolbox']:
@@ -189,6 +189,11 @@ class EventSequence:
         tAbsStart, tAbsEnd
 
     >>> a = EventSequence()
+    >>> from athenaCL.libATH.libTM import texture
+    >>> ti = texture.factory('lg')
+    >>> ti.loadDefault()
+    >>> ti.score() == True
+    True
     """
     def __init__(self):
         self._eventList = [] # a list of event dictionaries, perhaps un sorted
@@ -2016,76 +2021,76 @@ class EngineCsoundSilence(_OutputEngine):
 
 
 #-----------------------------------------------------------------||||||||||||--
-# TODO: remove?
+# max coll is being removed
 
-class EngineMaxColl(_OutputEngine):
-    """used to translate from athenaCL format to midi int score format
-    int format is used to get athenaCL data into Max/MSP or similar
-    no distinctiong between start time and duration, as notes are triggered
-    tracks are assigned a sequential number
-    all values are converted to integers (midi pitch, midi vel, ms dur)
-    uses midi integer values for pitch and amp
-    in order pitch, vel, dur (ms)
-    stored as chNum, val val val;
-    usefull for importing into a coll in max/msp
-    note: always uses a midi orchestra
-    """
-    def __init__(self, emObj, fpRef, ao):
-        """
-        >>> from athenaCL.libATH import athenaObj
-        >>> ao = athenaObj.AthenaObject()
-        >>> a = EngineMaxColl('generalMidi', {}, ao)
-        """
-        _OutputEngine.__init__(self, emObj, fpRef, ao) # provide event name
-        self.name = 'EngineMaxColl'
-        self.doc = lang.docOeMaxColl
-        self.trackList = []
-        # define orcs that are not compatible w/ this engine
-        self.orcIncompat = [] # all orchestras compatable
-        self.outAvailable = ['maxColl']
-        self.outMin = ['maxColl']
-
-    def _translatePoly(self):
-        """tramslates a athenaCL score to midi score format as defined                  
-        elsewhere
-        """
-        trackList = []
-        for tName in self.compatNames:
-            tDict = self.polySeq[tName]
-            orcMapMode = tDict['orcMapMode']
-            ch = tDict['midiCh']
-            pgm = tDict['midiPgm']
-            if not tDict['mute']:
-                esObj = tDict['esObj']
-                intSco = self._translateCollList(orcMapMode, esObj)
-                trackList.append((tName, pgm, ch, intSco))
-            for cName in tDict['TC'].keys():
-                if not tDict['TC'][cName]['mute']:
-                    esObj = tDict['TC'][cName]['esObj']
-                    intSco = self._translateCollList(orcMapMode, esObj)
-                    trackList.append(('%s-%s' % (tName, cName), pgm, ch, intSco))
-        self.trackList = trackList
-
-    def _write(self):
-        """ """
-        if 'maxColl' not in self.outRequest:
-            raise Exception('output engine called without being in output request')
-
-        self._translatePoly()
-        fileLines = []
-        partNo = 1 # cant use ch or program, just asign ints
-        for part in self.trackList:
-            scoStr = ''.join(part[3])
-            fileLines.append('%s, %s;\n' % (partNo, scoStr))
-            partNo = partNo + 1 # no limit on index no
-
-        f = open(self._outFormatToFilePath('maxColl'), 'w')
-        f.write(''.join(fileLines))
-        f.close()     
-        self.outComplete.append('maxColl')
-        
-    def _writePost(self):
-        self.fpRef['fpOutputView'] = self._outFormatToFilePath('maxColl')
+# class EngineMaxColl(_OutputEngine):
+#     """used to translate from athenaCL format to midi int score format
+#     int format is used to get athenaCL data into Max/MSP or similar
+#     no distinctiong between start time and duration, as notes are triggered
+#     tracks are assigned a sequential number
+#     all values are converted to integers (midi pitch, midi vel, ms dur)
+#     uses midi integer values for pitch and amp
+#     in order pitch, vel, dur (ms)
+#     stored as chNum, val val val;
+#     usefull for importing into a coll in max/msp
+#     note: always uses a midi orchestra
+#     """
+#     def __init__(self, emObj, fpRef, ao):
+#         """
+#         >>> from athenaCL.libATH import athenaObj
+#         >>> ao = athenaObj.AthenaObject()
+#         >>> a = EngineMaxColl('generalMidi', {}, ao)
+#         """
+#         _OutputEngine.__init__(self, emObj, fpRef, ao) # provide event name
+#         self.name = 'EngineMaxColl'
+#         self.doc = lang.docOeMaxColl
+#         self.trackList = []
+#         # define orcs that are not compatible w/ this engine
+#         self.orcIncompat = [] # all orchestras compatable
+#         self.outAvailable = ['maxColl']
+#         self.outMin = ['maxColl']
+# 
+#     def _translatePoly(self):
+#         """tramslates a athenaCL score to midi score format as defined                  
+#         elsewhere
+#         """
+#         trackList = []
+#         for tName in self.compatNames:
+#             tDict = self.polySeq[tName]
+#             orcMapMode = tDict['orcMapMode']
+#             ch = tDict['midiCh']
+#             pgm = tDict['midiPgm']
+#             if not tDict['mute']:
+#                 esObj = tDict['esObj']
+#                 intSco = self._translateCollList(orcMapMode, esObj)
+#                 trackList.append((tName, pgm, ch, intSco))
+#             for cName in tDict['TC'].keys():
+#                 if not tDict['TC'][cName]['mute']:
+#                     esObj = tDict['TC'][cName]['esObj']
+#                     intSco = self._translateCollList(orcMapMode, esObj)
+#                     trackList.append(('%s-%s' % (tName, cName), pgm, ch, intSco))
+#         self.trackList = trackList
+# 
+#     def _write(self):
+#         """ """
+#         if 'maxColl' not in self.outRequest:
+#             raise Exception('output engine called without being in output request')
+# 
+#         self._translatePoly()
+#         fileLines = []
+#         partNo = 1 # cant use ch or program, just asign ints
+#         for part in self.trackList:
+#             scoStr = ''.join(part[3])
+#             fileLines.append('%s, %s;\n' % (partNo, scoStr))
+#             partNo = partNo + 1 # no limit on index no
+# 
+#         f = open(self._outFormatToFilePath('maxColl'), 'w')
+#         f.write(''.join(fileLines))
+#         f.close()     
+#         self.outComplete.append('maxColl')
+#         
+#     def _writePost(self):
+#         self.fpRef['fpOutputView'] = self._outFormatToFilePath('maxColl')
 
 #-----------------------------------------------------------------||||||||||||--
 class EngineMidiFile(_OutputEngine):
@@ -2502,8 +2507,8 @@ class EventMode(object):
             engineRequest.append('EngineMidiFile')
         # check for output requests that have an engine
         # but are not eventModes
-        if 'maxColl' in outRequest:
-            engineRequest.append('EngineMaxColl')
+#         if 'maxColl' in outRequest:
+#             engineRequest.append('EngineMaxColl')
         if 'textTab' in outRequest or 'textSpace' in outRequest:
             engineRequest.append('EngineText')
         if 'acToolbox' in outRequest:
@@ -2524,32 +2529,6 @@ class EventMode(object):
         """if formats are known, return what paths were written
         """
         return self.fpRef[self.outFormatObjects[outFormatName].emKey]
-
-#         if output == 'audioFile': 
-#             path = self.fpRef['pathAudioSynth']
-#         elif output == 'midiFile': 
-#             path = self.fpRef['pathMid']
-#         elif output == 'csoundBatch': 
-#             path = self.fpRef['pathBat'] #self.batPath
-#         elif output == 'csoundScore': 
-#             path = self.fpRef['pathSco'] #self.scoPath
-#         elif output == 'csoundOrchestra': 
-#             path = self.fpRef['pathOrc'] #self.orcPath
-#         elif output == 'csoundData': 
-#             path = self.fpRef['pathCsd'] #self.csdPath
-#         elif output == 'superColliderTask': 
-#             path = self.fpRef['pathScScd'] #self.csdPath
-#         elif output == 'maxColl': 
-#             path = self.fpRef['pathMaxColl'] #self.txtPath
-#         elif output == 'textSpace': 
-#             path = self.fpRef['pathTxtSpace'] #self.csdPath
-#         elif output == 'textTab': 
-#             path = self.fpRef['pathTxtTab'] #self.txtPath
-#         elif output == 'acToolbox': 
-#             path = self.fpRef['pathAct'] #self.txtPath
-#         else:
-#             raise ValueError, 'bad output given: %s' % output 
-#         return path
 
 
     #-----------------------------------------------------------------------||--

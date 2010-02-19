@@ -34,6 +34,14 @@ class LineGroove(baseTexture.Texture):
 
     def _scoreMain(self):
         """creates score
+
+        >>> from athenaCL.libATH.libTM import texture
+        >>> ti = texture.factory('lg')
+        >>> ti.tmName == 'LineGroove'
+        True
+        >>> ti.loadDefault()
+        >>> ti.score() == True
+        True
         """
         # texture-wide time elements
         inst = self.getInst()

@@ -1541,7 +1541,6 @@ class Test(unittest.TestCase):
             'mf'      :'midiFile',
             'ts'      :'textSpace',
             'tt'      :'textTab',
-            'mc'      :'maxColl',
             'xao'     :'xmlAthenaObject',
             }
 

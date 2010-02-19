@@ -237,7 +237,7 @@ class HelpDoc:
     TPmap_usage = 'tpmap events arguments'
 
     # this my be incomplete
-    TPeg = 'TPeg: TextureParameter: Export Generator: Export ParameterObject data as a file; file type available are audioFile, maxColl, textSpace, and textTab.'    
+    TPeg = 'TPeg: TextureParameter: Export Generator: Export ParameterObject data as a file; file type available are audioFile, textSpace, and textTab.'    
     TPeg_usage = 'tpexp format events arguments [filePath]'
 
 

@@ -39,8 +39,7 @@ class IntervalExpansion(baseTexture.Texture):
         # define ordered list of dynamic parameters
         # [{name: x, type: x, default: x)]
         self.dynPmtrManifest = [
-            {'name':'ornamentShift', 'type':'genPmtrObjs', 'default': ('bg','rc', 
-                                                                            (0,0,-12,12)),
+            {'name':'ornamentShift', 'type':'genPmtrObjs', 'default': ('bg','rc', (0,0,-12,12)),
              'doc':'ornament pitch shift'},
             ]
         self._updateDynPmtrInit() # defines textPmtrNo, textLabels
@@ -156,6 +155,15 @@ class IntervalExpansion(baseTexture.Texture):
 
     def _scoreMain(self):
         """creates score
+
+        >>> from athenaCL.libATH.libTM import texture
+        >>> ti = texture.factory('IntervalExpansion')
+        >>> ti.tmName == 'IntervalExpansion'
+        True
+        >>> ti.loadDefault()
+        >>> ti.score() == True
+        True
+
         """
         self.ornamentObj = ornament.Ornament(self.pmtrObjDict,
                                                         self.temperamentObj)

@@ -51,6 +51,14 @@ class HarmonicShuffle(baseTexture.Texture):
     def _scoreMain(self):
         """creates score
         note: octave choose for every note
+
+        >>> from athenaCL.libATH.libTM import texture
+        >>> ti = texture.factory('HarmonicShuffle')
+        >>> ti.tmName == 'HarmonicShuffle'
+        True
+        >>> ti.loadDefault()
+        >>> ti.score() == True
+        True
         """
         # texture-wide time elements
         inst = self.getInst()

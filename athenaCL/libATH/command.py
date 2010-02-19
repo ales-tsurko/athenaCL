@@ -3121,9 +3121,9 @@ class TPeg(_CommandTP):
         # get out object
         self.outObj = outFormat.factory(self.fmt)
 
-        if self.outObj.name in ['maxColl']: # maxColl
-            environment.printWarn(['not yet implemented'])
-        elif self.outObj.name in ['textSpace', 'textTab']: # textSpace, textTab
+#         if self.outObj.name in ['maxColl']: # maxColl
+#             environment.printWarn(['not yet implemented'])
+        if self.outObj.name in ['textSpace', 'textTab']: # textSpace, textTab
             if self.fp == None:
                 self.fp = environment.getTempFile(self.outObj.ext)
                 #self.fp = drawer.tempFile(self.outObj.ext)

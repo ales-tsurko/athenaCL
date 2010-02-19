@@ -113,6 +113,15 @@ class MonophonicOrnament(baseTexture.Texture):
 
     def _scoreMain(self):
         """creates score
+
+        >>> from athenaCL.libATH.libTM import texture
+        >>> ti = texture.factory('MonophonicOrnament')
+        >>> ti.tmName == 'MonophonicOrnament'
+        True
+        >>> ti.loadDefault()
+        >>> ti.score() == True
+        True
+
         """
         self.ornamentObj = ornament.Ornament(self.pmtrObjDict,
                                                     self.temperamentObj)

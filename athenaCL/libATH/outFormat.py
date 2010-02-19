@@ -32,7 +32,7 @@ outputFormatNames = {
     'mf'      :'midiFile',
     'ts'      :'textSpace',
     'tt'      :'textTab',
-    'mc'      :'maxColl',
+#    'mc'      :'maxColl',
     'xao'     :'xmlAthenaObject',
     'at'      :'acToolbox', # textures and clones as sections
     }
@@ -51,13 +51,11 @@ def outputFormatParser(typeName):
     if parsed == None: pass
     return parsed
 
-
-
 outputExportFormatNames = {
     'af'      :'audioFile',
     'ts'      :'textSpace',
     'tt'      :'textTab',
-    'mc'      :'maxColl',
+#    'mc'      :'maxColl',
     }
 
 def outputExportFormatParser(typeName):
@@ -202,16 +200,16 @@ class FormatTextTab(_OutputFormat):
         self.ext = '.tab.txt'
         
 #-----------------------------------------------------------------||||||||||||--
-class FormatMaxColl(_OutputFormat):
-    def __init__(self):
-        """
-        >>> a = FormatMaxColl()
-        """
-        _OutputFormat.__init__(self)
-        self.name = 'maxColl'
-        self.emKey = 'pathMaxColl'
-        self.doc = 'Max coll object data format'
-        self.ext = '.max.txt'
+# class FormatMaxColl(_OutputFormat):
+#     def __init__(self):
+#         """
+#         >>> a = FormatMaxColl()
+#         """
+#         _OutputFormat.__init__(self)
+#         self.name = 'maxColl'
+#         self.emKey = 'pathMaxColl'
+#         self.doc = 'Max coll object data format'
+#         self.ext = '.max.txt'
 
 #-----------------------------------------------------------------||||||||||||--
 class FormatAcToolbox(_OutputFormat):

@@ -90,6 +90,11 @@ def factory(tmName, name=None):
     """this is used only for loading adn returning an object
     can return obj or parsed args
     first thing in list must be a string, type def
+
+    >>> a = factory('lg')
+    >>> a
+    <athenaCL.libATH.libTM.LineGroove.LineGroove...
+    >>> a = factory('da')
     """
     reload(baseTexture) # reload base classs
     mod, objType = locator(tmName) #check type string

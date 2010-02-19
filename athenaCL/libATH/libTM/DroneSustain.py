@@ -35,6 +35,14 @@ class DroneSustain(baseTexture.Texture):
 
     def _scoreMain(self):
         """creates score
+
+        >>> from athenaCL.libATH.libTM import texture
+        >>> ti = texture.factory('DroneSustain')
+        >>> ti.tmName == 'DroneSustain'
+        True
+        >>> ti.loadDefault()
+        >>> ti.score() == True
+        True
         """
         # texture-wide PATH/PITCH elements
         # texture-wide time elements

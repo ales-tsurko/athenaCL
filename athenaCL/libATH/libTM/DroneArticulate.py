@@ -32,6 +32,14 @@ class DroneArticulate(baseTexture.Texture):
 
     def _scoreMain(self):
         """creates score
+
+        >>> from athenaCL.libATH.libTM import texture
+        >>> ti = texture.factory('DroneArticulate')
+        >>> ti.tmName == 'DroneArticulate'
+        True
+        >>> ti.loadDefault()
+        >>> ti.score() == True
+        True
         """
         # texture-wide PATH/PITCH elements
         # texture-wide time elements

@@ -19,6 +19,8 @@ from athenaCL.libATH import multiset
 # scObj = SC.SetClass()
 from athenaCL.libATH import language
 lang = language.LangObj()
+
+from athenaCL.libATH import pitchPath
 from athenaCL.libATH import drawer
 from athenaCL.libATH import error
 from athenaCL.libATH import typeset
@@ -380,8 +382,8 @@ class Texture(object):
 
 
     #-----------------------------------------------------------------------||--
-    def load(self, pmtrQDict, pathObj, temperamentName, 
-                pitchMode, auxNo, fpAudioDirs, midiPgm=None, 
+    def load(self, pmtrQDict, pathObj=None, temperamentName='TwelveEqual', 
+                pitchMode='ps', auxNo=0, fpAudioDirs=[], midiPgm=None, 
                 midiCh=None, mute=0, 
                 silenceMode=0, orcMapMode=1, refresh=1):
         """used for starting a texture from a pmtrQDict
@@ -390,6 +392,10 @@ class Texture(object):
         silenceMode determies whether or not restts are calculated and stored
         if 1, all rests are calculated and stored
         """
+        if pathObj == None:
+            pathObj = pitchPath.PolyPath('auto-internal') # name is auto
+            pathObj.autoFill([0]) # create a path with only one ptich
+
         self.path = pathObj # reference to the path object, not a copy
         self.pmtrObjDict = {}
         self.pmtrQDict = copy.deepcopy(pmtrQDict)
@@ -447,7 +453,7 @@ class Texture(object):
             ok = self.score()
             assert ok
 
-    def loadDefault(self, inst, pathObj, fpAudioDirs=[], 
+    def loadDefault(self, inst=4, pathObj=None, fpAudioDirs=[], 
                             lclTimes=None, orcName='csoundNative', 
                             auxNo=None, refresh=1):
         """used to create a texture instance from default values, ie, when
@@ -1309,7 +1315,13 @@ class Texture(object):
         self.timeRangeAbs = self.esObj.getTimeRangeAbs() 
 
     def score(self): # main method called for scoring
-        #print _MOD, 'texture score method called.'
+        '''
+        >>> from athenaCL.libATH.libTM import texture
+        >>> ti = texture.factory('lg')
+        >>> ti.loadDefault()
+        >>> ti.score()
+        1
+        '''
         self._scorePre()
         ok = self._scoreMain()
         self._scorePost()
@@ -1326,12 +1338,18 @@ class Texture(object):
 
     def scoreTest(self, p, dur=10):
         """test the score by calling score() w/ a shorter time range
-        must store current pmtr obj settings, then edit, and th restore
+        must store current pmtr obj settings, then edit, and then restore
         p is name of parameter; if time range, do a complete run
-        not yet used...
+        not yet used
+
+        >>> from athenaCL.libATH.libTM import texture
+        >>> ti = texture.factory('lg')
+        >>> ti.loadDefault()
+        >>> ti.scoreTest('tRange')
+        1
         """
         if p == 'tRange':
-            print _MOD, 'scoreTest() get tRange parameter'
+            environment.printDebug(['scoreTest() get tRange parameter'])
         #tRangeAbsSrc = copy.copy(self.timeRangeAbs)
         # dont change pmtrQDict, just pmtrObjDict
         tRangeSrc = self.pmtrObjDict['tRange']        
