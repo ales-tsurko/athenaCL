@@ -893,7 +893,7 @@ class LineSegment(basePmtr.Parameter):
         self.argDemos = [
             ['ls','e',('bg','rc',(5,10,20)),('ru',0,20),('ru',30,50)],
             ]
-        self.doc = lang.docPoBgl # FIX
+        self.doc = lang.docPoLs
 
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()

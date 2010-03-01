@@ -559,7 +559,9 @@ Apple, Macintosh, Mac OS, and QuickTime are trademarks or registered trademarks 
     
     _waveValuePeriod = 'between 0 and 1 at a rate given in either time or events per period.'
     
-    _waveCommon = '%s Depending on the stepString argument, the period rate (frequency) may be specified in spc (seconds per cycle) or eps (events per cycle). The phase argument is specified as a value between 0 and 1. Note: conventional cycles per second (cps or Hz) are not used for frequency.' % _scaleCommon
+    _waveSecondsPerCycle = 'Depending on the stepString argument, the period rate (frequency) may be specified in spc (seconds per cycle) or eps (events per cycle).'
+
+    _waveCommon = '%s %s. The phase argument is specified as a value between 0 and 1. Note: conventional cycles per second (cps or Hz) are not used for frequency.' % (_waveSecondsPerCycle, _scaleCommon)
 
     _bpmIndependent = 'when using this Rhythm Generator, tempo information (bpm) has no effect on event timing'
     
@@ -754,6 +756,9 @@ Apple, Macintosh, Mac OS, and QuickTime are trademarks or registered trademarks 
     docPoBghc = 'Provides a dynamic break-point function with half-cosine interpolation. %s The exponent argument may be any positive or negative numeric value.' % _bgCommon
 
     docPoBgf = 'Provides a dynamic break-point function without interpolation. %s' % _bgCommon
+
+
+    docPoLs = 'Provides a dynamic line segment created from three embedded Generator ParameterObjects. Start and end values, taken from min and max generators, are used to create a line segment spaning the time or event distance provided by the secPerCycle argument. %s' % (_waveSecondsPerCycle)
     
     #-----------------------------------------------------------------------||--
     # file pmtrObjects
