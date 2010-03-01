@@ -855,23 +855,7 @@ class BreakGraphFlat(_BreakGraph):
 
 
 #-----------------------------------------------------------------||||||||||||--
-# simple line generator
-
-
-# class LineSegment(_LineSegment):
-#     def __init__(self, args, refDict):
-#         _BreakGraph.__init__(self, args, refDict) # call base init
-#         self.type = 'breakGraphLinear'
-#         # modify the default args to hide the exponent incongruity
-#         self.argDefaults = self.argDefaults[:5]
-#         self.argNames = ['stepString', 'edgeString', 
-#                               'parameterObject: x point Generator', 
-#                               'parameterObject: y point Generator', 'pointCount']
-#         self.argDemos = []
-#         self.doc = lang.docPoBgl
-#         self._setObj()
-
-
+# a dynamic line generator
 
 class LineSegment(basePmtr.Parameter):
     def __init__(self, args, refDict):
@@ -892,6 +876,7 @@ class LineSegment(basePmtr.Parameter):
                          'min', 'max']
         self.argDemos = [
             ['ls','e',('bg','rc',(5,10,20)),('ru',0,20),('ru',30,50)],
+            ['ls','e',('ws','e',5,0,2,15),0,('ru',0,100)],
             ]
         self.doc = lang.docPoLs
 
@@ -913,8 +898,10 @@ class LineSegment(basePmtr.Parameter):
         i = t
         self.xStart = i # i becomes xStart
         lineSpan = self.spcObj(i, refDict)
+        if lineSpan == 0: # try  another point
+            lineSpan = self.spcObj(i, refDict)
         if lineSpan == 0:
-            raise(error.ParameterObjectSyntaxError(msg))
+            raise(error.ParameterObjectSyntaxError('seconds per cycle parameter object returns zero.'))
 
         self.xEnd = self.xStart + lineSpan
         yStart = self.minObj(i, refDict)
@@ -952,7 +939,7 @@ class LineSegment(basePmtr.Parameter):
         if self.step == 'event': # if use events, not time
             t = self.i
 
-        if self.xStart == None or t >= self.xEnd:
+        if self.xStart == None or t >= self.xEnd or t < self.xStart:
             self._genPoints(refDict, t) # refresh points and object
 
         self.currentValue = self.obj(t) # no ref dict needed; omde object
