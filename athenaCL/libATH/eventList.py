@@ -539,7 +539,7 @@ class EventSequence:
 class EventSequenceSplit:
     """object for storing data for a texture, clone, or parameter
     in separate channels; output provided for graphing
-    used for TImap, TCmap, TPmap
+    used for TImap, TCmap, TPmap, TPe
 
     split score holds data for either pre or post texture pmtr data
         or raw pmtr data provided w/ pmtr objects
@@ -563,10 +563,16 @@ class EventSequenceSplit:
     this is not normally stored in ao.aoInfo, but packed here in command.py
 
     """
-    def __init__(self, srcObj, srcFmt='t', eventCount=None, refresh=0,\
-                     aoInfo=None):
+    def __init__(self, srcObj, srcFmt='t', eventCount=None, refresh=0,
+                aoInfo=None):
         """srcFmt is either t (texture) or c (clone)
-        or pg or pf, parameter generator or parameter filter"""
+        or pg or pf, parameter generator or parameter filter
+
+        >>> from athenaCL.libATH.libPmtr import parameter
+        >>> obj = parameter.factory(['ru', 0, 1])
+        >>> titleStr = parameter.pmtrLibTitle('genPmtrObjs')
+        >>> ess = EventSequenceSplit([[titleStr, 'g', obj]], 'pg', 100)
+        """
         self.srcObj = srcObj # a list of table, pmtrObj pairs
         self.srcFmt = srcFmt
         # can be used to limt number of events shown
@@ -622,8 +628,7 @@ class EventSequenceSplit:
 
         # store order of presentation
         if self.srcFmt == 't': # texture
-            self.pmtrOrder = ['time', 'beatT', 'acc', 'dur', 'sus', 'ps', 'fieldQ',
-                                    'octQ', 'ampQ', 'panQ']
+            self.pmtrOrder = ['time', 'beatT', 'acc', 'dur', 'sus', 'ps', 'fieldQ', 'octQ', 'ampQ', 'panQ']
             for label in basePmtr.auxLabel(self.auxNo):
                 self.pmtrOrder.append(label)
         elif self.srcFmt == 'c': # clone; dont show bpm, dur, frm texture
@@ -774,13 +779,37 @@ class EventSequenceSplit:
             del self.splitScore[pmtr]
             del self.pmtrArgs[pmtr]
             self.pmtrOrder.remove(pmtr) # this is just a list
-            
+
+    def getTitleMicro(self, pmtrLabel):
+        """Get a minimal title for labeling arrays
+
+        >>> from athenaCL.libATH.libPmtr import parameter
+        >>> obj = parameter.factory(['ru', 0, 1])
+        >>> titleStr = parameter.pmtrLibTitle('genPmtrObjs')
+        >>> ess = EventSequenceSplit([[titleStr, 'g', obj]], 'pg', 100)
+        >>> ess.load()
+        >>> ess.pmtrArgs.keys()
+        ['Generator ParameterObject']
+        >>> ess.pmtrArgs['Generator ParameterObject']
+        'randomUniform, (constant, 0), (constant, 1)'
+        >>> ess.getTitleMicro('Generator ParameterObject')
+        'randomUniform'
+        """
+        if self.pmtrArgs[pmtrLabel] != '':
+            pmtrStr = self.pmtrArgs[pmtrLabel].split(',')[0] 
+            if self.srcObj != None and not drawer.isList(self.srcObj):
+                junk, fullPmtr = self.srcObj.decodePmtrName(pmtrLabel, 'usr')
+                if fullPmtr != '': # assign fullPmtr name
+                    pmtrLabel = fullPmtr
+        return pmtrStr
+
     def getTitle(self, pmtrLabel):
-        """the title gotten here is used for graphics, and, with args is often too 
+        """the title  here is used for graphics, and, with args is often too 
         long for a graphical display; thus, now just returning title w/o args"""
         pmtrStr = None # po name if available
         if self.pmtrArgs[pmtrLabel] != '':
-            pmtrStr = self.pmtrArgs[pmtrLabel].split(',')[0] # first item is name
+            # first item is name
+            pmtrStr = self.pmtrArgs[pmtrLabel].split(',')[0] 
             if self.srcObj != None and not drawer.isList(self.srcObj):
                 junk, fullPmtr = self.srcObj.decodePmtrName(pmtrLabel, 'usr')
                 if fullPmtr != '': # assign fullPmtr name
@@ -809,9 +838,9 @@ class EventSequenceSplit:
                 # y values are constant
                 # x value is initial x plus sustain
                 coord.append((x, self.splitScore[pmtr][i], 
-                                  x + self.splitScore['sus'][i], 
+                              x + self.splitScore['sus'][i], 
                                   self.splitScore[pmtr][i]))
-            i = i + 1
+            i += 1
         return coord
 
     def getKeys(self):
@@ -846,6 +875,20 @@ class EventSequenceSplit:
         f.writelines(msg)
         f.close()
 
+    def writeOutputEngine(self, oeName, filePath):
+        if oeName == 'pureDataArray':
+            dataNamePairs = []
+            for key in self.getKeys(): # this gets pmtr obj groups, or arg slots
+                dataTitle = self.getTitleMicro(key)
+                dataList = self.splitScore[key]
+                #environment.printDebug(['found event count', len(dataList)])
+                dataNamePairs.append([dataList, dataTitle])
+            oe = EnginePureDataArray(None, None, None)
+            msg = oe.translateExternal(dataNamePairs)
+            f = open(filePath, 'w')
+            f.writelines(msg)
+            f.close()
+
     def writeBuffer(self, filePath):
         """write and audio file from data 
         """
@@ -863,7 +906,7 @@ class EventSequenceSplit:
                     # values may not be normalized
                     self.aObj.insertMix(0, self.splitScore[key])              
         else:
-            raise ValueError, 'unexpected src fmt'
+            raise ValueError('unexpected src fmt')
 
 
 
@@ -2031,8 +2074,6 @@ class EnginePureDataArray(_OutputEngine):
     """
     def __init__(self, emObj, fpRef, ao):
         """
-
-
 #N canvas 100 100 900 300 10;
 # x,y windo start, x,y, window end; last value is font size!
 
@@ -2048,22 +2089,16 @@ class EnginePureDataArray(_OutputEngine):
 # 1 / -1 is the y range
 # 140 is the y size; this is the visual height in pixels
 
-
 #X restore 10 40 graph;
 # x, y for upper left corner
-
-
         """
         _OutputEngine.__init__(self, emObj, fpRef, ao) # provide event name
         self.name = 'EnginePureDataArray'
         self.doc = lang.docOePDArray
-
         self.msg = []
-
         self.orcIncompat = [] # all orchestras compatable
         self.outAvailable = ['pureDataArray']
         self.outMin = ['pureDataArray']
-
 
     def _getArrayValues(self, dataList):
         '''
@@ -2074,7 +2109,6 @@ class EnginePureDataArray(_OutputEngine):
         msg = []
         for value in dataList:
             msg.append('%s' % round(value, 7))
-
         return ' '.join(msg)
 
     def _getArrayDef(self, name, dataList, vCount):
@@ -2084,14 +2118,14 @@ class EnginePureDataArray(_OutputEngine):
         >>> print(a._getArrayDef('test', [-0.62, -0.651, -0.66], 0))
         #N canvas 0 0 450 300 (subpatch) 0;
         #X array test 3 float 3;
-        #A -0.62 -0.651 -0.66;
+        #A 0 -0.62 -0.651 -0.66;
         #X coords 0 1 3 -1 6 80 1;
         #X restore 10 40 graph;
 
         >>> print(a._getArrayDef('testAlt', [-2, 0, 3, 1.5], 1))
         #N canvas 0 0 450 300 (subpatch) 0;
         #X array testAlt 4 float 3;
-        #A -2.0 0.0 3.0 1.5;
+        #A 0 -2.0 0.0 3.0 1.5;
         #X coords 0 3 4 -2 8 80 1;
         #X restore 10 140 graph;
         '''
@@ -2113,7 +2147,8 @@ class EnginePureDataArray(_OutputEngine):
         msg.append('#N canvas 0 0 450 300 (subpatch) 0;')
         # set name here, as well as data point size
         msg.append('#X array %s %s float 3;' % (name, dataSize))
-        msg.append('#A %s;' % self._getArrayValues(dataList))
+        # need to place one zero in advance of array values here
+        msg.append('#A 0 %s;' % self._getArrayValues(dataList))
         msg.append('#X coords 0 %s %s %s %s %s 1;' % (dataMax,
                 dataSize, dataMin, dataSize*2, vPresentation))
         # final posittioning of object
@@ -2132,6 +2167,29 @@ class EnginePureDataArray(_OutputEngine):
         msg.append('#N canvas 100 100 900 300 10;')
         msg += arrayDefs
         return '\n'.join(msg)
+
+
+    def translateExternal(self, dataNamePairs):
+        """Public interface for creating an array directly, w/o use of
+        an event sequence object or other higher-level contstructs
+
+        >>> a = EnginePureDataArray(None, None, None)
+        >>> print(a.translateExternal([([3,4,5], 'test')]))
+        #N canvas 100 100 900 300 10;
+        #N canvas 0 0 450 300 (subpatch) 0;
+        #X array test 3 float 3;
+        #A 0 3.0 4.0 5.0;
+        #X coords 0 5 3 0 6 80 1;
+        #X restore 10 40 graph;
+        """
+        msg = []
+        vShift = 0
+        for dataList, nameStr in dataNamePairs:
+            msg.append(self._getArrayDef('%s' % (nameStr), dataList, vShift))
+            vShift += 1
+        msg = self._insertPatchHeader(msg)
+        return msg
+
 
     def _translatePDArray(self, esObj, pmtrName):
         """get data for one parameter at a time parameter"""

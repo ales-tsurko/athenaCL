@@ -466,9 +466,18 @@ class Parameter(object):
         
     def _loadAutoConstant(self, arg, lib='genPmtrObjs'):
         """take args and if a number, returns as a constant value parameterObj
-        otherwise, keep as is"""
+        otherwise, keep as is
+
+        >>> a = Parameter([])
+        >>> post = a._loadAutoConstant(45)
+        >>> post.type
+        'constant'
+        >>> post = a._loadAutoConstant(['ru', 0, 1])
+        >>> post.type
+        'randomUniform'
+        """
         if drawer.isNum(arg):
-            pmtrArgs = ('c', arg)
+            pmtrArgs = ('c', arg) # fit within a constant
         else: # its a list to create a ParameterObject
             pmtrArgs = arg            
         # create a ParameterObject
@@ -502,6 +511,19 @@ class Parameter(object):
         return obj   
     
     def _loadMinMax(self, min, max):
+        '''
+        >>> a = Parameter([])
+        >>> post = a._loadMinMax(45, 34)
+        >>> post[0].type, post[1].type
+        ('constant', 'constant')
+        >>> post = a._loadMinMax(45, ['ru', 0, 1])
+        >>> post[0].type, post[1].type
+        ('constant', 'randomUniform')
+        >>> post = a._loadMinMax(['ru', 0, 1], ['ru', 0, 1])
+        >>> post[0].type, post[1].type
+        ('randomUniform', 'randomUniform')
+        '''
+
         if drawer.isNum(min):
             minArgs = ('c', min)
         elif drawer.isList(min):

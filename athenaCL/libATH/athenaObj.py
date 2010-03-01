@@ -459,7 +459,7 @@ class AthenaObject(object):
       'tmCmd':('TextureModule', 'TMo(select)', 'TMv(view)',                                  
                   'TMls(list)'),
       'tpCmd':('TextureParameter', 'TPls(list)', 'TPv(select)', 'TPmap(map)', 
-                  'TPeg(export)'),
+                  'TPe(export)'),
       'tiCmd':('TextureInstance', 'TIn(new)', 'TIcp(copy)', 
                   'TIrm(remove)', 'TIo(select)', 'TIv(view)', 
                   'TIe(edit)', 'TIls(list)', 'TImode(mode)', 

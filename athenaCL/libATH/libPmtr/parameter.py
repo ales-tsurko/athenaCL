@@ -134,12 +134,12 @@ genPmtrNames = {
     'bphc':'breakPointHalfCosine', # half cosine interpolation
     'bpf':'breakPointFlat',
 
-# use embedded parameter obj to create values (x) and time or event segments
-# could be breakPointConstructor, dynamicPoint, breakGraph
     'bgl':'breakGraphLinear', 
     'bgp':'breakGraphPower', 
     'bghc':'breakGraphHalfCosine', 
     'bgf':'breakGraphFlat', 
+
+    'ls' : 'lineSegment',
 
     # operators
     'oa' :'operatorAdd',
@@ -850,6 +850,22 @@ class Test(unittest.TestCase):
         args = ('breakPointPower', 'e', 'l', ((0,0), (5,1), (10,.5)), 2)
         self._parameterRunner(factory(args), 20)
 
+
+    #-----------------------------------------------------------------------||--
+    def testLineSegment(self):
+        args = ('ls', 'e', 10, 0, 5)
+        self._parameterRunner(factory(args), 20)
+
+        args = ('ls','e',('bg','rc',(5,10,20)),('ru',0,20),('ru',30,50))
+        self._parameterRunner(factory(args), 20)
+
+        args = ('ls','t',('bg','rp',(5,10,20)),('ru',0,50),('ru',0,50))
+        self._parameterRunner(factory(args), 20)
+
+
+
+
+    #-----------------------------------------------------------------------||--
     def testAccumulator(self):
         args = ('accumulator', 20, ('waveSine', 'e', 30, 0, 10, 0),)
         self._parameterRunner(factory(args), 20)

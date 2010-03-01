@@ -10,6 +10,9 @@
 
 
 import copy
+import unittest, doctest
+
+
 from athenaCL.libATH import typeset
 from athenaCL.libATH import drawer
 from athenaCL.libATH import unit
@@ -42,17 +45,10 @@ class _Wave(basePmtr.Parameter):
         
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
+        if ok == 0: raise(error.ParameterObjectSyntaxError(msg)) # report error
                 
         self.step = self._stepControlParser(self.args[0]) # raises exception 
         self.spcObj = self._loadAutoConstant(self.args[1])
-
-#         self.spc = self.args[1] # spc (or epc) not cps
-#         try:
-#             self.fq = 1.0 / self.spc # convert spc to frequency
-#         except ZeroDivisionError:
-#             raise error.ParameterObjectSyntaxError, 'spc/epc must be greater than zero.'   
-  
         self.phase = self.args[2]
         self.minObj, self.maxObj = self._loadMinMax(self.args[3], self.args[4])
         self.obj = None #assigned in subclass
@@ -165,7 +161,7 @@ class _WaveExponential(basePmtr.Parameter):
 
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
+        if ok == 0: raise(error.ParameterObjectSyntaxError(msg)) # report error
         
         self.step = self._stepControlParser(self.args[0]) # raises except on error
         self.spcObj = self._loadAutoConstant(self.args[1])
@@ -255,7 +251,7 @@ class _Random(basePmtr.Parameter):
         self.argDefaults = [0, 1]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
+        if ok == 0: raise(error.ParameterObjectSyntaxError(msg)) # report error
         self.minObj, self.maxObj = self._loadMinMax(self.args[0], self.args[1])
         self.obj = None #assigned in subclass
 
@@ -333,7 +329,7 @@ class _RandomOneArg(basePmtr.Parameter):
         self.argDefaults = [.5, 0, 1]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
+        if ok == 0: raise(error.ParameterObjectSyntaxError(msg)) # report error
         self.lambd = float(self.args[0]) # needs to be a float
         self.minObj, self.maxObj = self._loadMinMax(self.args[1], self.args[2])
         self.obj = None #assigned in subclass
@@ -406,7 +402,7 @@ class _RandomTwoArg(basePmtr.Parameter):
         self.argDefaults = [.5, .5, 0, 1]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
+        if ok == 0: raise(error.ParameterObjectSyntaxError(msg)) # report error
 
         self.argA = float(self.args[0]) # needs to be a float
         self.argB = float(self.args[1]) # needs to be a float
@@ -478,7 +474,7 @@ class RandomWeibull(_RandomTwoArg):
                              ]
         if self.argA >= 20 or self.argB >= 20:
             msg = 'alpha and beta should not be greater than 20.'
-            raise error.ParameterObjectSyntaxError(msg)      
+            raise(error.ParameterObjectSyntaxError(msg))      
         self.obj = rand.WeibullRandom(self.argA, self.argB) #omde object
 
 
@@ -495,7 +491,7 @@ class _BreakPoint(basePmtr.Parameter):
                                   ((0,1),(6,.3),(12,.3),(18,0),(24,.6)), -1.5]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
+        if ok == 0: raise(error.ParameterObjectSyntaxError(msg)) # report error
 
         # raises except on error
         self.step = self._stepControlParser(self.args[0]) 
@@ -504,7 +500,7 @@ class _BreakPoint(basePmtr.Parameter):
         self.points = self.args[2]
         ok, msg = self._scrubPoints() # not sure what to do if it fails
         if ok != 1:
-            raise error.ParameterObjectSyntaxError(msg)
+            raise(error.ParameterObjectSyntaxError(msg))
 
         self.exp = 1 # only used in power
         if len(self.args) >= 4:
@@ -680,7 +676,7 @@ class _BreakGraph(basePmtr.Parameter):
                                               ['bg','rc',(0,.25,.5,.75,1)], 60, -1.5]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
+        if ok == 0: raise(error.ParameterObjectSyntaxError(msg)) # report error
 
         self.step = self._stepControlParser(self.args[0]) # raises except on error
         self.loop = self._loopControlParser(self.args[1]) # raises except on error
@@ -693,9 +689,9 @@ class _BreakGraph(basePmtr.Parameter):
 
         # gen points, scrub, and sort
         ok, msg = self._genPoints(refDict)
-        if ok != 1: raise error.ParameterObjectSyntaxError(msg)
+        if ok != 1: raise(error.ParameterObjectSyntaxError(msg))
         ok, msg = self._scrubPoints() # not sure what to do if it fails
-        if ok != 1: raise error.ParameterObjectSyntaxError(msg)
+        if ok != 1: raise(error.ParameterObjectSyntaxError(msg))
 
         self.exp = 1 # only used in power
         if len(self.args) >= 6:
@@ -859,6 +855,116 @@ class BreakGraphFlat(_BreakGraph):
 
 
 #-----------------------------------------------------------------||||||||||||--
+# simple line generator
+
+
+# class LineSegment(_LineSegment):
+#     def __init__(self, args, refDict):
+#         _BreakGraph.__init__(self, args, refDict) # call base init
+#         self.type = 'breakGraphLinear'
+#         # modify the default args to hide the exponent incongruity
+#         self.argDefaults = self.argDefaults[:5]
+#         self.argNames = ['stepString', 'edgeString', 
+#                               'parameterObject: x point Generator', 
+#                               'parameterObject: y point Generator', 'pointCount']
+#         self.argDemos = []
+#         self.doc = lang.docPoBgl
+#         self._setObj()
+
+
+
+class LineSegment(basePmtr.Parameter):
+    def __init__(self, args, refDict):
+
+        """creates score
+
+        >>> from athenaCL.libATH.libPmtr import parameter
+        >>> a = parameter.factory(['ls', 'e', 10, 0, 5])
+        """
+        basePmtr.Parameter.__init__(self, args, refDict) # call base init
+
+        self.type = 'lineSegment'
+        # args are: stepString, 
+        self.argTypes = [['int', 'str'], ['num','list'], 
+                         ['num','list'], ['num','list']]
+        self.argDefaults = ['e', 10, 0, 5]
+        self.argNames = ['stepString', 'parameterObject: secPerCycle', 
+                         'min', 'max']
+        self.argDemos = [
+            ['ls','e',('bg','rc',(5,10,20)),('ru',0,20),('ru',30,50)],
+            ]
+        self.doc = lang.docPoBgl # FIX
+
+        # check raw arguments for number, type
+        ok, msg = self._checkRawArgs()
+        if ok == 0: raise(error.ParameterObjectSyntaxError(msg)) # report error
+
+        # raises except on error
+        self.step = self._stepControlParser(self.args[0]) 
+        # get seconds per cycle
+        self.spcObj = self._loadAutoConstant(self.args[1])
+        self.minObj, self.maxObj = self._loadMinMax(self.args[2], self.args[3])
+        self.i = 0 # counter 
+        self.xStart = None
+        self.xEnd = None
+
+    def _genPoints(self, refDict, t):
+        """determine how many points need to generated; collecting in points list"""
+        i = t
+        self.xStart = i # i becomes xStart
+        lineSpan = self.spcObj(i, refDict)
+        if lineSpan == 0:
+            raise(error.ParameterObjectSyntaxError(msg))
+
+        self.xEnd = self.xStart + lineSpan
+        yStart = self.minObj(i, refDict)
+        yEnd = self.maxObj(i, refDict)
+        # one segment
+        points = [(self.xStart, yStart), (self.xEnd, yEnd)]
+        # check values to make sure they are numbers
+        if not drawer.isNum(points[0][0]) or not drawer.isNum(points[0][1]):
+            return 0, 'all point values must be numbers.'
+        self.obj = bpf.LinearSegment(points, periodic=1)
+        return 1, '' # all good
+
+    def checkArgs(self):
+        ok, msg = self.spcObj.checkArgs()
+        if not ok: return 0, msg    
+        ok, msg = self.minObj.checkArgs()
+        if not ok: return 0, msg    
+        ok, msg = self.maxObj.checkArgs()
+        if not ok: return 0, msg    
+        return 1, ''
+
+    def repr(self, format=''):
+        spcStr = self.spcObj.repr(format)
+        minStr = self.minObj.repr(format)
+        maxStr = self.maxObj.repr(format)
+        return '%s, (%s), (%s), (%s)' % (self.type, spcStr, minStr, maxStr)
+ 
+    def reset(self):
+        self.spcObj.reset()
+        self.minObj.reset()
+        self.maxObj.reset()
+        self.i = 0 # step always starts at 0
+
+    def __call__(self, t, refDict=None):
+        if self.step == 'event': # if use events, not time
+            t = self.i
+
+        if self.xStart == None or t >= self.xEnd:
+            self._genPoints(refDict, t) # refresh points and object
+
+        self.currentValue = self.obj(t) # no ref dict needed; omde object
+        # increment after value returned
+        if self.step == 'event': # if use steps, not time
+            self.i = self.i + 1
+        return self.currentValue
+
+
+
+
+#-----------------------------------------------------------------||||||||||||--
 # from possible envelope generator subclass
 
 #     def _scrubPoints(self):
@@ -917,7 +1023,7 @@ class EnvelopeGeneratorTrapezoid(basePmtr.Parameter):
 
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
+        if ok == 0: raise(error.ParameterObjectSyntaxError(msg)) # report error
 
         # proportional absolute switch
         self.propAbsSwitch = self._scaleSwitchParser(self.args[0]) 
@@ -935,7 +1041,7 @@ class EnvelopeGeneratorTrapezoid(basePmtr.Parameter):
         self.points = None
         # gen points, scrub, and sort
         ok, msg = self._genPoints(refDict)
-        if ok != 1: raise error.ParameterObjectSyntaxError(msg)
+        if ok != 1: raise(error.ParameterObjectSyntaxError(msg))
         self.obj = None #assigned in subclass
         self._setObj()
 
@@ -1046,7 +1152,7 @@ class EnvelopeGeneratorUnit(basePmtr.Parameter):
 
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
+        if ok == 0: raise(error.ParameterObjectSyntaxError(msg)) # report error
 
         # proportional absolute switch
         self.loop = self._loopControlParser(self.args[0]) # raises except on error
@@ -1061,7 +1167,7 @@ class EnvelopeGeneratorUnit(basePmtr.Parameter):
         self.points = None
         # gen points, scrub, and sort
         ok, msg = self._genPoints(refDict)
-        if ok != 1: raise error.ParameterObjectSyntaxError(msg)
+        if ok != 1: raise(error.ParameterObjectSyntaxError(msg))
         self.obj = None #assigned in subclass
         self._setObj()
 
@@ -1165,7 +1271,7 @@ class EnvelopeGeneratorAdsr(basePmtr.Parameter):
 
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
+        if ok == 0: raise(error.ParameterObjectSyntaxError(msg)) # report error
 
         # proportional absolute switch
         self.propAbsSwitch = self._scaleSwitchParser(self.args[0]) 
@@ -1184,7 +1290,7 @@ class EnvelopeGeneratorAdsr(basePmtr.Parameter):
         self.points = None
         # gen points, scrub, and sort
         ok, msg = self._genPoints(refDict)
-        if ok != 1: raise error.ParameterObjectSyntaxError(msg)
+        if ok != 1: raise(error.ParameterObjectSyntaxError(msg))
         self.obj = None #assigned in subclass
         self._setObj()
 
@@ -1272,10 +1378,19 @@ class EnvelopeGeneratorAdsr(basePmtr.Parameter):
 
 
 
+
 #-----------------------------------------------------------------||||||||||||--
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
 
 
 
-
-
-
+#-----------------------------------------------------------------||||||||||||--
+if __name__ == '__main__':
+    from athenaCL.test import baseTest
+    baseTest.main(Test)

@@ -237,8 +237,8 @@ class HelpDoc:
     TPmap_usage = 'tpmap events arguments'
 
     # this my be incomplete
-    TPeg = 'TPeg: TextureParameter: Export Generator: Export ParameterObject data as a file; file type available are audioFile, textSpace, and textTab.'    
-    TPeg_usage = 'tpexp format events arguments [filePath]'
+    TPe = 'TPe: TextureParameter: Export: Export ParameterObject data as a file; file types available are pureDataArray, audioFile, textSpace, and textTab.'    
+    TPe_usage = 'tpe format events arguments [filePath]'
 
 
 
@@ -664,7 +664,10 @@ class HelpDoc:
         line args are given"""
         name, usageStr = self.searchCmdUsage(searchStr)
         if usageStr == None:
-            return  'incorrect usage; no additional help available.\n'
+            if errorStr == None:
+                return 'incorrect usage; no additional help available.\n'
+            else:
+                return 'incorrect usage; %s.\n' % errorStr
         elif errorStr == None:
             return '%s %s\n' % (self.__msgUsage, usageStr)
         else:

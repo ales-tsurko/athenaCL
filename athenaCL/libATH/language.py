@@ -148,12 +148,12 @@ class LangEn:
 modular, polyphonic, poly-paradigm algorithmic music composition in a cross-platform interactive command-line environment."""
 
     msgAthDescLong = """\
-The athenaCL system is an open-source, object-oriented composition tool written in Python. The system can be scripted and embedded, and includes integrated instrument libraries, post-tonal and microtonal pitch modeling tools, multiple-format graphical outputs, and musical output in Csound, SuperCollider, MIDI, audio file, XML, and text formats."""
+The athenaCL system is an open-source, object-oriented composition tool written in Python. The system can be scripted and embedded, and includes integrated instrument libraries, post-tonal and microtonal pitch modeling tools, multiple-format graphical outputs, and musical output in Csound, SuperCollider, Pure Data, MIDI, audio file, XML, and text formats."""
 
     
     # sf net limits to only 254 characters, also for fink desc detail
     msgAthDescSf ="""
-Modular, polyphonic, poly-paradigm algorithmic music composition in a cross-platform interactive command-line environment written in Python and providing musical output in Csound, MIDI, audio file, XML, and text formats.     
+Modular, polyphonic, poly-paradigm algorithmic music composition in a cross-platform interactive command-line environment written in Python and providing musical output in Csound, SuperCollider, Pure Data, MIDI, audio file, XML, and text formats.     
     """
 
     # not worth saying: extensible (its open and in Python)

@@ -3035,18 +3035,19 @@ class TPmap(_CommandTP):
         # second arg sets openMedia to false
         obj.write(fp, 0) 
 
-class TPeg(_CommandTP):
+class TPe(_CommandTP):
     """sub class TPmap for exporting generator values
 
     >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
-    >>> a = TPeg(ao, args='tpmap g 120 ru,0,1')
+    >>> a = TPe(ao, args='pda 120 ru,0,1')
+    >>> a.gather()
     """
     def __init__(self, ao, args='', **keywords):
         _CommandTP.__init__(self, ao, args, **keywords)
         self.processSwitch = 1
         self.gatherSwitch = 1 
         self.gfxSwitch = 0 # display
-        self.cmdStr = 'TPeg'
+        self.cmdStr = 'TPe'
         self.lib = 'genPmtrObjs' # fixed
     
     def gather(self): 
@@ -3059,19 +3060,24 @@ class TPeg(_CommandTP):
         if args != '':
             args = argTools.ArgOps(args)
             self.fmt = outFormat.outputExportFormatParser(args.get(0))
-            if self.fmt == None: return self._getUsage()
+            if self.fmt == None: 
+                opts = drawer.listToStrGrammar(
+                       outFormat.outputExportFormatNames.values())
+                return self._getUsage('no format %s; select %s' % (args.get(0),
+                            opts))
 
             self.events = drawer.strToNum(args.get(1), 'int')
             if self.events == None: return self._getUsage()
 
             bundle, self.eventListSplitFmt, noPmtrObjs = self._tpGetBundleFmt(
-                                                                        self.lib)
+                                                                 self.lib)
             pos = 2 # 2 args already given
             for subLib in bundle:
                 usrDataEval, msg = self._tiEvalUsrStr(args.get(pos), None)
-                if usrDataEval == None: return self._getUsage(msg)
+                if usrDataEval == None: 
+                    return self._getUsage(msg)
                 self.argBundle.append((subLib, usrDataEval))
-                pos = pos + 1
+                pos += 1
             # allow an optional final argument for abs file path
             self.fp = args.get(pos) # may return None
             if self.fp != None and not os.path.isabs(self.fp):
@@ -3085,7 +3091,7 @@ class TPeg(_CommandTP):
             if self.events == None: return lang.msgReturnCancel
             
             bundle, self.eventListSplitFmt, noPmtrObjs = self._tpGetBundleFmt(
-                                                                        self.lib)
+                                                                   self.lib)
             for subLib in bundle:
                 titleStr = parameter.pmtrLibTitle(subLib)
                 usrStr = dialog.askStr('enter a %s argument:' % titleStr,
@@ -3120,25 +3126,20 @@ class TPeg(_CommandTP):
         self.pathList = []
         # get out object
         self.outObj = outFormat.factory(self.fmt)
+        if self.fp == None:
+            self.fp = environment.getTempFile(self.outObj.ext)
 
-#         if self.outObj.name in ['maxColl']: # maxColl
-#             environment.printWarn(['not yet implemented'])
         if self.outObj.name in ['textSpace', 'textTab']: # textSpace, textTab
-            if self.fp == None:
-                self.fp = environment.getTempFile(self.outObj.ext)
-                #self.fp = drawer.tempFile(self.outObj.ext)
             if self.outObj.name == 'textSpace':
                 self.splitSco.writeTable(self.fp, ' ')
             elif self.outObj.name == 'textTab':
                 self.splitSco.writeTable(self.fp, '\t')
-            self.pathList.append(self.fp)
-        # write audio file
+        elif self.outObj.name in ['pureDataArray']:
+            self.splitSco.writeOutputEngine(self.outObj.name, self.fp)
         elif self.outObj.name in ['audioFile']: # use .aif, but use pref later
-            if self.fp == None:
-                self.fp = environment.getTempFile(self.outObj.ext)
-                #self.fp = drawer.tempFile(self.outObj.ext)
             self.splitSco.writeBuffer(self.fp)
-            self.pathList.append(self.fp)
+
+        self.pathList.append(self.fp)
 
     def log(self):
         if self.gatherStatus and self.processStatus: # if complete
