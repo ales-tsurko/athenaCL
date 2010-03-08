@@ -18,16 +18,27 @@ import unittest, doctest
 
 from athenaCL.libATH import drawer
 from athenaCL.libATH import unit
+
 _MOD = 'dice.py'
+from athenaCL.libATH import prefTools
+environment = prefTools.Environment(_MOD)
+
+
+
 
 #-----------------------------------------------------------------||||||||||||--
 class Die:
-    """definees a die object; can be continuous or have a number of sides
+    """defines a die object; can be continuous or have a number of sides
     if continuous, continuous values between 0 and 1 are possible
     if it has sides, the unit interval is divided by the number of sides; 
         the median of these-length segments are provided
     """
     def __init__(self, sideNo=0):
+        """
+        >>> a = Die(0)
+        >>> a.roll()
+        >>> post = a()
+        """
         self.sideNo = sideNo# zero sides is continueous
         self.sideBounds = []
         self.valueLast = None # last value rolled
@@ -72,6 +83,14 @@ class DiceUnit:
             to ordered positions; dice weights are floating point values
             that sum to one; non weighted dice equall to equal weights of 
             1 / number-of-dice
+
+        >>> a = DiceUnit([0, 0, 0, 0])
+        >>> a.diceWeightDefault
+        [0.25, 0.25, 0.25, 0.25]
+        >>> a.binArrayLast
+        [0, 0, 0, 0]
+        >>> a.roll([1,1,1,1])
+        >>> post = a.binArrayLast
         """
         self.diceNo = len(diceFmt)
         self.dice = []
@@ -96,7 +115,7 @@ class DiceUnit:
             assert len(diceWeight) == self.diceNo
             self.diceWeight = diceWeight
         # roll dice, only if variance in change pattern
-        for i in range(0, self.diceNo):
+        for i in range(self.diceNo):
             if binArray[i] != self.binArrayLast[i]: # if 1
                 self.dice[i].roll() 
         # rolls are measured and weighted now
@@ -140,11 +159,19 @@ class GameNoise:
         gamma is the noise index, usually between 0 and 4
             any gamma value is made negative
             0 white, 1 pink, 2 brown, 3, 4 black
+
+        >>> a = GameNoise(10)
+        >>> a.noDice
+        4
+        >>> a.move
+        [[0, 0, 0, 0], [0, 0, 0, 1], [0, 0, 1, 0], [0, 0, 1, 1], [0, 1, 0, 0], [0, 1, 0, 1], [0, 1, 1, 0], [0, 1, 1, 1], [1, 0, 0, 0], [1, 0, 0, 1], [1, 0, 1, 0], [1, 0, 1, 1], [1, 1, 0, 0], [1, 1, 0, 1], [1, 1, 1, 0], [1, 1, 1, 1]]
         """
         self.noVal = noVal # desired number of values
-        if self.noVal <= 0: raise ValueError, 'number of values must be greater than zerp'
+        if self.noVal <= 0: raise ValueError, 'number of values must be greater than zero'
         # find exponent that is greater than or equal to
         self.noDice = self._findNearestExp(self.noVal)
+        #environment.printDebug(['final number of dice', self.noDice])
+
         # number of binary permutations must be an exp of 2 to be complete
         # create a list of game moves using binary arrays
         self.move = self._binarySeries(pow(2,self.noDice))
@@ -206,12 +233,31 @@ class GameNoise:
     # note: weights have a minimum of 1, and max up to large numbers (65, 512)
 
     def _weightRawSingle(self, dieIndex, gamma):
+        """
+        Gamma is shifted and scaled, and then used as a negative expoonent of
+        math.e; this value is then used as a base for the dieIndex, used as 
+        an exponent
+    
+        >>> a = GameNoise(10)
+        >>> a._weightRawSingle(3,0)
+        0.35355...
+        >>> a._weightRawSingle(2,2)
+        0.12499...
+        >>> a._weightRawSingle(6,1)
+        0.01562...
+        """
         exp = (gamma + 1.0) * .5 * .6931472
         p = pow(math.e, -exp) # negative eponent
         return pow(p, dieIndex)
 
     def _updateGamma(self, gamma=None):
-        """ make gamma <= 0; provide default if necessary"""
+        """ make gamma <= 0; provide default if necessary
+
+        >>> a = GameNoise(10)
+        >>> a._updateGamma(3)
+        >>> a.gamma
+        -3
+        """
         if gamma == None: # provide default
             self.gamma = 0 # white noise
         else:
@@ -223,7 +269,20 @@ class GameNoise:
         """get an array of dice weighting
         weights a proportion of sum for all weights;
         this proportion is used to scale the contribtion of each die
-        to the final sum"""
+        to the final sum
+
+        >>> a = GameNoise(10) # get 4 dice b/c this is nearest power of 2
+        >>> a._diceWeight(0)
+        [0.13807118488213274, 0.1952621441311885, 0.27614237513248824, 0.39052429585419057]
+        >>> a._diceWeight(1)
+        [0.25, 0.25, 0.25, 0.25]
+        >>> a._diceWeight(2)
+        [0.39052429585419057, 0.27614237513248824, 0.1952621441311885, 0.13807118488213271]
+        >>> a._diceWeight(3)
+        [0.53333334093655471, 0.26666666528426275, 0.1333333300501241, 0.066666663729058454]
+        >>> a._diceWeight(4)
+        [0.65670767595633661, 0.23218121869256828, 0.082088454707129804, 0.029022650643965243]
+        """
         # updates self.gamma
         self._updateGamma(gamma)
         # calc raw weights, reverse, and normalize
@@ -247,6 +306,10 @@ class GameNoise:
     def step(self, gamma):
         """play one move in the game
         dice weights are calculated for each step based only on the gamma value
+
+        >>> a = GameNoise(10)
+        >>> a.step(0)
+        >>> post = a()
         """
         # update gamma; default will cause no change
         # get this move, store for comparison
@@ -258,7 +321,7 @@ class GameNoise:
         #   print 'gamma', self.gamma, 'diceWeight', self.dice.diceWeight
 
         # incre position
-        self.movePos = self.movePos + 1
+        self.movePos += 1
         if self.movePos >= len(self.move):
             self.movePos = 0
         self.sumLast = self.dice.sum()

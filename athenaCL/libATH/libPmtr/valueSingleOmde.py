@@ -88,11 +88,12 @@ class _Wave(basePmtr.Parameter):
             #raise error.ParameterObjectSyntaxError, 'spc/epc must be greater than zero.'       
 
         self.currentValue = unit.denorm(self.obj(tLocal, fq), # only use tLocal 
-                                  self.minObj(t, refDict),   self.maxObj(t, refDict))
+                                  self.minObj(t, refDict), self.maxObj(t, refDict))
         # increment after value returned
         if self.step == 'event': # if use steps, not time
-            self.i = self.i + 1
+            self.i += 1
         return self.currentValue
+
 
 # omde waves produce values b/n 0 and 1
 class WaveSine(_Wave):
@@ -145,6 +146,81 @@ class WaveTriangle(_Wave):
         self.doc = lang.docPoWt
         self.argDemos.append(['e',30,0,('ru',0,.3),('ru',.7,1)])
         self.obj = oscillator.Triangle(None, self.phase) #omde object
+
+
+
+#-----------------------------------------------------------------||||||||||||--
+class _WaveHalfPeriod(_Wave):
+    def __init__(self, args, refDict):
+        _Wave.__init__(self, args, refDict) # call base init
+        self.spc = None
+        self.timeShift = None
+        self.currentTimeRange = None
+        self.phaseShift = None
+
+    def __call__(self, t, refDict=None):
+        if self.step == 'event': # if use events, not time
+            tLocal = self.i # do not pass this time to sub pmtrObjs!
+        else: tLocal = t             
+        
+        if self.currentTimeRange == None or (tLocal < self.currentTimeRange[0] or tLocal >= self.currentTimeRange[1]): 
+            # double seconds per cycle so that specified values are the
+            # the time of one half period
+            self.spc = self.spcObj(t, refDict) * 2
+            # shift the phase to the start of this segment
+            self.timeShift = -tLocal
+            # update at the half period
+            self.currentTimeRange = [tLocal, tLocal + (self.spc * .5)]
+
+            # flip flop phase shift to get second half of wave
+            if self.phaseShift == None or self.phaseShift == .5:
+                self.phaseShift = 0
+            else:
+                self.phaseShift = .5
+
+        try: fq = 1.0 / self.spc # convert spc to frequency
+        except ZeroDivisionError:
+            fq = 1 # override
+            #raise error.ParameterObjectSyntaxError, 'spc/epc must be greater than zero.'       
+ 
+        rawPosition = self.obj(tLocal+self.timeShift, fq, 
+                                phase0=self.phaseShift)
+
+        environment.printDebug(['current fq', fq, 'raw position', rawPosition])
+
+        self.currentValue = unit.denorm(rawPosition, # only use tLocal 
+                           self.minObj(t, refDict), self.maxObj(t, refDict))
+        # increment after value returned
+        if self.step == 'event': # if use steps, not time
+            self.i += 1
+        return self.currentValue
+
+
+class WaveHalfPeriodSine(_WaveHalfPeriod):
+    def __init__(self, args, refDict):
+        _WaveHalfPeriod.__init__(self, args, refDict) # call base init
+        self.type = 'waveHalfPeriodSine'
+        self.doc = lang.docPoWs # TODO: add
+
+        self.argDefaults = ['e', ['bg','rc',[10,20,30]], 0, 0, 1]
+        self.argDemos.append(['e',20,0,0,('ws','e',60,.25,.25,1)])
+        self.argDemos.append(['e',('bg','oo',(19,19,20,20,20)),0,0,1])
+
+        self.obj = oscillator.Sine(None, self.phase) #omde object
+        
+class WaveHalfPeriodPulse(_WaveHalfPeriod):
+    def __init__(self, args, refDict):
+        _WaveHalfPeriod.__init__(self, args, refDict) # call base init
+        self.type = 'waveHalfPeriodPulse'
+        self.doc = lang.docPoWs # TODO: add
+
+        self.argDefaults = ['e', ['bg','rc',[10,20,30]], 0, 0, 1]
+        self.argDemos.append(['e',10,0,('a',0,('ws','e',30,.75,-.01,.03)),.5])
+        self.argDemos.append(['e',('bg','rc',(15,10,5,8,2)), 0,0,('ls','e',100,.3,1)])
+        self.obj = oscillator.Square(None, self.phase) #omde object
+
+
+
 
 #-----------------------------------------------------------------||||||||||||--
 # exonential wave; have an additional argument
@@ -875,7 +951,7 @@ class LineSegment(basePmtr.Parameter):
         self.argNames = ['stepString', 'parameterObject: secPerCycle', 
                          'min', 'max']
         self.argDemos = [
-            ['ls','e',('bg','rc',(5,10,20)),('ru',0,20),('ru',30,50)],
+            ['ls','e',('bg','rc',(4,7,18)),('ru',0,20),('ru',30,50)],
             ['ls','e',('ws','e',5,0,2,15),0,('ru',0,100)],
             ]
         self.doc = lang.docPoLs
@@ -975,7 +1051,6 @@ class LineSegment(basePmtr.Parameter):
 #         self.points = scrubPoints
 # 
 #         return 1, '' # all good 
-
 
 
 

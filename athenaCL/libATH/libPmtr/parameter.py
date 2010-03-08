@@ -44,8 +44,8 @@ genPmtrNames = {
 
     # general pmtr objects
     'c'  :'constant',
-    'cg' :'cyclicGen',
-    'bg' :'basketGen',
+    'cg' :'cyclicGen', # consider renaming cyclicGenerator
+    'bg' :'basketGen', # consider renaming basketGenerator
     'bs' :'basketSelect', # given a fixed list, use unit interval vals to select
     'bf' :'basketFill',
     'bfs':'basketFillSelect', # combine basket fill and basket select
@@ -61,8 +61,10 @@ genPmtrNames = {
     'sl' :'sieveList',
     'lp' :'listPrime', 
     'vp' :'valuePrime',
+
     # chaotic
     'lm' :'logisticMap',
+    # 'bm' : 'bakersMap', add new simple chaotic generator
     'hb' :'henonBasket', # collect henon values, normalize
     'lb' :'lorenzBasket', # collect lorenze values, normalize
     # tools
@@ -90,7 +92,9 @@ genPmtrNames = {
     'ih' :'iterateHold', # fill list from pmtrObj and select
     'ic' :'iterateCross', # cross b/n two pmtr objs w/ unit control
     'is' :'iterateSelect', # fill a list, select w/ unit control
+
     'sah' :'sampleAndHold', # only call generator when trigger is met
+    #'st' : 'schmittTrigger', # two thresholds, one generator, 0/1 outpout
 
     # python raw code tools
     #'lc': 'listComprehension', provide a list comprehension expression?
@@ -104,6 +108,14 @@ genPmtrNames = {
     'wsd':'waveSawDown',
     'wsu':'waveSawUp',
     'wt' :'waveTriangle',
+
+    # need cyclical generators that take spc once per period, or twice
+    # want to be able to have a describe on/off steps in e/t units
+    # can be used to create dynamin on/off patterns
+
+    'whps': 'waveHalfPeriodSine', 
+    'whpp': 'waveHalfPeriodPulse', # update spc once per half period
+
     # 12 random types
     'ru' :'randomUniform',
     'rl' :'randomLinear',
@@ -139,7 +151,7 @@ genPmtrNames = {
     'bghc':'breakGraphHalfCosine', 
     'bgf':'breakGraphFlat', 
 
-    'ls' : 'lineSegment',
+    'ls' : 'lineSegment', # uses e/t comparson
 
     # operators
     'oa' :'operatorAdd',
@@ -758,6 +770,13 @@ class Test(unittest.TestCase):
     def testWavePowerDown(self):
         args = ('wavePowerDown', 't', 30, 0, 2.5, 0, 10)
         self._parameterRunner(factory(args), 30)
+
+
+    #-----------------------------------------------------------------------||--
+    def testWaveHalfPeriodSine(self):
+        args = ('waveHalfPeriodSine', 't', 30, 0, 0, 10)
+        self._parameterRunner(factory(args), 30)
+
 
     #-----------------------------------------------------------------------||--
     def testRandomUniform(self):
