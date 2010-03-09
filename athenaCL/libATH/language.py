@@ -561,7 +561,12 @@ Apple, Macintosh, Mac OS, and QuickTime are trademarks or registered trademarks 
     
     _waveSecondsPerCycle = 'Depending on the stepString argument, the period rate (frequency) may be specified in spc (seconds per cycle) or eps (events per cycle).'
 
-    _waveCommon = '%s %s. The phase argument is specified as a value between 0 and 1. Note: conventional cycles per second (cps or Hz) are not used for frequency.' % (_waveSecondsPerCycle, _scaleCommon)
+    _waveCommon = '%s %s The phase argument is specified as a value between 0 and 1. Note: conventional cycles per second (cps or Hz) are not used for frequency.' % (_waveSecondsPerCycle, _scaleCommon)
+
+    _waveSecondsPerCycleHalfPeriod = 'Depending on the stepString argument, the half-period rate (frequency) may be specified in spc (seconds per cycle) or eps (events per cycle).'
+
+    _waveHalfPeriodCommon = '%s %s The phase argument is specified as a value between 0 and 1. Half-period oscillators update seconds/event per cycle only once per half-period, permitting smooth transitons between diverse half-period segments. Note: conventional cycles per second (cps or Hz) are not used for frequency.' % (_waveSecondsPerCycleHalfPeriod, _scaleCommon)
+
 
     _bpmIndependent = 'when using this Rhythm Generator, tempo information (bpm) has no effect on event timing'
     
@@ -708,6 +713,12 @@ Apple, Macintosh, Mac OS, and QuickTime are trademarks or registered trademarks 
     docPoWpd = 'Provides a power down wave %s %s' % (_waveValuePeriod,
                                                             _waveCommon)
     
+    docPoWhps = 'Provides half-period sinusoid oscillation %s %s' % (_waveValuePeriod, _waveHalfPeriodCommon)    
+    docPoWhpc = 'Provides half-period cosinusoid oscillation %s %s' % (_waveValuePeriod, _waveHalfPeriodCommon)    
+    docPoWhpp = 'Provides half-period pulse (square) wave oscillation %s %s' % (_waveValuePeriod, _waveHalfPeriodCommon)    
+    docPoWhpt = 'Provides half-period triangle wave oscillation %s %s' % (_waveValuePeriod, _waveHalfPeriodCommon)    
+
+
     docPoRu = 'Provides random numbers between 0 and 1 within an uniform distribution. %s Note: values are evenly distributed between min and max.' % _scaleCommon
     docPoRl = 'Provides random numbers between 0 and 1 within a linearly decreasing distribution. %s Note: values are distributed more strongly toward min.' % _scaleCommon
     docPoRil = 'Provides random numbers between 0 and 1 within a linearly increasing distribution. %s Note: values are distributed more strongly toward max.' % _scaleCommon

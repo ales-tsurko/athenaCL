@@ -4,9 +4,12 @@
 #
 # Authors:       Christopher Ariza
 #
-# Copyright:     (c) 2007 Christopher Ariza
+# Copyright:     (c) 2007-2010 Christopher Ariza
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
+
+
+import unittest, doctest
 
 
 
@@ -122,12 +125,40 @@ class MultisetError(StandardError):
 # was TestBug
 # now error.TestError
 class TestError(StandardError):
+    '''
+    >>> a = TestError()
+    '''
     def __init__(self, msg=''):
         self._msg = msg
         StandardError.__init__(self, "%s" % self._msg)
     
     def __repr__(self):
         return self._msg
+
+
+
+
+
+
+        
+#-----------------------------------------------------------------||||||||||||--
+class Test(unittest.TestCase):
+    
+    def runTest(self):
+        pass
+            
+    def testDummy(self):
+        self.assertEqual(True, True)
+
+
+
+
+
+#-----------------------------------------------------------------||||||||||||--
+if __name__ == '__main__':
+    from athenaCL.test import baseTest
+    baseTest.main(Test)
+
 
 
 

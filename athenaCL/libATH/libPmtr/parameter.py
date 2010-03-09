@@ -114,7 +114,9 @@ genPmtrNames = {
     # can be used to create dynamin on/off patterns
 
     'whps': 'waveHalfPeriodSine', 
-    'whpp': 'waveHalfPeriodPulse', # update spc once per half period
+    'whpc': 'waveHalfPeriodCosine', 
+    'whpp': 'waveHalfPeriodPulse', 
+    'whpt': 'waveHalfPeriodTriangle', 
 
     # 12 random types
     'ru' :'randomUniform',
@@ -774,7 +776,19 @@ class Test(unittest.TestCase):
 
     #-----------------------------------------------------------------------||--
     def testWaveHalfPeriodSine(self):
-        args = ('waveHalfPeriodSine', 't', 30, 0, 0, 10)
+        args = ('waveHalfPeriodSine', 't', ('bg','rc',(10,20,30)), 0, 0, 10)
+        self._parameterRunner(factory(args), 30)
+
+    def testWaveHalfPeriodCosine(self):
+        args = ('waveHalfPeriodCosine', 't', ('bg','rc',(10,20,30)), 0, 0, 10)
+        self._parameterRunner(factory(args), 30)
+
+    def testWaveHalfPeriodPulse(self):
+        args = ('waveHalfPeriodPulse', 't', ('bg','rc',(10,20,30)), 0, 0, 10)
+        self._parameterRunner(factory(args), 30)
+
+    def testWaveHalfPeriodTriangle(self):
+        args = ('waveHalfPeriodTriangle', 't', ('bg','rc',(10,20,30)), 0, 0, 10)
         self._parameterRunner(factory(args), 30)
 
 

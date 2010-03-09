@@ -19,6 +19,10 @@ from athenaCL.libATH import error
 
 
 _MOD = 'markov.py'
+from athenaCL.libATH import prefTools
+environment = prefTools.Environment(_MOD)
+
+
 # string just for string.ascii_lowercase
 
 # Markov chains:
@@ -576,7 +580,7 @@ class Transition:
                         if srcSeq[i] in label[i][1:]: # match any operands
                             matchCount = matchCount + 1
             if matchCount == srcLen:
-                print _MOD, 'exp match; label:', label, 'src:', srcSeq
+                environment.printDebug(['exp match; label:', label, 'src:', srcSeq])
                 return self._weightSrc[label]
         # return None if nothing found
         return None

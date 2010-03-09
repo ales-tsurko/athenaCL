@@ -185,8 +185,7 @@ class _WaveHalfPeriod(_Wave):
  
         rawPosition = self.obj(tLocal+self.timeShift, fq, 
                                 phase0=self.phaseShift)
-
-        environment.printDebug(['current fq', fq, 'raw position', rawPosition])
+        #environment.printDebug(['current fq', fq, 'raw position', rawPosition])
 
         self.currentValue = unit.denorm(rawPosition, # only use tLocal 
                            self.minObj(t, refDict), self.maxObj(t, refDict))
@@ -200,24 +199,39 @@ class WaveHalfPeriodSine(_WaveHalfPeriod):
     def __init__(self, args, refDict):
         _WaveHalfPeriod.__init__(self, args, refDict) # call base init
         self.type = 'waveHalfPeriodSine'
-        self.doc = lang.docPoWs # TODO: add
+        self.doc = lang.docPoWhps # TODO: add
 
         self.argDefaults = ['e', ['bg','rc',[10,20,30]], 0, 0, 1]
         self.argDemos.append(['e',20,0,0,('ws','e',60,.25,.25,1)])
         self.argDemos.append(['e',('bg','oo',(19,19,20,20,20)),0,0,1])
-
         self.obj = oscillator.Sine(None, self.phase) #omde object
+
+class WaveHalfPeriodCosine(_WaveHalfPeriod):
+    def __init__(self, args, refDict):
+        _WaveHalfPeriod.__init__(self, args, refDict) # call base init
+        self.type = 'waveHalfPeriodCosine'
+        self.doc = lang.docPoWhpc # TODO: add
+        self.argDefaults = ['e', ['bg','rc',[10,20,30]], 0, 0, 1]
+        self.obj = oscillator.Cosine(None, self.phase) #omde object
         
 class WaveHalfPeriodPulse(_WaveHalfPeriod):
     def __init__(self, args, refDict):
         _WaveHalfPeriod.__init__(self, args, refDict) # call base init
         self.type = 'waveHalfPeriodPulse'
-        self.doc = lang.docPoWs # TODO: add
+        self.doc = lang.docPoWhpp # TODO: add
 
         self.argDefaults = ['e', ['bg','rc',[10,20,30]], 0, 0, 1]
         self.argDemos.append(['e',10,0,('a',0,('ws','e',30,.75,-.01,.03)),.5])
         self.argDemos.append(['e',('bg','rc',(15,10,5,8,2)), 0,0,('ls','e',100,.3,1)])
         self.obj = oscillator.Square(None, self.phase) #omde object
+
+class WaveHalfPeriodTriangle(_WaveHalfPeriod):
+    def __init__(self, args, refDict):
+        _WaveHalfPeriod.__init__(self, args, refDict) # call base init
+        self.type = 'waveHalfPeriodTriangle'
+        self.doc = lang.docPoWhpt # TODO: add
+        self.argDefaults = ['e', ['bg','rc',[10,20,30]], 0, 0, 1]
+        self.obj = oscillator.Triangle(None, self.phase) #omde object
 
 
 

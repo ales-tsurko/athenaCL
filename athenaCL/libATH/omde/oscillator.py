@@ -5,7 +5,7 @@
 # Authors:       Maurizio Umberto Puxeddu
 #                    Christopher Ariza
 #
-# Copyright:     (c) 2001-2009 Christopher Ariza
+# Copyright:     (c) 2001-2010 Christopher Ariza
 # Copyright:     (c) 2000-2001 Maurizio Umberto Puxeddu
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
@@ -63,7 +63,7 @@ class Sine(Function):
         self.T = 1.0 / self.frequency
 
         phase = ((self.phase0*self.T) + t) * self.frequency
-        environment.printDebug(['phase0:', self.phase0, 'phaseFinal', phase])
+        #environment.printDebug(['phase0:', self.phase0, 'phaseFinal', phase])
 
         return (1.0 + sin(2.0 * pi * phase)) / 2.0
 
