@@ -17,7 +17,6 @@ from athenaCL.libATH import typeset
 from athenaCL.libATH import unit
 from athenaCL.libATH import error
 
-
 _MOD = 'markov.py'
 from athenaCL.libATH import prefTools
 environment = prefTools.Environment(_MOD)
