@@ -614,6 +614,9 @@ class MarkovPulse(basePmtr.RhythmParameter):
         self.argTypes = ['str', 'list']
         self.argNames = ['transitionString', 'parameterObject: order value']
         # note: restringulator can hand commas in braces...
+
+        # TODO: accept single value for order value!
+
         self.argDefaults = ['a{3,1,1}b{2,1,1}c{3,2,0}:{a=3|b=4|c=1}', 
                                  ('c', 0)]
         # check raw arguments for number, type

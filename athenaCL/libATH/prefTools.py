@@ -75,8 +75,8 @@ def getCategoryDefaultDict(platform, category):
                       'fpScratchDir': '', # used for writing temporary files
                       'fpAudioDir': '',
                       'tLastVersionCheck': '',
-                      'eventOutput': "('midiFile', 'xmlAthenaObject')",
-                      'eventMode':'csoundNative', # startup value
+                      'eventOutput': "('midiFile', 'xmlAthenaObject', 'csoundData')",
+                      'eventMode':'midi', # startup value
                       'refreshMode': '1', # esObj refreshing
                       'debug': '0', 
 
