@@ -15,11 +15,12 @@
 import sys, os, time, random, traceback, httplib, urllib
 import unittest, doctest
 
-athVersion = '2.0.0a12'
-athBuild = '2010.03.09'
-athDate = '9 March 2010' # human readable version
+athVersion = '2.0.0a13'
+athBuild = '2010.03.31'
+athDate = '31 March 2010' # human readable version
 __version__ = athVersion
 __license__ = "GPL"
+
 
 # athenaObj.py needs correct dir information for writing
 # a file (prefs) and loading demos, and opening .xml and and other resources 
@@ -1011,6 +1012,9 @@ class Interpreter(object):
 
         >>> a._lineCmdArgSplit('pin TEST CAPS')
         ('pin', 'TEST CAPS')
+
+        >>> a._lineCmdArgSplit('tie x6 cf,"a quoted string"')
+        ('tie', 'x6 cf,"a quoted string"')
         """
         if drawer.isList(line): # accept lists of strings
             lineNew = [str(part) for part in line]
@@ -1027,7 +1031,7 @@ class Interpreter(object):
 
         # extract command from args, assuming that all cmds use identchars
         while i < len(line) and line[i] in lang.IDENTCHARS:
-            i = i + 1
+            i += 1
         cmd, arg = line[:i], line[i:].strip()
         if cmd in self.ao.cmdPrefixes: 
             cmd = cmd + '_' # special menu command need an added character
@@ -1194,7 +1198,7 @@ class Interpreter(object):
             if cmdLine == None: 
                 continue
             cmdLine = self.ao.cmdCorrect(cmdLine)
-            if self.echo: # no echo if set to quite
+            if self.echo: # no echo if set to quiet
                 self.out(('%s %s\n' % (self.ao.promptSym, cmdLine)))
             # exceptions are handled in side this method
             stop = self._cmd(cmdLine)
@@ -1367,22 +1371,6 @@ class Interpreter(object):
         code.interact(msg)
 
 
-    def proc_ASexe(self, data):
-        """run a script and print results
-        """
-        scriptArgs = {} # gather data to generate commands
-        scriptArgs['allCmds'] = self.ao.cmdDocManifest()
-        scriptArgs['textureNames'] = texture.tmObjs
-        
-        fileName = data['name']
-        if fileName[-3:] == '.py':
-            fileName = fileName[:-3]
-
-        timer = rhythm.Timer() # start timer
-        self.runScript(fileName, scriptArgs)
-        timer.stop()
-        dialog.msgOut('\nAthenaScript Execute %s complete (%s):\n' % (
-                                            data['name'], timer), self.termObj)
 
     def proc_AOrm(self, data):
         dialog.msgOut('reinitializing AthenaObject.\n', self.termObj)        

@@ -230,11 +230,20 @@ class Command(object):
         """general method for evaluating usrStrings
         prohibits doing wack things, provides error messages
         calls restringulator to quote all char/sym sequences
+   
+        >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
+        >>> a = Command(ao)
+        >>> a._strRawToData('ru, 0, 1')
+        (('ru', 0, 1), '')
+        >>> a._strRawToData('cf, "a quoted string"')
+        (('cf', 'a quoted string'), '')
         """
-        if usrStr == None: return None, 'no user data provided'
+        if usrStr == None: 
+            return None, 'no user data provided'
         msg = '' # no error
         # if user str is already an evaluated number, return it w/o error
-        if drawer.isNum(usrStr): return usrStr, msg # already evaluated
+        if drawer.isNum(usrStr): 
+            return usrStr, msg # already evaluated
         if usrStr.find('__') == 0:
             msg = '%s: %s' % (errorPreface, 'Internal Access Attempt')
             usrDataEval = None
@@ -901,7 +910,7 @@ class Command(object):
         return demo, demoAdjust
 
 
-    def _tiEvalUsrStr(self, usrStr, p, tName=None):
+    def _tiEvalUsrStr(self, usrStr, p=None, tName=None):
         """filter and evaluate user entered data
         used for all TIe commands, whenever user giving complex args
         used also for command line tie arg passing
@@ -909,6 +918,15 @@ class Command(object):
             this optional b/c w/ TIe, know which texture
             w/ TEe, data is evaluated before a texture is selected
         note: this calls re-stringulation with _strRawToData method
+
+        >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
+        >>> a = Command(ao)
+        >>> a._tiEvalUsrStr('ru,0,1')
+        (('ru', 0, 1), '')
+        >>> a._tiEvalUsrStr('ru, 0, 1')
+        (('ru', 0, 1), '')
+        >>> a._tiEvalUsrStr('cf, "a quoted string"')
+        (('cf', 'a quoted string'), '')
         """
         if tName != None:
             if (p in self.ao.textureLib[tName].pmtrCommon and 
@@ -932,7 +950,14 @@ class Command(object):
 
     def _tiCompleteEditData(self, p, usrDataEval, textureName):
         """autocompletes special parameter argument lists
-        if an error is found, returns None and a msg"""
+        if an error is found, returns None and a msg
+
+        >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
+        >>> a = Command(ao)
+        >>> a._tiCompleteEditData('a', ('ru', 0, 1), None)
+        (('ru', 0, 1), None)
+
+        """
         msg = None # if an error is found, store string 
         if p == 'tRange':
             evalData = ("staticRange", usrDataEval) 
@@ -3747,6 +3772,29 @@ class TIe(Command):
         self.cmdStr = 'TIe'
 
     def gather(self): 
+        '''
+        >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
+        >>> ao.setEventMode('m')
+    
+        >>> a = TIn(ao, args='a 0')
+        >>> ok, result = a.do()
+
+        >>> a = TIe(ao, args='a ru,0,1')
+        >>> a.gather()
+        >>> a.usrDataEval
+        ('ru', 0, 1)
+
+        >>> a = TIe(ao, args='a ru, 0, 1')
+        >>> a.gather()
+        >>> a.usrDataEval
+        ('ru', 0, 1)
+
+        >>> a = TIe(ao, args='x4 cf,"path to file"')
+        >>> a.gather()
+        >>> a.usrDataEval
+        ('cf', 'path to file')
+        '''
+
         args = self.args
         if self._tiTestExistance() != None: #check existance
             return self._tiTestExistance()
@@ -3762,10 +3810,18 @@ class TIe(Command):
             args = argTools.ArgOps(args) # no strip
             p, label = decodePmtrName(args.get(0), 'str')
             p = self._numPmtrConvertLabel(p, tName)
-            if p == None: return self._getUsage()
-            else: # do for path too
-                usrDataEval, msg = self._tiEvalUsrStr(args.get(1,'end'), p, tName)
-                usrDataEval, msg = self._tiCompleteEditData(p, usrDataEval, tName)
+            if p == None: 
+                return self._getUsage()
+            else: 
+                # note: here we are keeping spaces with args.get(). 
+                # this is important
+                # in the case of passing a file path that has a space in it
+                # this may have potential side effects that have not been   
+                # found yet
+                usrDataEval, msg = self._tiEvalUsrStr(args.get(1,'end',
+                                   keepSpace=True), p, tName)
+                usrDataEval, msg = self._tiCompleteEditData(p, 
+                                   usrDataEval, tName)
             if usrDataEval == None: return self._getUsage(msg)
 
         if p == None or usrDataEval == None:
@@ -4297,6 +4353,30 @@ class TEe(Command):
         self.cmdStr = 'TEe'
 
     def gather(self): 
+
+        '''
+        >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
+        >>> ao.setEventMode('m')
+    
+        >>> a = TEe(ao, args='a 0')
+        >>> ok, result = a.do()
+
+        >>> a = TEe(ao, args='a ru,0,1')
+        >>> a.gather()
+        >>> a.usrDataEval
+        ('ru', 0, 1)
+
+        >>> a = TEe(ao, args='a ru, 0, 1')
+        >>> a.gather()
+        >>> a.usrDataEval
+        ('ru', 0, 1)
+
+        >>> a = TEe(ao, args='x4 cf,"path to file"')
+        >>> a.gather()
+        >>> a.usrDataEval
+        ('cf', 'path to file')
+        '''
+
         args = self.args
         if self._tiTestExistance() != None: #check existance
             return self._tiTestExistance()
@@ -4315,7 +4395,8 @@ class TEe(Command):
             p = self._numPmtrConvertLabel(p, tName)
             if p == None: return self._getUsage()
             else:
-                usrDataEval, msg = self._tiEvalUsrStr(args.get(1,'end'), p)
+                usrDataEval, msg = self._tiEvalUsrStr(args.get(1,'end',
+                                   keepSpace=True), p, tName)
                 usrDataEval, msg = self._tiCompleteEditData(p, usrDataEval, tName)
             if usrDataEval == None: return self._getUsage(msg)
 
@@ -5019,7 +5100,8 @@ class TCe(Command):
             p = self._numPmtrConvertLabel(p, tName)
             if p == None: return self._getUsage()
             else: # do for path too
-                usrDataEval, msg = self._tcEvalUsrStr(args.get(1,'end'), p)
+                usrDataEval, msg = self._tcEvalUsrStr(args.get(1,'end', 
+                    keepSpace=True), p)
                 usrDataEval = self._tcCompleteEditData(p, usrDataEval, tName, cName)
             if usrDataEval == None: return self._getUsage()
 
@@ -5647,10 +5729,11 @@ class EOo(_CommandEO):
             return '%s %s' % (self.cmdStr, fmtStr)
 
     def display(self): 
-        # get as a string
         prefList = self._emGetOutputFormats('str')
-        return 'EventOutput formats: %s.\n' % prefList
-
+        if len(prefList) > 0:
+            return 'EventOutput formats: %s.\n' % prefList
+        else:
+            return 'EventOutput formats active: none.\n'
 
 class EOrm(_CommandEO):
     """remove an output format"""
@@ -5695,10 +5778,11 @@ class EOrm(_CommandEO):
             return '%s %s' % (self.cmdStr, fmtStr)
 
     def display(self): 
-        # get as a string
         prefList = self._emGetOutputFormats('str')
-        return 'EventOutput formats: %s.\n' % prefList
-
+        if len(prefList) > 0:
+            return 'EventOutput formats: %s.\n' % prefList
+        else:
+            return 'EventOutput formats active: none.\n'
 
 class EOls(_CommandEO):
     def __init__(self, ao, args='', **keywords):
@@ -5730,8 +5814,7 @@ class EOls(_CommandEO):
         bufList      = [0, 2]
         justList         = ['c','l',]
         table = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
-                                                  bufList, justList, self.termObj,
-                                                  'twoColumn')
+                   bufList, justList, self.termObj, 'twoColumn')
         msg.append('%s\n' % table)
         return ''.join(msg)
 
@@ -7462,35 +7545,6 @@ class AHexe(Command):
         return {'cmdList':self.cmdList}
 
 
-
-#-----------------------------------------------------------------||||||||||||--
-# athena script commands
-# class ASexe(Command):
-#     "SUBCMD"
-#     def __init__(self, ao, args='', **keywords):
-#         Command.__init__(self, ao, args, **keywords)
-#         self.processSwitch = 0 # display only
-#         self.gatherSwitch = 1 # display only
-#         self.cmdStr = 'ASexe'
-#         self.subCmd = 1 # if 1, executed within method of interptreter
-# 
-#     def gather(self): 
-#         args = self.args
-#         self.name = None
-#         if args != '':
-#             args = argTools.ArgOps(args)
-#             self.name = args.get(0,'end')
-#         if self.name == None:
-#             dialog.msgOut('supply argument with command line.\n', 
-#                                 self.termObj)
-#             return lang.msgReturnCancel
-# 
-#     def log(self): # no history stored, as ao is removed
-#         if self.gatherStatus and self.processStatus: # if complete
-#             return '%s %s' % (self.cmdStr, self.name) 
-# 
-#     def result(self):
-#         return {'name':self.name}
 
 
 #-----------------------------------------------------------------||||||||||||--
