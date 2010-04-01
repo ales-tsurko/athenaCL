@@ -4357,6 +4357,8 @@ class TEe(Command):
         '''
         >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
         >>> ao.setEventMode('m')
+        >>> a = TIn(ao, args='a 0')
+        >>> ok, result = a.do()
     
         >>> a = TEe(ao, args='a 0')
         >>> ok, result = a.do()
