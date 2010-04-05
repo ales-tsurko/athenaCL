@@ -1041,7 +1041,7 @@ class Interpreter(object):
 
     #-----------------------------------------------------------------------||--
     def _cmd(self, line):
-        """Internal command loop command exectuion
+        """Internal command loop command exectuion. See cmd(), below, for public interface.
 
         does actual processing of each command, adding do prefix
         separates args from command
@@ -1085,17 +1085,14 @@ class Interpreter(object):
             self.out(lang.msgAthObjError)
         return stop
 
-    def cmd(self, line, arg=None, *arguments, **keywords):
-        """Public interface for exucting commands.
+    def cmd(self, line, *arguments, **keywords):
+        """Public interface for exucting a single command line. This duplicates the functionality of _cmd(), above, yet provides nices features for a public interface.
 
         errorMode is a keyuword aregument; can be exception or return
 
-        give cmdline, or cmd + arg; cmdline will be split if arg == None
+        Given cmdline, or cmd arguments; cmdline will be split if arg == None
         good for calling a single command from cgi, or external interpreter
-        return output as string, not printed
-        does not log errors, does not keep a history
-        _not_ used in normal interactive loop
-        returns a status flag, and msg string
+        return output as string, not printed. Does not log errors, does not keep a history.
 
         >>> a = Interpreter()
         >>> a.cmd('pin', 'a 3', errorMode='return')[0]
@@ -1110,13 +1107,23 @@ class Interpreter(object):
         >>> post = a.cmd('pin', 'a', '3')
         >>> post.startswith('PI a added to PathInstances')
         True
+
+        >>> a = Interpreter()
+        >>> post = a.cmd('''pin   a     3''')
+        >>> post.startswith('PI a added to PathInstances')
+        True
+
         """
+        # testing: at this level, commands should already be parsed by 
+        # line. thus, we can permit line breaks and replace with spaces
+        line = line.replace('\n', '')
+        line = line.replace('\t', ' ')
 
         errorMode = 'exception' # default
         if 'errorMode' in keywords.keys():
             errorMode = keywords['errorMode']            
 
-        if arg == None: # no args, assume cmd needs to be split
+        if len(arguments) == 0: # no args, assume cmd needs to be split
             splitLine = self._lineCmdArgSplit(line)
             if splitLine == None:
                 if errorMode == 'exception':
@@ -1126,9 +1133,15 @@ class Interpreter(object):
             cmd, arg = splitLine
         else: # args are given, so line is command name
             cmd = line # add any additional arguments added individually
-            if len(arguments) > 0:
-                argsExtra = [str(part) for part in arguments]
-                arg = arg + ' ' + ' '.join(argsExtra)
+
+            argsExtra = []
+            for part in arguments:
+                part = str(part)
+                part = part.replace('\n', '')
+                part = part.replace('\t', ' ')
+                argsExtra.append(part)
+            # add to whatever was passed as arg
+            arg = ' '.join(argsExtra)
 
         # cmdCorrect called here; this is done in cmdExecute and not in _cmd
         # as this is a public method, however, this may be necessary here
@@ -1143,14 +1156,13 @@ class Interpreter(object):
             try: # execute cmdClassNametion, manage threads
                 cmdObj = cmdClassName(self.ao, arg, verbose=self.verbose)
                 ok, result = cmdObj.do() # no out on resutl here
-                #environment.printDebug(['ok, result', ok, result])
                 if not ok or lang.ERROR in result:
                     raise Exception('command level error: %s' % result)
             except Exception: 
-                #exc.args = (exc.args[0].append(result)) + list(exc.args[1:])
                 raise # raise the same Exception
             return result
 
+        # this error mode is for backwards compatibility
         elif errorMode == 'return':
             if cmdClassName == None:
                 return 0, "no command given"
