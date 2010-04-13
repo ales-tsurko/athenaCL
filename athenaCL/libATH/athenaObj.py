@@ -1157,7 +1157,7 @@ class Interpreter(object):
                 cmdObj = cmdClassName(self.ao, arg, verbose=self.verbose)
                 ok, result = cmdObj.do() # no out on resutl here
                 if not ok or lang.ERROR in result:
-                    raise Exception('command level error: %s' % result)
+                    raise Exception('command level error: %s' % result.strip())
             except Exception: 
                 raise # raise the same Exception
             return result
@@ -1177,7 +1177,7 @@ class Interpreter(object):
                 traceback.print_exc() # print teaceback, dont log error
                 result = 'error occured'
                 ok = 0
-            return ok, result
+            return ok, result.strip()
         else: 
             raise Exception('bad error mode')
 

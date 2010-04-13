@@ -116,6 +116,17 @@ def isDict(usrData):
         return False
 
 
+def almostEquals(x, y = 0.0, grain=1e-7):
+    '''
+    Comparisons between floats that are normally inconsistent.
+    
+    Borrowed from music21.
+    '''
+    
+    if abs(x - y) < grain: return True
+    else: return False
+
+
 
 
 
