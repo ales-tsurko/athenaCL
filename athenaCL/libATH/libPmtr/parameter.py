@@ -92,6 +92,7 @@ genPmtrNames = {
 
     # grammar generators
     'gt' : 'grammarTerminus',
+    #'gh' : 'grammarHistory', # select evolution components from complete table
     #'gc' : 'grammarCycle', # select evolution components
 
     # meta-generators

@@ -383,7 +383,7 @@ class Grammar:
 
          """
         knownSym = self._symbols.keys()
-        environment.printDebug(['known symbols', knownSym])
+        #environment.printDebug(['known symbols', knownSym])
         for inRule, outRule in self._rules.items():
             # this is not the right way to do this!
             # need to iterate through rule parts first
@@ -703,7 +703,7 @@ class Grammar:
         replacementCount = 0
         for inRule, outRule in self._rules.items():
 
-            environment.printDebug(['in/out rule', inRule, outRule])
+            #environment.printDebug(['in/out rule', inRule, outRule])
 
             # NOTE: assuming single value matches
             for i in range(len(self._state)):
@@ -739,7 +739,7 @@ class Grammar:
 
                 matchTag.append([tag, replacement])
         # do all replacements
-        environment.printDebug(['stateNew: prereplace', stateNew])
+        #environment.printDebug(['stateNew: prereplace', stateNew])
         for tag, replacement in matchTag:
             # these are not actual indices but tags to points in the scratch
             iNew = stateNew.find(tag)
@@ -749,7 +749,7 @@ class Grammar:
             # insert final value
             stateNew = pre + replacement + post
 
-        environment.printDebug(['stateNew: post', stateNew])
+        #environment.printDebug(['stateNew: post', stateNew])
 
         # replace old
         self._state = stateNew
