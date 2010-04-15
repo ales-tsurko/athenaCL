@@ -4,11 +4,13 @@
 #
 # Authors:       Christopher Ariza
 #
-# Copyright:     (c) 2009 Christopher Ariza
+# Copyright:     (c) 2009-2010 Christopher Ariza
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
 
 import string, random
+import unittest, doctest
+import uuid
 
 from athenaCL.libATH import permutate
 from athenaCL.libATH import drawer
@@ -18,7 +20,8 @@ from athenaCL.libATH import error
 
 
 _MOD = 'grammar.py'
-
+from athenaCL.libATH import prefTools
+environment = prefTools.Environment(_MOD)
 
 
 # clases for creating grammars
@@ -34,18 +37,21 @@ _MOD = 'grammar.py'
 # weight defs: keys are source transitions statments w/ step indicator :
 #                   transition{name=weight|name=weight}
 # support for limited regular expressions in weight defs
+
 # t:*:t match any one in the second palce; not e same as zero or more
 # t:-t:t match anything that is not t
 # t:w|q:t match either (alternation)
         
+# or assuming only 26 characters:
+# t*t
+# **t
 
 
 # markov version
 # a{.2}b{5}c{8} :{a=1|b=2|c=1}
 # a{.2}b{5}c{8} :{a=1|b=2|c=1} a:{c=2|a=1} c:{b=1} a:a:{a=3|b=9} c:b:{a=2|b=7|c=4}
-# 
-# 
-# 
+
+
 # grammar version
 # a{.2}b{5}c{8} a{a:b} c{b} b{b:c=.4|a:c=.6}
 # 
@@ -54,10 +60,9 @@ _MOD = 'grammar.py'
 # 
 # need a delimter between variables and rules
 # @ sign might make sense
+
 # a{.2}b{5}c{8} @ a{a:b} c{b} b:c{b:c=.4|a:c=.6}
-# % sign possible
-# a{.2}b{5}c{8} % a{a:b} c{b} b{b:c=.4|a:c=.6}
-# 
+
 # 
 # how do we incorporate constants?
 # a{F+-}b{F+-}c{F+-}
@@ -94,28 +99,33 @@ _MOD = 'grammar.py'
 # 
 # 
 # 
-# w/ context: ab goes to ac?
-# a:b{a:c}
-# 
+# w/ context ab goes to ac?
+# ab{ac}
+# *ba{a}
+# b*a{c}
+#
 
 
 
 
 
 
-
+#---------------------------------------------------------------------------||--
 class Grammar:
 
     def __init__(self):
         self._srcStr = ''
         # a dictionary of alphabetic symbols and their assoicated values
         self._symbols = {}
-        # production rules
-        self._rules = {} 
-        # stores complete representation, w/ fractional weights
-        #self._weightPost = {} 
+        self._rules = {} # production rules
+        self._axiom = None # initial state, chosen at random if not provided
+        # store a string array of current state
+        # init should be axiom
+        self._state = None
+
         self.OPEN = '{'
         self.CLOSE = '}'
+        # could also be % symbol
         self.SPLIT = '@' # used to devide varaible assign from rules
 
         self.ASSIGN = '='
@@ -132,14 +142,16 @@ class Grammar:
         # symbols may not include spaces, nor case
         self.SYM = string.lowercase + string.digits
 
-
-
-    #-----------------------------------------------------------------------||--
-
         
     def _sortSymbolLabel(self, pair):
         """give a pairs of items (where the first is the label)
-        extract label and return a sorted list"""
+        extract label and return a sorted list
+
+
+        >>> g = Grammar()
+        >>> g._sortSymbolLabel([['a', 234.5], ['b', 234]])
+        [('a', 234.5), ('b', 234)]
+        """
         label = []
         maxSize = 0
         for s, w in pair:
@@ -156,13 +168,26 @@ class Grammar:
   
     #-----------------------------------------------------------------------||--
     def _parseValidate(self, usrStr):
-        """make sure the the string is well formed"""
+        """make sure the the string is well formed
+
+        >>> g = Grammar()
+        >>> g._parseValidate('sdf{3}')
+        >>> g._parseValidate('sdf{3}}')
+        Traceback (most recent call last):
+        TransitionSyntaxError: all braces not paired
+        """
         if usrStr.count(self.OPEN) != usrStr.count(self.CLOSE):
           # replace with exception subclass
-          raise error.TransitionSyntaxError, "all braces not paired"
+          raise error.TransitionSyntaxError("all braces not paired")
 
     def _parseClean(self, usrStr):
-        """remove any unusual characters that might appear"""
+        """remove any unusual characters that might appear
+        >>> g = Grammar()
+        >>> g._parseClean('sdf{3}')
+        'sdf{3}'
+        >>> g._parseClean('sdf{"green"}')
+        'sdf{green}'
+        """
         for char in ['"', "'"]:
             usrStr = usrStr.replace(char, '')
         return usrStr
@@ -221,11 +246,36 @@ class Grammar:
 # 
 
     def _parseRuleValue(self, pairRule):
-        """read a preliminary dictionary of rules, and split into a list of rules based on having one or more probabilistic rule options"""
-        self._rules = {} 
+        """Read a preliminary dictionary of rules, and split into a list of rules based on having one or more probabilistic rule options
+
+        >>> g = Grammar()
+        >>> g._parseRuleValue({'a': 'ab'})
+        >>> g._rules
+        {'a': [('ab', 1)]}
+
+        >>> g._parseRuleValue({'a': 'ab|ac'})
+        >>> g._rules
+        {'a': [('ab', 1), ('ac', 1)]}
+
+        >>> g._parseRuleValue({'a': 'ab|ac|aa=3'})
+        >>> g._rules
+        {'a': [('ab', 1), ('ac', 1), ('aa', 3)]}
+
+
+        >>> g._parseRuleValue({'a': 'ab=3|c=12|aa=3'})
+        >>> g._rules
+        {'a': [('ab', 3), ('c', 12), ('aa', 3)]}
+
+        >>> g._parseRuleValue({'a': 'ab=3|c=12|aa=0'})
+        Traceback (most recent call last):
+        TransitionSyntaxError: bad weight value given: aa=0
+
+        """
+        self._rules = {} # this always clears the last rules
         for key, value in pairRule.items():
-            # make key into a list of symbol strings
-            # need to do this still
+
+            # TODO: make key into a list of symbol strings
+            # this permits context sensitivity
             #key = self._parseWeightKey(key)
 
             # make value into a src:dst pairs
@@ -241,31 +291,61 @@ class Grammar:
                     w = weights[0].split(self.ASSIGN)[0]
                     ruleList.append((w, 1))
             # if there are no assignments but more than one option
+            # that is, no = sign assignments
             elif value.count(self.ASSIGN) == 0: 
                 for symbol in weights:
                     ruleList.append((symbol, 1))
             else:
-                # if providing assignments weight, must provide all
-                if value.count(self.ASSIGN) != len(weights): 
-                    raise error.TransitionSyntaxError, \
-                    "weight specifications, if provided, must be provided for each rule output options"
+                environment.printDebug(['obtained weights', weights, value.count(self.ASSIGN)])
+
                 for assign in weights:
-                    # if assignment are present this means that there is more than          
-                    # than one option
+                    # if not assignment, provide one
+                    if self.ASSIGN not in assign:
+                        assign += '=1' # assume 1
+
                     symbol, w = assign.split(self.ASSIGN)
                     # convert to float or int, may not be less tn zero
                     # will return None on error
                     w = drawer.strToNum(w, 'num', 0, None)
-                    if w in (None, 0): # no zero weights, or other errors
-                        raise error.TransitionSyntaxError, \
-                                "bad weight value given: %s" % assign
+                    if w in [None, 0]: # no zero weights, or other errors
+                        raise error.TransitionSyntaxError(
+                                "bad weight value given: %s" % assign)
                     ruleList.append((symbol, w))
             self._rules[key] = ruleList 
 
 
+    def _parseAxiom(self, axiomSrc=None):
+        """Call this after all symbols have been found
+        """
+        knownSym = self._symbols.keys()
+        if axiomSrc != None:
+            # NOTE: assumes no delimiters
+            axiomSrc = axiomSrc.strip()
+            for char in axiomSrc:
+                if char not in knownSym:
+                    raise error.TransitionSyntaxError(
+                            "bad axiom value given: %s" % char)
+            self._axiom = axiomSrc
+        else: # get a random start
+            self._axiom = random.choice(knownSym)
+        # always update state to axiom 
+        self._state = self._axiom
+
     def _checkSymbolFormDef(self, symStr):
         """makes sure that symbol usage is valid for symbol definitions
-        symbols cannot have spaces, case, or strange characters"""
+        symbols cannot have spaces, case, or strange characters
+
+        >>> g = Grammar()
+        >>> g._checkSymbolFormDef('wer')
+        >>> g._checkSymbolFormDef('w:er')
+        Traceback (most recent call last):
+        TransitionSyntaxError: symbol definition uses illegal characters (:)
+
+        >>> g._checkSymbolFormDef('wer@#$')
+        Traceback (most recent call last):
+        TransitionSyntaxError: symbol definition uses illegal characters (@)
+
+        """
         for char in symStr:
             if char not in self.SYM:
                 raise error.TransitionSyntaxError,\
@@ -273,7 +353,12 @@ class Grammar:
 
     def _checkSymbolFormRuleKey(self, symStr):
         """makes sure that symbol usage is valid for weight label keys
-        permits step separateors and expression characters"""
+        permits step separateors and expression characters
+
+        >>> g = Grammar()
+        >>> g._checkSymbolFormRuleKey('wer')
+
+        """
         valid = self.SYM + self.STEP + ''.join(self.EXPRESS)
         for char in symStr:
             if char not in valid:
@@ -286,35 +371,80 @@ class Grammar:
             if char in symStr:
                 count += 1
             if count > 0: break
-        if count == 0: # no symbiols were found
+        if count == 0: # no symbols were found
             raise error.TransitionSyntaxError,\
             "rule definition does not define source symbol"
 
     def _checkRuleReference(self):
-        """make sure that all rule outputs and inputs refer to defined symbols """
+        """make sure that all rule outputs and inputs refer to defined symbols
+
+        >>> g = Grammar()
+        >>> g._parseRuleValue({'a': 'ab=3|c=12|aa=3'})
+
+         """
         knownSym = self._symbols.keys()
+        environment.printDebug(['known symbols', knownSym])
         for inRule, outRule in self._rules.items():
             # this is not the right way to do this!
             # need to iterate through rule parts first
-            match = 0
+            #environment.printDebug(['in rule, out rule', inRule, outRule])
+
+            match = False
             for s in knownSym:
                 if s in inRule: 
-                    match = 1
+                    match = True
+            if not match:
+                raise error.TransitionSyntaxError("rule component (%s) references an undefined symbol" % inRule)
+
+            match = False
+            for option, weight in outRule: # pairs of value, weight
+                # if out rules point to more then value, need to split here
+                # NOTE: this assumes there are not delimiters used
+                for char in option:
+                    if char not in knownSym:   
+                        match = False
+                        break
+                    else:
+                        match = True
+                if not match:
+                    break
             if not match:
                 raise error.TransitionSyntaxError, "rule component (%s) references an undefined symbol" % inRule
-            match = 0
-            for s in knownSym:
-                for option in outRule: # pairs of value, weight
-                    print _MOD, option
-                    if s in option[0]:
-                        match = 1
-            if not match:
-                raise error.TransitionSyntaxError, "rule component (%s) references an undefined symbol" % outRule
     
 
     #-----------------------------------------------------------------------||--
 
-    def _parse(self, usrStr):
+    def _parse(self, usrStr):        
+        '''
+        >>> g = Grammar()
+        >>> g._parse('a{3}b{4} @ a{b}b{a|b}')
+        >>> g._parse('a{3}b{4} @ a{b}b{a|b|c}')
+        Traceback (most recent call last):
+        TransitionSyntaxError: rule component (b) references an undefined symbol
+
+        >>> g._parse('a{3}b{4}c{3} @ a{b}b{a|b|c}')
+
+        >>> g._parse('a{3}b{4}c{3} @ a{b}d{a|b|c}')
+        Traceback (most recent call last):
+        TransitionSyntaxError: rule component (d) references an undefined symbol
+
+        >>> g._symbols
+        {'a': '3', 'c': '3', 'b': '4'}
+
+        >>> g._parse('a{3}b{4}c{3} @ a{bb}b{aa|b|c}')
+        >>> g._symbols
+        {'a': '3', 'c': '3', 'b': '4'}
+        >>> g._rules
+        {'a': [('bb', 1)], 'b': [('aa', 1), ('b', 1), ('c', 1)]}
+
+        >>> g._parse('a{3}b{4} @ a{b}b{a|b} @ b')
+        >>> g._axiom
+        'b'
+        >>> g._parse('a{3}b{4} @ a{b}b{a|b} @ baab')
+        >>> g._axiom
+        'baab'
+
+        '''
         # divide all groups into pairs of key, {}-enclosed values
         # all elements of notation are <key>{<value>} pairs
         # this notation has two types: symbol definitions and weight definitions
@@ -325,8 +455,6 @@ class Grammar:
         # t:*:t match any one in the second palce; not e same as zero or more
         # t:-t:t match anything that is not t
         # t:w|q:t match either (alternation)
-        
-        # note: this will remove all spaces in all keys and all values
 
         self._parseValidate(usrStr)
         usrStr = self._parseClean(usrStr)
@@ -334,19 +462,23 @@ class Grammar:
         pairSymbol = {}
         pairRule = {}
 
-        if usrStr.count(self.SPLIT) != 1: # must be 1 and only 1
-            raise error.TransitionSyntaxError, "must include exactly one split delimiter (%s)" % self.SPLIT
-        partSymbol, partRule = usrStr.split(self.SPLIT)
-        #print _MOD, partSymbol, partRule
+        if usrStr.count(self.SPLIT) not in [1, 2]: # must be 1 or 2
+            raise error.TransitionSyntaxError("must include exactly one split delimiter (%s)" % self.SPLIT)
+        if usrStr.count(self.SPLIT) == 1:
+            partSymbol, partRule = usrStr.split(self.SPLIT)
+            partAxiom = None
+        elif usrStr.count(self.SPLIT) == 2: # split into three
+            partSymbol, partRule, partAxiom = usrStr.split(self.SPLIT)
 
         for subStr, dst in [(partSymbol, 'symbol'), (partRule, 'rule')]:
             groups = subStr.split(self.CLOSE)
             for double in groups:
-                if self.OPEN not in double: continue
+                if self.OPEN not in double: 
+                    continue
                 try:
                     key, value = double.split(self.OPEN)
                 except: # possible syntax error in formationi
-                    raise error.TransitionSyntaxError, "badly placed delimiters"
+                    raise error.TransitionSyntaxError("badly placed delimiters")
     
                 # key is always a symbol def: will change case and remove spaces
                 key = drawer.strScrub(key, 'lower', [' ']) # rm spaces from key
@@ -360,31 +492,44 @@ class Grammar:
                     self._checkSymbolFormRuleKey(key)
                     pairRule[key] = drawer.strScrub(value, 'lower', [' ']) 
 
-
         # this initializes symbol table
         if pairSymbol == {}:
-            raise error.TransitionSyntaxError, "no symbols defined"
+            raise error.TransitionSyntaxError("no symbols defined")
         self._symbols = pairSymbol
         # pass the pair dictionary to weight parser
         if pairRule == {}:
-            raise error.TransitionSyntaxError, "no rules defined"
+            raise error.TransitionSyntaxError("no rules defined")
         self._parseRuleValue(pairRule) # assigns to self._rules
         
         # check symbol usage and determine orders
         self._checkRuleReference()
-        #self._checkSymbolUsage()
-        
+        # assigns axiom value
+        self._parseAxiom(partAxiom)  
 
     #-----------------------------------------------------------------------||--         
     def _valueToSymbol(self, value):
-        """for a data value, return the defined symbol label"""
+        """for a data value, return the defined symbol label
+
+        >>> g = Grammar()
+        >>> g._parse('a{3}b{4} @ a{b}b{a|b}')
+        >>> g._valueToSymbol('4') # everything is a string
+        'b'
+        """
         for s, v in self._symbols.items():
-            if value == v: return s
-        raise ValueError, 'value not known as symbol'
+            if str(value) == v:
+                return s
+        raise ValueError('value (%s) not known as a symbol' % value)
             
     def _valueListToSymbolList(self, valueList):
         """given a list of values (taken from an previous generated values)
-        convert all the values to the proper symbols, and return as a tuple"""
+        convert all the values to the proper symbols, and return as a tuple
+
+        >>> g = Grammar()
+        >>> g._parse('a{3}b{4} @ a{b}b{a|b}')
+        >>> g._valueListToSymbolList(['3', '4', '3', '4'])
+        ('a', 'b', 'a', 'b')
+   
+        """
         if len(valueList) == 0:
             return () # return an empty tuple
         msg = []
@@ -393,30 +538,96 @@ class Grammar:
         return tuple(msg)
         
 
+    def _symbolToValue(self, value):
+        """for a data value, return the defined symbol label
+
+        >>> g = Grammar()
+        >>> g._parse('a{3}b{4} @ a{b}b{a|b}')
+        >>> g._symbolToValue('a') # everything is a string
+        3.0
+        """
+        for s, v in self._symbols.items():
+            if value == s:
+                if drawer.isCharNum(v):
+                    return float(v)
+                else:
+                    return v
+        raise ValueError('symbol (%s) not known as a value' % value)
+
+    def _symbolListToValueList(self, symbolList):
+        """given a list of values (taken from an previous generated values)
+        convert all the values to the proper symbols, and return as a tuple
+
+        >>> g = Grammar()
+        >>> g._parse('a{3}b{4} @ a{b}b{a|b}')
+        >>> g._symbolListToValueList(('a', 'b', 'a', 'b'))
+        [3.0, 4.0, 3.0, 4.0]
+   
+        """
+        if len(symbolList) == 0:
+            return [] # return an empty tuple
+        msg = []
+        for s in symbolList:
+            msg.append(self._symbolToValue(s))
+        return msg
+
+    def _symbolStrToValueList(self, symbolStr):
+        '''
+        >>> g = Grammar()
+        >>> g._parse('a{3}b{4} @ a{b}b{a|b}')
+        >>> g._symbolStrToValueList('aaabbaaaba')
+        [3.0, 3.0, 3.0, 4.0, 4.0, 3.0, 3.0, 3.0, 4.0, 3.0]
+
+        '''
+        # divide into list
+        symbolList = []
+        for char in symbolStr:
+            symbolList.append(char)
+        return self._symbolListToValueList(symbolList)
+
+
     #-----------------------------------------------------------------------||--
     def repr(self):
-        """provide a complete grammar string"""
+        """provide a complete grammar string
+        >>> g = Grammar()
+        >>> g._parse('a{3}b{4} @ a{b}b{a|b} @ a')
+        >>> g.repr()
+        'a{3}b{4}@a{b}b{a=1|b=1}@a'
+
+        >>> g._parse('a{3}b{4} @ a{bba}b{a|b} @ a')
+        >>> g.repr()
+        'a{3}b{4}@a{bba}b{a=1|b=1}@a'
+
+        >>> g._parse('a{3}b{4} @ a{bba}b{a=3|b=10} @ a')
+        >>> g.repr()
+        'a{3}b{4}@a{bba}b{a=3|b=10}@a'
+
+        """
         # do symbol list first
-#         msg = []
-#         syms = self._sortSymbolLabel(self._symbols.items())
-#         for s, data in syms:
-#             msg.append('%s%s%s%s' % (s, self.OPEN, data, self.CLOSE))
-#         # determin where to get weight keys, from src or post
-#         # Get a list of all defined keys
-#         # sort transition keys, or weight labels
-#         trans = self._sortWeightKey(self._weightSrc)
-#         for t in trans:
-#             wList = self._weightSrc[t]
-#             #if wList == None: continue # this should not happen...
-#             tStr = self._reprWeightLabelKey(t)
-#             msg.append('%s%s%s%s' % (tStr, self.OPEN, self._reprWeightList(wList),
-#                                               self.CLOSE))
-#         return ''.join(msg)
-        return ''
+        msg = []
+        syms = self._sortSymbolLabel(self._symbols.items())
+        for s, data in syms:
+            msg.append('%s%s%s%s' % (s, self.OPEN, data, self.CLOSE))
+        msg.append(self.SPLIT)
+        for src, dst in self._rules.items():
+            sub = []
+            if len(dst) > 1:
+                for part, weight in dst:
+                    sub.append('%s=%s' % (part, weight))
+            else: # leave out weight, just get first part
+                sub.append(dst[0][0])
+            msg.append('%s%s%s%s' % (src, self.OPEN, '|'.join(sub), self.CLOSE))
+        msg.append(self.SPLIT)
+        msg.append(self._axiom)
+        return ''.join(msg)
 
     def __str__(self):
-        print self._symbols
-        print self._rules
+        """provide a complete grammar string
+        >>> g = Grammar()
+        >>> g.load('a{3}b{4} @ a{b}b{a|b} @ a')
+        >>> str(g)
+        'a{3}b{4}@a{b}b{a=1|b=1}@a'
+        """
         return self.repr()
         
 
@@ -427,40 +638,146 @@ class Grammar:
         self._srcStr = usrStr
         self._parse(self._srcStr)
 
+    def _tagIn(self, input):
+        '''Must wrap numbers so that 1 does not math 11; instaed <1> and <11> are different matches
+        '''
+        return '<%s>' % input
+        
+
+    def next(self):
+        '''Apply all rules and produce a new self._state
+
+        >>> g = Grammar()
+        >>> g.load('a{3}b{4} @ a{bab}b{aab} @ abaa')
+        >>> str(g)
+        'a{3}b{4}@a{bab}b{aab}@abaa'
+        >>> g.next()
+        >>> g.getState()
+        'babaabbabbab'
+        >>> g.next()
+        >>> g.getState()
+        'aabbabaabbabbabaabaabbabaabaabbabaab'
+        >>> g.getState(values=True)
+        [3.0, 3.0, 4.0, 4.0, 3.0, 4.0, 3.0, 3.0, 4.0, 4.0, 3.0, 4.0, 4.0, 3.0, 4.0, 3.0, 3.0, 4.0, 3.0, 3.0, 4.0, 4.0, 3.0, 4.0, 3.0, 3.0, 4.0, 3.0, 3.0, 4.0, 4.0, 3.0, 4.0, 3.0, 3.0, 4.0]
+
+        >>> g = Grammar()
+        >>> g.load('a{3}b{4}c{20}d{2} @ a{bab}b{acb}c{ac}d{cd} @ abd')
+        >>> str(g)
+        'a{3}b{4}c{20}d{2}@a{bab}c{ac}b{acb}d{cd}@abd'
+        >>> g.next()
+        >>> # TODO: this is not expected, as this is tranforming the same
+        >>> # section more than once
+        >>> g.getState() 
+        'babacbcd'
+        >>> g.next()
+        >>> g.getState() 
+        'acbbabacbbabacacbaccd'
+
+
+        >>> g = Grammar()
+        >>> g.load('a{a}b{b} @ a{ab}b{a} @ b')
+        >>> g.getState()
+        'b'
+        >>> g.next()
+        >>> g.getState()
+        'a'
+        >>> g.next()
+        >>> g.getState()
+        'ab'
+        >>> g.next()
+        >>> g.getState()
+        'aba'
+        >>> g.next()
+        >>> g.getState()
+        'abaab'
+        >>> g.next()
+        >>> g.getState()
+        'abaababa'
+
+        '''
+        if self._state == None:
+            self._state = self._axiom # a copy in principle
+
+        stateNew = self._state # copy
+        matchTag = [] # matched start indices
+        replacementCount = 0
+        for inRule, outRule in self._rules.items():
+
+            environment.printDebug(['in/out rule', inRule, outRule])
+
+            # NOTE: assuming single value matches
+            for i in range(len(self._state)):
+                char = self._state[i]
+                if char != inRule: # comparison
+                    continue
+                # store a string of index in the temp to mark positions
+                # can find first instance of symbol; will not 
+                # be past symbols b/c we are replacing with the old index nums
+                iNew = stateNew.find(char)
+                pre = stateNew[:iNew]
+                # skip location
+                post = stateNew[iNew+1:] # NOTE: assume length of target is 1
+                # insert marker as a random cod
+                tag = self._tagIn(replacementCount)
+                replacementCount += 1
+                stateNew = pre + tag + post
+
+                # make a rule section
+                if len(outRule) == 1:
+                    # a list of value, weight pairSymbol
+                    replacement = outRule[0][0] 
+                else:
+                    options = []
+                    weights = []
+                    for o, w in outRule:
+                        options.append(o)
+                        weights.append(w)
+                    # create unit boundaries from ordered weights
+                    boundary = unit.unitBoundaryProportion(weights)
+                    i = unit.unitBoundaryPos(random.random(), boundary)
+                    replacement = options[i] # index is in position
+
+                matchTag.append([tag, replacement])
+        # do all replacements
+        environment.printDebug(['stateNew: prereplace', stateNew])
+        for tag, replacement in matchTag:
+            # these are not actual indices but tags to points in the scratch
+            iNew = stateNew.find(tag)
+            pre = stateNew[:iNew]
+            # skip location
+            post = stateNew[iNew+len(tag):]
+            # insert final value
+            stateNew = pre + replacement + post
+
+        environment.printDebug(['stateNew: post', stateNew])
+
+        # replace old
+        self._state = stateNew
+
+
+    def getState(self, values=False):
+        if not values:
+            return self._state
+        else:
+            return self._symbolStrToValueList(self._state)
+
 
 
 
 
 
 #-----------------------------------------------------------------||||||||||||--
-class TestOld:
-
-    def __init__(self):
-        self.testParse()
-        #self.testAnalysis()
-
-        
-    def testParse(self):
-
-        import rhythm
-        timer = rhythm.Timer() # get a timer to test time
+class Test(unittest.TestCase):
     
-        testA = "a{x} b{y} c{z} @ a{a:b} c{b:b|a:a}"
-        # this defines the same rule more than once; combine?
-        testB = "a{x} b{y} c{z} @ a{a:b} c{b:b|a:a} c{a:a:a=3|b:b:b=3}"
-        testC = "a{x} b{y} c{z} @ a{a:b=23} c{b:b=3}" # these have redundant assig
-        
-        for test in [testA, testB, testC]:
-            a = Grammar()
-            print test
-            a.load(test)
-            print a._symbols
-            print a._rules
-            print
+    def runTest(self):
+        pass
+            
+    def testRandom(self):
+        pass
 
 
-
-        print '\ntotal time %s' % timer('sw')
-
-
+#-----------------------------------------------------------------||||||||||||--
+if __name__ == '__main__':
+    from athenaCL.test import baseTest
+    baseTest.main(Test)
 

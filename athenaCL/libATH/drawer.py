@@ -163,7 +163,7 @@ def isFunc(usrData):
         return False
 
 def isCharNum(usrData):
-    """determine if a character array does contains a number as a string
+    """determine if a character array contains a number as a string
     if not should be interpreted as a string, otherwise, it is a float or other
     string symbol arrangement; will not remove list delimiters
 

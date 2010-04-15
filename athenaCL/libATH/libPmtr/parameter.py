@@ -67,6 +67,7 @@ genPmtrNames = {
     # 'bm' : 'bakersMap', add new simple chaotic generator
     'hb' :'henonBasket', # collect henon values, normalize
     'lb' :'lorenzBasket', # collect lorenze values, normalize
+
     # tools
     'n'  :'noise',
     'm'  :'mask',
@@ -79,13 +80,20 @@ genPmtrNames = {
     'fb': 'funnelBinary', # dynamic rounding
     'a'  :'accumulator',
     'q'  :'quantize',
+
     # markov generators
     'mv' :'markovValue',        # provide string specification
     'mga':'markovGeneratorAnalysis', # provide a PO, a number of gens, analyze
     #'ma':'markovAnalysis' # provide a list/file to analyze
+
     # automata generators
     'cv' : 'caValue',
     'cl' : 'caList', # non unit-interval version
+
+    # grammar generators
+    'gt' : 'grammarTerminus',
+    #'gc' : 'grammarCycle', # select evolution components
+
     # meta-generators
     'ig' :'iterateGroup', # pos/neg for skip, repeat
     'iw' :'iterateWindow', # select from a list of pmtrObjs
@@ -873,6 +881,15 @@ class Test(unittest.TestCase):
 
     def testPathRead(self):
         pass
+
+
+
+    def testGrammarTerminus(self):    
+        args = ('gt', 'a{.2}b{.5}c{.8}d{0}@a{ba}b{bc}c{cd}d{ac}@a', 
+                 10, 'oc')
+        self._parameterRunner(factory(args), 20)
+
+
 
     #-----------------------------------------------------------------------||--
     def testBreakPointLinear(self):

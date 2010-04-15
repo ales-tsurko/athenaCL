@@ -8,7 +8,7 @@
 # Copyright:     (c) 2001-2010 Christopher Ariza
 # License:       GPL
 # Note:          this software is based in part on c++ code with the following 
-#                    copyright: (c) 2000 by Robert Rowe
+#                copyright: (c) 2000 by Robert Rowe
 #-----------------------------------------------------------------||||||||||||--
 
 
@@ -17,20 +17,16 @@ import unittest, doctest
 import random, copy
 
 
-
-
-# Note: this module is due for revisions
-# objects need string representations, and some str rep code needs to be removed
-# needs to handle pulse objects, instead of raw list implementation
-# some variables could use renaming.
-
-
 _MOD = 'genetic.py'
 from athenaCL.libATH import prefTools
 environment = prefTools.Environment(_MOD)
 
 
 #-----------------------------------------------------------------||||||||||||--
+# TODO:
+# objects need string representations, and some str rep code needs to be removed
+# needs to handle pulse objects, instead of raw list implementation
+
 
 def getTwoLoci(bitLength):
     """return two index values for a list of pulses
@@ -892,9 +888,12 @@ class Genome:
         self.trueUniqueBestList= []
         
 
+
+
+
+
+
 #-----------------------------------------------------------------||||||||||||--
-
-
 class Test(unittest.TestCase):
     
     def runTest(self):

@@ -619,6 +619,10 @@ Apple, Macintosh, Mac OS, and QuickTime are trademarks or registered trademarks 
     docPoCl = 'Produces values from a one-dimensional cellular automata table. %s %s %s' % (_caHeader, _tableExtract, _selectionStr)
 
     docPoCv = 'Produces values from a one-dimensional cellular automata table scaled within dynamic min and max values. %s %s %s %s' % (_caHeader, _tableExtract, _selectionStr, _scaleAfter)
+
+
+    docPoGt = 'Produces values from a one-dimensional string rewrite rule, or generative grammar. The terminus, or final result of the number of generations of values specifed by the stepCount parameter, is used to produce a list of defined values. %s' % ( _selectionStr)
+
     
     docPoPr = "Extracts pitch information from the current Multiset within a Texture's Path. Data can be presented in a variety of formats including representations of the Multiset as 'forte', 'mason', or data on the current active pitch as 'fq' (frequency), 'ps' (psReal), 'midi' (midi pitch values), 'pch' (Csound pitch octave format), or 'name' (alphabetic note names)."
 

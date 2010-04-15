@@ -21,6 +21,7 @@ from athenaCL.libATH import pitchTools
 from athenaCL.libATH import language
 lang = language.LangObj()
 from athenaCL.libATH import markov
+from athenaCL.libATH import grammar
 from athenaCL.libATH import quantize
 from athenaCL.libATH import sieve
 from athenaCL.libATH import table
@@ -2464,6 +2465,57 @@ class MarkovGeneratorAnalysis(basePmtr.Parameter):
         return self.currentValue
 
 
+
+#-----------------------------------------------------------------||||||||||||--
+class GrammarTerminus(basePmtr.Parameter):
+    def __init__(self, args, refDict):
+        basePmtr.Parameter.__init__(self, args, refDict) # call base init
+        self.type = 'grammarTerminus'
+        self.doc = lang.docPoGt
+        self.argTypes = ['str', 'int', 'str']
+        self.argNames = ['grammarString', 'stepCount', 'selectionString']
+        self.argDefaults = ['a{.2}b{.5}c{.8}d{0}@a{ba}b{bc}c{cd}d{ac}@a', 
+                           6, 'oc']
+        self.argDemos = []
+        # check raw arguments for number, type
+        ok, msg = self._checkRawArgs()
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
+        
+        self.grammarObj = grammar.Grammar() # creat obj w/o loading
+        try:
+            self.grammarObj.load(self.args[0])
+        except error.TransitionSyntaxError, e: 
+            raise error.ParameterObjectSyntaxError('Grammar creation failed: %s' % e)
+
+        self.valueCount = int(self.args[1])
+        self.control = self._selectorParser(self.args[2]) # raises exception
+
+        # perform generations
+        for i in range(self.valueCount):
+            self.grammarObj.next()
+
+        self.selector = basePmtr.Selector(
+                        self.grammarObj.getState(values=True), self.control)
+
+    def checkArgs(self):
+        return 1, ''
+
+    def repr(self, format=''):
+        msg = []
+        msg.append('%s, %s, %s, %s' % (self.type, str(self.grammarObj),
+                                     self.valueCount, self.control))
+        return ''.join(msg)
+
+    def reset(self):
+        self.selector.reset()
+
+    def __call__(self, t=None, refDict=None):
+        self.currentValue = self.selector()
+        return self.currentValue
+        
+
+
+
 #-----------------------------------------------------------------||||||||||||--
 class FibonacciSeries(basePmtr.Parameter):
     def __init__(self, args, refDict):
@@ -2520,7 +2572,7 @@ class FibonacciSeries(basePmtr.Parameter):
         # show sieve if not argsOnly
         msg.append('\n')
         msg.append(self.LMARGIN + '%s' % self._scrubList(self.normSeries, 
-                                                    self.minObj(0), self.maxObj(0)))
+                                        self.minObj(0), self.maxObj(0)))
         return ''.join(msg)
 
     def reset(self):
@@ -2531,7 +2583,7 @@ class FibonacciSeries(basePmtr.Parameter):
     def __call__(self, t=None, refDict=None):
         element = self.selector()
         self.currentValue = unit.denorm(element, 
-                                  self.minObj(t, refDict),   self.maxObj(t, refDict))
+                     self.minObj(t, refDict),   self.maxObj(t, refDict))
         return self.currentValue
 
 
