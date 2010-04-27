@@ -13,8 +13,14 @@ import unittest, doctest
 
 from athenaCL.libATH import error
 from athenaCL.libATH import drawer
+from athenaCL.libATH import unit
 
 _MOD = 'feedback.py'
+from athenaCL.libATH import prefTools
+environment = prefTools.Environment(_MOD)
+
+
+
 
 # bipolar feedback: increases and decreases output
 # hunting is a term used to describe oscillation around boundary
@@ -45,13 +51,30 @@ _MOD = 'feedback.py'
 
 
 #-----------------------------------------------------------------||||||||||||--
-class Particle:
+class Particle(object):
     def __init__(self, lifeCycle):
-        """life cycle is a dictionary of pairs
-        each pair gives a state (as a string letter) followed by
-        a number of frames at which that state exists
-        after all states have passed, the particle is dead 
+        """A model of a multi-state particle that is defined by an ordered series of states, and a number of frames at that state. 
+
+        `lifeCycle` is a list of pairs; each pair gives a state (as a string letter) followed by a number of frames at which that state exists
+        after all states have passed, the particle is dead.
+
+        >>> pairs = [('a', 30), ('b',30)]
+        >>> a = Particle(pairs)
+        >>> a.lifeSpan
+        60
+        >>> a.lifeBounds
+        {'a': (1, 30), 'b': (31, 60)}
+
+
+        >>> pairs = [('a', 10)]
+        >>> a = Particle(pairs)
+        >>> a.lifeSpan
+        10
+        >>> a.lifeBounds
+        {'a': (1, 10)}
         """
+        if not drawer.isList(lifeCycle):
+            raise error.ParticleSyntaxError('life cycle must be a list')
         self.lifeCycle = lifeCycle
         self.lifeBounds = {}
         self.lifeSpan = 0 # number of frames in life
@@ -60,11 +83,19 @@ class Particle:
         self.state = self.lifeCycle[0][0] # get first state
 
     def _updateLifeSpan(self):
+        """
+        >>> pairs = [('a', 10)]
+        >>> a = Particle(pairs)
+        >>> a.lifeSpan = 0
+        >>> a._updateLifeSpan()
+        >>> a.lifeSpan
+        10
+        """
         self.lifeSpan = 0
         pos = 1 # age zero is not counted
         for key, num in self.lifeCycle:
             if num <= 0:
-                raise error.ParticleSyntaxError
+                raise error.ParticleSyntaxError('number of frames defined for state (%s) is less than or equal to zero' % num)
 
             self.lifeSpan = self.lifeSpan + num
             next = pos + num
@@ -72,10 +103,45 @@ class Particle:
             pos = next
                             
     def advance(self, ageStep=1):
-        """advance one frame
-        ageStep can be a function or a number (value around 1)
-        ageStep is rounded to the nearest integer
-        thus floating point values outside of .5 and 1.5 cause shifts
+        """Advance the particle one frame.
+
+        The `ageStep` argumetn can be a function that returns a number or a number (value around 1).
+        This value is rounded to the nearest integer; floating point values outside of .5 and 1.5 cause shifts.
+
+        >>> pairs = [('a', 2)]
+        >>> a = Particle(pairs)
+        >>> a.advance()
+        True
+        >>> a.advance()
+        True
+        >>> a.advance()
+        False
+
+        >>> pairs = [('a', 2)]
+        >>> a = Particle(pairs)
+        >>> a.advance(2)
+        True
+        >>> a.advance(2)
+        False
+
+        >>> pairs = [('a', 1), ('b', 1), ('c', 1)]
+        >>> a = Particle(pairs)
+        >>> a.advance()
+        True
+        >>> a.state
+        'a'
+        >>> a.advance()
+        True
+        >>> a.state
+        'b'
+        >>> a.advance()
+        True
+        >>> a.state
+        'c'
+        >>> a.advance()
+        False
+        >>> a.state == None
+        True
         """
         if drawer.isNum(ageStep):
             ageUnit = ageStep
@@ -85,33 +151,107 @@ class Particle:
         self.age = self.age + int(round(ageUnit))
         if self.age > self.lifeSpan: # must be greater, not >=
             self.state = None
-            return 0 # cant advance, as is dead
+            return False # cant advance, as is dead
+        # check each state in the life bounds, see if this age
+        # is within the range of any of those bounds
         for key in self.lifeBounds:
             if (self.age >= self.lifeBounds[key][0] and self.age <= 
                 self.lifeBounds[key][1]):
-                self.state = key
+                self.state = key # assign new state
                 break
-        return 1
+        return True # still alive
 
     def isDead(self):
-        """return boolean if particle is dead"""
-        if self.age > self.lifeSpan: return 1 # greater, not gt equal
-        else: return 0
+        """return boolean if particle is dead
+
+        >>> pairs = [('a', 1), ('b', 2)]
+        >>> a = Particle(pairs)
+        >>> a.advance(3)
+        True
+        >>> a.isDead()
+        False
+        >>> a.state
+        'b'
+        >>> a.advance() # kills the particle
+        False
+        >>> a.isDead()
+        True
+
+        """
+        if self.age > self.lifeSpan: return True # greater, not gt equal
+        else: return False
 
     def getState(self):
-        """return current state"""
+        """return current state
+
+        >>> pairs = [('a', 1), ('b', 2)]
+        >>> a = Particle(pairs)
+        >>> a.advance(3)
+        True
+        >>> a.getState()
+        'b'
+        """
         return self.state
 
     def reset(self):
+        '''
+        >>> pairs = [('a', 1), ('b', 2)]
+        >>> a = Particle(pairs)
+        >>> a.advance(4)
+        False
+        >>> a.getState() == None
+        True
+        >>> a.isDead()
+        True
+        >>> a.reset()
+        >>> a.isDead()
+        False
+        >>> a.state == None # no state until we advance
+        True
+        >>> a.advance()
+        True
+        >>> a.getState()
+        'a'
+        '''
         self.age = 0
         self.state = None
         self._updateLifeSpan()
 
     def __repr__(self):
+        '''
+        >>> pairs = [('a', 1), ('b', 2)]
+        >>> a = Particle(pairs)
+        >>> a.advance(2)
+        True
+        >>> repr(a)
+        '<Particle: state b; age 2; dead False>'
+        >>> a.advance(1)
+        True
+        >>> repr(a)
+        '<Particle: state b; age 3; dead False>'
+        >>> a.advance(1)
+        False
+        >>> repr(a)
+        '<Particle: state None; age 4; dead True>'
+        >>> a.advance(1) # can age beyond death, but has no state
+        False
+        >>> repr(a)
+        '<Particle: state None; age 5; dead True>'
+
+        '''
+        
         return '<Particle: state %s; age %s; dead %s>' % (self.state, self.age, self.isDead())
 
     def __call__(self, ageStep=1):
-        """advance the particle"""
+        """advance the particle
+
+        >>> pairs = [('a', 1), ('b', 2)]
+        >>> a = Particle(pairs)
+        >>> a(2)
+        True
+        >>> a.getState()
+        'b'
+        """
         return self.advance(ageStep)
         # will return 0 when dead
 
@@ -122,83 +262,260 @@ class Particle:
         
 
 
-#-----------------------------------------------------------------||||||||||||--
-class SensorProducer:
-    """object for detecting number of particles
-    and producing new particles
-    could be thought of as a gland, exreter, or something else
 
-    may sense only 1 particles
-    may produce 1 or more particles
+#-----------------------------------------------------------------||||||||||||--
+class SensorTransformer(object):
+    """Object for transforming and/or destroying Particles
+
+    All particles share the same life span and state structure (lifeCycle).
+
+    May sense only 1 particles, may produce 1 or more particles.
+
+    >>> a = SensorProducer()
+    """
+
+    def __init__(self):
+        
+        # provide a target and weighting for the most likely outcom
+        # a weighting of None cause immediate distruction
+        # can map to other particles
+        # essential a first order weighting of sorts
+        self.particleTransformMap = {'a':[(None, 3), ('a', 1)]}
+
+        # need to determine how many transformations this senor
+        # does
+        self.transformationCountRange = {None: 1}
+
+
+    def setParticleMap(self, particleTransformMap, particleSenseType):
+        """set particle life cycle and particle sense type
+        this likely will only be set once per 
+
+        >>> tm = {'a':[(None, 3), ('a', 1)]}
+        >>> a = SensorProducer()
+        >>> a.setParticleMap(tm, 'b')
+        """
+        self.particleTransformMap = particleTransformMap
+
+
+    def process(self, particleArray):
+        '''Given a particle array, perform transformations.
+        '''
+        count = 1
+        for i in count:
+            # pick a random target
+            j = random.choice(range(len(particleArray))
+            particle = particleArray[j]
+
+            for key in self.particleTransformMap.keys():
+                if particle.state == key:
+                    # perform weighted selection of action
+                    pass
+
+
+#-----------------------------------------------------------------||||||||||||--
+class SensorProducer(object):
+    """Object for detecting number of particles and producing new particles; could be thought of as a gland, exreter, or something else
+
+    All particles share the same life span and state structure (lifeCycle).
+
+    May sense only 1 particles, may produce 1 or more particles.
+
+    >>> a = SensorProducer()
     """
 
     def __init__(self):
         self.particleLifeCycle = None # life cycle of particles produced b
-        self.particleSenseType = None # particle type this sensor senses
+
+        # this is a string matching the type of particle this sense matches
+        self.particleSenseType = None 
+
+        # an integer represnting the count of particles that this SensorProducer
+        # targets to create
         self.threshold = None # desired value
         
+        # given a distance form the threshold, determine 
+        # how many particles to create; for each max span, define a range 
+        # difference from threshold that maps to a range form min to max values
+        # produced
+        # default here always produces 1 value
+        self.productionCountRange = {None: 1}
+
         # shift are calculated in relation to threshold
         self.boundaryShiftUpper = None # count above threshold that is permitted
         self.boundaryShiftLower = None # count below threshold that is permitted
         
     def setThreshold(self, threshold, lower=2, upper=2):
-        """sets abs count range around threshold
+        """Set threshold as well as upper and lower boundaries. 
+
+        sets abs count range around threshold
         upper and lower are fixed here; might be useful to add noise to boundary
-        this may need to be called for each state"""
+        this may need to be called for each state
+
+        >>> pairs = [('a', 1), ('b', 2)]
+        >>> a = SensorProducer()
+        >>> a.setParticle(pairs, 'b')
+
+        >>> a.setThreshold(30)
+        >>> a._getBoundary()
+        (28, 32)
+
+        >>> a.setThreshold(30, 5, 2)
+        >>> a._getBoundary()
+        (25, 32)
+        """
         self.threshold = threshold
         self.boundaryShiftUpper = upper
         self.boundaryShiftLower = lower
         
     def setParticle(self, particleLifeCycle, particleSenseType):
         """set particle life cycle and particle sense type
-        this likely will only be set once per """
+        this likely will only be set once per 
+
+        >>> pairs = [('a', 1), ('b', 2)]
+        >>> a = SensorProducer()
+        >>> a.setParticle(pairs, 'b')
+        """
         self.particleLifeCycle = particleLifeCycle
         self.particleSenseType = particleSenseType
 
+
+    def setProductionCountRange(self, productionCountRange):
+        '''
+        >>> pcr = {(0,10):1, (10, 20):2, None: [3, 5]}
+        >>> pairs = [('a', 1), ('b', 2)]
+        >>> a = SensorProducer()
+        >>> a.setParticle(pairs, 'b')
+        >>> a.setProductionCountRange(pcr)
+        '''
+        self.productionCountRange = productionCountRange
+
     def produce(self):
-        """return a particle object based """
+        """return a particle object. Can be used to force the production of a new particle, as used in initializing Environments. 
+
+        >>> pairs = [('a', 1), ('b', 2)]
+        >>> a = SensorProducer()
+        >>> a.setParticle(pairs, 'b')
+        >>> a.produce()
+        <Particle: state a; age 0; dead False>
+
+        """
         part = Particle(self.particleLifeCycle)
         return part
 
     def sense(self, composition):
-        """provide a dictionary of an envrionment's compositioin
+        """This returns the number of particles sensed that are found in the composition dictionary.
+
+        Provide a dictionary of an envrionment's composition
         look for particleSenseType
-        if above or below boundary, determine action"""
+        if above or below boundary, determine action
+
+        >>> pairs = [('a', 1), ('b', 2)]
+        >>> composition = {'a': 10, 'b': 20}
+        >>> a = SensorProducer()
+        >>> a.setThreshold(30)
+        >>> a.setParticle(pairs, 'b')
+        >>> a.produce()
+        <Particle: state a; age 0; dead False>
+        >>> a.sense(composition) # count of snesed particles found in the comp
+        20 
+        """
         senseLevel = 0
-        for partType in composition: # keys in a dictionary
+        for partType in composition.keys(): # keys in a dictionary
             if self.particleSenseType == partType:
                 senseLevel = composition[self.particleSenseType]
                 break
         return senseLevel
 
     def _getBoundary(self):
+        '''
+        >>> a = SensorProducer()
+        >>> a.setThreshold(30, 10, 10)
+        >>> a._getBoundary()
+        (20, 40)
+        '''
         max = self.threshold + self.boundaryShiftUpper
         if max < self.threshold: max = self.threshold
         min = self.threshold - abs(self.boundaryShiftLower)
-        if min > self.threshold: min = self.threshold
-        if min < 0: min = 0
+        if min > self.threshold: 
+            min = self.threshold
+        if min < 0: 
+            min = 0
         return min, max
 
+
+    def _getProductionCount(self, span):
+        '''Given a number representing range to threshold, provide the number of particles produced.
+
+        >>> pcr = {(0,10):1, (11, 20):2, None: [3, 5]}
+        >>> pairs = [('a', 1), ('b', 2)]
+        >>> a = SensorProducer()
+        >>> a.setThreshold(30)
+        >>> a.setParticle(pairs, 'b')
+        >>> a.setProductionCountRange(pcr)
+        >>> a._getProductionCount(3)
+        1
+        >>> a._getProductionCount(12)
+        2
+        >>> a._getProductionCount(34) in [3,4,5]
+        True
+        '''
+        countRaw = None
+        for key in self.productionCountRange.keys():
+            # a None key provides a default value range
+            if key == None: 
+                continue
+            # key is inclusive min max:
+            if span >= key[0] and span <= key[1]:
+                countRaw = self.productionCountRange[key]
+        # if no match, get None, for all spans out of defined ranges
+        if countRaw == None:
+            countRaw = self.productionCountRange[None]
+
+        if not drawer.isList(countRaw): # create an inclusive range
+            countRaw = [countRaw, countRaw]
+        count = random.choice(range(countRaw[0], countRaw[1]+1))
+        return count
+
+
     def process(self, composition):
-        """get senseLevel, and min and max boundaries;
+        """Sense the level of the target particle based on the system composition provided as an argument. 
+
+        If the number of sensed particles is less than the lower boundary, create one particle. 
+
+        If the number of of sensed particles is greater than that number, presently do nothing. Options: prudce consumer particles?
+
+        get senseLevel, and min and max boundaries;
         determine how many particles to produce
         return a list of particles
 
-        its possible that the number of particles produced shuold be controlled
+        its possible that the number of particles produced should be controlled
         with a probabilistic function
+
+        >>> pairs = [('a', 1), ('b', 2)]
+        >>> composition = {'a': 10, 'b': 20}
+        >>> a = SensorProducer()
+        >>> a.setThreshold(30)
+        >>> a.setParticle(pairs, 'b')
+        >>> a.process(composition)
+        [<Particle: state a; age 0; dead False>]
+
+        >>> # if we are over the threshold, no particles are produced
+        >>> composition = {'a': 10, 'b': 35}
+        >>> a.process(composition)
+        []
         """
         senseLevel = self.sense(composition)
         min, max = self._getBoundary()
-         
-        if senseLevel < min: # return particles
-            partCount = 1
-        elif senseLevel >= min and senseLevel < self.threshold: # return particles
-            partCount = 1
-        elif senseLevel == self.threshold: # return particles
+        span = self.threshold - senseLevel
+
+        # presently this is only looking at threshold; min/max range
+        # is not being examined
+        if senseLevel < self.threshold: # return particles
+            partCount = self._getProductionCount(span)
+        elif senseLevel == self.threshold: 
             partCount = 0
-        elif senseLevel > self.threshold and senseLevel <= max: # return particles
-            partCount = 0
-        elif senseLevel > max: # produce nothing
+        elif senseLevel > self.threshold:
             partCount = 0
 
         #print _MOD, 'senseLevel, partCount', senseLevel, partCount
@@ -209,24 +526,62 @@ class SensorProducer:
 
 
     def __repr__(self):
+        '''
+        >>> pairs = [('a', 1), ('b', 2)]
+        >>> composition = {'a': 10, 'b': 20}
+        >>> a = SensorProducer()
+        >>> a.setThreshold(30)
+        >>> a.setParticle(pairs, 'b')
+        >>> repr(a)
+        "<SensorProducer: particleLifeCycle [('a', 1), ('b', 2)]>"
+        '''
         return '<SensorProducer: particleLifeCycle %s>' % (self.particleLifeCycle)
 
 
 #-----------------------------------------------------------------||||||||||||--
 class _Environment:
+    '''
+    A base class for modeling various envrionments. 
+
+
+    >>> a = EnvironmentThermostat()
+    >>> a.fillSensorProducer()
+    '''
     def __init__(self):
+        # sample values, all provided to one type of Sensor
+        self.sensorProducerCount = 10
+        self.sensorProductionCountRange = {None: 1}
+        self.threshold = 100
+        self.range = [30, 140]
+        self.ageStepList = [1] # range of ages values selected from
+        self.boundaryShift = 4 # use for up and down
+        self.particleLifeCycle = [('a', 4)]
+        self.particleSenseType = 'a'
+
+        self._particleArray = [] # a list of particle objects
+        self._sensorProducerArray = [] # a list of gland objects
+
+    def clear(self):
+        '''Remove all particles and sensors.
+        '''
         self._particleArray = [] # a list of particle objects
         self._sensorProducerArray = [] # a list of gland objects
         # will call method of subclass
-        self.fillSensorProducer()
-
 
     def fillSensorProducer(self):
-        """define in subclass; fill array with congigured sensorProducers"""
-        pass 
+        '''Depending on self.sensorProducerCount, create as many SensorProducer objects as specified. All have th8e same lifeCycle and threshold.
+        '''
+        for x in range(self.sensorProducerCount): 
+            sp = SensorProducer()
+            # set life cycle and sense
+            sp.setParticle(self.particleLifeCycle, self.particleSenseType) 
+            sp.setThreshold(self.threshold, self.boundaryShift, 
+                self.boundaryShift)
+            sp.setProductionCountRange(self.sensorProductionCountRange)
+            self._sensorProducerArray.append(sp)
 
     def fillParticle(self, count=1):
-        """fille the envrionment with existing particles
+        """Fill the envrionment with existing particles
         can be used for creating initial conditions
         will use existing sensorProducers to fill
         count is     number of times through all sensor producers
@@ -235,46 +590,71 @@ class _Environment:
             for sp in self._sensorProducerArray:
                 self._particleArray.append(sp.produce()) 
 
-    def getComposition(self):
-        """return numbers of each particle in a dictionary
-        pass this dictionary to sensorProducers"""
+    def getComposition(self, normalize=False, boundaryMethod=None):
+        """Return numbers of each particle in a dictionary
+        pass this dictionary to sensorProducers
+
+        >>> a = _Environment()
+        >>> a.fillSensorProducer()
+        >>> a.getComposition()
+        {}
+        >>> a.advance() 
+        >>> a.getComposition()
+        {'a': 10}
+        >>> a.advance() 
+        >>> a.getComposition()
+        {'a': 20}
+
+        """
         post = {}
         for part in self._particleArray: # part is a particle object
             state = part.getState()
             if state not in post:
                 post[state] = 0
-            post[state] = post[state] + 1
+            post[state] = post[state] + 1        
+        if boundaryMethod != None:
+            for key in post.keys():
+                pre = post[key]
+                post[key] = unit.boundaryFit(self.range[0], 
+                    self.range[1], pre, boundaryMethod)
+        if normalize:
+            for key in post.keys():
+                pre = post[key]
+                post[key] = unit.unitNorm(pre, self.range)
         return post
 
-
     def getSensorThresholdAverage(self):
-        """examine all sensors; for each particle type, get threshold, 
-        determine average"""
+        """Examine all sensors; for each particle type, get threshold, 
+        determine average
+
+        >>> a = _Environment()
+        >>> a.fillSensorProducer()
+        >>> a.getComposition()
+        {}
+        >>> a.advance() 
+        >>> a.getComposition()
+        {'a': 10}
+        >>> a.getSensorThresholdAverage()
+        {'a': 100.0}
+    
+        """
         post = {}
         for sp in self._sensorProducerArray:
-            if sp.particleSenseType not in post:
-                post[sp.particleSenseType] = (0, 0) # count, threshold sum
+            if sp.particleSenseType not in post.keys():
+                post[sp.particleSenseType] = [0, 0] # count, threshold sum
             # increment count
-            post[sp.particleSenseType][0] = post[sp.particleSenseType][0] + 1
-            t = sp.threshold
-            post[sp.particleSenseType][1] = post[sp.particleSenseType][1] + t
+            post[sp.particleSenseType][0] += 1
+            post[sp.particleSenseType][1] += sp.threshold
         # get all averages
         avg = {}
         for senseType in post: # get keys
-            # divide threshold sum by number of sensors
-            avg[senseType] = post[1] / float(post[0]) # average
+            # divide threshold sum by number of sensors for average
+            avg[senseType] = post[senseType][1] / float(post[senseType][0])
         return avg
 
 
-    def fillEquilibrium(self):
-        """challange to figure out what kind of particles to create
-        each sensorProducer may have a uniqe type of particle definition
-        """
-        pass
-
-
     def _advanceParticle(self, ageStep):
-        """advnace each particle by one frame
+        """Advance each particle by the number of frames given in the ageStep.
         ageStep is rounded to the nearest integer
         providing a value between 0 and 1 will give 50% chance of advancing
         providing a value between 0 and 2 will give 50% chance of advancing
@@ -289,23 +669,30 @@ class _Environment:
                 deadIndex.append(partIndex)
         # remove dead particles, should already be low to high      
         deadIndex.reverse() 
-        for partIndex in deadIndex: # delet indices in reverse
+        for partIndex in deadIndex: # delete indices in reverse
             del self._particleArray[partIndex]
 
 
     def _advanceSensor(self, composition):
-        """get particles from all sensors"""
+        """Get particles from all sensors based on the current composition of this state. 
+        """
         for sp in self._sensorProducerArray:
             # output a list of zero or more particles
             self._particleArray = self._particleArray + sp.process(composition)
 
 
-    def advance(self, ageStep=1):
-        """general method to advance the environemtn by one states"""
+    def advance(self, ageStep=None):
+        """Advance all particles the specified number of steps. 
+
+        Providing fractional age steps creates probabilities in aging. 
+        """
+        if ageStep == None:
+            ageStep = random.choice(self.ageStepList)
         # advance all existing particles; remove any dead particles
         self._advanceParticle(ageStep)
+        # an ageStpe greawter than one only advnaces the particles ages
+        # sps are only advanced one step
         self._advanceSensor(self.getComposition())
-
 
     def reprPartcle(self):
         post = self.getComposition()
@@ -314,77 +701,41 @@ class _Environment:
         return post
         
     def __repr__(self):
-        return '<Environment particle: %s; sensorProducer: %s>' % (self.reprPartcle(), 
-                                                    len(self._sensorProducerArray))
+        return '<Environment particle: %s; sensorProducer: %s>' % (self.reprPartcle(), len(self._sensorProducerArray))
 
 
 
 #-----------------------------------------------------------------||||||||||||--
-
 class EnvironmentThermostat(_Environment):
 
     def __init__(self):
-
         """this model uses one type of particle
         each particle has the same threshold; 
             not all threholds have to be the same
+
+        >>> a = EnvironmentThermostat()
+        >>> 
         """
-
-        # must define some attributes before calling base class
-        self.sensorCount = 10
-        self.threshold = 100
-        self.boundaryShift = 4 # use for up and down
-        self.particleLifeCycle = [('a', 4)]
-        self.particleSenseType = 'a'
-
-        # call base class init, will call fillSensorProducer
+        # call base class init
         _Environment.__init__(self)
 
+        # must define some attributes before calling base class
+        # more sensorProducers cause more value stability
+        self.sensorProducerCount = 6
+        self.sensorProductionCountRange = {(1,10): [1, 2], 
+                                           (11, 20): [2, 4], 
+                                           None: [3, 8]}
 
-    def fillSensorProducer(self):
+        self.threshold = 100
+        self.range = [30, 140]
+        self.ageStepList = [1, 1.5, 2, 2.5] # range of ages values selected from
 
-        for x in range(self.sensorCount): 
-            sp = SensorProducer()
-            # set life cycle and sense
-            sp.setParticle(self.particleLifeCycle, self.particleSenseType) 
-            sp.setThreshold(self.threshold, self.boundaryShift, self.boundaryShift)
-            self._sensorProducerArray.append(sp)
-
+        self.boundaryShift = 4 # use for up and down
+        self.particleLifeCycle = [('a', 6)]
+        self.particleSenseType = 'a'
 
 
 
-#-----------------------------------------------------------------||||||||||||--
-# class TestOld:
-#     def __init__(self):
-#         pass
-#     
-#     def testParticle(self):
-#         a = Particle([('a',3), ('b',4), ('c',8)])
-#         print a.lifeCycle
-#         print a.lifeBounds
-#         while 1:
-#             post = a(random.random()+.125)
-#             print a
-#             if post == 0: break
-# 
-# 
-#     def testSensorProducer(self):
-#         threshold = 10
-#         boundaryShift = 4 # use for up and down
-#         particleLifeCycle = [('a', 10)]
-#         particleSenseType = 'a'
-# 
-#         sp = feedback.SensorProducer() 
-#         sp.setThreshold(threshold, boundaryShift, boundaryShift)
-#         sp.setParticle(particleLifeCycle, particleSenseType) 
-#         print sp._getBoundary()
-#         a = sp._produce()
-#         print a
-#         print sp._sense({'d':80,'a':10,'b':20})
-# 
-# 
-#     def testEnvironment(self):
-#         pass
 
 
 
@@ -414,6 +765,18 @@ class Test(unittest.TestCase):
         sp.setThreshold(threshold, boundaryShift, boundaryShift)
         sp.setParticle(particleLifeCycle, particleSenseType) 
         a = sp.produce()
+
+    def testEnvironmentThermostat(self):
+        environment.printDebug(['testing EnvironmentThermostat'])
+        a = EnvironmentThermostat()
+        a.fillSensorProducer()
+        self.assertEqual(a.getComposition(), {})
+
+        for i in range(100):
+            a.advance()
+            environment.printDebug([a.getComposition(normalize=False, boundaryMethod='limit')])   
+
+
 
 #-----------------------------------------------------------------||||||||||||--
 

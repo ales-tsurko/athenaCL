@@ -139,13 +139,13 @@ class LangEn:
     # key description paragrahs
     
     # very short
-    msgAthDescMicroMini = "polyphonic, poly-paradigm algorithmic music composition"
+    msgAthDescMicroMini = "poly-paradigm algorithmic music composition"
 
-    msgAthDescMini = "polyphonic, poly-paradigm algorithmic music composition in an interactive command-line environment"
+    msgAthDescMini = "poly-paradigm algorithmic music composition in an interactive command-line environment"
     
     # normal subtitle
     msgAthDescShort = """\
-modular, polyphonic, poly-paradigm algorithmic music composition in a cross-platform interactive command-line environment."""
+modular poly-paradigm algorithmic music composition in a cross-platform interactive command-line environment."""
 
     msgAthDescLong = """\
 The athenaCL system is an open-source, object-oriented composition tool written in Python. The system can be scripted and embedded, and includes integrated instrument libraries, post-tonal and microtonal pitch modeling tools, multiple-format graphical outputs, and musical output in Csound, SuperCollider, Pure Data, MIDI, audio file, XML, and text formats."""
@@ -153,19 +153,19 @@ The athenaCL system is an open-source, object-oriented composition tool written 
     
     # sf net limits to only 254 characters, also for fink desc detail
     msgAthDescSf ="""
-Modular, polyphonic, poly-paradigm algorithmic music composition in a cross-platform interactive command-line environment written in Python and providing musical output in Csound, SuperCollider, Pure Data, MIDI, audio file, XML, and text formats.     
+Modular poly-paradigm algorithmic music composition in a cross-platform interactive command-line environment written in Python and providing musical output in Csound, SuperCollider, Pure Data, MIDI, audio file, XML, and text formats.     
     """
 
     # not worth saying: extensible (its open and in Python)
     # sieves/specturm pitch tools: not clear
 
-    _pmtrObjSummary = "Over sixty specialized Generator, Rhythm, and Filter ParameterObjects provide tools for stochastic, chaotic, cellular automata based, markov based, wave-form, fractional noise (1/f), genetic, Xenakis sieve, linear and exponential break-point segments, masks, and various other algorithmic models. ParameterObjects can be embedded in other ParameterObjects to provide powerful dynamic and masked value generation."
+    _pmtrObjSummary = "Over eighty specialized Generator, Rhythm, and Filter ParameterObjects provide tools for stochastic, chaotic, cellular automata based, Markov based, generative grammar and Lindenmayer system (L-system), wave-form, fractional noise (1/f), genetic, Xenakis sieve, linear and exponential break-point segments, masks, and various other algorithmic models. ParameterObjects can be embedded in other ParameterObjects to provide powerful dynamic and masked value generation."
     
     # use this in addition to msgAthDescLong for complete listing
     msgAthDescFull = """\
-Musical parts are deployed as Textures, layered surface-defining objects containing numerous independent ParameterObjects to control pitch, tempo, rhythm, amplitude, panning, and instrument (Csound) parameters. The system includes an integrated library of Csound instruments, and supports output for external Csound instruments, MIDI, and a variety of alternative formats. %s Textures can be combined and edited, and tuned with algorithmic Temperament objects. Texture Clones allow the filtering and processing of Texture events, performing transformations not possible with parameter generation alone.
+Musical parts are deployed as Textures, layered surface-defining objects containing numerous independent ParameterObjects to control pitch, tempo, rhythm, amplitude, panning, and instrument (Csound) parameters. The system includes an integrated library of Csound and SuperCollider instruments, and supports output for external Csound instruments, MIDI, and a variety of alternative formats. %s Textures can be combined and edited, and tuned with algorithmic Temperament objects. Texture Clones allow the filtering and processing of Texture events, performing transformations not possible with parameter generation alone.
 
-The algorithmic system uses Path objects to organize and share pitch groups. Paths provide simultaneous representations of ordered content groups in set-class, pitch-class space, and pitch space. Paths may contain numerous PathVoices (voice leadings) and may be analyzed with both set-class similarity measures and voice leading rankings. As a reference utility, pitch groups can be searched, analyzed, and compared with a wide variety of tools.""" % (_pmtrObjSummary)
+The algorithmic system uses Path objects to organize and share pitch groups. Paths provide simultaneous representations of ordered content groups in set-class, pitch-class space, and pitch space.""" % (_pmtrObjSummary)
 
     msgAthFeatInterface =  """\
 Advanced, easy to use, interactive command line: enter commands with arguments, or just enter the command and athenaCL will prompt the user for all necessary data.

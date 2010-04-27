@@ -54,9 +54,35 @@ def tableMinMax(table):
     
     
 #-----------------------------------------------------------------||||||||||||--
+def unitNorm(value, valueRange):
+    '''Normalize value within the unit interval.
+
+    >>> unitNorm(3, (3,10))
+    0.0
+    >>> unitNorm(1, (3,10)) # values are not limited here
+    -0.285714... 
+    >>> unitNorm(6.5, (3,10))
+    0.5
+    >>> unitNorm(10, (3,10))
+    1.0
+    >>> unitNorm(17, (3,10))
+    2.0
+    '''
+    min, max = seriesMinMax(valueRange)
+    span = max - min
+
+    dif = value - min
+    if drawer.isInt(dif):
+        dif = float(dif)         
+    if span != 0:
+        return dif / span
+    else: # fill value if span is zero
+        return 0
+
+
 def unitNormRange(series, fixRange=None):
-    """read all values from a a list
-    normalize values wihtin min and maximum of series
+    """read all values from a list
+    normalize values within min and maximum of series
 
     >>> unitNormRange([0,3,4])
     [0.0, 0.75, 1.0]
@@ -464,7 +490,6 @@ def discreteCompress(series):
     return comp
 
 #-----------------------------------------------------------------||||||||||||--
-
 def boundaryFit(a, b, f, boundaryMethod):
     """take boundary levels a,b and place f within them
     available methods include wrap, reflect, limit
