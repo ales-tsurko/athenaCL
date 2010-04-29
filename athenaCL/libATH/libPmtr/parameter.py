@@ -95,6 +95,14 @@ genPmtrNames = {
     #'gh' : 'grammarHistory', # select evolution components from complete table
     #'gc' : 'grammarCycle', # select evolution components
 
+    # cant use feedbackSystem as 'fs' is already taken
+    # feedback model library
+    # feedback environment?
+    # particle feedback / feedback particle
+    'fml' : 'feedbackModelLibrary',
+    #'fmp': 'feedbackModelParametric',
+    
+
     # meta-generators
     'ig' :'iterateGroup', # pos/neg for skip, repeat
     'iw' :'iterateWindow', # select from a list of pmtrObjs
@@ -889,6 +897,12 @@ class Test(unittest.TestCase):
         args = ('gt', 'a{.2}b{.5}c{.8}d{0}@a{ba}b{bc}c{cd}d{ac}@a', 
                  10, 'oc')
         self._parameterRunner(factory(args), 20)
+
+
+    def testFeedbackModelLibrary(self):    
+        args = ['fml', 'cc', ('bg','rc',(1,3)), ('c',.9), 0, 1]
+        self._parameterRunner(factory(args), 20)
+
 
 
 

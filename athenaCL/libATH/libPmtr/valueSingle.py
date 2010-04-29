@@ -21,6 +21,7 @@ from athenaCL.libATH import pitchTools
 from athenaCL.libATH import language
 lang = language.LangObj()
 from athenaCL.libATH import markov
+from athenaCL.libATH import feedback
 from athenaCL.libATH import grammar
 from athenaCL.libATH import quantize
 from athenaCL.libATH import sieve
@@ -588,7 +589,7 @@ class ValueSieve(basePmtr.Parameter):
     def __call__(self, t=None, refDict=None):
         element = self.selector()
         self.currentValue = unit.denorm(element, 
-                                  self.minObj(t, refDict),   self.maxObj(t, refDict))
+                    self.minObj(t, refDict),   self.maxObj(t, refDict))
         return self.currentValue
 
 #-----------------------------------------------------------------||||||||||||--
@@ -2511,6 +2512,74 @@ class GrammarTerminus(basePmtr.Parameter):
 
     def __call__(self, t=None, refDict=None):
         self.currentValue = self.selector()
+        return self.currentValue
+        
+
+#-----------------------------------------------------------------||||||||||||--
+class FeedbackModelLibrary(basePmtr.Parameter):
+    def __init__(self, args, refDict):
+        basePmtr.Parameter.__init__(self, args, refDict) # call base init
+        self.type = 'feedbackModelLibrary'
+        self.doc = lang.docPoGt
+        self.argTypes = ['str', 'list', 'list', ['num','list'], ['num','list']]
+
+        # might add threshold value normalized w/n unit interval
+        self.argNames = ['feedbackModelName', 'parameterObject: aging step', 'parameterObject: threshold', 'min', 'max',]
+        self.argDefaults = ['cc', ('bg','rc',(1,3)), ('c',.9), 0, 1]
+        self.argDemos = []
+        # check raw arguments for number, type
+        ok, msg = self._checkRawArgs()
+        if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
+
+
+        try:
+            self.feedbackType = feedback.libraryParser(self.args[0])
+            self.feedbackObj = feedback.factory(self.feedbackType)
+            self.feedbackObj.fillSensorProducer()
+        except feedback.FeedbackError, e: 
+            raise error.ParameterObjectSyntaxError('Feedback object creation failed: %s' % e)
+
+        self.ageObj = self._loadSub(self.args[1], 'genPmtrObjs') 
+        self.thresholdObj = self._loadSub(self.args[2], 'genPmtrObjs') 
+
+        self.minObj, self.maxObj = self._loadMinMax(self.args[3], self.args[4])
+
+
+    def checkArgs(self):
+        ok, msg = self.ageObj.checkArgs()
+        if ok != 1: return ok, msg
+        ok, msg = self.thresholdObj.checkArgs()
+        if ok != 1: return ok, msg
+
+        ok, msg = self.minObj.checkArgs()
+        if ok != 1: return ok, msg
+        ok, msg = self.maxObj.checkArgs()
+        if ok != 1: return ok, msg
+
+        return 1, ''
+
+    def repr(self, format=''):
+        ageStr = self.ageObj.repr(format)
+        thresholdStr = self.thresholdObj.repr(format)
+
+        minStr = self.minObj.repr(format)
+        maxStr = self.maxObj.repr(format)
+
+        msg = []
+        msg.append('%s, %s, (%s), (%s), (%s), (%s)' % (self.type, self.feedbackType, ageStr, thresholdStr, minStr, maxStr))
+        return ''.join(msg)
+
+    def reset(self):
+        self.minObj.reset()
+        self.maxObj.reset()
+        self.ageObj.reset()
+        self.thresholdObj.reset()
+
+    def __call__(self, t=None, refDict=None):
+        # advance based on an age
+        self.feedbackObj.advance(self.ageObj())
+        self.currentValue = unit.denorm(self.feedbackObj.getValue(), 
+                        self.minObj(t, refDict), self.maxObj(t, refDict))
         return self.currentValue
         
 
