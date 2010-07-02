@@ -2520,7 +2520,7 @@ class FeedbackModelLibrary(basePmtr.Parameter):
     def __init__(self, args, refDict):
         basePmtr.Parameter.__init__(self, args, refDict) # call base init
         self.type = 'feedbackModelLibrary'
-        self.doc = lang.docPoGt
+        self.doc = lang.docPoFml
         self.argTypes = ['str', 'list', 'list', ['num','list'], ['num','list']]
 
         # might add threshold value normalized w/n unit interval
@@ -2577,7 +2577,7 @@ class FeedbackModelLibrary(basePmtr.Parameter):
 
     def __call__(self, t=None, refDict=None):
         # advance based on an age
-        self.feedbackObj.advance(self.ageObj())
+        self.feedbackObj.advance(self.ageObj(t, refDict))
         self.currentValue = unit.denorm(self.feedbackObj.getValue(), 
                         self.minObj(t, refDict), self.maxObj(t, refDict))
         return self.currentValue

@@ -965,8 +965,8 @@ class LineSegment(basePmtr.Parameter):
         self.argNames = ['stepString', 'parameterObject: secPerCycle', 
                          'min', 'max']
         self.argDemos = [
-            ['ls','e',('bg','rc',(4,7,18)),('ru',0,20),('ru',30,50)],
-            ['ls','e',('ws','e',5,0,2,15),0,('ru',0,100)],
+            ['e',('bg','rc',(4,7,18)),('ru',0,20),('ru',30,50)],
+            ['e',('ws','e',5,0,2,15),0,('ru',0,100)],
             ]
         self.doc = lang.docPoLs
 

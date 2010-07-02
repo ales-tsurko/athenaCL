@@ -573,6 +573,10 @@ class EventSequenceSplit:
         >>> titleStr = parameter.pmtrLibTitle('genPmtrObjs')
         >>> ess = EventSequenceSplit([[titleStr, 'g', obj]], 'pg', 100)
         """
+
+        environment.printDebug(['EventSequenceSplit got srcObj, srcFmt', srcObj, srcFmt])
+
+
         self.srcObj = srcObj # a list of table, pmtrObj pairs
         self.srcFmt = srcFmt
         # can be used to limt number of events shown
@@ -593,6 +597,9 @@ class EventSequenceSplit:
                 if len(self.srcObj.esObj) == 0:
                     raise ValueError, 'clone with empty esObj cannot be graphed' 
 
+        # need to reverse srcObj order 
+        #if self.srcFmt in ['pf']:
+        #    self.srcObj.reverse()
         # all data elements other than aux values could be array objects
 
         # build template for split scire
@@ -645,6 +652,8 @@ class EventSequenceSplit:
         else:
             raise ValueError, 'bad src format'
 
+        #environment.printDebug(['EventSequenceSplit splitScore', splitScore, self.pmtrOrder])
+
         # store labels for each parameter
         self.pmtrArgs = {}
         for pmtr in self.pmtrOrder:
@@ -682,6 +691,7 @@ class EventSequenceSplit:
         for key in delKey:
             self.pmtrOrder.remove(key)
 
+
     def _loadPostScore(self):
         """creates a new score w/ srcObj, 
         splits a score into a dictionary of labeled parameters values
@@ -718,7 +728,11 @@ class EventSequenceSplit:
                 
     def _loadRawParameter(self):
         """srcObj is a list of raw parameter objects
-        optionally skip string storage with strBypass"""
+        optionally skip string storage with strBypass
+
+        Note: in the case of pf format filter presentations, the filter must be given first. 
+        
+        """
         # add time values
         refDict = basePmtr.REFDICT_SIM
         # merge with aoInfo if around
@@ -731,6 +745,9 @@ class EventSequenceSplit:
         self.splitScore['event'] = range(0, self.nEvent)
 
         for label, lib, pObj in self.srcObj:
+
+            #environment.printDebug(['\nEventSequenceSplit._loadRawParameter', label, lib, pObj])
+
             # check if strings are to be processed
             if pObj.outputFmt == 'str' and self.strBypass:
                 continue
@@ -747,6 +764,8 @@ class EventSequenceSplit:
                 valArray = self.splitScore[self.srcObj[0][0]] # this gets label
                 tArray = self.splitScore['time']
                 self.splitScore[label] = pObj(valArray, tArray, refDictArray)
+
+                #environment.printDebug(['EventSequenceSplit._loadRawParameter', valArray, self.splitScore[label]])
             elif lib in ['rthmPmtrObjs']:
                 for t in self.splitScore['time']: # run through time list
                     dur, sus, acc = pObj(t, refDict)

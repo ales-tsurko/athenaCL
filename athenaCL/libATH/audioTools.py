@@ -133,8 +133,8 @@ def encodeMp3(src, dstDir=None, br=128, title='',
     else: # use provided dstdir
         dst = os.path.join(dstDir, dstName)
     tagStr = '--tt "%s" --ta "%s" --tl "%s" --ty "%s" ' % (title, artist, 
-                                                                            album, year)
-    cmd = 'lame -m s -q %s --cbr --disptime 1 -b %s -c %s %s %s' % (quality, br, 
+                                                           album, year)
+    cmd = 'lame -m s -q %s --add-id3v2 --cbr --disptime 1 -b %s -c %s %s %s' % (quality, br, 
                                                             tagStr, src, dst)
     os.system(cmd)
     return dst
@@ -163,6 +163,23 @@ def decodeMp3(src, dstDir=None, dstName=None, quality=2):
     else: # use provided dstdir
         dst = os.path.join(dstDir, dstName)
     cmd = 'lame -m s -q %s --decode --disptime 1 -c %s %s' % (quality, src, dst)
+    os.system(cmd)
+    return dst
+
+def encodeFlac(src, dstDir=None, dstName=None):
+    """To encode:
+  flac [INPUTFILE [...]] """
+    srcDir, srcName = os.path.split(src)
+    srcName, ext = osTools.extSplit(srcName)
+    
+    # optional dstName will be used instead of the srcName mod if provided
+    if dstName == None:
+        dstName = srcName + '.flac'
+    if dstDir == None or not os.path.isdir(dstDir): #place in same dir
+        dst = os.path.join(srcDir, dstName)
+    else: # use provided dstdir
+        dst = os.path.join(dstDir, dstName)
+    cmd = 'flac -o %s %s ' % (dst, src)
     os.system(cmd)
     return dst
 

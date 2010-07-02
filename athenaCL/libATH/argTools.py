@@ -189,14 +189,15 @@ def strongType(usrArgs, argTypes, defaultArgs=[], argCountOffset=0):
 
 #-----------------------------------------------------------------||||||||||||--
 class ArgOps:
-    """Object to handle parsing of commandline arguments.
+    """Object to handle parsing of commandline arguments, provided either as a space-delimited string or as a list of arguments. 
 
-    given w/o commas, space delimited, as used in Interpreter
+    Args are given w/o commas, space delimited, as used in Interpreter
     this arg lists only use positional values; not flags are permitted
     optional argument may follow required ones"""
     
     def __init__(self, argStr, stripComma=False):
-        """
+        """Note: `argStr` can be either a string or a list of pre-partitioned objects. 
+
         >>> a = ArgOps('test 1 2 3')
         >>> a.get(2)
         '2'
@@ -218,7 +219,7 @@ class ArgOps:
         'test,'
 
         """
-        if drawer.isList(argStr): # accept alread partitioned lists
+        if drawer.isList(argStr): # accept already partitioned lists
             self.argList = argStr
         else:
             argStr = argStr.strip() # clear trailing white space

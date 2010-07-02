@@ -13,6 +13,8 @@ from athenaCL.libATH import imageTools
 from athenaCL.libATH import eventList
 
 _MOD = 'graphPmtr.py'
+from athenaCL.libATH import prefTools
+environment = prefTools.Environment(_MOD)
 
 #-----------------------------------------------------------------||||||||||||--
 
@@ -267,7 +269,11 @@ class TPmapCanvas(_MapCanvas):
         _MapCanvas.__init__(self)
         self.c = fmt
         self.events = events # number of events
-        self.splitSco = eventList.EventSequenceSplit(srcList, srcFmt, self.events)
+
+        environment.printDebug(['TPmapCanvas splitSco srcList', srcList, srcFmt])
+
+        self.splitSco = eventList.EventSequenceSplit(srcList, srcFmt, 
+                        self.events)
         self.splitSco.load()
         self.xRelation = 'event' # always event for tpmaps
 
@@ -287,6 +293,8 @@ class TPmapCanvas(_MapCanvas):
         self.c = imageTools.Canvas(fmt, self.winWIDTH, self.winHEIGHT, 
                                             self.COLORbgAbs, 'TPmap', master)
         #draw all parameters
+
+        # TODO: this is not showing source and filter, only one value
         for pmtr in self.splitSco.getKeys():
             # xRelation will always be 'event' for parameter displays
             dataList = self.splitSco.getCoord(pmtr, 'event')

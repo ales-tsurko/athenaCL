@@ -76,7 +76,7 @@ class InfoManager:
         self.fpReadme = os.path.join(self.fpDocDir, self.fnReadme)
 
         # for decorative elements
-        self._divChar = ['.'] + ['_'] * 24
+        self._divChar = ['='] * 24
         self._divWidth = 68
 
     #-----------------------------------------------------------------------||--
@@ -115,9 +115,8 @@ IIIa. Quick Start Distributions
 IIIb. Quick Start Installers
 IVa. Installation
 IVb. athenaCL via Command Line Interface
-IVc. athenaCL via Python Interpreter Application
-IVd. athenaCL via IDLE
-IVe. athenaCL via Python Prompt
+IVc. athenaCL via IDLE
+IVd. athenaCL via Python Prompt
 V. Documentation
 VI. Contact Information
 VII. Credits and Acknowledgments
@@ -165,8 +164,8 @@ All Platforms
     2. decompress athenaCL distribution and place wherever desired
 
 UNIX, Command Line Environments, Macintosh MacOS X:
-    3. % pythonw setup.py
-    4. % pythonw athenacl.py
+    3. % python setup.py
+    4. % python athenacl.py
 
 For more information and additional installation options, see below.
 """
@@ -206,28 +205,6 @@ For more information and additional installation options, see below.
 # 
 
 
-#         msgAppEnviron = """\
-# IVa.     APPLICATION ENVIRONMENTS
-# 
-# athenaCL can be run in four different Python environments, depending on your platform and Python installation. These four environments are explained below.
-# 
-# CLI: Command line interface. This is Python run from a system's native command line environment. Running athenaCL within the CLI is recommended whenever possible, and provides the greatest application functionality (including proper line-wrapping and readline on unix environments).
-# 
-# IDLE: IDLE is the tk gui-based Integrated Development Environment distributed with every Python installation. IDLE provides configurable syntax coloring as well as a complete text editor.
-# 
-# PP: Python Prompt. If already in a Python interpreter, athenaCL can be imported directly from the Python prompt.
-# 
-# The following list recommends an environment for each platform. Individual instructions for each environment are provided below.
-# 
-# UNIX (any): CLI
-# Mac OSX (10.3, 10.4, 10.5 System Python or MacPython): CLI
-# Windows (95/98/ME/XP/Vista): IDLE
-# Windows (NT/2000/XP/Vista): CLI
-# 
-# Notes for Mac OSX Users: MacOS X 10.3 (Panther), 10.4 (Tiger), and 10.5 (Leopard) include a complete Python installation (available via Terminal.app) that will run athenaCL without additional configuration (found at /usr/bin/python or /usr/bin/pythonw). The athenaCL.app application, included with the .dmg distribution, assists the user in installing and running athenaCL. MacOS X users may install the official Macintosh Python distribution instead (installed at /usr/local/bin/python).
-# 
-# Notes for Windows Users: When launching a Python interpreter on some versions of Windows, the resulting console does not have text scrolling and text selection features. For this reason, Windows users will be asked when launching athenaCL if they want to load athenaCL in IDLE. Loading athenaCL in IDLE may provide a better command-line interface.
-# """
 
         msgInstall = """\
 IVa. INSTALLATION:
@@ -264,18 +241,6 @@ launching with the athenaCL tool and /usr/local/bin in PATH:
     5. % athenacl
 """
 
-        msgPIA = """\
-IVc. athenaCL VIA PYTHON INTERPRETER APPLICATION (PIA):
-
-installing:
-    1. decompress athenaCL
-    2. place athenaCL directory wherever you like
-    3. enter the athenaCL directory
-    4. double-click "setup.py"
-
-launching:
-    5. double-click "athenacl.py"
-"""
 
         msgIDLE = """\
 IVd. athenaCL VIA IDLE:
@@ -295,7 +260,7 @@ launching from the command line interface:
 """
 
         msgPP = """\
-IVe. athenaCL VIA PYTHON PROMPT (PP)
+IVd. athenaCL VIA PYTHON PROMPT
 
 If the athenaCL setup.py script has been successfully completed, Python should already by aware of the location of the current athenaCL installation. If the athenaCL setup.py script has not been properly run, the directory containing athenaCL must be manually added to the Python sys.path:
 (if the athenaCL directory is located in the directory "/src")
@@ -356,8 +321,6 @@ VII. CREDITS and ACKNOWLEDGMENTS:
         msg.append('%s\n' % msgInstall)
         msg.append('%s\n' % lang.msgDividerAlgo(_divWidth, _divChar))
         msg.append('%s\n' % msgCLI)
-        msg.append('%s\n' % lang.msgDividerAlgo(_divWidth, _divChar))
-        msg.append('%s\n' % msgPIA)
         msg.append('%s\n' % lang.msgDividerAlgo(_divWidth, _divChar))
         msg.append('%s\n' % msgIDLE)
         msg.append('%s\n' % lang.msgDividerAlgo(_divWidth, _divChar))

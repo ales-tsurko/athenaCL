@@ -161,15 +161,15 @@ class SampleSelect(_FileChooser):
 # rename pvoc.1, .2, etcetera
 # cd to this dir in batch file
 
-class AnalysisSelect(_FileChooser):
-    def __init__(self, args, refDict):
-        """searches a list of directories recursively and finds all files
-            files named in args are found within these directories
-            dirs are onlys serached if list of dirs has changed"""
-        _FileChooser.__init__(self, args, refDict) # call base init
-        self.type = 'analysisSelect'
-        self.doc = lang.docPoAs
-
+# class AnalysisSelect(_FileChooser):
+#     def __init__(self, args, refDict):
+#         """searches a list of directories recursively and finds all files
+#             files named in args are found within these directories
+#             dirs are onlys serached if list of dirs has changed"""
+#         _FileChooser.__init__(self, args, refDict) # call base init
+#         self.type = 'analysisSelect'
+#         self.doc = lang.docPoAs
+# 
 
 #-----------------------------------------------------------------||||||||||||--
 class DirectorySelect(basePmtr.Parameter):

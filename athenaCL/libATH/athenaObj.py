@@ -575,9 +575,9 @@ class AthenaObject(object):
         return ''.join(msg)
 
     def cmdCorrect(self, line):
-        """acts as an athenaCL cmd parser:
-        capitalizes and corrects user cmd strings called w/n cmdExecute
-        does not deal with special commands like q, quit, cmd, and others
+        """Acts as an athenaCL cmd parser: Capitalizes and corrects first part of user cmd strings called within cmdExecute. Does not deal with special commands like q, quit, cmd, and others.
+
+        If `checkFirstArg` is True, the first arg in the string is assumed to be a command. 
 
         >>> a = AthenaObject()
         >>> a.cmdCorrect('tils')
@@ -599,6 +599,7 @@ class AthenaObject(object):
         """
         if line == None:
             return None
+
         line = line.strip()
         if len(line) <= 1: # short command get no change?
             return line
@@ -1041,7 +1042,7 @@ class Interpreter(object):
 
     #-----------------------------------------------------------------------||--
     def _cmd(self, line):
-        """Internal command loop command exectuion. See cmd(), below, for public interface.
+        """Internal command loop command execution for interactive usage within thd Interpreter. See cmd(), below, for public interface.
 
         does actual processing of each command, adding do prefix
         separates args from command
@@ -1085,43 +1086,30 @@ class Interpreter(object):
             self.out(lang.msgAthObjError)
         return stop
 
-    def cmd(self, line, *arguments, **keywords):
-        """Public interface for exucting a single command line. This duplicates the functionality of _cmd(), above, yet provides nices features for a public interface.
 
-        errorMode is a keyuword aregument; can be exception or return
+    def _prepareCommandArguments(self, line, arguments=[], 
+        errorMode='exception'):
+        '''Prepare a list, or a string, or a bunch of extrac args, for processing.
 
-        Given cmdline, or cmd arguments; cmdline will be split if arg == None
-        good for calling a single command from cgi, or external interpreter
-        return output as string, not printed. Does not log errors, does not keep a history.
+        >>> i = Interpreter()
+        >>> i._prepareCommandArguments('tin a 3')
+        ('tin', 'a 3')
+        >>> i._prepareCommandArguments('tin', 'a 3')
+        ('tin', ['a', '3'])
+        '''
+        #environment.printDebug(['arguments initial', arguments])
 
-        >>> a = Interpreter()
-        >>> a.cmd('pin', 'a 3', errorMode='return')[0]
-        1
-
-        >>> a = Interpreter()
-        >>> post = a.cmd('pin a 3')
-        >>> post.startswith('PI a added to PathInstances')
-        True
-
-        >>> a = Interpreter()
-        >>> post = a.cmd('pin', 'a', '3')
-        >>> post.startswith('PI a added to PathInstances')
-        True
-
-        >>> a = Interpreter()
-        >>> post = a.cmd('''pin   a     3''')
-        >>> post.startswith('PI a added to PathInstances')
-        True
-
-        """
-        # testing: at this level, commands should already be parsed by 
+        # at this level, commands should already be parsed by 
         # line. thus, we can permit line breaks and replace with spaces
-        line = line.replace('\n', '')
-        line = line.replace('\t', ' ')
+        if drawer.isStr(line):
+            line = line.replace('\n', '')
+            line = line.replace('\t', ' ')
 
-        errorMode = 'exception' # default
-        if 'errorMode' in keywords.keys():
-            errorMode = keywords['errorMode']            
+        # if line is a lost and arguments are empty, assume that first
+        # element is command and remaining are args
+        if drawer.isList(line) and arguments == []: 
+            arguments = line[1:] # must assign this first
+            line = line[0]
 
         if len(arguments) == 0: # no args, assume cmd needs to be split
             splitLine = self._lineCmdArgSplit(line)
@@ -1130,24 +1118,78 @@ class Interpreter(object):
                     raise Exception('no command given')
                 elif errorMode == 'return':
                     return 0, "no command given"
+            # here, args are still space-separated strings
+            # cannut divide by spaces, as we me have a file path
             cmd, arg = splitLine
         else: # args are given, so line is command name
             cmd = line # add any additional arguments added individually
-
             argsExtra = []
+            if not drawer.isList(arguments):
+                arguments = arguments.split(' ')
             for part in arguments:
-                part = str(part)
-                part = part.replace('\n', '')
-                part = part.replace('\t', ' ')
-                argsExtra.append(part)
+                # note: here we are converting to a string
+                #part = str(part)
+                if drawer.isStr(part):
+                    part = part.strip()
+                    part = part.replace('\n', '')
+                    part = part.replace('\t', ' ')
+                if part != '':
+                    argsExtra.append(part)
+
             # add to whatever was passed as arg
-            arg = ' '.join(argsExtra)
+            arg = argsExtra # keep as a list
+            #arg = ' '.join(argsExtra)
+
+        environment.printDebug(['_prepareCommandArguments()', 'cmd:', cmd, 'arg:', arg])
+        return cmd, arg
+
+    def cmd(self, line, *arguments, **keywords):
+        """Public interface for executing a single command line. This duplicates the functionality of _cmd(), above, yet provides features for a public interface.
+
+        The `errorMode` is a keyword argument; can be 'exception' or 'return.'
+
+        Given cmdline, or cmd arguments; cmdline will be split if arg == None
+        good for calling a single command from cgi, or external interpreter
+        return output as string, not printed. Does not log errors, does not keep a history.
+
+        >>> a = Interpreter()
+        >>> post = a.cmd('pin a 3')
+        >>> post.startswith('PI a added to PathInstances')
+        True
+        >>> a = Interpreter()
+        >>> post = a.cmd('pin', 'a', '3')
+        >>> post.startswith('PI a added to PathInstances')
+        True
+        >>> a = Interpreter()
+        >>> post = a.cmd('''pin   a     3''')
+        >>> post.startswith('PI a added to PathInstances')
+        True
+        """
+
+# note: this form  does not work any more
+# this may not be a problem
+
+#         >>> a = Interpreter()
+#         >>> a.cmd('pin', 'a 3', errorMode='return')[0]
+#         1
+
+        errorMode = 'exception' # default
+        if 'errorMode' in keywords.keys():
+            errorMode = keywords['errorMode']  
+        # separate the command string from the args, which may be a list
+        # or a string          
+        cmd, arg = self._prepareCommandArguments(line, arguments,
+                   errorMode=errorMode)
+        # temporarily coerce into string
+#         if drawer.isList(arg):
+#             arg = [str(x) for x in arg]
+#             arg = ' '.join(arg)
 
         # cmdCorrect called here; this is done in cmdExecute and not in _cmd
-        # as this is a public method, however, this may be necessary here
-        cmd = self.ao.cmdCorrect(cmd)
-        cmdClassName = self._getCmdClass(cmd)
-        #environment.printDebug(['cmd, args', cmd, arg])
+        # as this is a public method
+        # this treates the first arg as a string and provides necssary
+        # corrections for creating a command class
+        cmdClassName = self._getCmdClass(self.ao.cmdCorrect(cmd))
 
         if errorMode == 'exception':
             if cmdClassName == None:
@@ -1178,7 +1220,8 @@ class Interpreter(object):
                 result = 'error occured'
                 ok = 0
             return ok, result.strip()
-        else: 
+
+        else:  # catch bad parameter setting
             raise Exception('bad error mode')
 
 
@@ -1562,10 +1605,61 @@ class Test(unittest.TestCase):
                 raise Exception('failed cmd (%s): %s' % (cmd, result))
 
 
+    def testInterpreterEmbeddedParameterObject(self):
+
+
+        ai = Interpreter('terminal')
+
+        # test results of preparing command arguments
+        for preLine, preArgs, post in [ 
+                ('tin a 3', [], ('tin', 'a 3')),
+                ('tin', ['a', '3'], ('tin', ['a', '3'])),
+                # the number is retained
+                ('tin', ['a', 3], ('tin', ['a', 3])),
+                ('tin', ['a', 3, None], ('tin', ['a', 3, None])),
+                ('tin a b 200 1234', [], ('tin', ('a b 200 1234'))),
+                (['tin', 'a', 'b', 200, 1234], [], ('tin', ['a', 'b', 200, 1234])),
+
+                ]:
+            self.assertEqual(
+                ai._prepareCommandArguments(preLine, preArgs), post)
+
+
+        ai.cmd('pin a 3', errorMode='exception') 
+
+
+        ai.cmd('emo m', errorMode='exception') 
+        ai.cmd('tin a 1', errorMode='exception') 
+        #ai.cmd('tin', 'b', 2, errorMode='exception') 
+        #ai.cmd(['tin', 'c', 65], errorMode='exception') 
+
+        ai.cmd('tie', 'a', ('bg', 'rc', (.2, .8)), errorMode='exception') 
+
+        from athenaCL.libATH.libPmtr import parameter, basePmtr
+
+        po1 = parameter.factory('bg, rc, (.1, 1)')
+        ai.cmd('tie', 'a', po1, errorMode='exception') 
+
+        po2 = parameter.factory('bg, rc, (-1, -2, -3)')
+        self.assertEqual(True, isinstance(po2, basePmtr.Parameter))
+        ai.cmd('tie', 'o', po2, errorMode='exception') 
+
+        # TODO: this works, but actually creates a new instance
+        # need to modify Texture to get isntance sharing
+
+        #ai.cmd('eln') 
+        #ai.cmd('elh') 
+
 
 #-----------------------------------------------------------------||||||||||||--
 if __name__ == '__main__':
-    from athenaCL.test import baseTest
-    baseTest.main(Test)
+
+    if len(sys.argv) == 1: # normal conditions
+
+        from athenaCL.test import baseTest
+        baseTest.main(Test)
 
 
+    elif len(sys.argv) > 1:
+        a = Test()
+        a.testInterpreterEmbeddedParameterObject()

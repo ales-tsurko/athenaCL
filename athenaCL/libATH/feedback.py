@@ -153,7 +153,10 @@ class ParticleCore(object):
         else:
             ageUnit = ageStep() # assume it is a function
 
-        self.age = self.age + int(round(ageUnit))
+        # Probabilistic rounding of floating point values
+        ageUnitInt = drawer.floatToInt(ageUnit, 'weight')
+        self.age += ageUnitInt
+
         if self.age > self.lifeSpan: # must be greater, not >=
             self.state = None
             return False # cant advance, as is dead
@@ -189,8 +192,8 @@ class ParticleCore(object):
     def getState(self):
         """return current state
 
-        >>> pairs = [('a', 1), ('b', 2)]
-        >>> a = Particle(pairs)
+        >>> lc = [('a', 1), ('b', 2)]
+        >>> a = Particle(lc)
         >>> a.advance(3)
         True
         >>> a.getState()
@@ -702,8 +705,6 @@ class _Environment:
 
         # sample values, all provided to one type of Sensor
         self.sensorProducerCount = 10
-        # mapping if difference from theshold and production count
-        self.sensorProductionCountRange = {None: 1}
         self.range = [30, 140]
 
         # store one object and make copies
@@ -848,7 +849,7 @@ class _Environment:
             del self._particleTransformerArray[partIndex]
 
     def _advanceSensor(self):
-        """Get particles from all sensors based on the current composition of this state. 
+        """Process all sensors
         """
         composition = self.getComposition()
         for sp in self._sensorProducerArray:
@@ -921,6 +922,10 @@ class EnvironmentThermostat(_Environment):
     def getValue(self):
         dict = self.getComposition(normalize=True, boundaryMethod='limit')
         return dict['a']
+
+
+
+
 
 
 class EnvironmentClimateControl(_Environment):

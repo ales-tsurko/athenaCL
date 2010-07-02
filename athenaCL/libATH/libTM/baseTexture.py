@@ -990,8 +990,10 @@ class Texture(object):
         if not ok: raise ValueError, 'texture edit: original data cannot be restored: %s' % msg
 
     def editPmtrObj(self, pmtrName, pmtrValue, refresh=1):
-        """edits a texture parameter object
-        refresh: determines if eventlists are refreshed after each run
+        """Edits a Texture's Parameter object
+
+        The `refresh` parameter determines if eventlists are refreshed after each run.
+
         not clearing the score will allow faster clone values
         self.clearScore() # this is for data efficiency; vals are updated
         """
@@ -1017,13 +1019,22 @@ class Texture(object):
             attrName = 'pmtrQDict'
             oldData = self.pmtrQDict # attrReference
             newData = copy.deepcopy(self.pmtrQDict)  # copy old dict
-            newData[p] = pmtrValue
+            # if we have a parameter object, we need to store a string
+            # representation here
+            if isinstance(pmtrValue, basePmtr.Parameter):
+                environment.printDebug(['editPmtrObj():', 'storing string representation', repr(str(pmtrValue))])
+                newData[p] = str(pmtrValue)
+            else:
+                newData[p] = pmtrValue
         else:
             return 0, 'incorrect parameter label access.'
         # set attribute
         setattr(self, attrName, newData)
+
         try: # try to refresh objects
             editPhase = 'object creation:'
+            # TODO: here is where we need to pass a reference to the 
+            # object, and not create new object
             ok, msg = self.updatePmtrObj(p)
             if not ok:
                 self._editRestore(attrName, p, oldData)

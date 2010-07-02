@@ -227,7 +227,7 @@ class Command(object):
               return numEval
 
     def _strRawToData(self, usrStr, errorPreface=lang.ERROR):
-        """general method for evaluating usrStrings
+        """Method for evaluating user strings provided for Texture editing.
         prohibits doing wack things, provides error messages
         calls restringulator to quote all char/sym sequences
    
@@ -248,6 +248,7 @@ class Command(object):
             msg = '%s: %s' % (errorPreface, 'Internal Access Attempt')
             usrDataEval = None
         else:
+            environment.printDebug(['pre restringulator:', usrStr])
             usrStr = drawer.restringulator(usrStr) # add quotes if necessary
             try:
                 usrDataEval = eval(usrStr)
@@ -260,6 +261,8 @@ class Command(object):
             except NameError, e: # if strings given without a quote not converted
                 msg = '%s %s' % (errorPreface, 'name-error (quote all strings)')
                 usrDataEval = None
+
+        environment.printDebug(['results of _strRawToData():', usrDataEval, msg])
         return usrDataEval, msg
 
 
@@ -911,9 +914,8 @@ class Command(object):
 
 
     def _tiEvalUsrStr(self, usrStr, p=None, tName=None):
-        """filter and evaluate user entered data
-        used for all TIe commands, whenever user giving complex args
-        used also for command line tie arg passing
+        """Filter and evaluate user-entered string data. Used for all TIe commands, whenever user is giving complex arguments for ParameterObjects. Also used for command line TIe argument passing
+
         optionally check if p is supported in this tName
             this optional b/c w/ TIe, know which texture
             w/ TEe, data is evaluated before a texture is selected
@@ -944,7 +946,7 @@ class Command(object):
         elif p == 'inst': # must be a number
             if not drawer.isInt(usrDataEval):        
                 return None, 'instrument number must be an integer.\n'
-        elif p == None: # case of evaluating user parameter ojbs w/o a texture
+        elif p == None: # case of evaluating user parameter obs w/o a texture
             pass #  may returns a string as usrDataEval; cannot check for errors
         return usrDataEval, msg
 
@@ -2719,6 +2721,8 @@ class _CommandTP(Command):
         >>> a = _CommandTP(ao)
         >>> a._tpConvertLibType('genPmtrObjs')
         'genPmtrObjs'
+        >>> a._tpConvertLibType('filterPmtrObjs')
+        'filterPmtrObjs'
         """
         try:
             usrStr = parameter.pmtrLibParser(usrStr)
@@ -2745,7 +2749,7 @@ class _CommandTP(Command):
         are necessary to create an image 
         """
         if lib == 'filterPmtrObjs':
-            bundle = ('genPmtrObjs', 'filterPmtrObjs')
+            bundle = ('filterPmtrObjs', 'genPmtrObjs')
             eventListSplitFmt = 'pf'
             noPmtrObjs = 2
         elif lib == 'rthmPmtrObjs':
@@ -2926,6 +2930,7 @@ class TPv(_CommandTP):
 class TPmap(_CommandTP):
     """
     TODO: update method of getting temporary files
+    TODO: interactive version has different command sequence than cl
 
     >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> a = TPmap(ao, args='120 ru,0,1')
@@ -2953,13 +2958,17 @@ class TPmap(_CommandTP):
             args = argTools.ArgOps(args) # no strip
             #lib = self._tpConvertLibType(args.get(0))
             #if lib == None: return self._getUsage()
+
             self.events = drawer.strToNum(args.get(0), 'int')
             if self.events == None: return self._getUsage('number of events cannot be determined')
 
             # get lib by looking at the first parameter object given
             lib = parameter.pmtrNameToPmtrLib(args.get(1))
+            #environment.printDebug(['got first arg lib', lib])
+
             lib = self._tpConvertLibType(lib) # only certain libs are spported
-            if lib == None: return self._getUsage('cannot access parameter object from %s' % args.get(1))
+            if lib == None: 
+                return self._getUsage('cannot access parameter object from %s' % args.get(1))
 
             bundle, self.eventListSplitFmt, noPmtrObjs = self._tpGetBundleFmt(
                                                         lib)
@@ -2967,6 +2976,7 @@ class TPmap(_CommandTP):
 
             pos = 1
             for subLib in bundle:
+                #environment.printDebug(['subLib', subLib])
                 usrDataEval, msg = self._tiEvalUsrStr(args.get(pos), None)
                 if usrDataEval == None: return self._getUsage(msg)
                 self.argBundle.append((subLib, usrDataEval))
@@ -2982,7 +2992,8 @@ class TPmap(_CommandTP):
             if lib == None: return lang.msgReturnCancel
             self.events = self._getNumber('number of events:', 'int')
             if self.events == None: return lang.msgReturnCancel
-            bundle, self.eventListSplitFmt, noPmtrObjs = self._tpGetBundleFmt(lib)
+            bundle, self.eventListSplitFmt, noPmtrObjs = self._tpGetBundleFmt(
+                                                         lib)
             for subLib in bundle:
                 titleStr = parameter.pmtrLibTitle(subLib)
                 usrStr = dialog.askStr('enter a %s argument:' % titleStr,
@@ -3000,6 +3011,13 @@ class TPmap(_CommandTP):
         self.msg = [] # store string representations
         pmtrCount = 0
         self._textDisplay = 0
+
+        #environment.printDebug(['argBundle', self.argBundle])
+        # in the case of filter pos, need to have generator first
+        if len(self.argBundle) > 1 and self.argBundle[0][0] == 'filterPmtrObjs':
+            self.argBundle.reverse()
+        environment.printDebug(['argBundlePost', self.argBundle])
+
         for subLib, usrDataEval in self.argBundle:
             #print _MOD, 'subLib, usrdataEval', subLib, usrDataEval
             if pmtrCount >= self.noPmtrObjs:
@@ -3020,7 +3038,10 @@ class TPmap(_CommandTP):
             self.msg.append(obj.repr('argsOnly'))
             titleStr = parameter.pmtrLibTitle(subLib)
             self.objBundle.append((titleStr, subLib, obj))
-            pmtrCount = pmtrCount + 1
+            pmtrCount += 1
+
+        #environment.printDebug(['objBundle', self.objBundle])
+
 
     def display(self): 
         # note: this is an unconventional use of aoInfo
@@ -3796,6 +3817,8 @@ class TIe(Command):
         '''
 
         args = self.args
+        environment.printDebug(['raw args', args])
+
         if self._tiTestExistance() != None: #check existance
             return self._tiTestExistance()
         if self._tiTestNameExists() != None: # check name
@@ -3812,16 +3835,19 @@ class TIe(Command):
             p = self._numPmtrConvertLabel(p, tName)
             if p == None: 
                 return self._getUsage()
-            else: 
-                # note: here we are keeping spaces with args.get(). 
-                # this is important
-                # in the case of passing a file path that has a space in it
-                # this may have potential side effects that have not been   
-                # found yet
+
+            if isinstance(args.get(1), basePmtr.Parameter):
+                usrDataEval = args.get(1)
+                msg = ''
+                environment.printDebug(['TIe', 'found Parameter subclass', usrDataEval])
+            else:
+            # note: here we are keeping spaces with args.get(). 
+            # this is important in the case of passing a file path s
+            # this may have potential side effects 
                 usrDataEval, msg = self._tiEvalUsrStr(args.get(1,'end',
-                                   keepSpace=True), p, tName)
+                               keepSpace=True), p, tName)
                 usrDataEval, msg = self._tiCompleteEditData(p, 
-                                   usrDataEval, tName)
+                               usrDataEval, tName)
             if usrDataEval == None: return self._getUsage(msg)
 
         if p == None or usrDataEval == None:

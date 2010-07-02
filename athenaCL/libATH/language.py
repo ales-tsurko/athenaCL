@@ -620,17 +620,17 @@ Apple, Macintosh, Mac OS, and QuickTime are trademarks or registered trademarks 
 
     docPoCv = 'Produces values from a one-dimensional cellular automata table scaled within dynamic min and max values. %s %s %s %s' % (_caHeader, _tableExtract, _selectionStr, _scaleAfter)
 
+    docPoGt = 'Produces values from a one-dimensional string rewrite rule, or Lindenmayer-system generative grammar. The terminus, or final result of the number of generations of values specifed by the stepCount parameter, is used to produce a list of defined values. %s' % ( _selectionStr)
 
-    docPoGt = 'Produces values from a one-dimensional string rewrite rule, or generative grammar. The terminus, or final result of the number of generations of values specifed by the stepCount parameter, is used to produce a list of defined values. %s' % ( _selectionStr)
+    docPoFml = 'A model of a feedback system made from discrete particles. %s' % ( _scaleCommon)
 
-    
+
     docPoPr = "Extracts pitch information from the current Multiset within a Texture's Path. Data can be presented in a variety of formats including representations of the Multiset as 'forte', 'mason', or data on the current active pitch as 'fq' (frequency), 'ps' (psReal), 'midi' (midi pitch values), 'pch' (Csound pitch octave format), or 'name' (alphabetic note names)."
 
 
     docPoLm = "Performs the logistic map, or the Verhulst population growth equation. The logistic map is a non-linear one-dimensional discrete deterministic dynamical system. %s Variable x represents the population value; value p represents a combined rate for reproduction and starvation. The p argument allows the user to provide a static or dynamic value to the equation. Certain p-value presets can be provided with strings: 'bi', 'quad', or 'chaos'. If a number is provided for p, the value will be used to create a constant ParameterObject. The equation outputs values within the unit interval. %s" % (_dyanmicalSystem, _scaleCommonPlural)
     
-    docPoHb =  "Performs the Henon map, a non-linear two-dimensional discrete deterministic dynamical system. %s Variables x and y describe coordinate positions; values a (alpha) and b (beta) configure the system. As the output range cannot be predicted, as many values as specified by the valueCount argument, as well as any combination of variables with the valueSelect argument, are generated and stored at initialization. These values are then scaled within the unit interval. %s %s Note: some values may cause unexpected results; alpha values should not exceed 2.0." % (_dyanmicalSystem, 
-                                                _selectionStr, _scaleAfter) 
+    docPoHb =  "Performs the Henon map, a non-linear two-dimensional discrete deterministic dynamical system. %s Variables x and y describe coordinate positions; values a (alpha) and b (beta) configure the system. As the output range cannot be predicted, as many values as specified by the valueCount argument, as well as any combination of variables with the valueSelect argument, are generated and stored at initialization. These values are then scaled within the unit interval. %s %s Note: some values may cause unexpected results; alpha values should not exceed 2.0." % (_dyanmicalSystem, _selectionStr, _scaleAfter) 
     
     docPoLb = "Performs the Lorenz attractor, a non-linear three-dimensional discrete deterministic dynamical system. The equations are derived from a simplified model of atmospheric convection rolls. %s Variables x, y, and z are proportional to convective intensity, temperature difference between descending and ascending currents, and the difference in vertical temperature profile from linearity. Values s (sigma), r, and b are the Prandtl number, the quotient of the Rayleigh number and the critical Rayleigh number, and the geometric factor. As the output range cannot be predicted, as many values as specified by the valueCount argument, as well as any combination of variables with the valueSelect argument, are generated and stored at initialization. These values are then scaled within the unit interval. %s %s Note: some values may cause unexpected results; r should not exceed 90." % (_dyanmicalSystem, _selectionStr, _scaleAfter)   
     

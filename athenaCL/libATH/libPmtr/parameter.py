@@ -36,7 +36,7 @@ genPmtrNames = {
     # data access
     'pr' :'pathRead',
     'ss' :'sampleSelect',
-    'as' :'analysisSelect', # likely remove
+    #'as' :'analysisSelect', # likely remove
     'ds' :'directorySelect',
     'cf' :'constantFile', # provide a file path as a constant
     # output conversion to a different type format or display

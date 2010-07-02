@@ -875,7 +875,7 @@ def getud():
                 dir = None
         return dir
 
-def listToStr(set, space='rmSpace'):
+def listToStr(set, removeSpace=True, removeOuter=False):
     """converts a list/tuple to a string, removes space
 
     >>> listToStr([3,4,2.3])
@@ -892,8 +892,10 @@ def listToStr(set, space='rmSpace'):
         setRepr.append(str(part))
 
     setRepr = '(%s)' % ','.join(setRepr)
-    if space == 'rmSpace':
+    if removeSpace:
         setRepr = setRepr.replace(' ', '')
+    if removeOuter:
+        setRepr = setRepr[1:-1]
     return setRepr
 
 def listToStrGrammar(items, finalSeparator=None): 
