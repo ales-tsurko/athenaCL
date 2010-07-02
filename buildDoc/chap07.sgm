@@ -1,0 +1,131 @@
+<chapter id="ch-automate">
+   <title>Tutorial 9: Automating and Scripting athenaCL</title>
+   
+      <para>This tutorial demonstrates some of the many ways the athenaCL system can be automated, scripted, and used from the shell and within the Python programming language.</para>
+
+
+      
+
+      <!--###################################################################-->
+      <sect1 id="sect-python-interpreter">
+      <title>Creating an athenaCL Interpreter within Python</title>
+
+
+      <para>Within a Python interpreter or a Python script on any platform, one or more instances of the athenaCL Interpreter can be created and programmatically controlled. The cmd() method of an Interpreter instance allows athenaCL commands and arguments to be passed to the Interpreter as strings. The cmd() method returns two values, a status flag (0 or 1) and a string message or display. The status flag must be checked to determine successful completion of a command; as the Interpreter is designed to handle errors, exceptions generally will not be raised.
+      </para>
+
+<!-- 
+
+<title>Creating and editing Textures from the UNIX shell</title>
+<screen>% <ui>athenacl -e "emo mp" -e "tmo lg" -e "tin a1 36" -e "tie r 
+l,((4,3,1),(4,3,0),(4,2,1)),rc" -e "tin b1 37" -e "tie r
+l,((4,6,1),(4,1,1),(4,3,1)),rc" -e "tin c1 53" -e "tie r
+l,((4,1,1),(4,1,1),(4,6,0)),rw" -e "tee a bg,rc,(.5,.7,.75,.8,1)" -e "tee b
+ws,t,4,0,122,118" -e "eln /Volumes/xdisc/_scratch/a.xml" -e "elh" -e "q
+confirm"</ui>
+ -->
+
+
+
+<example>
+<title>An athenaCL Interpreter in Python</title>
+<screen>>>> <ui>from athenaCL.libATH import athenaObj</ui>
+>>> <ui>athInptr = athenaObj.Interpreter()</ui>
+>>> <ui>ok, msg = athInptr.cmd('AUpc 9000hz')</ui>
+>>> <ui>if ok: print msg</ui>
+...
+AthenaUtility Pitch Converter
+format              fq        
+name                C#~9      
+midi                121       
+pitch-class         1         
+pch                 13.0125   
+frequency           9000.0000 
+pitch-space         61.25 
+</screen></example>
+
+
+      </sect1>
+
+
+<!-- 
+
+      <sect1 id="sect-python-programming">
+      <title>Python Programming with athenaCL objects</title>
+
+
+      <para>Without using the athenaCL Interpreter, low-level athenaCL objects can be instantiated and directly controlled and manipulated from within the Python language. As the interpreter is not employed, such usage requires a greater specification of environment variables and argument strings. 
+      </para>
+
+
+   </sect1>
+ -->
+
+      
+
+      <!--###################################################################-->
+      <sect1 id="sect-python-generator">
+      <title>Creating athenaCL Generator ParameterObjects within Python</title>
+
+
+      <para>Components of the athenaCL system can be used in isolation as resources within Python. Generator ParameterObjects offer particularly useful resources for a range of generative activities.
+      </para>
+
+      <para>To create a Generator ParameterObject, a Python list of ParameterObject arguments must be passed to the factory() function of the parameter module. This list of arguments must provide proper data objects for each argument.
+      </para>
+
+      <para>The returned ParameterObject instance has many useful attributes and methods. The doc attribute provides the ParameterObject documentation string. The __str__ method, accessed with the built-in str() function, returns the complete formatted argument string. The __call__ method, accessed by calling the instance name, takes a single argument and returns the next value, or the value at the specified argument time value.
+      </para>
+
+
+<example>
+<title>Creating a Generator ParameterObject</title>
+<screen>>>> <ui>from athenaCL.libATH.libPmtr import parameter</ui>
+>>> <ui> po = parameter.factory(['ws','t',6,0,-1,1])</ui>
+>>> <ui>str(po)</ui>
+'waveSine, time, (constant, 6), 0, (constant, -1), (constant, 1)'<!-- py -->
+>>> <ui>po.doc</ui>
+'Provides sinusoid oscillation between 0 and 1 at a rate given in either time or events per period. This value is scaled within the range designated by min and max; min and max may be specified with ParameterObjects. Depending on the stepString argument, the period rate (frequency) may be specified in spc (seconds per cycle) or eps (events per cycle). The phase argument is specified as a value between 0 and 1. Note: conventional cycles per second (cps or Hz) are not used for frequency.' <!-- py -->
+>>> <ui>po(1)</ui>
+0.8660254037844386
+>>> <ui>po(5)</ui>
+-0.86602540378443904
+</screen>
+</example>
+
+
+      </sect1>
+
+
+
+
+     
+      <!--###################################################################-->
+      <sect1 id="sect-python-csound">
+      <title>Creating athenaCL Generator ParameterObjects within Csound</title>
+
+
+      <para>Within Csound 5.0 orchestras, Python scripts can be written and objects from Python libraries can be instantiated and processed. Numerous Generator ParameterObjects and other athenaCL objects can be created, modified, and called from within Csound instruments. For complete examples, see the detailed articles on the topic (Ariza [AN#1824], [AN#1990]).
+      </para>
+
+      </sect1>
+
+
+<!-- 
+
+      <sect1 id="sect-python-programming">
+      <title>Python Programming with athenaCL objects</title>
+
+
+      <para>Without using the athenaCL Interpreter, low-level athenaCL objects can be instantiated and directly controlled and manipulated from within the Python language. As the interpreter is not employed, such usage requires a greater specification of environment variables and argument strings. 
+      </para>
+
+
+   </sect1>
+ -->
+
+
+
+
+   
+</chapter>
