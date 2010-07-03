@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<athenaObject>
+	<athena>
+		<attr key="activeEventMode" value="csoundNative"/>
+		<attr key="audioChannels" value="2"/>
+		<attr key="audioRate" value="44100"/>
+		<attr key="author" value="ariza"/>
+		<attr key="date" value="Sat Jan 23 15:29:13 2010"/>
+		<attr key="tniMode" value="0"/>
+		<attr key="version" value="2.0.0-beta"/>
+	</athena>
+	<paths>
+		<attr key="activePath" value="a"/>
+		<pathLib>
+			<pi name="a">
+				<attr key="ambitus" value="0"/>
+				<attr key="durFraction" value="[1]"/>
+				<attr key="field" value="[0]"/>
+				<attr key="pcsPath" value="[(0,)]"/>
+				<attr key="psPath" value="[(0,)]"/>
+				<attr key="scPath" value="[(1, 1, 0)]"/>
+			</pi>
+		</pathLib>
+	</paths>
+	<textures>
+		<attr key="activeTexture" value=""/>
+		<attr key="activeTextureModule" value="LineGroove"/>
+		<cloneLib>
+		</cloneLib>
+		<attr key="midiTempo" value="120"/>
+		<textureLib>
+		</textureLib>
+	</textures>
+</athenaObject>
