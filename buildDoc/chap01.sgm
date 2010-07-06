@@ -134,10 +134,9 @@ PI a added to PathInstances.
 
 <example>
 <title>Entering a command with arguments</title>
+<screen>
 pi{a}ti{} :: pin b d,f#,a
 PI b added to PathInstances.
-<screen>
-
 </screen></example>
       
       <para>Notice that in the above example the Path name and pitch collection arguments are entered at the same time as the command: "pin b d,f#,a". As an interactive command-line program, athenaCL can obtain arguments from the user, and can, alternatively, accept space-separated arguments following a command. Command-line arguments allow advanced users ease and speed and, when called from an external environment (such as a UNIX shell or Python script), permit advanced scripting automation. All athenaCL commands can function both with arguments and with interactive prompts. Command-line arguments, however, are never required: if arguments are absent, the user is prompted for the necessary details.

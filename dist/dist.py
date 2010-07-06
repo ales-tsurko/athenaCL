@@ -17,7 +17,6 @@ from athenaCL.libATH import athenaObj
 from athenaCL.libATH import info
 
 _MOD = 'dist.py'
-
 from athenaCL.libATH import prefTools
 environment = prefTools.Environment(_MOD)
 
@@ -84,7 +83,7 @@ class Distributor(object):
     def _uploadPyPi(self):
         os.system('cd %s; python setup.py bdist_egg upload' % 
                 athenaObj.fpPackageDir)
-
+        os.system('cd %s; python setup.py register' % athenaObj.fpPackageDir)
 
     def _uploadGoogleCode(self, fp):
         summary = athenaObj.athVersion
@@ -115,4 +114,4 @@ class Distributor(object):
 if __name__ == '__main__':
     a = Distributor()
     a.build()
-    a.upload()
+    #a.upload()

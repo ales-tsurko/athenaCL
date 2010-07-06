@@ -216,6 +216,7 @@ def _getPackagesList():
     """list of all packages, delimited by period"""
     pkg = (  'athenaCL', 
              'athenaCL.demo', 
+             'athenaCL.test', 
              'athenaCL.libATH', 
              'athenaCL.libATH.libGfx', 
              'athenaCL.libATH.libOrc', 
@@ -280,10 +281,37 @@ def runDisutils(bdistType):
         download_url = lang.msgAthDownloadTar % athVersion,
         packages = _getPackagesList(), # first is 'athenaCL'   
         package_data = {'athenaCL' : ['audio/*.aif',
-                                      'demo/*.xml',
-                                      'demo/*.txt',
+
+                                      'demo/csound/*.xml',
+                                      'demo/csound/*.txt',
+                                      'demo/csound/*.py',
+                                      'demo/csound/*.mp3',
+
+                                      'demo/legacy/*.xml',
+                                      'demo/legacy/*.txt',
+                                      'demo/legacy/*.py',
+
+                                      'demo/manual/*.xml',
+                                      'demo/manual/*.txt',
+                                      'demo/manual/*.py',
+
+                                      'demo/midi/*.xml',
+                                      'demo/midi/*.txt',
+                                      'demo/midi/*.py',
+                                      'demo/midi/*.mid',
+
+                                      'demo/supercollider/*.xml',
+                                      'demo/supercollider/*.txt',
+                                      'demo/supercollider/*.py',
+
+                                      'doc/*.htm',
                                       'doc/*.txt',
-                                      'doc/*.pdf',
+                                      'doc/html/*.htm',
+                                      'doc/html/*.css',
+                                      'doc/html/images/*.png',
+
+                                      'test/xml/*.xml',
+
                                      ]}
     ) # close setup args
     
@@ -297,8 +325,10 @@ def writeManifestTemplate(fpPackageDir):
     osTools.rm(os.path.join(fpPackageDir, 'MANIFEST')) 
     dst = os.path.join(fpPackageDir, 'MANIFEST.in')
     msg = []
-    msg.append('global-include *.txt *.aif *.pdf\n')
-    msg.append('prune buildDoc dist')
+    msg.append('global-include *.txt *.aif *.htm *.mid *.png *.xml *.css *.py *.mp3\n')
+    msg.append('prune buildDoc\n')
+    msg.append('prune dist\n')
+    msg.append('prune tools\n')
 
     f = open(dst, 'w')
     f.writelines(msg)

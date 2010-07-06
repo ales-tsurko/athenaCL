@@ -15,9 +15,9 @@
 import sys, os, time, random, traceback, httplib, urllib
 import unittest, doctest
 
-athVersion = '2.0.0a14'
-athBuild = '2010.04.15'
-athDate = '15 April 2010' # human readable version
+athVersion = '2.0.0a15'
+athBuild = '2010.07.05'
+athDate = '5 July 2010' # human readable version
 __version__ = athVersion
 __license__ = "GPL"
 
@@ -119,16 +119,19 @@ class External(object):
         # check for demo files
         self.demoDirList = []
         if 'demo' in srcDirContent:
-            demoPath = os.path.join(self.fpSrcDir, 'demo')
-            self.demoDirList.append(drawer.pathScrub(demoPath))
+            # all standard demo folders
+            for subDir in ['csound', 'legacy', 'midi', 
+                'supercollider', 'manual']:
+                demoPath = os.path.join(self.fpSrcDir, 'demo', subDir)
+                self.demoDirList.append(drawer.pathScrub(demoPath))
 
             demoTestPath = os.path.join(self.fpSrcDir, 'test', 'xml')
             self.demoDirList.append(drawer.pathScrub(demoTestPath))
 
-        if 'CVS' in srcDirContent: # check if there is a cvs dir
-            self.cvsDirPresent = 1
+        if '.svn' in srcDirContent: # check if there is a cvs dir
+            self.svnDirPresent = 1
         else:
-            self.cvsDirPresent = 0
+            self.svnDirPresent = 0
 
         # a docs dir is only found in athenaCL dir in distribution
         # package
@@ -152,7 +155,7 @@ class External(object):
     #-----------------------------------------------------------------------||--
     def getCvsStat(self):
         """return string if this is likely a cvs co"""
-        if self.cvsDirPresent: return 'cvs'
+        if self.svnDirPresent: return 'cvs'
         else: return 'package'
 
     def _updateLogs(self):

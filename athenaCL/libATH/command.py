@@ -248,7 +248,7 @@ class Command(object):
             msg = '%s: %s' % (errorPreface, 'Internal Access Attempt')
             usrDataEval = None
         else:
-            environment.printDebug(['pre restringulator:', usrStr])
+            #environment.printDebug(['pre restringulator:', usrStr])
             usrStr = drawer.restringulator(usrStr) # add quotes if necessary
             try:
                 usrDataEval = eval(usrStr)
@@ -262,7 +262,7 @@ class Command(object):
                 msg = '%s %s' % (errorPreface, 'name-error (quote all strings)')
                 usrDataEval = None
 
-        environment.printDebug(['results of _strRawToData():', usrDataEval, msg])
+        #environment.printDebug(['results of _strRawToData():', usrDataEval, msg])
         return usrDataEval, msg
 
 
@@ -3016,7 +3016,7 @@ class TPmap(_CommandTP):
         # in the case of filter pos, need to have generator first
         if len(self.argBundle) > 1 and self.argBundle[0][0] == 'filterPmtrObjs':
             self.argBundle.reverse()
-        environment.printDebug(['argBundlePost', self.argBundle])
+        #environment.printDebug(['argBundlePost', self.argBundle])
 
         for subLib, usrDataEval in self.argBundle:
             #print _MOD, 'subLib, usrdataEval', subLib, usrDataEval
@@ -3449,21 +3449,20 @@ class TImode(Command):
         """converts strings to pitch or poly mode"""
         ref = {
             'p' : ['pitch', 'p'],
-         #   'y' : ['polyphony', 'y'],
             's' : ['silence', 's'],
             'm' : ['map', 'm', 'postmap', 'pm'],
                 }
         usrStr = drawer.selectionParse(usrStr, ref)
         return usrStr # may be None
                     
-    def _tiConvertPolyMode(self, usrStr):
-        """converts user entry to pitch mode strings"""
-        ref = {
-            'set' : ['set', 's'],
-            'part' : ['part', 'p'],
-                }
-        usrStr = drawer.selectionParse(usrStr, ref)
-        return usrStr # may be None     
+#     def _tiConvertPolyMode(self, usrStr):
+#         """converts user entry to poly mode strings"""
+#         ref = {
+#             'set' : ['set', 's'],
+#             'part' : ['part', 'p'],
+#                 }
+#         usrStr = drawer.selectionParse(usrStr, ref)
+#         return usrStr # may be None     
 
     def _tiConvertPitchMode(self, usrStr):
         """converts user entry to pitch mode strings"""
@@ -3497,9 +3496,9 @@ class TImode(Command):
             if modeChoice == 'p':
                 modeValue = self._tiConvertPitchMode(args.get(1))
                 if modeValue == None: return self._getUsage()
-            elif modeChoice == 'y':
-                modeValue = self._tiConvertPolyMode(args.get(1))
-                if modeValue == None: return self._getUsage()
+#             elif modeChoice == 'y':
+#                 modeValue = self._tiConvertPolyMode(args.get(1))
+#                 if modeValue == None: return self._getUsage()
             elif modeChoice == 's':
                 modeValue = typeset.convertBool(args.get(1))
                 if modeValue == None: return self._getUsage()
@@ -3521,15 +3520,15 @@ class TImode(Command):
                     if modeValue == None:
                         dialog.msgOut(lang.msgTInoSuchPitchMode, self.termObj)
                         continue
-            elif modeChoice == 'y':
-                while modeValue == None:
-                    query = lang.msgTImodePolyChoose % currentPolyMode
-                    modeValue = dialog.askStr(query, self.termObj)
-                    if modeValue == None: return lang.msgReturnCancel
-                    modeValue = self._tiConvertPolyMode(modeValue)
-                    if modeValue == None:
-                        dialog.msgOut(lang.msgTInoSuchPolyMode, self.termObj)
-                        continue
+#             elif modeChoice == 'y':
+#                 while modeValue == None:
+#                     query = lang.msgTImodePolyChoose % currentPolyMode
+#                     modeValue = dialog.askStr(query, self.termObj)
+#                     if modeValue == None: return lang.msgReturnCancel
+#                     modeValue = self._tiConvertPolyMode(modeValue)
+#                     if modeValue == None:
+#                         dialog.msgOut(lang.msgTInoSuchPolyMode, self.termObj)
+#                         continue
             elif modeChoice == 's':
                 while modeValue == None:
                     query = lang.msgTImodeSilenceChoose % typeset.boolAsStr(
@@ -3817,7 +3816,7 @@ class TIe(Command):
         '''
 
         args = self.args
-        environment.printDebug(['raw args', args])
+        #environment.printDebug(['raw args', args])
 
         if self._tiTestExistance() != None: #check existance
             return self._tiTestExistance()

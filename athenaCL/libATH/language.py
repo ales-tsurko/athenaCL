@@ -124,7 +124,7 @@ class LangEn:
     msgAthDeveloperURL = 'http://code.google.com/p/athenacl/'
     msgAuthor = 'Christopher Ariza'
     msgAuthorEmail = 'ariza@flexatone.net'
-    msgBugReport = 'athenacl-development@lists.sourceforge.net'
+    msgBugReport = 'athenacl@googlegroups.com'
 
     msgCgiDomain = 'www.flexatone.net:80'
     msgCgiURL = '/cgi-bin/py/flexNet/software/q.cgi' #?stateNext=8'
@@ -363,7 +363,7 @@ Apple, Macintosh, Mac OS, and QuickTime are trademarks or registered trademarks 
     msgTInoTextEdit       = 'TIe %s' % ERROR + ' this texture has no static texture parameters\n'
     msgTInoDynEdit            = 'TIe %s' % ERROR + ' this texture has no dynamic texture parameters\n'
 
-    msgTImodeChoose   = 'edit TI %s: Pitch, Polyphony, Silence, or PostMap Mode? (p, y, s, m):'
+    msgTImodeChoose   = 'edit TI %s: Pitch, Silence, or PostMap Mode? (p, s, m):'
     msgTImodePitchChoose = TAB + 'current Pitch Mode: %s. enter new mode (sc, pcs, ps):'
     msgTImodePolyChoose   = TAB + 'current Polyphony Mode: %s. enter new mode (set, part):'
     msgTImodeSilenceChoose = TAB + 'current Silence Mode: %s. enter new mode (on, off):'

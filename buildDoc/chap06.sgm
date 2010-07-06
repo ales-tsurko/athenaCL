@@ -30,26 +30,27 @@
 
 <example>
 <title>Creating a Texture</title>
-<screen>[PI()TI()] :: <ui>emo m</ui> 
+<screen>
+pi{}ti{} :: emo m
 EventMode mode set to: midi.
 
-[PI()TI()] :: <ui>tin a1 0</ui>
+pi{}ti{} :: tin a1 0
 TI a1 created.
 
-[PI(auto)TI(a1)] :: <ui>tie t 0,6</ui>
+pi{auto}ti{a1} :: tie t 0,6
 TI a1: parameter time range updated.
 
-[PI(auto)TI(a1)] :: <ui>tie r cs,(wpd,e,16,2,0,.6,.02)</ui>
+pi{auto}ti{a1} :: tie r cs,(wpd,e,16,2,0,.6,.02)
 TI a1: parameter rhythm updated.
 
-[PI(auto)TI(a1)] :: <ui>tie f wpd,e,16,2,0,12,-24</ui>
+pi{auto}ti{a1} :: tie f wpd,e,16,2,0,12,-24
 TI a1: parameter local field updated.
 
-[PI(auto)TI(a1)] :: <ui>tiv</ui>
+pi{auto}ti{a1} :: tiv
 TI: a1, TM: LineGroove, TC: 0, TT: TwelveEqual
-pitchMode: pitchSpace, polyMode: set, silenceMode: off, postMapMode: on
+pitchMode: pitchSpace, silenceMode: off, postMapMode: on
 midiProgram: piano1
-   status: +, duration: 00.0--6.41
+      status: +, duration: 00.0--6.41
 (i)nstrument        0 (generalMidi: piano1)
 (t)ime range        0.0--6.0
 (b)pm               constant, 120
@@ -61,31 +62,32 @@ midiProgram: piano1
 local (f)ield       wavePowerDown, event, (constant, 16), 2, 0, (constant, 12),
                     (constant, -24)
 local (o)ctave      constant, 0
-(a)mplitude         constant, 0.9
+(a)mplitude         randomBeta, 0.4, 0.4, (constant, 0.7), (constant, 0.9)
 pan(n)ing           constant, 0.5
 au(x)iliary         none
 texture (s)tatic
-   s0               parallelMotionList, (), 0.0
-   s1               pitchSelectorControl, randomPermutate            
-   s2               levelFieldMonophonic, event
-   s3               levelOctaveMonophonic, event
+      s0            parallelMotionList, (), 0.0
+      s1            pitchSelectorControl, randomPermutate
+      s2            levelFieldMonophonic, event
+      s3            levelOctaveMonophonic, event
 texture (d)ynamic   none
 </screen></example>
 
-<!-- tutorial07-a.xml -->
+<!-- tutorial06-a.xml -->
 
-      <para>After creating a Texture, a Clone can be created with the command TCn, for TextureClone New. The user is prompted to enter the name of the new Clone. By default, the Filter ParameterObject filterAdd is applied to the start time of all events with a duration equal to one Pulse. As with Textures, a Clone can be displayed with the TCv command. After displaying the Clone, the user examines the documentation for ParameterObject filterAdd:
+      <para>After creating a Texture, a Clone can be created with the command TCn, for TextureClone New. The user is prompted to enter the name of the new Clone. By default, the Filter ParameterObject filterAdd is applied to the start time of all events with a duration equal to one Pulse. A Clone can be displayed with the TCv command. After displaying the Clone, the user examines the documentation for ParameterObject filterAdd:
       </para>
 
 <example>
 <title>Creating and Viewing a Clone with TCn and TCv</title>
-<screen>[PI(auto)TI(a1)] :: <ui>tcn</ui>
-name this TextureClone: <ui>w1</ui>
+<screen>
+pi{auto}ti{a1} :: tcn
+name this TextureClone: w1
 TC w1 created.
 
-[PI(auto)TI(a1)] :: <ui>tcv</ui>
+pi{auto}ti{a1} :: tcv
 TC: w1, TI: a1
-   status: +, duration: 00.5--6.91
+      status: +, duration: 00.5--6.91
 (t)ime              filterAdd, (loop, ((1,1,+)), orderedCyclic) 
 s(u)stain           bypass                                      
 a(c)cent            bypass                                      
@@ -95,16 +97,8 @@ local (o)ctave      bypass
 pan(n)ing           bypass                                      
 au(x)iliary         none                                        
 clone (s)tatic                                                  
-   s0               timeReferenceSource, textureTime            
-   s1               retrogradeMethodToggle, off  
-   
-[PI(auto)TI(a1)] :: <ui>tpv fa</ui>
-Filter ParameterObject
-{name,documentation}
-FilterAdd           filterAdd, parameterObject
-                    Description: Each value is added to the value produced by
-                    the ParameterObject. Arguments: (1) name, (2)
-                    parameterObject {operator value generator}
+      s0            timeReferenceSource, textureTime            
+      s1            retrogradeMethodToggle, off 
 </screen></example>
 
 
@@ -116,11 +110,11 @@ FilterAdd           filterAdd, parameterObject
       
 <example>
 <title>Editing a Clone with TCe</title>
-<screen>[PI(auto)TI(a1)] :: <ui>tcn</ui>
-name this TextureClone: <ui>w2</ui>
+<screen>
+pi{auto}ti{a1} :: tcn w2
 TC w2 created.
 
-[PI(auto)TI(a1)] :: <ui>tpv fma</ui>
+pi{auto}ti{a1} :: tpv fma
 Filter ParameterObject
 {name,documentation}
 FilterMultiplyAnchor filterMultiplyAnchor, anchorString, parameterObject
@@ -132,25 +126,17 @@ FilterMultiplyAnchor filterMultiplyAnchor, anchorString, parameterObject
                      {'lower', 'upper', 'average', 'median'}, (3)
                      parameterObject {operator value generator}
 
-[PI(auto)TI(a1)] :: <ui>tce</ui> 
-edit TC a1
-which parameter? (t,u,c,f,o,a,n,x,s): <ui>t</ui>
-current time: filterAdd, (loop, ((1,1,+)), orderedCyclic)
-new value: <ui>fma, l, (ws, e, 8, 0, 1, 2)</ui>
+pi{auto}ti{a1} :: tce t fma, l, (ws, e, 8, 0, 1, 2)
 TC w2: parameter time updated.
 
-[PI(auto)TI(a1)] :: <ui>tce</ui>
-edit TC a1
-which parameter? (t,u,c,f,o,a,n,x,s): <ui>f</ui>
-current local field: bypass
-new value: <ui>fa, (c, -7)</ui>
+pi{auto}ti{a1} :: tce f fa,(c,-7)
 TC w2: parameter local field updated.
 
-[PI(auto)TI(a1)] :: <ui>tcv</ui>
+pi{auto}ti{a1} :: tcv
 TC: w2, TI: a1
-   status: +, duration: 000.0--11.41
-(t)ime              filterMultiplyAnchor, lower, (waveSine, event, 8, 0,
-                    (constant, 1), (constant, 2))
+      status: +, duration: 000.0--11.41
+(t)ime              filterMultiplyAnchor, lower, (waveSine, event, (constant,
+                    8), 0, (constant, 1), (constant, 2))
 s(u)stain           bypass
 a(c)cent            bypass
 local (f)ield       filterAdd, (constant, -7)
@@ -159,84 +145,89 @@ local (o)ctave      bypass
 pan(n)ing           bypass
 au(x)iliary         none
 clone (s)tatic
-   s0               timeReferenceSource, textureTime
-   s1               retrogradeMethodToggle, off
+      s0            timeReferenceSource, textureTime
+      s1            retrogradeMethodToggle, off
+
 </screen></example>
 
 
       <para>As with Textures and other objects in athenaCL, Clones can be listed with the TCls command, and the active Clone can be selected with the TCo command. Further, upon examining the parent Texture with TIls, notice that two Clones are now displayed under the TC heading:
-      </para
+      </para>
 
-<!-- tutorial07-b.xml -->
+<!-- 
+tutorial06-b.xml
+ -->
 
 
 <example>
 <title>Listing and Selecting Clones with TCls and TCo</title>
-<screen>[PI(auto)TI(a1)] :: <ui>tcls</ui>
+<screen>
+pi{auto}ti{a1} :: tcls
 TextureClones of TI a1
 {name,status,duration}
- + w2               + 000.0--11.41    
    w1               + 00.5--6.91      
+ + w2               + 000.0--11.41 
 
-[PI(auto)TI(a1)] :: <ui>tco w1</ui>
+pi{auto}ti{a1} :: tco w1
 TC w1 of TI a1 now active.
 
-[PI(auto)TI(a1)] :: <ui>tils</ui>
+pi{auto}ti{a1} :: tils
 TextureInstances available:
 {name,status,TM,PI,instrument,time,TC}
  + a1               + LineGroove  auto        0   0.0--6.0   2
 </screen></example>
 
-      <para>Clones features special transformations selected by CloneStatic ParameterObjects. In the following example, a new Clone is created named w3. The CloneStatic ParameterObject retrogradeMethodToggle is set to timeInverse, causing the Clone to create a retrograde presentation of the Texture's events. Additionally, the Clone's time attributes is set with a filterMultuplyAnchor ParameterObject and the Clone's field attributes is set with a filterAdd ParameterObject:
+      <para>Clones features special transformations selected by CloneStatic ParameterObjects. In the following example, a new Clone is created named w3. The CloneStatic ParameterObject retrogradeMethodToggle is set to timeInverse, causing the Clone to create a retrograde presentation of the Texture's events. Additionally, the Clone's time attribute is set with a filterMultuplyAnchor ParameterObject and the Clone's field attributes is set with a filterAdd ParameterObject:
       </para>
       
       
 <example>
 <title>Creating and Editing Clones</title>
-<screen>[PI(auto)TI(a1)] :: <ui>tpv retrograde</ui>
+<screen>
+pi{auto}ti{a1} :: tpv retrograde
 Clone Static ParameterObject
 {name,documentation}
 retrogradeMethodToggle retrogradeMethodToggle, name
                        Description: Selects type of retrograde transformation
-                       applied to Texture. Arguments: (1) name, (2) name
+                       applied to Texture events. Arguments: (1) name, (2) name
                        {'timeInverse', 'eventInverse', 'off'}
 
-[PI(auto)TI(a1)] :: <ui>tcn</ui>
-name this TextureClone: <ui>w3</ui>
+pi{auto}ti{a1} :: tcn w3
 TC w3 created.
 
-[PI(auto)TI(a1)] :: <ui>tce</ui>
+pi{auto}ti{a1} :: tce 
 edit TC a1
-which parameter? (t,u,c,f,o,a,n,x,s): <ui>s</ui>
-select a static clone parameter to edit, from s0 to s1: <ui>1</ui>
-current value for c1: <ui>off</ui>
+which parameter? (t,u,c,f,o,a,n,x,s): s
+select a clone static parameter to edit, from s0 to s1: 1
+current value for c1: off
 new value: timeinverse
 TC w3: parameter clone static updated.
 
-[PI(auto)TI(a1)] :: <ui>tce t fma,l,(c,2.5)</ui>
+pi{auto}ti{a1} :: tce t fma,l,(c,2.5)
 TC w3: parameter time updated.
 
-[PI(auto)TI(a1)] :: <ui>tce f fa,(c,7)</ui> 
+pi{auto}ti{a1} :: tce f fa,(c,7)
 TC w3: parameter local field updated.
 </screen></example>
 
-<!-- tutorial07-c.xml -->
+<!-- tutorial06-c.xml -->
 
-      <para>The TEmap command displays all Textures as well as all Texture Clones. Texture Clones appear under their parent Clone. Textures and Clones, further, can be muted independently.
+      <para>The TEmap command displays all Textures as well as all Texture Clones. Texture Clones appear under their parent Texture. Textures and Clones, further, can be muted independently.
       </para>
 
 
 <example>
 <title>Viewing Textures and Clones with TEmap</title>
-<screen>[PI(auto)TI(a1)] :: <ui>temap</ui>
+<screen>
+pi{auto}ti{a1} :: temap
 TextureEnsemble Map:
 15.22s              |      .       |      .       |      .      |       .      |
 a1                  _________________________                                   
-   w3               ............................................................
-   w2               .............................................               
-   w1                 .........................   
+      w3            ............................................................
+      w2               .............................................
+      w1                 .........................
 </screen>
-<!-- tutorial07-c.xml -->
+<!-- tutorial06-c.xml -->
 <graphic fileref="images/exCmd-teMap-c"></graphic>
 </example>
 
