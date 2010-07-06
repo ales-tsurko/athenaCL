@@ -3,9 +3,10 @@
 from athenaCL.libATH import athenaObj
 ath = athenaObj.Interpreter()
 
-ath.cmd('emo m')
  
 cmd = [
+'emo m',
+
 'pin a d3,e3,g3,a3,b3,d4,e4,g4,a4,b4,d5,e5,g5,a5,b5',
 'tmo ha',
 'tin a 27',
@@ -18,11 +19,29 @@ cmd = [
 'tie d3 ru,1,4',
 ]
 
-for line in cmd:
-    ath.cmd(line)
 
-ath.cmd('eln') 
-ath.cmd('elh') 
+
+
+def main(cmdList=[], fp=None, hear=True):
+    ath = athenaObj.Interpreter()
+
+    for line in cmdList:
+        ath.cmd(line)
+
+    if fp == None:
+        ath.cmd('eln') 
+    else:
+        ath.cmd('eln %s' % fp)
+
+    if hear:
+        ath.cmd('elh') 
+
+
+if __name__ == '__main__':
+    main(cmd)
+
+
+
 
 
 

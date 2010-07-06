@@ -1,10 +1,9 @@
 # Deploying Pitch Sieves with HarmonicAssembly
 
 from athenaCL.libATH import athenaObj
-ath = athenaObj.Interpreter()
-ath.cmd('emo m')
  
 cmd = [
+'emo m',
 
 'pin a 11@1|13@2|23@5|25@6,c1,c7',
 'tmo ha',
@@ -32,11 +31,30 @@ cmd = [
 'tie d3 bg,rc,(2,3)',
 ]
 
-for line in cmd:
-    ath.cmd(line)
 
-ath.cmd('eln') 
-ath.cmd('elh') 
+
+
+
+def main(cmdList=[], fp=None, hear=True):
+    ath = athenaObj.Interpreter()
+
+    for line in cmdList:
+        ath.cmd(line)
+
+    if fp == None:
+        ath.cmd('eln') 
+    else:
+        ath.cmd('eln %s' % fp)
+
+    if hear:
+        ath.cmd('elh') 
+
+
+if __name__ == '__main__':
+    main(cmd)
+
+
+
 
 
 

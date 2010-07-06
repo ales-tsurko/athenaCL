@@ -1,11 +1,9 @@
 # Composing with Densities using TM TimeFill and a Single Sample
 
 from athenaCL.libATH import athenaObj
-ath = athenaObj.Interpreter()
-
-ath.cmd('emo cn')
  
 cmd = [
+'emo cn',
 'tmo tf',
 'tin a 32',
 # set a file path to an audio file
@@ -26,12 +24,29 @@ cmd = [
 'tie a ru,.1,.3',
 ]
 
-for line in cmd:
-    ath.cmd(line)
 
-ath.cmd('eln') 
-ath.cmd('elr') 
-ath.cmd('elh') 
+
+
+def main(cmdList=[], fp=None, hear=True, render=True):
+    ath = athenaObj.Interpreter()
+
+    for line in cmdList:
+        ath.cmd(line)
+
+    if fp == None:
+        ath.cmd('eln') 
+    else:
+        ath.cmd('eln %s' % fp)
+
+    if render:
+        ath.cmd('elr') 
+
+    if hear:
+        ath.cmd('elh') 
+
+if __name__ == '__main__':
+    main(cmd)
+
 
 
 

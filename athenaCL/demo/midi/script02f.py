@@ -1,11 +1,9 @@
 # Building an Extended Rhythmic Line with Fixed Tempo Phasing
 
 from athenaCL.libATH import athenaObj
-ath = athenaObj.Interpreter()
-
-ath.cmd('emo mp')
  
 cmd = [
+'emo mp',
 'tin a 70',
 'tie r pt,(bg,oc,(2,4,4)),(bg,oc,(4,1,1,2,1)),(c,1) ',
 'tie t 0,60',
@@ -15,11 +13,28 @@ cmd = [
 'tie b c,128',
 ]
 
-for line in cmd:
-    ath.cmd(line)
 
-ath.cmd('eln') 
-ath.cmd('elh') 
+
+def main(cmdList=[], fp=None, hear=True):
+    ath = athenaObj.Interpreter()
+
+    for line in cmdList:
+        ath.cmd(line)
+
+    if fp == None:
+        ath.cmd('eln') 
+    else:
+        ath.cmd('eln %s' % fp)
+
+    if hear:
+        ath.cmd('elh') 
+
+
+if __name__ == '__main__':
+    main(cmd)
+
+
+
 
 
 

@@ -355,8 +355,25 @@ class External(object):
                 self.visualMethod = drawer.imageFormats()
             return self.visualMethod
 
+    def getFilePathDemo(self, dirMatch=['midi'], extMatch=['.py']):
+        '''Get all demo file paths, matching by one or more directory and one or more file extension.
 
-
+        >>> e = External()
+        >>> e.updateAll()
+        >>> len(e.getFilePathDemo()) > 30
+        True
+        '''
+        post = []
+        for fpDir in self.demoDirList: # get dirs
+            for dir in dirMatch:
+                if fpDir.endswith(dir):
+                    for fn in os.listdir(fpDir):
+                        if fn.startswith('__'): continue # pass __init__.py
+                        fp = os.path.join(fpDir, fn)
+                        for ext in extMatch:
+                            if fp.endswith(ext):
+                                post.append(fp)
+        return post
 
 #-----------------------------------------------------------------||||||||||||--
 class AthenaObject(object):
@@ -1143,7 +1160,7 @@ class Interpreter(object):
             arg = argsExtra # keep as a list
             #arg = ' '.join(argsExtra)
 
-        environment.printDebug(['_prepareCommandArguments()', 'cmd:', cmd, 'arg:', arg])
+        #environment.printDebug(['_prepareCommandArguments()', 'cmd:', cmd, 'arg:', arg])
         return cmd, arg
 
     def cmd(self, line, *arguments, **keywords):

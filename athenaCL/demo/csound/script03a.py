@@ -3,10 +3,10 @@
 from athenaCL.libATH import athenaObj
 ath = athenaObj.Interpreter()
 
-ath.cmd('emo cn')
  
 cmd = [
-        
+'emo cn',
+
 'tmo LineGroove',
 
 'tin a 4',
@@ -30,12 +30,28 @@ cmd = [
         
 ]
 
-for line in cmd:
-    ath.cmd(line)
 
-ath.cmd('eln') 
-ath.cmd('elr') 
-ath.cmd('elh') 
+
+def main(cmdList=[], fp=None, hear=True, render=True):
+    ath = athenaObj.Interpreter()
+
+    for line in cmdList:
+        ath.cmd(line)
+
+    if fp == None:
+        ath.cmd('eln') 
+    else:
+        ath.cmd('eln %s' % fp)
+
+    if render:
+        ath.cmd('elr') 
+
+    if hear:
+        ath.cmd('elh') 
+
+if __name__ == '__main__':
+    main(cmd)
+
 
 
 

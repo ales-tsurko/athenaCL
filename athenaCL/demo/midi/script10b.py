@@ -1,14 +1,13 @@
 # Feedback System as Path Index Values
 
 from athenaCL.libATH import athenaObj
-ath = athenaObj.Interpreter()
 
-ath.cmd('emo m')
  
 cmd = [        
 
-# create a single, large Multiset using a sieve
+'emo m',
 
+# create a single, large Multiset using a sieve
 'pin a 5@1|7@4,c2,c7',
 
 'tmo ha',
@@ -34,15 +33,29 @@ cmd = [
 # select pitches from Multiset using Climate Control
 
 'tie d1 fml,cc,(bg,rc,(.5,1,1.5)),(c,.7),0,18',
-
-
 ]
 
-for line in cmd:
-    ath.cmd(line)
 
-ath.cmd('eln') 
-ath.cmd('elh') 
+
+
+def main(cmdList=[], fp=None, hear=True):
+    ath = athenaObj.Interpreter()
+
+    for line in cmdList:
+        ath.cmd(line)
+
+    if fp == None:
+        ath.cmd('eln') 
+    else:
+        ath.cmd('eln %s' % fp)
+
+    if hear:
+        ath.cmd('elh') 
+
+
+if __name__ == '__main__':
+    main(cmd)
+
 
 
 

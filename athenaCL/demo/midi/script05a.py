@@ -1,10 +1,10 @@
 # Self Similar Markovian Melody Generation and Transposition
 
 from athenaCL.libATH import athenaObj
-ath = athenaObj.Interpreter()
-ath.cmd('emo m')
  
 cmd = [
+
+'emo m',
 
 'tin a 24',
 'tie r cs,(n,100,1.5,.100,.180)',
@@ -26,11 +26,29 @@ cmd = [
 'tie a om,(rb,.2,.5,(ls,e,(ru,3,20),.5,1)),(wp,e,(ru,25,30),0,0,1)',
 ]
 
-for line in cmd:
-    ath.cmd(line)
 
-ath.cmd('eln') 
-ath.cmd('elh') 
+
+
+def main(cmdList=[], fp=None, hear=True):
+    ath = athenaObj.Interpreter()
+
+    for line in cmdList:
+        ath.cmd(line)
+
+    if fp == None:
+        ath.cmd('eln') 
+    else:
+        ath.cmd('eln %s' % fp)
+
+    if hear:
+        ath.cmd('elh') 
+
+
+if __name__ == '__main__':
+    main(cmd)
+
+
+
 
 
 

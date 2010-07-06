@@ -1,11 +1,9 @@
 # Grammar States as Path Index Values
 
 from athenaCL.libATH import athenaObj
-ath = athenaObj.Interpreter()
-
-ath.cmd('emo m')
  
 cmd = [        
+'emo m',
 
 # create a single, large Multiset using a sieve
 'pin a 5@0|7@2,c2,c7',
@@ -31,11 +29,28 @@ cmd = [
    
 ]
 
-for line in cmd:
-    ath.cmd(line)
 
-ath.cmd('eln') 
-ath.cmd('elh') 
+
+
+def main(cmdList=[], fp=None, hear=True):
+    ath = athenaObj.Interpreter()
+
+    for line in cmdList:
+        ath.cmd(line)
+
+    if fp == None:
+        ath.cmd('eln') 
+    else:
+        ath.cmd('eln %s' % fp)
+
+    if hear:
+        ath.cmd('elh') 
+
+
+if __name__ == '__main__':
+    main(cmd)
+
+
 
 
 
