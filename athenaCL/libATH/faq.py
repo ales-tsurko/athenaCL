@@ -187,7 +187,7 @@ class Faq7(FaqEntry):
     id       = 7
     group    = 'general'
     query    = 'Where is the source code?'
-    answer = 'Every distribution download of athenaCL comes with a complete copy of the source code. Since Python is an interpreted language, the source code can be run "live": there is no executable or binary of athenaCL, the source-code simply runs in the Python interpreter. Developers can get (with SVN) the most recent source at SourceForge (http://code.google.com/p/athenacl/). An athenaCL.exe installer is available; this installs athenaCL as a Python package, and is not the athenaCL program itself.'
+    answer = 'Every distribution download of athenaCL comes with a complete copy of the source code. Since Python is an interpreted language, the source code can be run "live": there is no executable or binary of athenaCL, the source-code simply runs in the Python interpreter. Developers can get (with SVN) the most recent source at Google Code (http://code.google.com/p/athenacl/). An athenaCL.exe installer is available; this installs athenaCL as a Python package.'
 
 class Faq8(FaqEntry):
     id       = 8
@@ -229,7 +229,7 @@ class Faq14(FaqEntry):
     id       = 14
     group    = 'general'
     query    = 'Where can I ask questions about athenaCL?'
-    answer = 'The athenacl-development list is for users and developers of athenaCL, and can be used to ask questions, get help, or discuss issues related to athenaCL. Users can subscribe and un-subscribe from this list here: http://lists.sourceforge.net/lists/listinfo/athenacl-development. To prevent spam, you must join this list to send messages. All questions are welcome. Alternatively, users may contact Christopher Ariza directly.'
+    answer = 'The athenacl Google Group is for users and developers of athenaCL, and can be used to ask questions, get help, or discuss issues related to athenaCL. Users can view and/or subscribe to this list here: http://groups.google.com/group/athenacl. All questions are welcome. Alternatively, users may contact Christopher Ariza directly.'
 
 class Faq15(FaqEntry):
     id       = 15

@@ -5,13 +5,10 @@ from athenaCL.libATH import athenaObj
 cmd = [        
 'emo mp',
 
-
 'tmo lg',
-
 'tin a 60',
 
 # non deterministic binary algae generator applied to accent
-
 'tie r pt,(c,8),(c,1),(gt,a{0}b{1}@a{ab}b{a|aaa}@b,10,oc)',
 
 'tie a c,1',

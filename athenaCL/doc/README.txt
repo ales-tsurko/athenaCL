@@ -5,7 +5,7 @@ www.athenacl.org
 
 ====================================================================
 athenaCL 2.0.0a15
-5 July 2010
+7 July 2010
 This document contains the following information:
 
 I. Platform Dependencies

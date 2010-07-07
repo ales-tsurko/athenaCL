@@ -16,8 +16,8 @@ import sys, os, time, random, traceback, httplib, urllib
 import unittest, doctest
 
 athVersion = '2.0.0a15'
-athBuild = '2010.07.05'
-athDate = '5 July 2010' # human readable version
+athBuild = '2010.07.07'
+athDate = '7 July 2010' # human readable version
 __version__ = athVersion
 __license__ = "GPL"
 
@@ -1444,7 +1444,6 @@ class Interpreter(object):
             exitStr = 'Control-Z' 
         msg = 'Python Interactive. enter %s to exit:' % exitStr
         code.interact(msg)
-
 
 
     def proc_AOrm(self, data):

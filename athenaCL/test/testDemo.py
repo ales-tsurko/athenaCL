@@ -32,17 +32,35 @@ class TestExternal(unittest.TestCase):
         ao = athenaObj.AthenaObject()
 
         for fp in ao.external.getFilePathDemo(['midi'], ['.py']):
+            environment.printDebug(['processing:', fp])
+
             fpDir, fn = os.path.split(fp)
             modName = fn.replace('.py', '')
             file, pathname, description = imp.find_module(modName, [fpDir])
             module = imp.load_module(modName, file, pathname, description)
             # pass command lines to main function
-            module.main(module.cmd)
 
-            break
+            fpDst = os.path.join(fpDir, modName + '.xml')
+            module.main(module.cmd, fp=fpDst, hear=False)
 
-        # get on midi dir
 
+    def testDemoWriteCsound(self):
+        from athenaCL.libATH import athenaObj
+
+        ao = athenaObj.AthenaObject()
+
+        for fp in ao.external.getFilePathDemo(['csound'], ['.py']):
+            environment.printDebug(['processing:', fp])
+
+            fpDir, fn = os.path.split(fp)
+            modName = fn.replace('.py', '')
+            file, pathname, description = imp.find_module(modName, [fpDir])
+            module = imp.load_module(modName, file, pathname, description)
+            # pass command lines to main function
+
+            fpDst = os.path.join(fpDir, modName + '.xml')
+            # remove midi file
+            module.main(['eorm mf', 'eoo cd'] + module.cmd, fp=fpDst, render=True, hear=False)
         
 
 #-------------------------------------------------------------------------------
@@ -97,8 +115,8 @@ if __name__ == '__main__':
         a = TestExternal()
 
 
-        a.testDemoWriteMIDI()
-
+        #a.testDemoWriteMIDI()
+        a.testDemoWriteCsound()
         #a.runTest()
 
 

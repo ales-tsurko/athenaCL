@@ -549,7 +549,10 @@ class Test(unittest.TestCase):
 
 #-----------------------------------------------------------------||||||||||||--
 if __name__ == '__main__':
+
     from athenaCL.test import baseTest
     baseTest.main(Test)
 
 
+    a = InfoManager()
+    a.main()
