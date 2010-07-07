@@ -32,23 +32,38 @@ filter po: can be linear or nonlinear, and can be run in sequence. -->
       </para>
 
 
-      <para>The athenaCL system has been under development since June 2000. The software is cross platform, developed under an open-source license, and programmed in the Python language. An interactive command-line interface is the primary user environment of athenaCL, though the complete functionality of the system is alternatively available as a scriptable batch processor or as a programmable Python extension library. 
+      <para>The athenaCL system has been under development since June 2000. The software is cross platform, developed under an open-source license, and programmed in the Python language. An interactive command-line interface provides an easy-to-use environment for beginners and a quick reference for advanced users. The complete functionality of the system is alternatively available as a scriptable batch processor or as a programmable Python extension library. 
       </para>
-      
-
-      
+     
       </sect1>
+
+
 
       <!--###################################################################-->
       <sect1 id="sect-about">
-      <title>About the Tutorial Manual</title>
-            
-      <para>This document consists of a number of different tutorials, each focusing on different aspects of the athenaCL system from the perspective of the user. Following the tutorials are appendices, providing documentation useful for reference. Much of this reference documentation is also available from within athenaCL. This document does not offer a complete description of the history, context, and internal structure of the athenaCL system; such a description, including comparative analysis to related historical and contemporary systems and detailed explanation of object models and interactions, is provided in the text <e>An Open Design for Computer-Aided Algorithmic Music Composition: athenaCL</e> (Ariza 2005 [AN#900]). Numerous additional articles are available that explore aspects of the athenaCL system in detail (Ariza 2002 [AN#5], 2003 [AN#425], 2004 [AN#443], 2005 [AN#613], 2006 [AN#1343], 2007 [AN#1355], 2007 [AN#1617], 2008 [AN#1824], 2009 [AN#1990]). Users interested in code-level work, either modifying or extending the athenaCL system, should consult these additional resources.
-      </para>
+      <title>Getting Started and Advanced Work</title>
 
-      <para>The tutorials need not be done in any particular order, but should be chosen depending on interests. All users should read <xref linkend="ch-interface"></xref> and <xref linkend="ch-ao-em"></xref> to gain familiarity with the interface and basic athenaCL concepts. Users interested in composing music with athenaCL should then read <xref linkend="ch-texture"></xref>, <xref linkend="ch-texture-path"></xref>, and <xref linkend="ch-clone"></xref>. Returning to <xref linkend="ch-path"></xref> may be necessary for more details on Paths, and users wishing to use athenaCL within Python should read <xref linkend="ch-automate"></xref>.
+      <para>To learn the athenaCL system, many basic concepts of the system design and command interface must be examined in depth. The tutorials included in this document provide an overview to all essential concepts. Following the tutorials are appendices, providing documentation useful for reference. Much of this reference documentation is also available from within athenaCL.
+      </para>
+            
+      <para>All users should read <xref linkend="ch-interface"></xref> and <xref linkend="ch-ao-em"></xref> to gain familiarity with the interface and basic athenaCL concepts. Basic composition tools are covered in <xref linkend="ch-texture"></xref>, <xref linkend="ch-texture-path"></xref>, and <xref linkend="ch-clone"></xref>. For more detailed information on organizing pitch structures, see <xref linkend="ch-path"></xref>.
       </para>
       
+      <para>Users with experience with Python and/or other generative music systems, or users who have mastered the athenaCL interactive command-line interface, will likely want to begin storing athenaCL command scripts in Python code files. This approach provides a wide range of opportunities for programmatically extending the power of athenaCL. A common approach for advanced usage of athenaCL is to use the interactive command-line interface for reference and sketching, and then store series of commands or command-generating procedures in Python files. The section <xref linkend="ch-automate"></xref> provides basic examples for this approach. Additional, over 30 demonstration Python scripts are distributed with athenaCL and included in <xref linkend="ax06"></xref>.
+      </para>
+
+
+      </sect1>
+
+
+
+      <!--###################################################################-->
+      <sect1 id="sect-more-information">
+      <title>More Information</title>
+            
+      <para>This document does not offer a complete description of the history, context, and internal structure of the athenaCL system; such a description, including comparative analysis to related historical and contemporary systems and detailed explanation of object models and interactions, is provided in the text <e>An Open Design for Computer-Aided Algorithmic Music Composition: athenaCL</e> (Ariza 2005 [AN#900]). Numerous additional articles are available that explore aspects of the athenaCL system in detail (Ariza 2002 [AN#5], 2003 [AN#425], 2004 [AN#443], 2005 [AN#613], 2006 [AN#1343], 2007 [AN#1355], 2007 [AN#1617], 2008 [AN#1824], 2009 [AN#1990]).
+      </para>
+
       
       </sect1>
 
@@ -76,7 +91,7 @@ filter po: can be linear or nonlinear, and can be run in sequence. -->
       <sect1 id="sect-production">
       <title>Production of This Manual</title>
       
-      <para>The first edition of the <e>athenaCL Tutorial Manual</e> was released in August of 2001 and covered athenaCL versions 1.0 to 1.3. The second edition was released in June 2005 and covers athenaCL versions 1.4 and beyond. The third edition was released in July 2010 and converse athenaCL versions 2.0.
+      <para>The first edition of the <e>athenaCL Tutorial Manual</e> was released in August of 2001 and covered athenaCL versions 1.0 to 1.3. The second edition was released in June 2005 and covers athenaCL versions 1.4 and beyond. The third edition was released in July 2010 and convers athenaCL versions 2.0.
       </para>
       
       <para>This manual is constructed and maintained with the help of various open-source tools: <ulink url="http://www.docbook.org">DocBook</ulink>, <ulink url="http://docbook.sourceforge.net/projects/dsssl/">the Modular DocBook Stylesheet distribution</ulink>, <ulink url="http://openjade.sourceforge.net/">OpenJade</ulink>, <ulink url="http://www.python.org/">Python</ulink>, and <ulink url="http://www.imagemagick.org/">ImageMagick</ulink>.

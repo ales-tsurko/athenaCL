@@ -114,4 +114,4 @@ class Distributor(object):
 if __name__ == '__main__':
     a = Distributor()
     a.build()
-    #a.upload()
+    a.upload()

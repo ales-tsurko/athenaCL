@@ -216,6 +216,11 @@ def _getPackagesList():
     """list of all packages, delimited by period"""
     pkg = (  'athenaCL', 
              'athenaCL.demo', 
+             'athenaCL.demo.csound', 
+             'athenaCL.demo.midi', 
+             'athenaCL.demo.legacy', 
+             'athenaCL.demo.manual', 
+
              'athenaCL.test', 
              'athenaCL.libATH', 
              'athenaCL.libATH.libGfx', 
@@ -328,6 +333,7 @@ def writeManifestTemplate(fpPackageDir):
     msg.append('global-include *.txt *.aif *.htm *.mid *.png *.xml *.css *.py *.mp3\n')
     msg.append('prune buildDoc\n')
     msg.append('prune dist\n')
+    msg.append('prune obsolete\n')
     msg.append('prune tools\n')
 
     f = open(dst, 'w')
