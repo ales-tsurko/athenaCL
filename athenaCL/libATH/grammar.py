@@ -38,7 +38,7 @@ environment = prefTools.Environment(_MOD)
 #                   transition{name=weight|name=weight}
 # support for limited regular expressions in weight defs
 
-# t:*:t match any one in the second palce; not e same as zero or more
+# t:*:t match any one in the second palce; not the same as zero or more
 # t:-t:t match anything that is not t
 # t:w|q:t match either (alternation)
         
@@ -69,12 +69,11 @@ environment = prefTools.Environment(_MOD)
 # perhaps empty brace?
 # f{F}r{+}l{-} @ f{f:r:l}
 # 
-# 
 # then rules
 # context free: a can go to abc or ac
 # a{a:b:c|a:c}
 # 
-# context free we weighted probabilites for rules
+# context free with weighted probabilites for rules
 # a{a:b:c=.2|a:c=.8}
 # 
 # a{a:b:c=4|a:c=43}
@@ -127,7 +126,6 @@ class Grammar:
         self.CLOSE = '}'
         # could also be % symbol
         self.SPLIT = '@' # used to devide varaible assign from rules
-
         self.ASSIGN = '='
 
         # space separates weights; also used as 'or' in weight keys?
@@ -144,13 +142,15 @@ class Grammar:
 
         
     def _sortSymbolLabel(self, pair):
-        """give a pairs of items (where the first is the label)
+        """give pairs of items (where the first is the label)
         extract label and return a sorted list
-
 
         >>> g = Grammar()
         >>> g._sortSymbolLabel([['a', 234.5], ['b', 234]])
         [('a', 234.5), ('b', 234)]
+
+        >>> g._sortSymbolLabel([['c', 234.5], ['a', 234]])
+        [('a', 234), ('c', 234.5)]
         """
         label = []
         maxSize = 0
@@ -160,7 +160,7 @@ class Grammar:
             label.append((s,w))
         label.sort()
         post = []
-        for i in range(0, maxSize+1):
+        for i in range(maxSize+1):
             for s, w in label:
                 if len(s) == i:
                     post.append((s,w))

@@ -226,6 +226,8 @@ class FileStats(DirWalk):
         dir, name = os.path.split(dirname)
         if name == 'CVS':
             return None
+        elif name.lower() == '.svn':
+            return None
         elif name[0] == '.':
             return None
         else:
@@ -240,10 +242,16 @@ class FileStats(DirWalk):
         elif line[0] == '#': # a comment
             return 'comment', None
         else: # it is a line of code
-            if line[:3] == 'def':
+            if line.startswith('def test'):
+                return 'line', 'defTest'
+            elif line.startswith('class Test'):
+                return 'line', 'classTest'
+
+            elif line[:3] == 'def':
                 return 'line', 'def'
             elif line[:5] == 'class':
                 return 'line', 'class'
+
             else: # regular line of code
                 return 'line', None
 
@@ -254,6 +262,9 @@ class FileStats(DirWalk):
         white = 0
         defs = 0
         classes = 0
+        defsTest = 0
+        classesTest = 0
+
         for entry in self.fileList:
             f = open(entry, 'r')
             fileLines = f.readlines()
@@ -261,25 +272,32 @@ class FileStats(DirWalk):
             for line in fileLines:
                 x, y = self.constrainLines(line)
                 if x == 'white':
-                    white = white + 1
+                    white += 1
                 elif x == 'comment':
-                    comments = comments + 1
+                    comments += 1
                 elif x == 'line':
                     sum = sum + 1
                     if y == 'def':
-                        defs = defs + 1
+                        defs += 1
                     elif y == 'class':
-                        classes = classes + 1
-        return sum, white, comments, defs, classes
+                        classes += 1
+                    elif y == 'defTest':
+                        defsTest += 1
+                    elif y == 'classTest':
+                        classesTest += 1
+
+        return sum, white, comments, defs, classes, defsTest, classesTest
     
     def reportCount(self):
-        sum, white, comments, defs, classes = self.countLines()
+        x = self.countLines()
+        sum, white, comments, defs, classes, defsTest, classesTest = x
         for entry in self.dirList:
             print entry
         print '\n%s lines of code found for %s .py files' % (sum,
                                                       len(self.fileList))
         print '(%s white, %s comments)' % (white, comments) 
-        print '%s class, %s def statements\n' % (classes, defs)
+        print '%s class, %s def statements' % (classes, defs)
+        print '%s Test classes, %s def test statements\n' % (classesTest, defsTest)
 
 #-----------------------------------------------------------------||||||||||||--
 class GatherCvs(DirWalk):
