@@ -122,6 +122,9 @@ class Grammar:
         # init should be axiom
         self._state = None
 
+        # store max size of all output rules
+        self._maxRuleOutputSize = 0
+
         self.OPEN = '{'
         self.CLOSE = '}'
         # could also be % symbol
@@ -193,58 +196,6 @@ class Grammar:
         return usrStr
 
 
-#     def _parseWeightKey(self, key):
-#         """ make key into a list of symbol strings
-#         store expression weight keys in a tuple, with operator leading, as a sub 
-#         tuple. only one operator is allowed, must be tuple b/c will be a dict key
-#         >>> a._parseWeightKey('a:b:c')
-#         ('a', 'b', 'c')
-#         >>> a._parseWeightKey('a:b:c|d')
-#         ('a', 'b', ('|', 'c', 'd'))
-#         >>> a._parseWeightKey('a:b:c|d|e')
-#         ('a', 'b', ('|', 'c', 'd', 'e'))
-#         >>> a._parseWeightKey('a:*:c')
-#         ('a', ('*',), 'c')
-#         >>> a._parseWeightKey('a:*:-c')
-#         ('a', ('*',), ('-', 'c'))
-#         """
-#         # make key into a list of symbol strings
-#         # if key is self.STEP, assign as empty tuple
-#         if key == self.STEP: return ()
-#         key = tuple(key.split(self.STEP)) # always split by step delim
-#         # filter empty strings
-#         keyPost = [] 
-#         for element in key:
-#             if element == '': continue
-#             keyPost.append(element.strip())
-#         key = keyPost
-#         # check for expressions in each segment of key
-#         keyFinal = []
-#         for segment in key:
-#             keyPost = []
-#             for exp in self.EXPRESS:
-#                 if exp in segment:
-#                     keyPost.append(exp)
-#             if len(keyPost) == 0: # no expressions used, a normal weight key
-#                 keyFinal.append(segment) # make it a tuple before return
-#             elif len(keyPost) > 1:
-#                 msg = "only one operator may be used per weight key segment"
-#                 raise error.TransitionSyntaxError, msg
-#             # definitial an expression, pack new tuple, leading with expression op
-#             # if it is an or sym, need to split by this symbol
-#             else:
-#                 if self.EXPRESSOR in segment:
-#                     opperands = segment.split(self.EXPRESSOR)
-#                     segmentPost = [self.EXPRESSOR] + opperands
-#                     keyFinal.append(tuple(segmentPost))
-#                 else: # key post already has expression operator leading
-#                     for val in segment:
-#                         if val in self.EXPRESS: continue 
-#                         keyPost.append(val)
-#                     keyFinal.append(tuple(keyPost))
-#         return tuple(keyFinal)
-# 
-
     def _parseRuleValue(self, pairRule):
         """Read a preliminary dictionary of rules, and split into a list of rules based on having one or more probabilistic rule options
 
@@ -266,16 +217,29 @@ class Grammar:
         >>> g._rules
         {'a': [('ab', 3), ('c', 12), ('aa', 3)]}
 
+        >>> g._parseRuleValue({'a': 'ab=3|c=12|aa=3', 'c': 'b=3|c=5|a'})
+        >>> g._rules
+        {'a': [('ab', 3), ('c', 12), ('aa', 3)], 'c': [('b', 3), ('c', 5), ('a', 1)]}
+
         >>> g._parseRuleValue({'a': 'ab=3|c=12|aa=0'})
         Traceback (most recent call last):
         TransitionSyntaxError: bad weight value given: aa=0
+
+        >>> g._parseRuleValue({'a': ''})
+        >>> g._rules
+        {'a': [('', 1)]}
+
+        >>> g._parseRuleValue({'a': 'ab=3|c=12|'})
+        >>> g._rules
+        {'a': [('ab', 3), ('c', 12), ('', 1)]}
 
         """
         self._rules = {} # this always clears the last rules
         for key, value in pairRule.items():
 
             # TODO: make key into a list of symbol strings
-            # this permits context sensitivity
+            # this permits context sensitivity; that is: we can match to not
+            # just one but many characters
             #key = self._parseWeightKey(key)
 
             # make value into a src:dst pairs
@@ -296,10 +260,10 @@ class Grammar:
                 for symbol in weights:
                     ruleList.append((symbol, 1))
             else:
-                environment.printDebug(['obtained weights', weights, value.count(self.ASSIGN)])
+                #environment.printDebug(['obtained weights', weights, value.count(self.ASSIGN)])
 
                 for assign in weights:
-                    # if not assignment, provide one
+                    # if not assignment, provide one as a string
                     if self.ASSIGN not in assign:
                         assign += '=1' # assume 1
 
@@ -319,7 +283,7 @@ class Grammar:
         """
         knownSym = self._symbols.keys()
         if axiomSrc != None:
-            # NOTE: assumes no delimiters
+            # NOTE: assumes no delimiters between symbols
             axiomSrc = axiomSrc.strip()
             for char in axiomSrc:
                 if char not in knownSym:
@@ -359,11 +323,14 @@ class Grammar:
         >>> g._checkSymbolFormRuleKey('wer')
 
         """
+        if symStr == '': # permit the empty string
+            return 
+
         valid = self.SYM + self.STEP + ''.join(self.EXPRESS)
         for char in symStr:
             if char not in valid:
-                raise error.TransitionSyntaxError,\
-                "rule definition uses illegal characters (%s)" % char
+                raise error.TransitionSyntaxError(
+                "rule definition uses illegal characters (%s)" % char)
         # there must be at least on symbol on left side of production
         # rule that is just a symbol
         count = 0
@@ -372,35 +339,52 @@ class Grammar:
                 count += 1
             if count > 0: break
         if count == 0: # no symbols were found
-            raise error.TransitionSyntaxError,\
-            "rule definition does not define source symbol"
+            raise error.TransitionSyntaxError("rule definition does not define source symbol")
 
     def _checkRuleReference(self):
-        """make sure that all rule outputs and inputs refer to defined symbols
+        """Make sure that all rule outputs and inputs refer to defined symbols. Thi permits
 
         >>> g = Grammar()
         >>> g._parseRuleValue({'a': 'ab=3|c=12|aa=3'})
 
          """
-        knownSym = self._symbols.keys()
-        #environment.printDebug(['known symbols', knownSym])
-        for inRule, outRule in self._rules.items():
-            # this is not the right way to do this!
-            # need to iterate through rule parts first
-            #environment.printDebug(['in rule, out rule', inRule, outRule])
+        self._maxRuleOutputSize = 0
 
+        knownSym = self._symbols.keys()
+        for inRule, outRule in self._rules.items():
+            #environment.printDebug(['in rule, out rule', inRule, outRule])
+            environment.printDebug(['in rule', repr(inRule), 'out rule', outRule])
+
+            # TODO this is not the right way to do this!
+            # need to iterate through rule parts first
             match = False
-            for s in knownSym:
-                if s in inRule: 
-                    match = True
+            # permit empty string as input: this is not yet fully implemented
+            if inRule == '': 
+                match = True
+            else:
+                for s in knownSym:
+                    if s in inRule: 
+                        match = True
             if not match:
                 raise error.TransitionSyntaxError("rule component (%s) references an undefined symbol" % inRule)
 
+            # check out rules, of which there is 1 or more
+            # NOTE: this assumes there are not delimiters used
             match = False
             for option, weight in outRule: # pairs of value, weight
+
+                #environment.printDebug(['_checkRuleReference(): option', repr(option)])
+
+                if len(option) > self._maxRuleOutputSize:
+                    self._maxRuleOutputSize = len(option)
+
+                if option == '': # accept empty output option
+                    match = True
+
                 # if out rules point to more then value, need to split here
-                # NOTE: this assumes there are not delimiters used
                 for char in option:
+#                     if char == '': # permit empty string
+#                         match = True 
                     if char not in knownSym:   
                         match = False
                         break
@@ -639,7 +623,7 @@ class Grammar:
         self._parse(self._srcStr)
 
     def _tagIn(self, input):
-        '''Must wrap numbers so that 1 does not math 11; instaed <1> and <11> are different matches
+        '''Must wrap numbers so that 1 does not match 11; instaed <1> and <11> are different matches
         '''
         return '<%s>' % input
         
@@ -665,8 +649,6 @@ class Grammar:
         >>> str(g)
         'a{3}b{4}c{20}d{2}@a{bab}c{ac}b{acb}d{cd}@abd'
         >>> g.next()
-        >>> # TODO: this is not expected, as this is tranforming the same
-        >>> # section more than once
         >>> g.getState() 
         'babacbcd'
         >>> g.next()
@@ -695,20 +677,37 @@ class Grammar:
         'abaababa'
 
         '''
-        if self._state == None:
+        if self._state == None or self._state == '':
             self._state = self._axiom # a copy in principle
 
         stateNew = self._state # copy
         matchTag = [] # matched start indices
         replacementCount = 0
+
+        # make groups of index values, src groups to match
+        # need to find largest rule in size
+        indexCharPairs = []
+        # self._maxRuleOutputSize
+
+        #environment.printDebug(['next(): self._state', self._state])
+
+        for size in range(1, self._maxRuleOutputSize+1):
+        #for size in range(1, 2):
+            for i in range(0, len(self._state), size):      
+                pair = (i, self._state[i:i+size])
+                if pair not in indexCharPairs:
+                    indexCharPairs.append(pair) 
+
         for inRule, outRule in self._rules.items():
 
-            #environment.printDebug(['in/out rule', inRule, outRule])
+            #environment.printDebug(['next(): in/out rule', repr(inRule), outRule])
 
-            # NOTE: assuming single value matches
-            for i in range(len(self._state)):
-                char = self._state[i]
-                if char != inRule: # comparison
+            #environment.printDebug(['next(): index char pairs', indexCharPairs])
+
+            for i, char in indexCharPairs:
+            #for i, char in enumerate(self._state):
+
+                if char != inRule: # comparison to rule
                     continue
                 # store a string of index in the temp to mark positions
                 # can find first instance of symbol; will not 
@@ -716,16 +715,20 @@ class Grammar:
                 iNew = stateNew.find(char)
                 pre = stateNew[:iNew]
                 # skip location
-                post = stateNew[iNew+1:] # NOTE: assume length of target is 1
+                post = stateNew[iNew+len(char):] 
                 # insert marker as a random cod
                 tag = self._tagIn(replacementCount)
                 replacementCount += 1
                 stateNew = pre + tag + post
 
+                #environment.printDebug(['next(): stateNew', stateNew, repr(pre), repr(tag), repr(post)])
+
                 # make a rule section
+                # if only one rule, simply provide it 
                 if len(outRule) == 1:
                     # a list of value, weight pairSymbol
                     replacement = outRule[0][0] 
+                # if more than one rule, do a weighted selection
                 else:
                     options = []
                     weights = []
@@ -737,7 +740,10 @@ class Grammar:
                     i = unit.unitBoundaryPos(random.random(), boundary)
                     replacement = options[i] # index is in position
 
+                # a lost of all replacements to make, between the tag and the
+                # replacement
                 matchTag.append([tag, replacement])
+
         # do all replacements
         #environment.printDebug(['stateNew: prereplace', stateNew])
         for tag, replacement in matchTag:
@@ -762,8 +768,17 @@ class Grammar:
             return self._symbolStrToValueList(self._state)
 
 
+    def reset(self):
+        '''Reset the state. 
+        '''
+        # state will be set to axiom on next call
+        self._state = None
 
 
+    def setAxiom(self, src):
+        '''Reset the axiom and the initial state.
+        '''
+        self._parseAxiom(src)
 
 
 #-----------------------------------------------------------------||||||||||||--
@@ -772,8 +787,88 @@ class Test(unittest.TestCase):
     def runTest(self):
         pass
             
-    def testRandom(self):
-        pass
+    def testBasic(self):
+
+        g = Grammar()
+        g.load('a{3}b{4} @ a{bab}b{aab} @ a')
+        g.next()
+        self.assertEqual(g.getState(), 'bab')
+        g.reset()
+        g.next()
+        self.assertEqual(g.getState(), 'bab')
+        g.setAxiom('b')
+        self.assertEqual(g.getState(), 'b')
+        g.next()
+        self.assertEqual(g.getState(), 'aab')
+
+        g.setAxiom('ab')
+        self.assertEqual(g.getState(), 'ab')
+        g.next()
+        self.assertEqual(g.getState(), 'babaab')
+        g.next()
+        self.assertEqual(g.getState(), 'aabbabaabbabbabaab')
+
+
+        # simple oscillation
+        g = Grammar()
+        g.load('a{3}b{4} @ a{b}b{a} @ a')
+        g.next()
+        self.assertEqual(g.getState(), 'b')
+        g.next()
+        self.assertEqual(g.getState(), 'a')
+        g.next()
+        self.assertEqual(g.getState(), 'b')
+        g.next()
+        self.assertEqual(g.getState(), 'a')
+
+
+        # simple oscillation
+        g = Grammar()
+        g.load('a{3}b{4} @ a{b}b{a} @ a')
+        g.next()
+        self.assertEqual(g.getState(), 'b')
+        g.next()
+        self.assertEqual(g.getState(), 'a')
+        g.next()
+        self.assertEqual(g.getState(), 'b')
+        g.next()
+        self.assertEqual(g.getState(), 'a')
+
+
+        # decomposition: can we decompose
+        g = Grammar()
+        g.load('a{3}b{4} @ a{b}b{}{a} @ a')
+        g.next()
+        self.assertEqual(g.getState(), 'b')
+        g.next()
+        self.assertEqual(g.getState(), '')
+        g.next()
+        # for now, this replaces with the axiom
+        self.assertEqual(g.getState(), 'b')
+
+        g = Grammar()
+        g.load('a{3}b{4} @ a{bab}b{} @ bbabbabb')
+        g.next()
+        self.assertEqual(g.getState(), 'babbab')
+        g.next()
+        self.assertEqual(g.getState(), 'babbab')
+
+
+
+        # try context matches
+        g = Grammar()
+        g.load('a{3}b{4} @ aa{bb}bb{aaaa} @ bb')
+        g.next()
+        self.assertEqual(g.getState(), 'aaaa')
+        g.next()
+        self.assertEqual(g.getState(), 'bbbb')
+        g.next()
+        self.assertEqual(g.getState(), 'aaaaaaaa')
+        g.next()
+        self.assertEqual(g.getState(), 'bbbbbbbb')
+        g.next()
+        self.assertEqual(g.getState(), 'aaaaaaaaaaaaaaaa')
+
 
 
 #-----------------------------------------------------------------||||||||||||--
