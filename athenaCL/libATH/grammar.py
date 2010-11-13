@@ -29,74 +29,27 @@ environment = prefTools.Environment(_MOD)
 # employ markov style string notation
 
 
-# divide all groups into pairs of key, {}-enclosed values
-# all elements of notation are <key>{<value>} pairs
-# this notation has two types: symbol definitions and weight definitions
-# symbol defs: keys are alphabetic, values can be anything (incl lists)
-#                   name{symbol}
-# weight defs: keys are source transitions statments w/ step indicator :
-#                   transition{name=weight|name=weight}
-# support for limited regular expressions in weight defs
 
-# t:*:t match any one in the second palce; not the same as zero or more
-# t:-t:t match anything that is not t
-# t:w|q:t match either (alternation)
-        
-# or assuming only 26 characters:
-# t*t
-# **t
-
-
-# markov version
+# markov version used : to delimit chars/symbols
 # a{.2}b{5}c{8} :{a=1|b=2|c=1}
 # a{.2}b{5}c{8} :{a=1|b=2|c=1} a:{c=2|a=1} c:{b=1} a:a:{a=3|b=9} c:b:{a=2|b=7|c=4}
 
 
-# grammar version
+# grammar version does not use : to delimt, as not necessary for second 
+# or higher order
 # a{.2}b{5}c{8} a{a:b} c{b} b{b:c=.4|a:c=.6}
 # 
 # first define variables
 # a{.2}b{5}c{8}
 # 
-# need a delimter between variables and rules
-# @ sign might make sense
 
-# a{.2}b{5}c{8} @ a{a:b} c{b} b:c{b:c=.4|a:c=.6}
-
-# 
-# how do we incorporate constants?
-# a{F+-}b{F+-}c{F+-}
-# perhaps empty brace?
-# f{F}r{+}l{-} @ f{f:r:l}
-# 
-# then rules
-# context free: a can go to abc or ac
-# a{a:b:c|a:c}
-# 
-# context free with weighted probabilites for rules
-# a{a:b:c=.2|a:c=.8}
-# 
-# a{a:b:c=4|a:c=43}
-# 
-# 
-# context free with limited regular expression
-# here we match a with any other symbols
-# a:*{a:c}
-# here we can match either or; a or c goes to b
-# a|c{b}
-# here we match anything that is not a
-# -a{b:a}
-# 
-# 
 # can we specify genetic operators
 # mutation rules
 # need to define this as a mutation operation w/ a special flag
 # perhaps *?
 # mutation happens on the original production rules but does not continue
 # *b{c=.3|a=.6}
-# 
-# 
-# 
+
 # 
 # w/ context ab goes to ac?
 # ab{ac}
@@ -136,9 +89,9 @@ class Grammar:
         self.STEP = ':'
         # symbols for expression weight key definitions
         self.EXPRESSALL = '*'
-        self.EXPRESSNOT = '-'
+        #self.EXPRESSNOT = '-'
         self.EXPRESSOR   = '|'
-        self.EXPRESS = self.EXPRESSALL, self.EXPRESSNOT, self.EXPRESSOR
+        self.EXPRESS = self.EXPRESSALL, self.EXPRESSOR # self.EXPRESSNOT, 
         # define valid symbol (name) characters
         # symbols may not include spaces, nor case
         self.SYM = string.lowercase + string.digits
@@ -180,8 +133,8 @@ class Grammar:
         TransitionSyntaxError: all braces not paired
         """
         if usrStr.count(self.OPEN) != usrStr.count(self.CLOSE):
-          # replace with exception subclass
-          raise error.TransitionSyntaxError("all braces not paired")
+            # replace with exception subclass
+            raise error.TransitionSyntaxError("all braces not paired")
 
     def _parseClean(self, usrStr):
         """remove any unusual characters that might appear
@@ -233,15 +186,13 @@ class Grammar:
         >>> g._rules
         {'a': [('ab', 3), ('c', 12), ('', 1)]}
 
+        >>> g._parseRuleValue({'*a': 'ab=3|c=12|a=3'})
+        >>> g._rules
+        {'*a': [('ab', 3), ('c', 12), ('a', 3)]}
+
         """
         self._rules = {} # this always clears the last rules
         for key, value in pairRule.items():
-
-            # TODO: make key into a list of symbol strings
-            # this permits context sensitivity; that is: we can match to not
-            # just one but many characters
-            #key = self._parseWeightKey(key)
-
             # make value into a src:dst pairs
             ruleList = []
             weights = value.split(self.ASSIGNDELIMIT) # this is the |
@@ -317,7 +268,7 @@ class Grammar:
 
     def _checkSymbolFormRuleKey(self, symStr):
         """makes sure that symbol usage is valid for weight label keys
-        permits step separateors and expression characters
+        permits step separators and expression characters
 
         >>> g = Grammar()
         >>> g._checkSymbolFormRuleKey('wer')
@@ -331,10 +282,11 @@ class Grammar:
             if char not in valid:
                 raise error.TransitionSyntaxError(
                 "rule definition uses illegal characters (%s)" % char)
-        # there must be at least on symbol on left side of production
+        # there must be at least one symbol on left side of production
         # rule that is just a symbol
         count = 0
-        for char in self.SYM:
+        # can be a defined symbol or an all expression
+        for char in self.SYM + self.EXPRESSALL: 
             if char in symStr:
                 count += 1
             if count > 0: break
@@ -342,10 +294,9 @@ class Grammar:
             raise error.TransitionSyntaxError("rule definition does not define source symbol")
 
     def _checkRuleReference(self):
-        """Make sure that all rule outputs and inputs refer to defined symbols. Thi permits
+        """Make sure that all rule outputs and inputs refer to defined symbols. Rule inputs can use EXPRESSALL for matching 
 
-        >>> g = Grammar()
-        >>> g._parseRuleValue({'a': 'ab=3|c=12|aa=3'})
+        This method is called in _parse(). 
 
          """
         self._maxRuleOutputSize = 0
@@ -355,18 +306,17 @@ class Grammar:
             #environment.printDebug(['in rule, out rule', inRule, outRule])
             environment.printDebug(['in rule', repr(inRule), 'out rule', outRule])
 
-            # TODO this is not the right way to do this!
             # need to iterate through rule parts first
-            match = False
+            match = True
             # permit empty string as input: this is not yet fully implemented
             if inRule == '': 
-                match = True
+                pass
             else:
-                for s in knownSym:
-                    if s in inRule: 
-                        match = True
+                for r in inRule:
+                    if r not in knownSym + [self.EXPRESSALL]:
+                        match = False
             if not match:
-                raise error.TransitionSyntaxError("rule component (%s) references an undefined symbol" % inRule)
+                raise error.TransitionSyntaxError("source rule component (%s) references an undefined symbol" % inRule)
 
             # check out rules, of which there is 1 or more
             # NOTE: this assumes there are not delimiters used
@@ -393,7 +343,7 @@ class Grammar:
                 if not match:
                     break
             if not match:
-                raise error.TransitionSyntaxError, "rule component (%s) references an undefined symbol" % inRule
+                raise error.TransitionSyntaxError, "destination rule component (%s) references an undefined symbol" % outRule
     
 
     #-----------------------------------------------------------------------||--
@@ -404,13 +354,13 @@ class Grammar:
         >>> g._parse('a{3}b{4} @ a{b}b{a|b}')
         >>> g._parse('a{3}b{4} @ a{b}b{a|b|c}')
         Traceback (most recent call last):
-        TransitionSyntaxError: rule component (b) references an undefined symbol
+        TransitionSyntaxError: destination rule component ([('a', 1), ('b', 1), ('c', 1)]) references an undefined symbol
 
         >>> g._parse('a{3}b{4}c{3} @ a{b}b{a|b|c}')
 
         >>> g._parse('a{3}b{4}c{3} @ a{b}d{a|b|c}')
         Traceback (most recent call last):
-        TransitionSyntaxError: rule component (d) references an undefined symbol
+        TransitionSyntaxError: source rule component (d) references an undefined symbol
 
         >>> g._symbols
         {'a': '3', 'c': '3', 'b': '4'}
@@ -428,17 +378,18 @@ class Grammar:
         >>> g._axiom
         'baab'
 
+        >>> g._parse('a{3}b{4} @ a{b}ac{a|b} @ baab')
+        Traceback (most recent call last):
+        TransitionSyntaxError: source rule component (ac) references an undefined symbol
+
+        >>> g._parse('a{3}b{4} @ *{b} @ baab') # * can be source, not dst
+        >>> g._parse('a{3}b{4} @ a{*} @ baab') # * cannot be destination
+        Traceback (most recent call last):
+        TransitionSyntaxError: destination rule component ([('*', 1)]) references an undefined symbol
+
         '''
         # divide all groups into pairs of key, {}-enclosed values
         # all elements of notation are <key>{<value>} pairs
-        # this notation has two types: symbol definitions and weight definitions
-        # symbol defs: keys are alphabetic, values can be anything (incl lists)
-        #                   name{symbol}
-        # rule defs: keys are source, value is production rule 
-        # support for limited regular expressions in weight defs
-        # t:*:t match any one in the second palce; not e same as zero or more
-        # t:-t:t match anything that is not t
-        # t:w|q:t match either (alternation)
 
         self._parseValidate(usrStr)
         usrStr = self._parseClean(usrStr)
@@ -700,15 +651,36 @@ class Grammar:
 
         for inRule, outRule in self._rules.items():
 
-            #environment.printDebug(['next(): in/out rule', repr(inRule), outRule])
+            environment.printDebug(['next(): in/out rule', repr(inRule), outRule])
+            # grammar.py: next(): in/out rule '*' [('ab',1)] 
 
             #environment.printDebug(['next(): index char pairs', indexCharPairs])
 
+            # char here may be 1 or more characters, up to max rule size
             for i, char in indexCharPairs:
             #for i, char in enumerate(self._state):
 
-                if char != inRule: # comparison to rule
+                # comparison to rule
+                match = False
+                # test single character, exact match
+                if inRule == self.EXPRESSALL or inRule == char: 
+                    match = True
+                # if mutliple characters, and one is expressall, and lenght
+                # is the same
+                elif (len(inRule) > 1 and len(inRule) == len(char) 
+                and self.EXPRESSALL in inRule):
+                    matchChar = 0
+                    for j in range(len(inRule)):
+                        if inRule[j] == char[j] or inRule[j] == self.EXPRESSALL:
+                            matchChar += 1
+                    if matchChar == len(inRule):
+                        match = True
+
+                if not match:
                     continue
+
+                # need to find cases of two or more char matches
+
                 # store a string of index in the temp to mark positions
                 # can find first instance of symbol; will not 
                 # be past symbols b/c we are replacing with the old index nums
@@ -722,8 +694,8 @@ class Grammar:
                 stateNew = pre + tag + post
 
                 #environment.printDebug(['next(): stateNew', stateNew, repr(pre), repr(tag), repr(post)])
-
                 # make a rule section
+
                 # if only one rule, simply provide it 
                 if len(outRule) == 1:
                     # a list of value, weight pairSymbol
@@ -855,7 +827,7 @@ class Test(unittest.TestCase):
 
 
 
-        # try context matches
+        # try context matches: can match one to many
         g = Grammar()
         g.load('a{3}b{4} @ aa{bb}bb{aaaa} @ bb')
         g.next()
@@ -869,10 +841,125 @@ class Test(unittest.TestCase):
         g.next()
         self.assertEqual(g.getState(), 'aaaaaaaaaaaaaaaa')
 
+        g = Grammar()
+        g.load('a{3}b{4} @ aaa{aba}aba{bbb}bbb{aaa} @ bbb')
+        g.next()
+        self.assertEqual(g.getState(), 'aaa')
+        g.next()
+        self.assertEqual(g.getState(), 'aba')
+        g.next()
+        self.assertEqual(g.getState(), 'bbb')
+        g.next()
+        self.assertEqual(g.getState(), 'aaa')
+        g.next()
+
+        g = Grammar()
+        g.load('a{3}b{4} @ aaa{aba}aba{bbb}bbb{aaa} @ bbbbbb')
+        g.next()
+        self.assertEqual(g.getState(), 'aaaaaa')
+        g.next()
+        self.assertEqual(g.getState(), 'abaaba')
+        g.next()
+        self.assertEqual(g.getState(), 'bbbbbb')
+        g.next()
+        self.assertEqual(g.getState(), 'aaaaaa')
+        g.next()
+
+
+    def testWeighted(self):
+
+        # can use pipe to define equal probabilistic options
+        g = Grammar()
+        g.load('a{3}b{4} @ a{b|a}b{a|b} @ a')
+        g.next()
+        self.assertEqual(g.getState() in ['a', 'b'], True)
+        g.next()
+        self.assertEqual(g.getState() in ['a', 'b'], True)
+        g.next()
+        self.assertEqual(g.getState() in ['a', 'b'], True)
+
+
+
+        g = Grammar()
+        g.load('a{3}b{4} @ a{b=5|a} b{a|b=5} @ a')
+        post = []
+        for x in range(100):
+            post.append(g.getState())
+            g.next()
+        # probabilistic weighting favoring b
+        self.assertEqual(post.count('b') > 70, True)
+
+
+        g = Grammar()
+        g.load('a{.2}b{5}c{8} @ a{ab} c{b} b{bc=.4|ac=.6}')
+
+
+
+    def testRegularExpression(self):
+
+
+        g = Grammar()
+        g.load('a{1}b{5}c{10} @ *{ab} @ a')
+
+        g.next()
+        self.assertEqual(g.getState(), 'ab')
+
+
+        # partial matches with *
+        g = Grammar()
+        g.load('a{1}b{5}c{10} @ a*{ab} @ aa')
+        g.next()
+        self.assertEqual(g.getState(), 'ab')
+
+        g = Grammar()
+        g.load('a{1}b{5}c{10} @ **{ab} @ aa')
+        g.next()
+        self.assertEqual(g.getState(), 'ab')
+
+        g = Grammar()
+        g.load('a{1}b{5}c{10} @ b*{ab} @ ba')
+        g.next()
+        self.assertEqual(g.getState(), 'ab')
+
+        g = Grammar()
+        g.load('a{1}b{5}c{10} @ *a{cc} @ ba')
+        g.next()
+        self.assertEqual(g.getState(), 'cc')
+
+
+        g = Grammar()
+        g.load('a{1}b{5}c{10} @ *a{cc} c*{aa} @ cc')
+        g.next()
+        self.assertEqual(g.getState(), 'aa')
+        g.next()
+        self.assertEqual(g.getState(), 'cc')
+        g.next()
+        self.assertEqual(g.getState(), 'aa')
+        g.next()
+        self.assertEqual(g.getState(), 'cc')
+    
+
+        g = Grammar()
+        g.load('a{1}b{5}c{10} @ a*c{ccc} *c*{abc} @ abc')
+        g.next()
+        self.assertEqual(g.getState(), 'ccc')
+        g.next()
+        self.assertEqual(g.getState(), 'abc')
+        g.next()
+        self.assertEqual(g.getState(), 'ccc')
+        g.next()
+        self.assertEqual(g.getState(), 'abc')
+
+
 
 
 #-----------------------------------------------------------------||||||||||||--
 if __name__ == '__main__':
+    import sys
     from athenaCL.test import baseTest
-    baseTest.main(Test)
 
+    if len(sys.argv) >= 2:
+        t = Test()
+        t.testRegularExpression()
+    else:
+        baseTest.main(Test)
