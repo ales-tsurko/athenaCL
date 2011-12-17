@@ -6,7 +6,7 @@
 #
 # Authors:       Christopher Ariza
 #
-# Copyright:     (c) 2001-2010 Christopher Ariza
+# Copyright:     (c) 2001-2011 Christopher Ariza
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
 
