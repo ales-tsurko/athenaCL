@@ -45,10 +45,10 @@ class BinaryAccent(basePmtr.RhythmParameter):
         try:
             self.rObj = rhythm.Rhythm(self.args[0])  # first arg list of rhtyhms
         except error.PulseSyntaxError:
-            raise error.ParameterObjectSyntaxError, "enter a list of two pulse objects."
+            raise error.ParameterObjectSyntaxError("enter a list of two pulse objects.")
         #self.rObj = self._expandRhythm(self.rObj)
         if len(self.rObj) != 2:
-            raise error.ParameterObjectSyntaxError, "enter a list of two pulse objects."
+            raise error.ParameterObjectSyntaxError("enter a list of two pulse objects.")
         # set sustain mults for each pulse
         self.rObj[0].setSus(1.4)
         self.rObj[1].setSus(1.6)
@@ -129,7 +129,7 @@ class GaRhythm(basePmtr.RhythmParameter):
         except ValueError:
             self.genome = None # this will return error when args checked
         if self.genome == None:
-            raise error.ParameterObjectSyntaxError, 'genome failed to be populated.'
+            raise error.ParameterObjectSyntaxError('genome failed to be populated.')
 
         self.rObjBundle = [] # stores list of rhythms, by family
         self.pulseBundle = [] # stores all pulses as one list
@@ -205,7 +205,7 @@ class Loop(basePmtr.RhythmParameter):
         try:
             self.rObj = rhythm.Rhythm(self.args[0])
         except error.PulseSyntaxError:
-            raise error.ParameterObjectSyntaxError, "enter a list of pulse objects."
+            raise error.ParameterObjectSyntaxError("enter a list of pulse objects.")
         for r in range(0, len(self.rObj)):
             self.rObj[r].setSus(.94) # set constant sustain, was 98, but still cut
 
@@ -451,16 +451,16 @@ class PulseSieve(basePmtr.RhythmParameter):
         
         self.currentPulse = None # init value, used in getCurrentRhythm     
         self.length = abs(int(round(self.args[1])))
-        self.z = range(0, self.length)
+        self.z = list(range(0, self.length))
         try:
             self.sieveObj = sieve.Sieve(self.args[0], self.z)
         except AttributeError: 
-            raise error.ParameterObjectSyntaxError, "incorrect sieve syntax."
+            raise error.ParameterObjectSyntaxError("incorrect sieve syntax.")
 
         try:
             self.pulseObj = rhythm.Pulse(self.args[2])
         except error.PulseSyntaxError:
-            raise error.ParameterObjectSyntaxError, "incorrect sieve syntax."
+            raise error.ParameterObjectSyntaxError("incorrect sieve syntax.")
         self.pulseObj.setSus(.94) # no sustain
 
         self.pulseOn = self.pulseObj.copy()
@@ -542,11 +542,11 @@ class RhythmSieve(basePmtr.RhythmParameter):
         
         self.currentPulse = None # init value, used in getCurrentRhythm     
         self.length = abs(int(round(self.args[1])))
-        self.z = range(0, self.length)
+        self.z = list(range(0, self.length))
         try:
             self.sieveObj = sieve.Sieve(self.args[0], self.z)
         except AttributeError: 
-            raise error.ParameterObjectSyntaxError, "incorrect sieve syntax."
+            raise error.ParameterObjectSyntaxError("incorrect sieve syntax.")
 
         # NOTE: update this to use binary segment
         # gets a binary representawtion
@@ -626,8 +626,8 @@ class MarkovPulse(basePmtr.RhythmParameter):
         self.markovObj = markov.Transition() # creat obj w/o loading
         try:
             self.markovObj.loadTransition(self.args[0])
-        except error.TransitionSyntaxError, e: 
-            raise error.ParameterObjectSyntaxError, 'Markov transition creation failed: %s' % e
+        except error.TransitionSyntaxError as e: 
+            raise error.ParameterObjectSyntaxError('Markov transition creation failed: %s' % e)
         # will raise error
         self.orderObj = self._loadSub(self.args[1], 'genPmtrObjs')
         # need to store accumulated values
@@ -639,8 +639,8 @@ class MarkovPulse(basePmtr.RhythmParameter):
         for key in self.markovObj.getSignified():
             try:
                 pulseObj = rhythm.Pulse(key) # let guess pulse type
-            except error.PulseSyntaxError, e:
-                raise error.ParameterObjectSyntaxError, 'failed pulse object definition: %s' % e
+            except error.PulseSyntaxError as e:
+                raise error.ParameterObjectSyntaxError('failed pulse object definition: %s' % e)
             self.pulseRef[key] = pulseObj # store objs
 
     def checkArgs(self):
@@ -832,7 +832,7 @@ class IterateRhythmGroup(basePmtr.RhythmParameter):
                 # force the selection of a new value, examin results
                 failCount = failCount + 1        
                 if failCount > self.FAILLIMIT and self.valueBuffer == []:
-                    print lang.WARN, self.type, 'no values obtained; supplying value'
+                    print(lang.WARN, self.type, 'no values obtained; supplying value')
                     valTriple = self.rthmObj(t, refDict)
                     valObj = self.rthmObj.currentPulse
                     self.valueBuffer.append((valTriple, valObj))
@@ -880,15 +880,15 @@ class IterateRhythmWindow(basePmtr.RhythmParameter):
         for argList in self.args[0]:
             try:
                 pmtrObj = parameter.factory(argList, 'rthmPmtrObjs')
-            except error.ParameterObjectSyntaxError, msg:
-                raise error.ParameterObjectSyntaxError, 'failed sub-parameter: %s' % msg
+            except error.ParameterObjectSyntaxError as msg:
+                raise error.ParameterObjectSyntaxError('failed sub-parameter: %s' % msg)
             self.objArray.append(pmtrObj)
         
         self.countObj = self._loadSub(self.args[1], 'genPmtrObjs')   
         # check control string
         self.control = self._selectorParser(self.args[2]) 
         # create a selector that returns indix values for objArray
-        self.selector = basePmtr.Selector(range(len(self.objArray)), self.control)
+        self.selector = basePmtr.Selector(list(range(len(self.objArray))), self.control)
 
 
     def checkArgs(self):
@@ -940,7 +940,7 @@ class IterateRhythmWindow(basePmtr.RhythmParameter):
                 # force the selection of a new value, examine results
                 failCount = failCount + 1        
                 if failCount > self.FAILLIMIT and self.valueBuffer == []:
-                    print lang.WARN, self.type, 'no values obtained; supplying value'
+                    print(lang.WARN, self.type, 'no values obtained; supplying value')
                     valTriple = self.objArray[pos](t, refDict)
                     valObj = self.objArray[pos].currentPulse
                     self.valueBuffer.append((valTriple, valObj))

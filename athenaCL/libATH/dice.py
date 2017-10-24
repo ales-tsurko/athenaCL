@@ -167,7 +167,7 @@ class GameNoise:
         [[0, 0, 0, 0], [0, 0, 0, 1], [0, 0, 1, 0], [0, 0, 1, 1], [0, 1, 0, 0], [0, 1, 0, 1], [0, 1, 1, 0], [0, 1, 1, 1], [1, 0, 0, 0], [1, 0, 0, 1], [1, 0, 1, 0], [1, 0, 1, 1], [1, 1, 0, 0], [1, 1, 0, 1], [1, 1, 1, 0], [1, 1, 1, 1]]
         """
         self.noVal = noVal # desired number of values
-        if self.noVal <= 0: raise ValueError, 'number of values must be greater than zero'
+        if self.noVal <= 0: raise ValueError('number of values must be greater than zero')
         # find exponent that is greater than or equal to
         self.noDice = self._findNearestExp(self.noVal)
         #environment.printDebug(['final number of dice', self.noDice])
@@ -195,7 +195,7 @@ class GameNoise:
                 bin.append(1)
             else:
                 bin.append(0)
-            dec = long(dec/2)
+            dec = int(dec/2)
         if bin == []: return [0]
         else: return bin
     

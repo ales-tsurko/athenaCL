@@ -393,7 +393,7 @@ class LevelEventPartition(basePmtr.StaticParameterTexture):
         usrStr = drawer.selectionParse(usrStr, ref)
         if usrStr == None:
             selStr = drawer.selectionParseKeyLabel(ref)
-            raise error.ParameterObjectSyntaxError, 'bad control value: enter %s.' % selStr
+            raise error.ParameterObjectSyntaxError('bad control value: enter %s.' % selStr)
         return usrStr
 
     def checkArgs(self):
@@ -428,7 +428,7 @@ class EventDensityPartition(basePmtr.StaticParameterTexture):
         usrStr = drawer.selectionParse(usrStr, ref)
         if usrStr == None:
             selStr = drawer.selectionParseKeyLabel(ref)
-            raise error.ParameterObjectSyntaxError, 'bad control value: enter %s.' % selStr
+            raise error.ParameterObjectSyntaxError('bad control value: enter %s.' % selStr)
         return usrStr
 
     def checkArgs(self):
@@ -463,7 +463,7 @@ class LevelEventCount(basePmtr.StaticParameterTexture):
         usrStr = drawer.selectionParse(usrStr, ref)
         if usrStr == None:
             selStr = drawer.selectionParseKeyLabel(ref)
-            raise error.ParameterObjectSyntaxError, 'bad control value: enter %s.' % selStr
+            raise error.ParameterObjectSyntaxError('bad control value: enter %s.' % selStr)
         return usrStr
 
     def checkArgs(self):
@@ -522,7 +522,7 @@ class InterpolationMethodControl(basePmtr.StaticParameterTexture):
         usrStr = drawer.selectionParse(usrStr, ref)
         if usrStr == None:
             selStr = drawer.selectionParseKeyLabel(ref)
-            raise error.ParameterObjectSyntaxError, 'bad control value: enter %s.' % selStr
+            raise error.ParameterObjectSyntaxError('bad control value: enter %s.' % selStr)
         return usrStr
 
     def checkArgs(self):

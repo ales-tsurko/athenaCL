@@ -121,7 +121,7 @@ knownEXT = (imageEXT + audioEXT + videoEXT + dataEXT +
 # messagge formatting for standard output
 
 def alertMsg(str='', prepend=''):
-    print '%s--||||||||||||-- %s' % (prepend, str)
+    print('%s--||||||||||||-- %s' % (prepend, str))
     
 def cmtAlert(str='', prepend='#'):
     return '%s--||||||||||||-- %s\n' % (prepend, str)
@@ -180,7 +180,7 @@ def rmdir(path):
 
 
 def rm(path):
-    if path == os.sep: raise ValueError, 'macro remove canceled' # safety
+    if path == os.sep: raise ValueError('macro remove canceled') # safety
     if os.name == 'posix': 
         os.system('rm -f -r "%s"' % path)
     else: # mac, windows
@@ -193,15 +193,15 @@ def rm(path):
         
 def rmSudo(path, sudoFound=None):
     """sudo is not avail on all plats, so su root on other nixes"""
-    if path == os.sep: raise ValueError, 'macro remove canceled' # safety
+    if path == os.sep: raise ValueError('macro remove canceled') # safety
     if os.name == 'posix': 
         if sudoFound == None: # test
             sudoFound = drawer.isSudo() # 1 if exists
         if drawer.isDarwin() or sudoFound:
-            print PROMPTdarwin % ('removing', path)
+            print(PROMPTdarwin % ('removing', path))
             os.system('sudo rm -f -r "%s"' % path)
         else: # other *nixes
-            print PROMPTposix % ('removing', path)
+            print(PROMPTposix % ('removing', path))
             os.system('su root -c "rm -f -r %s"' % path)
     else: # mac, windows
         for root, dirs, files in os.walk(path, topdown=False):
@@ -235,10 +235,10 @@ def cpSudo(src, dst, sudoFound=None):
         if sudoFound == None: # test
             sudoFound = drawer.isSudo() # 1 if exists
         if drawer.isDarwin() or sudoFound:
-            print PROMPTdarwin % ('writing', dst)
+            print(PROMPTdarwin % ('writing', dst))
             os.system('sudo cp %s %s' % (src, dst))
         else: # other *nixes
-            print PROMPTposix % ('writing', dst)
+            print(PROMPTposix % ('writing', dst))
             os.system('su root -c "cp %s %s"' % (src, dst))
     else: # mac, windows
         if os.path.isdir():
@@ -271,10 +271,10 @@ def mvSudo(src, dst, sudoFound=None):
         if sudoFound == None: # test
             sudoFound = drawer.isSudo() # 1 if exists
         if drawer.isDarwin() or sudoFound:
-            print PROMPTdarwin % ('moving', dst)
+            print(PROMPTdarwin % ('moving', dst))
             os.system('sudo mv %s %s' % (src, dst))
         else: # other *nixes
-            print PROMPTposix % ('moving', dst)
+            print(PROMPTposix % ('moving', dst))
             os.system('su root -c "mv %s %s"' % (src, dst))
     else: # mac, windows
         shutil.move(src, dst)
@@ -292,10 +292,10 @@ def mkdirSudo(path, sudoFound=None, flagStr=''):
         if sudoFound == None: # test
             sudoFound = drawer.isSudo() # 1 if exists
         if drawer.isDarwin() or sudoFound:
-            print PROMPTdarwin %     ('writing directory', path)
+            print(PROMPTdarwin %     ('writing directory', path))
             os.system('sudo mkdir %s %s' % (flagStr, path))
         else: # other *nixes
-            print PROMPTposix % ('writing directory', path)
+            print(PROMPTposix % ('writing directory', path))
             os.system('su root -c "mkdir %s %s"' % (flagStr, path))
     else:
         os.mkdir(path)
@@ -315,10 +315,10 @@ def chmodSudo(value, path, sudoFound=None):
         if sudoFound == None: # test
             sudoFound = drawer.isSudo() # 1 if exists
         if drawer.isDarwin() or sudoFound:
-            print PROMPTdarwin %     ('changing permissions', path)
+            print(PROMPTdarwin %     ('changing permissions', path))
             os.system('sudo chmod %s "%s"' % (value, path))
         else: # other *nixes
-            print PROMPTposix % ('changing permissions', path)
+            print(PROMPTposix % ('changing permissions', path))
             os.system('su root -c "chmod %s %s"' % (value, path))
 
 
@@ -330,12 +330,12 @@ def md5checksum(filePath):
     """
     import md5 # this is depcreated; use hashlib
 
-    print _MOD, 'mpd5 obtained from:', filePath
+    print(_MOD, 'mpd5 obtained from:', filePath)
     f = open(filePath)
     msg = f.read()
     f.close()
     val = md5.new(msg).hexdigest()
-    print _MOD, 'md5:', val
+    print(_MOD, 'md5:', val)
     return val
         
 def man(path):
@@ -496,7 +496,7 @@ def mountAfp(user, pswd, ip, dirVol):
                 user, pswd, ip, vol, dirVol)
         os.system(cmdStr)
     else:
-        print '%s already exists.' % dirVol
+        print('%s already exists.' % dirVol)
 
 def unmount(dirVol):
     os.system('umount %s' % dirVol)
@@ -603,7 +603,7 @@ def dmg(version, path, readmePath=None, dmgRsrc=None, vTag=1):
     ditto(tmpDir, '/Volumes/%s/' % (name)) # copy to volume
 
     if dmgRsrc != None:
-        print 'Customize dmg now, then press return'
+        print('Customize dmg now, then press return')
         os.system('read ') # wait for return form user
         ### break to make manual adjustments
     # hide resource files, if around
@@ -778,7 +778,7 @@ def openMedia(path, prefDict=None):
         else: # win or other
             pass # rely on system
     elif fileType != None: # get from prefDict
-        for key in prefDict.keys():
+        for key in list(prefDict.keys()):
             # match by filetype string leading key and path string
             if key.startswith(fileType) and 'path' in key.lower(): 
                 app = prefDict[key] # may be a complete file path, or a name
@@ -832,8 +832,8 @@ def findFinkDir():
     retuns None on error: means no fink installation
     """
     if os.name == 'posix': # create launch script
-        import commands
-        msg = commands.getoutput('fink dumpinfo -p %p fink')
+        import subprocess
+        msg = subprocess.getoutput('fink dumpinfo -p %p fink')
         # last line is somethign like: %p: /sw
         msgStr = msg.split('\n')[-1] # get last if more tn 1 line
         if msgStr.find('command not found') >= 0: # cant find fink command
@@ -886,7 +886,7 @@ def findManPath(group=1, altSys=None):
             dirs = [os.path.join(finkStub, 'share', 'man')]
         else: # use common dirs
             dirs = commonManDirs
-    else: raise ValueError, 'bad system alternate option given'
+    else: raise ValueError('bad system alternate option given')
     found = []
     for path in dirs:
         if os.path.isdir(path):

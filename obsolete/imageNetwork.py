@@ -168,7 +168,7 @@ class MCnetCanvas:
             self.totalSets = len(rowAxisSets) + len(columnAxisSets)
             self.masterSetList = rowAxisSets + columnAxisSets
 
-        if (srcSize, dstSize) in self.fixedPosChart.keys():
+        if (srcSize, dstSize) in list(self.fixedPosChart.keys()):
             self.mapPostitionType = 'fixed'
         else:
             self.mapPostitionType = 'perimeter'
@@ -184,7 +184,7 @@ class MCnetCanvas:
                     sideUnits = side
                     break
 
-        self.areaKeys = range(0,area) # list to get a point for all area
+        self.areaKeys = list(range(0,area)) # list to get a point for all area
         self.noGutters        = sideUnits + 1
         self.mapGUTTER        = 3 # in pixels
         self.nodeWidth        = 46
@@ -207,7 +207,7 @@ class MCnetCanvas:
             if xCord == sideUnits:
                 xCord = 0
                 yCord = yCord + 1
-        cordKeys = self.cordDict.keys()
+        cordKeys = list(self.cordDict.keys())
         cordKeys.sort()
 
         # this calculate the height of the entire window
@@ -263,14 +263,14 @@ class MCnetCanvas:
         if self.mapPostitionType == 'fixed':
             setLoc = self.fixedPosChart[(srcSize, dstSize)]['setLoc']
             # assign sets to coords
-            for node in setLoc.keys():
+            for node in list(setLoc.keys()):
                 position = setLoc[node]
                 self.cordDict[position]['set'] = node
           #  counter = counter + 1
 
         elif self.mapPostitionType == 'perimeter': # use parimiter method
             # get perimeter points
-            locations =  self.cordDict.keys()
+            locations =  list(self.cordDict.keys())
             tempLocs = []
             for node in locations:
                 if node[0] == 0 or node[1] == 0:
@@ -348,7 +348,7 @@ class MCnetCanvas:
                 minDispl, maxDispl, orderedResults, counter = a
                 if minDispl == 1: # find sets in grid
                     lineCords = [] # clear before finding two points
-                    for node in self.cordDict.keys():
+                    for node in list(self.cordDict.keys()):
                         if self.cordDict[node]['set'] == colEntry:
                             lineCords.append(node)
                         if self.cordDict[node]['set'] == rowEntry:

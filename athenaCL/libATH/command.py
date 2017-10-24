@@ -200,7 +200,7 @@ class Command(object):
 
     def _getNoTI(self):
         """returns number of textures"""
-        return len(self.ao.textureLib.keys())
+        return len(list(self.ao.textureLib.keys()))
 
     def _getNoPI(self):
         """returns number of paths"""
@@ -252,13 +252,13 @@ class Command(object):
             usrStr = drawer.restringulator(usrStr) # add quotes if necessary
             try:
                 usrDataEval = eval(usrStr)
-            except TypeError, e: 
+            except TypeError as e: 
                 msg = '%s %s' % (errorPreface, e) #'type-error')
                 usrDataEval = None
-            except SyntaxError, e: 
+            except SyntaxError as e: 
                 msg = '%s %s' % (errorPreface, e) #'syntax-error')
                 usrDataEval = None
-            except NameError, e: # if strings given without a quote not converted
+            except NameError as e: # if strings given without a quote not converted
                 msg = '%s %s' % (errorPreface, 'name-error (quote all strings)')
                 usrDataEval = None
 
@@ -632,16 +632,16 @@ class Command(object):
             return None
         # check that number is in proper range
         if fmt == basePmtr.AUXQ:
-            if no not in range(0, self.ao.textureLib[tName].auxNo):
+            if no not in list(range(0, self.ao.textureLib[tName].auxNo)):
                 return None
         elif fmt == basePmtr.TEXTQ:
-            if no not in range(0, self.ao.textureLib[tName].textPmtrNo):
+            if no not in list(range(0, self.ao.textureLib[tName].textPmtrNo)):
                 return None
         elif fmt == basePmtr.DYNQ:
-            if no not in range(0, self.ao.textureLib[tName].dynPmtrNo):
+            if no not in list(range(0, self.ao.textureLib[tName].dynPmtrNo)):
                 return None
         elif fmt == basePmtr.CLONEQ:
-            if no not in range(0, self.ao.cloneLib.clonePmtrNo()):
+            if no not in list(range(0, self.ao.cloneLib.clonePmtrNo())):
                 return None
         label = '%s%s' % (fmt, no)
         return label
@@ -707,7 +707,7 @@ class Command(object):
         """checks if a path name exists"""
         if name == None:
             name = self.ao.activePath
-        if self.ao.pathLib.has_key(name) != 1:
+        if (name in self.ao.pathLib) != 1:
             return lang.msgPImissingName
         else:
             return None
@@ -738,7 +738,7 @@ class Command(object):
         used for default, when a texture has lost its path
         for eventModes that requre a path
         will not overwrite existing paths with the same name"""
-        if name not in self.ao.pathLib.keys():
+        if name not in list(self.ao.pathLib.keys()):
             self.ao.pathLib[name] = pitchPath.PolyPath(name)
             self.ao.pathLib[name].autoFill(psList)
         self.ao.activePath = name
@@ -760,7 +760,7 @@ class Command(object):
             name = self._nameReplace(name)
             if self._nameTest(name) != None:
                 dialog.msgOut(self._nameTest(name), self.termObj)
-            elif self.ao.pathLib.has_key(name):
+            elif name in self.ao.pathLib:
                 dialog.msgOut(lang.msgPInameTaken, self.termObj)
             else:
                 return name
@@ -809,7 +809,7 @@ class Command(object):
         this is an improved version used for ELn; this allowes for muted
         textures to exist with active clones"""
         activeCount = 0
-        for tName in self.ao.textureLib.keys():
+        for tName in list(self.ao.textureLib.keys()):
             t = self.ao.textureLib[tName]
             # if active and no clonse
             if not t.mute and tName not in self.ao.cloneLib.tNames():
@@ -835,7 +835,7 @@ class Command(object):
     def _tiTestNameExists(self, name=None):
         if name == None:
             name = self.ao.activeTexture
-        if self.ao.textureLib.has_key(name) != 1:
+        if (name in self.ao.textureLib) != 1:
             return lang.msgTImissingName
         else:
             return None
@@ -876,7 +876,7 @@ class Command(object):
         t = self.ao.textureLib[tName]
         if p == 'path':
             attribute_to_edit = t.path
-            for pair in self.ao.pathLib.items():
+            for pair in list(self.ao.pathLib.items()):
                 if pair[1] == attribute_to_edit:
                     old_name = pair[0]
             path_string = t.path.repr('scPath')     
@@ -937,7 +937,7 @@ class Command(object):
         usrDataEval, msg = self._strRawToData(usrStr, lang.msgTIeditArgError)
         # do parameter specific adjustments
         if p == 'path': # given  a string arg, retrurn the reference to e path
-            if usrDataEval not in self.ao.pathLib.keys():
+            if usrDataEval not in list(self.ao.pathLib.keys()):
                 return None, 'no path named %s.\n' % str(usrDataEval)
             usrDataEval = self.ao.pathLib[usrDataEval] # get reference of path
         elif p == 'tRange': # must be a number
@@ -973,7 +973,7 @@ class Command(object):
             try: # this may raise a ValueError
                 pmtrName = self.ao.textureLib[textureName].getTextStaticName(p)
                 evalData = tuple([pmtrName,] + list(usrDataEval))
-            except ValueError, e:
+            except ValueError as e:
                 evalData = None
                 msg = e # store error message
         else:# all other parameters return unmodified
@@ -1045,23 +1045,23 @@ class Command(object):
             name = self._nameReplace(name)
             if self._nameTest(name) != None:
                 dialog.msgOut(self._nameTest(name), self.termObj)
-            elif self.ao.textureLib.has_key(name):
+            elif name in self.ao.textureLib:
                 dialog.msgOut(lang.msgTInameTaken, self.termObj)
             else:
                 return name
 
     def _tiRemove(self, name): # args is name of texture 
-        if name in self.ao.textureLib.keys():
+        if name in list(self.ao.textureLib.keys()):
             self.ao.textureLib[name].path.refDecr()
             del self.ao.textureLib[name] # del object
             if name in self.ao.cloneLib.tNames():   # del clone dict,if exists
                 self.ao.cloneLib.delete(name) # deletes all clones w/ this text
             if name == self.ao.activeTexture:
-                if len(self.ao.textureLib.keys()) == 0:
+                if len(list(self.ao.textureLib.keys())) == 0:
                     self.ao.activeTexture = ''
                 else:# gets a random texture to replace
                     self.ao.activeTexture = random.choice(
-                                                     self.ao.textureLib.keys()) 
+                                                     list(self.ao.textureLib.keys())) 
             return 'TI %s destroyed.\n' % name
         else:
             return None # error 
@@ -1080,7 +1080,7 @@ class Command(object):
         if usrDataEval == None: 
             return 0, msg
         try: obj = parameter.factory(usrDataEval, 'g')
-        except error.ParameterObjectSyntaxError, e:
+        except error.ParameterObjectSyntaxError as e:
             return 0, e
         return 1, obj
     
@@ -1102,7 +1102,7 @@ class Command(object):
     def _teGetTimeMapDict(self):
         tiMapDict = {} #clear
         #muteList = self._tiMuteList()
-        for tName in self.ao.textureLib.keys():
+        for tName in list(self.ao.textureLib.keys()):
             t = self.ao.textureLib[tName]
             tiMapDict[tName] = {} # add a dictionary w/ name for key
             tiMapDict[tName]['tRange'] = t.timeRangeAbs # this is abs time
@@ -1123,11 +1123,11 @@ class Command(object):
         if tiMapDict == None: tiMapDict = self._teGetTimeMapDict()
         startTime = 0
         endTime = 0
-        for tName in tiMapDict.keys():
+        for tName in list(tiMapDict.keys()):
             s, e = tiMapDict[tName]['tRange']
             if s <= startTime: startTime = s
             if e >= endTime: endTime = e
-            for cName in tiMapDict[tName]['cloneDict'].keys():
+            for cName in list(tiMapDict[tName]['cloneDict'].keys()):
                 s, e = tiMapDict[tName]['cloneDict'][cName]['tRange']
                 # check for a clone that is longer               
                 if s <= startTime: startTime = s
@@ -1751,7 +1751,7 @@ class PIv(Command):
             label = ('TI References (%s): ' %
                         self.ao.pathLib[nameToView].refCount)
             listOfTInames = []
-            for tName in self.ao.textureLib.keys():
+            for tName in list(self.ao.textureLib.keys()):
                 if (self.ao.textureLib[tName].path.name == 
                      self.ao.pathLib[nameToView].name):
                     listOfTInames.append(tName)
@@ -2046,7 +2046,7 @@ class PIls(Command):
         msg = []
         msg.append('PathInstances available:\n')
         entryLines = []
-        pathNames = self.ao.pathLib.keys()
+        pathNames = list(self.ao.pathLib.keys())
         pathNames.sort()
         for name in pathNames:
             pathStr = self.ao.pathLib[name].repr('scPath')
@@ -2087,8 +2087,8 @@ class PIcp(Command):
 
     def _piCopy(self, srcName, dstName):
         """copies one path to new path"""
-        if (srcName != dstName and self.ao.pathLib.has_key(srcName) and 
-                                          dstName not in self.ao.pathLib.keys())== 1:
+        if (srcName != dstName and srcName in self.ao.pathLib and 
+                                          dstName not in list(self.ao.pathLib.keys()))== 1:
             # sets name attribute
             self.ao.pathLib[dstName] = self.ao.pathLib[srcName].copy(dstName)
             self.ao.activePath = dstName
@@ -2106,7 +2106,7 @@ class PIcp(Command):
         if args != '':
             args = argTools.ArgOps(args, stripComma=True)
             msg = []
-            self.oldName = drawer.inList(args.get(0), self.ao.pathLib.keys())
+            self.oldName = drawer.inList(args.get(0), list(self.ao.pathLib.keys()))
             if self.oldName == None: return self._getUsage()
             if args.list(1, 'end') != None:
                 for newName in args.list(1, 'end'):
@@ -2115,7 +2115,7 @@ class PIcp(Command):
 
         if self.cpList == []:
             self.oldName = self._chooseFromList('select a path to copy:',
-                         self.ao.pathLib.keys(), 'case')
+                         list(self.ao.pathLib.keys()), 'case')
             if self.oldName == None: return lang.msgPIbadName
             query = 'name the copy of path %s:' % self.oldName 
             name = self._piGetNewName(query)
@@ -2160,7 +2160,7 @@ class PIrm(Command):
         self.cmdStr = 'PIrm'
 
     def _piRemove(self, name): # args is name of path
-        if name in self.ao.pathLib.keys():
+        if name in list(self.ao.pathLib.keys()):
             # this is 0 when there are no longer any TIs that link to this path
             if self.ao.pathLib[name].refCount != 0:  
                 return ('PI %s is being used by %i Textures. either delete Textures ("TIrm") or change their Path ("TIe").\n' % 
@@ -2169,10 +2169,10 @@ class PIrm(Command):
                 self.ao.activePath = ''
             del self.ao.pathLib[name]
             if name == self.ao.activePath:
-                if len(self.ao.pathLib.keys()) == 0:
+                if len(list(self.ao.pathLib.keys())) == 0:
                     self.ao.activePath = ''
                 else:
-                    self.ao.activePath = random.choice(self.ao.pathLib.keys())
+                    self.ao.activePath = random.choice(list(self.ao.pathLib.keys()))
             return 'PI %s destroyed.\n' % name
         else:
             return None # error
@@ -2188,13 +2188,13 @@ class PIrm(Command):
             msg = []
             if args.list(0, 'end') != None:
                 for name in args.list(0, 'end'):
-                    name = drawer.inList(name, self.ao.pathLib.keys())
+                    name = drawer.inList(name, list(self.ao.pathLib.keys()))
                     if name == None: return self._getUsage()
                     self.rmList.append(name)
             else: return self._getUsage()
         if self.rmList == []:
             name = self._chooseFromList('select a path to delete:', 
-                     self.ao.pathLib.keys(), 'case')
+                     list(self.ao.pathLib.keys()), 'case')
             if name == None: return lang.msgPIbadName
             query = 'are you sure you want to delete path %s?'
             askUsr = dialog.askYesNoCancel((query % name), 1, self.termObj)
@@ -2251,11 +2251,11 @@ class PIo(Command):
         self.name = None
         if args != '':
             args = argTools.ArgOps(args) # no strip
-            self.name = drawer.inList(args.get(0), self.ao.pathLib.keys())
+            self.name = drawer.inList(args.get(0), list(self.ao.pathLib.keys()))
             if self.name == None: return self._getUsage()
         if self.name == None:
             self.name = self._chooseFromList('select a path to activate:', 
-                              self.ao.pathLib.keys(), 'case')
+                              list(self.ao.pathLib.keys()), 'case')
             if self.name == None: return lang.msgPIbadName
 
     def process(self): 
@@ -2303,7 +2303,7 @@ class PImv(Command):
         pathBinRef[newPathName] = pathBinRef[oldPathName]
         #set at init, must change after copy
         pathBinRef[newPathName].name = newPathName 
-        for key in textureBinRef.keys():        
+        for key in list(textureBinRef.keys()):        
             ### change
             if textureBinRef[key].path.name == oldPathName: # had old name
                 # sets attribute obj, name, value 
@@ -2321,7 +2321,7 @@ class PImv(Command):
 
         if args != '':
             args = argTools.ArgOps(args, stripComma=True)
-            oldPathName = drawer.inList(args.get(0), self.ao.pathLib.keys())
+            oldPathName = drawer.inList(args.get(0), list(self.ao.pathLib.keys()))
             if oldPathName == None: return self._getUsage()
             newPathName = args.get(1)
             if newPathName == None: return self._getUsage()
@@ -2670,7 +2670,7 @@ class TMls(Command):
             if name == self.ao.activeTextureModule: activity = lang.ACTIVE
             else: activity = lang.INACTIVE
             refCount = 0
-            for textName in self.ao.textureLib.keys():
+            for textName in list(self.ao.textureLib.keys()):
                 # see if TIs are using this TM
                 if self.ao.textureLib[textName].tmName == name: 
                     refCount = refCount + 1
@@ -2774,7 +2774,7 @@ class _CommandTP(Command):
             usrStr = outFormat.outputExportFormatParser(usrStr)
             if usrStr == None:
                 msgPre = 'format error: select %s:' % drawer.listToStrGrammar(
-                                outFormat.outputExportFormatNames.values(), 'or')
+                                list(outFormat.outputExportFormatNames.values()), 'or')
                 #dialog.msgOut(msg, self.termObj)
             else: return usrStr
                       
@@ -3025,7 +3025,7 @@ class TPmap(_CommandTP):
                 break
             try:
                 obj = parameter.factory(usrDataEval, subLib)
-            except error.ParameterObjectSyntaxError, msg:
+            except error.ParameterObjectSyntaxError as msg:
                 return '%s\n' % msg
             ok, msg = obj.checkArgs()
             if not ok:
@@ -3108,7 +3108,7 @@ class TPe(_CommandTP):
             self.fmt = outFormat.outputExportFormatParser(args.get(0))
             if self.fmt == None: 
                 opts = drawer.listToStrGrammar(
-                       outFormat.outputExportFormatNames.values())
+                       list(outFormat.outputExportFormatNames.values()))
                 return self._getUsage('no format %s; select %s' % (args.get(0),
                             opts))
 
@@ -3158,7 +3158,7 @@ class TPe(_CommandTP):
         for subLib, usrDataEval in self.argBundle:
             try:
                 obj = parameter.factory(usrDataEval, subLib)
-            except error.ParameterObjectSyntaxError, msg:
+            except error.ParameterObjectSyntaxError as msg:
                 return '%s\n' % msg
             ok, msg = obj.checkArgs()
             if not ok:
@@ -3245,7 +3245,7 @@ class TIn(Command):
             args = argTools.ArgOps(args)
             self.name = args.get(0)
             if self.name == None: return self._getUsage()
-            if self.name in self.ao.textureLib.keys():
+            if self.name in list(self.ao.textureLib.keys()):
                 return self._getUsage()
             if self._nameTest(self.name) != None:
                 return self._getUsage(self._nameTest(self.name))
@@ -3337,11 +3337,11 @@ class TIo(Command):
         self.name = None
         if args != '':
             args = argTools.ArgOps(args) # no strip
-            self.name = drawer.inList(args.get(0), self.ao.textureLib.keys())
+            self.name = drawer.inList(args.get(0), list(self.ao.textureLib.keys()))
             if self.name == None: return self._getUsage()
         if self.name == None:
             self.name = self._chooseFromList('which TextureInstnace to make active?', 
-                     self.ao.textureLib.keys(), 'case')
+                     list(self.ao.textureLib.keys()), 'case')
             if self.name == None: return lang.msgTIbadName
 
     def process(self): 
@@ -3378,7 +3378,7 @@ class TImute(Command):
         self.cmdStr = 'TImute'
 
     def _tiMute(self, nameToMute):
-        if nameToMute in self.ao.textureLib.keys():
+        if nameToMute in list(self.ao.textureLib.keys()):
             if self.ao.textureLib[nameToMute].mute:
                 self.ao.textureLib[nameToMute].mute = 0
                 return 'TI %s is no longer muted.\n' % nameToMute
@@ -3856,7 +3856,7 @@ class TIe(Command):
             demo, demoAdjust = self._tiGetDemo(tName, p, label, 'edit')
             if demo == None: return demoAdjust # this is the error message
             if p == 'path':
-                usrStr = self._chooseFromList(demo, self.ao.pathLib.keys(), 'case')
+                usrStr = self._chooseFromList(demo, list(self.ao.pathLib.keys()), 'case')
                 if usrStr == None: return lang.msgPIbadName
                 usrDataEval, errorMsg = self._tiEvalUsrStr(usrStr, p, tName)
                 if usrDataEval == None: return errorMsg
@@ -3947,7 +3947,7 @@ class TIls(Command):
     def display(self): 
         msg = []
         msg.append('TextureInstances available:\n')
-        tNames = self.ao.textureLib.keys()
+        tNames = list(self.ao.textureLib.keys())
         tNames.sort()
         entryLines = []
         for name in tNames:
@@ -4001,14 +4001,14 @@ class TIrm(Command):
             args = argTools.ArgOps(args, stripComma=True)
             if args.list(0, 'end') != None: # if supplied
                 for name in args.list(0, 'end'):
-                    name = drawer.inList(name, self.ao.textureLib.keys())
+                    name = drawer.inList(name, list(self.ao.textureLib.keys()))
                     if name == None: return self._getUsage()
                     self.rmList.append(name)
             else: return self._getUsage()
 
         if self.rmList == []:
             name = self._chooseFromList('which TextureInstnace to delete?', 
-                     self.ao.textureLib.keys(), 'case')
+                     list(self.ao.textureLib.keys()), 'case')
             if name == None: return lang.msgTIbadName
             query = 'are you sure you want to delete texture %s?' % name
             askUsr = dialog.askYesNoCancel(query, 1, self.termObj)
@@ -4057,7 +4057,7 @@ class TIcp(Command):
 
     def _tiCopy(self, srcName, copyName):
         """copies a texture"""
-        if srcName != copyName and self.ao.textureLib.has_key(srcName) == 1:
+        if srcName != copyName and (srcName in self.ao.textureLib) == 1:
             self.ao.textureLib[copyName] = self.ao.textureLib[srcName].copy(
                                                                                       copyName)
             # increment references for this path
@@ -4080,7 +4080,7 @@ class TIcp(Command):
         if args != '':
             args = argTools.ArgOps(args, stripComma=True)
             self.oldName = drawer.inList(args.get(0), 
-                                self.ao.textureLib.keys())
+                                list(self.ao.textureLib.keys()))
             if self.oldName == None: return self._getUsage()
             if args.list(1, 'end') != None: # if supplied
                 for newName in args.list(1, 'end'):
@@ -4089,7 +4089,7 @@ class TIcp(Command):
 
         if self.cpList == []:
             self.oldName = self._chooseFromList('which TextureInstnace to copy?', 
-                self.ao.textureLib.keys(), 'case')
+                list(self.ao.textureLib.keys()), 'case')
             if self.oldName == None: return lang.msgTIbadName
             query = 'name this copy of TI %s:' % (repr(self.oldName))
             name = self._tiGetNewName(query)
@@ -4162,7 +4162,7 @@ class TImv(Command):
         if args != '':
             args = argTools.ArgOps(args, stripComma=True)
             self.oldTextName = drawer.inList(args.get(0), 
-                                     self.ao.textureLib.keys())
+                                     list(self.ao.textureLib.keys()))
             if self.oldTextName == None: return self._getUsage()
             self.newTextName = args.get(1)
             if self.newTextName == None: return self._getUsage()
@@ -4436,7 +4436,7 @@ class TEe(Command):
             if demo == None: return demoAdjust # this is the error message
     
             if p=='path':
-                usrStr = self._chooseFromList(demo, self.ao.pathLib.keys(), 
+                usrStr = self._chooseFromList(demo, list(self.ao.pathLib.keys()), 
                                  'case')
                 if usrStr == None: return lang.msgPIbadName
             elif p in ('ampQ', 'panQ', 'fieldQ', 'octQ', 'beatT', 'tRange', 
@@ -4466,7 +4466,7 @@ class TEe(Command):
         self.report = []
         refresh = self.ao.aoInfo['refreshMode']
         # no errors: do final changes on ALL TEXTURES
-        for tName in self.ao.textureLib.keys():
+        for tName in list(self.ao.textureLib.keys()):
             # if self.p is not part of this texture (w/ an aux, or text)
             # an errormsg will be returned
             self.ok, msgEdit = self._tiEdit(tName, self.p, 
@@ -4544,7 +4544,7 @@ class TEv(Command):
         p = self.p # this is the name of the texture 'self' variable
         label = self.label
 
-        text_keys = self.ao.textureLib.keys()
+        text_keys = list(self.ao.textureLib.keys())
         text_keys.sort()
         msg = []
         msg.append('compare parameters: ')
@@ -4559,7 +4559,7 @@ class TEv(Command):
             msg.append('path\n')
             for key in text_keys:
                 name = 'unknown'
-                for pair in self.ao.pathLib.items():
+                for pair in list(self.ao.pathLib.items()):
                     if pair[1] == self.ao.textureLib[key].path:
                         name = pair[0]   
                 pathStr = self.ao.textureLib[key]._getPathList('string')
@@ -4616,7 +4616,7 @@ class TEmap(Command):
 
     def process(self): 
         if not self.ao.aoInfo['refreshMode']: # if refresh mode is off
-            for tName in self.ao.textureLib.keys():
+            for tName in list(self.ao.textureLib.keys()):
                 ok, msg = self._tiRefresh(tName) # update esObj if refreshmode off
         self.tiMapDict = self._teGetTimeMapDict()
 
@@ -4632,13 +4632,13 @@ class TEmap(Command):
         msg = []
         msg.append('TextureEnsemble Map:\n')
         msg.append(ruler)
-        tiNameList = tiMapDict.keys()
+        tiNameList = list(tiMapDict.keys())
         tiNameList.sort()
         for tiName in tiNameList:
             s, e = tiMapDict[tiName]['tRange']
             graph = typeset.graphDuration(totalDur, s, e, graphWidth, '_')
             msg.append('%s%s\n' % (tiName.ljust(lang.LMARGINW), graph))
-            for tcName in tiMapDict[tiName]['cloneDict'].keys():
+            for tcName in list(tiMapDict[tiName]['cloneDict'].keys()):
                 cloneS, cloneE = tiMapDict[tiName]['cloneDict'][tcName]['tRange']
                 graph = typeset.graphDuration(totalDur, cloneS, cloneE, 
                                                       graphWidth, '.')
@@ -5827,7 +5827,7 @@ class EOls(_CommandEO):
         msg.append('EventOutput active:\n')
         entryLines = []
         prefList = self._emGetOutputFormats()
-        allEvents = outFormat.outputFormatNames.values()
+        allEvents = list(outFormat.outputFormatNames.values())
         allEvents.sort()
         for entry in allEvents:
             if entry in prefList:  
@@ -5907,7 +5907,7 @@ class EMls(Command):
         msg = []
         msg.append('EventMode modes available:\n')
         entryLines = []
-        names = eventList.eventModeNames.values()
+        names = list(eventList.eventModeNames.values())
         names.sort()
         for entry in names:
             if entry == self.ao.activeEventMode:  
@@ -6355,10 +6355,10 @@ class _CommandAO(Command):
         """clears all ref counts on paths and recounts all uses of a path"""
         # clear all current values
         extantPaths = []
-        for pathName in self.ao.pathLib.keys():
+        for pathName in list(self.ao.pathLib.keys()):
             self.ao.pathLib[pathName].refCount = 0
             extantPaths.append(pathName)
-        for textureName in self.ao.textureLib.keys():
+        for textureName in list(self.ao.textureLib.keys()):
             pathName = self.ao.textureLib[textureName].path.name
             if pathName in extantPaths:
                 self.ao.pathLib[pathName].refIncr()
@@ -6410,8 +6410,8 @@ class _CommandAO(Command):
             self.ao.pathLib = {}     # reinit path bin
         else: # a name check must make sure that no paths with same name exist
             pass # do nothing, and add paths
-        if len(pathData['pathLib'].keys()) > 0: # paths exist
-            for pathName in pathData['pathLib'].keys():
+        if len(list(pathData['pathLib'].keys())) > 0: # paths exist
+            for pathName in list(pathData['pathLib'].keys()):
                 self.ao.pathLib[pathName] = pitchPath.PolyPath(pathName)
                 self.ao.pathLib[pathName].loadDataModel(
                                                   pathData['pathLib'][pathName])
@@ -6423,8 +6423,8 @@ class _CommandAO(Command):
         pathData = {}
         pathData['activePath'] = self.ao.activePath
         pathData['pathLib'] = {}
-        if len(self.ao.pathLib.keys()) > 0: # paths exist
-            for pathName in self.ao.pathLib.keys():
+        if len(list(self.ao.pathLib.keys())) > 0: # paths exist
+            for pathName in list(self.ao.pathLib.keys()):
                 p = self.ao.pathLib[pathName].writeDataModel()
                 pathData['pathLib'][pathName] = p
         else: # no paths exist, create dummy plug
@@ -6443,8 +6443,8 @@ class _CommandAO(Command):
         if replace == 'replace':
             self.ao.activeTexture = copy.deepcopy(textureData['activeTexture'])
             self.ao.textureLib = {}  # reinit path bin
-        if len(textureData['textureLib'].keys()) > 0: # textures exist
-            for textureName in textureData['textureLib'].keys():
+        if len(list(textureData['textureLib'].keys())) > 0: # textures exist
+            for textureName in list(textureData['textureLib'].keys()):
                 t = textureData['textureLib'][textureName]
                 pathName = copy.deepcopy(t['pathName'])
                 tmName = copy.deepcopy(t['tmName'])
@@ -6464,7 +6464,7 @@ class _CommandAO(Command):
                                  silenceMode, orcMapMode)
         if replace == 'replace':
             self.ao.cloneLib = clone.CloneManager()
-        for tag in textureData['cloneLib'].keys():
+        for tag in list(textureData['cloneLib'].keys()):
             post = tag.split(',') # comma separated
             tName, cName = post[0], post[1]
             c = textureData['cloneLib'][tag]
@@ -6489,8 +6489,8 @@ class _CommandAO(Command):
         textureData['activeTextureModule'] = self.ao.activeTextureModule
         textureData['midiTempo'] = self.ao.midiTempo # added 1.1
         textureData['textureLib'] = {}
-        if len(self.ao.textureLib.keys()) > 0: # textures exist
-            for tName in self.ao.textureLib.keys():
+        if len(list(self.ao.textureLib.keys())) > 0: # textures exist
+            for tName in list(self.ao.textureLib.keys()):
                 textureData['textureLib'][tName] = {}
                 t = textureData['textureLib'][tName]
                 t['pathName'] = self.ao.textureLib[tName].path.name
@@ -6532,10 +6532,10 @@ class _CommandAO(Command):
             try: # this may be a w wase of time
                 f = open(path, 'rU') 
                 doc = xml.dom.minidom.parse(f)
-            except IOError, errorMsg:
+            except IOError as errorMsg:
                 f.close()
                 return 'unknown', str(errorMsg) + '\n' + lang.msgAOerrorXML 
-            except xml.parsers.expat.ExpatError, errorMsg:
+            except xml.parsers.expat.ExpatError as errorMsg:
                 f.close()
                 return 'unknown', str(errorMsg) + '\n' + lang.msgAOerrorXML 
             f.close()
@@ -6564,32 +6564,32 @@ class _CommandAO(Command):
         self.ao.pathLib and self.ao.textureLib
         corrects for name conflicts by appending underscore
         """
-        for mgTextureName in tData['textureLib'].keys():
-            if mgTextureName in self.ao.textureLib.keys():
+        for mgTextureName in list(tData['textureLib'].keys()):
+            if mgTextureName in list(self.ao.textureLib.keys()):
                 oldMgTextureName = copy.deepcopy(mgTextureName)
                 while 1:
                     mgTextureName = mgTextureName + '_'
-                    if mgTextureName not in self.ao.textureLib.keys():
+                    if mgTextureName not in list(self.ao.textureLib.keys()):
                         break
                 newData = copy.deepcopy(
                             tData['textureLib'][oldMgTextureName])
                 tData['textureLib'][mgTextureName] = newData
-                if oldMgTextureName in tData['cloneLib'].keys():
+                if oldMgTextureName in list(tData['cloneLib'].keys()):
                      data = copy.deepcopy(
                             tData['cloneLib'][oldMgTextureName])
                      tData['cloneLib'][mgTextureName] = data
                      del tData['cloneLib'][oldMgTextureName]
                 del tData['textureLib'][oldMgTextureName]
-        for mgPathName in pData['pathLib'].keys():
-            if mgPathName in self.ao.pathLib.keys():
+        for mgPathName in list(pData['pathLib'].keys()):
+            if mgPathName in list(self.ao.pathLib.keys()):
                 oldMgPathName = copy.deepcopy(mgPathName)
                 while 1:
                     mgPathName = mgPathName + '_'
-                    if mgPathName not in self.ao.pathLib.keys():
+                    if mgPathName not in list(self.ao.pathLib.keys()):
                         break
                 newData = copy.deepcopy(pData['pathLib'][oldMgPathName])
                 pData['pathLib'][mgPathName] = newData
-                for textureName in tData['textureLib'].keys():
+                for textureName in list(tData['textureLib'].keys()):
                     thisPathName = tData[
                                         'textureLib'][textureName]['pathName']
                     if thisPathName == oldMgPathName:
@@ -7087,13 +7087,13 @@ class APdir(Command):
         # argForce is used here to reduce arg usage when called
         # by other commands, here, the do() method of Command
         # argForce gives a quasi interactive nature
-        if 'argForce' in keywords.keys():
+        if 'argForce' in list(keywords.keys()):
             self.argForce = keywords['argForce']
         else:
             self.argForce = None
 
     def _updateTextureFilePaths(self):
-        for name in self.ao.textureLib.keys():
+        for name in list(self.ao.textureLib.keys()):
             self.ao.textureLib[name].updateFilePaths(
                 self.ao.aoInfo['fpAudioDirs'])
 
@@ -7473,7 +7473,7 @@ class AHls(Command):
         pass
 
     def display(self): 
-        keys = self.ao.aoInfo['history'].keys()
+        keys = list(self.ao.aoInfo['history'].keys())
         keys.sort()
         if len(keys) == 0:
             return 'no history.\n'
@@ -7528,7 +7528,7 @@ class AHexe(Command):
         self.subCmd = 1 # if 1, executed within method of interptreter
 
     def gather(self): 
-        self.keys = self.ao.aoInfo['history'].keys()
+        self.keys = list(self.ao.aoInfo['history'].keys())
         self.keys.sort()
         if len(self.keys) == 0:
             return 'no history.\n'
@@ -7835,7 +7835,7 @@ class AUmg(Command):
             if tStr == None: return None
             try:
                 self.mObj.loadTransition(tStr)
-            except error.TransitionSyntaxError, e:
+            except error.TransitionSyntaxError as e:
                 dialog.msgOut('%s%s\n' % (lang.TAB, e), self.termObj)
                 continue
             return tStr
@@ -7857,7 +7857,7 @@ class AUmg(Command):
             if self.order == None: return self._getUsage()
             try:
                 self.mObj.loadTransition(args.get(2,'end','off','space'))
-            except error.TransitionSyntaxError, e:
+            except error.TransitionSyntaxError as e:
                 return self._getUsage(e)             
         if self.count == None: # get args from user
             self.count = self._getNumber('number of generations:', 'int', 1, 999)
@@ -7950,7 +7950,7 @@ class AUca(Command):
             if spec == None: return None
             try:
                 specObj = automata.AutomataSpecification(spec)
-            except error.AutomataSpecificationError, e:
+            except error.AutomataSpecificationError as e:
                 dialog.msgOut('%s%s\n' % (lang.TAB, e), self.termObj)
                 continue
             return spec # return spec, not object
@@ -7990,7 +7990,7 @@ class AUca(Command):
         mutationStart = self.mutation(0, refDict)
         try:
             self.ca = automata.factory(self.specStr, ruleStart, mutationStart)
-        except error.AutomataSpecificationError, e:
+        except error.AutomataSpecificationError as e:
             return 'error in CA specification: %s\n' % e
         for i in range(1, self.ca.spec.get('yTotal')): # already got zero
             self.ca.gen(1, self.rule(i, refDict), self.mutation(i, refDict))

@@ -49,7 +49,7 @@ def durToTrapezoid(tStart, propAbsSwitch, dur, rampUp, widthMax, rampDown,
     nadir = unit.denorm(0, min, max)
 
     if propAbsSwitch not in ['absolute', 'proportional']:
-        raise error.ParameterObjectSyntaxError, 'incorrect switch'
+        raise error.ParameterObjectSyntaxError('incorrect switch')
 
     if propAbsSwitch == 'absolute':
         timeUnitDenorm = [rampUp, widthMax, rampDown, widthMin]
@@ -98,7 +98,7 @@ def durToAdsr(tStart, propAbsSwitch, dur, attack, decay,
     susLevel = (peak-nadir) * unit.limit(susScalar)
 
     if propAbsSwitch not in ['absolute', 'proportional']:
-        raise error.ParameterObjectSyntaxError, 'incorrect switch'
+        raise error.ParameterObjectSyntaxError('incorrect switch')
 
     if propAbsSwitch == 'absolute':
         timeUnitDenorm = [attack, decay, sustain, release]

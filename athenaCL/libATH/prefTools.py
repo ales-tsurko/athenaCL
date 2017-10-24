@@ -169,20 +169,20 @@ def updatePrefDict(oldPrefDict, platform):
     categories = ['external', 'athena', 'gui']
 
     # if missing a category:
-    if len(oldPrefDict.keys()) != len(defaultPrefDict.keys()):
-        for category in defaultPrefDict.keys():
-            if category not in oldPrefDict.keys():
+    if len(list(oldPrefDict.keys())) != len(list(defaultPrefDict.keys())):
+        for category in list(defaultPrefDict.keys()):
+            if category not in list(oldPrefDict.keys()):
                 oldPrefDict[category] = defaultPrefDict[category]
 
     for catName in categories: # check each key
         # provide backwards compat for changed category names 
-        if catName not in oldPrefDict.keys():
+        if catName not in list(oldPrefDict.keys()):
             if catName == 'external': 
                 oldPrefDict[catName] = oldPrefDict['csound'] 
                 del oldPrefDict['csound']
-        oldCatKeys = oldPrefDict[catName].keys()
+        oldCatKeys = list(oldPrefDict[catName].keys())
         oldCatKeys.sort() # sort keys and compare
-        newCatKeys = defaultPrefDict[catName].keys()
+        newCatKeys = list(defaultPrefDict[catName].keys())
         newCatKeys.sort()
         if not oldCatKeys == newCatKeys:
             for key in newCatKeys:

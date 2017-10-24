@@ -2507,36 +2507,36 @@ class Test(unittest.TestCase):
         self.assertEqual(True, True)
 
     def testScRef(self):
-        for key, value in SCREF.items():
+        for key, value in list(SCREF.items()):
             self.assertEqual(len(key), 3)
-            if value.keys() != []:
+            if list(value.keys()) != []:
                 # if we have keys, make sure that name is one of them
-                self.assertEqual('name' in value.keys(), True)
+                self.assertEqual('name' in list(value.keys()), True)
 
     def testTnRef(self):
         partition = {}
-        for key, value in TNREF.items():
+        for key, value in list(TNREF.items()):
             self.assertEqual(len(key), 3)
             # the third value of the key should be -1, 1, or 0
             self.assertEqual(key[2] in [-1, 0, 1], True)
-            if key[0] not in partition.keys():
+            if key[0] not in list(partition.keys()):
                 partition[key[0]] = []
                 partition[key[0]].append(value) # append unique ids
             else:
                 partition[key[0]].append(value) # append unique ids
 
-        for key, value in partition.items():
+        for key, value in list(partition.items()):
             # the length of the list should be the max value stored
             self.assertEqual(max(value), len(partition[key]))    
 
     def testScDict(self):
-        for key, value in SCDICT.items():
+        for key, value in list(SCDICT.items()):
             max = TNMAX[key]
             # make sure the max value is the length of all keys for each size
-            self.assertEqual(max, len(value.keys()))
+            self.assertEqual(max, len(list(value.keys())))
 
     def testForte(self):
-        for setSize, setCount in TNIMAX.items(): # look at tni structures
+        for setSize, setCount in list(TNIMAX.items()): # look at tni structures
             if setSize == 0: continue
             for i in range(1, setCount+1):
                 self.assertEqual(len(FORTE[setSize][1]), 4)

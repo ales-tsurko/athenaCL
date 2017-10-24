@@ -9,7 +9,7 @@
 #-----------------------------------------------------------------||||||||||||--
 
 # not sure this import is necessary
-from __future__ import generators
+
 # standarind importas
 import copy, string, random
 import unittest, doctest
@@ -89,7 +89,7 @@ def eratosthenes():
             # in dicitionary
             # print 'p,q', p, q
             nextMult = p + q # prime prime plus the candidate; next multiple
-            while nextMult in D.keys(): # incr x by p until it is a unique key
+            while nextMult in list(D.keys()): # incr x by p until it is a unique key
                 nextMult = nextMult + p
             # re-store the prime under a key of the next multiple
             D[nextMult] = p # x is now the next unique multple to be found
@@ -272,7 +272,7 @@ def _lcmRecurse(filter):
     timer.start()
     for i in range(len(filter)):
         if timer() >= 60: # 1.5 minute
-            print 'lcm timed out.'
+            print('lcm timed out.')
             lcmVal = None
             break
         lcmVal = _lcm(lcmVal, filter[i])
@@ -289,7 +289,7 @@ def _lcmBrute(filter):
     while 1:
         lcmVal = upper * x # get next multiple
         if lcmVal >= MAX:
-            print 'no lcm up to %s' % MAX
+            print('no lcm up to %s' % MAX)
             return None
         match = 0
         for q in lower:
@@ -343,12 +343,12 @@ class Residual:
         # is an actual range and not start/end points b/c when producing a not (-)
         # it is easy to remove the mod,n from the range
         if z == None: # supply default if necessary
-            z = range(0, 100) 
+            z = list(range(0, 100)) 
         self.z = z
         #print 'residual init self.z', self.z
         self.m = m
         if neg not in [0, 1]:
-            raise TypeError, 'negative value must be 0, 1, or a Boolean'
+            raise TypeError('negative value must be 0, 1, or a Boolean')
         self.neg = neg # negative, complement boolean
         if self.m == 0: # 0 mode causes ZeroDivisionError
             self.shift = shift
@@ -367,7 +367,7 @@ class Residual:
         """z is the range of integers to use when generating a list
         convenience functiont that fixes max
         """
-        self.z = range(min, max+1)
+        self.z = list(range(min, max+1))
 
     def segFmtSet(self, fmt):
         fmt = drawer.strScrub(fmt, 'l')
@@ -419,7 +419,7 @@ class Residual:
         elif format in ['int', 'integer']: # int, integer
             return seg
         else:
-            raise TypeError, '%s not a valid sieve format string.' % format
+            raise TypeError('%s not a valid sieve format string.' % format)
 
     def period(self):
         """period is M; obvious, but nice for completeness
@@ -530,7 +530,7 @@ class Residual:
         '15@11'
         """
         if other.neg or self.neg:
-            raise TypeError, 'complented Residual objects cannot be intersected'
+            raise TypeError('complented Residual objects cannot be intersected')
         m, n = self._cmpIntersection(self.m, other.m, self.shift, other.shift)
         # get the union of both z
         zSet = setConstruct(self.z) | setConstruct(other.z) 
@@ -609,7 +609,7 @@ class CompressionSeg:
             if num not in self.match:
                 self.match.append(num)
         if len(self.match) <= 1:
-            raise ValueError, 'segment must have more than one element'
+            raise ValueError('segment must have more than one element')
         self._zUpdate(z) # sets self.z
         # max mod should always be the max of z; this is b/c at for any segment
         # if the mod == max of seg, at least one point can be found in the segment
@@ -619,20 +619,20 @@ class CompressionSeg:
         try:
             self._process()
         except AssertionError:
-            raise ValueError, 'no Residual classes found for this z range'
+            raise ValueError('no Residual classes found for this z range')
 
     def _zUpdate(self, z=None):
         # z must at least be a superset of match
         if z != None: # its a list
             if not self._subset(self.match, z):
-                raise ValueError, 'z range must be a superset of desired segment'
+                raise ValueError('z range must be a superset of desired segment')
             else: # okay, assign
                 self.z = z
             zMin, zMax = self.z[0], self.z[-1]
         # z is range from max to min, unless provided at init     
         else: # range from min, max; add 1 for range() to max
             zMin, zMax = self.match[0], self.match[-1] 
-            self.z = range(zMin, (zMax + 1)) 
+            self.z = list(range(zMin, (zMax + 1))) 
 
 
     #-----------------------------------------------------------------------||--
@@ -767,7 +767,7 @@ class Sieve:
                 
         # note: this z should only be used if usrStr is a str, and not a list
         if z == None and drawer.isStr(usrStr):
-            z = range(0, 100)
+            z = list(range(0, 100))
         elif z == None and drawer.isList(usrStr): # if a list, keep as None
             pass
         self.z = z # may be none; will be handled in self._load
@@ -853,7 +853,7 @@ class Sieve:
             self._resClear('cmp') # clear compressed residuals
             self._initCompression() # may update self.nonCompressible
         if self.nonCompressible: # do not changes set
-            print 'no compression availabile at this z.'
+            print('no compression availabile at this z.')
         else:
             self.state = 'cmp'
 
@@ -862,7 +862,7 @@ class Sieve:
     def dataLoad(self, data):
         """load reinit an existing object"""
         self.usrStr = data['logStr']
-        if data.has_key('z'):
+        if 'z' in data:
             self.z = data['z']
         self._load()
 
@@ -885,7 +885,7 @@ class Sieve:
         """z is the range of integers to use when generating a list
         convenience functiont that fixes max
         """
-        self.z = range(min, max+1)
+        self.z = list(range(min, max+1))
 
     def segFmtSet(self, fmt):
         fmt = drawer.strScrub(fmt, 'l')
@@ -1064,13 +1064,13 @@ class Sieve:
         assert state in ['cmp', 'exp']
         if state == 'cmp':
             libKeys = []
-            for key in self.resLib.keys():
+            for key in list(self.resLib.keys()):
                 if key in self.cmpTree:
                     libKeys.append(key)
             return libKeys
         elif state == 'exp':
             libKeys = []
-            for key in self.resLib.keys():
+            for key in list(self.resLib.keys()):
                 if key in self.expTree:
                     libKeys.append(key)
             return libKeys
@@ -1093,7 +1093,7 @@ class Sieve:
         resDict = self._parseResidual(''.join(resStr))
         if resDict == None:
             msg = 'cannot parse %s' % ''.join(resStr)
-            raise SyntaxError, 'bad residual class notation: (%r)' % msg
+            raise SyntaxError('bad residual class notation: (%r)' % msg)
         resObj = Residual(resDict['m'],resDict['shift'],
                     resDict['neg'], self.z)
         #print 'created', resDict, self.z
@@ -1112,7 +1112,7 @@ class Sieve:
             z = self.z 
         # z is valid, gets default from residual class
         if not drawer.isList(z) and z != None:
-            raise TypeError, 'z must be a list of integers.'
+            raise TypeError('z must be a list of integers.')
         valList = self.resLib[id](n, z) # call residual object
         return self._setInstantiateStr(valList)
 
@@ -1124,13 +1124,13 @@ class Sieve:
         """reset self.resId to the next available number
         may need to re-label some residual classes if gaps develop
         ids should be coniguous integer sequence"""
-        iVals = range(0, len(self.resLib.keys()))
+        iVals = list(range(0, len(list(self.resLib.keys()))))
         for i in iVals:
             testKey = self._resKeyStr(i)
             if testKey not in self.cmpTree and testKey not in self.expTree:
-                raise KeyError, 'gap in residual keys'
+                raise KeyError('gap in residual keys')
         # set resId to next availabe index, the length of the keys
-        self.resId = len(self.resLib.keys())
+        self.resId = len(list(self.resLib.keys()))
 
     def _resClear(self, state=None):
         if state == None: # clear all
@@ -1143,7 +1143,7 @@ class Sieve:
             # reset id to reflect deleted classes
             self._resResetId()
         elif state == 'exp':
-            raise ValueError, 'expanded residual classes shold never be cleared'
+            raise ValueError('expanded residual classes shold never be cleared')
 
     #-----------------------------------------------------------------------||--
     # expansion methods
@@ -1195,12 +1195,12 @@ class Sieve:
             # if NEG is last char this is always an error
             elif char == self.NEG and charNext == None:
                 msg = 'negation cannot be used without operands'
-                raise SyntaxError, 'badly formed logical string (a): (%s)' % msg
+                raise SyntaxError('badly formed logical string (a): (%s)' % msg)
             # attempting to use negationg as a binary operators
             elif (char == self.NEG and charPrevious != None and 
                 charPrevious in self.RESIDUAL): # digit, or @ sign
                 msg = 'negation cannot be used as a binary operator'
-                raise SyntaxError, 'badly formed logical string (b): (%s)' % msg
+                raise SyntaxError('badly formed logical string (b): (%s)' % msg)
             # check if self.NEG is not folloed by a digit;
             # special case of self.NEG; need to convert into a binary operator
             elif (char == self.NEG and charNext != None and 
@@ -1210,7 +1210,7 @@ class Sieve:
                 if (charPrevious != None and charPrevious not 
                     in [self.LGROUP, self.AND, self.OR, self.XOR]):
                     msg = 'negation must be of a group and isolated by delimiters'
-                    raise SyntaxError, 'badly formed logical string (c): (%s)' % msg
+                    raise SyntaxError('badly formed logical string (c): (%s)' % msg)
                 # add a set of z, or 1@0
                 else: # maintain representation until evaluation
                     self.expTree.append(char)
@@ -1245,7 +1245,7 @@ class Sieve:
                 i = i + 1
         # do some checks 
         if len(self.resLib) == 0:
-            raise SyntaxError, 'no residual classes defined'
+            raise SyntaxError('no residual classes defined')
         self.expTree = ''.join(self.expTree)
 
 
@@ -1288,7 +1288,7 @@ class Sieve:
         # will use z if set elsewheres
         seg = self.segment('exp')
         if seg == []: # empty set
-            raise IndexError, 'empty segment; segment compression not possible'
+            raise IndexError('empty segment; segment compression not possible')
         else:
             segObj = CompressionSeg(seg, self.z)
             for resObj in segObj():
@@ -1423,9 +1423,9 @@ class Sieve:
 
             # must collect non width formats as integer values; then convert
             if format in ['wid', 'width']:
-                segmentPartial = self.segment(self.state, n, range(zMin, zMax), format)
+                segmentPartial = self.segment(self.state, n, list(range(zMin, zMax)), format)
             else: # if a unit, need to start with integers
-                segmentPartial = self.segment(self.state, n, range(zMin, zMax), 'int')
+                segmentPartial = self.segment(self.state, n, list(range(zMin, zMax)), 'int')
 
             found = found + segmentPartial[:]
             p = p + zStep # increment start value
@@ -1437,16 +1437,16 @@ class Sieve:
         # trim any extra
         seg = found[:length] 
         if len(seg) != length:
-            raise ValueError, 'desired length of sieve segment cannot be found'
+            raise ValueError('desired length of sieve segment cannot be found')
 
         # only width format comes out correct after concatenation
         # for unit and binary, derive new z based on min and max
         if format in ['unit']:
             # make z to minimum and max value found
-            return unit.unitNormRange(seg, range(seg[0], seg[-1]+1))
+            return unit.unitNormRange(seg, list(range(seg[0], seg[-1]+1)))
         elif format in ['bin', 'binary']:
             # make to minimum and max value found
-            return unit.discreteBinaryPad(seg, range(seg[0], seg[-1]+1))
+            return unit.discreteBinaryPad(seg, list(range(seg[0], seg[-1]+1)))
         else:
             return seg
 
@@ -1580,7 +1580,7 @@ class SievePitch:
         """
         min = self.psLower.get('psReal')
         max = self.psUpper.get('psReal')
-        z = range(int(min), int(max+1))
+        z = list(range(int(min), int(max+1)))
         n = self.psOrigin.get('psReal') # shift origin
 
         # get integer range
@@ -1594,7 +1594,7 @@ class SievePitch:
 
             # this z will not be shifted
             # need to get list of apropriate size
-            z = range(0, len(valList)) 
+            z = list(range(0, len(valList))) 
             
             # get a binary segment
             binSeg = self.sieveObj(n, z, 'bin')
@@ -1628,7 +1628,7 @@ class TestOld:
         may be notated, for subset F, as F' or F w/ line over top
         """
         if z == None:
-            z = range(0,100)
+            z = list(range(0,100))
         ab = []
         for value in z:
             if value not in set: # dont do anything
@@ -1682,7 +1682,7 @@ class Test(unittest.TestCase):
                     ]
         for arg in testArgs:
             testObj = Sieve(arg)
-            post = testObj(0, range(0, 30))
+            post = testObj(0, list(range(0, 30)))
 
 
     def testSievePitch(self):
@@ -1708,7 +1708,7 @@ class Test(unittest.TestCase):
 
 
     def testSieve(self):
-        z = range(0,100)
+        z = list(range(0,100))
         usrStr = '3@2 & 4@1 | 2@0 & 3@1 | 3@3 | -4@2'
         a = Sieve(usrStr, z)
         self.assertEqual(str(a), '3@2&4@1|2@0&3@1|3@0|-4@2')

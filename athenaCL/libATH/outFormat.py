@@ -264,7 +264,7 @@ def factory(request):
     if drawer.isStr(request):
         request = drawer.strScrub(request, 'L')
         if request == 'all':
-            request = outputFormatNames.values()
+            request = list(outputFormatNames.values())
         # if other string given, add to a list
         else:
             request = [request]

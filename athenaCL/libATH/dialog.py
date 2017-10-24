@@ -98,7 +98,7 @@ def rawInput(prompt, termObj=None):
         prompt = typeset.wrapText(prompt, w, 0, 'line')
     # line wraping may remove the last space after prompt; make sure it is 
     # still there
-    return raw_input(_fixQuery(prompt))
+    return input(_fixQuery(prompt))
 
 #-----------------------------------------------------------------||||||||||||--
 
@@ -328,20 +328,20 @@ def promptGetDir(prompt='select a directory:', sampleDir='',
             path, stat = _macGetDirectory(prompt)
             return path, stat
         except:
-            print lang.msgDlgMacError
+            print(lang.msgDlgMacError)
 
     # platform specific file dialogs.
     if dlgVisualMethod[:2] == 'tk':
         try:
-            import Tkinter
-            import tkFileDialog
+            import tkinter
+            import tkinter.filedialog
             TK = 1
         except ImportError:
             TK = 0
-            print lang.msgDlgTkError
+            print(lang.msgDlgTkError)
 
     if dlgVisualMethod[:2] == 'tk' and TK == 1:
-        tkTemp = Tkinter.Tk()
+        tkTemp = tkinter.Tk()
         tkTemp.withdraw()
         ## "dir" only shows directories, but are unable to select 
         options = {'filetypes':[("directory", "*")], 
@@ -351,7 +351,7 @@ def promptGetDir(prompt='select a directory:', sampleDir='',
         if os.path.isdir(sampleDir):
             options['initialdir'] = sampleDir
             
-        guiTemp = tkFileDialog.Open()
+        guiTemp = tkinter.filedialog.Open()
         guiTemp.options = options
         # filename = apply(tkFileDialog.Open, (), options).show(
         try:
@@ -453,20 +453,20 @@ def promptPutFile(prompt='name this file:', defaultName='name',
             path, stat = _macPutFile(prompt, defaultName, defaultDir)
             return path, stat
         except: # will be MacOS.Error but must import MacOS to select?
-            print lang.msgDlgMacError
+            print(lang.msgDlgMacError)
 
     # platform specific file dialogs.
     if dlgVisualMethod[:2] == 'tk':
         try:
-            import Tkinter
-            import tkFileDialog
+            import tkinter
+            import tkinter.filedialog
             TK = 1
         except ImportError:
             TK = 0
-            print lang.msgDlgTkError
+            print(lang.msgDlgTkError)
 
     if dlgVisualMethod[:2] == 'tk' and TK == 1:
-        tkTemp = Tkinter.Tk()
+        tkTemp = tkinter.Tk()
         tkTemp.withdraw()
         # put extension here, but dont know if i need period or not
         options = {'filetypes':[("all files", "*")],    
@@ -476,7 +476,7 @@ def promptPutFile(prompt='name this file:', defaultName='name',
         if os.path.isdir(defaultDir):
             options['initialdir'] = defaultDir
                         
-        guiTemp = tkFileDialog.SaveAs()
+        guiTemp = tkinter.filedialog.SaveAs()
         guiTemp.options = options
         # filename = apply(tkFileDialog.Open, (), options).show(
         try:
@@ -626,20 +626,20 @@ def promptGetFile(prompt='select a file', defaultDir='', mode='file',
             path, stat = _macGetFile(prompt, defaultDir)
             return path, stat
         except:
-            print lang.msgDlgMacError
+            print(lang.msgDlgMacError)
 
     # platform specific file dialogs.
     if dlgVisualMethod[:2] == 'tk':
         try:
-            import Tkinter
-            import tkFileDialog
+            import tkinter
+            import tkinter.filedialog
             TK = 1
         except ImportError:
             TK = 0
-            print lang.msgDlgTkError
+            print(lang.msgDlgTkError)
 
     if dlgVisualMethod[:2] == 'tk' and TK:
-        tkTemp = Tkinter.Tk()
+        tkTemp = tkinter.Tk()
         tkTemp.withdraw()
         options = {'filetypes':[("all files", "*")], 
                         'title'   : prompt,      
@@ -648,7 +648,7 @@ def promptGetFile(prompt='select a file', defaultDir='', mode='file',
         if os.path.isdir(defaultDir):
             options['initialdir'] = defaultDir
         
-        guiTemp = tkFileDialog.Open()
+        guiTemp = tkinter.filedialog.Open()
         guiTemp.options = options
         # filename = apply(tkFileDialog.Open, (), options).show(
         try:
@@ -746,7 +746,7 @@ def getTempo():
         diffs = []
         i = 0
         while 1:
-            c = raw_input('')
+            c = input('')
             when = time.time()
             if c.find("q") >= 0:
                 break
@@ -768,9 +768,9 @@ def getTempo():
              sum = sum + d
         avgBeatT = sum / len(diffs)
         avgTempo = 60.0 / avgBeatT
-        print "average tempo %.2f BPM (%.2f s/beat)" % (avgTempo, avgBeatT)
+        print("average tempo %.2f BPM (%.2f s/beat)" % (avgTempo, avgBeatT))
         q_string = "    keep, repeat, or cancel? (k, r, or c): "
-        usrStr = raw_input(q_string)
+        usrStr = input(q_string)
         usrStr = usrStr.lower()
         if usrStr == '' or usrStr == None:
             exit = 1 #keep, dont cancel
@@ -912,7 +912,7 @@ def testStr(n=100, newLines=0):
         if newLines == 1 and x % 10 == 1: # once in a while
             msg.append('\n%sNewLine' % i) # show a new line
         else:
-            max = random.choice(range(1,10))# len of word
+            max = random.choice(list(range(1,10)))# len of word
             msg.append(str(i))
             for x in range(0, max):
                 msg.append(random.choice(string.lowercase))

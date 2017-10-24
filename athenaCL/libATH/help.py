@@ -648,7 +648,7 @@ class HelpDoc:
                 doc = getattr(self, name)
                 filter.append([name, doc]) 
             # if in gloss, search for synonymes
-            elif name in self.__glossIndex.keys():
+            elif name in list(self.__glossIndex.keys()):
                 for altName in self.__glossIndex[name]['syn']:
                     if searchStr in altName or altName in searchStr:
                         doc = getattr(self, name)
@@ -696,7 +696,7 @@ class HelpDoc:
             # this searches all attributes of help, all gloss and synonym entries
             filter = self.searchRef(searchStr)
             for name, doc in filter:
-                if name in self.__glossIndex.keys():
+                if name in list(self.__glossIndex.keys()):
                     title = self.__glossIndex[name]['title']
                 # alter usage attributes with a predictable title
                 # will add usage documentation to command documentation

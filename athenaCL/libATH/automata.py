@@ -263,7 +263,7 @@ class AutomataSpecification:
 
         if key == 'yTotal': # y with skip, for actual generations
             return self.src['y'] + self.src['s']
-        elif key in self.src.keys():
+        elif key in list(self.src.keys()):
             return self.src[key]
         else: raise AttributeError
 
@@ -292,7 +292,7 @@ class AutomataSpecification:
         """this model is borrowed from markov.py; could be abstracted to
         a common utility"""
         if usrStr.count(self.OPEN) != usrStr.count(self.CLOSE):
-            raise error.AutomataSpecificationError, "all braces not paired"     
+            raise error.AutomataSpecificationError("all braces not paired")     
         post = {}
         groups = usrStr.split(self.CLOSE)
         for double in groups:
@@ -321,8 +321,8 @@ class AutomataSpecification:
                 }
         
         # src keys have already been formated to single character refs
-        for key in ref.keys():
-            if key not in src.keys():
+        for key in list(ref.keys()):
+            if key not in list(src.keys()):
                 src[key] = ref[key][0]
             else: # keu exists, eval numbers if necessary
                 if drawer.isNum(ref[key][0]): # check numbers                           
@@ -410,7 +410,7 @@ def ruleCount(srcSpan, dstValues, srcValues=None):
     # totalistic rule count: k = k, len(dstValues)
     if drawer.isNum(dstValues):
         k = dstValues
-        dstValues = range(dstValues)
+        dstValues = list(range(dstValues))
     else: # assume its a list
         k = len(dstValues)
     if srcValues == None: # not totalistic
@@ -476,7 +476,7 @@ class _Automaton:
         self.size = size # number of cells in one step       
         # may need to prase these values
         self.init = caInitParser(init)
-        if self.init == None: raise ValueError, 'bad init value'
+        if self.init == None: raise ValueError('bad init value')
         if dstValues != None: # can be none for continuous ca
             dstValues.sort()
         self.dstValues = dstValues
@@ -748,7 +748,7 @@ class _AutomatonOneDimension(_Automaton):
         if end == None:
             end = len(self.stepHistory)         
         for step in range(start, end):
-            print self._fmtStep(self.stepHistory[step])
+            print(self._fmtStep(self.stepHistory[step]))
             #time.sleep(.001)
         
     def getCells(self, fmt='table', norm=1, stepStart=None, stepEnd=None, 
@@ -833,7 +833,7 @@ class Standard(_AutomatonOneDimension):
         size = self.spec.get('x')
         init = self.spec.get('i')
         
-        dstValues = range(k) #[0,1]
+        dstValues = list(range(k)) #[0,1]
         srcSpan = self._rToSrcSpan(r) 
         srcValues = None # same as dst, based on srcSpan
         self.ruleMax = ruleCount(srcSpan, dstValues) # 256 
@@ -866,15 +866,15 @@ class Totalistic(_AutomatonOneDimension):
         size = self.spec.get('x')
         init = self.spec.get('i')
 
-        if k <= 1: raise ValueError, 'bad k value'
-        if r < 1: raise ValueError, 'bad r value'
+        if k <= 1: raise ValueError('bad k value')
+        if r < 1: raise ValueError('bad r value')
         
-        dstValues = range(k) # if k ==2, k= [0,1]
+        dstValues = list(range(k)) # if k ==2, k= [0,1]
         srcSpan = self._rToSrcSpan(r) 
         # max of dstValues * srcSpan is max
         # [0,1,2,3] # all sums of two states---
         # also (3*k)-2
-        srcValues = range((dstValues[-1]*srcSpan)+1)     # srcNot e same as dst
+        srcValues = list(range((dstValues[-1]*srcSpan)+1))     # srcNot e same as dst
         
         self.ruleMax = ruleCount(srcSpan,dstValues,srcValues)
         rule = self._ruleFilter(rule)
@@ -1006,7 +1006,7 @@ class _AutomatonTwoDimension(_Automaton):
             end = len(self.stepHistory)         
         for step in range(start, end):
             for row in self.stepHistory[step]:
-                print self._fmtStep(row)
+                print(self._fmtStep(row))
 
 
 #-----------------------------------------------------------------||||||||||||--
@@ -1049,9 +1049,9 @@ class TestOld:
                 a.gen(100)
                 #timerTotal.stop()
                 timer.stop()
-                print a
-                print timer('sw')
-            print 'total time', timerTotal('sw')
+                print(a)
+                print(timer('sw'))
+            print('total time', timerTotal('sw'))
 
 
     def testOneDimensionDisplay(self):       
@@ -1078,10 +1078,10 @@ class TestOld:
                     a.display()
                     for norm in range(0,2):
                         for out in a.outFmt:
-                            print _MOD, out, norm
-                            print a.getCells(out, norm)
-                    print a
-            print 'total time', timerTotal('sw')
+                            print(_MOD, out, norm)
+                            print(a.getCells(out, norm))
+                    print(a)
+            print('total time', timerTotal('sw'))
 
 
 

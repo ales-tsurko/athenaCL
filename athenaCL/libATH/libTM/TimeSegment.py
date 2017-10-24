@@ -198,7 +198,7 @@ class TimeSegment(baseTexture.Texture):
                 tCurrent = unit.denorm(tUnit, tStartSeg, tEndSeg)
                 pathPos = self.clockFindPos(tCurrent) # get pos for current time
                 if pathPos == None: 
-                    raise ValueError, 'tCurrent out of all time ranges'
+                    raise ValueError('tCurrent out of all time ranges')
     
                 #print _MOD, 'pp, tc', pathPos, tCurrent
                 #print _MOD, 'tss, tes', tStartSeg, tEndSeg
@@ -208,7 +208,7 @@ class TimeSegment(baseTexture.Texture):
                 multisetCurrent = self.getMultiset(pathPos)
     
                 # create a generator to get pitches from chord as index values
-                selectorChordPos = basePmtr.Selector(range(0,len(chordCurrent)),
+                selectorChordPos = basePmtr.Selector(list(range(0,len(chordCurrent))),
                                                                  textPitchSelectorControl)
     
                 # choose pc from chord

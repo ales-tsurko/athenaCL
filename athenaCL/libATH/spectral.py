@@ -31,7 +31,7 @@ class SpectrumData:
         the number of values to read; can also be set below
         w/ getPitch method"""
         if usrStr == None:
-            raise ValueError, 'bad file path given'
+            raise ValueError('bad file path given')
         if usrStr.find(',') >= 0:
             filePath, maxCount = usrStr.split(',')[:2]
             maxCount = drawer.strToNum(maxCount, 'int')
@@ -45,12 +45,12 @@ class SpectrumData:
         # file path shuold always exists
         filePath = drawer.pathScrub(filePath)
         if not os.path.exists(filePath) or os.path.isdir(filePath): 
-            raise ValueError, 'bad file path given'
+            raise ValueError('bad file path given')
         self.filePath = filePath
         self.forms = ['audacity.spectrum', 'audacity.autocorrelation']
         ok = self._parseFormat()
         if ok == None:
-            raise ValueError, 'bad file path given'
+            raise ValueError('bad file path given')
         self.dataEval, self.fmt = ok
     
     def _parseFormat(self):
@@ -116,10 +116,10 @@ class SpectrumData:
         maxLen = len(self.dataEval)
         if maxCount > 0: # get top portion of sorted list
             if maxCount > maxLen: maxCount = maxLen
-            posList = range(maxCount)
+            posList = list(range(maxCount))
         elif maxCount < 0: # get bottom portion of sorted list
             if maxCount < -maxLen: maxCount = -maxLen
-            posList = range(len(self.dataEval) + maxCount, len(self.dataEval))
+            posList = list(range(len(self.dataEval) + maxCount, len(self.dataEval)))
         else: return [] # empty range
         pitchList = []
         assert format in ['fq', 'psReal']
@@ -220,7 +220,7 @@ class PhaseAnalysis:
 
     def readAvg(self, bin):
         # for a given bin, get the average of all values for all frmaes
-        if bin > self.binCount - 1: raise ValueError, 'bin out of range'
+        if bin > self.binCount - 1: raise ValueError('bin out of range')
         a = 0
         f = 0
 
@@ -415,11 +415,11 @@ class PabonGame:
     def run(self):
         t = 0
         for step in self.signal:
-            print 'step:', step, 'time:', t
+            print('step:', step, 'time:', t)
             for part in self.components:
                 part.postTime(t, step)
 
-            print self._repr()
+            print(self._repr())
             t = t + 1
 
     def _repr(self, style=''):

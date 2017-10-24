@@ -94,7 +94,7 @@ class Orchestra(object):
         elif pmtr == 'ps': # ALWAYS map psReal values, regardless of orcMapMode
             val = self._postMapPs(iNo, val)
         else: # this shoudl never happen
-            raise ValueError, 'bad parameter name in orchestra'
+            raise ValueError('bad parameter name in orchestra')
         return val
         
     #-----------------------------------------------------------------------||--
@@ -148,7 +148,7 @@ class Instrument:
         starting at auxQ0"""
         presetDict = {} # default values are set in TMclass.loadDefault
         # this corrects the labeling of aux fields to reflext that used later on
-        for key in self.pmtrDefault.keys(): # isolate pmtr fields
+        for key in list(self.pmtrDefault.keys()): # isolate pmtr fields
             if key[:4] == 'pmtr': # rename pmtr keys to a single auxQ
                 adjNum = int(key[4:]) - (self.pmtrCountDefault + 1)  # 7 = 0
                 newKey  = 'auxQ%i' % adjNum

@@ -143,8 +143,8 @@ class Selector(object):
         elif len(self.ref) == 1: self._direction = [0]
         elif len(self.ref) == 2: self._direction = [0,1]
         else:
-            self._direction = range(0, len(self.ref)) # 0,1,2
-            post = range(1, (len(self.ref)-1)) # 1,
+            self._direction = list(range(0, len(self.ref))) # 0,1,2
+            post = list(range(1, (len(self.ref)-1))) # 1,
             post.reverse() # second half of range
             self._direction = self._direction + post
             
@@ -244,7 +244,7 @@ class Selector(object):
         """
         # emergency check
         if len(self.ref) == 0:
-            raise IndexError, 'selector has no values'
+            raise IndexError('selector has no values')
         if self.control == 'randomChoice':
             return self._randomChoice()
         elif self.control == 'randomWalk':
@@ -258,7 +258,7 @@ class Selector(object):
         elif self.control == 'orderedOscillate':
             return self._orderedOscillate()
         else:
-            raise ValueError, 'no control for %s' % self.control
+            raise ValueError('no control for %s' % self.control)
 
 
 #-----------------------------------------------------------------||||||||||||--
@@ -310,7 +310,7 @@ class Parameter(object):
         self.MARKOVLIMIT = 9 # limit order of markov analysis
         # store commonly used argument names and their extra documentation
         # may need to gather lists of options from other modules
-        _optListTable = table.tableMonoFormatRef.keys()
+        _optListTable = list(table.tableMonoFormatRef.keys())
         _optListTable.sort()
 
         # note: some of these values should be obtained from the parsers
@@ -386,7 +386,7 @@ class Parameter(object):
                 count = count + 1
                 argSub.append('(%s) %s' % (count, argStr))
                 # see if more info is avail for this arg name
-                if argStr in self._argNameRef.keys():
+                if argStr in list(self._argNameRef.keys()):
                     argChoice = self._argNameRef[argStr]
                 if argChoice != None:
                     docSub = []
@@ -457,11 +457,11 @@ class Parameter(object):
         from athenaCL.libATH.libPmtr import parameter
         try:
             obj = parameter.factory(arg, lib)
-        except error.ParameterObjectSyntaxError, msg:
+        except error.ParameterObjectSyntaxError as msg:
             if idStr == '':
-                raise error.ParameterObjectSyntaxError, 'failed sub-parameter: %s' % msg
+                raise error.ParameterObjectSyntaxError('failed sub-parameter: %s' % msg)
             else:
-                raise error.ParameterObjectSyntaxError, 'failed %s sub-parameter: %s' % (idStr, msg)            
+                raise error.ParameterObjectSyntaxError('failed %s sub-parameter: %s' % (idStr, msg))            
         return obj
         
     def _loadAutoConstant(self, arg, lib='genPmtrObjs'):
@@ -484,8 +484,8 @@ class Parameter(object):
         from athenaCL.libATH.libPmtr import parameter
         try:
             obj = parameter.factory(pmtrArgs, lib)
-        except error.ParameterObjectSyntaxError, msg:
-            raise error.ParameterObjectSyntaxError, 'failed sub-parameter: %s' % msg
+        except error.ParameterObjectSyntaxError as msg:
+            raise error.ParameterObjectSyntaxError('failed sub-parameter: %s' % msg)
         return obj
     
     def _loadAutoConstantStr(self, arg, ref, lib='genPmtrObjs'):
@@ -498,7 +498,7 @@ class Parameter(object):
         elif drawer.isStr(arg):
             post = drawer.selectionParse(arg, ref, 0) # autosearch off
             if post == None:
-                raise error.ParameterObjectSyntaxError, 'no such preset name known.'
+                raise error.ParameterObjectSyntaxError('no such preset name known.')
             pmtrArgs = ('c', post) # a constant pmtr obj
         else: # its a list to create a ParameterObject
             pmtrArgs = arg
@@ -506,8 +506,8 @@ class Parameter(object):
         from athenaCL.libATH.libPmtr import parameter
         try:
             obj = parameter.factory(pmtrArgs, lib)
-        except error.ParameterObjectSyntaxError, msg:
-            raise error.ParameterObjectSyntaxError, 'failed sub-parameter: %s' % msg
+        except error.ParameterObjectSyntaxError as msg:
+            raise error.ParameterObjectSyntaxError('failed sub-parameter: %s' % msg)
         return obj   
     
     def _loadMinMax(self, min, max):
@@ -537,12 +537,12 @@ class Parameter(object):
         from athenaCL.libATH.libPmtr import parameter
         try:
             minObj = parameter.factory(minArgs)
-        except error.ParameterObjectSyntaxError, msg:
-            raise error.ParameterObjectSyntaxError, 'failed sub-parameter: %s' % msg
+        except error.ParameterObjectSyntaxError as msg:
+            raise error.ParameterObjectSyntaxError('failed sub-parameter: %s' % msg)
         try:
             maxObj = parameter.factory(maxArgs)
-        except error.ParameterObjectSyntaxError, msg:
-            raise error.ParameterObjectSyntaxError, 'failed sub-parameter: %s' % msg
+        except error.ParameterObjectSyntaxError as msg:
+            raise error.ParameterObjectSyntaxError('failed sub-parameter: %s' % msg)
         return minObj, maxObj
 
 
@@ -580,7 +580,7 @@ class Parameter(object):
         usrStr = drawer.selectionParse(usrStr, ref)
         if usrStr == None:
             selStr = drawer.selectionParseKeyLabel(ref)
-            raise error.ParameterObjectSyntaxError, 'bad direction name: enter %s.' % selStr
+            raise error.ParameterObjectSyntaxError('bad direction name: enter %s.' % selStr)
         return usrStr
     
     def _selectorParser(self, usrStr):
@@ -601,7 +601,7 @@ class Parameter(object):
         usrStr = drawer.selectionParse(usrStr, ref)
         if usrStr == None:
             selStr = drawer.selectionParseKeyLabel(ref)
-            raise error.ParameterObjectSyntaxError, 'bad selectionString: enter %s.' % selStr
+            raise error.ParameterObjectSyntaxError('bad selectionString: enter %s.' % selStr)
         return usrStr
 
     def _loopControlParser(self, usrStr):
@@ -618,7 +618,7 @@ class Parameter(object):
         usrStr = drawer.selectionParse(usrStr, ref)
         if usrStr == None:
             selStr = drawer.selectionParseKeyLabel(ref)
-            raise error.ParameterObjectSyntaxError, "loop control is either %s." % selStr
+            raise error.ParameterObjectSyntaxError("loop control is either %s." % selStr)
         return usrStr # may be None
 
     def _stepControlParser(self, usrStr):
@@ -636,7 +636,7 @@ class Parameter(object):
         usrStr = drawer.selectionParse(usrStr, ref)
         if usrStr == None:
             selStr = drawer.selectionParseKeyLabel(ref)
-            raise error.ParameterObjectSyntaxError, "bad step control. enter %s." % selStr
+            raise error.ParameterObjectSyntaxError("bad step control. enter %s." % selStr)
         return usrStr # may be None
         
 
@@ -653,7 +653,7 @@ class Parameter(object):
         usrStr = drawer.selectionParse(usrStr, ref)
         if usrStr == None:
             selStr = drawer.selectionParseKeyLabel(ref)
-            raise error.ParameterObjectSyntaxError, "bad frame level control. enter %s." % selStr
+            raise error.ParameterObjectSyntaxError("bad frame level control. enter %s." % selStr)
         return usrStr # may be None
 
 
@@ -672,7 +672,7 @@ class Parameter(object):
         usrStr = drawer.selectionParse(usrStr, ref)      
         if usrStr == None:
             selStr = drawer.selectionParseKeyLabel(ref)
-            raise error.ParameterObjectSyntaxError, "bad boundary method. enter %s." % selStr         
+            raise error.ParameterObjectSyntaxError("bad boundary method. enter %s." % selStr)         
         return usrStr # may be None
     
     def _onOffParser(self, usrStr):
@@ -689,7 +689,7 @@ class Parameter(object):
         usrStr = drawer.selectionParse(usrStr, ref)
         if usrStr == None:
             selStr = drawer.selectionParseKeyLabel(ref)
-            raise error.ParameterObjectSyntaxError, 'bad control value: enter %s.' % selStr
+            raise error.ParameterObjectSyntaxError('bad control value: enter %s.' % selStr)
         return usrStr
 
     def _anchorParser(self, usrStr):
@@ -707,7 +707,7 @@ class Parameter(object):
         usrStr = drawer.selectionParse(usrStr, ref)
         if usrStr == None:
             selStr = drawer.selectionParseKeyLabel(ref)
-            raise error.ParameterObjectSyntaxError, 'bad control value: enter %s.' % selStr
+            raise error.ParameterObjectSyntaxError('bad control value: enter %s.' % selStr)
         return usrStr
 
     def _scaleSwitchParser(self, usrStr):
@@ -724,7 +724,7 @@ class Parameter(object):
         usrStr = drawer.selectionParse(usrStr, ref)
         if usrStr == None:
             selStr = drawer.selectionParseKeyLabel(ref)
-            raise error.ParameterObjectSyntaxError, "bad step control. enter %s." % selStr
+            raise error.ParameterObjectSyntaxError("bad step control. enter %s." % selStr)
         return usrStr # may be None
         
 
@@ -742,7 +742,7 @@ class Parameter(object):
         usrStr = drawer.selectionParse(usrStr, ref)
         if usrStr == None:
             selStr = drawer.selectionParseKeyLabel(ref)
-            raise error.ParameterObjectSyntaxError, 'bad control value: enter %s.' % selStr
+            raise error.ParameterObjectSyntaxError('bad control value: enter %s.' % selStr)
         return usrStr
 
 
@@ -761,7 +761,7 @@ class Parameter(object):
         usrStr = drawer.selectionParse(usrStr, ref)
         if usrStr == None:
             selStr = drawer.selectionParseKeyLabel(ref)
-            raise error.ParameterObjectSyntaxError, 'bad control value: enter %s.' % selStr
+            raise error.ParameterObjectSyntaxError('bad control value: enter %s.' % selStr)
         return usrStr
 
     def _valueSelectTriParser(self, usrStr):
@@ -786,7 +786,7 @@ class Parameter(object):
         usrStr = drawer.selectionParse(usrStr, ref)
         if usrStr == None:
             selStr = drawer.selectionParseKeyLabel(ref)
-            raise error.ParameterObjectSyntaxError, 'bad control value: enter %s.' % selStr
+            raise error.ParameterObjectSyntaxError('bad control value: enter %s.' % selStr)
         return usrStr
 
         
@@ -804,7 +804,7 @@ class Parameter(object):
         usrStr = drawer.selectionParse(usrStr, ref)
         if usrStr == None:
             selStr = drawer.selectionParseKeyLabel(ref)
-            raise error.ParameterObjectSyntaxError, 'bad control value: enter %s.' % selStr
+            raise error.ParameterObjectSyntaxError('bad control value: enter %s.' % selStr)
         return usrStr
 
     def _typeFormatParser(self, usrStr):
@@ -816,7 +816,7 @@ class Parameter(object):
         usrStr = drawer.selectionParse(usrStr, ref)
         if usrStr == None:
             selStr = drawer.selectionParseKeyLabel(ref)
-            raise error.ParameterObjectSyntaxError, 'bad control value: enter %s.' % selStr
+            raise error.ParameterObjectSyntaxError('bad control value: enter %s.' % selStr)
         return usrStr
 
         
@@ -831,7 +831,7 @@ class Parameter(object):
         usrStr = drawer.selectionParse(usrStr, ref)
         if usrStr == None:
             selStr = drawer.selectionParseKeyLabel(ref)
-            raise error.ParameterObjectSyntaxError, 'bad control value: enter %s.' % selStr
+            raise error.ParameterObjectSyntaxError('bad control value: enter %s.' % selStr)
         return usrStr        
         
 
@@ -852,7 +852,7 @@ class Parameter(object):
         usrStr = drawer.selectionParse(usrStr, ref)
         if usrStr == None:
             selStr = drawer.selectionParseKeyLabel(ref)
-            raise error.ParameterObjectSyntaxError, 'bad control value: enter %s.' % selStr
+            raise error.ParameterObjectSyntaxError('bad control value: enter %s.' % selStr)
         return usrStr        
 
     def _selectLevelMonophonicParser(self, usrStr):
@@ -864,7 +864,7 @@ class Parameter(object):
         usrStr = drawer.selectionParse(usrStr, ref)
         if usrStr == None:
             selStr = drawer.selectionParseKeyLabel(ref)
-            raise error.ParameterObjectSyntaxError, 'bad control value: enter %s.' % selStr
+            raise error.ParameterObjectSyntaxError('bad control value: enter %s.' % selStr)
         return usrStr
 
     def _selectLevelPolyphonicParser(self, usrStr):
@@ -882,7 +882,7 @@ class Parameter(object):
         usrStr = drawer.selectionParse(usrStr, ref)
         if usrStr == None:
             selStr = drawer.selectionParseKeyLabel(ref)
-            raise error.ParameterObjectSyntaxError, 'bad control value: enter %s.' % selStr
+            raise error.ParameterObjectSyntaxError('bad control value: enter %s.' % selStr)
         return usrStr
 
     # filter po converters needed here for backwards compat
@@ -896,7 +896,7 @@ class Parameter(object):
         usrStr = drawer.selectionParse(usrStr, ref)
         if usrStr == None:
             selStr = drawer.selectionParseKeyLabel(ref)
-            raise error.ParameterObjectSyntaxError, 'bad control value: enter %s.' % selStr
+            raise error.ParameterObjectSyntaxError('bad control value: enter %s.' % selStr)
         return usrStr
 
     def _selectTimeRefParser(self, usrStr):
@@ -913,7 +913,7 @@ class Parameter(object):
         usrStr = drawer.selectionParse(usrStr, ref)
         if usrStr == None:
             selStr = drawer.selectionParseKeyLabel(ref)
-            raise error.ParameterObjectSyntaxError, 'bad control value: enter %s.' % selStr
+            raise error.ParameterObjectSyntaxError('bad control value: enter %s.' % selStr)
         return usrStr
         
 

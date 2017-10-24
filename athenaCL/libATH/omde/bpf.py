@@ -146,7 +146,7 @@ class BPF(Function):
       time0 = None
       for time1, value1 in self.pairs:
             if time0 is not None and time1 < time0:
-                raise ValueError, 'pairs are not in temporal sequence'
+                raise ValueError('pairs are not in temporal sequence')
             time0 = time1
             
 
@@ -170,11 +170,11 @@ class PowerSegment(BPF):
         (time, value)
         like PowerSegment((0, 1), (5, 3), (20, 1))
         """
-        if dict.has_key('exp'):
+        if 'exp' in dict:
             self.exponent = dict['exp']
         else: self.exponent = 1.0
         
-        if dict.has_key('periodic'):
+        if 'periodic' in dict:
             periodic = dict['periodic']
         else: periodic = 0
         
@@ -217,7 +217,7 @@ class LinearSegment(BPF):
         (time, value)
         like LineSegment((0, 1), (5, 3), (20, 1))
         """
-        if dict.has_key('periodic'):
+        if 'periodic' in dict:
             periodic = dict['periodic']
         else: periodic = 0
         BPF.__init__(self, pairs, periodic)
@@ -235,7 +235,7 @@ class HalfCosineSegment(BPF):
     >>> a = HalfCosineSegment([(0, 1), (5, 3), (20, 1)])
     """
     def __init__(self, pairs, **dict):
-        if dict.has_key('periodic'):
+        if 'periodic' in dict:
             periodic = dict['periodic']
         else: periodic = 0
         BPF.__init__(self, pairs, periodic)
@@ -263,7 +263,7 @@ class NoInterpolationSegment(BPF):
 
         >>> a = NoInterpolationSegment([(0, 1), (5, 3), (20, 1)])
         """
-        if dict.has_key('periodic'):
+        if 'periodic' in dict:
             periodic = dict['periodic']
         else: periodic = 0
         BPF.__init__(self, pairs, periodic)

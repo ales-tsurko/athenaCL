@@ -32,7 +32,7 @@ try:
 except ImportError:
     PIL = 0
 try:
-    import Tkinter
+    import tkinter
     TK = 1
 except ImportError:
     TK = 0
@@ -75,7 +75,7 @@ def HTMLColorToRGB(colorstring):
     colorstring = colorstring.strip()
     if colorstring[0] == '#': colorstring = colorstring[1:]
     if len(colorstring) != 6:
-        raise ValueError, "input #%s is not in #RRGGBB format" % colorstring
+        raise ValueError("input #%s is not in #RRGGBB format" % colorstring)
     r, g, b = colorstring[:2], colorstring[2:4], colorstring[4:]
     r, g, b = [int(n, 16) for n in (r, g, b)]
     return (r, g, b)
@@ -167,7 +167,8 @@ fontLibPil = {
     'times' : ('timB', 'timBI', 'timI', 'timR'),
     }
 
-def getFontPath((face, style, size)): # dont check for errrs
+def getFontPath(xxx_todo_changeme): # dont check for errrs
+    (face, style, size) = xxx_todo_changeme
     for n in fontLibPil[face]:
         if style in n or style == n:
             group = n
@@ -207,23 +208,23 @@ class Thumb:
                 outfile = os.path.splitext(infile)[0] + ".th%s%s" % (
                                                               self.sizeW, self.fmt)
             if infile.endswith('.gif'):
-                print _MOD, 'cannot process gif files: %s' % infile
+                print(_MOD, 'cannot process gif files: %s' % infile)
             elif outfile in nameOutFiles:
-                print _MOD, 'file already generated: %s' % outfile
+                print(_MOD, 'file already generated: %s' % outfile)
             elif infile != outfile:
                 try:
                     im = Image.open(infile)
                     if self.sizeW != None: # only resize if size is not None
-                        print _MOD, 'reducing size to %s' % self.sizeW
+                        print(_MOD, 'reducing size to %s' % self.sizeW)
                         im.thumbnail((self.sizeW, self.sizeH), Image.ANTIALIAS)
                     #im.save(outfile, "JPEG")
                     im.save(outfile)
                     procFiles.append([infile, outfile])
                     nameOutFiles.append(outfile)
-                except IOError, msg:
-                    print _MOD, "cannot create thumbnail: %s" % infile, msg 
+                except IOError as msg:
+                    print(_MOD, "cannot create thumbnail: %s" % infile, msg) 
             else:
-                print _MOD, 'name conflict: %s' % infile
+                print(_MOD, 'name conflict: %s' % infile)
         return procFiles
 
 
@@ -327,7 +328,7 @@ class BarCode(GridGraphic):
     def __init__(self, src=None, width=120, foreColor='#000000', 
                           backColor='#aaaaaa', xMult=1, yMult=1, horizontal=1):
         if width == None and src == None:
-            raise ValueError, 'not enough arguments'
+            raise ValueError('not enough arguments')
         #foreColor can be a list of colors that are chosen from at random
         if not drawer.isList(foreColor):
             foreColor = [foreColor,]
@@ -541,7 +542,7 @@ class WebText:
                                          4, 4, 1, wrapW)
 
         else:
-            raise KeyError, 'no such style name %r' % style
+            raise KeyError('no such style name %r' % style)
 
     def write(self, filePath):
         self.image.write(filePath)
@@ -645,19 +646,19 @@ class TkCanvas(_CanvasBase):
 
     def __init__(self, w, h, bg, name, master):
         if not TK:
-            raise ImportError, 'Tkinter not loaded'
+            raise ImportError('Tkinter not loaded')
         _CanvasBase.__init__(self, w, h, bg, 'tk', name)
         if master == None:
-            self.master = Tkinter.Tk()
+            self.master = tkinter.Tk()
         else:
             self.master = master
         # not sure this is needed
         #self.top = Tkinter.Toplevel() # create a top level?
-        self.frame = Tkinter.Frame(self.master, width=self.w, height=self.h, bd=0,
+        self.frame = tkinter.Frame(self.master, width=self.w, height=self.h, bd=0,
                                      bg=self.bg, relief='flat')
         self.frame.pack(fill='both', pady=0, padx=0)
         # create base canvas
-        self.c = Tkinter.Canvas(self.frame, bg=self.bg, bd=0, width=self.w, 
+        self.c = tkinter.Canvas(self.frame, bg=self.bg, bd=0, width=self.w, 
                     height=self.h, highlightthickness=0, 
                     closeenough=1, confine=1)
         self.c.pack(fill='both', pady=0, padx=0) 
@@ -1232,7 +1233,7 @@ def Canvas(fmt, w, h, bg='#000000', name='image', master=None, transp=None):
     elif fmt == 'eps':
         obj = EpsCanvas(w, h, bg, name)
     else:
-        raise ValueError, 'bad canvas format type: %s' % fmt
+        raise ValueError('bad canvas format type: %s' % fmt)
     return obj
 
 
@@ -1282,7 +1283,7 @@ class ProcessGraphCoordData:
         """
         self.xRangeLib = {}
         self.yRangeLib = {}
-        for key in self.dataLib.keys():
+        for key in list(self.dataLib.keys()):
             xMax = self.dataLib[key][0][0] # seed w/ values from data
             xMin = self.dataLib[key][0][0]
             yMax = self.dataLib[key][0][1]
@@ -1356,7 +1357,7 @@ class ProcessGraphCoordData:
     def _findAxis(self):
         self.xAxisLib = {}
         self.yAxisLib = {}
-        for key in self.dataLib.keys():
+        for key in list(self.dataLib.keys()):
             self.xAxisLib[key] = self._genAxis(self.xRangeLib[key][0], 
                                         self.xRangeLib[key][1], self.xRez, 'x')
             self.yAxisLib[key] = self._genAxis(self.yRangeLib[key][0], 
@@ -1390,7 +1391,7 @@ class ProcessGraphCoordData:
                         return i + 1
                     elif upper == lower: # equal?
                         return i # round to lower?
-                    else: print _MOD, 'x error'
+                    else: print(_MOD, 'x error')
             elif side == 'y': # greater to lesser values
                 if value == axis[i]:
                     return i
@@ -1405,7 +1406,7 @@ class ProcessGraphCoordData:
                         return i + 1
                     elif upper == lower: # equal?
                         return i # round to lower?
-                    else: print _MOD, 'y error'
+                    else: print(_MOD, 'y error')
 
     def _findPlot(self):
         """create a bit map based on resolution
@@ -1416,7 +1417,7 @@ class ProcessGraphCoordData:
         method to get values out in old format"""
         self.plotLib = [] # used to be a dictionary
         # each key represents a color/symbol/fill-pattern group
-        for key in self.dataLib.keys():
+        for key in list(self.dataLib.keys()):
             for data in self.dataLib[key]:
                 if self.dataMode == 'point':
                     x, y = data
@@ -1446,7 +1447,7 @@ class ProcessGraphCoordData:
         """
         self.bitLib = {} # this is like the old plotLib format
         # build empty double array
-        for key in self.dataLib.keys():
+        for key in list(self.dataLib.keys()):
             self.bitLib[key] = []
             for y in range(self.yRez): # replace w/ array?
                 row = array.array('i')
@@ -1476,7 +1477,7 @@ class ProcessGraphCoordData:
         return self.plotLib
     
     def keys(self):
-        return self.dataLib.keys()
+        return list(self.dataLib.keys())
     
     def gridKey(self, key, side='x', lines=3):
         """returns a grid key for this axis
@@ -2057,7 +2058,7 @@ class NumericalPointGraph(_GraphBase):
     this graph is used for TImap and TPmap displays"""
     def __init__(self, dataObj=None, origin=(0,0)):
     
-        groupKey = dataObj.keys()[0] # take first key, will be 1
+        groupKey = list(dataObj.keys())[0] # take first key, will be 1
         # graph base wants a bit-map of enter data to be written
         _GraphBase.__init__(self, dataObj.xRez, dataObj.yRez, 
                                   dataObj.getPlotLib(), origin)
@@ -2137,7 +2138,7 @@ class NumericalBarGraph(_GraphBase):
     now; may be real-value x,y pairs or x,y,x,y quads"""
     def __init__(self, dataObj=None, origin=(0,0)):
     
-        groupKey = dataObj.keys()[0] # take first key, will be 1
+        groupKey = list(dataObj.keys())[0] # take first key, will be 1
         # will assign self.plotLib
         _GraphBase.__init__(self, dataObj.xRez, dataObj.yRez, 
                                   dataObj.getPlotLib(), origin)
@@ -2350,7 +2351,7 @@ class TestOld:
         fmtList = ['tk', 'png', 'eps']
         import time
         for fmt in fmtList:
-            print _MOD, 'testing format', fmt
+            print(_MOD, 'testing format', fmt)
             a = Canvas(fmt, 200, 200)
             a.rectangle(10, 10, 120, 120, '#333333', '#ffffff', 5)
             a.rectangle(150, 150, 180, 180, None, '#ffffff', 2)

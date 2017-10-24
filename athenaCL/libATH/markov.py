@@ -90,7 +90,7 @@ class Transition:
     #-----------------------------------------------------------------------||--
     def _sortWeightKey(self, dict):
         """sort transition keys by size first"""
-        keys = dict.keys()
+        keys = list(dict.keys())
         keys.sort()
         # sort keys by length
         ord = []
@@ -121,7 +121,7 @@ class Transition:
     def _parseValidate(self, usrStr):
         """make sure the the string appears correct"""
         if usrStr.count(self.OPEN) != usrStr.count(self.CLOSE):
-            raise error.TransitionSyntaxError, "all braces not paired"
+            raise error.TransitionSyntaxError("all braces not paired")
 
     def _parseWeightKey(self, key):
         """ make key into a list of symbol strings
@@ -162,7 +162,7 @@ class Transition:
                 keyFinal.append(segment) # make it a tuple before return
             elif len(keyPost) > 1:
                 msg = "only one operator may be used per weight key segment"
-                raise error.TransitionSyntaxError, msg
+                raise error.TransitionSyntaxError(msg)
             # definitial an expression, pack new tuple, leading with expression op
             # if it is an or sym, need to split by this symbol
             else:
@@ -181,7 +181,7 @@ class Transition:
         """read a complete dictionary of transition keys and weights, 
         and load weights as a list"""
         self._weightSrc = {} 
-        for key, value in pairWeight.items():
+        for key, value in list(pairWeight.items()):
             # make key into a list of symbol strings
             key = self._parseWeightKey(key)
             # make value into a list of pairs
@@ -190,8 +190,7 @@ class Transition:
             for assign in weights:
                 if self.ASSIGN not in assign: continue
                 if assign.count(self.ASSIGN) > 1: # bad syntax or other error
-                    raise error.TransitionSyntaxError, \
-                            "incorrect weight specification: %s" % assign
+                    raise error.TransitionSyntaxError("incorrect weight specification: %s" % assign)
                 symbol, w = assign.split(self.ASSIGN)
                 # convert to float or int, may not be less tn zero
                 # will return None on error
@@ -200,8 +199,7 @@ class Transition:
                 # side-effects; need to test in whole
                 # not defining all weights is permitted
                 if w in (None, 0): # no zero weights, or other errors
-                    raise error.TransitionSyntaxError, \
-                            "bad weight value given: %s" % assign
+                    raise error.TransitionSyntaxError("bad weight value given: %s" % assign)
                 weightList.append((symbol, w))
             # assign to weight src
             self._weightSrc[key] = weightList 
@@ -209,8 +207,8 @@ class Transition:
     def _checkSymbolUsage(self):
         """check to see if all symbols used in weight keys are in symbol list
         also update orders; this fills _ordersSrc"""
-        symbols = self._symbols.keys()
-        for key in self._weightSrc.keys():
+        symbols = list(self._symbols.keys())
+        for key in list(self._weightSrc.keys()):
             ord = len(key) # a zero key will be an empty tuple
             if ord not in self._ordersSrc: 
                 self._ordersSrc.append(ord) # len of weight label is order
@@ -219,8 +217,7 @@ class Transition:
             for w in weights:
                 # weights are always symbol, number pairs
                 if w[0] not in symbols:
-                    raise error.TransitionSyntaxError,\
-                            "weight specified for undefined symbol: %s" % w[0]
+                    raise error.TransitionSyntaxError("weight specified for undefined symbol: %s" % w[0])
         # sort order list             
         self._ordersSrc.sort()
                 
@@ -229,8 +226,7 @@ class Transition:
         symbols cannot have spaces, case, or strange characters"""
         for char in symStr:
             if char not in self.SYM:
-                raise error.TransitionSyntaxError,\
-                "symbol definition uses illegal characters (%s)" % char
+                raise error.TransitionSyntaxError("symbol definition uses illegal characters (%s)" % char)
 
     def _checkSymbolFormWeightKey(self, symStr):
         """makes sure that symbol usage is valid for weight label keys
@@ -238,8 +234,7 @@ class Transition:
         valid = self.SYM + self.STEP + ''.join(self.EXPRESS)
         for char in symStr:
             if char not in valid:
-                raise error.TransitionSyntaxError,\
-                "symbol definition uses illegal characters (%s)" % char
+                raise error.TransitionSyntaxError("symbol definition uses illegal characters (%s)" % char)
                 
     def _parseClean(self, usrStr):
         """remove any unusual characters that migth appear"""
@@ -274,7 +269,7 @@ class Transition:
             try:
                 key, value = double.split(self.OPEN)
             except: # possible syntax error in formationi
-                raise error.TransitionSyntaxError, "badly placed delimiters"
+                raise error.TransitionSyntaxError("badly placed delimiters")
             # key is always a symbol def: will change case and remove spaces
             key = drawer.strScrub(key, 'lower', [' ']) # rm spaces from key
             # split into 2 dictionaries, one w/ symbol defs, one w/ weights
@@ -288,11 +283,11 @@ class Transition:
                 pairSymbol[key] = drawer.strScrub(value, None, [' ']) 
         # this initializes symbol table
         if pairSymbol == {}:
-            raise error.TransitionSyntaxError, "no symbols defined"
+            raise error.TransitionSyntaxError("no symbols defined")
         self._symbols = pairSymbol
         # pass the pair dictionary to weight parser
         if pairWeight == {}:
-            raise error.TransitionSyntaxError, "no weights defined"
+            raise error.TransitionSyntaxError("no weights defined")
         self._parseWeightValue(pairWeight)
         # check symbol usage and determine orders
         self._checkSymbolUsage()
@@ -301,9 +296,9 @@ class Transition:
     #-----------------------------------------------------------------------||--         
     def _valueToSymbol(self, value):
         """for a data value, return the defined symbol label"""
-        for s, v in self._symbols.items():
+        for s, v in list(self._symbols.items()):
             if value == v: return s
-        raise ValueError, 'value not known as Transition symbol'
+        raise ValueError('value not known as Transition symbol')
             
     def _valueListToSymbolList(self, valueList):
         """given a list of values (taken from an previous generated values)
@@ -321,7 +316,7 @@ class Transition:
     def _analyzeZero(self, data):
         """assumes symbols are defined"""
         self._weightSrc[()] = [] # key is empty tuple
-        for sym in self._symbols.keys():
+        for sym in list(self._symbols.keys()):
             value = self._symbols[sym]
             self._weightSrc[()].append((sym, data.count(value)))
             
@@ -354,7 +349,7 @@ class Transition:
         if wrap:
             data = data + data[:order]            
             
-        symbols = self._symbols.keys()
+        symbols = list(self._symbols.keys())
         trans = permutate.selections(symbols, order)              
         # go through all transition possibilities for this order          
         for t in trans: 
@@ -483,7 +478,7 @@ class Transition:
         """provide a complete transition string"""
         # do symbol list first
         msg = []
-        syms = self._sortSymbolLabel(self._symbols.items())
+        syms = self._sortSymbolLabel(list(self._symbols.items()))
         for s, data in syms:
             msg.append('%s%s%s%s' % (s, self.OPEN, data, self.CLOSE))
         # determin where to get weight keys, from src or post
@@ -539,11 +534,11 @@ class Transition:
     def getSignified(self):
         """return symbol values as a list; useful for checking type and quality
         of possible outptus"""
-        return self._symbols.values()
+        return list(self._symbols.values())
 
     def getItems(self):
         """get key, value pairs from sybol dict"""
-        return self._symbols.items()
+        return list(self._symbols.items())
 
     def getOrderMax(self):
         """get highest specified order values"""
@@ -558,11 +553,11 @@ class Transition:
         and qual distribution when srubbed)"""
         # for expression compat, need a method here to search weights
         # and determine of there is a direct match, or an expression match
-        if self._weightSrc.has_key(srcSeq): # direct match
+        if srcSeq in self._weightSrc: # direct match
             return self._weightSrc[srcSeq]
         # if no key defined, search for matching expressions
         srcLen = len(srcSeq)
-        for label in self._weightSrc.keys():
+        for label in list(self._weightSrc.keys()):
             if len(label) != srcLen: continue # a def for a different order
             matchCount = 0
             for i in range(srcLen):
@@ -591,7 +586,7 @@ class Transition:
         # if an empty weight list is given, use an equal distribution
         # based onall known symbols
         if wList == None:         
-            symbols = self._symbols.keys() # order does not matter
+            symbols = list(self._symbols.keys()) # order does not matter
             wPost = [1] * len(symbols)
             sDeclared = symbols[:]
         else:
@@ -613,10 +608,10 @@ class Transition:
         next available order, otherwise, will use zero order
         order may be a float; if so it will use weighting from drawer
         """
-        symbols = self._symbols.keys()
+        symbols = list(self._symbols.keys())
         # get appropriate order: if a float, will be dynamically allocated
         order = drawer.floatToInt(order, 'weight')
-        if order not in range(0, self._ordersSrc[-1]+1):
+        if order not in list(range(0, self._ordersSrc[-1]+1)):
             order = self._ordersSrc[-1] # use highest defined
         #print _MOD, 'using order', order
         # get appropriate key of given length of previous
@@ -657,7 +652,7 @@ class TestOld:
         
     def testParse(self):
 
-        import rhythm
+        from . import rhythm
         timer = rhythm.Timer() # get a timer to test time
     
         testA = "a{x} b{y} c{z} :{a=3|b=.03|c=5} a:{a=1|b=5|c=4} b{a=2|b=2|c=6} c{a=3|b=1|c=9} a::b::{a=3|b=2} a:c:b{a=1}"
@@ -684,23 +679,23 @@ class TestOld:
                          testI, testJ]:
             a = Transition()
             a.loadTransition(test)
-            print a
+            print(a)
             for order in range(0,4):
-                print 'requested order:', order
+                print('requested order:', order)
                 msg = []
                 for x in range(30):
                     val = random.random()
                     msg.append(a.next(val, msg, order))
-                print ' '.join(msg)
-            print
+                print(' '.join(msg))
+            print()
 
-        print '\ntotal time %s' % timer('sw')
+        print('\ntotal time %s' % timer('sw'))
 
 
 
     def testAnalysis():
 
-        import rhythm
+        from . import rhythm
         timer = rhythm.Timer() # get a timer to test time
             
         msgA = 'that this is a this that is a a this is that but not this that is a is a that this this that but that but this but is but not'      
@@ -768,19 +763,19 @@ class TestOld:
             a = Transition()
             max = 2
             a.loadString(test, max)
-            print a
+            print(a)
             for order in range(0,max+1):
-                print 'requested order: (w/ random upward variation)', order
+                print('requested order: (w/ random upward variation)', order)
                 msg = []
                 for x in range(120):
                     postOrder = order + random.random()
                     val = random.random()
                     msg.append(a.next(val, msg, postOrder))
-                print ' '.join(msg)
-                print
+                print(' '.join(msg))
+                print()
             
             
-        print '\ntotal time %s' % timer('sw')
+        print('\ntotal time %s' % timer('sw'))
 
 
 

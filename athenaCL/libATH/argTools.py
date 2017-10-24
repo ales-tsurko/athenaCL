@@ -49,9 +49,9 @@ def parseFlags(argv, flags, posStart=1, spaceLimit=0):
 
     """
     # flags me be ref dict with doc vaules; check type
-    if isinstance(flags, types.DictionaryType):
+    if isinstance(flags, dict):
         flagTemp = []
-        for entry in flags.keys():
+        for entry in list(flags.keys()):
             flagTemp = flagTemp + list(entry) #str, tuple convert to list
         flags = flagTemp
     #for flag in flags:
@@ -94,7 +94,7 @@ def parseFlags(argv, flags, posStart=1, spaceLimit=0):
                         extraData.append(argv[i+1])
                         i = i + 1
                 else: # already have some data w/ this flag, assume that is all
-                    print 'spaceLimit, no data to add', flagSymbol
+                    print('spaceLimit, no data to add', flagSymbol)
                     pass
 
             flagValue = ' '.join(extraData) # put space between args

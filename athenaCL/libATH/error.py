@@ -99,10 +99,10 @@ class ArgumentError(SyntaxError):
 
 # was CloneError
 # now error.CloneError
-class CloneError(StandardError):
+class CloneError(Exception):
     def __init__(self, msg=''):
         self._msg = msg
-        StandardError.__init__(self, "%s" % self._msg)
+        Exception.__init__(self, "%s" % self._msg)
     
     def __repr__(self):
         return self._msg
@@ -112,10 +112,10 @@ class CloneError(StandardError):
 
 # was MultisetInitError, BadSetInput
 # now error.MultisetError
-class MultisetError(StandardError):
+class MultisetError(Exception):
     def __init__(self, msg=''):
         self._msg = msg
-        StandardError.__init__(self, "%s" % self._msg)
+        Exception.__init__(self, "%s" % self._msg)
     
     def __repr__(self):
         return self._msg
@@ -124,13 +124,13 @@ class MultisetError(StandardError):
 
 # was TestBug
 # now error.TestError
-class TestError(StandardError):
+class TestError(Exception):
     '''
     >>> a = TestError()
     '''
     def __init__(self, msg=''):
         self._msg = msg
-        StandardError.__init__(self, "%s" % self._msg)
+        Exception.__init__(self, "%s" % self._msg)
     
     def __repr__(self):
         return self._msg

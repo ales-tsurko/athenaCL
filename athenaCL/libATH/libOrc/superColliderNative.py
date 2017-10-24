@@ -62,10 +62,10 @@ class SuperColliderNative(baseOrc.Orchestra):
 
 
     def getInstObj(self, iNo):
-        if iNo in self._instrObjDict.keys(): # already loaded
+        if iNo in list(self._instrObjDict.keys()): # already loaded
             return self._instrObjDict[iNo] # call attribute of module to get object
         else:
-            raise ValueError, 'bad insturment number given: %s' % iNo
+            raise ValueError('bad insturment number given: %s' % iNo)
             
 
     def constructOrc(self, noChannels=2, instList=None):
@@ -246,9 +246,9 @@ class Inst0(InstrumentSuperCollider):
           'pmtr8'   : ('bg', 'rc', [.1, .2, .3, .4]),
           'pmtr9'   : ('ru', 60, 120),
           }
-        self.auxNo = len(self.pmtrInfo.keys())
+        self.auxNo = len(list(self.pmtrInfo.keys()))
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
-        self.pmtrFieldNames = ['sus', 'amp', 'pan'] + self.pmtrInfo.keys()
+        self.pmtrFieldNames = ['sus', 'amp', 'pan'] + list(self.pmtrInfo.keys())
 
         self.author = 'athenaCL native' # attribution
 
@@ -303,9 +303,9 @@ class Inst10(InstrumentSuperCollider):
           'pmtr7'   : ('bg', 'rc', [3, 2, 1]),
           'pmtr8'   : ('bg', 'rc', [.02, .05]),
           }
-        self.auxNo = len(self.pmtrInfo.keys())
+        self.auxNo = len(list(self.pmtrInfo.keys()))
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
-        self.pmtrFieldNames = ['sus', 'amp', 'pan', 'ps'] + self.pmtrInfo.keys()
+        self.pmtrFieldNames = ['sus', 'amp', 'pan', 'ps'] + list(self.pmtrInfo.keys())
 
         self.author = 'athenaCL native' # attribution
 

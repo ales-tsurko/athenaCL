@@ -216,7 +216,7 @@ class Texture(object):
         if usrStr not in self.textLabels:
             # try to match by parameter obj name
             usrStr = drawer.strScrub(usrStr, 'lower')
-            for key in parameter.textPmtrNames.keys():
+            for key in list(parameter.textPmtrNames.keys()):
                 if usrStr == key: # get long name
                     usrStr = parameter.textPmtrNames[key]
                     break
@@ -228,7 +228,7 @@ class Texture(object):
                     found = 1
                     break
             if not found:
-                raise ValueError, 'unknown label name for static parameter'
+                raise ValueError('unknown label name for static parameter')
         return usrStr
 
     def findTextDynamicLabel(self, usrStr):
@@ -266,7 +266,7 @@ class Texture(object):
         """this only supplies names, which wil load defaults"""
         for i, textLabel in basePmtr.textLabel(self.textPmtrNo, 1):
             # add arg list default if missing to pmtrQdict
-            if not self.pmtrQDict.has_key(textLabel):
+            if textLabel not in self.pmtrQDict:
                 args = [self.textPmtrNames[i],]
                 dummyObj = parameter.factory(args, 'textPmtrObjs', self.refDict)
                 self.pmtrQDict[textLabel] = dummyObj.getArgs()
@@ -283,7 +283,7 @@ class Texture(object):
     def _updateDynPmtrDefaults(self):
         """must supply complete arguments to create dynamic parameter objects"""
         for i, dynLabel in basePmtr.dynLabel(self.dynPmtrNo, 1):
-            if not self.pmtrQDict.has_key(dynLabel):
+            if dynLabel not in self.pmtrQDict:
                 args = self.dynPmtrManifest[i]['default']
                 self.pmtrQDict[dynLabel] = args
     
@@ -339,7 +339,7 @@ class Texture(object):
         """
         #temperamentObj = temperament.Temperament() # generic
         name = temperament.temperamentNameParser(name) # for backward compat
-        if name == None: raise ValueError, 'bad temperament name error'
+        if name == None: raise ValueError('bad temperament name error')
         self.temperamentName = name
         self.temperamentObj = temperament.factory(self.temperamentName)
 
@@ -466,15 +466,15 @@ class Texture(object):
         auxNo, pmtrQDict = self._getInstInfo(inst, orcName, auxNo)
             
         # often defined with orc but not required
-        if not pmtrQDict.has_key('ampQ'): # if missing amp
+        if 'ampQ' not in pmtrQDict: # if missing amp
             pmtrQDict['ampQ'] = 'rb,.4,.4,.7,.9'
-        if not pmtrQDict.has_key('panQ'): # if missing
+        if 'panQ' not in pmtrQDict: # if missing
             pmtrQDict['panQ'] = ('constant', .5)
-        if not pmtrQDict.has_key('octQ'): # if missing
+        if 'octQ' not in pmtrQDict: # if missing
             pmtrQDict['octQ'] = ('constant', 0) # no shift
-        if not pmtrQDict.has_key('fieldQ'): # if missing
+        if 'fieldQ' not in pmtrQDict: # if missing
             pmtrQDict['fieldQ'] = ('constant', 0)
-        if not pmtrQDict.has_key('rhythmQ'): # if missing
+        if 'rhythmQ' not in pmtrQDict: # if missing
             pmtrQDict['rhythmQ'] = 'pt,(c,4),(bg,rp,(1,1,2,3)),(c,1),(c,.75)'
 
         pmtrQDict['inst']     = ('staticInst', inst, orcName) # default value
@@ -790,7 +790,7 @@ class Texture(object):
 
     def getPathPos(self):
         """gets a list of path positions, from 0 to len-1"""
-        return range(0, len(self.path))
+        return list(range(0, len(self.path)))
 
     def getPathLen(self):
         """gets a list of path positions"""
@@ -903,7 +903,7 @@ class Texture(object):
         # remove old aux values 
         for auxLabel in basePmtr.auxLabel(oldAuxNo):
             del self.pmtrQDict[auxLabel]
-            if auxLabel in self.pmtrObjDict.keys(): # remove objects if they exist
+            if auxLabel in list(self.pmtrObjDict.keys()): # remove objects if they exist
                 del self.pmtrObjDict[auxLabel]
 
         # insert new aux values, from preset dict
@@ -926,7 +926,7 @@ class Texture(object):
             try:
                 self.pmtrObjDict[pmtrName] = parameter.factory(args, 
                                                   'textPmtrObjs', self.refDict)
-            except error.ParameterObjectSyntaxError, msg: # initialization errors
+            except error.ParameterObjectSyntaxError as msg: # initialization errors
                 return 0, 'incorrect arguments: %s' % msg
         else:
             # get appropriate library
@@ -936,7 +936,7 @@ class Texture(object):
                 lib = 'genPmtrObjs'
             try:
                 self.pmtrObjDict[pmtrName] = parameter.factory(args, lib)
-            except error.ParameterObjectSyntaxError, msg: # initialization errors
+            except error.ParameterObjectSyntaxError as msg: # initialization errors
                 return 0, 'incorrect arguments: %s' % msg
         # check for errors
         if self.pmtrObjDict[pmtrName] == None: # failure to match object type
@@ -973,7 +973,7 @@ class Texture(object):
         elif pmtrName != '':
             ok, msg = self._evalPmtrObj(pmtrName)
         else: # reinit all paramters, no name given
-            for pmtrName in self.pmtrQDict.keys():
+            for pmtrName in list(self.pmtrQDict.keys()):
                 ok, msg = self._evalPmtrObj(pmtrName)
                 if ok != 1: break # stop processing on error
         # post update actions
@@ -987,7 +987,7 @@ class Texture(object):
         setattr(self, attrName, data)
         ok, msg = self.updatePmtrObj(pmtrName)
         # this should never fail
-        if not ok: raise ValueError, 'texture edit: original data cannot be restored: %s' % msg
+        if not ok: raise ValueError('texture edit: original data cannot be restored: %s' % msg)
 
     def editPmtrObj(self, pmtrName, pmtrValue, refresh=1):
         """Edits a Texture's Parameter object
@@ -1045,19 +1045,19 @@ class Texture(object):
                 if not ok:
                     self._editRestore(attrName, p, oldData)
                     return ok, 'score creation returned an error.'
-        except error.ParameterObjectSyntaxError, msg: # standard init errors from pmtr obj
+        except error.ParameterObjectSyntaxError as msg: # standard init errors from pmtr obj
             msg = '%s %s' % (editPhase, msg)
             ok = 0
-        except IndexError, msg:
+        except IndexError as msg:
             msg = '%s incorrect number of arguments. %s.' % (editPhase, msg)
             ok = 0
-        except TypeError, msg:
+        except TypeError as msg:
             msg = '%s incorrect data-type in arguments. %s' % (editPhase, msg)
             ok = 0 
-        except UnboundLocalError, msg:
+        except UnboundLocalError as msg:
             msg = '%s incorrect paramater type in arguments. %s' % (editPhase, msg)
             ok = 0
-        except ValueError, msg:
+        except ValueError as msg:
             msg = '%s value error: an inappropriate data type used.' % editPhase
             ok = 0
         except ZeroDivisionError:
@@ -1223,7 +1223,7 @@ class Texture(object):
         nameSort = []
         nameList = []
         highest = 0
-        for name in self.pmtrObjDict.keys():
+        for name in list(self.pmtrObjDict.keys()):
             pri = self.pmtrObjDict[name].priority
             if pri < 0: # turns off post event processing
                 continue
@@ -1272,8 +1272,8 @@ class Texture(object):
         self.esObj.append(eventDict)
 
     def _mergeEventDict(self, parent, child):
-        for key in parent.keys():
-            if not child.has_key(key): # if child does not have value, copy
+        for key in list(parent.keys()):
+            if key not in child: # if child does not have value, copy
                 child[key] = copy.deepcopy(parent[key])
         return child
 
@@ -1307,7 +1307,7 @@ class Texture(object):
     def _scorePre(self): # called w/n score method
         self.stateClear() # resets
         self.esObj.clear() # clear event sequence
-        for pmtrName in self.pmtrQDict.keys():
+        for pmtrName in list(self.pmtrQDict.keys()):
             if pmtrName[:5] != 'textQ': #dont update texture options
                 # reset all necessary variables before scoring
                 # do update dyn parameters

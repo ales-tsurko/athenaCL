@@ -432,7 +432,7 @@ def psToNoteName(psReal):
     elif micro >= .75 and micro <= 1:
         qStr = ''
         qOffset = 1 # add an extra half step, round up
-    else: raise ValueError, 'micro tone value exceeds range'
+    else: raise ValueError('micro tone value exceeds range')
     # get oct offset for if wraps to ictace
     if (pc + qOffset) > 11:
         octOffset = 1
@@ -464,7 +464,7 @@ def psToMusicXml(psReal):
     elif micro >= .75 and micro <= 1:
         qVal = 0
         qOffset = 1 # add an extra half step, round up
-    else: raise ValueError, 'micro tone value exceeds range'
+    else: raise ValueError('micro tone value exceeds range')
     # get oct offset for if wraps to ictace
     if (pc + qOffset) > 11:
         octOffset = 1
@@ -778,7 +778,7 @@ class Pitch:
         """use of the get method should replace all direct attribute
         access. """
         if name not in self.forms:
-            raise ValueError, 'bad format name'
+            raise ValueError('bad format name')
         return self._convert(name) # convert to appropriate data and return
 
     def _procStrFloat(self, realVal, sigDigControl):
@@ -835,7 +835,7 @@ class Pitch:
         elif format == 'pc': # 6 sig digits
             return '%i' % self._convert(format)           
         else:
-            raise ValueError, 'no such format string: %s' % format
+            raise ValueError('no such format string: %s' % format)
 
     def __str__(self):
         return self.repr()

@@ -335,7 +335,7 @@ VII. CREDITS and ACKNOWLEDGMENTS:
         f = open(self.fpReadme, 'w')
         f.write(''.join(msg))     
         f.close()  
-        print 'info.py: writing %s' % self.fpReadme
+        print('info.py: writing %s' % self.fpReadme)
 
 
     #-----------------------------------------------------------------------||--
@@ -503,7 +503,7 @@ VII. CREDITS and ACKNOWLEDGMENTS:
 .Sh OPTIONS
 .Bl -tag -width flag""")
 
-        for key in flagsRef.keys():
+        for key in list(flagsRef.keys()):
             flagStr = ', '.join(key) # key is a list
             msg.append('\n.It Cm %s\n' % flagStr)
             msg.append('%s' % flagsRef[key])
@@ -521,7 +521,7 @@ The original author and current maintainer of
 .Nm
 is %s <%s>."""    % (lang.msgBugReport, lang.msgAuthor, lang.msgAuthorEmail))
 
-        print 'info.py: writing %s' % self.fpMan
+        print('info.py: writing %s' % self.fpMan)
 
         f = open(self.fpMan, 'w')
         f.writelines(msg)        

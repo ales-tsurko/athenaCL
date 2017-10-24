@@ -80,14 +80,14 @@ class Quantizer:
             stepLast.append(copy.copy(step)) # add previous step
         
             if n >= self.LOOPLIMIT: # around 1000 
-                print _MOD, 'failed to find boundray neighbors'
+                print(_MOD, 'failed to find boundray neighbors')
                 return None, None
         
     def updateGrid(self, grid):
         """can be called each time attract is called for dynamic grid
         can be called once for static grid"""
         if len(grid) <= 0: # need more values
-            raise ValueError, 'grid must have more than 1 value'
+            raise ValueError('grid must have more than 1 value')
         self.grid = grid
         self.gridRetro = grid[:]
         self.gridRetro.reverse()

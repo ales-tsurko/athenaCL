@@ -75,7 +75,7 @@ class HarmonicShuffle(baseTexture.Texture):
         textOctaveLevel = self.getTextStatic('lop', 'level')     
   
         pLen = self.getPathLen()
-        selectorMultisetPos = basePmtr.Selector(range(pLen),
+        selectorMultisetPos = basePmtr.Selector(list(range(pLen)),
                                                          textMultisetSelectorControl)
 
         # random generator for creating offset in vetical attacks
@@ -106,7 +106,7 @@ class HarmonicShuffle(baseTexture.Texture):
 
                 # create a selector to get pitches from chord as index values
                 # only need to create one for each chord
-                selectorChordPos = basePmtr.Selector(range(len(chordCurrent)),
+                selectorChordPos = basePmtr.Selector(list(range(len(chordCurrent))),
                                                                  textPitchSelectorControl)
 
                 # determine how many pitches in this simultaneity

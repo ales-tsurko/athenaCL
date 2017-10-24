@@ -62,7 +62,7 @@ def factory(orcName):
     elif orcName == 'superColliderNative':
         return superColliderNative.SuperColliderNative()
     else:
-        raise ValueError, 'bad orchestra name: %s' % orcName
+        raise ValueError('bad orchestra name: %s' % orcName)
 
 #-----------------------------------------------------------------||||||||||||--
 
@@ -70,15 +70,15 @@ def factory(orcName):
 class Test:
     def __init__(self):
         # call test methods
-        for orcName in orcNames.keys():
+        for orcName in list(orcNames.keys()):
             a = factory(orcName)
-            print
-            print a.name
+            print()
+            print(a.name)
             a.getInstInfo()
     
             if a.instNoList() != None:
                 for iNo in a.instNoList():
-                    print str(iNo).ljust(4), a.getInstName(iNo)
+                    print(str(iNo).ljust(4), a.getInstName(iNo))
                     a.getInstPreset(iNo)
     
             a.constructOrc()
@@ -93,7 +93,7 @@ class Test(unittest.TestCase):
         self.assertEqual(True, True)
 
     def testBuild(self):
-        for orcName in orcNames.keys():
+        for orcName in list(orcNames.keys()):
             a = factory(orcName)
             post = a.name
             post = a.getInstInfo()

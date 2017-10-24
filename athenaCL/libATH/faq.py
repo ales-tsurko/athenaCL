@@ -20,13 +20,13 @@ class FaqDictionary:
         """
         >>> a = FaqDictionary()
         """
-        self.keyList = range(1,30) # increase number for new entries
+        self.keyList = list(range(1,30)) # increase number for new entries
 
         self.groupTitleDict = {'general': 'General Information',
               'install': 'Installing, Starting, and Uninstalling athenaCL',
                                       'usage' : 'Using and Configuring athenaCL',
                                       }
-        self.groupList = self.groupTitleDict.keys()
+        self.groupList = list(self.groupTitleDict.keys())
 
         self.faqDict = {}
         for number in self.keyList:
@@ -36,7 +36,7 @@ class FaqDictionary:
 
     def sortKeys(self):
         keyQuaryList = []
-        for entry in self.faqDict.keys():
+        for entry in list(self.faqDict.keys()):
             keyQuaryList.append((self.faqDict[entry].query, entry))
         keyQuaryList.sort()
         keyIds = []
@@ -45,7 +45,7 @@ class FaqDictionary:
         return keyIds
 
     def searchQuery(self, query):
-        for entry in self.faqDict.keys():
+        for entry in list(self.faqDict.keys()):
             if query.lower() in self.faqDict[entry].query.lower():
                 return self.faqDict[entry].query, self.faqDict[entry].answer
         return None, None # if nothing found

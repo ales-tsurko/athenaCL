@@ -468,7 +468,7 @@ class Freezer(Generator):
           t is the freeze time (default is 0.0).
           """
           if not isinstance(f, Function):
-                raise ValueError, "Function expected. got '%s'", type(f)
+                raise ValueError("Function expected. got '%s'").with_traceback(type(f))
           
           self.f = f
           self.t = make_generator(t)
@@ -502,9 +502,9 @@ def make_function(object, begin = None, end = None):
           if begin is not None and end is not None:
                 return object.instance(begin, end)
           elif begin is not None and end is None:
-                raise ValueError, 'generator model not allowed without complete life span'
+                raise ValueError('generator model not allowed without complete life span')
           else:
-                raise ValueError, 'generator model without life span'
+                raise ValueError('generator model without life span')
      
      return ConstantFunction(object)
 

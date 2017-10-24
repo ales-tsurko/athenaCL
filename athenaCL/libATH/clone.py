@@ -167,7 +167,7 @@ class Clone:
         if usrStr not in self.cloneLabels:
             # try to match by parameter obj name
             usrStr = drawer.strScrub(usrStr, 'lower')
-            for key in parameter.clonePmtrNames.keys(): # keys are short
+            for key in list(parameter.clonePmtrNames.keys()): # keys are short
                 if usrStr == key: # get long name
                     usrStr = parameter.clonePmtrNames[key]
                     break
@@ -179,7 +179,7 @@ class Clone:
                     found = 1
                     break
             if not found:
-                raise ValueError, 'bad label name for clone pmtr data: %s' % usrStr
+                raise ValueError('bad label name for clone pmtr data: %s' % usrStr)
         return usrStr
 
 
@@ -385,12 +385,12 @@ class Clone:
         oldPmtrDict = copy.deepcopy(self.pmtrQDict)
         
         #print _MOD, 'clone: oldAuxNo, self.AuxNo', oldAuxNo, self.auxNo
-        print lang.WARN, 'new Clone auxiliary value %s' % self.auxNo
+        print(lang.WARN, 'new Clone auxiliary value %s' % self.auxNo)
 
         # remove old aux values 
         for auxLabel in basePmtr.auxLabel(oldAuxNo):
             del self.pmtrQDict[auxLabel]
-            if auxLabel in self.pmtrObjDict.keys(): # remove objects if they exist
+            if auxLabel in list(self.pmtrObjDict.keys()): # remove objects if they exist
                 del self.pmtrObjDict[auxLabel]
         
         # insert new values from defaults
@@ -401,7 +401,7 @@ class Clone:
         """this only supplies names, which wil load defaults"""
         for i, cloneLabel in basePmtr.cloneLabel(self.clonePmtrNo, 1):
             # add arg list default if missing to pmtrQdict
-            if not cloneLabel in self.pmtrQDict.keys():
+            if not cloneLabel in list(self.pmtrQDict.keys()):
                 args = [self.clonePmtrNames[i],]
                 dummyObj = parameter.factory(args, 'clonePmtrObjs', self.refDict)
                 self.pmtrQDict[cloneLabel] = dummyObj.getArgs()
@@ -415,14 +415,14 @@ class Clone:
             try:
                 self.pmtrObjDict[pmtrName] = parameter.factory(args, 
                                                   'clonePmtrObjs', refDict)
-            except error.ParameterObjectSyntaxError, msg: 
+            except error.ParameterObjectSyntaxError as msg: 
                 # initialization errors
                 return 0, 'incorrect arguments: %s' % msg
         else:
             try:
                 self.pmtrObjDict[pmtrName] = parameter.factory(args,
                                            'filterPmtrObjs', refDict)
-            except error.ParameterObjectSyntaxError, msg: 
+            except error.ParameterObjectSyntaxError as msg: 
                 # initialization errors
                 return 0, 'incorrect arguments: %s' % msg
         # check for errors
@@ -454,7 +454,7 @@ class Clone:
         if pmtrName != '':
             ok, msg = self._evalPmtrObj(pmtrName, refDict)
         else: # reinit all paramters, no name given
-            for pmtrName in self.pmtrQDict.keys():
+            for pmtrName in list(self.pmtrQDict.keys()):
                 ok, msg = self._evalPmtrObj(pmtrName, refDict)
                 if ok != 1: break # stop processing on error
         # post update actions:
@@ -464,7 +464,7 @@ class Clone:
         setattr(self, attrName, data)
         ok, msg = self.updatePmtrObj(pmtrName, refDict)
         # this should never fail
-        if not ok: raise ValueError, 'clone edit: original data cannot be restored: %s' % msg
+        if not ok: raise ValueError('clone edit: original data cannot be restored: %s' % msg)
         
     def editPmtrObj(self, pmtrName, pmtrValue, refDict, esObj=None, refresh=1):
         """refresh: turn off score generation
@@ -504,19 +504,19 @@ class Clone:
                 if not ok:
                     self._editRestore(attrName, p, oldData, refDict)
                     return ok, 'score creation returned an error.'
-        except error.ParameterObjectSyntaxError, msg: # standard init errors from pmtr obj
+        except error.ParameterObjectSyntaxError as msg: # standard init errors from pmtr obj
             msg = '%s %s' % (editPhase, msg)
             ok = 0
-        except IndexError, msg:
+        except IndexError as msg:
             msg = '%s incorrect number of arguments. %s.' % (editPhase, msg)
             ok = 0
-        except TypeError, msg:
+        except TypeError as msg:
             msg = '%s incorrect data-type in arguments. %s' % (editPhase, msg)
             ok = 0 
-        except UnboundLocalError, msg:
+        except UnboundLocalError as msg:
             msg = '%s incorrect paramater type in arguments. %s' % (editPhase, msg)
             ok = 0
-        except ValueError, msg:
+        except ValueError as msg:
             msg = '%s value error: an inappropriate data type used.' % editPhase
             ok = 0
         except ZeroDivisionError:
@@ -646,7 +646,7 @@ class Clone:
         if len(self.esObj) == 0:
             raise Exception('no events in EventSequence object')
 
-        for pmtrName in self.pmtrQDict.keys():
+        for pmtrName in list(self.pmtrQDict.keys()):
             if pmtrName[:6] != 'cloneQ': # check texture options
                 # reset all necessary variables before scoring
                 self.pmtrObjDict[pmtrName].reset() 
@@ -764,13 +764,13 @@ class CloneManager:
 
     def tNames(self):
         """return names of textures that have keys"""
-        return self._tRef.keys()
+        return list(self._tRef.keys())
     
     def cNames(self, tName):
         """return the names of the clone for a named textuire
         if texture does not have clones, returns None"""
         if tName not in self.tNames(): return []
-        names = self._tRef[tName].keys()
+        names = list(self._tRef[tName].keys())
         names.sort()
         return names
 
@@ -802,20 +802,20 @@ class CloneManager:
     #-----------------------------------------------------------------------||--
     def load(self, tName, cName, pmtrQDict, auxNo, auxFmt, mute=0):
         """initialize a clone object inside the appropriate texture label"""
-        if not tName in self._tRef.keys():
+        if not tName in list(self._tRef.keys()):
             self._tRef[tName] = {}
-        if cName in self._tRef[tName].keys():
-            raise error.CloneError, 'clone name already exists'
+        if cName in list(self._tRef[tName].keys()):
+            raise error.CloneError('clone name already exists')
         self._tRef[tName][cName] = Clone(cName, tName)
         self._tRef[tName][cName].load(pmtrQDict, auxNo, auxFmt, mute)
         self._tRefCurrent[tName] = cName
 
     def loadDefault(self, tName, cName, auxNo, auxFmt):
         """initialize a clone object inside the appropriate texture label"""
-        if not tName in self._tRef.keys():
+        if not tName in list(self._tRef.keys()):
             self._tRef[tName] = {}
-        if cName in self._tRef[tName].keys():
-            raise error.CloneError, 'clone name already exists'
+        if cName in list(self._tRef[tName].keys()):
+            raise error.CloneError('clone name already exists')
         self._tRef[tName][cName] = Clone(cName, tName)
         self._tRef[tName][cName].loadDefault(auxNo, auxFmt)
         self._tRefCurrent[tName] = cName
@@ -839,13 +839,13 @@ class CloneManager:
 
     def delete(self, tName, cName=None):
         if cName == None: # delete all of a texture's clones
-            if tName in self._tRef.keys():
+            if tName in list(self._tRef.keys()):
                 del self._tRef[tName]
                 del self._tRefCurrent[tName]
             else: # this should not happen
                 environLocal.printDebug['attempting to remove clone from texture %s not stored in tRef' % tName]
         else:
-            if tName in self._tRef.keys():
+            if tName in list(self._tRef.keys()):
                 del self._tRef[tName][cName]
             else: # this should not happen
                 environLocal.printDebug['attempting to remove clone from texture %s not stored in tRef' % tName]
@@ -856,7 +856,7 @@ class CloneManager:
     def tMove(self, tOld, tNew):
         """change the name of a texture"""
         if tNew in self.tNames():
-            raise error.CloneError, 'texture name already exists'         
+            raise error.CloneError('texture name already exists')         
         self._tRef[tNew] = self._tRef[tOld]
         del self._tRef[tOld]
         self._tRefCurrent[tNew] = self._tRefCurrent[tOld]
@@ -865,7 +865,7 @@ class CloneManager:
     def cMove(self, tName, cOld, cNew):
         """change the name of a clone"""
         if cNew in self.cNames(tName):
-            raise error.CloneError, 'clone name already exists'
+            raise error.CloneError('clone name already exists')
         self._tRef[tName][cNew] = self._tRef[tName][cOld]
         del self._tRef[tName][cOld]
         if self._tRefCurrent[tName] == cOld: # selected
@@ -874,7 +874,7 @@ class CloneManager:
     def cCopy(self, tName, cOld, cNew):
         """copy a clone within the same texture"""
         if cNew in self.cNames(tName):
-            raise error.CloneError, 'clone name already exists'
+            raise error.CloneError('clone name already exists')
         self._tRef[tName][cNew] = self._tRef[tName][cOld].copy(cNew, tName)
         if self._tRefCurrent[tName] == cOld: # selected
             self._tRefCurrent[tName] = cNew
@@ -886,7 +886,7 @@ class CloneManager:
         have clones
         """
         if tNew in self.tNames():
-            raise error.CloneError, 'bad source or destination texture naming'
+            raise error.CloneError('bad source or destination texture naming')
         if tOld not in self.tNames(): # cant do anything with this; no clones
             return None
         self._tRef[tNew] = {}

@@ -55,8 +55,8 @@ def uniToXml(usrStr, encoding='ascii'):
     try:
         unicodeData = usrStr.decode('utf-8')
         msg = unicodeData.encode(encoding, 'xmlcharrefreplace')
-    except UnicodeDecodeError, e:
-        print _MOD, 'utf problem', usrStr
+    except UnicodeDecodeError as e:
+        print(_MOD, 'utf problem', usrStr)
         #raise ValueError, '%s: %s' % (e, usrStr)
         msg = usrStr
     # for some reason, some characters return strange results: 
@@ -76,7 +76,7 @@ def uniToXml(usrStr, encoding='ascii'):
 def paraToSgml(str):
     "convert text with \n marks into separate paragraphs"
     if str == None:
-        print _MOD, 'got None for a sgml para conversion'
+        print(_MOD, 'got None for a sgml para conversion')
         str = 'none: missing data.'
     lines = str.split('\n')
     newStr = ''
@@ -92,14 +92,14 @@ def paraToSgml(str):
 def _dictionaryStrKey(data):
     """check to see this is a dictionary, and all keys are strings"""
     if drawer.isDict(data):# recurse into dictionary, use key as name
-        for key in data.keys():
+        for key in list(data.keys()):
             if not drawer.isStr(key):
                 return 0 # dictionary, but a key is not a string
         return 1 # all keys are strings, a dictionary
     return 0 # not a dictionary
 
 def _resolveOuterName(orient, tab, levelMatch, parentName, name):
-    matchKeys = levelMatch.keys()
+    matchKeys = list(levelMatch.keys())
     if 'all' in matchKeys or parentName in matchKeys:
         if parentName in matchKeys:
             levelName = levelMatch[parentName]
@@ -142,7 +142,7 @@ def pyToXml(parentName, name, dict, indent=1, levelManifest=[]):
     tab = '\t' * indent
     msg.append(_resolveOuterName('open', tab, levelMatch, parentName, name))
 
-    keyList = dict.keys()
+    keyList = list(dict.keys())
     keyList.sort()
     for key in keyList:
         tab = '\t' * (indent + 1)
@@ -225,10 +225,10 @@ class Dsl:
         temp = {}
         for xKey, (xValue, xFmt) in self.parameterList:
             temp[xKey] = xValue, xFmt
-        if key in temp.keys():
+        if key in list(temp.keys()):
             del temp[key]
         temp[key] = (value, fmt)
-        self.parameterList = temp.items() # restore as list
+        self.parameterList = list(temp.items()) # restore as list
         #print self.variableList
 
     def _getEntity(self):
@@ -237,7 +237,7 @@ class Dsl:
         for fmt, group, url in self.entityList:
             dataStr.append('<!ENTITY %s %s "%s" CDATA DSSSL>\n' % (fmt, 
                                 group, url))
-            print 'xmlTools.py: dsl importing', url
+            print('xmlTools.py: dsl importing', url)
         return dataStr
 
     def _writeParameter(self):
@@ -314,10 +314,10 @@ class Xsl:
         temp = {}
         for xKey, xValue in self.variableList:
             temp[xKey] = xValue
-        if key in temp.keys():
+        if key in list(temp.keys()):
             del temp[key]
         temp[key] = value
-        self.variableList = temp.items() # restore as list
+        self.variableList = list(temp.items()) # restore as list
         #print self.variableList
 
     def addParameter(self, key, value):
@@ -326,15 +326,15 @@ class Xsl:
         temp = {}
         for xKey, xValue in self.parameterList:
             temp[xKey] = xValue
-        if key in temp.keys():
+        if key in list(temp.keys()):
             del temp[key]
         temp[key] = value
-        self.parameterList = temp.items() # restore as list
+        self.parameterList = list(temp.items()) # restore as list
         #print self.variableList
 
     def _writeImport(self):
         for url in self.importList:
-            print 'xmlTools.py: xsl importing', url
+            print('xmlTools.py: xsl importing', url)
             self.msg.append('''\
     <xsl:import href="%s"/>\n''' % url) # import base
 

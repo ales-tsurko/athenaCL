@@ -309,7 +309,7 @@ class TPmapCanvas(_MapCanvas):
 #-----------------------------------------------------------------||||||||||||--
 
 if __name__ == '__main__':
-    print 'test code must be re-done'
+    print('test code must be re-done')
     #TImap = TImapCanvas(None, None, None, 'pil')
     #TImap.show()
     #TImap2 = TImapCanvas(None, None, 'tk')

@@ -15,7 +15,7 @@ from athenaCL.libATH import drawer
 
 # optional modules
 try:
-    from HTMLParser import HTMLParser
+    from html.parser import HTMLParser
 except ImportError:
     pass
 
@@ -87,7 +87,7 @@ class StyleSheet:
         self.colorDict['hr']        = '#999999'
 
         if colorDict != None: # assign
-            for key in colorDict.keys():
+            for key in list(colorDict.keys()):
                 self.colorDict[key] = colorDict[key] # set new values
 
     def setFontDict(self, fontDict=None):
@@ -100,7 +100,7 @@ class StyleSheet:
         self.fontDict['mon'] = 6
 
         if fontDict != None:
-            for key in fontDict.keys():
+            for key in list(fontDict.keys()):
                 self.fontDict[key] = fontDict[key] # set new values
 
         
@@ -306,7 +306,7 @@ class ImageNameBank:
     def __call__(self, parentDir, ext='.gif', group=None, groupMax=None):
         if group == None:
             group = '_'
-        if group not in self.fileNames.keys():
+        if group not in list(self.fileNames.keys()):
             self.fileNames[group] = []
         # seems like this should only happen if groupMax is not
         # None, but not sure
@@ -335,7 +335,7 @@ class ImageNameBank:
         appends each time called"""
         group = '_local'
         groupMax = 999
-        if not self.fileNames.has_key(group):
+        if group not in self.fileNames:
             self.fileNames[group] = []
             self.groupMax[group] = groupMax
 
@@ -345,7 +345,7 @@ class ImageNameBank:
 
     def report(self):
         allPaths = []
-        for group in self.fileNames.keys():
+        for group in list(self.fileNames.keys()):
             allPaths = allPaths + self.fileNames[group]
         return allPaths
 
@@ -359,7 +359,7 @@ class RollOver:
     def script(self):
         headScript = '<script>\n<!--\nif (document.images) {\n'
 
-        sortedKeys = self.imageDict.keys()
+        sortedKeys = list(self.imageDict.keys())
         sortedKeys.sort()
 
         for key in sortedKeys: # key is a number
@@ -389,7 +389,7 @@ function turnOff(imageName) {
         return headScript
 
     def idList(self): # id numbers, with 1 offset
-        return self.imageDict.keys()
+        return list(self.imageDict.keys())
 
     def linkImage(self, id, postBreaks=0):
         imageName = 'image%s' % id 
@@ -944,15 +944,15 @@ pageTracker._trackPageview();
     def _updateColData(self, colData):
         """provides backward compat for col data"""
             # backward compat
-        if not colData.has_key('outline'):
+        if 'outline' not in colData:
             colData['outline'] = '' # a string w / chars = 'lrtb'
-        if not colData.has_key('outlineWidth'):
+        if 'outlineWidth' not in colData:
             colData['outlineWidth'] = 1 # a string w / chars = 'lrtb'
-        if not colData.has_key('outlineColor'):
+        if 'outlineColor' not in colData:
             colData['outlineColor'] = '#000000' # a string w / chars = 'lrtb'
-        if not colData.has_key('pad'):
+        if 'pad' not in colData:
             colData['pad'] = 0 # can be vert, horiz, both
-        if not colData.has_key('color'):
+        if 'color' not in colData:
             colData['color'] = None # none
         return colData
 
@@ -1188,9 +1188,9 @@ pageTracker._trackPageview();
                      'December':'Dec',
                      }
 
-        for key, value in dayRef.items():
+        for key, value in list(dayRef.items()):
             dateStr = dateStr.replace(key, value)
-        for key, value in monthRef.items():
+        for key, value in list(monthRef.items()):
             dateStr = dateStr.replace(key, value)
 
         # remove empty time designations
@@ -1211,7 +1211,7 @@ pageTracker._trackPageview();
 
         msg.append("""<FORM NAME="menu">
  <SELECT NAME="%s" size="1" onChange="if (this.options[selectedIndex].value != '') location.href=this.options[selectedIndex].value" style="width: 110; font-size: 10px">
-""" % ('links' + str(random.choice(range(0,100)))))
+""" % ('links' + str(random.choice(list(range(0,100))))))
         for entry in optionPairs:
             url = entry[0]
             label = entry[1]
@@ -1302,7 +1302,7 @@ pageTracker._trackPageview();
                      # '128 kbs' : [128000, 0, ''],
                         '512 kbs' : [512000, 0, ''],
                         }
-        for key in timeDict.keys():
+        for key in list(timeDict.keys()):
             entry = timeDict[key]
             speed = entry[0] # first is speed
             time = size / speed
@@ -1365,7 +1365,7 @@ Version=2
         b.append(self.BR*2)
         for audioDict in audioRef:
             if titleLinkSwitch == 'name':
-                if 'title' in audioDict.keys():
+                if 'title' in list(audioDict.keys()):
                     titleLink = audioDict['title']
                 else:
                     titleLink = 'Audio File Information'
@@ -1444,7 +1444,7 @@ AddType video/x-m4v m4v
         msg.append(self.htmlClose)
 
         if htmlPath == None: ## this should be printed
-            print ''.join(msg)
+            print(''.join(msg))
         else:
             f = open(htmlPath, 'w')
             f.writelines(msg)        
@@ -1456,7 +1456,7 @@ AddType video/x-m4v m4v
         "if no html path (None) prints page to stdout"
         msg = self.refreshPage(dst) # gets a tring
         if htmlPath == None: ## this should be printed
-            print ''.join(msg)
+            print(''.join(msg))
         else:
             f = open(htmlPath, 'w')
             f.write(msg)      
@@ -1467,7 +1467,7 @@ AddType video/x-m4v m4v
         "if no html path (None) prints page to stdout"
         msg = self.framePage(sizeList, pathList, nameList) # use default
         if htmlPath == None: ## this should be printed
-            print ''.join(msg)
+            print(''.join(msg))
         else:
             f = open(htmlPath, 'w')
             f.write(msg)      
@@ -1479,7 +1479,7 @@ AddType video/x-m4v m4v
 # various html/online client functions
 def getWeather(displayFmt='print'):
     """display can be print or str"""
-    import urllib   # Library for retrieving files using a URL.
+    import urllib.request, urllib.parse, urllib.error   # Library for retrieving files using a URL.
     import re       # Library for finding patterns in text.
     
     locDict = {
@@ -1492,14 +1492,14 @@ def getWeather(displayFmt='print'):
     # Open and read the web page.
     MAX_PAGE_LEN = 20000 
     msg = []
-    keys = locDict.keys()
+    keys = list(locDict.keys())
     keys.sort()
     for locStr in keys:
         url = locDict[locStr]
         try:
-            webpage = urllib.urlopen(url).read(MAX_PAGE_LEN)
+            webpage = urllib.request.urlopen(url).read(MAX_PAGE_LEN)
         # An I/O error occurred; print the error message and exit.
-        except IOError, e: 
+        except IOError as e: 
             msg.append('I/O error (%s): ' % locStr, e.strerror )
             webpage = None
         # Pattern which matches text like '66.9 F'. The last
@@ -1513,7 +1513,7 @@ def getWeather(displayFmt='print'):
                                                               matchF.group(1).ljust(4), 
                                                               matchC.group(1).ljust(4)))
     if displayFmt == 'print':
-        print ''.join(msg)
+        print(''.join(msg))
     else:
         return ''.join(msg)
 
@@ -1543,12 +1543,12 @@ class LinkParser(HTMLParser):
             self.hrefOpen = 0
 
 def getLinks(url):
-    import urllib
+    import urllib.request, urllib.parse, urllib.error
     parser = LinkParser()
     try:
-        parser.feed(urllib.urlopen(url).read())
-    except Exception, e:
-        print '%s: %s\n' % (e, url)
+        parser.feed(urllib.request.urlopen(url).read())
+    except Exception as e:
+        print('%s: %s\n' % (e, url))
         return
     parser.close()
     if not parser.hrefs:

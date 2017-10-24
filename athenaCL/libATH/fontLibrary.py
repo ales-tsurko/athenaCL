@@ -2899,9 +2899,9 @@ fontStrong = {
 
 
 def genCharTemplate(count=2, w=15, h=8):
-    chars = fontMicro.keys()
+    chars = list(fontMicro.keys())
     chars.sort()
-    print chars
+    print(chars)
     msg = []
     for name in chars:
         msg.append('\t\t"%s" : (\n' % name)
@@ -2913,7 +2913,7 @@ def genCharTemplate(count=2, w=15, h=8):
                 msg.append('\n')
             else:
                 msg.append('),\n')
-    print ''.join(msg)
+    print(''.join(msg))
 
 
 
@@ -2944,9 +2944,9 @@ class FontBitMap:
         elif font == 'strong':
             self.font = fontStrong
         else:
-            raise ValueError, 'no such font %r' % font
+            raise ValueError('no such font %r' % font)
 
-        self.fontChar = fontMicro.keys()
+        self.fontChar = list(fontMicro.keys())
         self.wFont = len(self.font['a'][0])
         self.hFont = len(self.font['a'])
 
@@ -2995,7 +2995,7 @@ class FontBitMap:
         """add equal white space to each side of char"""
         bitTotal = bitWidth - self._findCharWidth(char)
         if bitTotal < 0:
-            raise ValueError, 'bitWidth is too small'
+            raise ValueError('bitWidth is too small')
         if bitTotal == 0: # already is desired width
             return char
         if bitTotal % 2 == 0: # its even
@@ -3028,7 +3028,7 @@ class FontBitMap:
 
     def getChar(self, char):
         char = char.lower()
-        if char in self.font.keys():
+        if char in list(self.font.keys()):
             return self._kernChar(self.font[char])
         elif char == ' ': # get space
             return self._getSpaceChar()
@@ -3068,7 +3068,7 @@ class FontBitMap:
         masterGrid = []
         for rowGrid in bitLines:
             if rowGrid == []:
-                print _MOD, 'error'
+                print(_MOD, 'error')
                 continue
             if len(rowGrid[0]) != bitWidth:
                 bitDif = bitWidth - len(rowGrid[0])
@@ -3111,7 +3111,7 @@ class FontBitMap:
             rowStr = rowStr.replace(' ','')
             rowStr = rowStr.replace('1','.')
             rowStr = rowStr.replace('0',' ')
-            print rowStr
+            print(rowStr)
 
 
 

@@ -55,7 +55,7 @@ def extractXML(path):
 def _evalRecurse(data):
     """recursively evaluate data in dictionaries; if data is a string, 
     dont evaluate if data is a dict, recurse"""
-    keyList = data.keys()
+    keyList = list(data.keys())
     for key in keyList:
         if drawer.isDict(data[key]):
             _evalRecurse(data[key])
@@ -153,8 +153,8 @@ class BackwardsCompat:
     def _pre140_pmtrObjUpdates(self):
         """minor fixes to old parameterObjects"""
         t = self.tData
-        for tName in t['textureLib'].keys():
-            for pmtrKey in t['textureLib'][tName]['pmtrQDict'].keys():
+        for tName in list(t['textureLib'].keys()):
+            for pmtrKey in list(t['textureLib'][tName]['pmtrQDict'].keys()):
                 arg = t['textureLib'][tName]['pmtrQDict'][pmtrKey]   
                 newArgs = tuple(self._recursiveUpdate(arg))
                 if newArgs != arg: # a change has been made
@@ -180,8 +180,8 @@ class BackwardsCompat:
     def _pre144_pmtrObjUpdates(self):
         """minor fixes to old parameterObjects"""
         t = self.tData
-        for tName in t['textureLib'].keys():
-            for pmtrKey in t['textureLib'][tName]['pmtrQDict'].keys():
+        for tName in list(t['textureLib'].keys()):
+            for pmtrKey in list(t['textureLib'][tName]['pmtrQDict'].keys()):
                 arg = t['textureLib'][tName]['pmtrQDict'][pmtrKey]   
                 # do alterations to textureStatic
                 replacePairs = [('nonRedundantSwitch', 'pitchSelectorControl'), 
@@ -201,21 +201,21 @@ class BackwardsCompat:
         this causes errors elsewhere, and his been fixed
         this method looks a the aux and removes any extra aux like things"""
         t = self.tData
-        for tName in t['textureLib'].keys():
+        for tName in list(t['textureLib'].keys()):
             auxNo = t['textureLib'][tName]['auxNo']
             # store all valid
             auxLabelValid = basePmtr.auxLabel(auxNo)
-            for pmtrKey in t['textureLib'][tName]['pmtrQDict'].keys():           
+            for pmtrKey in list(t['textureLib'][tName]['pmtrQDict'].keys()):           
                 if pmtrKey not in auxLabelValid: # not a valid auxq
                     if pmtrKey[:4] == 'auxQ': # if it looks like an auxq
                         del t['textureLib'][tName]['pmtrQDict'][pmtrKey]
                         environment.printDebug(['removed extra auxQ:', pmtrKey])
         # clear extra clone aux as well
-        for cName in t['cloneLib'].keys():
+        for cName in list(t['cloneLib'].keys()):
             auxNo = t['cloneLib'][cName]['auxNo']
             # store all valid
             auxLabelValid = basePmtr.auxLabel(auxNo)
-            for pmtrKey in t['cloneLib'][cName]['pmtrQDict'].keys():              
+            for pmtrKey in list(t['cloneLib'][cName]['pmtrQDict'].keys()):              
                 if pmtrKey not in auxLabelValid: # not a valid auxq
                     if pmtrKey[:4] == 'auxQ': # if it looks like an auxq
                         del t['cloneLib'][cName]['pmtrQDict'][pmtrKey]
@@ -227,10 +227,10 @@ class BackwardsCompat:
         smaller aux value, extra Q keys exist that should not by the aux count
         this causes errors elsewhere, and his been fixed
         this method looks a the aux and removes any extra aux like things"""
-        if 'nchnls' in self.aData.keys():
+        if 'nchnls' in list(self.aData.keys()):
             self.aData['audioChannels'] = self.aData['nchnls']
             del self.aData['nchnls']
-        if 'audioRate' not in self.aData.keys():
+        if 'audioRate' not in list(self.aData.keys()):
             self.aData['audioRate'] = 44100
 
     #-----------------------------------------------------------------------||--

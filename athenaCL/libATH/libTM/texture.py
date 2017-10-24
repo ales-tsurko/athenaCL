@@ -55,7 +55,7 @@ tmNames = {
     'if' : 'InterpolateFill', 
     }
 
-tmObjs = tmNames.values()
+tmObjs = list(tmNames.values())
 
 
 
@@ -82,7 +82,7 @@ def locator(usrStr):
             modFound = mod
             break
     if modFound == None:
-        raise ValueError, 'parameter type error: %s' % usrStr # failure
+        raise ValueError('parameter type error: %s' % usrStr) # failure
     return modFound, objType
 
 
@@ -99,9 +99,9 @@ def factory(tmName, name=None):
     reload(baseTexture) # reload base classs
     mod, objType = locator(tmName) #check type string
     if objType == None:
-        raise ValueError, 'texture module type error' # failure
+        raise ValueError('texture module type error') # failure
     if objType not in tmObjs:
-        raise ValueError, 'texture module type error' # failure
+        raise ValueError('texture module type error') # failure
 
     tmObjAttr = getattr(mod, objType)
     tmObj = tmObjAttr(name)
@@ -129,7 +129,7 @@ class Test(unittest.TestCase):
         self.assertEqual(True, True)
 
     def testFactory(self):
-        for key, name in tmNames.items():
+        for key, name in list(tmNames.items()):
             post = factory(name)
 
 #-----------------------------------------------------------------||||||||||||--

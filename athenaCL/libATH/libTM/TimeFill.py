@@ -94,7 +94,7 @@ class TimeFill(baseTexture.Texture):
                 tStartSet, tEndSet = self.getTimeRange() # value relative to path
 
             # create a generator to get pitches from chord as index values
-            selectorChordPos = basePmtr.Selector(range(len(chordCurrent)),
+            selectorChordPos = basePmtr.Selector(list(range(len(chordCurrent))),
                                               textPitchSelectorControl)
             # real set start is always the formal start time here
             tCurrent = copy.deepcopy(tStartSet)

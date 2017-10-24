@@ -80,7 +80,7 @@ class ModuleGather(object):
             except Exception as excp: # this takes all exceptions!
                 msg = ['failed import:', fp, '\n', 
                     '\tEXCEPTION:', str(excp).strip()]
-                print(' '.join(msg))
+                print((' '.join(msg)))
                 continue
             modules.append(mod)
 
@@ -120,7 +120,7 @@ def main(testGroup=['test']):
         unitTestCases = []
     
         if not hasattr(module, 'Test'):
-            print('%s has no Test class' % module)
+            print(('%s has no Test class' % module))
         else:
             if 'test' in testGroup:
                 unitTestCases.append(module.Test)
@@ -140,7 +140,7 @@ def main(testGroup=['test']):
                 optionflags = (doctest.ELLIPSIS | doctest.NORMALIZE_WHITESPACE))
             s1.addTests(s3)
         except ValueError:
-            print('%s cannot load Doctests' % module)
+            print(('%s cannot load Doctests' % module))
             continue
 
     print('running Tests...\n')

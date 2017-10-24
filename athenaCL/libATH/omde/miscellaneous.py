@@ -35,6 +35,7 @@ import unittest, doctest
 
 
 from athenaCL.libATH.omde import rand # used for omdeRand
+from functools import reduce
 omdeRand = rand
 from athenaCL.libATH.omde.functional import Function, Generator, make_function
 
@@ -126,7 +127,7 @@ class Accumulator(Function):
                 self.add = self.noBounds
           else:
                 if upper is None or lower is None:
-                     raise ValueError, 'cannot create a bound accumulator with undefined bounds'
+                     raise ValueError('cannot create a bound accumulator with undefined bounds')
                 
                 self.upper = make_function(upper)
                 self.lower = make_function(lower)
@@ -137,7 +138,7 @@ class Accumulator(Function):
                 elif mode in ['wrap', 'w']:
                      self.add = self.wrapAtBounds
                 else:
-                     raise ValueError, "mode can only be 'unbound', 'limit', 'reflect', 'mirror' or 'wrap' (got %s)" % mode
+                     raise ValueError("mode can only be 'unbound', 'limit', 'reflect', 'mirror' or 'wrap' (got %s)" % mode)
 
      def __call__(self, t):
           """
@@ -334,12 +335,12 @@ class List(Generator):
 
           mode = 'cycle'
 
-          for key in dict.keys():
+          for key in list(dict.keys()):
                 if key == 'mode': mode = dict['mode']
          
           list0 = list(list0)
           if len(list0) == 0:
-                raise ValueError, 'cannot create an empty List'
+                raise ValueError('cannot create an empty List')
           self.list = copy.deepcopy(list0)
 
           if mode in ['cycle', 'c']:
@@ -364,10 +365,10 @@ class List(Generator):
           elif mode in ['random', 'r']:
                 self.next = self.random_next
           else:
-                raise ValueError, self._value_error_message % mode
+                raise ValueError(self._value_error_message % mode)
 
      def __call__(self):
-          return self.next()
+          return next(self)
 
      def computePermutations(self, list):
           permutations = []
@@ -444,8 +445,8 @@ class Choice(Function):
      def __init__(self, pair0, *pairs):
           Function.__init__(self)
           for pair in pairs:
-                if type(pair) is not types.TupleType:
-                     raise ValueError, 'pair (object, probability) expected. got %s', repr(pair)
+                if type(pair) is not tuple:
+                     raise ValueError('pair (object, probability) expected. got %s').with_traceback(repr(pair))
 
           self.set = []
           for o, p in [pair0] + list(pairs):
@@ -453,7 +454,7 @@ class Choice(Function):
 
      def __call__(self, t):
           sum = reduce(lambda x,y: x+y, [possible_choice.probability(t) for possible_choice in self.set ])
-          self.set = map(_MarkAccumulatorEvaluate(t, sum), self.set)
+          self.set = list(map(_MarkAccumulatorEvaluate(t, sum), self.set))
 
           n = omdeRand.random()
           for possible_choice in self.set:
@@ -482,7 +483,7 @@ class StaticChoice(Function):
 
           sum = reduce(lambda x,y: x+y, 
                   [possible_choice.probability for possible_choice in self.set])
-          self.set = map(_MarkAccumulator(sum), self.set)
+          self.set = list(map(_MarkAccumulator(sum), self.set))
 
      def __call__(self, t):
           n = omdeRand.random()

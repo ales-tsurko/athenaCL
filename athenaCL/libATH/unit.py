@@ -36,7 +36,7 @@ def seriesMinMax(series):
     if seriesLen == 1:
         return series[0], series[0]
     elif seriesLen == 0:
-        raise ValueError, 'series with no values given'
+        raise ValueError('series with no values given')
     q = []
     for val in series:
         q.append(val)
@@ -215,7 +215,7 @@ def unitNormProportion(series):
     # note: negative values should be shifted to positive region first
     sum = 0
     for x in series:
-        if x < 0: raise ValueError, 'series members should be positive'
+        if x < 0: raise ValueError('series members should be positive')
         sum = sum + x
     assert sum != 0
     unit = [] # weights on the unit interval; sum == 1
@@ -695,7 +695,7 @@ class FunnelUnit:
                 posUpper = i
                 break
         # get lower
-        posArray = range(0, pos)
+        posArray = list(range(0, pos))
         posArray.reverse()
         for i in posArray:
             if self.binaryMap[i] == 1:

@@ -87,8 +87,8 @@ class FileInfo:
           # note that this does not work for some raw audio files 
           try:
                 audioData = sndhdr.what(self.absPath)
-          except RuntimeError, e:
-                print _MOD, 'bad audio file: %s' % absPath
+          except RuntimeError as e:
+                print(_MOD, 'bad audio file: %s' % absPath)
                 audioData = None
 
           if audioData == None:
@@ -276,11 +276,11 @@ class FileStats(DirWalk):
      def reportCount(self):
           sum, white, comments, defs, classes = self.countLines()
           for entry in self.dirList:
-                print entry
-          print '\n%s lines of code found for %s .py files' % (sum,
-                                                                        len(self.fileList))
-          print '(%s white, %s comments)' % (white, comments) 
-          print '%s class, %s def statements\n' % (classes, defs)
+                print(entry)
+          print('\n%s lines of code found for %s .py files' % (sum,
+                                                                        len(self.fileList)))
+          print('(%s white, %s comments)' % (white, comments)) 
+          print('%s class, %s def statements\n' % (classes, defs))
 
 #-----------------------------------------------------------------||||||||||||--
 class GatherCvs(DirWalk):
@@ -422,11 +422,11 @@ class ConvertBreaks:
      
           for path in pathList:
                 if os.path.isdir(path):
-                     print "not a file (dir): %s" % path
+                     print("not a file (dir): %s" % path)
                      continue
                 data = open(path, "rb").read()
                 if '\0' in data:
-                     print "not a file (binary): %s" % path
+                     print("not a file (binary): %s" % path)
                      continue
 
                 newdata = re.sub("\r?\n", newLF, data)
@@ -441,14 +441,14 @@ class ConvertBreaks:
                                                       ['txt', 'py', 'xml'])
           filteredFileList = selPaths
           if len(filteredFileList) == 0:
-                print 'empty directory: %s' % self.searchDir
+                print('empty directory: %s' % self.searchDir)
           else:
                 fileNumber = '%i' % len(filteredFileList)
                 msg = ('convert to %s: %s files in %s' % 
                                                   (self.dstFormat.upper(), 
                                                   fileNumber.rjust(4), 
                                                   self.searchDir))
-                print msg
+                print(msg)
                 self.convert(filteredFileList, self.dstFormat)
 
 
@@ -473,24 +473,24 @@ class RenameQuad:
                      or file[-3:] == 'CH3' or file[-3:] == 'CH4'):
                      newKey = file[:-3] # name, with out period ?
                      newRef = file[-3:] # ext
-                     if self.group.has_key(newKey):
+                     if newKey in self.group:
                           self.group[newKey].append(newRef)
                      else:
                           self.group[newKey] = []
                           self.group[newKey].append(newRef)
 
      def rename(self):
-          for fileGroup in self.group.keys():
-                print 'renaming %s' % fileGroup
+          for fileGroup in list(self.group.keys()):
+                print('renaming %s' % fileGroup)
                 for ext in self.group[fileGroup]:
                      oldName = fileGroup + ext
                      newName = fileGroup + '.' + self.conversion[ext] # . needed
                      oldPath = os.path.join(self.searchDir, oldName)
                      newPath = os.path.join(self.searchDir, newName)
                      cmdStr = 'mv %s %s' % (oldPath, newPath)
-                     print cmdStr
+                     print(cmdStr)
                      os.system(cmdStr)
-          print ''          
+          print('')          
 
 class RenameStereo:
      """strip L,R extensions from files"""
@@ -512,15 +512,15 @@ class RenameStereo:
                 if file[-2:] == '.L' or file[-2:] == '.R':
                      newKey = file[:-2] # name, with out period
                      newRef = file[-2:] # extension
-                     if self.group.has_key(newKey):
+                     if newKey in self.group:
                           self.group[newKey].append(newRef)
                      else:
                           self.group[newKey] = []
                           self.group[newKey].append(newRef)
 
      def rename(self):
-          for fileGroup in self.group.keys():
-                print 'renaming %s' % fileGroup
+          for fileGroup in list(self.group.keys()):
+                print('renaming %s' % fileGroup)
                 for ext in self.group[fileGroup]:
                      oldName = fileGroup + ext
                      if len(self.group[fileGroup]) == 1: # if only one file here
@@ -532,7 +532,7 @@ class RenameStereo:
                      cmdStr = 'mv %s %s' % (oldPath, newPath)
                      #print cmdStr
                      os.system(cmdStr)
-          print ''          
+          print('')          
 
 #-----------------------------------------------------------------||||||||||||--
 
@@ -558,18 +558,18 @@ class BundleFiles:
                      if name[-len(ext):] == ext: # if has this ext
                           nameStub = name[:-len(ext)]
                           break
-                if nameStub not in bundleDict.keys():
+                if nameStub not in list(bundleDict.keys()):
                      bundleDict[nameStub] = []
                 bundleDict[nameStub].append(path)
 
-          for groupName in bundleDict.keys():
+          for groupName in list(bundleDict.keys()):
                 if len(bundleDict[groupName]) > 1: # dont bundle single items
                      groupDir = os.path.join(self.searchDir, groupName)
                      if os.path.isdir(groupDir) != 1: # if doesnt exists
-                          print groupDir # if doesnt exist
+                          print(groupDir) # if doesnt exist
                           os.mkdir(groupDir)
                      else:
-                          print "dir in the way: %s" % groupDir 
+                          print("dir in the way: %s" % groupDir) 
 
                      for path in bundleDict[groupName]:
                           dir, name = os.path.split(path)
@@ -579,7 +579,7 @@ class BundleFiles:
                                 #print cmdStr
                                 os.system(cmdStr)
                           else:
-                                print "file in the way: %s" % newDst 
+                                print("file in the way: %s" % newDst) 
 
 
 class BundleAudio:
@@ -604,7 +604,7 @@ class BundleAudio:
                      cmdStr = 'mv %s %s' % (path, newDst)
                      os.system(cmdStr)
                 else:
-                     print "file in the way: %s" % newDst 
+                     print("file in the way: %s" % newDst) 
 
 
 
@@ -620,8 +620,8 @@ class ProofSheet:
      "parent class for proof sheets"
      def __init__(self, dirPath):
           if not os.path.isdir(dirPath):
-                print 'got bad dir path', dirPath
-                raise error.ArgumentError, 'bad file path supplied'
+                print('got bad dir path', dirPath)
+                raise error.ArgumentError('bad file path supplied')
           dirPath = drawer.pathScrub(dirPath)
 
           self.dirPath = dirPath
@@ -632,7 +632,7 @@ class ProofSheet:
           self.proofDirPath = os.path.join(self.dirPath, self.proofDirName)
           if os.path.exists(self.proofDirPath) != 1:
                 os.mkdir(self.proofDirPath)
-                print 'writing: %s' % self.proofDirPath
+                print('writing: %s' % self.proofDirPath)
           else: pass
           # create index path
           self.indexPath = os.path.join(self.proofDirPath, 'index.html')
@@ -772,12 +772,12 @@ class ImageSheet(ProofSheet):
           except:
                 return None
           msg = []
-          sortKeys = exifData.keys()
+          sortKeys = list(exifData.keys())
           sortKeys.sort()
           for key in sortKeys:
                 #if not drawer.isStr(exifData[key]):
                 #     print '%s: %s' % (key, exifData[key].printable)
-                if key in viewKeys.keys():
+                if key in list(viewKeys.keys()):
                      msg.append('%s-%s' % (viewKeys[key], exifData[key]))
           f.close()
           if msg == []:
@@ -1051,7 +1051,7 @@ class LinkSheet(ProofSheet):
 
      def process(self):
           # get all file paths (after removing old images dir!)
-          from urllib import urlopen
+          from urllib.request import urlopen
 
           doc = urlopen(self.url).read()
 
@@ -1079,7 +1079,7 @@ class LinkSheet(ProofSheet):
           count = 0
 
           if self.filteredLinks == []:
-                print 'no matches'
+                print('no matches')
                 return None
                 
           for descr, url in self.filteredLinks:
@@ -1165,13 +1165,13 @@ class CompareDir:
           """count relative subdirs, excluding parent dir
           first method called to gather all file data"""
           self.dirListA = []
-          for file in self.fileDictA.keys():
+          for file in list(self.fileDictA.keys()):
                 relDir = self.fileDictA[file].relDir
                 if relDir != None:
                      if relDir not in self.dirListA:
                           self.dirListA.append(relDir)
           self.dirListB = []
-          for file in self.fileDictB.keys():
+          for file in list(self.fileDictB.keys()):
                 relDir = self.fileDictB[file].relDir
                 if relDir != None:
                      if relDir not in self.dirListB:
@@ -1180,38 +1180,38 @@ class CompareDir:
 
      def _mergeFiles(self):
           "combine files from a, b into a composite"
-          for file in self.fileDictA.keys():
-                if file not in self.mergedFileDict.keys():
+          for file in list(self.fileDictA.keys()):
+                if file not in list(self.mergedFileDict.keys()):
                      self.mergedFileDict[file] = {} #each entry a dictionary
-                if not self.mergedFileDict[file].has_key('found'):
+                if 'found' not in self.mergedFileDict[file]:
                      self.mergedFileDict[file]['found'] = []
                 self.mergedFileDict[file]['found'].append('a')
-          for file in self.fileDictB.keys():
-                if file not in self.mergedFileDict.keys():
+          for file in list(self.fileDictB.keys()):
+                if file not in list(self.mergedFileDict.keys()):
                      self.mergedFileDict[file] = {} #each entry a dictionary
-                if not self.mergedFileDict[file].has_key('found'):
+                if 'found' not in self.mergedFileDict[file]:
                      self.mergedFileDict[file]['found'] = []
                 self.mergedFileDict[file]['found'].append('b')
           #print self.mergedFileDict
 
      def _mergeDirs(self):
           "combine dirs from a, b into a composite"
-          for file in self.fileDictA.keys():
+          for file in list(self.fileDictA.keys()):
                 relDir = self.fileDictA[file].relDir
                 if relDir != None: # not toplevel dir
-                     if relDir not in self.mergedDirDict.keys():
+                     if relDir not in list(self.mergedDirDict.keys()):
                           self.mergedDirDict[relDir] = {}
-                     if not self.mergedDirDict[relDir].has_key('found'):
+                     if 'found' not in self.mergedDirDict[relDir]:
                           self.mergedDirDict[relDir]['found'] = []
                      # only need one mark for many files in this dir
                      if 'a' not in self.mergedDirDict[relDir]['found']:
                           self.mergedDirDict[relDir]['found'].append('a')
-          for file in self.fileDictB.keys():
+          for file in list(self.fileDictB.keys()):
                 relDir = self.fileDictB[file].relDir
                 if relDir != None: # not toplevel dir
-                     if relDir not in self.mergedDirDict.keys():
+                     if relDir not in list(self.mergedDirDict.keys()):
                           self.mergedDirDict[relDir] = {}
-                     if not self.mergedDirDict[relDir].has_key('found'):
+                     if 'found' not in self.mergedDirDict[relDir]:
                           self.mergedDirDict[relDir]['found'] = []
                      # only need one mark for many files in this dir
                      if 'b' not in self.mergedDirDict[relDir]['found']:
@@ -1221,7 +1221,7 @@ class CompareDir:
           "find each file in merged that does not have a copy in a, then b"
           self.fileMissListA = []
           self.fileMissListB = []
-          for file in self.mergedFileDict.keys():
+          for file in list(self.mergedFileDict.keys()):
                 if len(self.mergedFileDict[file]['found']) == 2:
                      pass # has both
                 else:
@@ -1234,7 +1234,7 @@ class CompareDir:
           "find each dir in merged that does not have a copy in a, then b"
           self.dirMissListA = []
           self.dirMissListB = []
-          for dir in self.mergedDirDict.keys():
+          for dir in list(self.mergedDirDict.keys()):
                 if len(self.mergedDirDict[dir]['found']) == 2:
                      pass # has both
                 else:
@@ -1290,9 +1290,9 @@ class CompareDir:
           # must be handled carefully
           if reasonInt > 0 and mostrecent == None:
                 mostrecent = 'ERROR'
-                print 'ambiguity with %s' % fileObjA.relPath
-                print 'mTimeA %s mTimeB %s' % (fileObjA.mTime, fileObjB.mTime)
-                print 'cTimeA %s cTimeB %s' % (fileObjA.cTime, fileObjB.cTime)
+                print('ambiguity with %s' % fileObjA.relPath)
+                print('mTimeA %s mTimeB %s' % (fileObjA.mTime, fileObjB.mTime))
+                print('cTimeA %s cTimeB %s' % (fileObjA.cTime, fileObjB.cTime))
 
           return reasonInt, reasonList, mostrecent
 
@@ -1301,7 +1301,7 @@ class CompareDir:
           self.fileOutdateListA = [] # files outdated on a
           self.fileOutdateListB = [] # files outdated on b
 
-          for file in self.mergedFileDict.keys():
+          for file in list(self.mergedFileDict.keys()):
                 if len(self.mergedFileDict[file]['found']) == 2: # has both
                      fileObjA = self.fileDictA[file]
                      fileObjB = self.fileDictB[file]
@@ -1323,7 +1323,7 @@ class CompareDir:
                      
      def _displayFileDiff(self):
           fileDiffList = [] # temporary
-          for file in self.mergedFileDict.keys():
+          for file in list(self.mergedFileDict.keys()):
                 if self.mergedFileDict[file]['diff'][0] > 0: # a 
                      relPathA = self.fileDictA[file].relPath
                      relPathB = self.fileDictB[file].relPath
@@ -1413,58 +1413,58 @@ class CompareDir:
           if len(list) == 0: pass
           for entry in list:
                 if drawer.isStr(entry):
-                     print '\t%s' % entry
+                     print('\t%s' % entry)
                 else:
-                     print '\t%s\n\t%s --> \n\t%s' % (entry[0], entry[1], entry[2])
+                     print('\t%s\n\t%s --> \n\t%s' % (entry[0], entry[1], entry[2]))
 
      def report(self):
           self.analyze()
 
           # display all files that must be movied
-          print 'A: %s' % self.srcA
-          print 'B: %s' % self.srcB
+          print('A: %s' % self.srcA)
+          print('B: %s' % self.srcB)
 
-          print 'AB: (diff)'
+          print('AB: (diff)')
           self._printList(self._displayFileDiff())
 
-          print 'A: (mkdir)'
+          print('A: (mkdir)')
           self._printList(self.mkdirA)
-          print 'B to A: (cp)'
+          print('B to A: (cp)')
           self._printList(self.cpBA)
 
-          print 'B: (mkdir)'
+          print('B: (mkdir)')
           self._printList(self.mkdirB)
-          print 'A to B: (cp)'
+          print('A to B: (cp)')
           self._printList(self.cpAB)
 
           # display statistics of numbers
-          print 'A: %s' % self.srcA
-          print 'B: %s' % self.srcB
-          print '\t\t\tA\tB\tAB'
-          print 'total dirs\t\t%s\t%s\t%s' % (len(self.dirListA), 
+          print('A: %s' % self.srcA)
+          print('B: %s' % self.srcB)
+          print('\t\t\tA\tB\tAB')
+          print('total dirs\t\t%s\t%s\t%s' % (len(self.dirListA), 
                                                                   len(self.dirListB),
-                                                                  len(self.mergedDirDict.keys()))
-          print 'total files\t\t%s\t%s\t%s' % (len(self.fileDictA.keys()), 
-                                                                     len(self.fileDictB.keys()),
-                                                                     len(self.mergedFileDict.keys()))
-          print 'missing dirs\t\t%s\t%s'     % (len(self.dirMissListA), 
-                                                                        len(self.dirMissListB))
-          print 'missing files\t\t%s\t%s' % (len(self.fileMissListA), 
-                                                                        len(self.fileMissListB))
-          print 'outdated files\t\t%s\t%s' % (len(self.fileOutdateListA), 
-                                                                                len(self.fileOutdateListB))
+                                                                  len(list(self.mergedDirDict.keys()))))
+          print('total files\t\t%s\t%s\t%s' % (len(list(self.fileDictA.keys())), 
+                                                                     len(list(self.fileDictB.keys())),
+                                                                     len(list(self.mergedFileDict.keys()))))
+          print('missing dirs\t\t%s\t%s'     % (len(self.dirMissListA), 
+                                                                        len(self.dirMissListB)))
+          print('missing files\t\t%s\t%s' % (len(self.fileMissListA), 
+                                                                        len(self.fileMissListB)))
+          print('outdated files\t\t%s\t%s' % (len(self.fileOutdateListA), 
+                                                                                len(self.fileOutdateListB)))
 
      def update(self):
           # self.report() # call separately
           if len(self.cpBA) > 0 or len(self.cpAB) > 0:
                 ok = dialog.askYesNo('\nare you sure you want to update these files?')
                 if ok != 1:
-                     print 'no changes made'
+                     print('no changes made')
                 else:
                      self._processDir() # create dirs first
                      self._processFile()
           else:
-                print 'files and directories are up to date!'
+                print('files and directories are up to date!')
 
 
 
@@ -1512,7 +1512,7 @@ class Profiler:
           for counter in range(numberOfTimes):
                 calibrator += p.calibrate(10000)
           calibrator /= numberOfTimes
-          print calibrator
+          print(calibrator)
           return calibrator
      
      def runProfile(self, methodStr=None, statFile=None, recalibrate=1,\
@@ -1573,12 +1573,12 @@ class test:
      #-----------------------------------------------------------------------||--
      def _randStr(self):
           txt = '' # to add to files
-          for char in range(0, random.choice(range(10, 500))):
+          for char in range(0, random.choice(list(range(10, 500)))):
                 txt = txt + random.choice(['a', 'b', 'c', 'd', 'e', 'f'])
           return txt
 
      def _randMutate(self, path):
-          if random.choice(range(0,99)) % 2 == 0: # if even
+          if random.choice(list(range(0,99))) % 2 == 0: # if even
                 if drawer.isDarwin():
                      if random.choice([0,1]) == 1:
                           osTools.rsrcSetCreator(path, 'R*ch')

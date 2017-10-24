@@ -198,7 +198,7 @@ def findNormalT(pcSet, setMatrix=None):
     elif card > 12:
         return None # 'irrational cardinality error'
 
-    rotIndices = range(0, card)
+    rotIndices = list(range(0, card))
     foundIndex = None                #control variable
     for rot in rotIndices:
         r = rot # dont need to add 1? + 1
@@ -432,18 +432,18 @@ def getAllScTriples(cardRange='all', tniTog=0):
     as an int (getting just the values of that int
     or as a range from 1 to 12; if range, last values is inclusif"""
     if cardRange == 'all':
-        gatherCards = range(1,13)
+        gatherCards = list(range(1,13))
     elif drawer.isInt(cardRange):
         gatherCards = [cardRange,] # only get one card
     elif drawer.isList(cardRange):
         if cardRange[1] < cardRange[0]:
-            raise ValueError, 'bad cardinality range given'
+            raise ValueError('bad cardinality range given')
         elif cardRange[0] == cardRange[1]:
             gatherCards = [cardRange[0],] # only get one card
         else:
-            gatherCards = range(cardRange[0], cardRange[1]+1)
+            gatherCards = list(range(cardRange[0], cardRange[1]+1))
     found = []
-    for scTriple in TNREF.keys():
+    for scTriple in list(TNREF.keys()):
         card = scTriple[0]
         inv = scTriple[2]
         if card in gatherCards:
@@ -491,7 +491,7 @@ def findRef(searchStr, refType='name', setRange='all', tniMode=0):
         scoreDict[setTuple] = 0
         if refDict == None:
             continue
-        if refType in refDict.keys(): # name groups
+        if refType in list(refDict.keys()): # name groups
             nameList = refDict[refType]
             nameWords = []
             for nameStrings in nameList: # list of strings
@@ -503,7 +503,7 @@ def findRef(searchStr, refType='name', setRange='all', tniMode=0):
                     if nwTemp.find(swTemp) >= 0:
                         scoreDict[setTuple] = scoreDict[setTuple] + 1 # add
     rankList = []
-    for setTuple in scoreDict.keys():
+    for setTuple in list(scoreDict.keys()):
         if scoreDict[setTuple] == 0:
             del scoreDict[setTuple] # remove if 0 score
         else: # add ranks to a list
@@ -636,7 +636,7 @@ class Multiset:
             if refDict == None:
                 return None
             else:
-                for key in refDict.keys():
+                for key in list(refDict.keys()):
                     msgLines.append(', '.join(refDict[key]))
                 return msgLines
  
@@ -646,7 +646,7 @@ class Multiset:
                 return None
             else:
                 refDict = self.refData()
-                if refDict.has_key('name'):
+                if 'name' in refDict:
                     return ', '.join(refDict['name'])
                 else:
                     return None
@@ -655,7 +655,7 @@ class Multiset:
             return '%s' % self.tRef
 
         else:
-            raise ValueError, 'bad representation format'
+            raise ValueError('bad representation format')
 
     def __str__(self):
         """default string representation is as 'psReal'"""
@@ -726,7 +726,7 @@ class Multiset:
 
     def get(self, name):
         if name not in self.forms:
-            raise ValueError, 'bad format requested'
+            raise ValueError('bad format requested')
         return self._access(name) # convert to appropriate data and return
 
     # sc analysis measures
@@ -920,7 +920,7 @@ class MultisetFactory:
             return 'forte'
         else:
             for char in usrStr.lower(): # check if it has characters
-                if char in pitchTools.REFdiaNameToPc.keys():
+                if char in list(pitchTools.REFdiaNameToPc.keys()):
                     return 'psName'
             return 'psReal' # assume pset numbers
 
@@ -958,7 +958,7 @@ class MultisetFactory:
         for elem in usrList: # may be int or float
             elem = drawer.strScrub(elem)
             if elem == '': continue
-            elif elem[0] not in pitchTools.REFdiaNameToPc.keys():
+            elif elem[0] not in list(pitchTools.REFdiaNameToPc.keys()):
                 continue
             else: # this should never raise an error
                 psList.append(pitchTools.psNameToPs(elem))

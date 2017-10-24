@@ -333,13 +333,13 @@ class ParticleTransformer(ParticleCore):
         if len(particleArray) == 0: # empty
             return None
 
-        pIndex = random.choice(range(len(particleArray)))
+        pIndex = random.choice(list(range(len(particleArray))))
         p = particleArray[pIndex]
         # only process if state matches current state of this particle
         if p.getState() != self.getState():
             return particleArray # return unaltered reference
         # find transform        
-        if self.getState() not in self.transformMap.keys():
+        if self.getState() not in list(self.transformMap.keys()):
             return None
 
         weights = []
@@ -547,7 +547,7 @@ class SensorProducer(object):
         20 
         """
         senseLevel = 0
-        for partType in composition.keys(): # keys in a dictionary
+        for partType in list(composition.keys()): # keys in a dictionary
             if self.particleSenseType == partType:
                 senseLevel = composition[self.particleSenseType]
                 break
@@ -589,7 +589,7 @@ class SensorProducer(object):
         8
         '''
         countRaw = None
-        for key in self.productionCountRange.keys():
+        for key in list(self.productionCountRange.keys()):
             # a None key provides a default value range
             if key == None: 
                 continue
@@ -602,7 +602,7 @@ class SensorProducer(object):
 
         if not drawer.isList(countRaw): # create an inclusive range
             countRaw = [countRaw, countRaw]
-        count = random.choice(range(countRaw[0], countRaw[1]+1))
+        count = random.choice(list(range(countRaw[0], countRaw[1]+1)))
         return count
 
 
@@ -766,12 +766,12 @@ class _Environment:
                 post[state] = 0
             post[state] = post[state] + 1        
         if boundaryMethod != None:
-            for key in post.keys():
+            for key in list(post.keys()):
                 pre = post[key]
                 post[key] = unit.boundaryFit(self.range[0], 
                     self.range[1], pre, boundaryMethod)
         if normalize:
-            for key in post.keys():
+            for key in list(post.keys()):
                 pre = post[key]
                 post[key] = unit.unitNorm(pre, self.range)
         return post
@@ -793,7 +793,7 @@ class _Environment:
         """
         post = {}
         for sp in self._sensorProducerArray:
-            if sp.particleSenseType not in post.keys():
+            if sp.particleSenseType not in list(post.keys()):
                 post[sp.particleSenseType] = [0, 0] # count, threshold sum
             # increment count
             post[sp.particleSenseType][0] += 1
@@ -880,7 +880,7 @@ class _Environment:
 
     def reprPartcle(self):
         post = self.getComposition()
-        post = post.items()
+        post = list(post.items())
         post.sort()
         return post
         

@@ -54,7 +54,7 @@ import random as randomBuiltin
 # used to be this
 # _the_same = whrandom.whrandom() # returns an instances
 try:
-    _the_same = randomBuiltin.WichmannHill() # 2.3 and greater
+    _the_same = randomBuiltin.Random() # 2.3 and greater
 except (AttributeError, ImportError):
     import whrandom
     _the_same = whrandom.whrandom() # 2.3 and greater
@@ -109,7 +109,7 @@ class _LehmerRNG:
           self._seed = seed
           while self._seed == 0 or self._seed == self._mod:
                 time.sleep(.01)
-                self._seed = long((time.time() % 1) * self._mod)
+                self._seed = int((time.time() % 1) * self._mod)
 
 
 
@@ -146,7 +146,7 @@ class _GaussRNG:
           are two *independent* variables with normal distribution
           (mu = 0, sigma = 1).
           """
-          z = self.next
+          z = self.__next__
           self.next = None
           if z is None:
                      x2pi = random() * math.pi * 2

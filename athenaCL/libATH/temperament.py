@@ -277,7 +277,7 @@ def temperamentNameParser(usrStr):
 def factory(rawArgs):
     name = temperamentNameParser(rawArgs)
     if name == None: 
-        raise ValueError, 'bad temperament name given: %s' % rawArgs # failure
+        raise ValueError('bad temperament name given: %s' % rawArgs) # failure
     modAttr = globals()[name]
     return modAttr()
     

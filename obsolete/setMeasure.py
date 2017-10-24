@@ -81,7 +81,7 @@ class SetMeasure:
 
         scToCompare = self.scObj.getAllScTriples(cardRange, tniTog)
         if len(scToCompare) == 0:   # in_case something goes wrong
-            print _MOD, 'bad cardRange', cardRange,
+            print(_MOD, 'bad cardRange', cardRange, end=' ')
             return None
 
         analysisValues = []     # enter as pairs: (chord, value)          
@@ -92,7 +92,7 @@ class SetMeasure:
             else:
                 value = self.compareSet(SCx, scTriple)
             if value == None:
-                print _MOD, 'failed set comparison:', SCx, scTriple
+                print(_MOD, 'failed set comparison:', SCx, scTriple)
                 continue
 
             analysisValues.append((scTriple, value))

@@ -7,7 +7,7 @@
 # Copyright:     (c) 2005-2010 Christopher Ariza
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
-from __future__ import generators
+
 
 
 import unittest, doctest
@@ -25,21 +25,21 @@ import unittest, doctest
 def xcombinations(items, n):
     if n==0: yield []
     else:
-        for i in xrange(len(items)):
+        for i in range(len(items)):
             for cc in xcombinations(items[:i]+items[i+1:],n-1):
                 yield [items[i]]+cc
     
 def xselections(items, n):
     if n==0: yield []
     else:
-        for i in xrange(len(items)):
+        for i in range(len(items)):
             for ss in xselections(items, n-1):
                 yield [items[i]]+ss
 
 def xuniqueCombinations(items, n):
     if n==0: yield []
     else:
-        for i in xrange(len(items)-n+1):
+        for i in range(len(items)-n+1):
             for cc in xuniqueCombinations(items[i+1:],n-1):
                 yield [items[i]]+cc
 

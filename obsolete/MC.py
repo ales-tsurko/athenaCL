@@ -150,7 +150,7 @@ class MapClass:
             # must reverse these to get a dict to then reverse the mappings of
             sourceDict = vlMapDict[(dstSize, srcSize)]  
             newDict   = {}
-            for key in sourceDict.keys():
+            for key in list(sourceDict.keys()):
                 map = sourceDict[key]
                 newMap = self.flipMap(map)
                 newDict[key] = newMap
@@ -161,7 +161,7 @@ class MapClass:
         map = self.getMapDict(srcSize, dstSize)
         if map == None: return None
         else:
-            return len(map.keys())
+            return len(list(map.keys()))
 
 
     def getSingleMap(self, srcSize, dstSize, mapIndexNo):
@@ -233,7 +233,7 @@ class MapClass:
                                  'd' : '3',
                                  'e' : '4',
                                  'f' : '5' }
-        for letter in translationDict.keys():
+        for letter in list(translationDict.keys()):
             stringMap = stringMap.replace(letter, translationDict[letter])
         try:
             newMap = eval(stringMap)
@@ -242,7 +242,7 @@ class MapClass:
         srcSize, dstSize = self._getMapSrcDstSize(newMap)
         mapDict = self.getMapDict(srcSize, dstSize)
         if mapDict == None: return None
-        for key in mapDict.keys():
+        for key in list(mapDict.keys()):
             if mapDict[key] == newMap:
                 goodMap = 1
                 goodKey = key
@@ -313,7 +313,7 @@ class MapClass:
 
             srcPosCount = srcPosCount + 1
         
-        keyList = rowDict.keys()
+        keyList = list(rowDict.keys())
         keyList.sort()
         for key in keyList:
             if len(rowDict[key]) == 0:
@@ -331,7 +331,7 @@ class MapClass:
              with pcsX and its next movement as strings
         """
         rowDict = self.genSingleVlDiagram(pcsX, map)
-        rowKeys = rowDict.keys()
+        rowKeys = list(rowDict.keys())
         
         for i in range(0,len(pcsY)):
             if len(rowDict[i]) == 0:
@@ -353,7 +353,7 @@ class MapClass:
         dstSize = len(pcsY)
         mapDict = self.getMapDict(srcSize, dstSize)
 
-        for key in mapDict.keys():
+        for key in list(mapDict.keys()):
             map = mapDict[key]
             vlPairs = self.genVlPairs(pcsX, pcsY, map)
             vlDict[key] = vlPairs
@@ -442,7 +442,7 @@ class MapClass:
         rawVlPairs = tuple(rawVlPairs)
         vlPairDict = self.getAllVl(pcsX, pcsY)
         foundMapKey = 0
-        for key in vlPairDict.keys():
+        for key in list(vlPairDict.keys()):
             if vlPairDict[key] == rawVlPairs:
                 foundMapKey = key
                 break
@@ -464,7 +464,7 @@ class MapClass:
                         tempRawVlPairs[counter]     = b
                         tempRawVlPairs[counter+1]   = a
                         tempRawVlPairs = tuple(tempRawVlPairs)
-                        for key in vlPairDict.keys():
+                        for key in list(vlPairDict.keys()):
                             if vlPairDict[key] == tempRawVlPairs:
                                 foundMapKey = key
                                 break
@@ -497,7 +497,7 @@ class MapClass:
                         tempRawVlPairs[counter]     = b
                         tempRawVlPairs[counter+1]   = a
                         tempRawVlPairs = tuple(tempRawVlPairs)
-                        for key in vlPairDict.keys():
+                        for key in list(vlPairDict.keys()):
                             if vlPairDict[key] == tempRawVlPairs:
                                 foundMapKey = key
                                 break
@@ -927,7 +927,7 @@ class MapClass:
                 dstSet = tuple(range(mapIdTuple[1]))
 
             rowDict = self.genDoubleVlDiagram(srcSet, dstSet, mapGotten)
-            printKeyList = rowDict.keys()
+            printKeyList = list(rowDict.keys())
             printKeyList.sort()
             for key in printKeyList:
                 tempRow = rowDict[key].strip()
@@ -968,7 +968,7 @@ class MapClass:
                 ### createa  display
                 rowDict = self.genDoubleVlDiagram(sourceSet, destinationSet, 
                              self.fetchMap(mapIdTuple))
-                printKeyList = rowDict.keys()
+                printKeyList = list(rowDict.keys())
                 printKeyList.sort()
                 for key in printKeyList:
                     tempRow = rowDict[key].strip()
@@ -1021,7 +1021,7 @@ class MapClass:
         if len(pcsX) > 6 or len(pcsX) < 1 or len(pcsY) > 6 or len(pcsY) < 1:
             return None # error, bad size
         mapDict = self.getMapDict(len(pcsX), len(pcsY))
-        keyList = mapDict.keys()
+        keyList = list(mapDict.keys())
         keyList.sort()
         dictS = {}
         for key in keyList:
@@ -1152,7 +1152,7 @@ class MapClass:
                 line = line + repr(entry).replace(' ', '') + ':'
             mapString = self.rawMapToString(map)
             msg = msg + '%sMC %i, map %s\n' % (line.ljust(55), key, mapString)
-        print msg
+        print(msg)
 
 
 
@@ -1182,7 +1182,7 @@ class MapClass:
                 orderedIcPeaksU.append(i)
             dummy_vector[i] = -1     # knock out so that will not get chosen again
         ### use to finde span
-        double_range = range(0,12) + range(0,12)
+        double_range = list(range(0,12)) + list(range(0,12))
         start     = 0 
         count     = 0
         max   = 0
@@ -1259,7 +1259,7 @@ class MapClass:
         if len(pcsX) > 6 or len(pcsX) < 1 or len(pcsY) > 6 or len(pcsY) < 1:
             return None
         mapDict = self.getMapDict(len(pcsX), len(pcsY))
-        keyList = mapDict.keys()
+        keyList = list(mapDict.keys())
         keyList.sort()
         dictU = {}
         for key in keyList:
@@ -1434,7 +1434,7 @@ class MapClass:
                 line = line + repr(entry).replace(' ', '') + ':'
             mapString = self.rawMapToString(map)
             msg = msg + '%sMC %i, map %s\n' % (line.ljust(55), key, mapString)
-        print msg
+        print(msg)
 
     #-----------------------------------------------------------------------||--
     def BAL(self, pcsX, pcsY, map):
@@ -1461,7 +1461,7 @@ class MapClass:
                 orderedIcPeaksB.append(i)
             dummy_vector[i] = -1     # knock out so that will not get chosen again
 
-        double_range = range(0,12) + range(0,12)
+        double_range = list(range(0,12)) + list(range(0,12))
         start     = 0 
         count     = 0
         max   = 0
@@ -1536,7 +1536,7 @@ class MapClass:
         if len(pcsX) > 6 or len(pcsX) < 1 or len(pcsY) > 6 or len(pcsY) < 1:
             return None
         mapDict = self.getMapDict(len(pcsX), len(pcsY))
-        keyList = mapDict.keys()
+        keyList = list(mapDict.keys())
         keyList.sort()
         dictB = {}
         for key in keyList:
@@ -1715,6 +1715,6 @@ class MapClass:
                 line = line + repr(entry).replace(' ', '') + ':'
             mapString = self.rawMapToString(map)
             msg = msg + '%sMC %i, map %s\n' % (line.ljust(55), key, mapString)
-        print msg
+        print(msg)
 
 

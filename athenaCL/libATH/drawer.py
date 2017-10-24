@@ -26,8 +26,8 @@ def isList(usrData):
     >>> isList('')
     False
     """
-    if (isinstance(usrData, types.ListType) or 
-         isinstance(usrData, types.TupleType)):
+    if (isinstance(usrData, list) or 
+         isinstance(usrData, tuple)):
         return True
     else:
         return False
@@ -42,9 +42,9 @@ def isNum(usrData):
     >>> isNum(3)
     True
     """
-    if (isinstance(usrData, types.FloatType) or 
-         isinstance(usrData, types.IntType) or 
-         isinstance(usrData, types.LongType)):
+    if (isinstance(usrData, float) or 
+         isinstance(usrData, int) or 
+         isinstance(usrData, int)):
         return True
     else:
         return False
@@ -57,7 +57,7 @@ def isBool(usrData):
     >>> isBool(0)
     False
     """
-    if isinstance(usrData, types.BooleanType):
+    if isinstance(usrData, bool):
         return True
     else:
         return False
@@ -70,7 +70,7 @@ def isFloat(usrData):
     >>> isFloat(3)
     False
     """
-    if isinstance(usrData, types.FloatType):
+    if isinstance(usrData, float):
         return True
     else:
         return False
@@ -84,7 +84,7 @@ def isInt(usrData):
     >>> isInt('3')
     False
     """
-    if isinstance(usrData, types.IntType):
+    if isinstance(usrData, int):
         return True
     else:
         return False
@@ -97,7 +97,7 @@ def isStr(usrData):
     >>> isStr(3.2)
     False
     """
-    if isinstance(usrData, types.StringType):
+    if isinstance(usrData, str):
         return True
     else:
         return False
@@ -110,7 +110,7 @@ def isDict(usrData):
     >>> isDict('false')
     False
     """
-    if isinstance(usrData, types.DictType):
+    if isinstance(usrData, dict):
         return True
     else:
         return False
@@ -230,7 +230,7 @@ def isType(usrData, type):
     elif type == 'dict':
         return isDict(usrData)
     else:
-        raise ValueError, 'bad data type given'
+        raise ValueError('bad data type given')
 
 #-----------------------------------------------------------------||||||||||||--
 # list searching and confirmation
@@ -425,8 +425,8 @@ def isSudo():
     """test to see if sudo availabe on unix platforms
     this should be altered to use the command module"""
     if os.name != 'posix': return 0 # no sudo
-    import commands
-    stat, str = commands.getstatusoutput('sudo -V')
+    import subprocess
+    stat, str = subprocess.getstatusoutput('sudo -V')
     if stat == 0: # success if it returns zero
         return 1
     else: return 0
@@ -444,13 +444,13 @@ def imageFormats():
     except ImportError:
         PIL = 0
     try:
-        import Tkinter
+        import tkinter
         TK = 1
     except ImportError:
         TK = 0  
     if TK:
         try: # tkinter already imported; check creation, as may still fail
-            tkTemp = Tkinter.Tk()
+            tkTemp = tkinter.Tk()
             tkTemp.withdraw()
             tkTemp.destroy()
             del tkTemp
@@ -548,9 +548,9 @@ def strToNum(usrStr, numType='num', min=None, max=None, force=0):
             # note that reserved strings will be evaluated:
             # 'open' evaluates to a file object
             if not isNum(numEval):
-                raise ValueError, 'bad number format: %s' % numType     
+                raise ValueError('bad number format: %s' % numType)     
         else: # should not happen
-            raise ValueError, 'bad number format: %s' % numType
+            raise ValueError('bad number format: %s' % numType)
     except (SyntaxError, NameError, ValueError, TypeError, ZeroDivisionError):
         return None
     if min != None:  # check for min and max
@@ -612,7 +612,7 @@ def strScrub(usrStr, case=None, rm=[]):
         elif case.find('l') >= 0: # lower case
             usrStr = usrStr.lower()
         else:
-            raise ValueError, 'bad case type given'
+            raise ValueError('bad case type given')
     usrStr = usrStr.strip()
     for char in rm:
         usrStr = usrStr.replace(char, '')
@@ -810,7 +810,7 @@ def pathScrub(usrStr):
     will raise exception on error
     note: may want to use os.abspath to find abs paths"""
     if not isStr(usrStr):
-        raise ValueError, 'non-string submitted as a path string: %r' % usrStr
+        raise ValueError('non-string submitted as a path string: %r' % usrStr)
 
     if os.name == 'posix':
         # expand user must be done before realpath on posix
@@ -865,7 +865,7 @@ def getud():
         return os.path.expanduser('~') # get active users dir
     else: # win or other
         dir = None
-        if 'USERPROFILE' in os.environ.keys(): # windows xp and others
+        if 'USERPROFILE' in list(os.environ.keys()): # windows xp and others
             dir = os.environ['USERPROFILE'] #windows NT,2k,XP,etc
             if not os.path.isdir(dir):
                 dir = None
@@ -1176,13 +1176,13 @@ def acronymLibToStr(refDict):
     """
     short = []
     long = []
-    keys = refDict.keys()
+    keys = list(refDict.keys())
     keys.sort()
     for key in keys:
         value = refDict[key]
         short.append(key)
-        long.append(value)
-    return ', '.join(long), ', '.join(short)
+        int.append(value)
+    return ', '.join(int), ', '.join(short)
         
         
 def acronymExtract(usrStr):
@@ -1214,7 +1214,7 @@ def optionUniqueKeyLeadChar(refDict):
     True
     """
     firstChar = []
-    for label in refDict.keys(): # keys are acronymes
+    for label in list(refDict.keys()): # keys are acronymes
         label = label.lower()
         char = label[0] # get firs character
         if char in firstChar:
@@ -1250,7 +1250,7 @@ def acronymExpand(usrStr, refDict, autoSearch=None):
     # do before changing case
     autoStr = acronymExtract(usrStr)
     usrStr = strScrub(usrStr, 'lower')
-    for key in refDict.keys():
+    for key in list(refDict.keys()):
         # check if key mathces first
         if usrStr == key.lower():
             return refDict[key] # return value, not key
@@ -1259,7 +1259,7 @@ def acronymExpand(usrStr, refDict, autoSearch=None):
             return refDict[key]
     # if not match, and auto on, search auto extraction
     if autoSearch:
-        for key in refDict.keys():
+        for key in list(refDict.keys()):
             # check if key mathces first; dont check whole string
             if autoStr == key.lower():
                 return refDict[key]
@@ -1298,7 +1298,7 @@ def selectionParse(usrStr, refDict, autoSearch=None):
     autoStr = acronymExtract(usrStr)          
     # serach values in dict
     usrStr = strScrub(usrStr, 'lower')
-    for key in refDict.keys():
+    for key in list(refDict.keys()):
         if isStr(key):
             if key.lower() == usrStr:
                 return key
@@ -1311,7 +1311,7 @@ def selectionParse(usrStr, refDict, autoSearch=None):
             if val.lower() == usrStr:
                 return key
     if autoSearch:
-        for key in refDict.keys():
+        for key in list(refDict.keys()):
             # may just get first letter
             autoKey = acronymExtract(key)
             if autoStr == autoKey:
@@ -1321,7 +1321,7 @@ def selectionParse(usrStr, refDict, autoSearch=None):
 def selectionParseKeyLabel(ref, finalStr='or'):
     """utility to convert a selection parse dictionary to a text label
     that can be presented to users as a help string"""
-    names = ref.keys()
+    names = list(ref.keys())
     if len(names) == 1:
         return names[0] # value alone
     names.sort()
@@ -1494,9 +1494,9 @@ def getPrefsDir():
 
         # try to use defined app data directory for preference file
         # this is not available on all windows versions
-        if 'APPDATA' in os.environ.keys():
+        if 'APPDATA' in list(os.environ.keys()):
             dir = os.environ['APPDATA']
-        elif ('USERPROFILE' in os.environ.keys() and
+        elif ('USERPROFILE' in list(os.environ.keys()) and
             os.path.exists(os.path.join(
             os.environ['USERPROFILE'], 'Application Data'))):
             dir = os.path.join(os.environ['USERPROFILE'], 

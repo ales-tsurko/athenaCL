@@ -69,10 +69,10 @@ class TEmapCanvas:
 
         self.maxTime = self._findMaxTime(self.tiMapDict)
 
-        self.noEntries = len(self.tiMapDict.keys())
-        for textName in self.tiMapDict.keys(): #count clones
-            self.noEntries = self.noEntries + len(self.tiMapDict[       
-                                    textName]['cloneDict'].keys())
+        self.noEntries = len(list(self.tiMapDict.keys()))
+        for textName in list(self.tiMapDict.keys()): #count clones
+            self.noEntries = self.noEntries + len(list(self.tiMapDict[       
+                                    textName]['cloneDict'].keys()))
         self.noGutters = self.noEntries + 1
         self.mapGUTTER = 3 # in pixels
         self.headHeight = 2 # band at top of entry blocks
@@ -151,7 +151,7 @@ class TEmapCanvas:
 
         # draw textures
         yPosition = self.tMarginSize + self.mapGUTTER # initial space
-        tNameList = self.tiMapDict.keys()
+        tNameList = list(self.tiMapDict.keys())
         tNameList.sort()
         for tName in tNameList:
             yEndPos = yPosition + self.widthEntry
@@ -188,7 +188,7 @@ class TEmapCanvas:
             # shift down
             yPosition = yEndPos + self.mapGUTTER
             # clones
-            cNameList = self.tiMapDict[tName]['cloneDict'].keys()
+            cNameList = list(self.tiMapDict[tName]['cloneDict'].keys())
             cNameList.sort()
             for cName in cNameList:
                 yEndPos = yPosition + self.widthEntry
@@ -235,11 +235,11 @@ class TEmapCanvas:
     # not on actual duration...
     def _findMaxTime(self, tiMapDict):
         maxTime = 0.0
-        for tiName in tiMapDict.keys():
+        for tiName in list(tiMapDict.keys()):
             s, e = tiMapDict[tiName]['tRange']
             if maxTime <= e:
                 maxTime = e
-            for cloneName in tiMapDict[tiName]['cloneDict'].keys():
+            for cloneName in list(tiMapDict[tiName]['cloneDict'].keys()):
                 s, e = tiMapDict[tiName]['cloneDict'][cloneName]['tRange']
                 if maxTime <= e:
                     maxTime = e

@@ -12,7 +12,7 @@
 # License:       GPL
 #-----------------------------------------------------------------||||||||||||--
 
-import sys, os, time, random, traceback, httplib, urllib
+import sys, os, time, random, traceback, http.client, urllib.request, urllib.parse, urllib.error
 import unittest, doctest
 
 athVersion = '2.0.0a15'
@@ -29,14 +29,14 @@ __license__ = "GPL"
 # imports if necssary
 #-----------------------------------------------------------------||||||||||||--
 try: 
-    import libTM #assume we are in libATH
+    from . import libTM #assume we are in libATH
 except ImportError:
     try: from athenaCL.libATH import libTM
     except ImportError: 
         sys.stdout.write('athenaCL package cannot be found.\n')
         sys.exit()
 
-fpLibTM = libTM.__path__[0] # list, get first item
+fpLibTM = list(libTM.__path__)[0] # list, get first item
 fpLibATH = os.path.dirname(fpLibTM) # libATH dir
 fpSrcDir = os.path.dirname(fpLibATH) # athenaCL dir
 fpPackageDir = os.path.dirname(fpSrcDir) # athenacl dir
@@ -202,7 +202,7 @@ class External(object):
             bundle[i].append(line)
         # convert to value pairs
         param = {}
-        for group in bundle.keys(): # order here does not matter
+        for group in list(bundle.keys()): # order here does not matter
             i = 0 # first will be zero
             for field in bundle[group]: # order here matters
                 key = '%s%s%s' % (group, charSep, i)
@@ -224,11 +224,11 @@ class External(object):
         """attempt to submit a log file"""
         paramRaw = self._logParse()
         paramRaw['stateNext'] = '8' # state 8 is bug processing
-        params = urllib.urlencode(paramRaw)
+        params = urllib.parse.urlencode(paramRaw)
         headers = {"Content-type": "application/x-www-form-urlencoded", 
                       "Accept": "text/plain"}
         try:
-            conn = httplib.HTTPConnection(lang.msgCgiDomain)
+            conn = http.client.HTTPConnection(lang.msgCgiDomain)
             conn.request("POST", lang.msgCgiURL, params, headers)
             connect = 1
         except: # no connection active
@@ -237,12 +237,12 @@ class External(object):
             try:
                 response = conn.getresponse()
             except: # some other failure is possible here
-                print 'unknown connection error.'
+                print('unknown connection error.')
                 return None
             if response.status == 200: # good
                 data = response.read()
                 dataLines = data.split('\n')
-                print dataLines[0]
+                print(dataLines[0])
                 self._logDelete() # delete old log
             else:
                 environment.printWarn(['http error:', response.status])
@@ -256,9 +256,9 @@ class External(object):
         """if online, check current version
         returns None if not available"""
         try: # read number of chars lines 1.1.1.1000.10.10
-            webpage = urllib.urlopen(drawer.urlPrep(
+            webpage = urllib.request.urlopen(drawer.urlPrep(
                 lang.msgVersionURL)).read(24)
-        except IOError, e: # cant get online
+        except IOError as e: # cant get online
             webpage = None
         except: # all others
             webpage = None        
@@ -539,9 +539,9 @@ class AthenaObject(object):
         >>> a.prefixCmdGroup('teCmd')
         (['TEv', 'TEe', 'TEmap', 'TEmidi'], ['view', 'edit', 'map', 'midi'])
         """
-        if prefix not in self.cmdDict.keys():
+        if prefix not in list(self.cmdDict.keys()):
             prefix = prefix.lower() + 'Cmd'
-        if prefix in self.cmdDict.keys():
+        if prefix in list(self.cmdDict.keys()):
             cmdNameList = self.cmdDict[prefix]
             cmdList = []
             nameList = []
@@ -1194,7 +1194,7 @@ class Interpreter(object):
 #         1
 
         errorMode = 'exception' # default
-        if 'errorMode' in keywords.keys():
+        if 'errorMode' in list(keywords.keys()):
             errorMode = keywords['errorMode']  
         # separate the command string from the args, which may be a list
         # or a string          
@@ -1312,7 +1312,7 @@ class Interpreter(object):
 
     def _emptyline(self):
         """print result if an empty command has been found"""
-        if self._emptyCount >= random.choice(range(7,20)):
+        if self._emptyCount >= random.choice(list(range(7,20))):
             self._emptyCount = 0
             self.out(dialog.getEncouragement())
         self._emptyCount = self._emptyCount + 1 
@@ -1320,7 +1320,7 @@ class Interpreter(object):
 
     def _default(self, line):
         """if no command is parsed out of line"""
-        if self._blankCount >= random.choice(range(3,10)):
+        if self._blankCount >= random.choice(list(range(3,10))):
             self._blankCount = 0
             self.out(dialog.getAdmonishment(line))
         else:
@@ -1502,8 +1502,8 @@ class Test(unittest.TestCase):
         from athenaCL.libATH.libTM import texture
         
         cmdListE = []
-        for i in range(len(texture.tmNames.values())):
-            tmName = texture.tmNames.values()[i]
+        for i in range(len(list(texture.tmNames.values()))):
+            tmName = list(texture.tmNames.values())[i]
 
             if tmName == 'TimeSegment':
                 # TODO: time segment raise an error with

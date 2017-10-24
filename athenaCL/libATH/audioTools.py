@@ -372,7 +372,7 @@ class EnvelopeGenerator:
         #totalLen = obj.getnframes()
         totalLen = frames
         if totalLen < (fadeLen * 2):
-            raise ValueError, 'fades are too long'
+            raise ValueError('fades are too long')
         flatLen = totalLen - (fadeLen * 2)
 
         rampIn  = self._ramp(fadeLen, 'in')
@@ -573,7 +573,7 @@ class AudioFile:
         file exists, channel will be updated to appropriate value
         """
         if not AIF: # check if modules loaded
-            raise ImportError, 'aif modules not available (%s)' % os.name
+            raise ImportError('aif modules not available (%s)' % os.name)
         self.absPath = absPath
         # store an envelope generator for convenience
         self.envlGenObj = EnvelopeGenerator()
@@ -596,7 +596,7 @@ class AudioFile:
         """
         if self._FILEOPEN == 1: # file is already open:
             self.aObj.close()
-            raise IOError, 'attempt to open open file.'
+            raise IOError('attempt to open open file.')
         if mode == None: # determine by wether file exists or not
             if os.path.exists(self.absPath): mode = 'r'
             else: mode = 'w'
@@ -617,7 +617,7 @@ class AudioFile:
         
     def _close(self):
         if self._FILEOPEN == 0: # file is already closed
-            raise IOError, 'attempt to close a closed file.'
+            raise IOError('attempt to close a closed file.')
         self._update()
         #print 'closing file: frames %s, channels %s' % (
         #                            self.frames, self.ch)
@@ -703,7 +703,7 @@ class AudioFile:
             self.aObj.writeframesraw(newData)
             self._close()
         else:
-            raise ValueError, 'incompatible channel conversioin'
+            raise ValueError('incompatible channel conversioin')
             
     def fillNoise(self):
         """pos is start position w/n file"""
@@ -763,7 +763,7 @@ class AudioFile:
         """insert some noise at a given amp into the file at position
         specified in frames. dur specified in frames
         not: dur applied to stereo channel does seem to last for the proper dur"""
-        if frames + pos > self.frames: raise ValueError, 'bad position size'
+        if frames + pos > self.frames: raise ValueError('bad position size')
         noiseData = self.sampleGenObj.noise(frames, amp)
         srcLead = self.getData(0, pos-1) # get data before noise
         srcPost = self.getData(pos+frames, self.getSize()-(pos+frames))
@@ -866,7 +866,7 @@ class AudioFile:
         self._open('r') # open to read data
         if start + length > self.frames:
             self._close()
-            raise ValueError, 'bad start and frame length'
+            raise ValueError('bad start and frame length')
         self.aObj.setpos(start)
         data = self.aObj.readframes(length)
         self._close()
@@ -888,7 +888,7 @@ class AudioFile:
         audio to keep"""
         data = self.getData(pos, frames)
         if len(data) == 0:
-            print 'no data: %s: %s, %s' % (self.frames, pos, frames) 
+            print('no data: %s: %s, %s' % (self.frames, pos, frames)) 
             result = 0 # no data to get
         absMax = byteToInt(self.bytes)
         max = audioop.max(data, self.bytes)
@@ -897,8 +897,8 @@ class AudioFile:
             result = 1
         else:
             rmsPct = round((rms / float(absMax)), 3)
-            print _MOD, 'lowamp: rms %s max %s (rmsPct %.3f)' % (str(rms).ljust(5), 
-                                                     str(max).ljust(5), rmsPct)
+            print(_MOD, 'lowamp: rms %s max %s (rmsPct %.3f)' % (str(rms).ljust(5), 
+                                                     str(max).ljust(5), rmsPct))
             result = 0
         return result
         
@@ -909,10 +909,10 @@ class AudioFile:
         frames = self.getSize()
         rangeMax = frames - length
         if rangeMax <= 0: 
-            print _MOD, 'findShard: self.frames, length %s %s' % (
-                                                        self.frames, length)
+            print(_MOD, 'findShard: self.frames, length %s %s' % (
+                                                        self.frames, length))
             return None # skip
-        frameRange = range(0, rangeMax)
+        frameRange = list(range(0, rangeMax))
         for i in range(0, maxAttempt):
             trialStart = random.choice(frameRange)
             if self.testAmp(trialStart, length): # if passes
@@ -949,7 +949,7 @@ class ShardHarvest:
         obj = fileTools.AllFiles(self.srcDir, ['aif', 'aiff'])
         self.srcFiles = obj.report()
         # make a list indices to get src files from; will randomize
-        self.srcKeys = range(0, len(self.srcFiles))
+        self.srcKeys = list(range(0, len(self.srcFiles)))
         self.dstFiles = []
 
     def _fileNameStr(self, i):
@@ -972,7 +972,7 @@ class ShardHarvest:
         
         for i in range(indexStart, (fragments+indexStart)):
             if i % 10 == 0: # report every ten
-                print _MOD, 'current index: %s' % i
+                print(_MOD, 'current index: %s' % i)
 
             srcPath = self.srcFiles[self.srcKeys[(srcIndex % srcLen)]]
             srcIndex = srcIndex + 1
@@ -980,7 +980,7 @@ class ShardHarvest:
             aObj = AudioFile(srcPath)
             start = aObj.findShard(self.audioFrame)
             if start == None:
-                print 'no audio found in %s' % srcPath
+                print('no audio found in %s' % srcPath)
                 continue
 
             dstPath = os.path.join(self.dstDir, self._fileNameStr(i))
@@ -1009,7 +1009,7 @@ class EncodeChain:
     def run(self):
         srcObj = AudioFile(self.src)
         frames = srcObj.getSize()
-        print _MOD, 'length', frames
+        print(_MOD, 'length', frames)
         #refObj = srcObj.extract(self.ref, 0, frames) # store a version 
         #storageObj = srcObj.extract(self.storage, 0, frames)
         #print _MOD, 'duration', storageObj.getDur()
@@ -1056,7 +1056,7 @@ def waterMark(src, spotWidth=70, spotDur=1.05, spotAmp=.20):
         spotWidth is the segment widht (in sec) in which a wm may occur
         spotDur in seconds"""
         
-        if not os.path.exists(src): raise ValueError, 'no such file'        
+        if not os.path.exists(src): raise ValueError('no such file')        
         af = AudioFile(src)
         
         dur = af.getDur() # dur is in seconds
@@ -1077,13 +1077,13 @@ def waterMark(src, spotWidth=70, spotDur=1.05, spotAmp=.20):
             min = int(round((.1*spotWidth)))
             max = int(round((.3*spotWidth)))
             
-            secIn = random.choice(range(min, max))
+            secIn = random.choice(list(range(min, max)))
             secOut = spotWidth-secIn
             shift = fps * secIn
             pos = pos + shift
             
             af.insertNoise(pos, spotFrames, spotAmp)
-            print _MOD, af.absPath, '(%s)' % frameToSec(pos)
+            print(_MOD, af.absPath, '(%s)' % frameToSec(pos))
             # shift to end of second
             pos = pos + (fps * secOut)
             
@@ -1139,7 +1139,7 @@ def TestOld():
 
 
     # reccomended numbers between 300 and 500 (more for shorter)
-    print a.gather(300, indexStart)
+    print(a.gather(300, indexStart))
 
 
 

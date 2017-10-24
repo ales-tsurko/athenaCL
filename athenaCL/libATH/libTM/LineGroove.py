@@ -62,7 +62,7 @@ class LineGroove(baseTexture.Texture):
             multisetCurrent = self.getMultiset(pathPos)
 
             tStartSet, tEndSet = self.clockPoints()
-            selectorChordPos = basePmtr.Selector(range(len(chordCurrent)),
+            selectorChordPos = basePmtr.Selector(list(range(len(chordCurrent))),
                                                              textPitchSelectorControl)
             tStartSetReal = copy.deepcopy(tCurrent)
             self.stateUpdate(tCurrent, chordCurrent, None, 

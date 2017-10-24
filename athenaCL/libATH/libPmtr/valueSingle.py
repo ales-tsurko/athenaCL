@@ -103,7 +103,7 @@ class StaticRange(basePmtr.Parameter):
         self.tEnd   = self.args[0][1]
 
         if not drawer.isNum(self.tStart) or not drawer.isNum(self.tEnd):
-            raise error.ParameterObjectSyntaxError, 'time range values must be numbers.'
+            raise error.ParameterObjectSyntaxError('time range values must be numbers.')
 
     def checkArgs(self):
         if self.tStart == self.tEnd:
@@ -473,7 +473,7 @@ class SieveList(basePmtr.Parameter):
         if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
 
         try: self.sieveObj = sieve.Sieve(self.args[0])
-        except AttributeError: raise error.ParameterObjectSyntaxError, 'sieve creation failed'
+        except AttributeError: raise error.ParameterObjectSyntaxError('sieve creation failed')
 
         a = self.args[1]
         b = self.args[2]
@@ -483,8 +483,8 @@ class SieveList(basePmtr.Parameter):
         elif a < b:
             self.zMin = a
             self.zMax = b
-        else: raise error.ParameterObjectSyntaxError, 'zMin must not be equal to zMax'
-        self.z = range(self.zMin, self.zMax+1)
+        else: raise error.ParameterObjectSyntaxError('zMin must not be equal to zMax')
+        self.z = list(range(self.zMin, self.zMax+1))
         self.length = len(self.z)
         
         self.format = self._sieveFormatParser(self.args[3])     
@@ -542,10 +542,10 @@ class ValueSieve(basePmtr.Parameter):
         if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
 
         try: self.sieveObj = sieve.Sieve(self.args[0])
-        except AttributeError: raise error.ParameterObjectSyntaxError, 'sieve creation failed'
+        except AttributeError: raise error.ParameterObjectSyntaxError('sieve creation failed')
 
         self.length = int(self.args[1])
-        self.z = range(0, abs(self.length))
+        self.z = list(range(0, abs(self.length)))
         self.normSeries = self.sieveObj(0, self.z, 'unit')
         #self.normSeries = unit.unitNormRange(self.sieveSeg)
         if self.args[1] < 0: # a negative length reverses the series
@@ -614,10 +614,10 @@ class SieveFunnel(basePmtr.Parameter):
         if ok == 0: raise error.ParameterObjectSyntaxError(msg) # report error
 
         try: self.sieveObj = sieve.Sieve(self.args[0])
-        except AttributeError: raise error.ParameterObjectSyntaxError, 'sieve creation failed'
+        except AttributeError: raise error.ParameterObjectSyntaxError('sieve creation failed')
 
         self.length = int(self.args[1])
-        self.z = range(0, abs(self.length))
+        self.z = list(range(0, abs(self.length)))
         # NOTE: this needs to be updated to use a unit sieve segment
         self.sieveSeg = self.sieveObj(0, self.z)
         self.normSeries = unit.unitNormRange(self.sieveSeg)
@@ -693,7 +693,7 @@ class ListPrime(basePmtr.Parameter):
         self.format = self._sieveFormatParser(self.args[2])
 
         if self.length > 999999: # a million values is too many!     
-            raise error.ParameterObjectSyntaxError, 'length value exceeds a practical range'
+            raise error.ParameterObjectSyntaxError('length value exceeds a practical range')
         
         # process prime segment
         self.obj = sieve.PrimeSegment(self.start, abs(self.length))
@@ -751,7 +751,7 @@ class ValuePrime(basePmtr.Parameter):
         self.length = self.args[1]
 
         if self.length > 999999: # a million values is too many!     
-            raise error.ParameterObjectSyntaxError, 'length value exceeds a practical range'
+            raise error.ParameterObjectSyntaxError('length value exceeds a practical range')
 
         # process prime segment
         self.obj = sieve.PrimeSegment(self.start, abs(self.length))
@@ -832,7 +832,7 @@ class CaList(basePmtr.Parameter):
         self.mutation = self._loadSub(mutation, 'genPmtrObjs')
         
         self.tableFormat = table.monoFormatParser(self.args[3]) # raises exception
-        if self.tableFormat == None: raise error.ParameterObjectSyntaxError, 'bad table format'
+        if self.tableFormat == None: raise error.ParameterObjectSyntaxError('bad table format')
     
         # run ca only on init
         ruleStart = self.rule(0, self._refDictSim)
@@ -840,8 +840,8 @@ class CaList(basePmtr.Parameter):
 
         try:
             self.ca = automata.factory(self.args[0], ruleStart, mutationStart)
-        except error.AutomataSpecificationError, e:
-            raise error.ParameterObjectSyntaxError, 'error in CA specification: %s' % e
+        except error.AutomataSpecificationError as e:
+            raise error.ParameterObjectSyntaxError('error in CA specification: %s' % e)
 
         # must supply yTotal here to get generations w/ skip
         for i in range(1, self.ca.spec.get('yTotal')): # already got zero
@@ -910,7 +910,7 @@ class CaValue(basePmtr.Parameter):
         self.mutation = self._loadSub(mutation, 'genPmtrObjs')
         
         self.tableFormat = table.monoFormatParser(self.args[3]) # raises exception
-        if self.tableFormat == None: raise error.ParameterObjectSyntaxError, 'bad table format'
+        if self.tableFormat == None: raise error.ParameterObjectSyntaxError('bad table format')
     
         # run ca only on init
         ruleStart = self.rule(0, self._refDictSim)
@@ -918,8 +918,8 @@ class CaValue(basePmtr.Parameter):
 
         try:
             self.ca = automata.factory(self.args[0], ruleStart, mutationStart)
-        except error.AutomataSpecificationError, e:
-            raise error.ParameterObjectSyntaxError, 'error in CA specification: %s' % e
+        except error.AutomataSpecificationError as e:
+            raise error.ParameterObjectSyntaxError('error in CA specification: %s' % e)
 
         # must supply yTotal here to get generations w/ skip
         for i in range(1, self.ca.spec.get('yTotal')): # already got zero
@@ -1442,7 +1442,7 @@ class TypeFormat(basePmtr.Parameter):
         elif self.format == 'string':
             self.outputFmt = 'str' # declare outputFmt as string
         else:
-            raise AttributeError, 'bad typeFormat given: %s', self.format   
+            raise AttributeError('bad typeFormat given: %s').with_traceback(self.format)   
 
     def checkArgs(self):
         ok, msg = self.pmtrObj.checkArgs()
@@ -1464,7 +1464,7 @@ class TypeFormat(basePmtr.Parameter):
         elif self.format == 'string':
             self.currentValue = '%s' % src
         else:
-            raise AttributeError, 'bad typeFormat given: %s', self.format                
+            raise AttributeError('bad typeFormat given: %s').with_traceback(self.format)                
 
         return self.currentValue
 
@@ -1751,15 +1751,15 @@ class IterateWindow(basePmtr.Parameter):
         for argList in self.args[0]:
             try:
                 pmtrObj = parameter.factory(argList, 'genPmtrObjs')
-            except error.ParameterObjectSyntaxError, msg:
-                raise error.ParameterObjectSyntaxError, 'failed sub-parameter: %s' % msg
+            except error.ParameterObjectSyntaxError as msg:
+                raise error.ParameterObjectSyntaxError('failed sub-parameter: %s' % msg)
             self.objArray.append(pmtrObj)
             
         self.countObj = self._loadSub(self.args[1], 'genPmtrObjs')   
         # check control string
         self.control = self._selectorParser(self.args[2]) 
         # create a selector that returns indix values for objArray
-        self.selector = basePmtr.Selector(range(len(self.objArray)), self.control)
+        self.selector = basePmtr.Selector(list(range(len(self.objArray))), self.control)
 
     def checkArgs(self):
         ok, msg = self.countObj.checkArgs()
@@ -1806,7 +1806,7 @@ class IterateWindow(basePmtr.Parameter):
                 # force the selection of a new value, examine results
                 failCount = failCount + 1        
                 if failCount > self.FAILLIMIT and self.valueBuffer == []:
-                    print lang.WARN, self.type, 'no values obtained; supplying value'
+                    print(lang.WARN, self.type, 'no values obtained; supplying value')
                     self.valueBuffer.append(self.objArray[pos](t, refDict))
                 # leave loop if values in buffer
                 if self.valueBuffer != []: break
@@ -1871,7 +1871,7 @@ class IterateGroup(basePmtr.Parameter):
                 # force the selection of a new value, examin results
                 failCount = failCount + 1        
                 if failCount > self.FAILLIMIT and self.valueBuffer == []:
-                    print lang.WARN, self.type, 'no values obtained; supplying value'
+                    print(lang.WARN, self.type, 'no values obtained; supplying value')
                     self.valueBuffer.append(self.genObj(t, refDict))
                 # leave loop of values in buffer
                 if self.valueBuffer != []: break
@@ -2295,7 +2295,7 @@ class Quantize(basePmtr.Parameter):
             grid.append(abs(q))
         # accept redundant values, always take in order
         if grid == []: # this is a problem
-            print lang.WARN, self.type, 'supplying grid with default values'
+            print(lang.WARN, self.type, 'supplying grid with default values')
             grid.append(1) # give it something
         return grid
         
@@ -2327,8 +2327,8 @@ class MarkovValue(basePmtr.Parameter):
         self.markovObj = markov.Transition() # creat obj w/o loading
         try:
             self.markovObj.loadTransition(self.args[0])
-        except error.TransitionSyntaxError, e: 
-            raise error.ParameterObjectSyntaxError, 'Markov transition creation failed: %s' % e
+        except error.TransitionSyntaxError as e: 
+            raise error.ParameterObjectSyntaxError('Markov transition creation failed: %s' % e)
         self.orderObj = self._loadSub(self.args[1], 'genPmtrObjs')
         # need to store accumulated values
         self.accum = []
@@ -2485,7 +2485,7 @@ class GrammarTerminus(basePmtr.Parameter):
         self.grammarObj = grammar.Grammar() # creat obj w/o loading
         try:
             self.grammarObj.load(self.args[0])
-        except error.TransitionSyntaxError, e: 
+        except error.TransitionSyntaxError as e: 
             raise error.ParameterObjectSyntaxError('Grammar creation failed: %s' % e)
 
         self.valueCount = int(self.args[1])
@@ -2493,7 +2493,7 @@ class GrammarTerminus(basePmtr.Parameter):
 
         # perform generations
         for i in range(self.valueCount):
-            self.grammarObj.next()
+            next(self.grammarObj)
 
         self.selector = basePmtr.Selector(
                         self.grammarObj.getState(values=True), self.control)
@@ -2536,7 +2536,7 @@ class FeedbackModelLibrary(basePmtr.Parameter):
             self.feedbackType = feedback.libraryParser(self.args[0])
             self.feedbackObj = feedback.factory(self.feedbackType)
             self.feedbackObj.fillSensorProducer()
-        except feedback.FeedbackError, e: 
+        except feedback.FeedbackError as e: 
             raise error.ParameterObjectSyntaxError('Feedback object creation failed: %s' % e)
 
         self.ageObj = self._loadSub(self.args[1], 'genPmtrObjs') 

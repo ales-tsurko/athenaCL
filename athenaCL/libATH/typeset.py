@@ -629,7 +629,7 @@ def formatEqCol(header, entries, minColWidth, charWidth=70, outLine=False):
                     whiteSpace = ' ' * minColWidth
                     msg.append(whiteSpace)
                     col = (col+1) % entryPerLine # shift col but dont skip cmd
-        addedSpace = minColWidth - len(cmd)
+        addedSpace = int(minColWidth - len(cmd))
         whiteSpace = ' ' * addedSpace
         msg.append(cmd + whiteSpace)
         col = (col+1) % entryPerLine
@@ -752,8 +752,8 @@ class Test(unittest.TestCase):
             
     def testFormatEqCol(self):
         material = [['test'], ['a', 'b']]
-        minColWidth = range(0, 20, 5)
-        charWidth = range(0, 20, 5)
+        minColWidth = list(range(0, 20, 5))
+        charWidth = list(range(0, 20, 5))
 
         for m in material:
             for mcw in minColWidth:

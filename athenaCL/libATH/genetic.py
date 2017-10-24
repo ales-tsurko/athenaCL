@@ -354,7 +354,7 @@ class Chromosome:
                 if ogDiv == 1:
                     value = 1
                 else: # previously, add just one here
-                    value = random.choice(range(1,ogDiv))
+                    value = random.choice(list(range(1,ogDiv)))
                 ogMult = ogMult + value  
             # current value greater than one, choose add or subrtact
             else:   
@@ -362,13 +362,13 @@ class Chromosome:
                     if ogDiv == 1: # error with random if this value is one
                         value = 1
                     else:# previously, to add just one here
-                        value = random.choice(range(1,ogDiv))   
+                        value = random.choice(list(range(1,ogDiv)))   
                     ogMult = ogMult + value
                 else: # cannot subtract more than the mutliplier
                     if ogMult == 1:
                         value = 1
                     else: # previously, to add just one here
-                        value = random.choice(range(1,ogMult))   
+                        value = random.choice(list(range(1,ogMult)))   
                     ogMult = ogMult - value  # max value is ogMult-1
             self.bitVector[locus] = (ogDiv, ogMult, ogStat) 
             
@@ -482,7 +482,7 @@ class GeneticAlgorithm:
         """
         maxFitness = 0 # this is the worst value
         fitnessSum = 0
-        for key in self.population.keys():
+        for key in list(self.population.keys()):
             fitnessSum = fitnessSum + self.population[key].fitness
             if self.population[key].fitness >= maxFitness:
                 maxFitness = self.population[key].fitness
@@ -519,15 +519,15 @@ class GeneticAlgorithm:
         maxFitness = maxFitness * 1.5 
         
         adjustedSum = 0
-        for key in self.population.keys():
+        for key in list(self.population.keys()):
             adjustedSum = adjustedSum + int(round((maxFitness - 
                              self.population[key].fitness) * fitScaler))      
 
         #TODO: rewrite with unit.py tools        
         stopPoint = random.randint(0,adjustedSum)
         currentPoint = 0
-        chromoKeys = self.population.keys()
-        for dummykey in self.population.keys(): # keys are randomized
+        chromoKeys = list(self.population.keys())
+        for dummykey in list(self.population.keys()): # keys are randomized
             key = random.choice(chromoKeys)
             keyPosition = chromoKeys.index(key)
             del chromoKeys[keyPosition]
@@ -577,7 +577,7 @@ class GeneticAlgorithm:
 
     def _sortPopulation(self):      
         sortList = []
-        for key in self.population.keys():
+        for key in list(self.population.keys()):
             sortList.append((self.population[key].fitness, key))
         sortList.sort()
         #sortList.reverse()
@@ -609,7 +609,7 @@ class GeneticAlgorithm:
         j = 0
         while j < maxIndex:
             # there is another offspring avaiable
-            if (j+1) in offspringDict.keys(): 
+            if (j+1) in list(offspringDict.keys()): 
                 chromoA = offspringDict[j]
                 chromoB = offspringDict[j+1]
                 locus = 0
@@ -664,7 +664,7 @@ class GeneticAlgorithm:
         for entry in offspringList:
             offspringDict[i] = entry
             i = i + 1
-        for key in offspringDict.keys():
+        for key in list(offspringDict.keys()):
             chromo = offspringDict[key]
             locus = 0
             if (random.randint(0,9999) / 10000.0) < self.crossoverRate:
@@ -880,7 +880,7 @@ class Genome:
         self.ga.crossoverRate = crossoverRate
         
     def clear(self):
-        for key in self.ga.population.keys():
+        for key in list(self.ga.population.keys()):
             self.ga.population[key].randomize()
         self.genCounter = 0
         self.lastBestBitVector = []

@@ -45,7 +45,7 @@ class _Wave(basePmtr.Parameter):
         
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise(error.ParameterObjectSyntaxError(msg)) # report error
+        if ok == 0: raise error # report error
                 
         self.step = self._stepControlParser(self.args[0]) # raises exception 
         self.spcObj = self._loadAutoConstant(self.args[1])
@@ -251,7 +251,7 @@ class _WaveExponential(basePmtr.Parameter):
 
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise(error.ParameterObjectSyntaxError(msg)) # report error
+        if ok == 0: raise error # report error
         
         self.step = self._stepControlParser(self.args[0]) # raises except on error
         self.spcObj = self._loadAutoConstant(self.args[1])
@@ -341,7 +341,7 @@ class _Random(basePmtr.Parameter):
         self.argDefaults = [0, 1]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise(error.ParameterObjectSyntaxError(msg)) # report error
+        if ok == 0: raise error # report error
         self.minObj, self.maxObj = self._loadMinMax(self.args[0], self.args[1])
         self.obj = None #assigned in subclass
 
@@ -419,7 +419,7 @@ class _RandomOneArg(basePmtr.Parameter):
         self.argDefaults = [.5, 0, 1]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise(error.ParameterObjectSyntaxError(msg)) # report error
+        if ok == 0: raise error # report error
         self.lambd = float(self.args[0]) # needs to be a float
         self.minObj, self.maxObj = self._loadMinMax(self.args[1], self.args[2])
         self.obj = None #assigned in subclass
@@ -492,7 +492,7 @@ class _RandomTwoArg(basePmtr.Parameter):
         self.argDefaults = [.5, .5, 0, 1]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise(error.ParameterObjectSyntaxError(msg)) # report error
+        if ok == 0: raise error # report error
 
         self.argA = float(self.args[0]) # needs to be a float
         self.argB = float(self.args[1]) # needs to be a float
@@ -564,7 +564,7 @@ class RandomWeibull(_RandomTwoArg):
                              ]
         if self.argA >= 20 or self.argB >= 20:
             msg = 'alpha and beta should not be greater than 20.'
-            raise(error.ParameterObjectSyntaxError(msg))      
+            raise error      
         self.obj = rand.WeibullRandom(self.argA, self.argB) #omde object
 
 
@@ -581,7 +581,7 @@ class _BreakPoint(basePmtr.Parameter):
                                   ((0,1),(6,.3),(12,.3),(18,0),(24,.6)), -1.5]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise(error.ParameterObjectSyntaxError(msg)) # report error
+        if ok == 0: raise error # report error
 
         # raises except on error
         self.step = self._stepControlParser(self.args[0]) 
@@ -590,7 +590,7 @@ class _BreakPoint(basePmtr.Parameter):
         self.points = self.args[2]
         ok, msg = self._scrubPoints() # not sure what to do if it fails
         if ok != 1:
-            raise(error.ParameterObjectSyntaxError(msg))
+            raise error
 
         self.exp = 1 # only used in power
         if len(self.args) >= 4:
@@ -766,7 +766,7 @@ class _BreakGraph(basePmtr.Parameter):
                                               ['bg','rc',(0,.25,.5,.75,1)], 60, -1.5]
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise(error.ParameterObjectSyntaxError(msg)) # report error
+        if ok == 0: raise error # report error
 
         self.step = self._stepControlParser(self.args[0]) # raises except on error
         self.loop = self._loopControlParser(self.args[1]) # raises except on error
@@ -779,9 +779,9 @@ class _BreakGraph(basePmtr.Parameter):
 
         # gen points, scrub, and sort
         ok, msg = self._genPoints(refDict)
-        if ok != 1: raise(error.ParameterObjectSyntaxError(msg))
+        if ok != 1: raise error
         ok, msg = self._scrubPoints() # not sure what to do if it fails
-        if ok != 1: raise(error.ParameterObjectSyntaxError(msg))
+        if ok != 1: raise error
 
         self.exp = 1 # only used in power
         if len(self.args) >= 6:
@@ -972,7 +972,7 @@ class LineSegment(basePmtr.Parameter):
 
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise(error.ParameterObjectSyntaxError(msg)) # report error
+        if ok == 0: raise error # report error
 
         # raises except on error
         self.step = self._stepControlParser(self.args[0]) 
@@ -991,7 +991,7 @@ class LineSegment(basePmtr.Parameter):
         if lineSpan == 0: # try  another point
             lineSpan = self.spcObj(i, refDict)
         if lineSpan == 0:
-            raise(error.ParameterObjectSyntaxError('seconds per cycle parameter object returns zero.'))
+            raise error
 
         self.xEnd = self.xStart + lineSpan
         yStart = self.minObj(i, refDict)
@@ -1099,7 +1099,7 @@ class EnvelopeGeneratorTrapezoid(basePmtr.Parameter):
 
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise(error.ParameterObjectSyntaxError(msg)) # report error
+        if ok == 0: raise error # report error
 
         # proportional absolute switch
         self.propAbsSwitch = self._scaleSwitchParser(self.args[0]) 
@@ -1117,7 +1117,7 @@ class EnvelopeGeneratorTrapezoid(basePmtr.Parameter):
         self.points = None
         # gen points, scrub, and sort
         ok, msg = self._genPoints(refDict)
-        if ok != 1: raise(error.ParameterObjectSyntaxError(msg))
+        if ok != 1: raise error
         self.obj = None #assigned in subclass
         self._setObj()
 
@@ -1228,7 +1228,7 @@ class EnvelopeGeneratorUnit(basePmtr.Parameter):
 
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise(error.ParameterObjectSyntaxError(msg)) # report error
+        if ok == 0: raise error # report error
 
         # proportional absolute switch
         self.loop = self._loopControlParser(self.args[0]) # raises except on error
@@ -1243,7 +1243,7 @@ class EnvelopeGeneratorUnit(basePmtr.Parameter):
         self.points = None
         # gen points, scrub, and sort
         ok, msg = self._genPoints(refDict)
-        if ok != 1: raise(error.ParameterObjectSyntaxError(msg))
+        if ok != 1: raise error
         self.obj = None #assigned in subclass
         self._setObj()
 
@@ -1347,7 +1347,7 @@ class EnvelopeGeneratorAdsr(basePmtr.Parameter):
 
         # check raw arguments for number, type
         ok, msg = self._checkRawArgs()
-        if ok == 0: raise(error.ParameterObjectSyntaxError(msg)) # report error
+        if ok == 0: raise error # report error
 
         # proportional absolute switch
         self.propAbsSwitch = self._scaleSwitchParser(self.args[0]) 
@@ -1366,7 +1366,7 @@ class EnvelopeGeneratorAdsr(basePmtr.Parameter):
         self.points = None
         # gen points, scrub, and sort
         ok, msg = self._genPoints(refDict)
-        if ok != 1: raise(error.ParameterObjectSyntaxError(msg))
+        if ok != 1: raise error
         self.obj = None #assigned in subclass
         self._setObj()
 

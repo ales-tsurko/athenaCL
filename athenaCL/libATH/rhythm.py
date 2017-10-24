@@ -59,7 +59,7 @@ REFdynStr = { # gives lower boundary value, 8 equal divisions
 # replace with function from below
 def dynStrToAcc(sym):
     """convert dynStr to accent value; ints will be ints, otherwise floats"""
-    if sym not in REFdynStr.keys():
+    if sym not in list(REFdynStr.keys()):
         raise ValueError
     # return median of min/max
     if REFdynStr[sym][0] == REFdynStr[sym][1]:
@@ -72,7 +72,7 @@ def accToDynStr(num):
     elif num < .0001: return 'o'
     # no integers beyond this
     num = round(num, 4) # four sig digits
-    for sym in REFdynStr.keys():
+    for sym in list(REFdynStr.keys()):
         if num >= REFdynStr[sym][0] and num < REFdynStr[sym][1]:
             return sym
     raise ValueError # should not happen
@@ -154,9 +154,9 @@ class Pulse:
             if len(data) == 0:
                 return None # no data found
             if data[0].islower(): # if has chars
-                if data in REFdurStr.keys():
+                if data in list(REFdurStr.keys()):
                     return 'str'
-                elif data in REFdynStr.keys(): # maybe its a dynmaic
+                elif data in list(REFdynStr.keys()): # maybe its a dynmaic
                     return 'acc' # acc string value alone
                 else:
                     raise error.PulseSyntaxError
@@ -178,7 +178,7 @@ class Pulse:
         """
         data = copy.copy(self.srcData)
         if self.format == 'str':
-            if drawer.isStr(data) and data in REFdurStr.keys():
+            if drawer.isStr(data) and data in list(REFdurStr.keys()):
                 data = data.strip()
                 data = data.lower()
                 return self._expandRawTriple(REFdurStr[data]) # return None on error
@@ -196,7 +196,7 @@ class Pulse:
                 return self._expandRawTriple(data) # return None on error
         elif self.format == 'acc': # a list of amps
             if drawer.isStr(data):
-                if data in REFdynStr.keys(): # its a string
+                if data in list(REFdynStr.keys()): # its a string
                     data = self._dynStrToVal(data) # convert to number
                 else: # its a string number like '3'
                     try:
@@ -269,7 +269,7 @@ class Pulse:
         """
         usrStr = usrStr.lower()
         # provide keys to match other possible symbols (just need + really)
-        chars = drawer.strExtractAlpha(usrStr, REFdynStr.keys())
+        chars = drawer.strExtractAlpha(usrStr, list(REFdynStr.keys()))
         if chars not in usrStr: # chars are not all contiguous, bad arg
             raise error.PulseSyntaxError
         elif chars == '': # no chars at all, just numbers, return
@@ -280,7 +280,7 @@ class Pulse:
         # need to always have longest strings firts
         # to avoid f, vs fff confusions
         sortItems = []
-        for sym in REFdynStr.keys(): # will retain class, int or float
+        for sym in list(REFdynStr.keys()): # will retain class, int or float
             sortItems.append((len(sym), sym, dynStrToAcc(sym)))
         sortItems.sort()
         sortItems.reverse() # largest lengths first
@@ -386,7 +386,7 @@ class Pulse:
 
     def get(self, format='triple'):
         if format not in self.forms:
-            raise ValueError, 'bad format requested: %s' % format
+            raise ValueError('bad format requested: %s' % format)
         return self._access(format)
 
     def __eq__(self, other):
@@ -428,7 +428,7 @@ class Pulse:
         divisor is not altered
         """
         if not drawer.isInt(value):
-            raise ValueError, 'value must be an integer'
+            raise ValueError('value must be an integer')
         self.triple[1] = self.triple[1] * value
         
 
@@ -438,7 +438,7 @@ class Pulse:
         raising ot a higher terms
         duratin remains the same"""
         if not drawer.isInt(value):
-            raise ValueError, 'value must be an integer'
+            raise ValueError('value must be an integer')
         self.triple[0] = self.triple[0] * value
         self.triple[1] = self.triple[1] * value
 
@@ -447,9 +447,9 @@ class Pulse:
         div and mult
         must be sure that value is alreaduy a proper multiple"""
         if not drawer.isInt(div):
-            raise ValueError, 'value must be an integer'
+            raise ValueError('value must be an integer')
         if   float(div) / self.triple[0] != float(div) // self.triple[0]:
-            raise ValueError, 'target divisor does not divide evenly into pulse triple divisor'
+            raise ValueError('target divisor does not divide evenly into pulse triple divisor')
         # divide goal divisor by current divisor to get necessary mutltiple
         m = div // self.triple[0] 
         self.ratioRaise(m)
@@ -461,11 +461,11 @@ class Pulse:
         if 4, 5 is provided, denominatorided into 4/5 adn 1/5, return 4/5 first"""
 
         if not drawer.isInt(numerator):
-            raise ValueError, 'numerator must be an integer'
+            raise ValueError('numerator must be an integer')
         if not drawer.isInt(denominator):
-            raise ValueError, 'denominator must be an integer'
+            raise ValueError('denominator must be an integer')
         if numerator > denominator:
-            raise ValueError, 'fraction must be less than 1'
+            raise ValueError('fraction must be less than 1')
 
         a = self.copy()
         b = self.copy()
@@ -487,9 +487,9 @@ class Pulse:
         where the multipliers sum to the current multiplier"""
 
         if not drawer.isInt(multiplier):
-            raise ValueError, 'multiplier must be an integer'
+            raise ValueError('multiplier must be an integer')
         if multiplier > self.triple[1]:
-            raise ValueError, 'new multiplier must be less than current'
+            raise ValueError('new multiplier must be less than current')
 
         a = self.copy()
         b = self.copy()
@@ -651,7 +651,7 @@ class Rhythm:
 
     def get(self, name):
         if name not in self.forms:
-            raise ValueError, 'bad format requested: %s' % name
+            raise ValueError('bad format requested: %s' % name)
         return self._access(name)
 
     def __contains__(self, item):
@@ -752,27 +752,27 @@ class RhythmMeasure:
 
 
     def _diagnostic(self, post):
-        print 
-        print _MOD, 'measure partition diagnostic'
-        print 'dst rhtyhm:', self.dstRhythm
+        print() 
+        print(_MOD, 'measure partition diagnostic')
+        print('dst rhtyhm:', self.dstRhythm)
         sumTotal = 0
         mCount = 1
         for measure in post:
-            print 'measure %s' % mCount
-            print measure
+            print('measure %s' % mCount)
+            print(measure)
             sum = 0
             for pulse, tie in measure:
                 sum = sum + pulse.triple[1]
             sumTotal = sumTotal + sum
-            print 'sum', sum
+            print('sum', sum)
             mCount = mCount + 1
-        print
-        print 'sum measure', sumTotal
+        print()
+        print('sum measure', sumTotal)
         
         sumDst = 0
         for pulse in self.dstRhythm:
             sumDst = sumDst + pulse.triple[1]
-        print 'sum dst rhythm', sumDst
+        print('sum dst rhythm', sumDst)
 
 
     def partition(self):
@@ -812,7 +812,7 @@ class RhythmMeasure:
 
                 # mSum should always be less than the target before adding dur
                 if mSum >= target:
-                    raise ValueError, 'mSum has exceeded target before check'
+                    raise ValueError('mSum has exceeded target before check')
                 # find out how much space is left
                 mEmpty = target - mSum 
                 # this sum is conditional; it may exceed measure after this point
@@ -923,7 +923,7 @@ class TimeValue:
         elif drawer.isNum(data): # assume seconds
             self.time['s'] = data # keep floating point values
         else:
-            raise ValueError, 'unsupported data type'
+            raise ValueError('unsupported data type')
         self._updateTime() # update and shifts all values
         
 
@@ -965,7 +965,7 @@ class TimeValue:
                 self.time['h'] = int(usrList[1])
                 self.time['d'] = int(usrList[0])
             else:
-                raise ValueError, 'unsupported time string'
+                raise ValueError('unsupported time string')
         # order does not matter for labeled data
         # label must follow value
         elif format == 'label':
@@ -983,7 +983,7 @@ class TimeValue:
             if valList[-1] == '': # last label, no comma, causes last val to be ''
                 del valList[-1]
             if len(labelList) != len(valList):
-                raise ValueError, 'bad time string labels'
+                raise ValueError('bad time string labels')
             for i in range(0, len(labelList)):
                 val = valList[i]
                 label = labelList[i]
@@ -1040,7 +1040,7 @@ class TimeValue:
 
     def __getattr__(self, name):
         if name not in self.timeLabels:
-            print 'missing', name
+            print('missing', name)
             raise AttributeError
         s = self._seconds() # geet seconds
         if name == 's' or name == 'f':
@@ -1171,13 +1171,13 @@ class TestOld:
         for triple in ([4,1], [3,1], [1,1], [5,3]):
             a = Pulse(triple)
             for fraction in ([1,4], [3,4], [5,8], [2,3], [6,21]):
-                print 'source:', a, a()
-                print 'fraction:', str(fraction)
+                print('source:', a, a())
+                print('fraction:', str(fraction))
                 # split into a quarter and three quarters
                 x, y = a.fracture(fraction[0], fraction[1]) 
-                print 'result:', x, x(), y, y()
-                print 'sum:', x()[0] + y()[0]
-                print
+                print('result:', x, x(), y, y())
+                print('sum:', x()[0] + y()[0])
+                print()
 
 
     def testRhythm(self):
@@ -1187,34 +1187,34 @@ class TestOld:
         # the list of chars / floats gets converted to 3 pulses
         for val in testVals:
             a = Rhythm(val)
-            print '\ninput', val, len(a)
+            print('\ninput', val, len(a))
             for type in a.forms:
-                print a.repr(type), a.get(type)
+                print(a.repr(type), a.get(type))
 
     def testTimer(self):
         obj = Timer()
-        print 'print:', obj
+        print('print:', obj)
         time.sleep(2.2)
-        print 'print:', obj
+        print('print:', obj)
         time.sleep(2.8)
-        print 'call:', obj()
+        print('call:', obj())
         time.sleep(3.1)
-        print 'call:', obj()
+        print('call:', obj())
         time.sleep(1.1)
         obj.stop()
-        print obj
-        print 
+        print(obj)
+        print() 
 
     def testTimeValue(self):
         for testStr in ['3:2', '25h.2s', '1d 4h 64m 2.4s',
                              '3:2:4.3', 1201, 30.2, 234234]:
-            print testStr
+            print(testStr)
             tObj = TimeValue(testStr)
-            print tObj.repr('label')
-            print tObj.repr('watch')
+            print(tObj.repr('label'))
+            print(tObj.repr('watch'))
             for label in tObj.timeLabels:
-                print '%s:' % label, getattr(tObj, label) 
-            print
+                print('%s:' % label, getattr(tObj, label)) 
+            print()
 
 
 

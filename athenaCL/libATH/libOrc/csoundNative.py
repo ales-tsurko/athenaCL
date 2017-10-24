@@ -157,10 +157,10 @@ nchnls = 4
         return ''.join(msg)
 
     def getInstObj(self, iNo):
-        if iNo in self._instrObjDict.keys(): # already loaded
+        if iNo in list(self._instrObjDict.keys()): # already loaded
             return self._instrObjDict[iNo] # call attribute of module to get object
         else:
-            raise ValueError, 'bad insturment number given: %s' % iNo
+            raise ValueError('bad insturment number given: %s' % iNo)
             
     def getScoFtables(self):
         """public method as needed in score
@@ -192,7 +192,7 @@ nchnls = 4
             instList = self.instNoList()
         for number in instList:
             if not self.instNoValid(number):
-                print lang.WARN, 'instrument %i not available.' % number
+                print(lang.WARN, 'instrument %i not available.' % number)
                 continue
             instrObj = self.getInstObj(number)
             msg.append(instrObj.buildInstrDef(noChannels))

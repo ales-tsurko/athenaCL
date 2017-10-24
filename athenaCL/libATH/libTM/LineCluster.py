@@ -71,7 +71,7 @@ class LineCluster(baseTexture.Texture):
             tStartSet, tEndSet = self.clockPoints() 
 #             if textNonRedundantSwitch == 'on': selectorControl = 'randomPermutate'
 #             else: selectorControl = 'randomChoice'
-            selectorChordPos = basePmtr.Selector(range(len(chordCurrent)),
+            selectorChordPos = basePmtr.Selector(list(range(len(chordCurrent))),
                                                              textPitchSelectorControl)
             tStartSetReal = copy.deepcopy(tCurrent)
             self.stateUpdate(tCurrent, chordCurrent, None, 

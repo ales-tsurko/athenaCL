@@ -445,7 +445,7 @@ class Test:
         a.setMeasures(measureList)
 
         fp = drawer.tempFile('.xml')
-        print fp
+        print(fp)
         a.write(fp)
         
         osTools.openMedia(fp)

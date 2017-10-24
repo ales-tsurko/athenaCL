@@ -192,7 +192,7 @@ class Grammar:
 
         """
         self._rules = {} # this always clears the last rules
-        for key, value in pairRule.items():
+        for key, value in list(pairRule.items()):
             # make value into a src:dst pairs
             ruleList = []
             weights = value.split(self.ASSIGNDELIMIT) # this is the |
@@ -232,7 +232,7 @@ class Grammar:
     def _parseAxiom(self, axiomSrc=None):
         """Call this after all symbols have been found
         """
-        knownSym = self._symbols.keys()
+        knownSym = list(self._symbols.keys())
         if axiomSrc != None:
             # NOTE: assumes no delimiters between symbols
             axiomSrc = axiomSrc.strip()
@@ -263,8 +263,7 @@ class Grammar:
         """
         for char in symStr:
             if char not in self.SYM:
-                raise error.TransitionSyntaxError,\
-                "symbol definition uses illegal characters (%s)" % char
+                raise error.TransitionSyntaxError("symbol definition uses illegal characters (%s)" % char)
 
     def _checkSymbolFormRuleKey(self, symStr):
         """makes sure that symbol usage is valid for weight label keys
@@ -301,8 +300,8 @@ class Grammar:
          """
         self._maxRuleOutputSize = 0
 
-        knownSym = self._symbols.keys()
-        for inRule, outRule in self._rules.items():
+        knownSym = list(self._symbols.keys())
+        for inRule, outRule in list(self._rules.items()):
             #environment.printDebug(['in rule, out rule', inRule, outRule])
             environment.printDebug(['in rule', repr(inRule), 'out rule', outRule])
 
@@ -343,7 +342,7 @@ class Grammar:
                 if not match:
                     break
             if not match:
-                raise error.TransitionSyntaxError, "destination rule component (%s) references an undefined symbol" % outRule
+                raise error.TransitionSyntaxError("destination rule component (%s) references an undefined symbol" % outRule)
     
 
     #-----------------------------------------------------------------------||--
@@ -450,7 +449,7 @@ class Grammar:
         >>> g._valueToSymbol('4') # everything is a string
         'b'
         """
-        for s, v in self._symbols.items():
+        for s, v in list(self._symbols.items()):
             if str(value) == v:
                 return s
         raise ValueError('value (%s) not known as a symbol' % value)
@@ -481,7 +480,7 @@ class Grammar:
         >>> g._symbolToValue('a') # everything is a string
         3.0
         """
-        for s, v in self._symbols.items():
+        for s, v in list(self._symbols.items()):
             if value == s:
                 if drawer.isCharNum(v):
                     return float(v)
@@ -540,11 +539,11 @@ class Grammar:
         """
         # do symbol list first
         msg = []
-        syms = self._sortSymbolLabel(self._symbols.items())
+        syms = self._sortSymbolLabel(list(self._symbols.items()))
         for s, data in syms:
             msg.append('%s%s%s%s' % (s, self.OPEN, data, self.CLOSE))
         msg.append(self.SPLIT)
-        for src, dst in self._rules.items():
+        for src, dst in list(self._rules.items()):
             sub = []
             if len(dst) > 1:
                 for part, weight in dst:
@@ -579,7 +578,7 @@ class Grammar:
         return '<%s>' % input
         
 
-    def next(self):
+    def __next__(self):
         '''Apply all rules and produce a new self._state
 
         >>> g = Grammar()
@@ -649,7 +648,7 @@ class Grammar:
                 if pair not in indexCharPairs:
                     indexCharPairs.append(pair) 
 
-        for inRule, outRule in self._rules.items():
+        for inRule, outRule in list(self._rules.items()):
 
             environment.printDebug(['next(): in/out rule', repr(inRule), outRule])
             # grammar.py: next(): in/out rule '*' [('ab',1)] 
@@ -763,66 +762,66 @@ class Test(unittest.TestCase):
 
         g = Grammar()
         g.load('a{3}b{4} @ a{bab}b{aab} @ a')
-        g.next()
+        next(g)
         self.assertEqual(g.getState(), 'bab')
         g.reset()
-        g.next()
+        next(g)
         self.assertEqual(g.getState(), 'bab')
         g.setAxiom('b')
         self.assertEqual(g.getState(), 'b')
-        g.next()
+        next(g)
         self.assertEqual(g.getState(), 'aab')
 
         g.setAxiom('ab')
         self.assertEqual(g.getState(), 'ab')
-        g.next()
+        next(g)
         self.assertEqual(g.getState(), 'babaab')
-        g.next()
+        next(g)
         self.assertEqual(g.getState(), 'aabbabaabbabbabaab')
 
 
         # simple oscillation
         g = Grammar()
         g.load('a{3}b{4} @ a{b}b{a} @ a')
-        g.next()
+        next(g)
         self.assertEqual(g.getState(), 'b')
-        g.next()
+        next(g)
         self.assertEqual(g.getState(), 'a')
-        g.next()
+        next(g)
         self.assertEqual(g.getState(), 'b')
-        g.next()
+        next(g)
         self.assertEqual(g.getState(), 'a')
 
 
         # simple oscillation
         g = Grammar()
         g.load('a{3}b{4} @ a{b}b{a} @ a')
-        g.next()
+        next(g)
         self.assertEqual(g.getState(), 'b')
-        g.next()
+        next(g)
         self.assertEqual(g.getState(), 'a')
-        g.next()
+        next(g)
         self.assertEqual(g.getState(), 'b')
-        g.next()
+        next(g)
         self.assertEqual(g.getState(), 'a')
 
 
         # decomposition: can we decompose
         g = Grammar()
         g.load('a{3}b{4} @ a{b}b{}{a} @ a')
-        g.next()
+        next(g)
         self.assertEqual(g.getState(), 'b')
-        g.next()
+        next(g)
         self.assertEqual(g.getState(), '')
-        g.next()
+        next(g)
         # for now, this replaces with the axiom
         self.assertEqual(g.getState(), 'b')
 
         g = Grammar()
         g.load('a{3}b{4} @ a{bab}b{} @ bbabbabb')
-        g.next()
+        next(g)
         self.assertEqual(g.getState(), 'babbab')
-        g.next()
+        next(g)
         self.assertEqual(g.getState(), 'babbab')
 
 
@@ -830,40 +829,40 @@ class Test(unittest.TestCase):
         # try context matches: can match one to many
         g = Grammar()
         g.load('a{3}b{4} @ aa{bb}bb{aaaa} @ bb')
-        g.next()
+        next(g)
         self.assertEqual(g.getState(), 'aaaa')
-        g.next()
+        next(g)
         self.assertEqual(g.getState(), 'bbbb')
-        g.next()
+        next(g)
         self.assertEqual(g.getState(), 'aaaaaaaa')
-        g.next()
+        next(g)
         self.assertEqual(g.getState(), 'bbbbbbbb')
-        g.next()
+        next(g)
         self.assertEqual(g.getState(), 'aaaaaaaaaaaaaaaa')
 
         g = Grammar()
         g.load('a{3}b{4} @ aaa{aba}aba{bbb}bbb{aaa} @ bbb')
-        g.next()
+        next(g)
         self.assertEqual(g.getState(), 'aaa')
-        g.next()
+        next(g)
         self.assertEqual(g.getState(), 'aba')
-        g.next()
+        next(g)
         self.assertEqual(g.getState(), 'bbb')
-        g.next()
+        next(g)
         self.assertEqual(g.getState(), 'aaa')
-        g.next()
+        next(g)
 
         g = Grammar()
         g.load('a{3}b{4} @ aaa{aba}aba{bbb}bbb{aaa} @ bbbbbb')
-        g.next()
+        next(g)
         self.assertEqual(g.getState(), 'aaaaaa')
-        g.next()
+        next(g)
         self.assertEqual(g.getState(), 'abaaba')
-        g.next()
+        next(g)
         self.assertEqual(g.getState(), 'bbbbbb')
-        g.next()
+        next(g)
         self.assertEqual(g.getState(), 'aaaaaa')
-        g.next()
+        next(g)
 
 
     def testWeighted(self):
@@ -871,11 +870,11 @@ class Test(unittest.TestCase):
         # can use pipe to define equal probabilistic options
         g = Grammar()
         g.load('a{3}b{4} @ a{b|a}b{a|b} @ a')
-        g.next()
+        next(g)
         self.assertEqual(g.getState() in ['a', 'b'], True)
-        g.next()
+        next(g)
         self.assertEqual(g.getState() in ['a', 'b'], True)
-        g.next()
+        next(g)
         self.assertEqual(g.getState() in ['a', 'b'], True)
 
 
@@ -885,7 +884,7 @@ class Test(unittest.TestCase):
         post = []
         for x in range(100):
             post.append(g.getState())
-            g.next()
+            next(g)
         # probabilistic weighting favoring b
         self.assertEqual(post.count('b') > 70, True)
 
@@ -901,53 +900,53 @@ class Test(unittest.TestCase):
         g = Grammar()
         g.load('a{1}b{5}c{10} @ *{ab} @ a')
 
-        g.next()
+        next(g)
         self.assertEqual(g.getState(), 'ab')
 
 
         # partial matches with *
         g = Grammar()
         g.load('a{1}b{5}c{10} @ a*{ab} @ aa')
-        g.next()
+        next(g)
         self.assertEqual(g.getState(), 'ab')
 
         g = Grammar()
         g.load('a{1}b{5}c{10} @ **{ab} @ aa')
-        g.next()
+        next(g)
         self.assertEqual(g.getState(), 'ab')
 
         g = Grammar()
         g.load('a{1}b{5}c{10} @ b*{ab} @ ba')
-        g.next()
+        next(g)
         self.assertEqual(g.getState(), 'ab')
 
         g = Grammar()
         g.load('a{1}b{5}c{10} @ *a{cc} @ ba')
-        g.next()
+        next(g)
         self.assertEqual(g.getState(), 'cc')
 
 
         g = Grammar()
         g.load('a{1}b{5}c{10} @ *a{cc} c*{aa} @ cc')
-        g.next()
+        next(g)
         self.assertEqual(g.getState(), 'aa')
-        g.next()
+        next(g)
         self.assertEqual(g.getState(), 'cc')
-        g.next()
+        next(g)
         self.assertEqual(g.getState(), 'aa')
-        g.next()
+        next(g)
         self.assertEqual(g.getState(), 'cc')
     
 
         g = Grammar()
         g.load('a{1}b{5}c{10} @ a*c{ccc} *c*{abc} @ abc')
-        g.next()
+        next(g)
         self.assertEqual(g.getState(), 'ccc')
-        g.next()
+        next(g)
         self.assertEqual(g.getState(), 'abc')
-        g.next()
+        next(g)
         self.assertEqual(g.getState(), 'ccc')
-        g.next()
+        next(g)
         self.assertEqual(g.getState(), 'abc')
 
 

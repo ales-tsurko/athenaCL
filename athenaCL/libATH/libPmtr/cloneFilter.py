@@ -145,8 +145,8 @@ class PipeLine(basePmtr.FilterParameter):
         for argList in self.args[0]:
             try:
                 pmtrObj = parameter.factory(argList, 'filterPmtrObjs')
-            except error.ParameterObjectSyntaxError, msg:
-                raise error.ParameterObjectSyntaxError, 'failed sub-parameter: %s' % msg
+            except error.ParameterObjectSyntaxError as msg:
+                raise error.ParameterObjectSyntaxError('failed sub-parameter: %s' % msg)
             self.objArray.append(pmtrObj)
 
     def checkArgs(self):
@@ -254,7 +254,7 @@ class FilterQuantize(basePmtr.FilterParameter):
             grid.append(abs(q))
         # accept redundant values, always take in order
         if grid == []: # this is a problem
-            print lang.WARN, self.type, 'supplying grid with default values'
+            print(lang.WARN, self.type, 'supplying grid with default values')
             grid.append(1) # give it something
         return grid
 
@@ -487,8 +487,8 @@ class Replace(basePmtr.FilterParameter):
         from athenaCL.libATH.libPmtr import parameter
         try:
             self.pmtrObj = parameter.factory(self.args[0])
-        except error.ParameterObjectSyntaxError, msg:
-            raise error.ParameterObjectSyntaxError, 'failed sub-parameter: %s' % msg
+        except error.ParameterObjectSyntaxError as msg:
+            raise error.ParameterObjectSyntaxError('failed sub-parameter: %s' % msg)
 
     def checkArgs(self):
         ok, msg = self.pmtrObj.checkArgs()
@@ -539,8 +539,8 @@ class _FilterOperator(basePmtr.FilterParameter):
         try: # note: can be eithe gen or filter parameter object
             self.pmtrObj = parameter.factory(self.args[0], 
                                             [ 'genPmtrObjs','rthmPmtrObjs'])
-        except error.ParameterObjectSyntaxError, msg:
-            raise error.ParameterObjectSyntaxError, 'failed sub-parameter: %s' % msg
+        except error.ParameterObjectSyntaxError as msg:
+            raise error.ParameterObjectSyntaxError('failed sub-parameter: %s' % msg)
 
     def checkArgs(self):
         ok, msg = self.pmtrObj.checkArgs()
@@ -672,8 +672,8 @@ class _FilterOperatorAnchor(basePmtr.FilterParameter):
         try:
             self.pmtrObj = parameter.factory(self.args[1], 
                                             ['genPmtrObjs', 'rthmPmtrObjs'])
-        except error.ParameterObjectSyntaxError, msg:
-            raise error.ParameterObjectSyntaxError, 'failed sub-parameter: %s' % msg
+        except error.ParameterObjectSyntaxError as msg:
+            raise error.ParameterObjectSyntaxError('failed sub-parameter: %s' % msg)
 
     def checkArgs(self):
         ok, msg = self.pmtrObj.checkArgs()

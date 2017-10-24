@@ -261,11 +261,11 @@ filterPmtrNames = {
 
 
 #-----------------------------------------------------------------||||||||||||--
-genPmtrObjs = genPmtrNames.values() # values are class names
-rthmPmtrObjs = rthmPmtrNames.values()
-textPmtrObjs = textPmtrNames.values()
-clonePmtrObjs = clonePmtrNames.values()
-filterPmtrObjs = filterPmtrNames.values()
+genPmtrObjs = list(genPmtrNames.values()) # values are class names
+rthmPmtrObjs = list(rthmPmtrNames.values())
+textPmtrObjs = list(textPmtrNames.values())
+clonePmtrObjs = list(clonePmtrNames.values())
+filterPmtrObjs = list(filterPmtrNames.values())
 
 # all parameter objects; juts the full names, as a list (no clashes)
 allPmtrObjs = (rthmPmtrObjs + genPmtrObjs + 
@@ -274,8 +274,8 @@ allPmtrObjs = (rthmPmtrObjs + genPmtrObjs +
 allPmtrNames = {}
 for subDict in [genPmtrNames, rthmPmtrNames, textPmtrNames,
                 clonePmtrNames, filterPmtrNames]:
-    for key, value in subDict.items():
-        if key in allPmtrNames.keys():
+    for key, value in list(subDict.items()):
+        if key in list(allPmtrNames.keys()):
             raise Exception('found duplicated key: %s' % key)
         allPmtrNames[key] = value
 
@@ -315,7 +315,7 @@ def pmtrLibParser(usrStr):
     """
     parsed = drawer.acronymExpand(usrStr, pmtrLibNames)
     if parsed == None:
-        raise ValueError, 'bad parameter library provided: %s' % usrStr
+        raise ValueError('bad parameter library provided: %s' % usrStr)
     return parsed
     
 def pmtrLibTitle(libName):
@@ -337,7 +337,7 @@ def pmtrLibTitle(libName):
     elif libName == None:
         name = 'All'
     else:
-        raise ValueError, 'bad parameter library provided: %s' % libName
+        raise ValueError('bad parameter library provided: %s' % libName)
     return '%s %s' % (name, 'ParameterObject')
 
 
@@ -359,7 +359,7 @@ def pmtrLibNameToDict(libName):
     elif libName == 'filterPmtrObjs':
         data = filterPmtrNames
     else:
-        raise ValueError, 'bad parameter library provided: %s' % libName
+        raise ValueError('bad parameter library provided: %s' % libName)
 
     return data
 
@@ -380,7 +380,7 @@ def pmtrLibList(libName):
     elif libName == 'filterPmtrObjs':
         data = filterPmtrObjs
     else:
-        raise ValueError, 'bad parameter library provided: %s' % libName
+        raise ValueError('bad parameter library provided: %s' % libName)
 
     data = list(data)
     data.sort()
@@ -405,9 +405,9 @@ def pmtrNameToPmtrLib(pmtrName):
     if ',' in pmtrName: # if a comma
         pmtrName = pmtrName.split(',')[0] # just get first, strip args
     found = None
-    for libName in pmtrLibNames.values():
+    for libName in list(pmtrLibNames.values()):
         pmtrNamesDict = pmtrLibNameToDict(libName)
-        for key, value in pmtrNamesDict.items():
+        for key, value in list(pmtrNamesDict.items()):
             if pmtrName == key.lower() or pmtrName == value.lower():
                 found = libName
                 break
@@ -451,16 +451,16 @@ def pmtrTypeParser(typeName, libName='genPmtrObjs'):
         pmtrNames = allPmtrNames
 
     else:
-        raise error.ParameterObjectSyntaxError, 'no parameter library named: %r' % libName
+        raise error.ParameterObjectSyntaxError('no parameter library named: %r' % libName)
 
-    for key in pmtrNames.keys():
+    for key in list(pmtrNames.keys()):
         className = pmtrNames[key]
         if usrStr == key:
             return className
         elif usrStr == className.lower():
             return className
     # if not mattched, raise an error
-    raise error.ParameterObjectSyntaxError, 'no parameter named %r in %s' % (usrStr, pmtrLibTitle(libName)) 
+    raise error.ParameterObjectSyntaxError('no parameter named %r in %s' % (usrStr, pmtrLibTitle(libName))) 
 
 #-----------------------------------------------------------------||||||||||||--
 # arguments for parameter objects are assigned at creation of object
@@ -484,7 +484,7 @@ def locator(usrStr, libName=None):
     objType = pmtrTypeParser(usrStr, libName) #check type string
     # fix case, capitalize lead character:
     if objType == None: 
-        raise error.ParameterObjectSyntaxError, 'name error: no parameter named %r' % usrStr 
+        raise error.ParameterObjectSyntaxError('name error: no parameter named %r' % usrStr) 
     objType = objType[0].upper() + objType[1:]
     modFound = None
     # this actually looks through external module files
@@ -495,7 +495,7 @@ def locator(usrStr, libName=None):
             modFound = mod
             break
     if modFound == None:# failure
-        raise error.ParameterObjectSyntaxError, 'name error: no parameter named %r' % usrStr
+        raise error.ParameterObjectSyntaxError('name error: no parameter named %r' % usrStr)
     # return reference to object, and string name of object
     # may want to retrun objType first char to lower case?
     return modFound, objType
@@ -537,12 +537,12 @@ def factory(rawArgs, libName=None, refDict=None):
 
         try: # will raise exception on error
             mod, modStr = locator(objType, name) #check type string
-        except error.ParameterObjectSyntaxError, e: modStr = None
+        except error.ParameterObjectSyntaxError as e: modStr = None
         if modStr == None:
             if i != len(libOpt) - 1:
                 continue # if not the last one to try
             else:
-                raise error.ParameterObjectSyntaxError, 'parameter lib error (%s: %s, %s, %s)' % (name, objType, modStr, rawArgs) 
+                raise error.ParameterObjectSyntaxError('parameter lib error (%s: %s, %s, %s)' % (name, objType, modStr, rawArgs)) 
         else: # got a good object
             break
             # failure
@@ -585,11 +585,11 @@ class Test(unittest.TestCase):
 
 
     def testLocator(self):
-        for key, value in allPmtrNames.items():
+        for key, value in list(allPmtrNames.items()):
             self.assertEqual(locator(key)[1].lower(), value.lower())
 
     def testFactory(self):
-        for key, value in allPmtrNames.items():
+        for key, value in list(allPmtrNames.items()):
             post = factory(key)
 
 

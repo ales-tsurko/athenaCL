@@ -18,7 +18,7 @@ except ImportError:
     except ImportError: 
         sys.stdout.write('athenaCL package cannot be found.\n')
         sys.exit()
-fpLibATH = libATH.__path__[0] # list, get first item
+fpLibATH = list(libATH.__path__)[0] # list, get first item
 if not os.path.isabs(fpLibATH): #relative path, add cwd
     fpLibATH = os.path.abspath(fpLibATH)
 fpSrcDir = os.path.dirname(fpLibATH)
@@ -54,7 +54,7 @@ def helpMsg(athVersionStr, flagsRef):
     msg.append('%s\n' % lang.msgLicenseShort)
     msg.append('%s\n\n%s\n\n' % (lang.msgAthDescLong, lang.msgAthUsage))
     msg.append('Options:\n')
-    for key in flagsRef.keys():
+    for key in list(flagsRef.keys()):
         flagStr = ''
         for entry in key:
             flagStr = flagStr + '%s, ' % entry

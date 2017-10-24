@@ -139,7 +139,7 @@ def display(usrStr, rule=0, mutation=0):
     if ca == None: return _MOD, 'error, no such ca available'
     
     ca.gen(ca.spec.get('y'))
-    print _MOD, 'values generated, drawing...\n%s' % ca.repr('full') 
+    print(_MOD, 'values generated, drawing...\n%s' % ca.repr('full')) 
     
     # more pixels causes more time
     obj = CAmapCanvas(None, ca.getCells('table', 0, ca.spec.get('s'), None, 

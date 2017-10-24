@@ -132,13 +132,13 @@ class _FileChooser(basePmtr.Parameter):
             path = self._findFile(self.filePathList, fileName)
             if path == None:
                 if fileName not in missingReport:
-                    print lang.WARN, 'missing file %s' % fileName
+                    print(lang.WARN, 'missing file %s' % fileName)
                 missingReport.append(fileName)
                 #path = os.path.join(self.dirList[0], 'error') # defualt error!
                 count = count + 1 
                 if count > self.FAILLIMIT:
                     path = 'error.aif'
-                    print lang.WARN, 'supplying default: %s' % path
+                    print(lang.WARN, 'supplying default: %s' % path)
                     break
                 else:
                     continue

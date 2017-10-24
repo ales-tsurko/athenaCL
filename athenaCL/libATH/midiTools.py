@@ -92,7 +92,7 @@ class MidiPart:
             Checks for channel duplication, Sets default channel volume.
         """
         self.channel = int(c)
-        if self.mtrks.has_key(self.channel): # if another inst is using channel
+        if self.channel in self.mtrks: # if another inst is using channel
             # find that inst, set it to share, set this inst to share
             pass
         else: # create new instance for this channel
@@ -159,7 +159,7 @@ class MidiTrack:
             Events are stored in creation order.
         """
         if offset < 0: offset = 0
-        if self.miditrk.has_key(offset):
+        if offset in self.miditrk:
             self.miditrk[offset].append(event)
         else:
             self.miditrk[offset]=[event]
@@ -250,7 +250,7 @@ class MidiTrack:
         out.write( intToLong(0) )   # dummy, redo at end
         
         dataPt = out.tell()
-        trkKeys = self.miditrk.keys() # the keys are the midi timing offset
+        trkKeys = list(self.miditrk.keys()) # the keys are the midi timing offset
         trkKeys.sort()
 
         last = 0
@@ -295,7 +295,7 @@ class MidiScore:
         self.fileName = fileName
 
         self.tnames = {} 
-        chList = range(1, (self.maxCh + 1)) # 1-16
+        chList = list(range(1, (self.maxCh + 1))) # 1-16
         chList.remove(10) # 10 is reserved for drum kit on gm
         chIndex = 0 # position in list
         for name, pgm, ch, score in self.trackList: # passing a ref to dict
@@ -321,14 +321,14 @@ class MidiScore:
         instPerCh = {}
         for ch in range(1, (self.maxCh+1)): # dotn include 0 meta track
             count = 0
-            for name in self.tnames.keys():
+            for name in list(self.tnames.keys()):
                 if self.tnames[name].channel == ch:
                     count = count + 1
             instPerCh[ch] = count
 
         shiftPos = 0 # start at zero, mult offset base
         # used to randomly shift tracks latter if using the same channel
-        for name in self.tnames.keys():
+        for name in list(self.tnames.keys()):
             instSharingThisCh = instPerCh[self.tnames[name].channel]
             if instSharingThisCh > 1: # if more than 1 inst on this ch
                 self.tnames[name].chShare = 1 # need to share, to pgm changes
@@ -358,7 +358,7 @@ class MidiScore:
         # this may raise an exception, OSError or IOError
         f = open(filePath, 'wb') # get file obj named f
         # count tracks; needed for header       
-        mtrkKeys = self.mtrks.keys()
+        mtrkKeys = list(self.mtrks.keys())
         mtrkKeys.sort()
         trackCount = 1    # account for meta track
         for n in mtrkKeys[1:]:    # check all but 0 (meta)

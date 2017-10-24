@@ -95,7 +95,7 @@ def selectEventModeOrc(emName):
     'superColliderNative'
     """   
     emName = eventModeParser(emName)
-    if emName not in eventModeNames.values() or emName == None:
+    if emName not in list(eventModeNames.values()) or emName == None:
         raise Exception('bad event name obtained: %s' % emName)
 
     if emName == 'csoundNative':
@@ -124,7 +124,7 @@ def selectOutEngineOrc(emName, oeName):
     >>> selectOutEngineOrc('superColliderNative', 'EngineSuperColliderTask')
     'superColliderNative'
     """
-    if emName not in eventModeNames.values() or emName == None:
+    if emName not in list(eventModeNames.values()) or emName == None:
         raise Exception('bad emName: %s' % emName)
 
     if oeName not in outputEngineNames:
@@ -218,7 +218,7 @@ class EventSequence:
         
     def keys(self):
         # return event inex positions form 0
-        return range(0, len(self._eventList))
+        return list(range(0, len(self._eventList)))
 
     def __getitem__(self, key):
         """numbers are index keys, return event dict at this location"""
@@ -333,7 +333,7 @@ class EventSequence:
                 eventFrameIndex.append(i)
         
         if self.__len__() != len(eventFrameIndex):
-            raise ValueError, 'tFrameArray does not contain all events stored: %s, %s' % (self.__len__(), len(eventFrameIndex))
+            raise ValueError('tFrameArray does not contain all events stored: %s, %s' % (self.__len__(), len(eventFrameIndex)))
 
         # iterate over all indexes less 1, as two are done at a time
         for i in range(self.__len__()-1):
@@ -347,7 +347,7 @@ class EventSequence:
             # prepare list of parameters to clone in a dictionary
             # always include aux list, as some vals may not be numbers
             eventTemplate = {}
-            for key in eStart.keys():
+            for key in list(eStart.keys()):
                 if key not in active or key == 'aux':
                     eventTemplate[key] = copy.deepcopy(eStart[key])
                 
@@ -468,7 +468,7 @@ class EventSequence:
         src(t,d) 138 3   post(t,d) 138 1
         """
         # creat index arrays
-        iForward = range(self.__len__())
+        iForward = list(range(self.__len__()))
         iReverse = copy.deepcopy(iForward)
         iReverse.reverse()
 
@@ -595,7 +595,7 @@ class EventSequenceSplit:
             self.auxNo = self.srcObj.auxNo # must be clone or texture
             if self.srcFmt == 'c':
                 if len(self.srcObj.esObj) == 0:
-                    raise ValueError, 'clone with empty esObj cannot be graphed' 
+                    raise ValueError('clone with empty esObj cannot be graphed') 
 
         # need to reverse srcObj order 
         #if self.srcFmt in ['pf']:
@@ -650,7 +650,7 @@ class EventSequenceSplit:
         elif self.srcFmt in ['pr']: # parameter rhythm
             self.pmtrOrder = ['dur', 'sus', 'acc']
         else:
-            raise ValueError, 'bad src format'
+            raise ValueError('bad src format')
 
         #environment.printDebug(['EventSequenceSplit splitScore', splitScore, self.pmtrOrder])
 
@@ -670,7 +670,7 @@ class EventSequenceSplit:
         """
         delKey = []
         if self.srcFmt not in ['pg', 'pf', 'pr']: # parameter texture
-            for key in self.srcObj.pmtrObjDict.keys():
+            for key in list(self.srcObj.pmtrObjDict.keys()):
                 pObj = self.srcObj.pmtrObjDict[key]
                 if pObj.outputFmt == 'str' and self.strBypass:
                     delKey.append(key)
@@ -704,7 +704,7 @@ class EventSequenceSplit:
             # if this is a clone, scores needs data from texture
             ok = self.srcObj.score()
             if ok == -1 or self.srcObj.checkScore() == 0:
-                raise ValueError, 'bad score generation' # error        
+                raise ValueError('bad score generation') # error        
             esObj = self.srcObj.getScore()
         # uses esObj method with input obj of split score to update
         # split score may be empty here
@@ -714,7 +714,7 @@ class EventSequenceSplit:
         """suply a srcObj instance and load fresh parameter data
         may overwrite some data obtained w/ loadScoreList
         note: preScore cannot be calculated from a clone"""
-        for key in self.srcObj.pmtrObjDict.keys():
+        for key in list(self.srcObj.pmtrObjDict.keys()):
             if key not in self.pmtrOrder: # only parameters that are here
                 continue
             pObj = self.srcObj.pmtrObjDict[key]
@@ -741,8 +741,8 @@ class EventSequenceSplit:
             refDict['fpAudioDirs'] = self.aoInfo['fpAudioDirs']
         
         # these are the same; why have both?
-        self.splitScore['time'] = range(0, self.nEvent)
-        self.splitScore['event'] = range(0, self.nEvent)
+        self.splitScore['time'] = list(range(0, self.nEvent))
+        self.splitScore['event'] = list(range(0, self.nEvent))
 
         for label, lib, pObj in self.srcObj:
 
@@ -967,9 +967,9 @@ class Performer(object):
     def sort(self):
         """sort all event lists; only called by EventMode"""
         #print _MOD, 'Performer: sorting all EventSequences' 
-        for t in self.polySeq.keys(): # get texture names
+        for t in list(self.polySeq.keys()): # get texture names
             self.polySeq[t]['esObj'].sort()
-            for c in self.polySeq[t]['TC'].keys():
+            for c in list(self.polySeq[t]['TC'].keys()):
                 self.polySeq[t]['TC'][c]['esObj'].sort()
         
     def _packTexture(self, tName, t):
@@ -1012,7 +1012,7 @@ class Performer(object):
             if refresh:
                 ok = t.score() #returns -1 if score fails
                 if not ok or t.checkScore() == 0:
-                    print _MOD, 'texture failed to score', tName
+                    print(_MOD, 'texture failed to score', tName)
                     continue
             self._packTexture(tName, t)
 
@@ -1030,7 +1030,7 @@ class Performer(object):
         textureLib = ao.textureLib
         cloneLib = ao.cloneLib
         self.reset()
-        for tName in textureLib.keys():
+        for tName in list(textureLib.keys()):
             t = textureLib[tName]
             #inst = t.getInst()
             #if inst not in self.instList: self.instList.append(inst)
@@ -1038,7 +1038,7 @@ class Performer(object):
             if refresh:
                 ok = t.score() #returns -1 if score fails
                 if not ok or t.checkScore() == 0:
-                    print _MOD, 'texture failed to score', tName
+                    print(_MOD, 'texture failed to score', tName)
                     continue
             self._packTexture(tName, t)
             # get necessary inputs for clones
@@ -1051,7 +1051,7 @@ class Performer(object):
                 if refresh:
                     ok = c.score(esObjTexture, refDict)
                     if not ok:
-                        print _MOD, 'clone failed to score', tName, cName
+                        print(_MOD, 'clone failed to score', tName, cName)
                         continue
                 self._packClone(tName, cName, c)
 
@@ -1185,7 +1185,7 @@ class _OutputEngine:
         # only need polySequence here; no longer pass perfObj
         # polySeq = perfObj.polySeq
         
-        for t in polySeq.keys(): # get texture names
+        for t in list(polySeq.keys()): # get texture names
             tOrcObj = polySeq[t]['orcObj']
             inst = polySeq[t]['inst'] # inst number as integer
             if tOrcObj.name == self.orcObj.name: # assume match, full compat
@@ -1348,7 +1348,7 @@ class _OutputEngine:
             orderList.append('comment') # always last         
         label = []           
         for key in orderList:
-            if key in name.keys():
+            if key in list(name.keys()):
                 label.append(name[key])
             elif drawer.isInt(key):
                 iStr = str(key).rjust(2)
@@ -1686,7 +1686,7 @@ class EngineAudioFile(_OutputEngine):
             esObj = tDict['esObj']
             if not tDict['mute']: # pass object to mix data into
                 self.aObj = self._translateAudioFile(orcMapMode, esObj, self.aObj, self.unitSynthesizerMethod)
-            for cName in tDict['TC'].keys():
+            for cName in list(tDict['TC'].keys()):
                 if not tDict['TC'][cName]['mute']:
                     esObj = tDict['TC'][cName]['esObj'] 
                     self.aObj = self._translateAudioFile(orcMapMode, esObj,
@@ -1862,7 +1862,7 @@ class EngineCsoundNative(_OutputEngine):
         f.close()       
 
         if os.name == 'posix':        
-            os.chmod(self.fpRef['pathBat'], 0755) #makes executable (744=rwxr--r--) 
+            os.chmod(self.fpRef['pathBat'], 0o755) #makes executable (744=rwxr--r--) 
         else: # win or other
             pass
         self.outComplete.append('csoundBatch')
@@ -2015,7 +2015,7 @@ class EngineCsoundExternal(_OutputEngine):
                 data, label = self._translateCsoundExternalStr(orcMapMode, esObj)
                 msg.append(label)
                 msg.append(data)
-            for cName in tDict['TC'].keys():
+            for cName in list(tDict['TC'].keys()):
                 if not tDict['TC'][cName]['mute']:
                     msg.append(self._fmtHeadClone(className, tName, cName, ';'))
                     esObj = tDict['TC'][cName]['esObj'] 
@@ -2068,7 +2068,7 @@ class EngineCsoundSilence(_OutputEngine):
                 data, label = self._translateCsoundSilenceStr(orcMapMode, esObj)
                 msg.append(label)
                 msg.append(data)
-            for cName in tDict['TC'].keys():
+            for cName in list(tDict['TC'].keys()):
                 if not tDict['TC'][cName]['mute']:
                     msg.append(self._fmtHeadClone(className, tName, cName, ';'))
                     esObj = tDict['TC'][cName]['esObj'] 
@@ -2240,7 +2240,7 @@ class EnginePureDataArray(_OutputEngine):
                                 dataList, vShift))
                     vShift += 1
 
-            for cName in tDict['TC'].keys():
+            for cName in list(tDict['TC'].keys()):
                 if not tDict['TC'][cName]['mute']:
                     esObj = tDict['TC'][cName]['esObj']
                     for pmtrName in pmtrList:
@@ -2369,7 +2369,7 @@ class EngineMidiFile(_OutputEngine):
                 esObj = tDict['esObj']
                 midiSco = self._translateMidiList(orcMapMode, esObj)
                 trackList.append((tName, pgm, ch, midiSco))
-            for cName in tDict['TC'].keys():
+            for cName in list(tDict['TC'].keys()):
                 if not tDict['TC'][cName]['mute']:
                     esObj = tDict['TC'][cName]['esObj']
                     midiSco = self._translateMidiList(orcMapMode, esObj)
@@ -2469,7 +2469,7 @@ class EngineAcToolbox(_OutputEngine):
                 title = self._fmtTitleTexture(musicName, tName)
                 self.codeList.append(self._acSection(title, dataList, totalDur))
                 sectionList.append(title)
-            for cName in tDict['TC'].keys():
+            for cName in list(tDict['TC'].keys()):
                 if not tDict['TC'][cName]['mute']:
                     esObj = tDict['TC'][cName]['esObj']
                     totalDur = esObj.getTotalDuration()
@@ -2534,7 +2534,7 @@ class EngineText(_OutputEngine):
                                 esObj, delimit)
                 msg.append(label)
                 msg.append(data)
-            for cName in tDict['TC'].keys():
+            for cName in list(tDict['TC'].keys()):
                 if not tDict['TC'][cName]['mute']:
                     msg.append(self._fmtHeadClone(className, tName, cName,))
                     esObj = tDict['TC'][cName]['esObj']  
@@ -2594,7 +2594,7 @@ class EventMode(object):
     def __init__(self, ao, name):
         self.name = eventModeParser(name) # needed to get default orc update
         if self.name == None: 
-            raise ValueError, 'no such EventMode: %s' % name
+            raise ValueError('no such EventMode: %s' % name)
 
         self.ao = ao
         # not necessary to store perfObj, as created only w/ process method
@@ -2606,7 +2606,7 @@ class EventMode(object):
         
         #keep a local copy of all output format objects, keyed by format name
         self.outFormatObjects = {} # a dictionary of stringName/obj pairs
-        for key in outFormat.outputFormatNames.values():
+        for key in list(outFormat.outputFormatNames.values()):
             self.outFormatObjects[key] = outFormat.factory(key)
         
         # all fpRef keys used by engines to write files on process runs                            
@@ -2694,7 +2694,7 @@ class EventMode(object):
         self.fpRef['fpOutputAudio'] = self._buildPathPrime(self.fpRef['audioExt'])
 
         # this automatically loads all paths in output formats
-        for fmtObj in self.outFormatObjects.values():
+        for fmtObj in list(self.outFormatObjects.values()):
             self.fpRef[fmtObj.emKey] = self._buildPathPrime(fmtObj.ext)
 
         # assigned to after processing
@@ -2724,7 +2724,7 @@ class EventMode(object):
         """
         if drawer.isStr(outRequest):
             if outRequest == 'all':
-                outRequest = outFormat.outputFormatNames.values()
+                outRequest = list(outFormat.outputFormatNames.values())
         engineRequest = []
         # do exclusive groups first; cant be two kinds of csound
         # get engines for varuous EventMode Names         
@@ -2848,7 +2848,7 @@ class EventMode(object):
         self._initRefPaths()
         msg = []
         # get all write paths from all possible output formats
-        for fmtObj in self.outFormatObjects.values():
+        for fmtObj in list(self.outFormatObjects.values()):
             # emKey attribute is names used here
             msg.append(self.fpRef[fmtObj.emKey])
         return msg
@@ -2874,7 +2874,7 @@ class EventMode(object):
         else:
             headList.append('%s active OutputEngines:\n' % len(engineLib))
         entryLines = []
-        eNames = engineLib.keys()
+        eNames = list(engineLib.keys())
         eNames.sort()
         for engineName in eNames:
             engine = engineLib[engineName]
@@ -2888,7 +2888,7 @@ class EventMode(object):
         emOrcObj = orc.factory(selectEventModeOrc(self.name))
         engineLib = self._engineAllocate(usrOutRequest)
         msg = []
-        eNames = engineLib.keys()
+        eNames = list(engineLib.keys())
         eNames.sort()
         for engineName in eNames:
             engine = engineLib[engineName]
@@ -2948,13 +2948,13 @@ class EventMode(object):
         msg = []
         # when calling a engine, pass modeOrcObj, process in addition
         # to local texture based texture orcObj
-        for engineName in engineLib.keys():
+        for engineName in list(engineLib.keys()):
             try: # will write orchestra if necessary 
                 # only pass a fpRef to the polySeq to the engine
                 engineLib[engineName].write(perfObj.polySeq, outRequest) 
                 self.outComplete = (self.outComplete + 
                                    engineLib[engineName].outComplete)
-            except (IOError, OSError), e:
+            except (IOError, OSError) as e:
                 ok = 0
                 msg.append(e)
             # get fpRef data from engine

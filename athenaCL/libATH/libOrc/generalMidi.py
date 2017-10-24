@@ -69,7 +69,7 @@ def getPgmName(pgmNum):
     if pgmNum > 127:
         pgmName = 'unknown'
     else:
-        for name, num in gmProgramNames.items():
+        for name, num in list(gmProgramNames.items()):
             if num == pgmNum:
                 pgmName = name
                 break
@@ -86,12 +86,12 @@ def getPgmNumber(usrStr):
     # its a string
     usrStr = drawer.strScrub(usrStr, 'L')
     scoreDict = {}
-    for name in gmProgramNames.keys():
+    for name in list(gmProgramNames.keys()):
         nameTest = name.lower()
         scoreDict[name] = nameTest.count(usrStr) # counts instances
     best = ('', 0) # name, score
     # go basck over items; name does have case
-    for name, score in scoreDict.items():
+    for name, score in list(scoreDict.items()):
         if score > best[1]:
             best = (name, score)
     if best[0] == '': # nothing found
@@ -113,7 +113,7 @@ def getPercNameFromNoteName(usrStr):
     if midiInt < 35: midiInt = 35
     if midiInt > 81: midiInt = 81
     else:
-        for name, num in gmPercussionNames.items():
+        for name, num in list(gmPercussionNames.items()):
             if num == midiInt:
                 percName = name
                 break
@@ -123,18 +123,18 @@ def getNoteNameFromPercName(percStr):
     "for a given percussion name, find what note name is needed"
     foundName = None
     percStr = drawer.strScrub(percStr, 'L')
-    for name in gmPercussionNames.keys():
+    for name in list(gmPercussionNames.keys()):
         if percStr == name.lower():
             foundName = name
             break
     if foundName == None: # check again for partial matches
-        for name in gmPercussionNames.keys():
+        for name in list(gmPercussionNames.keys()):
             name = name.lower()
             if name.find(percStr) >= 0:
                 foundName = name
                 break
     if foundName == None:
-        print _MOD, 'cant find:', percStr
+        print(_MOD, 'cant find:', percStr)
     midiInt = gmPercussionNames[foundName]
     noteName = pitchTools.midiToNoteName(midiInt)
     return noteName # may be None on error
@@ -155,7 +155,7 @@ class GeneralMidi(baseOrc.Orchestra):
         baseOrc.Orchestra.__init__(self)
         self.name = 'generalMidi'
         self._dummyInst = InstrumentMidi()
-        self._instrNumbers = range(0, 128) # 127 program numbers
+        self._instrNumbers = list(range(0, 128)) # 127 program numbers
 
     def instNoValid(self, iNo):
         """test if an instrument number is valid"""
@@ -250,7 +250,7 @@ class GeneralMidiPercussion(GeneralMidi):
         self.name = 'generalMidiPercussion'
         self._dummyInst = InstrumentMidi()
         # instrument numbers are the pitch values
-        self._instrNumbers = range(35, 82) # 35-81 program numbers
+        self._instrNumbers = list(range(35, 82)) # 35-81 program numbers
 
     def getInstName(self, iNo):
         """over-ride from gm, as gotten from different dictionary"""

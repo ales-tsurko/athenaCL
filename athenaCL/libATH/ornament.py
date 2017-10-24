@@ -178,7 +178,7 @@ class Ornament:
         self.pmtrObjDict = pmtrObjDict # reference
         self.temperamentObj = temperamentObj # reference
         self._ornLibrary() # updates self.ornLib w/ new values
-        self.ornKeys = self.ornLib.keys()
+        self.ornKeys = list(self.ornLib.keys())
 
         # mu, sigma, min, max; want a range from -1 to 1
         self.gaussPmtrObj = parameter.factory(('randomGauss', .5, .1, -1, 1))
@@ -374,7 +374,7 @@ class Ornament:
         """
         # add additional parameters
         if name not in self.ornKeys:
-            raise AttributeError, 'no such ornament named %s' % name
+            raise AttributeError('no such ornament named %s' % name)
 
         ornDict = self.ornLib[name]
         ornDict['ornPos'] = ornPos
@@ -448,7 +448,7 @@ class Ornament:
 
                 psContourRef.append(psReal) # transpose by half steps
         else:
-            raise ValueError, 'no such pitchFormat'
+            raise ValueError('no such pitchFormat')
         # this now returns psReals, not pch values
         return psContourRef, refScales
 
@@ -488,7 +488,7 @@ class Ornament:
         if totOrnDur > rhythmBase:
             environment.printDebug(['ERROR: pos: %s, baseT: %s, ornT: %s' % (ornPos, rhythmBase, totOrnDur)])
             # ornament can never be longer than the rhythm base
-            raise ValueError, 'ornament time is longer than base note'
+            raise ValueError('ornament time is longer than base note')
 
         if tCurrent - totOrnDur < 0 and ornPos == 'anticipate':
             environment.printDebug(['anticipate ornament starts at negative time, mangling to attack'])
@@ -517,7 +517,7 @@ class Ornament:
         # short; need to check here for a short base note, if too 
         # short, raise an exception
         if durBase < .0001:
-            raise ValueError, 'ornament basDur is very very short'
+            raise ValueError('ornament basDur is very very short')
         return durBase, tBaseStart, tBaseEnd, tOrnStart, tOrnEnd
 
 
@@ -704,7 +704,7 @@ class Ornament:
             baseNoteEvent = self._makeEventDict(tBaseStart, durBase, amp, 
                                                             psBase, pan)
         else: # abort ornament, user tempered pitch
-            print lang.WARN, "ornamants aborted" 
+            print(lang.WARN, "ornamants aborted") 
             baseNoteEvent = self._makeEventDict(tCurrent, rhythmBase, amp, 
                                                             psBase, pan)
             eventList.append(baseNoteEvent)

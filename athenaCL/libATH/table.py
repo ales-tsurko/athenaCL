@@ -142,7 +142,7 @@ class Table:
         self.outFmt = ['table', 
             'flatRowPair','flatColumnPair',
             'flatRowReflectPair', 'flatColumnReflectPair', 
-                            ] + tableMonoFormatRef.keys()
+                            ] + list(tableMonoFormatRef.keys())
 
     def _rotate(self, data):
         """given data in a table, need to get

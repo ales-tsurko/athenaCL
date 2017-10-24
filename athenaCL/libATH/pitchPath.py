@@ -117,7 +117,7 @@ class PolyPath:
     def t(self, value, key=None):
         """if key == None, all sets are are transposed"""
         if key == None: # if none, do all
-            indexList = range(0,self.len())
+            indexList = list(range(0,self.len()))
         else:
             indexList = []
             indexList.append(key)
@@ -128,7 +128,7 @@ class PolyPath:
     def i(self, key=None):
         """if key == None, all sets are are inverted"""
         if key == None: # if none, do all
-            indexList = range(0,self.len())
+            indexList = list(range(0,self.len()))
         else:
             indexList = []
             indexList.append(key)
@@ -258,13 +258,13 @@ class PolyPath:
             field = copy.deepcopy(p['field'])
             # dur fractions added for 1.0.21 
             # if exists, replace: will be updated otherwise
-            if p.has_key('durFraction'): 
+            if 'durFraction' in p: 
                 durFraction = copy.deepcopy(p['durFraction'])
             i = 0
             for set in psPath:
                 setObj = multiset.Multiset(psPath[i], scPath[i])
                 setObj.setT(field[i])
-                if p.has_key('durFraction'): 
+                if 'durFraction' in p: 
                     setObj.setDur(durFraction[i])
                 self.multisetPath.append(setObj)
                 i = i + 1
@@ -345,7 +345,7 @@ class PolyPath:
         
     def get(self, name):
         if name not in self.forms:
-            raise ValueError, 'bad format name: %s' % name
+            raise ValueError('bad format name: %s' % name)
         return self._access(name)
 
     #-----------------------------------------------------------------------||--

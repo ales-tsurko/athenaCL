@@ -32,13 +32,13 @@ class LangObj:
 
         self.errorStr = 'missing string (%s)'
 
-        if self.language not in self.langDict.keys():
-            raise ValueError, 'no such language'
+        if self.language not in list(self.langDict.keys()):
+            raise ValueError('no such language')
 
     def __getattr__(self, name):
         # language can be dynamically changed.
-        if self.language not in self.langDict.keys():
-            raise ValueError, 'no such language'
+        if self.language not in list(self.langDict.keys()):
+            raise ValueError('no such language')
 
         if self.language == 'en': # en should have all strings
             try:
@@ -87,11 +87,11 @@ class LangEn:
     # name chars used for path/texture/clone names, as well as custom cursors
     # leave out # and %: python usesm leave out < > &, xml needs escaped
     # removed post 1.3.1: ^`~
-    NAMECHARS  = string.letters + string.digits + '_@$|*-=+(){}[].?!'
+    NAMECHARS  = string.ascii_letters + string.digits + '_@$|*-=+(){}[].?!'
     # chars allowed in a file name, no spaces allowed
-    FILECHARS  = string.letters + string.digits + '_-[].?!'
+    FILECHARS  = string.ascii_letters + string.digits + '_-[].?!'
     # all commands can only use these chars
-    IDENTCHARS = string.letters + string.digits + '_'
+    IDENTCHARS = string.ascii_letters + string.digits + '_'
     # define symbols and common words used
     DIVIDER = '.'
     ACTIVE  = '+'

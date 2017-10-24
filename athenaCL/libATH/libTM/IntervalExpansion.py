@@ -143,7 +143,7 @@ class IntervalExpansion(baseTexture.Texture):
                                 }
 
     def _ornGroupNames(self):
-        ornList = self.ornGroupLib.keys() 
+        ornList = list(self.ornGroupLib.keys()) 
         ornList.append('off') # add off option
         return ornList
 
