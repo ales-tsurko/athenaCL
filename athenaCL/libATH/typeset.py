@@ -626,7 +626,7 @@ def formatEqCol(header, entries, minColWidth, charWidth=70, outLine=False):
             # outline mode indents all entry after first entry of each group
             if outLine: # only if special mode is desired
                 if cmd != entries[0]: # if not the first
-                    whiteSpace = ' ' * minColWidth
+                    whiteSpace = ' ' * int(minColWidth)
                     msg.append(whiteSpace)
                     col = (col+1) % entryPerLine # shift col but dont skip cmd
         addedSpace = int(minColWidth - len(cmd))
