@@ -141,7 +141,7 @@ def writeUnixLauncher(pathLaunchScript, pathShellScript, optInstallTool=0,
         binPath = osTools.findBinPath()
         flagStr = '-p' # create intermediate dirs as required
         dstPath = os.path.join(binPath, name)
-        print _MOD, 'installing launcher script:\n%s' % dstPath
+        print(_MOD, 'installing launcher script:\n%s' % dstPath)
         if not os.path.exists(binPath): # create directory
             if optInstallTool == 1: # use sudo
                 osTools.mkdirSudo(binPath, sudoFound, flagStr)

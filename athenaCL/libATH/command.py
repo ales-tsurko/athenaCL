@@ -3046,7 +3046,7 @@ class TPmap(_CommandTP):
     def display(self): 
         # note: this is an unconventional use of aoInfo
         # in the future, ssdr and sadr should be moved into aoInfo anyways
-        aoInfo = self.ao.aoInfo['fpAudioDirs']
+        aoInfo = self.ao.aoInfo
         if self._textDisplay: # this may override user preference
             splitSco = eventList.EventSequenceSplit(self.objBundle, 
                     self.eventListSplitFmt, self.events, 0, aoInfo)
