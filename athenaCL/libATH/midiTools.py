@@ -15,10 +15,13 @@
 
 import copy
 import unittest, doctest
+import codecs
 
 _MOD = 'midiTools.py'
 
-
+# utility to convert str to bytes (conversion to python 3)
+def b(x):
+    return codecs.latin_1_encode(x)[0]
 #-----------------------------------------------------------------||||||||||||--
 # midi decimal conversion routines
 # used for acToolbox output format
@@ -47,7 +50,7 @@ def intToWord(x):
 
 def intToLong(x):
     """ Convert an int to a 4 byte MSB...LSB value. """
-    return intToWord(x>>16) + intToWord(x)
+    return intToWord(int(x)>>16) + intToWord(int(x))
 
 def intTo3Byte(x):
     """ Convert an int to a 3 byte MSB...LSB value.
@@ -245,9 +248,9 @@ class MidiTrack:
         # Create the track. We convert timing offsets to midi-deltas.
         # This is done in-memory so we can determine the size which
         # is put in before the data.
-        out.write("MTrk")
+        out.write(b("MTrk"))
         sizePt = out.tell()
-        out.write( intToLong(0) )   # dummy, redo at end
+        out.write(b(intToLong(0)))   # dummy, redo at end
         
         dataPt = out.tell()
         trkKeys = list(self.miditrk.keys()) # the keys are the midi timing offset
@@ -260,19 +263,19 @@ class MidiTrack:
                 delta = 0
             # get all event data from this point
             for eventData in self.miditrk[tOffset]:
-                out.write(intToVarNumber(delta) )
-                out.write(eventData)
+                out.write(b(intToVarNumber(delta)))
+                out.write(b(eventData))
                 delta = 0
             last = copy.copy(tOffset)
 
         # Add an EOF to the track
-        out.write(intToVarNumber(0))
-        out.write(chr(0xff) + chr(0x2f) + chr(0x00) )
+        out.write(b(intToVarNumber(0)))
+        out.write(b(chr(0xff) + chr(0x2f) + chr(0x00)))
         
         totsize = out.tell() - dataPt
         out.seek(sizePt)
 
-        out.write(intToLong(totsize))
+        out.write(b(intToLong(totsize)))
         out.seek(0, 2)      
 
 #-----------------------------------------------------------------||||||||||||--
@@ -365,8 +368,8 @@ class MidiScore:
             if len(self.mtrks[n].miditrk) > 1:
                 trackCount = trackCount + 1
         # Write Midi file header.
-        f.write("MThd" + intToLong(6) + intToWord(1) +
-                  intToWord(trackCount) + intToWord(self.tickPerBeat))
+        headerStr = "MThd" + intToLong(6) + intToWord(1) + intToWord(trackCount) + intToWord(self.tickPerBeat)
+        f.write(b(headerStr))
         # Write meta track
         self.mtrks[0].writeMidiTrack(f)
         # Write the remaining tracks

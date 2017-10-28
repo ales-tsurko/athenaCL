@@ -22,6 +22,7 @@ from athenaCL.libATH.libPmtr import rhythmSingle
 from athenaCL.libATH.libPmtr import textureStatic
 from athenaCL.libATH.libPmtr import cloneStatic
 from athenaCL.libATH.libPmtr import cloneFilter
+from importlib import reload
 
 # modules where parameters can be found
 pmtrModules = (valueSingle, valueSingleOmde, valueFile, 

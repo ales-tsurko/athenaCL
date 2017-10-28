@@ -27,6 +27,7 @@ from athenaCL.libATH.libTM import HarmonicShuffle
 from athenaCL.libATH.libTM import HarmonicAssembly
 from athenaCL.libATH.libTM import InterpolateLine
 from athenaCL.libATH.libTM import InterpolateFill
+from importlib import reload
 
 # modules where parameters can be found
 textureModules = (DroneArticulate, DroneSustain, 

@@ -11,6 +11,7 @@
 
 # this works but has the side effect that other imports, such as
 # from athenaCL import libATH
+# from importlib import reload
 # also start interactive sessions
 # thus, this is not used
 
