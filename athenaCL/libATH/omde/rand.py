@@ -146,7 +146,7 @@ class _GaussRNG:
           are two *independent* variables with normal distribution
           (mu = 0, sigma = 1).
           """
-          z = self.__next__
+          z = self.next
           self.next = None
           if z is None:
                      x2pi = random() * math.pi * 2

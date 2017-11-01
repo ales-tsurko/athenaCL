@@ -343,7 +343,7 @@ class Chromosome:
                 else:
                     ogDiv = ogDiv * 3
                     ogMult = ogMult * 3                      
-            self.bitVector[locus] = (ogDiv, ogMult, ogStat)               
+            self.bitVector[locus] = [ogDiv, ogMult, ogStat]               
             
         # this adds/subtracts from mutltiplier unit
         elif selectType == 'multiplierMutate':
@@ -354,7 +354,7 @@ class Chromosome:
                 if ogDiv == 1:
                     value = 1
                 else: # previously, add just one here
-                    value = random.choice(list(range(1,ogDiv)))
+                    value = random.choice(range(1,int(ogDiv)))
                 ogMult = ogMult + value  
             # current value greater than one, choose add or subrtact
             else:   
@@ -362,15 +362,15 @@ class Chromosome:
                     if ogDiv == 1: # error with random if this value is one
                         value = 1
                     else:# previously, to add just one here
-                        value = random.choice(list(range(1,ogDiv)))   
+                        value = random.choice(range(1,int(ogDiv)))   
                     ogMult = ogMult + value
                 else: # cannot subtract more than the mutliplier
                     if ogMult == 1:
                         value = 1
                     else: # previously, to add just one here
-                        value = random.choice(list(range(1,ogMult)))   
+                        value = random.choice(range(1,int(ogMult)))   
                     ogMult = ogMult - value  # max value is ogMult-1
-            self.bitVector[locus] = (ogDiv, ogMult, ogStat) 
+            self.bitVector[locus] = [ogDiv, ogMult, ogStat] 
             
         # this adds/subtracts a divisor unit
         elif selectType == 'divisorMutate':
@@ -383,7 +383,7 @@ class Chromosome:
                     ogDiv += 1
                 else:
                     ogDiv = ogDiv - 1
-            self.bitVector[locus] = (ogDiv, ogMult, ogStat) 
+            self.bitVector[locus] = [ogDiv, ogMult, ogStat] 
                             
         # flip status from rest to note
         elif selectType == 'flipNoteRest':
@@ -393,7 +393,7 @@ class Chromosome:
                 ogStat = 0
             else:
                 ogStat = 1
-            self.bitVector[locus] = (ogDiv, ogMult, ogStat) 
+            self.bitVector[locus] = [ogDiv, ogMult, ogStat] 
             
                                 
     def randomize(self):
@@ -831,6 +831,7 @@ class Genome:
                          self.ga.mutationRate, fitDur))
                     environment.printDebug([msg])
 
+        print(self.uniqueBestList)
         self.uniqueBestList.sort()
         if not silentDisplay:
             environment.printDebug(['unique BestFit BitVectors'])

@@ -165,7 +165,7 @@ class DirWalk:
 
     def walk(self):
         # the results of this are stored in self.curFiles, self.dirList
-        os.path.walk(self.searchDir, self.visitFunc, '')
+        os.walk(self.searchDir, self.visitFunc, '')
         self.fileFilter()
         self.dirFilter()
 
