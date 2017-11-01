@@ -1175,14 +1175,14 @@ def acronymLibToStr(refDict):
     ('list, open', 'ls, o')
     """
     short = []
-    long = []
+    vlong = []
     keys = list(refDict.keys())
     keys.sort()
     for key in keys:
         value = refDict[key]
         short.append(key)
-        int.append(value)
-    return ', '.join(int), ', '.join(short)
+        vlong.append(value)
+    return ', '.join(vlong), ', '.join(short)
         
         
 def acronymExtract(usrStr):

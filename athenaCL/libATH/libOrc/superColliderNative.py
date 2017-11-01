@@ -65,7 +65,7 @@ class SuperColliderNative(baseOrc.Orchestra):
         if iNo in list(self._instrObjDict.keys()): # already loaded
             return self._instrObjDict[iNo] # call attribute of module to get object
         else:
-            raise ValueError('bad insturment number given: %s' % iNo)
+            raise ValueError('bad instrument number given: %s' % iNo)
             
 
     def constructOrc(self, noChannels=2, instList=None):

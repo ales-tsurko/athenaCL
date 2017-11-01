@@ -831,7 +831,6 @@ class Genome:
                          self.ga.mutationRate, fitDur))
                     environment.printDebug([msg])
 
-        print(self.uniqueBestList)
         self.uniqueBestList.sort()
         if not silentDisplay:
             environment.printDebug(['unique BestFit BitVectors'])
