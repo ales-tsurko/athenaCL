@@ -85,7 +85,7 @@ class Transition:
         self.EXPRESS = self.EXPRESSALL, self.EXPRESSNOT, self.EXPRESSOR
         # define valid symbol (name) characters
         # symbols may not include spaces, nor case
-        self.SYM = string.lowercase + string.digits
+        self.SYM = string.ascii_lowercase + string.digits
 
     #-----------------------------------------------------------------------||--
     def _sortWeightKey(self, dict):
