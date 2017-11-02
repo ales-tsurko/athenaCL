@@ -513,7 +513,7 @@ def formatVariCol(headerKey, entryLines, minWidthList, bufList=[],
                     fitColWidths[colCount] >= minWidthList[colCount]): 
                     # add a bufer if found width is greater or equal to fit
                 finalW = minBufferW + finalW
-            finalColWidths.append(finalW)
+            finalColWidths.append(int(finalW))
 
             if justList[colCount].lower() == 'l':
                 lineStr.append(entry.ljust(finalColWidths[colCount]))
