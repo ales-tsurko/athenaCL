@@ -103,9 +103,6 @@ class ModuleGather(object):
 
 def main(testGroup=['test']):
     '''Run all tests. Group can be test and external
-
-    >>> print None
-    None
     '''    
 
     # in case there are any tests here, get a suite to load up later
