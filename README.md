@@ -2,7 +2,8 @@
 
 athenaCL is an algorithmic composition tool created by Christopher Ariza.
 
-Or, as described by the author on the [site](http://www.flexatone.org/article/athenaCLMain), it is a:
+Or, as described by the author on the [site](http://www.flexatone.org/article/athenaCLMain) more specifically, 
+it is:
 > modular poly-paradigm algorithmic music composition in a cross-platform interactive command-line environment.
 
 This repo is a fork. The last commit in the original repo was in 2011.
