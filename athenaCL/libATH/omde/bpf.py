@@ -57,12 +57,14 @@ class BPF(Function):
         self.xStart, junk = self.pairs[0] # x value of first
         self.xEnd, junk = self.pairs[-1] # x value of last
         self.period = self.xEnd - self.xStart 
+        self._is_periodic = periodic 
         
-        if periodic:
-            self.__call__ = self._evaluate_periodic
+    def __call__(self, t):
+        if self._is_periodic:
+            return self._evaluate_periodic(t)
         else:
-            self.__call__ = self._evaluate_aperiodic
-    
+            return self._evaluate_aperiodic(t)
+
     def _evaluate_aperiodic(self, t):
         """
         Aperiodic version of the __call__ operator.
@@ -84,7 +86,7 @@ class BPF(Function):
         # Evaluation past last point
         if index == len(self.pairs):
             return value0
-        
+
         return self.interpolate(t, time0, value0, time1, value1)
         
     def _evaluate_periodic(self, t):

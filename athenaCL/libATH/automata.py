@@ -685,7 +685,7 @@ class _AutomatonOneDimension(_Automaton):
             else: neg = 0
             i = abs(i) % stepLastLen
             if neg: i = -i
-            srcLast.append(stepLast[i])
+            srcLast.append(stepLast[int(i)])
         return srcLast # keep as list
 
     def _ruleMatch(self, srcRule, srcLast):
@@ -698,7 +698,8 @@ class _AutomatonOneDimension(_Automaton):
             with anything other-than the selected values
         """
         stepLast = self.stepHistory[-1] # get last
-        stepNext = self._getTemplate()
+        template = self._getTemplate()
+        stepNext = [float(item) for item in template]
         for pos in range(self.size): # scan each position
             srcLast = self._getSrcLast(pos, stepLast) # returns list
             for src, dst in ruleList: # iterate over each rule until found src
@@ -707,7 +708,7 @@ class _AutomatonOneDimension(_Automaton):
                     # if mutation is zero, never hapen
                     if random.random() < self.mutation: 
                         option = self.dstValues[:] # remove selected value
-                        option.pop(option.index(dst)) # and choose any other
+                        option.pop(option.index(int(dst))) # and choose any other
                         dst = random.choice(option)
                     stepNext[pos] = dst
                     break # only need to match one rule for each pos

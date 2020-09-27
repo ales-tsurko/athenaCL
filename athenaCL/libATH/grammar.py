@@ -94,7 +94,7 @@ class Grammar:
         self.EXPRESS = self.EXPRESSALL, self.EXPRESSOR # self.EXPRESSNOT, 
         # define valid symbol (name) characters
         # symbols may not include spaces, nor case
-        self.SYM = string.lowercase + string.digits
+        self.SYM = string.ascii_lowercase + string.digits
 
         
     def _sortSymbolLabel(self, pair):

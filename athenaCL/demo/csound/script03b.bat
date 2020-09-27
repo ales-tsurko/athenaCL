@@ -1,0 +1,2 @@
+#! /bin/sh 
+/usr/local/bin/csound -m2 -d -A -b1024 -B1024 "-o/home/alestsurko/Desktop/athenaCL/athenaCL/demo/csound/script03b.aif" "/home/alestsurko/Desktop/athenaCL/athenaCL/demo/csound/script03b.csd" 

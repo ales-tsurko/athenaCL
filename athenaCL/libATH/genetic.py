@@ -831,7 +831,7 @@ class Genome:
                          self.ga.mutationRate, fitDur))
                     environment.printDebug([msg])
 
-        self.uniqueBestList.sort()
+        self.uniqueBestList.sort(key = lambda x: x[0])
         if not silentDisplay:
             environment.printDebug(['unique BestFit BitVectors'])
             for entry in self.uniqueBestList:
@@ -859,7 +859,7 @@ class Genome:
             if uniqueScore == len(self.trueUniqueBestList): 
                 self.trueUniqueBestList.append((fitnessA, chromoA))  
  
-        self.trueUniqueBestList.sort()            
+        self.trueUniqueBestList.sort(key = lambda x: x[0])            
         if not silentDisplay:
             environment.printDebug(['true unique BestFit BitVectors'])
             for entry in self.trueUniqueBestList:

@@ -3127,7 +3127,7 @@ class Test(unittest.TestCase):
     def testBasic(self):
         for font in ['micro', 'macro', 'poster', 'capital']:
             obj = FontBitMap('testing ', font)
-            for char in string.letters + string.digits:
+            for char in string.ascii_letters + string.digits:
             #for char in string.punctuation + string.letters + string.digits:
                 char = obj.getChar(char)
                 char = obj._shaveChar(char)

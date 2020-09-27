@@ -1017,7 +1017,7 @@ def listSliceWrap(src, a, b, fmt='value'):
         min = b
         max = a
     post = []
-    for i in range(min, max):
+    for i in range(int(min), int(max)):
         q = i % len(src)
         if fmt == 'value': # this is default behavior
             post.append(src[q])

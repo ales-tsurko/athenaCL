@@ -910,7 +910,7 @@ class CloneManager:
 
     def current(self, tName):
         if self._tRefCurrent[tName] == '':
-            if self.number > 0: # select one
+            if self.number(tName) > 0: # select one
                 cName = random.choice(self.cNames(tName))
                 self._tRefCurrent[tName] = cName
                 return cName

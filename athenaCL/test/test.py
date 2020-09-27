@@ -41,7 +41,7 @@ class ModuleGather(object):
 
     def _walk(self):
         # the results of this are stored in self.curFiles, self.dirList
-        os.path.walk(self.dirParent, self._visitFunc, '')
+        os.walk(self.dirParent, self._visitFunc, '')
         self.modulePaths.sort()
         self.modulePaths.reverse()
 

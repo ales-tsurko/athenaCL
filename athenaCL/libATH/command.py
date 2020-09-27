@@ -6522,7 +6522,7 @@ class _CommandAO(Command):
     def _aoDetermineFileFormat(self, path):
         "check xml type of a file, or determine if it is an old pickled file"
         # added universal new line support; should provide cross-plat access
-        f = open(path, 'rU')
+        f = open(path, 'r')
         headerLine = f.readline()
         f.close()
         headerLine = headerLine.strip()
@@ -6530,7 +6530,7 @@ class _CommandAO(Command):
         if headerLine[:5] == '<?xml' or path[:-4] == '.xml':
             import xml.dom.minidom
             try: # this may be a w wase of time
-                f = open(path, 'rU') 
+                f = open(path, 'r') 
                 doc = xml.dom.minidom.parse(f)
             except IOError as errorMsg:
                 f.close()

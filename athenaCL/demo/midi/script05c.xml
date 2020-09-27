@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<athenaObject>
+	<athena>
+		<attr key="activeEventMode" value="midi"/>
+		<attr key="audioChannels" value="2"/>
+		<attr key="audioRate" value="44100"/>
+		<attr key="author" value="alestsurko"/>
+		<attr key="date" value="Mon Sep 28 00:59:58 2020"/>
+		<attr key="tniMode" value="0"/>
+		<attr key="version" value="2.0.0-a15"/>
+	</athena>
+	<paths>
+		<attr key="activePath" value="auto"/>
+		<pathLib>
+			<pi name="auto">
+				<attr key="ambitus" value="0"/>
+				<attr key="durFraction" value="[1]"/>
+				<attr key="field" value="[0]"/>
+				<attr key="pcsPath" value="[(0,)]"/>
+				<attr key="psPath" value="[(0,)]"/>
+				<attr key="scPath" value="[(1, 1, 0)]"/>
+			</pi>
+		</pathLib>
+	</paths>
+	<textures>
+		<attr key="activeTexture" value="a"/>
+		<attr key="activeTextureModule" value="LineGroove"/>
+		<cloneLib>
+		</cloneLib>
+		<attr key="midiTempo" value="120"/>
+		<textureLib>
+			<ti name="a">
+				<attr key="auxNo" value="0"/>
+				<attr key="midiCh" value="None"/>
+				<attr key="midiPgm" value="26"/>
+				<attr key="mute" value="0"/>
+				<attr key="orcMapMode" value="1"/>
+				<attr key="pathName" value="auto"/>
+				<attr key="pitchMode" value="ps"/>
+				<pmtrQDict>
+					<attr key="ampQ" value="('om', ['mv', 'a{.4}b{.6}c{.8}d{1}:{a=6|b=4|c=3|d=1}'], ['whpp', 'e', ['bg', 'rp', [5, 15, 10]]])"/>
+					<attr key="beatT" value="('c', 120)"/>
+					<attr key="fieldQ" value="('mv', 'a{2}b{4}c{7}d{9}e{11}:{a=1|b=3|c=1|d=3|e=1}a:{a=9|e=1}b:{a=3|c=1}c:{b=3|d=1}d:{c=3|e=1}e:{d=1}', ['wp', 'e', 100, 0, 1, 0])"/>
+					<attr key="inst" value="('staticInst', 26, 'generalMidi')"/>
+					<attr key="octQ" value="('mv', 'a{0}b{-1}c{-2}d{-3}a:{a=9|d=1}b:{a=3|b=1}c:{b=3|c=1}d:{c=1}', ['c', 1])"/>
+					<attr key="panQ" value="('constant', 0.5)"/>
+					<attr key="rhythmQ" value="('cs', ['whps', 'e', ['bg', 'rp', [5, 10, 15, 20]], 0, 0.2, 0.05])"/>
+					<attr key="tRange" value="('staticRange', (0, 60))"/>
+					<attr key="textQ0" value="('parallelMotionList', [], 0.0)"/>
+					<attr key="textQ1" value="('pitchSelectorControl', 'randomPermutate')"/>
+					<attr key="textQ2" value="('levelFieldMonophonic', 'event')"/>
+					<attr key="textQ3" value="('levelOctaveMonophonic', 'event')"/>
+				</pmtrQDict>
+				<attr key="silenceMode" value="0"/>
+				<attr key="temperamentName" value="TwelveEqual"/>
+				<attr key="tmName" value="LineGroove"/>
+			</ti>
+		</textureLib>
+	</textures>
+</athenaObject>

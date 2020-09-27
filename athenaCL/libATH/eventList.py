@@ -413,6 +413,8 @@ class EventSequence:
                 tFrameDur = tFrameArray[frameIndex][1]
                 for pmtr in active:
                     if pmtr == 'aux': continue
+                    #  print(bpArray[pmtr])
+                    #  print(bpArray[pmtr](tFrameStart))
                     eventDict[pmtr] = bpArray[pmtr](tFrameStart)
                 if 'aux' in active:
                     pmtr = 'aux'    

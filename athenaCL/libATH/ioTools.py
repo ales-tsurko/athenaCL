@@ -37,7 +37,7 @@ def extractXML(path):
     missing attributes are not added (backwards compat done in athenaObj
     """
     # added universal new line support; should provide cross-plat access
-    f = open(path, 'rU') 
+    f = open(path, 'r') 
     doc = xml.dom.minidom.parse(f)
     f.close()
     procData = xmlTools.xmlToPy(doc)

@@ -488,6 +488,20 @@ class Residual:
             return 1
         else: return 0
 
+    def __lt__(self, other):
+        return self.__cmp__(other)
+
+    def __gt__(self, other):
+        return self.__cmp__(other)
+
+    def __le__(self, other):
+        return self.__cmp__(other)
+
+    def __ge__(self, other):
+        return self.__cmp__(other)
+
+    # deprecated in python 2, but we use it for the updated "rich comparisons" 
+    # in python 3
     def __cmp__(self, other):
         """allow comparison based on m and shift; if all equal look at neg"""
         #return neg if self < other, zero if self == other, 
