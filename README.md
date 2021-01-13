@@ -28,9 +28,10 @@ works in the terminal.
 But test coverage is far from 100% and many bugs introduced by the conversion may still exist.
 
 For now, I don't have any plans to introduce new features, but if you'll find any bugs,
-I'm ready to try to fix it when I have time, so fill free to open issues. Also, feel free to open PR's.
+I'm ready to try to fix them when I have time. So fill free to open issues. Also, feel free to open 
+PR's.
 
-When I finish with the manual and fixing bugs I'd find in the examples of tutorials,
+When I finish with the manual and fixing bugs I'll find in the examples of tutorials,
 I'm going to keep it on "life support" - just fixing bugs, when I find some while using
 the application as a normal user (i.e. not a tester).
 
