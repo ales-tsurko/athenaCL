@@ -1,2 +1,3 @@
-__pycache__/
 *.mid
+__pycache__/
+build

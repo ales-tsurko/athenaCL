@@ -219,7 +219,6 @@ def _getPackagesList():
              'athenaCL.demo.csound', 
              'athenaCL.demo.midi', 
              'athenaCL.demo.legacy', 
-             'athenaCL.demo.manual', 
 
              'athenaCL.test', 
              'athenaCL.libATH', 
@@ -295,10 +294,6 @@ def runDisutils(bdistType):
                                       'demo/legacy/*.xml',
                                       'demo/legacy/*.txt',
                                       'demo/legacy/*.py',
-
-                                      'demo/manual/*.xml',
-                                      'demo/manual/*.txt',
-                                      'demo/manual/*.py',
 
                                       'demo/midi/*.xml',
                                       'demo/midi/*.txt',
