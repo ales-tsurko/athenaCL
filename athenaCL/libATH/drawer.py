@@ -439,7 +439,7 @@ def imageFormats():
     """
     available = ['text', 'eps'] # always available
     try:
-        import Image, ImageDraw, ImageFont #ImageFilter, ImageTk
+        from PIL import Image, ImageDraw, ImageFont
         PIL = 1
     except ImportError:
         PIL = 0
