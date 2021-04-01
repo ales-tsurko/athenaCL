@@ -187,7 +187,8 @@ class UniformRandom(Generator):
      def __init__(self):
           Generator.__init__(self)
           self.rng = UniformRNG()
-
+          self.rng.seed(1)
+# just an example but seed works
      def __call__(self):
           return self.rng.random()
 
