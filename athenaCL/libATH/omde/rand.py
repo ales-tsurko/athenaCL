@@ -36,15 +36,15 @@ BetaRandom
 WeibullRandom
 
 The random number generator exported by this module
-are not designed to be correct from a statistic point
+are not designed to be correct from a statistical point
 of view but useful from a musical point of view.
 
 In particular some of these generators have been
 modified to return values in the [0, 1] range
 even if they have a tail outside this interval.
 
-Other have been modified to be consistent with
-the Cmask original RNGs.
+Others have been modified to be consistent with
+the original CMask RNGs.
 '''
 
 import time, math
@@ -172,11 +172,6 @@ class _WeibullvariateRNG:
      def random(self, alpha, beta):
           u = self.uniformRNG.random()
           return alpha * pow(-math.log(u), 1.0/beta)
-
-
-
-
-
 
 # Public classes
 

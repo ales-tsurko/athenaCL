@@ -8028,13 +8028,19 @@ class AUca(Command):
 
 
 class AUbug(Command):
-    "utility testiing"
+    "utility testing"
     def __init__(self, ao, args='', **keywords):
         Command.__init__(self, ao, args, **keywords)
         self.processSwitch = 0 # display only
         self.gatherSwitch = 0 # display only
         self.cmdStr = 'AUpc'
         a = 4/0 # raise an error
+        
+class APsd(Command):
+    "Global random seed."
+    def __init__(self, ao, args='', **keywords):
+        Command.__init__(self, ao, args, **keywords)
+        self.cmdStr = 'APsd'
 
 #-----------------------------------------------------------------||||||||||||--
 # command direcotory commands
