@@ -170,8 +170,6 @@ class Selector(object):
             
     def _randomChoice(self):
         "randomly select an item"
-        random.seed(11)
-        # just an example of seed but it works
         return random.choice(self.ref)
 
     def _randomWalk(self):

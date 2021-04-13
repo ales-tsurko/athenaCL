@@ -7026,9 +7026,6 @@ class APr(Command):
         curVal = typeset.convertBool(self.ao.aoInfo['refreshMode'])
         return lang.msgAPrefreshMode % typeset.boolAsStr(curVal)
 
-
-
-
 class APwid(Command):
     """manually sets screen width"""
     def __init__(self, ao, args='', **keywords):
@@ -7073,9 +7070,6 @@ class APwid(Command):
 
     def display(self): 
         return 'screen width set to %s.\n' % self.width
-
-
-
 
 class APdir(Command):
 
@@ -7275,8 +7269,6 @@ class APea(Command):
             msg = 'no changes made to application file path.\n'
         return msg
 
-
-
 class APa(Command):
     """set the value of the number of channels
 
@@ -7453,9 +7445,6 @@ class APa(Command):
 # 
 # 
 
-
-
-
 #-----------------------------------------------------------------||||||||||||--
 # athena history commands
 class AHls(Command):
@@ -7567,12 +7556,8 @@ class AHexe(Command):
         if self.gatherStatus and self.processStatus: # if complete
             return '%s %s' % (self.cmdStr, drawer.listScrub(
                                     self._setReturnError(self.cmdRange))) 
-
     def result(self):
         return {'cmdList':self.cmdList}
-
-
-
 
 #-----------------------------------------------------------------||||||||||||--
 # athena utility commands
@@ -7780,7 +7765,6 @@ class AUbeat(Command):
             return lang.msgReturnCancel
         else:
             return 'average tempo found: %f\n' % self.avgTempo #return as string
-
 
 class AUpc(Command):
     "utility for pitch conversion"
@@ -8025,8 +8009,6 @@ class AUca(Command):
         # second arg sets openMedia to false
         obj.write(fp, 0)
 
-
-
 class AUbug(Command):
     "utility testing"
     def __init__(self, ao, args='', **keywords):
@@ -8036,14 +8018,33 @@ class AUbug(Command):
         self.cmdStr = 'AUpc'
         a = 4/0 # raise an error
         
-class APsd(Command):
-    "Global random seed."
+class TMsd(Command):
+    "Sets the random seed for Texture Modules (only)."
     def __init__(self, ao, args='', **keywords):
         Command.__init__(self, ao, args, **keywords)
+        self.processSwitch = 0 # display only
+        self.gatherSwitch = 0 # display only
+        self.cmdStr = 'TMsd'
+    
+class POsd(Command):
+    "Sets the random seed for Parameter Objects (only)."
+    def __init__(self, ao, args='', **keywords):
+        Command.__init__(self, ao, args, **keywords)
+        self.processSwitch = 0 # display only
+        self.gatherSwitch = 0 # display only
+        self.cmdStr = 'POsd'
+        
+class APsd(Command):
+    "Global random seed, overrides TMsd and POsd."
+    def __init__(self, ao, args='', **keywords):
+        Command.__init__(self, ao, args, **keywords)
+        self.processSwitch = 0 # display only
+        self.gatherSwitch = 0 # display only
         self.cmdStr = 'APsd'
+        
 
 #-----------------------------------------------------------------||||||||||||--
-# command direcotory commands
+# command directory. commands
 
 class _Menu(Command):
     """base class for menu commands
@@ -8095,9 +8096,6 @@ class _Menu(Command):
 
     def result(self):
         return {'command':self.usrCmd} # dict required return
-
-
-
 
 class PI_(_Menu):
     """menu command"""
@@ -8182,12 +8180,6 @@ class AU_(_Menu):
     def __init__(self, ao, args='', **keywords):
         _Menu.__init__(self, ao, args, **keywords)
         self.prefix = 'AU'
-
-
-
-
-
-
 
 #-----------------------------------------------------------------||||||||||||--
 class Test(unittest.TestCase):

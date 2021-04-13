@@ -56,8 +56,8 @@ import random as randomBuiltin
 try:
     _the_same = randomBuiltin.Random() # 2.3 and greater
 except (AttributeError, ImportError):
-    import whrandom
-    _the_same = whrandom.whrandom() # 2.3 and greater
+     import whrandom
+     the_same = whrandom.whrandom() # 2.3 and greater
         
 
 def _AlwaysTheSame():
@@ -110,7 +110,6 @@ class _LehmerRNG:
           while self._seed == 0 or self._seed == self._mod:
                 time.sleep(.01)
                 self._seed = int((time.time() % 1) * self._mod)
-
 
 
 #UniformRNG = LehmerRNG
@@ -182,8 +181,6 @@ class UniformRandom(Generator):
      def __init__(self):
           Generator.__init__(self)
           self.rng = UniformRNG()
-          self.rng.seed(1)
-# just an example but seed works
      def __call__(self):
           return self.rng.random()
 
