@@ -1517,7 +1517,7 @@ class quit(Command):
             self.confirm = 'confirm'
 
             # only do this if user has interactively confirmed quit
-            if self.ao.external.logCheck() == 1: # log exists, submit
+            if self.ao.external.logCheck() == 0: # log exists, submit DISABLED SENDING BUG REPORTS
                 ckUser=dialog.askYesNo(lang.msgSubmitLog, 0, self.termObj)
                 if ckUser == 1:
                     result = self.ao.external.logSend()
