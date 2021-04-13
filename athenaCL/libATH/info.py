@@ -145,7 +145,7 @@ http://www.flexatone.net/athenaCL/athenaCL.exe
         msgSoftDepend = """\
 II. SOFTWARE DEPENDENCIES:
 
-athenaCL requires Python 2.5 to 2.6. Python 3.0 and better is not yet supported. There is no athenaCL binary: athenaCL interactive sessions run inside a Python interpreter. Python is free and runs on every platform. No additional software is required for basic athenaCL operation. Download Python here:
+athenaCL requires Python 3.0 and better. There is no athenaCL binary: athenaCL interactive sessions run inside a Python interpreter. Python is free and runs on every platform. No additional software is required for basic athenaCL operation. Download Python here:
 http://www.python.org/download
 
 athenaCL produces both Csound and MIDI scores. Csound 5 is recommended; Csound 4.16 or better is required to render Csound scores. Csound is free and runs on every platform. Download Csound here:
@@ -160,7 +160,7 @@ http://www.pythonware.com/products/pil/
 IIIa. QUICK-START DISTRIBUTIONS:
 
 All Platforms
-    1. install Python 2.6
+    1. install Python 3
     2. decompress athenaCL distribution and place wherever desired
 
 UNIX, Command Line Environments, Macintosh MacOS X:
