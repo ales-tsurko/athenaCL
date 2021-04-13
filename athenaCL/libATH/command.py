@@ -10,7 +10,7 @@
 #-----------------------------------------------------------------||||||||||||--
 
 import sys, os, time, random, copy
-import unittest, doctest
+import unittest, doctest, traceback
 
 from athenaCL.libATH import argTools
 from athenaCL.libATH import audioTools
@@ -37,6 +37,7 @@ from athenaCL.libATH.libPmtr import parameter
 from athenaCL.libATH.libPmtr import basePmtr
 from athenaCL.libATH.libTM import texture
 from athenaCL.libATH.libOrc import generalMidi
+from athenaCL.libATH.omde import rand
 # conditional imports that may fail but are not necessary
 try:
     from athenaCL.libATH.libGfx import graphPmtr
@@ -48,8 +49,6 @@ except ImportError: # pil or tk may not be installed
 _MOD = 'command.py'
 from athenaCL.libATH import prefTools
 environment = prefTools.Environment(_MOD)
-
-
 
 #-----------------------------------------------------------------||||||||||||--
 class Command(object):
@@ -96,7 +95,6 @@ class Command(object):
 
         self.subCmd = 0 # subcommands are executed from method in interpreter
 
-
     def gather(self):
         """get args from user. should return None, unless error cancel
         return a string to display or cancel"""
@@ -142,7 +140,7 @@ class Command(object):
         # (1) get args
         if self.gatherSwitch:
             post = self.gather()
-            if post != None: # an error occured in the ather stage
+            if post != None: # an error occured in the gather stage
                 ok = 0 
                 return ok, post 
         self.gatherStatus = 1 # gather complete complete
@@ -7979,7 +7977,6 @@ class AUca(Command):
         for i in range(1, self.ca.spec.get('yTotal')): # already got zero
             self.ca.gen(1, self.rule(i, refDict), self.mutation(i, refDict))
 
-
     def log(self):
         if self.gatherStatus and self.processStatus: # if complete
             caStr = self.specStr # has been checked
@@ -8022,29 +8019,62 @@ class TMsd(Command):
     "Sets the random seed for Texture Modules (only)."
     def __init__(self, ao, args='', **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 0 # display only
-        self.gatherSwitch = 0 # display only
+        self.processSwitch = 1 # display only
+        self.gatherSwitch = 1 # display only
         self.cmdStr = 'TMsd'
-    
-class POsd(Command):
-    "Sets the random seed for Parameter Objects (only)."
+        self.seed = None
+        self.rng = None
+    def gather(self):
+        print("TMsd gather", self.args)
+        args = argTools.ArgOps(self.args) # no strip
+        self.seed = args.get(0, evaluate=True)
+        print("TMsd seed", self.seed)
+    def process(self):
+        print("TMsd process")
+        self.rng = rand.UniformRNG()
+        print("rng", self.rng)
+        self.rng.seed(self.seed)
+        self.log()
+        self.display()
+    def log(self): # return an executable command str, subclass
+        if self.gatherStatus and self.processStatus:
+            return '%s' % (self.cmdStr)
+    def display(self):
+        if self.seed == None: # error or cancel
+            return lang.msgReturnCancel
+        else:
+            return 'rng seed: %s' % (self.seed)
+     
+class TPsd(Command):
+    "Sets the random seed for Parameter Objects and all other RNGs (except Texture Modules)."
     def __init__(self, ao, args='', **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 0 # display only
-        self.gatherSwitch = 0 # display only
-        self.cmdStr = 'POsd'
+        self.processSwitch = 1 # display only
+        self.gatherSwitch = 1 # display only
+        self.cmdStr = 'TPsd'
+        self.new_seed = None
+        self.rng = None
+    def gather(self):
+        print("TPsd gather", self.args)
+        args = argTools.ArgOps(self.args) # no strip
+        self.seed = args.get(0, evaluate=True)
+        print("TPsd seed", self.seed)
+    def process(self):
+        print("TPsd process")
+        self.rng = random
+        print("rng", self.rng)
+        self.rng.seed(self.seed)
+    def log(self): # return an executable command str, subclass
+        if self.gatherStatus and self.processStatus:
+            return '%s' % (self.cmdStr)
+    def display(self):
+        if self.seed == None: # error or cancel
+            return lang.msgReturnCancel
+        else:
+            return 'rng seed: %s' % (self.seed)
         
-class APsd(Command):
-    "Global random seed, overrides TMsd and POsd."
-    def __init__(self, ao, args='', **keywords):
-        Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 0 # display only
-        self.gatherSwitch = 0 # display only
-        self.cmdStr = 'APsd'
-        
-
 #-----------------------------------------------------------------||||||||||||--
-# command directory. commands
+# command directory commands
 
 class _Menu(Command):
     """base class for menu commands

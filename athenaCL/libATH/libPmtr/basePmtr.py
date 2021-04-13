@@ -175,8 +175,6 @@ class Selector(object):
     def _randomWalk(self):
         "one-dimension random walk, with wrapping"
         if len(self.ref) == 1: return self.ref[0]
-        random.seed(11)
-        # just an example of seed but it works
         if random.choice([0,1]):
             self._i = self._i + 1
         else:
@@ -187,8 +185,6 @@ class Selector(object):
     def _randomPermutate(self):
         """non redundant selection at random; refils when empty"""
         if len(self.ref) == 1:  return self.ref[0]
-        random.seed(11)
-        # just an example of seed but it works
         if len(self.scratch) == 0:
             self._setListScratch()
         select = random.choice(self.scratch)

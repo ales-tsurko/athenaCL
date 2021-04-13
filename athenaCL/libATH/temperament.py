@@ -207,8 +207,6 @@ class NoiseLight(Temperament):
         Temperament.__init__(self)
         self.name = 'NoiseLight'
         self.doc = 'Provide uniform random +/- 5 cent noise on each pitch'
-        random.seed(100)
-        # example of seed    
     maxNoise = .05
     def _translatePitch(self):
         shift = (random.random() * (self.maxNoise * 2)) - self.maxNoise
@@ -222,8 +220,6 @@ class NoiseMedium(Temperament):
         Temperament.__init__(self)
         self.name = 'NoiseMedium'
         self.doc = 'Provide uniform random +/- 10 cent noise on each pitch'
-        random.seed(100)
-        # example of seed   
     maxNoise = .10
     def _translatePitch(self):
         shift = (random.random() * (self.maxNoise * 2)) - self.maxNoise
@@ -237,8 +233,6 @@ class NoiseHeavy(Temperament):
         Temperament.__init__(self)
         self.name = 'NoiseHeavy'
         self.doc = 'Provide uniform random +/- 15 cent noise on each pitch'
-        random.seed(100)
-        # example of seed    
     maxNoise = .15
     def _translatePitch(self):
         shift = (random.random() * (self.maxNoise * 2)) - self.maxNoise
@@ -250,8 +244,6 @@ class NoiseUser(Temperament):
         Temperament.__init__(self)
         self.name = 'NoiseUser'
         self.doc = 'Provide uniform random +/- 50 cent noise on each pitch'
-        random.seed(100)
-        # example of seed
     maxNoise = 10
     def _translatePitch(self):
         shift = (random.random() * (self.maxNoise * 2)) - self.maxNoise

@@ -1210,7 +1210,7 @@ class Interpreter(object):
         # this treates the first arg as a string and provides necssary
         # corrections for creating a command class
         cmdClassName = self._getCmdClass(self.ao.cmdCorrect(cmd))
-
+ 
         if errorMode == 'exception':
             if cmdClassName == None:
                 raise Exception("no command given")
