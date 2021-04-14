@@ -36,15 +36,15 @@ BetaRandom
 WeibullRandom
 
 The random number generator exported by this module
-are not designed to be correct from a statistic point
+are not designed to be correct from a statistical point
 of view but useful from a musical point of view.
 
 In particular some of these generators have been
 modified to return values in the [0, 1] range
 even if they have a tail outside this interval.
 
-Other have been modified to be consistent with
-the Cmask original RNGs.
+Others have been modified to be consistent with
+the original CMask RNGs.
 '''
 
 import time, math
@@ -56,8 +56,8 @@ import random as randomBuiltin
 try:
     _the_same = randomBuiltin.Random() # 2.3 and greater
 except (AttributeError, ImportError):
-    import whrandom
-    _the_same = whrandom.whrandom() # 2.3 and greater
+     import whrandom
+     the_same = whrandom.whrandom() # 2.3 and greater
         
 
 def _AlwaysTheSame():
@@ -110,7 +110,6 @@ class _LehmerRNG:
           while self._seed == 0 or self._seed == self._mod:
                 time.sleep(.01)
                 self._seed = int((time.time() % 1) * self._mod)
-
 
 
 #UniformRNG = LehmerRNG
@@ -173,11 +172,6 @@ class _WeibullvariateRNG:
           u = self.uniformRNG.random()
           return alpha * pow(-math.log(u), 1.0/beta)
 
-
-
-
-
-
 # Public classes
 
 class UniformRandom(Generator):
@@ -187,8 +181,6 @@ class UniformRandom(Generator):
      def __init__(self):
           Generator.__init__(self)
           self.rng = UniformRNG()
-          self.rng.seed(1)
-# just an example but seed works
      def __call__(self):
           return self.rng.random()
 

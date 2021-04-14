@@ -243,7 +243,7 @@ class NoiseUser(Temperament):
 
         Temperament.__init__(self)
         self.name = 'NoiseUser'
-        self.doc = 'Provide uniform random +/- 50 cNoiseHeavyent noise on each pitch'
+        self.doc = 'Provide uniform random +/- 50 cent noise on each pitch'
     maxNoise = 10
     def _translatePitch(self):
         shift = (random.random() * (self.maxNoise * 2)) - self.maxNoise
