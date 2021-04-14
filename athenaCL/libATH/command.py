@@ -1515,7 +1515,7 @@ class quit(Command):
             self.confirm = 'confirm'
 
             # only do this if user has interactively confirmed quit
-            if self.ao.external.logCheck() == 1: # log exists, submit
+            if self.ao.external.logCheck() == 0: # log exists, submit
                 ckUser=dialog.askYesNo(lang.msgSubmitLog, 0, self.termObj)
                 if ckUser == 1:
                     result = self.ao.external.logSend()
@@ -8025,14 +8025,14 @@ class TMsd(Command):
         self.seed = None
         self.rng = None
     def gather(self):
-        print("TMsd gather", self.args)
+#        print("TMsd gather", self.args)
         args = argTools.ArgOps(self.args) # no strip
         self.seed = args.get(0, evaluate=True)
-        print("TMsd seed", self.seed)
+#        print("TMsd seed", self.seed)
     def process(self):
-        print("TMsd process")
+#        print("TMsd process")
         self.rng = rand.UniformRNG()
-        print("rng", self.rng)
+#        print("rng", self.rng)
         self.rng.seed(self.seed)
         self.log()
         self.display()
@@ -8043,7 +8043,7 @@ class TMsd(Command):
         if self.seed == None: # error or cancel
             return lang.msgReturnCancel
         else:
-            return 'rng seed: %s' % (self.seed)
+            return 'rng seed: %s\n' % (self.seed)
      
 class TPsd(Command):
     "Sets the random seed for Parameter Objects and all other RNGs (except Texture Modules)."
@@ -8055,14 +8055,14 @@ class TPsd(Command):
         self.new_seed = None
         self.rng = None
     def gather(self):
-        print("TPsd gather", self.args)
+#        print("TPsd gather", self.args)
         args = argTools.ArgOps(self.args) # no strip
         self.seed = args.get(0, evaluate=True)
-        print("TPsd seed", self.seed)
+#        print("TPsd seed", self.seed)
     def process(self):
-        print("TPsd process")
+#        print("TPsd process")
         self.rng = random
-        print("rng", self.rng)
+#        print("rng", self.rng)
         self.rng.seed(self.seed)
     def log(self): # return an executable command str, subclass
         if self.gatherStatus and self.processStatus:
@@ -8071,7 +8071,7 @@ class TPsd(Command):
         if self.seed == None: # error or cancel
             return lang.msgReturnCancel
         else:
-            return 'rng seed: %s' % (self.seed)
+            return 'rng seed: %s\n' % (self.seed)
         
 #-----------------------------------------------------------------||||||||||||--
 # command directory commands

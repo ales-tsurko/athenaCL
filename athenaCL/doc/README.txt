@@ -4,8 +4,8 @@ athenaCL is free software, distributed under the GNU General Public License.
 www.athenacl.org
 
 ====================================================================
-athenaCL 2.0.0a15
-7 July 2010
+athenaCL 2.1
+May 2021
 This document contains the following information:
 
 I. Platform Dependencies
@@ -40,11 +40,11 @@ http://www.flexatone.net/athenaCL/athenaCL.exe
 ====================================================================
 II. SOFTWARE DEPENDENCIES:
 
-athenaCL requires Python 2.5 to 2.6. Python 3.0 and better is not yet supported. There is no athenaCL binary: athenaCL interactive sessions run inside a Python interpreter. Python is free and runs on every platform. No additional software is required for basic athenaCL operation. Download Python here:
+athenaCL requires Python 3.0 and better. There is no athenaCL binary: athenaCL interactive sessions run inside a Python interpreter. Python is free and runs on every platform. No additional software is required for basic athenaCL operation. Download Python here:
 http://www.python.org/download
 
-athenaCL produces both Csound and MIDI scores. Csound 5 is recommended; Csound 4.16 or better is required to render Csound scores. Csound is free and runs on every platform. Download Csound here:
-http://www.csounds.com
+athenaCL produces both Csound and MIDI scores. Csound 6 is recommended; Csound 4.16 or better is required to render Csound scores. Csound is free and runs on every platform. Download Csound here:
+https://csound.com/
 
 athenaCL produces images with various Python-based graphic output systems. These output systems include the Python TkInter GUI library and the Python Image Library (PIL), and may require additional Python software. Most Python distributions include TkInter (MacOS systems may require additional configuration); PIL is easily added to Python. Download PIL here:
 http://www.pythonware.com/products/pil/
@@ -53,7 +53,7 @@ http://www.pythonware.com/products/pil/
 IIIa. QUICK-START DISTRIBUTIONS:
 
 All Platforms
-    1. install Python 2.6
+    1. install Python 3
     2. decompress athenaCL distribution and place wherever desired
 
 UNIX, Command Line Environments, Macintosh MacOS X:
@@ -154,7 +154,7 @@ http://code.google.com/p/athenacl/
 ====================================================================
 VII. CREDITS and ACKNOWLEDGMENTS:
 
-athenaCL was created and is maintained by Christopher Ariza. Numerous generator ParameterObjects based in part on the Object-oriented Music Definition Environment (OMDE/pmask), Copyright 2000-2001 Maurizio Umberto Puxemdu; Cmask was created by Andre Bartetzki. The Command Line Interpreter is based in part on cmd.py; the module textwrap.py is by Greg Ward; both are distributed with Python, Copyright 2001-2003 Python Software Foundation. The fractional noise implementation in dice.py, Audacity spectrum importing, and dynamic ParameterObject boundaries are based in part on implementations by Paul Berg. The module genetic.py is based in part on code by Robert Rowe. The module midiTools.py is based in part on code by Bob van der Poel. The module chaos.py is based in part on code by Hans Mikelson. The module permutate.py is based in part on code by Ulrich Hoffman. Pitch class set names provided in part by Larry Solomon. The Rabin-Miller Primality Test is based in part on an implementation by Stephen Krenzel. The mpkg installer is generated with py2app (bdist_mpkg) by Bob Ippolito. Python language testing done with PyChecker (by Neal Norwitz Copyright 2000-2001 MetaSlash Inc.) and pyflakes (by Phil Frost Copyright 2005 Divmod Inc.). Thanks to the following people for suggestions and feedback: Paul Berg, Per Bergqvist, Marc Demers, Ryan Dorin, Elizabeth Hoffman, Anthony Kozar, Paula Matthusen, Robert Rowe, Jonathan Saggau, and Jesse Sklar. Thanks also to the many users who have submitted anonymous bug-reports.
+athenaCL was created by Christopher Ariza. Updated to run under Python 3 by Ales Tsurko in 2020. Version 2.1 was updated by Michael Gogins: the implementation of seeds for the random generators. Numerous generator ParameterObjects based in part on the Object-oriented Music Definition Environment (OMDE/pmask), Copyright 2000-2001 Maurizio Umberto Puxemdu; Cmask was created by Andre Bartetzki. The Command Line Interpreter is based in part on cmd.py; the module textwrap.py is by Greg Ward; both are distributed with Python, Copyright 2001-2003 Python Software Foundation. The fractional noise implementation in dice.py, Audacity spectrum importing, and dynamic ParameterObject boundaries are based in part on implementations by Paul Berg. The module genetic.py is based in part on code by Robert Rowe. The module midiTools.py is based in part on code by Bob van der Poel. The module chaos.py is based in part on code by Hans Mikelson. The module permutate.py is based in part on code by Ulrich Hoffman. Pitch class set names provided in part by Larry Solomon. The Rabin-Miller Primality Test is based in part on an implementation by Stephen Krenzel. The mpkg installer is generated with py2app (bdist_mpkg) by Bob Ippolito. Python language testing done with PyChecker (by Neal Norwitz Copyright 2000-2001 MetaSlash Inc.) and pyflakes (by Phil Frost Copyright 2005 Divmod Inc.). Thanks to the following people for suggestions and feedback: Paul Berg, Per Bergqvist, Marc Demers, Ryan Dorin, Elizabeth Hoffman, Anthony Kozar, Paula Matthusen, Robert Rowe, Jonathan Saggau, Jesse Sklar and Menno Knevel. Thanks also to the many users who have submitted anonymous bug-reports.
 
 Apple, Macintosh, Mac OS, and QuickTime are trademarks or registered trademarks of Apple Computer, Inc. Finale is a trademark of MakeMusic! Inc. Java is a trademark of Sun Microsystems. Linux is a trademark of Linus Torvalds. Max/MSP is a trademark of Cycling '74. Microsoft Windows and Visual Basic are trademarks or registered trademarks of Microsoft, Inc. PDF and PostScript are trademarks of Adobe, Inc. Sibelius is a trademark of Sibelius Software Ltd. SourceForge.net is a trademark of VA Software Corporation. UNIX is a trademark of The Open Group.
 

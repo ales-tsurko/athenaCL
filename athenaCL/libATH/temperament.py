@@ -256,7 +256,7 @@ class NoiseUser(Temperament):
 temperamentNames = ['TwelveEqual', 'Pythagorean', 'Just', 'MeanTone', 
                          'Split24Upper', 'Split24Lower', 
                          'Interleave24Even', 'Interleave24Odd', 
-                         'NoiseLight', 'NoiseMedium', 'NoiseHeavy']
+                         'NoiseLight', 'NoiseMedium', 'NoiseHeavy', 'NoiseUser']
 
 def temperamentNameParser(usrStr):
     # allows for backward compatibility with old names
@@ -274,6 +274,7 @@ def temperamentNameParser(usrStr):
         'NoiseLight'  : ['12lightnoise', '12noiselight', 'noiselight', 'nl'],
         'NoiseMedium'   : ['12noisemedium', 'noisemedium', 'nm'],
         'NoiseHeavy'  : ['12heavynoise', '12noiseheavy', 'noiseheavy', 'nh'],
+        'NoiseUser'  : ['12heavyuser', '12noiseuser', 'noiseuser', 'nu'],
             }
             
     usrStr = drawer.selectionParse(usrStr, ref)
