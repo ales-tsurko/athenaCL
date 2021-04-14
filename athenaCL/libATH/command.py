@@ -8043,7 +8043,7 @@ class TMsd(Command):
         if self.seed == None: # error or cancel
             return lang.msgReturnCancel
         else:
-            return 'rng seed: %s\n' % (self.seed)
+            return 'TextureModule seed: %s\n' % (self.seed)
      
 class TPsd(Command):
     "Sets the random seed for Parameter Objects and all other RNGs (except Texture Modules)."
@@ -8071,7 +8071,7 @@ class TPsd(Command):
         if self.seed == None: # error or cancel
             return lang.msgReturnCancel
         else:
-            return 'rng seed: %s\n' % (self.seed)
+            return 'TextureParameterObjects seed: %s\n' % (self.seed)
         
 #-----------------------------------------------------------------||||||||||||--
 # command directory commands
