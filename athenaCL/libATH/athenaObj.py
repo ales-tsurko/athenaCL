@@ -15,7 +15,7 @@
 import sys, os, time, random, traceback, http.client, urllib.request, urllib.parse, urllib.error
 import unittest, doctest
 
-athVersion = '2.1'
+athVersion = '2.0.0a16'
 athBuild = '2021.04'
 athDate = 'April 2021' # human readable version
 __version__ = athVersion

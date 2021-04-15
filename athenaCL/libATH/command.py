@@ -1515,7 +1515,7 @@ class quit(Command):
             self.confirm = 'confirm'
 
             # only do this if user has interactively confirmed quit
-            if self.ao.external.logCheck() == 0: # log exists, submit
+            if self.ao.external.logCheck() == 1: # log exists, submit
                 ckUser=dialog.askYesNo(lang.msgSubmitLog, 0, self.termObj)
                 if ckUser == 1:
                     result = self.ao.external.logSend()
@@ -8231,7 +8231,24 @@ class Test(unittest.TestCase):
             a = TPv(ao, args=tp)
             ok, result = a.do()
             self.assertEqual(ok, True)
-
+            
+    def testTMsd(self):
+        from athenaCL.libATH import athenaObj
+        interpreter = athenaObj.Interpreter('terminal')    
+        interpreter.cmd('TMsd 200')
+        first = rand.UniformRNG().random()
+        interpreter.cmd('TMsd 200')
+        second = rand.UniformRNG().random()
+        self.assertEqual(first, second)
+    
+    def testTPsd(self):
+        from athenaCL.libATH import athenaObj
+        interpreter = athenaObj.Interpreter('terminal')    
+        interpreter.cmd('TPsd 300')
+        first = random.random()
+        interpreter.cmd('TPsd 300')
+        second = random.random()
+        self.assertEqual(first, second)
 
 #-----------------------------------------------------------------||||||||||||--
 if __name__ == '__main__':
