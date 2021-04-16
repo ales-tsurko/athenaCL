@@ -27,7 +27,7 @@ environment = prefTools.Environment(_MOD)
 #-----------------------------------------------------------------||||||||||||--
 # note: this imports must match those tested in drawer.imageFormats
 try:
-    import Image, ImageDraw, ImageFont #, ImageFilter ImageTk
+    from PIL import Image, ImageDraw, ImageFont #, ImageFilter ImageTk
     PIL = 1
 except ImportError:
     PIL = 0
@@ -198,7 +198,7 @@ class Thumb:
             self.fileList = [fileList, ] # its a single file
 
     def reduce(self):
-        import Image
+        from PIL import Image
         procFiles = [] # stores tuples of src, dst file
         nameOutFiles = []
         for infile in self.fileList:

@@ -284,6 +284,9 @@ def runDisutils(bdistType):
         classifiers = _getClassifiers(),
         download_url = lang.msgAthDownloadTar % athVersion,
         packages = _getPackagesList(), # first is 'athenaCL'   
+        install_requires=[
+          'pillow',
+        ],
         package_data = {'athenaCL' : ['audio/*.aif',
 
                                       'demo/csound/*.xml',
