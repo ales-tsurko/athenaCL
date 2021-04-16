@@ -207,7 +207,6 @@ class NoiseLight(Temperament):
         Temperament.__init__(self)
         self.name = 'NoiseLight'
         self.doc = 'Provide uniform random +/- 5 cent noise on each pitch'
-    
     maxNoise = .05
     def _translatePitch(self):
         shift = (random.random() * (self.maxNoise * 2)) - self.maxNoise
@@ -221,7 +220,6 @@ class NoiseMedium(Temperament):
         Temperament.__init__(self)
         self.name = 'NoiseMedium'
         self.doc = 'Provide uniform random +/- 10 cent noise on each pitch'
-    
     maxNoise = .10
     def _translatePitch(self):
         shift = (random.random() * (self.maxNoise * 2)) - self.maxNoise
@@ -235,13 +233,21 @@ class NoiseHeavy(Temperament):
         Temperament.__init__(self)
         self.name = 'NoiseHeavy'
         self.doc = 'Provide uniform random +/- 15 cent noise on each pitch'
-    
     maxNoise = .15
     def _translatePitch(self):
         shift = (random.random() * (self.maxNoise * 2)) - self.maxNoise
         self.pc = self.pc + shift
 
+class NoiseUser(Temperament):
+    def __init__(self):
 
+        Temperament.__init__(self)
+        self.name = 'NoiseUser'
+        self.doc = 'Provide uniform random +/- 50 cent noise on each pitch'
+    maxNoise = 10
+    def _translatePitch(self):
+        shift = (random.random() * (self.maxNoise * 2)) - self.maxNoise
+        self.pc = self.pc + shift
 
 
 #-----------------------------------------------------------------||||||||||||--
@@ -250,7 +256,7 @@ class NoiseHeavy(Temperament):
 temperamentNames = ['TwelveEqual', 'Pythagorean', 'Just', 'MeanTone', 
                          'Split24Upper', 'Split24Lower', 
                          'Interleave24Even', 'Interleave24Odd', 
-                         'NoiseLight', 'NoiseMedium', 'NoiseHeavy']
+                         'NoiseLight', 'NoiseMedium', 'NoiseHeavy', 'NoiseUser']
 
 def temperamentNameParser(usrStr):
     # allows for backward compatibility with old names
@@ -268,6 +274,7 @@ def temperamentNameParser(usrStr):
         'NoiseLight'  : ['12lightnoise', '12noiselight', 'noiselight', 'nl'],
         'NoiseMedium'   : ['12noisemedium', 'noisemedium', 'nm'],
         'NoiseHeavy'  : ['12heavynoise', '12noiseheavy', 'noiseheavy', 'nh'],
+        'NoiseUser'  : ['12heavyuser', '12noiseuser', 'noiseuser', 'nu'],
             }
             
     usrStr = drawer.selectionParse(usrStr, ref)

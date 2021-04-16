@@ -224,6 +224,9 @@ class HelpDoc:
     TMls = 'TMls: TextureModule: List: Displays a list of all TextureModules.'    
     TMls_usage = 'tmls'
 
+    TMsd = 'TMsd: TextureModule: Seed: Sets the global random seed used by all Texture Modules.'    
+    TMsd_usage = 'tmsd seed'
+
     #-----------------------------------------------------------------------||--
 
 
@@ -239,7 +242,9 @@ class HelpDoc:
     # this my be incomplete
     TPe = 'TPe: TextureParameter: Export: Export ParameterObject data as a file; file types available are pureDataArray, audioFile, textSpace, and textTab.'    
     TPe_usage = 'tpe format events arguments [filePath]'
-
+    
+    TPsd = 'TPsd: TextureParameter: Seed: Sets the global random seed used by all Texture Parameters.'
+    TPsd_usage = 'tpsd seed'
 
 
     #-----------------------------------------------------------------------||--
@@ -388,10 +393,6 @@ class HelpDoc:
 
     ELauto = 'ELauto: EventList: Auto Render Control: Turn on or off auto rendering, causing athenaCL to automatically render (ELr) and hear (ELh) whenever an event list is created with ELn.'
     ELauto_usage = 'elauto'
-
-
-
-
 
 
     #-----------------------------------------------------------------------||--
@@ -729,14 +730,6 @@ class HelpDoc:
         
         return ''.join(msg)
 
-
-
-
-
-
-
-
-
 #-----------------------------------------------------------------||||||||||||--
 class Test(unittest.TestCase):
     
@@ -752,7 +745,6 @@ class Test(unittest.TestCase):
             post = a.reprUsage(cmd)
             post = a.reprCmd(cmd)
             post = a.searchRef(cmd)
-
 
 #-----------------------------------------------------------------||||||||||||--
 if __name__ == '__main__':

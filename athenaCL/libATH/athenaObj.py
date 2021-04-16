@@ -15,9 +15,9 @@
 import sys, os, time, random, traceback, http.client, urllib.request, urllib.parse, urllib.error
 import unittest, doctest
 
-athVersion = '2.0.0a15'
-athBuild = '2010.07.07'
-athDate = '7 July 2010' # human readable version
+athVersion = '2.0.0a16'
+athBuild = '2021.04.16'
+athDate = '16 April 2021' # human readable version
 __version__ = athVersion
 __license__ = "GPL"
 
@@ -478,9 +478,9 @@ class AthenaObject(object):
                   'PIret(retro)', 
                   'PIrot(rot)', 'PIslc(slice)'),
       'tmCmd':('TextureModule', 'TMo(select)', 'TMv(view)',                                  
-                  'TMls(list)'),
+                  'TMls(list)', 'TMsd(seed)'),
       'tpCmd':('TextureParameter', 'TPls(list)', 'TPv(select)', 'TPmap(map)', 
-                  'TPe(export)'),
+                  'TPsd(seed)', 'TPe(export)'),
       'tiCmd':('TextureInstance', 'TIn(new)', 'TIcp(copy)', 
                   'TIrm(remove)', 'TIo(select)', 'TIv(view)', 
                   'TIe(edit)', 'TIls(list)', 'TImode(mode)', 
@@ -1210,7 +1210,7 @@ class Interpreter(object):
         # this treates the first arg as a string and provides necssary
         # corrections for creating a command class
         cmdClassName = self._getCmdClass(self.ao.cmdCorrect(cmd))
-
+ 
         if errorMode == 'exception':
             if cmdClassName == None:
                 raise Exception("no command given")
