@@ -17,7 +17,7 @@ import unittest, doctest
 
 athVersion = '2.0.0a16'
 athBuild = '2021.04.16'
-athDate = '2021 April 16' # human readable version
+athDate = '16 April 2021' # human readable version
 __version__ = athVersion
 __license__ = "GPL"
 
