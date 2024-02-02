@@ -44,14 +44,14 @@ athenaCL 2.0.0a15
 
 ## Contents
 
-[I. Software Dependencies](#i.-software-dependencies)
-[II. Quick Start](#ii.-quick-start)
-[IIIa. Installation](#IIa.-installation)
-[IIIb. athenaCL via Command Line Interface](#iib.-athenacl-via-command-line-interface)
-[IIIc. athenaCL via IDLE](#iic.-athenacl-via-idle)
-[IIId. athenaCL via Python Prompt](#iid.-athenacl-via-python-prompt)
-[IV. Documentation](#iii.-documentation)
-[V. Credits and Acknowledgments](#iv.-creadits-and-acknowledgments)
+1. [I. Software Dependencies](#i-software-dependencies)
+2. [II. Quick Start](#ii-quick-start)
+3. [IIIa. Installation](#IIa-installation)
+4. [IIIb. athenaCL via Command Line Interface](#iib-athenacl-via-command-line-interface)
+5. [IIIc. athenaCL via IDLE](#iic-athenacl-via-idle)
+6. [IIId. athenaCL via Python Prompt](#iid-athenacl-via-python-prompt)
+7. [IV. Documentation](#iii-documentation)
+8. [V. Credits and Acknowledgments](#iv-creadits-and-acknowledgments)
 
 
 
@@ -103,27 +103,33 @@ distutils installation into the Python site-packages directory. (3) the
 
 
 
-## IIIb. athenaCL VIA COMMAND LINE INTERFACE (CLI)
+## IIIb. athenaCL VIA COMMAND LINE INTERFACE
 
 installing:
-    1. place athenaCL directory wherever you like
-    2. enter the athenaCL directory
-    3. `python setup.py`
+
+1. place athenaCL directory wherever you like
+2. enter the athenaCL directory
+3. `python setup.py`
 
 or, to install the "athenacl" launcher and the athenaCL man page:
-    3. `python setup.py tool`
+
+3. `python setup.py tool`
 
 or, to perform a distutils installation
-    3. `python setup.py install`
+
+3. `python setup.py install`
 
 launching from the command line interface:
-    4. `python athenacl.py`
+
+4. `python athenacl.py`
 
 launching with the athenaCL tool:
-    4. `/usr/local/bin/athenacl`
+
+4. `/usr/local/bin/athenacl`
 
 launching with the athenaCL tool and `/usr/local/bin` in `PATH`:
-    4. `athenacl`
+
+4. `athenacl`
 
 
 
@@ -131,16 +137,19 @@ launching with the athenaCL tool and `/usr/local/bin` in `PATH`:
 ## IIIc. athenaCL VIA IDLE
 
 installing:
-    1. place athenaCL directory wherever you like
-    2. enter the athenaCL directory
-    3. double-click "setup.py"
+
+1. place athenaCL directory wherever you like
+2. enter the athenaCL directory
+3. double-click "setup.py"
 
 launching on Windows:
-    4. double-click "athenacl.py"
-    5. enter "y" when asked to start athenaCL in IDLE
+
+4. double-click "athenacl.py"
+5. enter "y" when asked to start athenaCL in IDLE
 
 launching from the command line interface:
-    4. `$ python athenacl.py -s idle`
+
+4. `$ python athenacl.py -s idle`
 
 
 
@@ -153,11 +162,13 @@ athenaCL setup.py script has not been properly run, the directory containing
 athenaCL must be manually added to the Python sys.path:
 
 (if the athenaCL directory is located in the directory "/src")
-    1. `>>> import sys`
-    2. `>>> sys.path.append('/src')`
+
+1. `>>> import sys`
+2. `>>> sys.path.append('/src')`
 
 launching:
-    3. `>>> import athenaCL.athenacl`
+
+3. `>>> import athenaCL.athenacl`
 
 
 
