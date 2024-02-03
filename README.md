@@ -46,12 +46,12 @@ athenaCL 2.0.0a15
 
 1. [I. Software Dependencies](#i-software-dependencies)
 2. [II. Quick Start](#ii-quick-start)
-3. [IIIa. Installation](#IIa-installation)
-4. [IIIb. athenaCL via Command Line Interface](#iib-athenacl-via-command-line-interface)
-5. [IIIc. athenaCL via IDLE](#iic-athenacl-via-idle)
-6. [IIId. athenaCL via Python Prompt](#iid-athenacl-via-python-prompt)
-7. [IV. Documentation](#iii-documentation)
-8. [V. Credits and Acknowledgments](#iv-creadits-and-acknowledgments)
+3. [IIIa. Installation](#iiia-installation)
+4. [IIIb. athenaCL via Command Line Interface](#iiib-athenacl-via-command-line-interface)
+5. [IIIc. athenaCL via IDLE](#iiic-athenacl-via-idle)
+6. [IIId. athenaCL via Python Prompt](#iiid-athenacl-via-python-prompt)
+7. [IV. Documentation](#iv-documentation)
+8. [V. Credits and Acknowledgments](#v-creadits-and-acknowledgments)
 
 
 
