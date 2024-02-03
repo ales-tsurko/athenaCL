@@ -1,6 +1,7 @@
 # athenaCL Manual
 
 - [Preface](prfc01.md)
+- [Getting Started](getstart01.md)
 - [Tutorial 1: The Interactive Command Line Interface](chap01.md)
 - [Tutorial 2: AthenaObjects and EventModes](chap02.md)
 - [Tutorial 3: Creating and Editing Paths](chap03.md)
