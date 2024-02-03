@@ -175,8 +175,7 @@ launching:
 
 ## IV. DOCUMENTATION
 
-For complete documentation, tutorials, and reference, see the athenaCL Tutorial
-Manual: www.flexatone.net/athenaDocs/
+For complete documentation, tutorials, and reference, see [doc](doc/index.md).
 
 
 

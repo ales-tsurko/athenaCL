@@ -1,0 +1,418 @@
+# Tutorial 1: The Interactive Command Line Interface
+
+This tutorial provides essential information and examples for using athenaCL's
+interactive command-line Interpreter. This material is essential for
+understanding basic athenaCL operation and how to obtain help within the
+program.
+
+
+
+## Starting the athenaCL Interpreter
+
+Depending on your platform, there are a number of different ways to launch the
+athenaCL program and start the athenaCL Interpreter. For all platforms, using
+athenaCL requires installing (or finding) Python 2.6 (or better) on your
+system. Many advanced operating systems (UNIX-based operating systems including
+GNU/Linux and MacOS X) ship with Python installed.
+      
+For complete instructions on installing and launching athenaCL in each platform,
+please see the file "README.txt" included in the athenaCL distribution and in .
+      
+After launching athenaCL, the user is presented with a text-based display in a
+terminal or Python-interactive window. The user is presented with the following
+initialization information:
+      
+
+**Initialization information**
+
+```
+athenaCL 2.0.0 (on darwin via terminal)
+Enter "cmd" to see all commands. For help enter "?".
+Enter "c" for copyright, "w" for warranty, "r" for credits.
+
+pi{}ti{} :: 
+```
+
+When starting up the Interpreter, athenaCL looks in the athenaCL directory for
+the "libATH" folder, and then various directories within the "libATH"
+folder. These directories contain essential files and must be present for the
+program to run. The athenaCL prompt "::" is preceded by information concerning
+the AthenaObject. This will be explained in greater detail below.
+      
+
+
+
+## Introduction to Commands
+
+When using athenaCL, the user enters commands to get things done. athenaCL
+commands are organized by prefixes, two-letter codes that designate what the
+command operates upon. Prefixes are always displayed as capitalized letters,
+though the user, when entering commands, may use lower-case letters. Some common
+prefixes are "PI", for PathInstance, or "TI", for TextureInstance. What follows
+the prefix usually resembles UNIX shell commands: "ls" for listing objects, "rm"
+for removing objects. For example, the command to list all the available
+TextureModules is TMls: "TM" for TextureModule, "ls" for list. When no common
+UNIX command-abbreviation is available, intuitive short abbreviations are
+used. For example, the command to create the retrograde of a PathInstance is
+PIret: "PI" for PathInstance, "ret" for retrograde.
+      
+The division of commands into prefixes demonstrates, in part, the large-scale
+design of the AthenaObject. The AthenaObject consists of PathInstances and
+TextureInstances. PathInstances are objects that define pitch
+materials. TextureInstances define algorithmic music layers. Users can create,
+copy, edit and store collections of Paths and Textures within the
+AthenaObject. All Texture related commands, for example, start with a "T", like
+TextureTemperament ("TT"), TextureClone("TC") and TextureModule ("TM").
+      
+In addition to the commands available for working with Paths and Textures, there
+are commands for creating various event list formats (such as Csound scores and
+MIDI files) with the EventList commands (prefix "EL"). The complete
+AthenaObject, with all its Paths and Textures, is handled with AthenaObject
+commands (prefix "AO"). These commands are used to save and control the complete
+collection of Paths and Textures.
+      
+
+
+
+## Viewing Command Names
+
+When starting athenaCL, the user is presented with a prompt (::). To display a
+listing of all commands enter "cmd", for command:
+
+**Listing all commands**
+
+```
+pi{y0}ti{a2} :: cmd
+athenaCL Commands:
+................................................................................
+PathInstance        PIn(new)            PIcp(copy)          PIrm(remove)
+                    PIo(select)         PIv(view)           PIe(edit)           
+                    PIdf(duration)      PIls(list)          PIh(hear)           
+                    PIret(retro)        PIrot(rot)          PIslc(slice)        
+................................................................................
+TextureModule       TMo(select)         TMv(view)           TMls(list)
+TextureParameter    TPls(list)          TPv(select)         TPmap(map)          
+                    TPe(export)         
+TextureInstance     TIn(new)            TIcp(copy)          TIrm(remove)        
+                    TIo(select)         TIv(view)           TIe(edit)           
+                    TIls(list)          TImode(mode)        TImute(mute)        
+                    TIdoc(doc)          TImap(map)          TImidi(midi)        
+TextureClone        TCn(new)            TCcp(copy)          TCrm(remove)        
+                    TCo(select)         TCv(view)           TCe(edit)           
+                    TCls(list)          TCmute(mute)        TCmap(map)          
+TextureTemperament  TTls(list)          TTo(select)         
+TextureEnsemble     TEv(view)           TEe(edit)           TEmap(map)          
+                    TEmidi(midi)        
+................................................................................
+EventOutput         EOls(list)          EOo(select)         EOrm(remove)
+EventMode           EMls(list)          EMo(select)         EMv(view)           
+                    EMi(inst)           
+EventList           ELn(new)            ELw(save)           ELv(view)           
+                    ELh(hear)           ELr(render)         ELauto(auto)        
+................................................................................
+AthenaPreferences   APdir(directory)    APea(external)      APa(audio)
+                    APgfx(graphics)     APcurs(cursor)      APdlg(dialogs)      
+                    APr(refresh)        APwid(width)        
+AthenaHistory       AHls(list)          AHexe(execute)      
+AthenaUtility       AUsys(system)       AUdoc(docs)         AUup(update)        
+                    AUbeat(beat)        AUpc(pitch)         AUmg(markov)        
+                    AUma(markov)        AUca(automata)      
+AthenaObject        AOw(save)           AOl(load)           AOmg(merge)         
+                    AOrm(remove)  
+```
+
+This display, organized by prefix heading, shows each command followed by a
+longer description of the commands name.
+      
+
+
+
+## Executing Commands
+
+To use a command, simply enter its name. The user will be prompted for all
+additional information. For example, type "PIn" (or "pin") at the athenaCL
+prompt:
+      
+
+**Entering a command**
+
+```
+pi{}ti{} :: pin
+name this PathInstance: a
+enter a pitch set, sieve, spectrum, or set-class: b,c#,g
+      SC 3-8B as (B4,C#4,G4)? (y, n, or cancel): y
+      add another set? (y, n, or cancel): n
+PI a added to PathInstances.
+```
+
+This command prompts the user for a "pitch set, sieve, spectrum, or set-class"
+and then creates a multiset component of a Path. A Xenakis sieve (Xenakis 1990
+[AN#327], 1992 [AN#60]; Ariza 2004 [AN#443], 2005 [AN#613], 2009 [AN#1990]) can
+be entered using a logical string and a pitch range. Set class labels are given
+using Forte names. The user may enter the chord itself as pitch-names (with
+sharps as "#" and flats as "$") or pitch-classes (integers that represent the
+notes of the chromatic scale) (Straus 1990 [AN#34]). For instance, the chord
+D-major can be represented with the following pitch-name string: (D, F#, A). Or,
+the same chord can be represented as a pitch class set: (2,6,9), where 0 is
+always C, 1=C#, 2=D, …, 10=A#, and 11=B. Calling the PIn command to create a new
+path named "b" with this pitch class set gives us the following results:
+      
+
+**Entering a command with arguments**
+
+```
+pi{a}ti{} :: pin b d,f#,a
+PI b added to PathInstances.
+```
+
+Notice that in the above example the Path name and pitch collection arguments
+are entered at the same time as the command: "pin b d,f#,a". As an interactive
+command-line program, athenaCL can obtain arguments from the user, and can,
+alternatively, accept space-separated arguments following a
+command. Command-line arguments allow advanced users ease and speed and, when
+called from an external environment (such as a UNIX shell or Python script),
+permit advanced scripting automation. All athenaCL commands can function both
+with arguments and with interactive prompts. Command-line arguments, however,
+are never required: if arguments are absent, the user is prompted for the
+necessary details.
+      
+
+
+
+## Getting Help for Commands
+
+athenaCL provides two ways of helping the user access and learn commands. If the
+user only remembers the prefix of a command, this prefix can be entered at the
+prompt to produce a list of all commands associated with that prefix:
+      
+
+**Displaying a command listing**
+
+```
+pi{b}ti{} :: pi
+PI (PathInstance) commands:
+   PIn              new      
+   PIcp             copy     
+   PIrm             remove   
+   PIo              select   
+   PIv              view     
+   PIe              edit     
+   PIdf             duration 
+   PIls             list     
+   PIh              hear     
+   PIret            retro    
+   PIrot            rot      
+   PIslc            slice 
+```
+
+Help information is available for each command and can be accessed from the
+athenaCL prompt by typing either "?" or "help" followed by the name of the
+command. The following example provides the documentation for the PIn
+command. Notice that the main documentation is followed by "usage"
+documentation, or the format required for providing command-line arguments:
+      
+
+**Using the help command**
+
+```
+pi{b}ti{} :: help pin
+{topic,documentation}
+PIn                 PIn: PathInstance: New: Create a new Path from user-
+                    specified pitch groups. Users may specify pitch groups in a
+                    variety of formats. A Forte set class number (6-23A), a
+                    pitch-class set (4,3,9), a pitch-space set (-3, 23.2, 14),
+                    standard pitch letter names (A, C##, E~, G#), MIDI note
+                    numbers (58m, 62m), frequency values (222hz, 1403hz), a
+                    Xenakis sieve (5&3|11), or an Audacity frequency-analysis
+                    file (import) all may be provided. Pitches may be specified
+                    by letter name (psName), pitch space (psReal), pitch class,
+                    MIDI note number, or frequency. Pitch letter names may be
+                    specified as follows: a sharp is represented as "#"; a flat
+                    is represented as "$"; a quarter sharp is represented as
+                    "~"; multiple sharps, quarter sharps, and flats are valid.
+                    Octave numbers (where middle-C is C4) can be used with pitch
+                    letter names to provide register. Pitch space values (as
+                    well as pitch class) place C4 at 0.0. MIDI note numbers
+                    place C4 at 60. Numerical representations may encode
+                    microtones with additional decimal places. MIDI note-numbers
+                    and frequency values must contain the appropriate unit as a
+                    string ("m" or "hz"). Xenakis sieves are entered using logic
+                    constructions of residual classes. Residual classes are
+                    specified by a modulus and shift, where modulus 3 at shift 1
+                    is notated 3@1. Logical operations are notated with "&"
+                    (and), "|" (or), "^" (symmetric difference), and "-"
+                    (complementation). Residual classes and logical operators
+                    may be nested and grouped by use of braces ({}).
+                    Complementation can be applied to a single residual class or
+                    a group of residual classes. For example:
+                    -{7@0|{-5@2&-4@3}}. When entering a sieve as a pitch set,
+                    the logic string may be followed by two comma-separated
+                    pitch notations for register bounds. For example "3@2|4, c1,
+                    c4" will take the sieve between c1 and c4. Audacity
+                    frequency-analysis files can be produced with the cross-
+                    platform open-source audio editor Audacity. In Audacity,
+                    under menu View, select Plot Spectrum, configure, and
+                    export. The file must have a .txt extension. To use the
+                    file-browser, enter "import"; to select the file from the
+                    prompt, enter the complete file path, optionally followed by
+                    a comma and the number of ranked pitches to read.
+usage:              pin name set1 ... setN
+```
+
+The same help command can be used to access information concerning additional
+topics, notations, and representations used within athenaCL. For example,
+information about Markov transition strings can be accessed with the same help
+command:
+      
+
+**Accessing additional help topics**
+
+```
+pi{b}ti{} :: ? markov
+{topic,documentation}
+Markov Notation     Markov transition strings are entered using symbolic
+                    definitions and incomplete n-order weight specifications.
+                    The complete transition string consists of two parts: symbol
+                    definition and weights. Symbols are defined with alphabetic
+                    variable names, such as "a" or "b"; symbols may be numbers,
+                    strings, or other objects. Key and value pairs are notated
+                    as such: name{symbol}. Weights may be give in integers or
+                    floating point values. All transitions not specified are
+                    assumed to have equal weights. Weights are specified with
+                    key and value pairs notated as such: transition{name=weight
+                    | name=weight}. The ":" character is used as the zero-order
+                    weight key. Higher order weight keys are specified using the
+                    defined variable names separated by ":" characters. Weight
+                    values are given with the variable name followed by an "="
+                    and the desired weight. Multiple weights are separated by
+                    the "|" character. All weights not specified, within a
+                    defined transition, are assumed to be zero. For example, the
+                    following string defines three variable names for the values
+                    .2, 5, and 8 and provides a zero order weight for b at 50%,
+                    a at 25%, and c at 25%: a{.2}b{5}c{8} :{a=1|b=2|c=1}.
+                    N-order weights can be included in a transition string.
+                    Thus, the following string adds first and second order
+                    weights to the same symbol definitions: a{.2}b{5}c{8}
+                    :{a=1|b=2|c=1} a:{c=2|a=1} c:{b=1} a:a:{a=3|b=9}
+                    c:b:{a=2|b=7|c=4}. For greater generality, weight keys may
+                    employ limited single-operator regular expressions within
+                    transitions. Operators permitted are "*" (to match all
+                    names), "-" (to not match a single name), and "|" (to match
+                    any number of names). For example, a:*:{a=3|b=9} will match
+                    "a" followed by any name; a:-b:{a=3|b=9} will match "a"
+                    followed by any name that is not "b"; a:b|c:{a=3|b=9} will
+                    match "a" followed by either "b" or "c".
+```
+
+Throughout this document additional information for the reader may be
+recommended by suggesting the use of the help command. For example: (enter "help
+markov" for more information).
+      
+
+
+
+## Configuring the User Environment
+
+athenaCL has many configurable settings that are saved in a preference file and
+loaded for each athenaCL session. Some of these settings have default values;
+others will need to be configured the first time a command is used.
+      
+For example, following the athenaCL prompt ("::") is the the athenaCL "cursor
+tool." This tool, providing information on the active Texture and Path, can be
+turned on or off with the command APcurs, for AthenaPreferences cursor:
+      
+
+**Toggling the athenaCL cursor tool with APcurs**
+
+```
+pi{b}ti{} :: apcurs
+cursor tool set to off.
+
+:: apcurs
+cursor tool set to on.
+
+pi{b}ti{} :: 
+```
+
+athenaCL writes files. Some of these files are audio file formats, some are
+event list formats (scores, MIDI files), and some are image files. In most
+cases, athenaCL will write a file in a user specified "scratch" directory with
+an automatically-generated file name. This is convenient and fast. To set the
+scratch directory, enter the APdir command, for AthenaPreferences
+directory. (Replace "/Volumes/xdisc/_scratch" with a complete file path to a
+suitable directory.)
+      
+
+**Setting the scratch directory with APdir**
+
+```
+pi{b}ti{} :: apdir
+select directory to set: scratch or audio. (x or a): x
+/Users/ariza/_x/src/athenaCL
+................................................................................
+.cvsignore      .DS_Store       __init__.py     __init__.pyc    __init__.pyo    
+athenacl.py     athenacl.pyc    athenaObj.py    athenaObj.pyc   athenaObj.pyo   
+CVS             demo            docs            libATH          setup.py        
+tools     
+select a scratch directory:
+to change directory enter name, path, or ".."
+cancel or select? (c or s): /Volumes/xdisc/_scratch
+/Volumes/xdisc/_scratch
+................................................................................
+.DS_Store       a.mid           
+select a scratch directory:
+to change directory enter name, path, or ".."
+cancel or select? (c or s): s
+user scratch directory set to /Volumes/xdisc/_scratch.
+```
+
+The command PIh, for PathInstance hear, allows the creation of a MIDI file from
+a single Path specification. In this case, athenaCL writes the MIDI file in the
+user-specified scratch directory. After the file is written, athenaCL opens the
+file with the operating system. Depending on how the operating system is
+configured, the MIDI file should open in an appropriate player. The athenaCL
+system frequently works in this manner with the operating system and external
+programs and resources.
+      
+
+**Creating a MIDI file with PIh**
+
+```
+pi{b}ti{} :: pih
+command.py: temporary file: /Volumes/xdisc/_scratch/ath2010.07.01.16.12.52.xml 
+PI b hear with TM LineGroove complete.
+(/Volumes/xdisc/_scratch/ath2010.07.01.16.12.52.mid)
+```
+
+Numerous types of graphical aids are provided by athenaCL to assist in the
+representation of musical materials. Depending on the user's Python
+installation, numerous formats of graphic files are available. Formats include
+text (within the Interpreter display), Encapsulated PostScript (convertible to
+PDF), Tk GUI Windows, JPEG, and PNG. Tk requires the Python TkInter GUI
+installation; JPEG and PNG require the Python Imaging Library (PIL)
+installation.
+      
+The user can set an active graphic format with the APgfx command. For example:
+      
+
+**Setting the active graphics format with APgfx**
+
+```
+pi{b}ti{} :: apgfx
+active graphics format: png.
+select text, eps, tk, jpg, png. (t, e, k, j, or p): p
+graphics format changed to png.
+```
+
+To test the production of graphic output, the TPmap command, for
+TextureParameter map, can be used:
+      
+
+**Producing a graphical diagram with TPmap**
+
+```
+pi{b}ti{} :: tpmap 100 ru
+randomUniform, (constant, 0), (constant, 1)
+TPmap display complete.
+```
+

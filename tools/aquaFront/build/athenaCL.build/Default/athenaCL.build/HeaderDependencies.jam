@@ -1,6 +1,0 @@
-rule DefineHeaderDependencies
-{
-}
-
-DefineHeaderDependencies "<athenaCL>athenaCL.app" ;
-

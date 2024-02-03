@@ -1,0 +1,501 @@
+# Tutorial 2: AthenaObjects and EventModes
+
+This tutorial provides essential information concerning saving and opening an
+athenaCL session, as well as basic information for creating and configuring
+EventLists and EventModes.
+      
+
+
+
+## Introduction to AthenaObjects
+
+The AthenaObject stores the collection of user-created PathInstances and
+TextureInstances, as well as the names of the active objects and other settings
+relevant to the active athenaCL session (and not stored in the user preference
+file). The AthenaObject, when saved, is stored as an XML file. When athenaCL
+creates an XML AthenaObject file, the resulting file contains the complete state
+of the active AthenaObject.
+      
+
+
+
+## File Dialogs in athenaCL
+
+The athenaCL system supports a variety of styles of file dialogs, or the
+interface used to obtain and write files or directories. The default style of
+file dialog uses a custom text interface that lets the user browse their file
+system. Alternatively, all commands that require file or directory paths may be
+executed by supplying the complete file path as a command-line argument.
+      
+Use of text-base file dialogs, however, may not be convenient for some
+users. For this reason athenaCL offers GUI-based graphical file dialogs on
+platforms and environments that support such features. On Python installations
+that have the Tk GUI library TkInter installed, Tk-based file dialogs are
+available. On the Macintosh platform (OS9 and OSX) native MacOS file-dialogs are
+available. To change they athenaCL dialog style, enter the command APdlg:
+      
+
+**Changing the file dialog style with APdlg**
+
+```
+pi{}ti{} :: apdlg
+active dialog visual method: text.
+select text, tk, or mac. (t, k, or m): t
+dialog visual method changed to text.
+```
+
+Note: on some platforms use of GUI windows from inside a text-environment may
+cause unexpected results. In some cases, the GUI window may appear behind all
+other windows, in the background.
+      
+
+
+
+## Loading and Removing an AthenaObject
+
+The command AOl, for AthenaObject load, permits the user to load an AthenaObject
+XML file. Numerous small demonstration files are included within athenaCL. In
+the following example, the user loads the file "demo01.xml".
+      
+The following display demonstrates use of the text-based file-dialogs. When
+using the text-based interface, the user must select a directory before
+selecting a file. In the example below, the user enters "demo" to enter the
+"demo" directory in the athenaCL directory. The user then enter "s" to select
+this directory. Next, the user has the option the select a file from this
+directory, change the directory, or cancel. The user chooses to select a file
+with "f". After entering the name of the file ("demo01.xml") and confirming, the
+AthenaObject is loaded:
+      
+
+**Loading an AthenaObject with text-based file selection**
+
+```
+pi{}ti{} :: aol
+select an AthenaObject file:
+name file, change directory, or cancel? (f, cd, c): cd
+/Volumes/xdisc/_sync/_x/src/athenacl/athenaCL/demo/legacy
+................................................................................
+.svn            __init__.py     demo01.xml      demo03.xml      demo05.xml      
+spectrum01.txt  tutorial02.xml  tutorial03.xml  tutorial04.xml  tutorial05.xml  
+tutorial06.xml  tutorial07.xml  tutorial09.xml  
+to change directory enter name, path, or ".."
+cancel or select? (c or s): s
+select an AthenaObject file:
+name file, change directory, or cancel? (f, cd, c): f
+name file? demo01.xml
+      1.3.1 xml AthenaObject loaded (00:01):
+/Volumes/xdisc/_sync/_x/src/athenacl/athenaCL/demo/legacy/demo01.xml
+```
+
+To confirm that the AthenaObject has been loaded, the user may enter TIls to
+display a list of all TextureInstances. (For more information concerning
+Textures, see ).
+      
+
+**Listing TextureInstances with Tils**
+
+```
+pi{y0}ti{a2} :: tils
+TextureInstances available:
+{name,status,TM,PI,instrument,time,TC}
+   _space           + MonophonicOrnament x0          62  39.0--40.0   0
+   a0               + MonophonicOrnament y0          50  01.0--41.0   0
+   a1               + MonophonicOrnament y0          50  01.0--41.0   0
+ + a2               + MonophonicOrnament y0          50  01.0--41.0   0
+```
+
+The entire AthenaObject can be erased and set to its initial state without
+restarting the athenaCL program. The following example uses AOrm, for
+AthenaObject remove, to re-initialize the AthenaObject. Note: the AOrm will
+permanently remove all objects within athenaCL and cannot be un-done.
+      
+
+**Reinitializing the AthenaObject with AOrm**
+
+```
+pi{y0}ti{a2} :: aorm
+destroy the current AthenaObject? (y or n): y
+reinitializing AthenaObject.
+
+pi{}ti{} :: 
+```
+
+If the AthenaObject file is located in the athenaCL "demo" directory, or a
+directory from which a file was opened or saved-to by the user within the
+current session, athenaCL can find the file by giving the AOl command with the
+file's name as a command-line argument. To reload "demo01.xml", the user may
+enter the following arguments:
+      
+
+**Loading an AthenaObject from the command-line**
+
+```
+pi{}ti{} :: aol demo01.xml
+      1.3.1 xml AthenaObject loaded (00:01):
+/Volumes/xdisc/_sync/_x/src/athenacl/athenaCL/demo/legacy/demo01.xml
+```
+
+
+
+
+## EventModes and EventOutputs
+
+After loading a demonstration file containing TextureInstances, athenaCL can be
+used to create an EventList. As a poly-paradigm system with integrated
+instrument models, athenaCL supports numerous formats of EventLists and can work
+with a wide variety of sound sources, including Csound and MIDI. What types of
+EventLists are created depends on two settings within athenaCL: the EventMode
+and the EventOutput.
+      
+The EventModes configure athenaCL for working with a particular sound source and
+Orchestra model, such as the internal Csound orchestra (csoundNative), external
+Csound orchestras (csoundExternal), various types of MIDI files (generalMidi an
+generalMidiPercussion), and others. The EventMode determines what instruments
+are available for Texture creation (see , as well as the operation of some
+EventList commands. In some cases, the EventMode forces certain EventOutput
+formats to be written as well.
+      
+The EventOutputs select what file formats will be created when a new EventList
+is generated. athenaCL permits the user to create an EventList in numerous
+formats simultaneously. For example, a Csound score and orchestra, a MIDI file,
+and tab-delimited table can all be produced from one call to the EventList new
+command. Some EventOutput formats are created only if the AthenaObject contains
+Textures created in the appropriate EventMode. Other EventOutput formats can be
+created with any Texture in any EventMode. Such conflicts, however, are never a
+problem: athenaCL simply creates whatever EventOutput formats are appropriate
+based on the user-specified request.
+      
+To view the current EventMode, enter EMls. To view the current list of selected
+EventOutputs, enter EOls. The following example demonstrates these commands:
+      
+
+**Viewing EventMode and EventOutputs**
+
+```
+pi{y0}ti{a2} :: emls
+EventMode modes available:
+{name}
+   csoundExternal      
+ + csoundNative        
+   csoundSilence       
+   midi                
+   midiPercussion      
+   superColliderNative 
+
+pi{y0}ti{a2} :: eols
+EventOutput active:
+{name}
+   acToolbox         
+   audioFile         
+   csoundBatch       
+ + csoundData        
+   csoundOrchestra   
+   csoundScore       
+ + midiFile          
+   pureDataArray     
+   superColliderTask 
+   textSpace         
+   textTab           
+ + xmlAthenaObject  
+```
+
+To select an additional EventOutput to be requested when a new EventList is
+created, enter the command EOo, for EventOutput select. To remove an
+EventOutput, enter the command EOrm, for EventOutput remove. In the following
+example, the user adds a tab-delimited table output ("textTab") and a
+specialized output file for the AC Toolbox ("acToolbox"). After viewing the
+EventOutput list, these EventOutputs are removed. Note: EventOutputs, like many
+selection in athenaCL, can be designated using automatic acronym expansion
+(AAE), the user providing only the leading character and capitals.
+      
+
+**Adding and Removing EventOutputs**
+
+```
+pi{y0}ti{a2} :: eoo tt at
+EventOutput formats: midiFile, xmlAthenaObject, csoundData, textTab, acToolbox.
+
+pi{y0}ti{a2} :: eols
+EventOutput active:
+{name}
+ + acToolbox         
+   audioFile         
+   csoundBatch       
+ + csoundData        
+   csoundOrchestra   
+   csoundScore       
+ + midiFile          
+   pureDataArray     
+   superColliderTask 
+   textSpace         
+ + textTab           
+ + xmlAthenaObject  
+
+pi{y0}ti{a2} :: eorm tt at
+EventOutput formats: midiFile, xmlAthenaObject, csoundData.
+```
+
+
+
+
+## Creating an EventList
+
+To create an EventList, the command ELn, for EventList new, must be used. This
+command generates a new EventList for each Texture and Clone, and writes
+necessary EventOutput formats. Each time the ELn command is called, a new
+musical variant (depending on Texture, Clone, and ParameterObject specification)
+is produced. It is possible, even likely, that two EventLists, generated from
+the same AthenaObject file, will not be identical. EventLists, further, are
+never stored within an AthenaObject. For this reason, users should be careful to
+save and preserve produced EventList files.
+      
+When using the ELn command alone, temporary files are created, either in a
+system-location, or in the scratch directory selected by the user. The user may
+also, optionally, name the EventList. The EventList name is given as a file name
+(or a complete file path) ending with an ".xml" extension. Although the ELn
+command may produce many files, only one file path needs to be provided: all
+other EventOutput format file names are derived from this source .xml file
+path. If EventOutput xmlAthenaObject is active, an XML AthenaObject file will be
+written along with whatever user-specified or EventMode-mandated EventOutput
+formats are created.
+      
+In the example above, the user's EventOutput format specification indicates that
+midiFile and xmlAthenaObject are active outputs. The current EventMode, however,
+is set to csoundNative, and the Textures of "demo01.xml", upon examination, were
+created with csoundNative instruments. For these reasons, the ELn command, in
+this case, will produce an .xml AthenaObject file, a Csound .csd file, a MIDI
+file (.mid), and a script file for processing the Csound orchestra and score
+(.bat). For example:
+      
+
+**Creating a new EventList with Eln**
+
+```
+pi{y0}ti{a2} :: eln
+      EventList ath2010.07.02.13.22.35 complete:
+/Volumes/xdisc/_scratch/ath2010.07.02.13.22.35.bat
+/Volumes/xdisc/_scratch/ath2010.07.02.13.22.35.csd
+/Volumes/xdisc/_scratch/ath2010.07.02.13.22.35.mid
+/Volumes/xdisc/_scratch/ath2010.07.02.13.22.35.xml
+```
+
+Csound files require additional processing to hear audio from the results: this
+will be demonstrated below. The MIDI file, however, can be listened to
+immediately with any MIDI file player, such as QuickTime. To hear the file
+produced by ELn, enter the command ELh, for EventList hear:
+      
+
+**Opening an EventList with Elh**
+
+```
+pi{y0}ti{a2} :: elh
+EventList hear initiated: /Volumes/xdisc/_scratch/ath2010.07.02.13.22.35.mid
+```
+
+Depending on operating system configuration, the ELh command should open the
+newly-created MIDI file in a MIDI-file player. Alternatively, the MIDI file can
+be opened in an application that supports MIDI files, such as a notation program
+or sequencer.
+      
+The ELn command, as all athenaCL commands, can be used with command-line
+arguments. To create an EventList in a specific directory, simply provide a
+complete file path following the the ELn command. (Replace
+"/Volumes/xdisc/_scratch/" with a complete file path to a suitable directory.)
+      
+
+**Creating a new EventList with Eln and command-line arguments**
+
+```
+pi{y0}ti{a2} :: eln /Volumes/xdisc/_scratch/test02.xml
+      EventList test02 complete:
+/Volumes/xdisc/_scratch/test02.bat
+/Volumes/xdisc/_scratch/test02.csd
+/Volumes/xdisc/_scratch/test02.mid
+/Volumes/xdisc/_scratch/test02.xml
+```
+
+Using the ELh command to listen to this EventList, the user should identify that
+although "test01" and "test02" are closely related, each musical fragment, due
+to algorithmic variation, has differences.
+      
+
+
+
+## Configuring and Using Csound
+
+Although Csound files were created in the above examples, only the resulting
+MIDI files were auditioned. To produce audio files with Csound, some additional
+configuration may be necessary.
+      
+To create an audio file with Csound, two files are required: a score (.sco) and
+an orchestra (.orc); alternatively, both files can be combined into a single XML
+file called (within athenaCL) a csoundData file (.csd). With the csoundNative
+instruments and EventMode, all necessary Csound files are created by
+athenaCL. To activate csoundData file production, the EventOutput csoundData
+must be selected. Alternatively, users can create only a Csound score (with
+EventModes csoundExternal or csoundSilence), and apply this score to any desired
+external Csound orchestra.
+      
+The Csound audio rendering software must be installed separately. Csound is an
+open source, free, cross platform program available for all major operating
+systems.
+      
+Once configured properly, athenaCL provides commands to control Csound
+rendering. The user may be required to provide the location of (file path to)
+the Csound program; the location of the Csound program is set with the APea
+command, or Athena Preferences external applications command. Each platform has
+a different default Csound application specified. Unix: default position is
+/usr/local/bin/csound; MacOS X: default Csound is the same as Unix; Windows:
+users must select the Csound executable, "winsound.exe," with the APea
+command. The user can select a different Csound with the APea command; this
+selection is stored in the user preferences and is maintained between athenaCL
+sessions.
+      
+Assuming that the necessary Csound files were created with ELn as demonstrated
+above, the user may view the Csound score file created with the command ELv, or
+EventList view. Depending on operating system configuration, this command will
+open the score file with a platform-specific text reader. Alternatively, the
+.sco file can be manually selected and opened by the user.  Whenever athenaCL
+creates Csound files under EventMode csoundNative, a script file (.bat) is
+created to automate rendering of the audio file from the Csound score and
+orchestra (or .csd file). The script instructs Csound to create an audio file
+with the same name as the score in the same directory as the score, orchestra,
+and batch file.
+      
+Prior to writing files with the ELn command, the desired audio file format can
+be specified from within athenaCL using the command APa. The user will be
+prompted to select a file format from the options given. Note: the user must set
+Csound options before executing ELn; otherwise, they will have no effect until a
+new EventList is created.
+      
+
+**Changing the Csound audio file format with CPff**
+
+```
+pi{y0}ti{a2} :: apa
+select format, channels, or rate. (f,c,r): f
+current audio file format: aif.
+select aif, wav, or sd2. (a, w, or s): a
+audio format set to 'aif'.
+```
+
+Assuming correct Csound installation and configuration within athenaCL, the user
+can enter ELr to automatically initiate Csound rendering of the last Csound
+score created with ELn. ELr, using the operating system, calls the
+athenaCL-created script. For ELr to function, and thus the ELn-created script to
+function, the Csound score and orchestra files (or .csd file) must remain in
+their original locations.
+      
+
+**Rendering a Csound score**
+
+```
+pi{y0}ti{a2} :: elr
+audio rendering initiated: /Volumes/xdisc/_scratch/test02.bat
+```
+
+Alternatively, users can render Csound files created in athenaCL within any
+Csound application, just as they would for any other Csound score and orchestra,
+manually setting file Paths, file formats, and Csound option flags. See Csound
+documentation for more information on using Csound.
+      
+As demonstrated above with MIDI files, the user can open the Csound-rendered
+audio file with the ELh command. This command opens the audio file with a
+platform-specific media player.
+      
+
+**Opening Csound-generated audio files with ELh**
+
+```
+pi{y0}ti{a2} :: elh
+EventList hear initiated: /Volumes/xdisc/_scratch/test02.aif
+EventList hear initiated: /Volumes/xdisc/_scratch/test02.mid
+```
+
+To summarize, there are three athenaCL commands needed to create, render, and
+hear a Csound score, and they must be executed in order: ELn, ELr, ELh. To link
+these three commands, the user can set a automation preference with the ELauto
+command. When this option is toggled, the single command ELn will create an
+EventList, render it in Csound, and open the Csound-created audio file with a
+platform-specific media player.
+      
+
+
+
+## Saving and Merging AthenaObjects
+
+Loading a new AthenaObject will completely replace the current AthenaObject
+contents. For this reason, users should always save their work before loading a
+new AthenaObject. The user can, alternatively, merge AthenaObjects. Merging is a
+powerful tool: the user can combine many AthenaObjects that have been saved
+separately, or combine an AthenaObject numerous times with itself. In the
+example below, the user merges "demo01.xml", loaded above, with another of the
+same AthenaObject "demo01.xml". The file paths for athenaCL demonstration files
+are known to athenaCL, and thus the user can simply provide the name of the
+demonstration file as a command-line argument.
+      
+
+**Merging AthenaObjects with AOmg**
+
+```
+pi{y0}ti{a2} :: aomg demo01.xml
+      1.3.1 xml AthenaObject merged (00:01):
+/Volumes/xdisc/_sync/_x/src/athenacl/athenaCL/demo/legacy/demo01.xml
+
+pi{y0}ti{a2} :: 
+```
+
+The command TIls can be used to confirm that the AthenaObjects have been
+merged. The AOmg command, in the case that two Paths or Textures have the same
+name, automatically alters the name by appending an underscore ("_"). In the
+case where an AthenaObject is merged with itself as in this example, each
+Texture and Path is duplicated.
+      
+
+**Listing TextureInstances**
+
+```
+pi{y0}ti{a2} :: tils
+TextureInstances available:
+{name,status,TM,PI,instrument,time,TC}
+   _space           + MonophonicOrnament x0          62  39.0--40.0   0
+   _space_          + MonophonicOrnament x0_         62  39.0--40.0   0
+   a0               + MonophonicOrnament y0          50  01.0--41.0   0
+   a0_              + MonophonicOrnament y0_         50  01.0--41.0   0
+   a1               + MonophonicOrnament y0          50  01.0--41.0   0
+   a1_              + MonophonicOrnament y0_         50  01.0--41.0   0
+ + a2               + MonophonicOrnament y0          50  01.0--41.0   0
+   a2_              + MonophonicOrnament y0_         50  01.0--41.0   0
+
+```
+
+As shown above, the user may create a new MIDI or Csound EventList of this new
+AthenaObject and audition the results. As should be clear, the resulting musical
+structure will sound more dense due to the additional Textures. Due to
+algorithmic variation, each Texture will remain relatively independent.
+      
+To save the current AthenaObject, the user may create an XML AthenaObject
+file. Although AthenaObject files may be created with the proper EventOutput
+selection and by use of the ELn command, in same cases the user my want to
+create the XML AthenaObject file alone. The command AOw, for AthenaObject Write,
+provides this functionality. The user must name the AthenaObject with a ".xml"
+extension. In the example below the user saves the merged files as a new
+AthenaObject named "merged.xml" using a command-line argument. If desired, the
+AOw command can be used without command-line arguments to select the location of
+the file with an interactive file dialog. (Replace "/Volumes/xdisc/_scratch/"
+with a complete file path to a suitable directory.)
+      
+
+**Creating a new AthenaObject with AOw**
+
+```
+pi{y0}ti{a2} :: aow /Volumes/xdisc/_scratch/merged.xml
+      AthenaObject saved:
+/Volumes/xdisc/_scratch/merged.xml
+```
+
+Saving your work in athenaCL is very important, and should be done often. The
+athenaCL system can not reconstruct an AthenaObject from an EventList or an
+audio file; an athenaCL session can only be reconstructed by loading an
+AthenaObject XML file.
+      
