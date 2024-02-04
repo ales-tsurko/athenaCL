@@ -7,3 +7,4 @@ build
 .pytest_cache
 athenaCL/demo/midi/*.xml
 athenaCL/demo/midi/*.mid
+athenaCL/demo/csound/*.mp3
