@@ -10,9 +10,6 @@
 
 import os, sys
 
-
-import googlecode_upload # placed in site-packages
-
 from athenaCL.libATH import athenaObj
 from athenaCL.libATH import info
 
@@ -85,29 +82,8 @@ class Distributor(object):
                 athenaObj.fpPackageDir)
         os.system('cd %s; python setup.py register' % athenaObj.fpPackageDir)
 
-    def _uploadGoogleCode(self, fp):
-        summary = athenaObj.athVersion
-        project = 'athenacl'
-        user = 'christopher.ariza'
-
-        if fp.endswith('.tar.gz'):
-            labels = ['OpSys-All', 'Featured', 'Type-Archive']
-        elif fp.endswith('.exe'):
-            labels = ['OpSys-Windows', 'Featured', 'Type-Installer']
-        elif fp.endswith('.egg'):
-            labels = ['OpSys-All', 'Featured', 'Type-Archive']
-    
-        environment.printWarn(['starting GoogleCode upload of:', fp])
-        status, reason, url = googlecode_upload.upload_find_auth(fp, 
-                        project, summary, labels, user)
-        environment.printWarn([status, reason])
-
     def upload(self):    
         self._uploadPyPi()
-        for fp in [self.fpTar, self.fpEgg, self.fpWin]:
-            self._uploadGoogleCode(fp)
-
-        # uplaod to flexatone.net
 
 
 
