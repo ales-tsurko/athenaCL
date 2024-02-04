@@ -3,3 +3,4 @@
 __pycache__/
 build
 .DS_Store
+.nvim

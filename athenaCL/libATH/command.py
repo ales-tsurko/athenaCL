@@ -8024,21 +8024,21 @@ class TMsd(Command):
         self.cmdStr = 'TMsd'
         self.seed = None
         self.rng = None
+    
     def gather(self):
-#        print("TMsd gather", self.args)
         args = argTools.ArgOps(self.args) # no strip
         self.seed = args.get(0, evaluate=True)
-#        print("TMsd seed", self.seed)
+
     def process(self):
-#        print("TMsd process")
         self.rng = rand.UniformRNG()
-#        print("rng", self.rng)
         self.rng.seed(self.seed)
         self.log()
         self.display()
+
     def log(self): # return an executable command str, subclass
         if self.gatherStatus and self.processStatus:
             return '%s' % (self.cmdStr)
+
     def display(self):
         if self.seed == None: # error or cancel
             return lang.msgReturnCancel
@@ -8054,19 +8054,19 @@ class TPsd(Command):
         self.cmdStr = 'TPsd'
         self.new_seed = None
         self.rng = None
+
     def gather(self):
-#        print("TPsd gather", self.args)
         args = argTools.ArgOps(self.args) # no strip
         self.seed = args.get(0, evaluate=True)
-#        print("TPsd seed", self.seed)
+
     def process(self):
-#        print("TPsd process")
         self.rng = random
-#        print("rng", self.rng)
         self.rng.seed(self.seed)
+
     def log(self): # return an executable command str, subclass
         if self.gatherStatus and self.processStatus:
             return '%s' % (self.cmdStr)
+
     def display(self):
         if self.seed == None: # error or cancel
             return lang.msgReturnCancel

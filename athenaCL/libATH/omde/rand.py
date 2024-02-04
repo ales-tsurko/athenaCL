@@ -56,8 +56,8 @@ import random as randomBuiltin
 try:
     _the_same = randomBuiltin.Random() # 2.3 and greater
 except (AttributeError, ImportError):
-     import whrandom
-     the_same = whrandom.whrandom() # 2.3 and greater
+    import whrandom
+    _the_same = whrandom.whrandom() # 2.3 and greater
         
 
 def _AlwaysTheSame():

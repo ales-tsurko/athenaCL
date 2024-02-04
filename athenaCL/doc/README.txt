@@ -4,8 +4,8 @@ athenaCL is free software, distributed under the GNU General Public License.
 www.athenacl.org
 
 ====================================================================
-athenaCL 2.0.0a16
-April 2021
+athenaCL 2.0.0a15
+7 July 2010
 This document contains the following information:
 
 I. Platform Dependencies
@@ -42,11 +42,6 @@ http://www.flexatone.net/athenaCL/athenaCL.exe
 ====================================================================
 II. SOFTWARE DEPENDENCIES:
 
-athenaCL requires Python 3.0 or later. There is no athenaCL binary: athenaCL 
-interactive sessions run inside a Python interpreter. Python is free and runs 
-on every platform. No additional software is required for basic athenaCL 
-operation. Download Python here: http://www.python.org/download.
-
 athenaCL produces both Csound and MIDI scores. Csound is free and runs on 
 every platform. Download Csound here:
 https://csound.com/.
@@ -62,7 +57,7 @@ https://python-pillow.org/
 IIIa. QUICK-START DISTRIBUTIONS:
 
 All Platforms
-    1. install Python 3
+    1. install Python
     2. decompress athenaCL distribution and place wherever desired
 
 UNIX, Command Line Environments, Macintosh MacOS X:
@@ -176,9 +171,7 @@ http://code.google.com/p/athenacl/
 ====================================================================
 VII. CREDITS and ACKNOWLEDGMENTS:
 
-athenaCL was created by Christopher Ariza. Updated to run under Python 3 by 
-Ales Tsurko in 2020. Version 2.0.0a16 was updated by Michael Gogins to 
-implement seeds for the random generators. Numerous generator ParameterObjects 
+athenaCL was created by Christopher Ariza. Numerous generator ParameterObjects 
 based in part on the Object-oriented Music Definition Environment 
 (OMDE/pmask), Copyright 2000-2001 Maurizio Umberto Puxemdu; Cmask was created 
 by Andre Bartetzki. The Command Line Interpreter is based in part on cmd.py; 
