@@ -4,3 +4,4 @@ __pycache__/
 build
 .DS_Store
 .nvim
+.pytest_cache

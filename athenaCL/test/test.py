@@ -10,7 +10,7 @@
 
 
 import unittest, doctest
-import os, time, imp, sys
+import os, time, importlib, sys
 import traceback
 
 
@@ -74,7 +74,7 @@ class ModuleGather(object):
             name = self._getName(fp)
 
             try:
-                mod = imp.load_source(name, fp)
+                mod = importlib.import_module(name)
             except Exception as excp:  # this takes all exceptions!
                 msg = ["failed import:", fp, "\n", "\tEXCEPTION:", str(excp).strip()]
                 print((" ".join(msg)))
