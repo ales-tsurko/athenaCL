@@ -5,3 +5,5 @@ build
 .DS_Store
 .nvim
 .pytest_cache
+athenaCL/demo/midi/*.xml
+athenaCL/demo/midi/*.mid
