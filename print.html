@@ -1,0 +1,3400 @@
+<!DOCTYPE HTML>
+<html lang="en" class="coal" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>athenaCL Manual</title>
+        <meta name="robots" content="noindex">
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "coal";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('coal')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="prfc01.html"><strong aria-hidden="true">1.</strong> Preface</a></li><li class="chapter-item expanded "><a href="getstart01.html"><strong aria-hidden="true">2.</strong> Getting Started</a></li><li class="chapter-item expanded "><a href="chap01.html"><strong aria-hidden="true">3.</strong> Tutorial 1: The Interactive Command Line Interface</a></li><li class="chapter-item expanded "><a href="chap02.html"><strong aria-hidden="true">4.</strong> Tutorial 2: AthenaObjects and EventModes</a></li><li class="chapter-item expanded "><a href="chap03.html"><strong aria-hidden="true">5.</strong> Tutorial 3: Creating and Editing Paths</a></li><li class="chapter-item expanded "><a href="chap04.html"><strong aria-hidden="true">6.</strong> Tutorial 4: Creating and Editing Textures</a></li><li class="chapter-item expanded "><a href="chap05.html"><strong aria-hidden="true">7.</strong> Tutorial 5: Textures and Paths</a></li><li class="chapter-item expanded "><a href="chap06.html"><strong aria-hidden="true">8.</strong> Tutorial 6: Textures and Clones</a></li><li class="chapter-item expanded "><a href="chap07.html"><strong aria-hidden="true">9.</strong> Tutorial 7: Scripting athenaCL in Python</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">athenaCL Manual</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/ales-tsurko/athenaCL" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="preface"><a class="header" href="#preface">Preface</a></h1>
+<h2 id="overview-of-the-athenacl-system"><a class="header" href="#overview-of-the-athenacl-system">Overview of the athenaCL System</a></h2>
+<p>The athenaCL system is a software tool for creating musical structures. Music is
+rendered as a polyphonic event list, or an EventSequence object. This
+EventSequence can be converted into diverse forms, or OutputFormats, including
+scores for the Csound synthesis language, Musical Instrument Digital Interface
+(MIDI) files, and other specialized formats. Within athenaCL, Orchestra and
+Instrument models provide control of and integration with diverse
+OutputFormats. Orchestra models may include complete specification, at the code
+level, of external sound sources that are created in the process of OutputFormat
+generation.</p>
+<p>The athenaCL system features specialized objects for creating and manipulating
+pitch structures, including the Pitch, the Multiset (a collection of Pitches),
+and the Path (a collection of Multisets). Paths define reusable pitch
+groups. When used as a compositional resource, a Path is interpreted by a
+Texture object (described below).</p>
+<p>The athenaCL system features three levels of algorithmic design. The first two
+levels are provided by the ParameterObject and the Texture. The ParameterObject
+is a model of a low-level one-dimensional parameter generator and
+transformer. The Texture is a model of a multi-dimensional generative musical
+part. A Texture is controlled and configured by numerous embedded
+ParameterObjects. Each ParameterObject is assigned to either event parameters,
+such as amplitude and rhythm, or Texture configuration parameters. The Texture
+interprets ParameterObject values to create EventSequences. The number of
+ParameterObjects in a Texture, as well as their function and interaction, is
+determined by the Texture's parent type (TextureModule) and Instrument
+model. Each Texture is an instance of a TextureModule. TextureModules encode
+diverse approaches to multi-dimensional algorithmic generation. The
+TextureModule manages the deployment and interaction of lower level
+ParameterObjects, as well as linear or non-linear event generation. Specialized
+TextureModules may be designed to create a wide variety of musical structures.</p>
+<p>The third layer of algorithmic design is provided by the Clone, a model of the
+multi-dimensional transformative part. The Clone transforms EventSequences
+generated by a Texture. Similar to Textures, Clones are controlled and
+configured by numerous embedded ParameterObjects.</p>
+<p>Each Texture and Clone creates a collection of Events. Each Event is a rich data
+representation that includes detailed timing, pitch, rhythm, and parameter
+data. Events are stored in EventSequence objects. The collection all Texture and
+Clone EventSequences is the complete output of athenaCL. These EventSequences
+are transformed into various OutputFormats for compositional deployment.</p>
+<p>For general information on computer aided algorithmic composition and generative
+music systems, see the resources listed here and in (Ariza [AN#969], [AN#1940]).</p>
+<p>The athenaCL system has been under development since June 2000. The software is
+cross platform, developed under an open-source license, and programmed in the
+Python language. An interactive command-line interface provides an easy-to-use
+environment for beginners and a quick reference for advanced users. The complete
+functionality of the system is alternatively available as a scriptable batch
+processor or as a programmable Python extension library.</p>
+<h2 id="getting-started-and-advanced-work"><a class="header" href="#getting-started-and-advanced-work">Getting Started and Advanced Work</a></h2>
+<p>To learn the athenaCL system, many basic concepts of the system design and
+command interface must be examined in depth. The tutorials included in this
+document provide an overview to all essential concepts. Following the tutorials
+are appendices, providing documentation useful for reference. Much of this
+reference documentation is also available from within athenaCL.</p>
+<p>All users should read and to gain familiarity with the interface and basic
+athenaCL concepts. Basic composition tools are covered in , , and . For more
+detailed information on organizing pitch structures, see .</p>
+<p>Users with experience with Python and/or other generative music systems, or
+users who have mastered the athenaCL interactive command-line interface, will
+likely want to begin storing athenaCL command scripts in Python code files. This
+approach provides a wide range of opportunities for programmatically extending
+the power of athenaCL. A common approach for advanced usage of athenaCL is to
+use the interactive command-line interface for reference and sketching, and then
+store series of commands or command-generating procedures in Python files. The
+section provides basic examples for this approach. Additional, over 30
+demonstration Python scripts are distributed with athenaCL and included in .</p>
+<h2 id="more-information"><a class="header" href="#more-information">More Information</a></h2>
+<p>This document does not offer a complete description of the history, context, and
+internal structure of the athenaCL system; such a description, including
+comparative analysis to related historical and contemporary systems and detailed
+explanation of object models and interactions, is provided in the text An Open
+Design for Computer-Aided Algorithmic Music Composition: athenaCL (Ariza 2005
+[AN#900]). Numerous additional articles are available that explore aspects of
+the athenaCL system in detail (Ariza 2002 [AN#5], 2003 [AN#425], 2004 [AN#443],
+2005 [AN#613], 2006 [AN#1343], 2007 [AN#1355], 2007 [AN#1617], 2008 [AN#1824],
+2009 [AN#1990]).</p>
+<h2 id="conventions-used-in-this-manual"><a class="header" href="#conventions-used-in-this-manual">Conventions Used in This Manual</a></h2>
+<p>The following typographical conventions are used throughout this book: Constant
+width Used for athenaCL text output as transcribed in examples. This is what the
+program displays to the user.  Constant width bold</p>
+<p>Used for user text input as transcribed in examples. This is what the user
+enters into the program.</p>
+<h2 id="production-of-this-manual"><a class="header" href="#production-of-this-manual">Production of This Manual</a></h2>
+<p>The first edition of the athenaCL Tutorial Manual was released in August of 2001
+and covered athenaCL versions 1.0 to 1.3. The second edition was released in
+June 2005 and covers athenaCL versions 1.4 and beyond. The third edition was
+released in July 2010 and convers athenaCL versions 2.0.</p>
+<p>This manual is constructed and maintained with the help of various open-source
+tools: DocBook, the Modular DocBook Stylesheet distribution, OpenJade, Python,
+and ImageMagick.</p>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="software-dependencies"><a class="header" href="#software-dependencies">Software Dependencies</a></h2>
+<p>athenaCL produces both Csound and MIDI scores. Csound is free and runs on 
+every platform. Download Csound here:
+https://csound.com/.</p>
+<p>athenaCL produces images with various Python-based graphic output systems.
+These output systems include the Python TkInter GUI library and the fork of
+Python Image Library (Pillow), and may require additional Python software. Most
+Python distributions include TkInter (MacOS systems may require additional
+configuration); Pillow is easily added to Python.  https://python-pillow.org/</p>
+<h2 id="quick-start"><a class="header" href="#quick-start">Quick-Start</a></h2>
+<ol>
+<li><code>$ python setup.py</code></li>
+<li><code>$ python athenaCL/athenacl.py</code></li>
+</ol>
+<p>Or via python prompt:</p>
+<ol>
+<li><code>&gt;&gt;&gt; import athenaCL.athenacl</code></li>
+</ol>
+<h2 id="installation"><a class="header" href="#installation">Installation</a></h2>
+<p>Two installation methods are available: (1) placing the athenaCL directory
+wherever desired, or (2) installing the athenaCL source into the Python library
+with the Python Distribution Utilities (distutils). Both permit using athenaCL
+as an interactive application and as a library imported in Python.</p>
+<p>Installing athenaCL consist of running the file &quot;setup.py&quot;, a script that
+performs installation procedures.</p>
+<p>The setup.py script can take arguments to perform optional installation
+procedures. (1) the &quot;tool&quot; argument, on UNIX and macOS systems, will install a
+command-line utility launcher, &quot;athenacl,&quot; as well as a corresponding man
+page. (2) the &quot;install&quot; argument, on all platforms, will perform a Python
+distutils installation into the Python site-packages directory. (3) the
+&quot;uninstall&quot; option will remove all athenaCL installation files and directories.</p>
+<h2 id="athenacl-via-command-line-interface"><a class="header" href="#athenacl-via-command-line-interface">athenaCL Via Command Line Interface</a></h2>
+<p>installing:</p>
+<ol>
+<li>place athenaCL directory wherever you like</li>
+<li>enter the athenaCL directory</li>
+<li><code>python setup.py</code></li>
+</ol>
+<p>or, to install the &quot;athenacl&quot; launcher and the athenaCL man page:</p>
+<ol start="3">
+<li><code>python setup.py tool</code></li>
+</ol>
+<p>or, to perform a distutils installation</p>
+<ol start="3">
+<li><code>python setup.py install</code></li>
+</ol>
+<p>launching from the command line interface:</p>
+<ol start="4">
+<li><code>python athenacl.py</code></li>
+</ol>
+<p>launching with the athenaCL tool:</p>
+<ol start="4">
+<li><code>/usr/local/bin/athenacl</code></li>
+</ol>
+<p>launching with the athenaCL tool and <code>/usr/local/bin</code> in <code>PATH</code>:</p>
+<ol start="4">
+<li><code>athenacl</code></li>
+</ol>
+<h2 id="athenacl-via-idle"><a class="header" href="#athenacl-via-idle">athenaCL Via Idle</a></h2>
+<p>installing:</p>
+<ol>
+<li>place athenaCL directory wherever you like</li>
+<li>enter the athenaCL directory</li>
+<li>double-click &quot;setup.py&quot;</li>
+</ol>
+<p>launching on Windows:</p>
+<ol start="4">
+<li>double-click &quot;athenacl.py&quot;</li>
+<li>enter &quot;y&quot; when asked to start athenaCL in IDLE</li>
+</ol>
+<p>launching from the command line interface:</p>
+<ol start="4">
+<li><code>$ python athenacl.py -s idle</code></li>
+</ol>
+<h2 id="athenacl-via-python-prompt"><a class="header" href="#athenacl-via-python-prompt">athenaCL Via Python Prompt</a></h2>
+<p>If the athenaCL setup.py script has been successfully completed, Python should
+already be aware of the location of the current athenaCL installation. If the
+athenaCL setup.py script has not been properly run, the directory containing
+athenaCL must be manually added to the Python sys.path:</p>
+<p>(if the athenaCL directory is located in the directory &quot;/src&quot;)</p>
+<ol>
+<li><code>&gt;&gt;&gt; import sys</code></li>
+<li><code>&gt;&gt;&gt; sys.path.append('/src')</code></li>
+</ol>
+<p>launching:</p>
+<ol start="3">
+<li><code>&gt;&gt;&gt; import athenaCL.athenacl</code></li>
+</ol>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="tutorial-1-the-interactive-command-line-interface"><a class="header" href="#tutorial-1-the-interactive-command-line-interface">Tutorial 1: The Interactive Command Line Interface</a></h1>
+<p>This tutorial provides essential information and examples for using athenaCL's
+interactive command-line Interpreter. This material is essential for
+understanding basic athenaCL operation and how to obtain help within the
+program.</p>
+<h2 id="starting-the-athenacl-interpreter"><a class="header" href="#starting-the-athenacl-interpreter">Starting the athenaCL Interpreter</a></h2>
+<p>Depending on your platform, there are a number of different ways to launch the
+athenaCL program and start the athenaCL Interpreter. For all platforms, using
+athenaCL requires installing (or finding) Python 2.6 (or better) on your
+system. Many advanced operating systems (UNIX-based operating systems including
+GNU/Linux and MacOS X) ship with Python installed.</p>
+<p>For complete instructions on installing and launching athenaCL in each platform,
+please see the file &quot;README.txt&quot; included in the athenaCL distribution and in .</p>
+<p>After launching athenaCL, the user is presented with a text-based display in a
+terminal or Python-interactive window. The user is presented with the following
+initialization information:</p>
+<p><strong>Initialization information</strong></p>
+<pre><code>athenaCL 2.0.0 (on darwin via terminal)
+Enter &quot;cmd&quot; to see all commands. For help enter &quot;?&quot;.
+Enter &quot;c&quot; for copyright, &quot;w&quot; for warranty, &quot;r&quot; for credits.
+
+pi{}ti{} :: 
+</code></pre>
+<p>When starting up the Interpreter, athenaCL looks in the athenaCL directory for
+the &quot;libATH&quot; folder, and then various directories within the &quot;libATH&quot;
+folder. These directories contain essential files and must be present for the
+program to run. The athenaCL prompt &quot;::&quot; is preceded by information concerning
+the AthenaObject. This will be explained in greater detail below.</p>
+<h2 id="introduction-to-commands"><a class="header" href="#introduction-to-commands">Introduction to Commands</a></h2>
+<p>When using athenaCL, the user enters commands to get things done. athenaCL
+commands are organized by prefixes, two-letter codes that designate what the
+command operates upon. Prefixes are always displayed as capitalized letters,
+though the user, when entering commands, may use lower-case letters. Some common
+prefixes are &quot;PI&quot;, for PathInstance, or &quot;TI&quot;, for TextureInstance. What follows
+the prefix usually resembles UNIX shell commands: &quot;ls&quot; for listing objects, &quot;rm&quot;
+for removing objects. For example, the command to list all the available
+TextureModules is TMls: &quot;TM&quot; for TextureModule, &quot;ls&quot; for list. When no common
+UNIX command-abbreviation is available, intuitive short abbreviations are
+used. For example, the command to create the retrograde of a PathInstance is
+PIret: &quot;PI&quot; for PathInstance, &quot;ret&quot; for retrograde.</p>
+<p>The division of commands into prefixes demonstrates, in part, the large-scale
+design of the AthenaObject. The AthenaObject consists of PathInstances and
+TextureInstances. PathInstances are objects that define pitch
+materials. TextureInstances define algorithmic music layers. Users can create,
+copy, edit and store collections of Paths and Textures within the
+AthenaObject. All Texture related commands, for example, start with a &quot;T&quot;, like
+TextureTemperament (&quot;TT&quot;), TextureClone(&quot;TC&quot;) and TextureModule (&quot;TM&quot;).</p>
+<p>In addition to the commands available for working with Paths and Textures, there
+are commands for creating various event list formats (such as Csound scores and
+MIDI files) with the EventList commands (prefix &quot;EL&quot;). The complete
+AthenaObject, with all its Paths and Textures, is handled with AthenaObject
+commands (prefix &quot;AO&quot;). These commands are used to save and control the complete
+collection of Paths and Textures.</p>
+<h2 id="viewing-command-names"><a class="header" href="#viewing-command-names">Viewing Command Names</a></h2>
+<p>When starting athenaCL, the user is presented with a prompt (::). To display a
+listing of all commands enter &quot;cmd&quot;, for command:</p>
+<p><strong>Listing all commands</strong></p>
+<pre><code>pi{y0}ti{a2} :: cmd
+athenaCL Commands:
+................................................................................
+PathInstance        PIn(new)            PIcp(copy)          PIrm(remove)
+                    PIo(select)         PIv(view)           PIe(edit)           
+                    PIdf(duration)      PIls(list)          PIh(hear)           
+                    PIret(retro)        PIrot(rot)          PIslc(slice)        
+................................................................................
+TextureModule       TMo(select)         TMv(view)           TMls(list)
+TextureParameter    TPls(list)          TPv(select)         TPmap(map)          
+                    TPe(export)         
+TextureInstance     TIn(new)            TIcp(copy)          TIrm(remove)        
+                    TIo(select)         TIv(view)           TIe(edit)           
+                    TIls(list)          TImode(mode)        TImute(mute)        
+                    TIdoc(doc)          TImap(map)          TImidi(midi)        
+TextureClone        TCn(new)            TCcp(copy)          TCrm(remove)        
+                    TCo(select)         TCv(view)           TCe(edit)           
+                    TCls(list)          TCmute(mute)        TCmap(map)          
+TextureTemperament  TTls(list)          TTo(select)         
+TextureEnsemble     TEv(view)           TEe(edit)           TEmap(map)          
+                    TEmidi(midi)        
+................................................................................
+EventOutput         EOls(list)          EOo(select)         EOrm(remove)
+EventMode           EMls(list)          EMo(select)         EMv(view)           
+                    EMi(inst)           
+EventList           ELn(new)            ELw(save)           ELv(view)           
+                    ELh(hear)           ELr(render)         ELauto(auto)        
+................................................................................
+AthenaPreferences   APdir(directory)    APea(external)      APa(audio)
+                    APgfx(graphics)     APcurs(cursor)      APdlg(dialogs)      
+                    APr(refresh)        APwid(width)        
+AthenaHistory       AHls(list)          AHexe(execute)      
+AthenaUtility       AUsys(system)       AUdoc(docs)         AUup(update)        
+                    AUbeat(beat)        AUpc(pitch)         AUmg(markov)        
+                    AUma(markov)        AUca(automata)      
+AthenaObject        AOw(save)           AOl(load)           AOmg(merge)         
+                    AOrm(remove)  
+</code></pre>
+<p>This display, organized by prefix heading, shows each command followed by a
+longer description of the commands name.</p>
+<h2 id="executing-commands"><a class="header" href="#executing-commands">Executing Commands</a></h2>
+<p>To use a command, simply enter its name. The user will be prompted for all
+additional information. For example, type &quot;PIn&quot; (or &quot;pin&quot;) at the athenaCL
+prompt:</p>
+<p><strong>Entering a command</strong></p>
+<pre><code>pi{}ti{} :: pin
+name this PathInstance: a
+enter a pitch set, sieve, spectrum, or set-class: b,c#,g
+      SC 3-8B as (B4,C#4,G4)? (y, n, or cancel): y
+      add another set? (y, n, or cancel): n
+PI a added to PathInstances.
+</code></pre>
+<p>This command prompts the user for a &quot;pitch set, sieve, spectrum, or set-class&quot;
+and then creates a multiset component of a Path. A Xenakis sieve (Xenakis 1990
+[AN#327], 1992 [AN#60]; Ariza 2004 [AN#443], 2005 [AN#613], 2009 [AN#1990]) can
+be entered using a logical string and a pitch range. Set class labels are given
+using Forte names. The user may enter the chord itself as pitch-names (with
+sharps as &quot;#&quot; and flats as &quot;$&quot;) or pitch-classes (integers that represent the
+notes of the chromatic scale) (Straus 1990 [AN#34]). For instance, the chord
+D-major can be represented with the following pitch-name string: (D, F#, A). Or,
+the same chord can be represented as a pitch class set: (2,6,9), where 0 is
+always C, 1=C#, 2=D, …, 10=A#, and 11=B. Calling the PIn command to create a new
+path named &quot;b&quot; with this pitch class set gives us the following results:</p>
+<p><strong>Entering a command with arguments</strong></p>
+<pre><code>pi{a}ti{} :: pin b d,f#,a
+PI b added to PathInstances.
+</code></pre>
+<p>Notice that in the above example the Path name and pitch collection arguments
+are entered at the same time as the command: &quot;pin b d,f#,a&quot;. As an interactive
+command-line program, athenaCL can obtain arguments from the user, and can,
+alternatively, accept space-separated arguments following a
+command. Command-line arguments allow advanced users ease and speed and, when
+called from an external environment (such as a UNIX shell or Python script),
+permit advanced scripting automation. All athenaCL commands can function both
+with arguments and with interactive prompts. Command-line arguments, however,
+are never required: if arguments are absent, the user is prompted for the
+necessary details.</p>
+<h2 id="getting-help-for-commands"><a class="header" href="#getting-help-for-commands">Getting Help for Commands</a></h2>
+<p>athenaCL provides two ways of helping the user access and learn commands. If the
+user only remembers the prefix of a command, this prefix can be entered at the
+prompt to produce a list of all commands associated with that prefix:</p>
+<p><strong>Displaying a command listing</strong></p>
+<pre><code>pi{b}ti{} :: pi
+PI (PathInstance) commands:
+   PIn              new      
+   PIcp             copy     
+   PIrm             remove   
+   PIo              select   
+   PIv              view     
+   PIe              edit     
+   PIdf             duration 
+   PIls             list     
+   PIh              hear     
+   PIret            retro    
+   PIrot            rot      
+   PIslc            slice 
+</code></pre>
+<p>Help information is available for each command and can be accessed from the
+athenaCL prompt by typing either &quot;?&quot; or &quot;help&quot; followed by the name of the
+command. The following example provides the documentation for the PIn
+command. Notice that the main documentation is followed by &quot;usage&quot;
+documentation, or the format required for providing command-line arguments:</p>
+<p><strong>Using the help command</strong></p>
+<pre><code>pi{b}ti{} :: help pin
+{topic,documentation}
+PIn                 PIn: PathInstance: New: Create a new Path from user-
+                    specified pitch groups. Users may specify pitch groups in a
+                    variety of formats. A Forte set class number (6-23A), a
+                    pitch-class set (4,3,9), a pitch-space set (-3, 23.2, 14),
+                    standard pitch letter names (A, C##, E~, G#), MIDI note
+                    numbers (58m, 62m), frequency values (222hz, 1403hz), a
+                    Xenakis sieve (5&amp;3|11), or an Audacity frequency-analysis
+                    file (import) all may be provided. Pitches may be specified
+                    by letter name (psName), pitch space (psReal), pitch class,
+                    MIDI note number, or frequency. Pitch letter names may be
+                    specified as follows: a sharp is represented as &quot;#&quot;; a flat
+                    is represented as &quot;$&quot;; a quarter sharp is represented as
+                    &quot;~&quot;; multiple sharps, quarter sharps, and flats are valid.
+                    Octave numbers (where middle-C is C4) can be used with pitch
+                    letter names to provide register. Pitch space values (as
+                    well as pitch class) place C4 at 0.0. MIDI note numbers
+                    place C4 at 60. Numerical representations may encode
+                    microtones with additional decimal places. MIDI note-numbers
+                    and frequency values must contain the appropriate unit as a
+                    string (&quot;m&quot; or &quot;hz&quot;). Xenakis sieves are entered using logic
+                    constructions of residual classes. Residual classes are
+                    specified by a modulus and shift, where modulus 3 at shift 1
+                    is notated 3@1. Logical operations are notated with &quot;&amp;&quot;
+                    (and), &quot;|&quot; (or), &quot;^&quot; (symmetric difference), and &quot;-&quot;
+                    (complementation). Residual classes and logical operators
+                    may be nested and grouped by use of braces ({}).
+                    Complementation can be applied to a single residual class or
+                    a group of residual classes. For example:
+                    -{7@0|{-5@2&amp;-4@3}}. When entering a sieve as a pitch set,
+                    the logic string may be followed by two comma-separated
+                    pitch notations for register bounds. For example &quot;3@2|4, c1,
+                    c4&quot; will take the sieve between c1 and c4. Audacity
+                    frequency-analysis files can be produced with the cross-
+                    platform open-source audio editor Audacity. In Audacity,
+                    under menu View, select Plot Spectrum, configure, and
+                    export. The file must have a .txt extension. To use the
+                    file-browser, enter &quot;import&quot;; to select the file from the
+                    prompt, enter the complete file path, optionally followed by
+                    a comma and the number of ranked pitches to read.
+usage:              pin name set1 ... setN
+</code></pre>
+<p>The same help command can be used to access information concerning additional
+topics, notations, and representations used within athenaCL. For example,
+information about Markov transition strings can be accessed with the same help
+command:</p>
+<p><strong>Accessing additional help topics</strong></p>
+<pre><code>pi{b}ti{} :: ? markov
+{topic,documentation}
+Markov Notation     Markov transition strings are entered using symbolic
+                    definitions and incomplete n-order weight specifications.
+                    The complete transition string consists of two parts: symbol
+                    definition and weights. Symbols are defined with alphabetic
+                    variable names, such as &quot;a&quot; or &quot;b&quot;; symbols may be numbers,
+                    strings, or other objects. Key and value pairs are notated
+                    as such: name{symbol}. Weights may be give in integers or
+                    floating point values. All transitions not specified are
+                    assumed to have equal weights. Weights are specified with
+                    key and value pairs notated as such: transition{name=weight
+                    | name=weight}. The &quot;:&quot; character is used as the zero-order
+                    weight key. Higher order weight keys are specified using the
+                    defined variable names separated by &quot;:&quot; characters. Weight
+                    values are given with the variable name followed by an &quot;=&quot;
+                    and the desired weight. Multiple weights are separated by
+                    the &quot;|&quot; character. All weights not specified, within a
+                    defined transition, are assumed to be zero. For example, the
+                    following string defines three variable names for the values
+                    .2, 5, and 8 and provides a zero order weight for b at 50%,
+                    a at 25%, and c at 25%: a{.2}b{5}c{8} :{a=1|b=2|c=1}.
+                    N-order weights can be included in a transition string.
+                    Thus, the following string adds first and second order
+                    weights to the same symbol definitions: a{.2}b{5}c{8}
+                    :{a=1|b=2|c=1} a:{c=2|a=1} c:{b=1} a:a:{a=3|b=9}
+                    c:b:{a=2|b=7|c=4}. For greater generality, weight keys may
+                    employ limited single-operator regular expressions within
+                    transitions. Operators permitted are &quot;*&quot; (to match all
+                    names), &quot;-&quot; (to not match a single name), and &quot;|&quot; (to match
+                    any number of names). For example, a:*:{a=3|b=9} will match
+                    &quot;a&quot; followed by any name; a:-b:{a=3|b=9} will match &quot;a&quot;
+                    followed by any name that is not &quot;b&quot;; a:b|c:{a=3|b=9} will
+                    match &quot;a&quot; followed by either &quot;b&quot; or &quot;c&quot;.
+</code></pre>
+<p>Throughout this document additional information for the reader may be
+recommended by suggesting the use of the help command. For example: (enter &quot;help
+markov&quot; for more information).</p>
+<h2 id="configuring-the-user-environment"><a class="header" href="#configuring-the-user-environment">Configuring the User Environment</a></h2>
+<p>athenaCL has many configurable settings that are saved in a preference file and
+loaded for each athenaCL session. Some of these settings have default values;
+others will need to be configured the first time a command is used.</p>
+<p>For example, following the athenaCL prompt (&quot;::&quot;) is the the athenaCL &quot;cursor
+tool.&quot; This tool, providing information on the active Texture and Path, can be
+turned on or off with the command APcurs, for AthenaPreferences cursor:</p>
+<p><strong>Toggling the athenaCL cursor tool with APcurs</strong></p>
+<pre><code>pi{b}ti{} :: apcurs
+cursor tool set to off.
+
+:: apcurs
+cursor tool set to on.
+
+pi{b}ti{} :: 
+</code></pre>
+<p>athenaCL writes files. Some of these files are audio file formats, some are
+event list formats (scores, MIDI files), and some are image files. In most
+cases, athenaCL will write a file in a user specified &quot;scratch&quot; directory with
+an automatically-generated file name. This is convenient and fast. To set the
+scratch directory, enter the APdir command, for AthenaPreferences
+directory. (Replace &quot;/Volumes/xdisc/_scratch&quot; with a complete file path to a
+suitable directory.)</p>
+<p><strong>Setting the scratch directory with APdir</strong></p>
+<pre><code>pi{b}ti{} :: apdir
+select directory to set: scratch or audio. (x or a): x
+/Users/ariza/_x/src/athenaCL
+................................................................................
+.cvsignore      .DS_Store       __init__.py     __init__.pyc    __init__.pyo    
+athenacl.py     athenacl.pyc    athenaObj.py    athenaObj.pyc   athenaObj.pyo   
+CVS             demo            docs            libATH          setup.py        
+tools     
+select a scratch directory:
+to change directory enter name, path, or &quot;..&quot;
+cancel or select? (c or s): /Volumes/xdisc/_scratch
+/Volumes/xdisc/_scratch
+................................................................................
+.DS_Store       a.mid           
+select a scratch directory:
+to change directory enter name, path, or &quot;..&quot;
+cancel or select? (c or s): s
+user scratch directory set to /Volumes/xdisc/_scratch.
+</code></pre>
+<p>The command PIh, for PathInstance hear, allows the creation of a MIDI file from
+a single Path specification. In this case, athenaCL writes the MIDI file in the
+user-specified scratch directory. After the file is written, athenaCL opens the
+file with the operating system. Depending on how the operating system is
+configured, the MIDI file should open in an appropriate player. The athenaCL
+system frequently works in this manner with the operating system and external
+programs and resources.</p>
+<p><strong>Creating a MIDI file with PIh</strong></p>
+<pre><code>pi{b}ti{} :: pih
+command.py: temporary file: /Volumes/xdisc/_scratch/ath2010.07.01.16.12.52.xml 
+PI b hear with TM LineGroove complete.
+(/Volumes/xdisc/_scratch/ath2010.07.01.16.12.52.mid)
+</code></pre>
+<p>Numerous types of graphical aids are provided by athenaCL to assist in the
+representation of musical materials. Depending on the user's Python
+installation, numerous formats of graphic files are available. Formats include
+text (within the Interpreter display), Encapsulated PostScript (convertible to
+PDF), Tk GUI Windows, JPEG, and PNG. Tk requires the Python TkInter GUI
+installation; JPEG and PNG require the Python Imaging Library (PIL)
+installation.</p>
+<p>The user can set an active graphic format with the APgfx command. For example:</p>
+<p><strong>Setting the active graphics format with APgfx</strong></p>
+<pre><code>pi{b}ti{} :: apgfx
+active graphics format: png.
+select text, eps, tk, jpg, png. (t, e, k, j, or p): p
+graphics format changed to png.
+</code></pre>
+<p>To test the production of graphic output, the TPmap command, for
+TextureParameter map, can be used:</p>
+<p><strong>Producing a graphical diagram with TPmap</strong></p>
+<pre><code>pi{b}ti{} :: tpmap 100 ru
+randomUniform, (constant, 0), (constant, 1)
+TPmap display complete.
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="tutorial-2-athenaobjects-and-eventmodes"><a class="header" href="#tutorial-2-athenaobjects-and-eventmodes">Tutorial 2: AthenaObjects and EventModes</a></h1>
+<p>This tutorial provides essential information concerning saving and opening an
+athenaCL session, as well as basic information for creating and configuring
+EventLists and EventModes.</p>
+<h2 id="introduction-to-athenaobjects"><a class="header" href="#introduction-to-athenaobjects">Introduction to AthenaObjects</a></h2>
+<p>The AthenaObject stores the collection of user-created PathInstances and
+TextureInstances, as well as the names of the active objects and other settings
+relevant to the active athenaCL session (and not stored in the user preference
+file). The AthenaObject, when saved, is stored as an XML file. When athenaCL
+creates an XML AthenaObject file, the resulting file contains the complete state
+of the active AthenaObject.</p>
+<h2 id="file-dialogs-in-athenacl"><a class="header" href="#file-dialogs-in-athenacl">File Dialogs in athenaCL</a></h2>
+<p>The athenaCL system supports a variety of styles of file dialogs, or the
+interface used to obtain and write files or directories. The default style of
+file dialog uses a custom text interface that lets the user browse their file
+system. Alternatively, all commands that require file or directory paths may be
+executed by supplying the complete file path as a command-line argument.</p>
+<p>Use of text-base file dialogs, however, may not be convenient for some
+users. For this reason athenaCL offers GUI-based graphical file dialogs on
+platforms and environments that support such features. On Python installations
+that have the Tk GUI library TkInter installed, Tk-based file dialogs are
+available. On the Macintosh platform (OS9 and OSX) native MacOS file-dialogs are
+available. To change they athenaCL dialog style, enter the command APdlg:</p>
+<p><strong>Changing the file dialog style with APdlg</strong></p>
+<pre><code>pi{}ti{} :: apdlg
+active dialog visual method: text.
+select text, tk, or mac. (t, k, or m): t
+dialog visual method changed to text.
+</code></pre>
+<p>Note: on some platforms use of GUI windows from inside a text-environment may
+cause unexpected results. In some cases, the GUI window may appear behind all
+other windows, in the background.</p>
+<h2 id="loading-and-removing-an-athenaobject"><a class="header" href="#loading-and-removing-an-athenaobject">Loading and Removing an AthenaObject</a></h2>
+<p>The command AOl, for AthenaObject load, permits the user to load an AthenaObject
+XML file. Numerous small demonstration files are included within athenaCL. In
+the following example, the user loads the file &quot;demo01.xml&quot;.</p>
+<p>The following display demonstrates use of the text-based file-dialogs. When
+using the text-based interface, the user must select a directory before
+selecting a file. In the example below, the user enters &quot;demo&quot; to enter the
+&quot;demo&quot; directory in the athenaCL directory. The user then enter &quot;s&quot; to select
+this directory. Next, the user has the option the select a file from this
+directory, change the directory, or cancel. The user chooses to select a file
+with &quot;f&quot;. After entering the name of the file (&quot;demo01.xml&quot;) and confirming, the
+AthenaObject is loaded:</p>
+<p><strong>Loading an AthenaObject with text-based file selection</strong></p>
+<pre><code>pi{}ti{} :: aol
+select an AthenaObject file:
+name file, change directory, or cancel? (f, cd, c): cd
+/Volumes/xdisc/_sync/_x/src/athenacl/athenaCL/demo/legacy
+................................................................................
+.svn            __init__.py     demo01.xml      demo03.xml      demo05.xml      
+spectrum01.txt  tutorial02.xml  tutorial03.xml  tutorial04.xml  tutorial05.xml  
+tutorial06.xml  tutorial07.xml  tutorial09.xml  
+to change directory enter name, path, or &quot;..&quot;
+cancel or select? (c or s): s
+select an AthenaObject file:
+name file, change directory, or cancel? (f, cd, c): f
+name file? demo01.xml
+      1.3.1 xml AthenaObject loaded (00:01):
+/Volumes/xdisc/_sync/_x/src/athenacl/athenaCL/demo/legacy/demo01.xml
+</code></pre>
+<p>To confirm that the AthenaObject has been loaded, the user may enter TIls to
+display a list of all TextureInstances. (For more information concerning
+Textures, see ).</p>
+<p><strong>Listing TextureInstances with Tils</strong></p>
+<pre><code>pi{y0}ti{a2} :: tils
+TextureInstances available:
+{name,status,TM,PI,instrument,time,TC}
+   _space           + MonophonicOrnament x0          62  39.0--40.0   0
+   a0               + MonophonicOrnament y0          50  01.0--41.0   0
+   a1               + MonophonicOrnament y0          50  01.0--41.0   0
+ + a2               + MonophonicOrnament y0          50  01.0--41.0   0
+</code></pre>
+<p>The entire AthenaObject can be erased and set to its initial state without
+restarting the athenaCL program. The following example uses AOrm, for
+AthenaObject remove, to re-initialize the AthenaObject. Note: the AOrm will
+permanently remove all objects within athenaCL and cannot be un-done.</p>
+<p><strong>Reinitializing the AthenaObject with AOrm</strong></p>
+<pre><code>pi{y0}ti{a2} :: aorm
+destroy the current AthenaObject? (y or n): y
+reinitializing AthenaObject.
+
+pi{}ti{} :: 
+</code></pre>
+<p>If the AthenaObject file is located in the athenaCL &quot;demo&quot; directory, or a
+directory from which a file was opened or saved-to by the user within the
+current session, athenaCL can find the file by giving the AOl command with the
+file's name as a command-line argument. To reload &quot;demo01.xml&quot;, the user may
+enter the following arguments:</p>
+<p><strong>Loading an AthenaObject from the command-line</strong></p>
+<pre><code>pi{}ti{} :: aol demo01.xml
+      1.3.1 xml AthenaObject loaded (00:01):
+/Volumes/xdisc/_sync/_x/src/athenacl/athenaCL/demo/legacy/demo01.xml
+</code></pre>
+<h2 id="eventmodes-and-eventoutputs"><a class="header" href="#eventmodes-and-eventoutputs">EventModes and EventOutputs</a></h2>
+<p>After loading a demonstration file containing TextureInstances, athenaCL can be
+used to create an EventList. As a poly-paradigm system with integrated
+instrument models, athenaCL supports numerous formats of EventLists and can work
+with a wide variety of sound sources, including Csound and MIDI. What types of
+EventLists are created depends on two settings within athenaCL: the EventMode
+and the EventOutput.</p>
+<p>The EventModes configure athenaCL for working with a particular sound source and
+Orchestra model, such as the internal Csound orchestra (csoundNative), external
+Csound orchestras (csoundExternal), various types of MIDI files (generalMidi an
+generalMidiPercussion), and others. The EventMode determines what instruments
+are available for Texture creation (see , as well as the operation of some
+EventList commands. In some cases, the EventMode forces certain EventOutput
+formats to be written as well.</p>
+<p>The EventOutputs select what file formats will be created when a new EventList
+is generated. athenaCL permits the user to create an EventList in numerous
+formats simultaneously. For example, a Csound score and orchestra, a MIDI file,
+and tab-delimited table can all be produced from one call to the EventList new
+command. Some EventOutput formats are created only if the AthenaObject contains
+Textures created in the appropriate EventMode. Other EventOutput formats can be
+created with any Texture in any EventMode. Such conflicts, however, are never a
+problem: athenaCL simply creates whatever EventOutput formats are appropriate
+based on the user-specified request.</p>
+<p>To view the current EventMode, enter EMls. To view the current list of selected
+EventOutputs, enter EOls. The following example demonstrates these commands:</p>
+<p><strong>Viewing EventMode and EventOutputs</strong></p>
+<pre><code>pi{y0}ti{a2} :: emls
+EventMode modes available:
+{name}
+   csoundExternal      
+ + csoundNative        
+   csoundSilence       
+   midi                
+   midiPercussion      
+   superColliderNative 
+
+pi{y0}ti{a2} :: eols
+EventOutput active:
+{name}
+   acToolbox         
+   audioFile         
+   csoundBatch       
+ + csoundData        
+   csoundOrchestra   
+   csoundScore       
+ + midiFile          
+   pureDataArray     
+   superColliderTask 
+   textSpace         
+   textTab           
+ + xmlAthenaObject  
+</code></pre>
+<p>To select an additional EventOutput to be requested when a new EventList is
+created, enter the command EOo, for EventOutput select. To remove an
+EventOutput, enter the command EOrm, for EventOutput remove. In the following
+example, the user adds a tab-delimited table output (&quot;textTab&quot;) and a
+specialized output file for the AC Toolbox (&quot;acToolbox&quot;). After viewing the
+EventOutput list, these EventOutputs are removed. Note: EventOutputs, like many
+selection in athenaCL, can be designated using automatic acronym expansion
+(AAE), the user providing only the leading character and capitals.</p>
+<p><strong>Adding and Removing EventOutputs</strong></p>
+<pre><code>pi{y0}ti{a2} :: eoo tt at
+EventOutput formats: midiFile, xmlAthenaObject, csoundData, textTab, acToolbox.
+
+pi{y0}ti{a2} :: eols
+EventOutput active:
+{name}
+ + acToolbox         
+   audioFile         
+   csoundBatch       
+ + csoundData        
+   csoundOrchestra   
+   csoundScore       
+ + midiFile          
+   pureDataArray     
+   superColliderTask 
+   textSpace         
+ + textTab           
+ + xmlAthenaObject  
+
+pi{y0}ti{a2} :: eorm tt at
+EventOutput formats: midiFile, xmlAthenaObject, csoundData.
+</code></pre>
+<h2 id="creating-an-eventlist"><a class="header" href="#creating-an-eventlist">Creating an EventList</a></h2>
+<p>To create an EventList, the command ELn, for EventList new, must be used. This
+command generates a new EventList for each Texture and Clone, and writes
+necessary EventOutput formats. Each time the ELn command is called, a new
+musical variant (depending on Texture, Clone, and ParameterObject specification)
+is produced. It is possible, even likely, that two EventLists, generated from
+the same AthenaObject file, will not be identical. EventLists, further, are
+never stored within an AthenaObject. For this reason, users should be careful to
+save and preserve produced EventList files.</p>
+<p>When using the ELn command alone, temporary files are created, either in a
+system-location, or in the scratch directory selected by the user. The user may
+also, optionally, name the EventList. The EventList name is given as a file name
+(or a complete file path) ending with an &quot;.xml&quot; extension. Although the ELn
+command may produce many files, only one file path needs to be provided: all
+other EventOutput format file names are derived from this source .xml file
+path. If EventOutput xmlAthenaObject is active, an XML AthenaObject file will be
+written along with whatever user-specified or EventMode-mandated EventOutput
+formats are created.</p>
+<p>In the example above, the user's EventOutput format specification indicates that
+midiFile and xmlAthenaObject are active outputs. The current EventMode, however,
+is set to csoundNative, and the Textures of &quot;demo01.xml&quot;, upon examination, were
+created with csoundNative instruments. For these reasons, the ELn command, in
+this case, will produce an .xml AthenaObject file, a Csound .csd file, a MIDI
+file (.mid), and a script file for processing the Csound orchestra and score
+(.bat). For example:</p>
+<p><strong>Creating a new EventList with Eln</strong></p>
+<pre><code>pi{y0}ti{a2} :: eln
+      EventList ath2010.07.02.13.22.35 complete:
+/Volumes/xdisc/_scratch/ath2010.07.02.13.22.35.bat
+/Volumes/xdisc/_scratch/ath2010.07.02.13.22.35.csd
+/Volumes/xdisc/_scratch/ath2010.07.02.13.22.35.mid
+/Volumes/xdisc/_scratch/ath2010.07.02.13.22.35.xml
+</code></pre>
+<p>Csound files require additional processing to hear audio from the results: this
+will be demonstrated below. The MIDI file, however, can be listened to
+immediately with any MIDI file player, such as QuickTime. To hear the file
+produced by ELn, enter the command ELh, for EventList hear:</p>
+<p><strong>Opening an EventList with Elh</strong></p>
+<pre><code>pi{y0}ti{a2} :: elh
+EventList hear initiated: /Volumes/xdisc/_scratch/ath2010.07.02.13.22.35.mid
+</code></pre>
+<p>Depending on operating system configuration, the ELh command should open the
+newly-created MIDI file in a MIDI-file player. Alternatively, the MIDI file can
+be opened in an application that supports MIDI files, such as a notation program
+or sequencer.</p>
+<p>The ELn command, as all athenaCL commands, can be used with command-line
+arguments. To create an EventList in a specific directory, simply provide a
+complete file path following the the ELn command. (Replace
+&quot;/Volumes/xdisc/_scratch/&quot; with a complete file path to a suitable directory.)</p>
+<p><strong>Creating a new EventList with Eln and command-line arguments</strong></p>
+<pre><code>pi{y0}ti{a2} :: eln /Volumes/xdisc/_scratch/test02.xml
+      EventList test02 complete:
+/Volumes/xdisc/_scratch/test02.bat
+/Volumes/xdisc/_scratch/test02.csd
+/Volumes/xdisc/_scratch/test02.mid
+/Volumes/xdisc/_scratch/test02.xml
+</code></pre>
+<p>Using the ELh command to listen to this EventList, the user should identify that
+although &quot;test01&quot; and &quot;test02&quot; are closely related, each musical fragment, due
+to algorithmic variation, has differences.</p>
+<h2 id="configuring-and-using-csound"><a class="header" href="#configuring-and-using-csound">Configuring and Using Csound</a></h2>
+<p>Although Csound files were created in the above examples, only the resulting
+MIDI files were auditioned. To produce audio files with Csound, some additional
+configuration may be necessary.</p>
+<p>To create an audio file with Csound, two files are required: a score (.sco) and
+an orchestra (.orc); alternatively, both files can be combined into a single XML
+file called (within athenaCL) a csoundData file (.csd). With the csoundNative
+instruments and EventMode, all necessary Csound files are created by
+athenaCL. To activate csoundData file production, the EventOutput csoundData
+must be selected. Alternatively, users can create only a Csound score (with
+EventModes csoundExternal or csoundSilence), and apply this score to any desired
+external Csound orchestra.</p>
+<p>The Csound audio rendering software must be installed separately. Csound is an
+open source, free, cross platform program available for all major operating
+systems.</p>
+<p>Once configured properly, athenaCL provides commands to control Csound
+rendering. The user may be required to provide the location of (file path to)
+the Csound program; the location of the Csound program is set with the APea
+command, or Athena Preferences external applications command. Each platform has
+a different default Csound application specified. Unix: default position is
+/usr/local/bin/csound; MacOS X: default Csound is the same as Unix; Windows:
+users must select the Csound executable, &quot;winsound.exe,&quot; with the APea
+command. The user can select a different Csound with the APea command; this
+selection is stored in the user preferences and is maintained between athenaCL
+sessions.</p>
+<p>Assuming that the necessary Csound files were created with ELn as demonstrated
+above, the user may view the Csound score file created with the command ELv, or
+EventList view. Depending on operating system configuration, this command will
+open the score file with a platform-specific text reader. Alternatively, the
+.sco file can be manually selected and opened by the user.  Whenever athenaCL
+creates Csound files under EventMode csoundNative, a script file (.bat) is
+created to automate rendering of the audio file from the Csound score and
+orchestra (or .csd file). The script instructs Csound to create an audio file
+with the same name as the score in the same directory as the score, orchestra,
+and batch file.</p>
+<p>Prior to writing files with the ELn command, the desired audio file format can
+be specified from within athenaCL using the command APa. The user will be
+prompted to select a file format from the options given. Note: the user must set
+Csound options before executing ELn; otherwise, they will have no effect until a
+new EventList is created.</p>
+<p><strong>Changing the Csound audio file format with CPff</strong></p>
+<pre><code>pi{y0}ti{a2} :: apa
+select format, channels, or rate. (f,c,r): f
+current audio file format: aif.
+select aif, wav, or sd2. (a, w, or s): a
+audio format set to 'aif'.
+</code></pre>
+<p>Assuming correct Csound installation and configuration within athenaCL, the user
+can enter ELr to automatically initiate Csound rendering of the last Csound
+score created with ELn. ELr, using the operating system, calls the
+athenaCL-created script. For ELr to function, and thus the ELn-created script to
+function, the Csound score and orchestra files (or .csd file) must remain in
+their original locations.</p>
+<p><strong>Rendering a Csound score</strong></p>
+<pre><code>pi{y0}ti{a2} :: elr
+audio rendering initiated: /Volumes/xdisc/_scratch/test02.bat
+</code></pre>
+<p>Alternatively, users can render Csound files created in athenaCL within any
+Csound application, just as they would for any other Csound score and orchestra,
+manually setting file Paths, file formats, and Csound option flags. See Csound
+documentation for more information on using Csound.</p>
+<p>As demonstrated above with MIDI files, the user can open the Csound-rendered
+audio file with the ELh command. This command opens the audio file with a
+platform-specific media player.</p>
+<p><strong>Opening Csound-generated audio files with ELh</strong></p>
+<pre><code>pi{y0}ti{a2} :: elh
+EventList hear initiated: /Volumes/xdisc/_scratch/test02.aif
+EventList hear initiated: /Volumes/xdisc/_scratch/test02.mid
+</code></pre>
+<p>To summarize, there are three athenaCL commands needed to create, render, and
+hear a Csound score, and they must be executed in order: ELn, ELr, ELh. To link
+these three commands, the user can set a automation preference with the ELauto
+command. When this option is toggled, the single command ELn will create an
+EventList, render it in Csound, and open the Csound-created audio file with a
+platform-specific media player.</p>
+<h2 id="saving-and-merging-athenaobjects"><a class="header" href="#saving-and-merging-athenaobjects">Saving and Merging AthenaObjects</a></h2>
+<p>Loading a new AthenaObject will completely replace the current AthenaObject
+contents. For this reason, users should always save their work before loading a
+new AthenaObject. The user can, alternatively, merge AthenaObjects. Merging is a
+powerful tool: the user can combine many AthenaObjects that have been saved
+separately, or combine an AthenaObject numerous times with itself. In the
+example below, the user merges &quot;demo01.xml&quot;, loaded above, with another of the
+same AthenaObject &quot;demo01.xml&quot;. The file paths for athenaCL demonstration files
+are known to athenaCL, and thus the user can simply provide the name of the
+demonstration file as a command-line argument.</p>
+<p><strong>Merging AthenaObjects with AOmg</strong></p>
+<pre><code>pi{y0}ti{a2} :: aomg demo01.xml
+      1.3.1 xml AthenaObject merged (00:01):
+/Volumes/xdisc/_sync/_x/src/athenacl/athenaCL/demo/legacy/demo01.xml
+
+pi{y0}ti{a2} :: 
+</code></pre>
+<p>The command TIls can be used to confirm that the AthenaObjects have been
+merged. The AOmg command, in the case that two Paths or Textures have the same
+name, automatically alters the name by appending an underscore (&quot;_&quot;). In the
+case where an AthenaObject is merged with itself as in this example, each
+Texture and Path is duplicated.</p>
+<p><strong>Listing TextureInstances</strong></p>
+<pre><code>pi{y0}ti{a2} :: tils
+TextureInstances available:
+{name,status,TM,PI,instrument,time,TC}
+   _space           + MonophonicOrnament x0          62  39.0--40.0   0
+   _space_          + MonophonicOrnament x0_         62  39.0--40.0   0
+   a0               + MonophonicOrnament y0          50  01.0--41.0   0
+   a0_              + MonophonicOrnament y0_         50  01.0--41.0   0
+   a1               + MonophonicOrnament y0          50  01.0--41.0   0
+   a1_              + MonophonicOrnament y0_         50  01.0--41.0   0
+ + a2               + MonophonicOrnament y0          50  01.0--41.0   0
+   a2_              + MonophonicOrnament y0_         50  01.0--41.0   0
+
+</code></pre>
+<p>As shown above, the user may create a new MIDI or Csound EventList of this new
+AthenaObject and audition the results. As should be clear, the resulting musical
+structure will sound more dense due to the additional Textures. Due to
+algorithmic variation, each Texture will remain relatively independent.</p>
+<p>To save the current AthenaObject, the user may create an XML AthenaObject
+file. Although AthenaObject files may be created with the proper EventOutput
+selection and by use of the ELn command, in same cases the user my want to
+create the XML AthenaObject file alone. The command AOw, for AthenaObject Write,
+provides this functionality. The user must name the AthenaObject with a &quot;.xml&quot;
+extension. In the example below the user saves the merged files as a new
+AthenaObject named &quot;merged.xml&quot; using a command-line argument. If desired, the
+AOw command can be used without command-line arguments to select the location of
+the file with an interactive file dialog. (Replace &quot;/Volumes/xdisc/_scratch/&quot;
+with a complete file path to a suitable directory.)</p>
+<p><strong>Creating a new AthenaObject with AOw</strong></p>
+<pre><code>pi{y0}ti{a2} :: aow /Volumes/xdisc/_scratch/merged.xml
+      AthenaObject saved:
+/Volumes/xdisc/_scratch/merged.xml
+</code></pre>
+<p>Saving your work in athenaCL is very important, and should be done often. The
+athenaCL system can not reconstruct an AthenaObject from an EventList or an
+audio file; an athenaCL session can only be reconstructed by loading an
+AthenaObject XML file.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="tutorial-3-creating-and-editing-paths"><a class="header" href="#tutorial-3-creating-and-editing-paths">Tutorial 3: Creating and Editing Paths</a></h1>
+<p>This tutorial demonstrates the basic features of the Path, including creating,
+storing, examining, and editing Paths.</p>
+<h2 id="introduction-to-paths"><a class="header" href="#introduction-to-paths">Introduction to Paths</a></h2>
+<p>A PathInstance (or a Path or PI) is an ordered collection of pitch groups. A
+pitch group, or a Multiset, is the simultaneous representation of pitch-space,
+pitch-class space, and set-class information for a collection of
+microtonally-specified pitches. This collection can be treated as an ordered or
+unordered collection, can be edited by transposition, replacement, or serial
+re-ordering, and can be used by one or more Textures to provide pitch materials
+that are then independently transposed and interpreted by the Texture and its
+ParameterObjects.</p>
+<p>A PathInstance allows the representation of ordered content groups, and presents
+this representation as a multifaceted object. Paths can be of any length, from
+one to many Multisets long. A Multiset can be specified in terms of pitch class
+(excluding octave information with integers from 0 to 11), or in terms of
+pitch-space (including octave information with integers below 0 or above 11, or
+with register-specific note names such as C3 and G#12). A Multiset can also be
+specified as a group, set, or scale sequence such as a Forte set-class (Forte
+1973 [AN#161]) or a Xenakis sieve (Ariza 2005 [AN#613]). Finally, Multisets can
+be derived from spectrums and frequency analysis information provided from the
+cross-platform audio editor Audacity (enter &quot;help audacity&quot; for more
+information).</p>
+<p>A Path can be developed as a network of intervallic and motivic
+associations. The interpretation of a Path by a Texture provides access to
+diverse pitch representations for a variety of musical contexts, and permits
+numerous Textures to share identical or related pitch information. The use of a
+Path in a Texture, however, is optional: a Path can function, at a minimum,
+simply as a referential point in Pitch space from which subsequent Texture
+transpositions are referenced.</p>
+<h2 id="creating-selecting-and-viewing-pathinstances"><a class="header" href="#creating-selecting-and-viewing-pathinstances">Creating, Selecting, and Viewing PathInstances</a></h2>
+<p>To create a PathInstance, enter PIn (for PathInstance new) at the athenaCL
+prompt. You must name the new Path, and then supply a pitch group, Forte-number,
+Xenakis sieve, or alternative pitch representation (enter &quot;help pitch&quot; for more
+information on pitch representations).</p>
+<p><strong>Creating a new PathInstance with PIn</strong></p>
+<pre><code>pi{}ti{} :: pin
+name this PathInstance: pathA
+enter a pitch set, sieve, spectrum, or set-class: e$, e, c#
+      SC 3-2B as (D#4,E4,C#4)? (y, n, or cancel): y
+      add another set? (y, n, or cancel): y
+enter a pitch set, sieve, spectrum, or set-class: 0,1,6,7
+      SC 4-9 as (C4,C#4,F#4,G4)? (y, n, or cancel): y
+      add another set? (y, n, or cancel): y
+enter a pitch set, sieve, spectrum, or set-class: 3-11
+      SC 3-11A as (C4,D#4,G4)? (y, n, or cancel): y
+      add another set? (y, n, or cancel): y
+enter a pitch set, sieve, spectrum, or set-class: 7@3|6@4, g2, c4
+      SC 4-6 as (A#2,B2,F3,B3,C4)? (y, n, or cancel): y
+      add another set? (y, n, or cancel): n
+PI pathA added to PathInstances.
+
+pi{pathA}ti{} :: 
+</code></pre>
+<p>Note that after successfully creating a Path, the athenaCL cursor tool changes
+to reflect the active Path: the name in parenthesis following &quot;pi&quot; designates
+the active Path (&quot;pathA&quot;). The same information is provided for a
+TextureInstance following the &quot;ti&quot; prefix. To view the active PI, enter PIv at
+the athenaCL prompt:</p>
+<p><strong>Viewing a Path with PIv</strong></p>
+<pre><code>pi{pathA}ti{} :: piv
+PI: pathA
+psPath              3,4,1       0,1,6,7        0,3,7      -14,-13,-7,-1,0  
+                    D#4,E4,C#4  C4,C#4,F#4,G4  C4,D#4,G4  A#2,B2,F3,B3,C4  
+pcsPath             3,4,1       0,1,6,7        0,3,7      10,11,5,11,0     
+scPath              3-2B        4-9            3-11A      4-6              
+durFraction         1(25%)      1(25%)         1(25%)     1(25%)           
+TI References: none.
+</code></pre>
+<p>This display provides all essential information about a Path. The header
+contains the name of the Path (&quot;pathA&quot;). The parallel presentation of psPath,
+pcsPath, and scPath illustrates the simultaneous availability of pitch space,
+pitch class space, and set class representations. The label &quot;TI references&quot;,
+when needed, provides information on which TextureInstances link to this
+PathInstance.</p>
+<p>In order to hear a possible interpretation of this Path, the command PIh
+generates a MIDI file based on a simple interpretation of the Path with the
+active TextureModule. The resulting musical structure is only provided to
+audition the Path, and uses default values for all musical parameters. The MIDI
+file is written in the user-specified scratch directory (see ) and is opened via
+the operating system.</p>
+<p><strong>Creating a MIDI file with PIh</strong></p>
+<pre><code>pi{pathA}ti{} :: pih
+PI pathA hear with TM LineGroove complete.
+(/Volumes/xdisc/_scratch/ath2010.07.02.16.29.39.mid)
+</code></pre>
+<p>A second Path can be created exclusively with Forte set class numbers. In this
+example, all arguments are provided via the command line:</p>
+<p><strong>Creating a Path with Forte numbers</strong></p>
+<pre><code>pi{pathA}ti{} :: pin pathB 5-3 6-4 7-34 4-14
+PI pathB added to PathInstances.
+</code></pre>
+<p>A newly-created Path always becomes the active Path. Entering PIv will display
+the details of the newly created Path:</p>
+<p><strong>Displaying a Path</strong></p>
+<pre><code>pi{pathB}ti{} :: piv
+PI: pathB
+psPath              0,1,2,4,5        0,1,2,4,5,6          0,1,3,4,6,8,10        
+                    C4,C#4,D4,E4,F4  C4,C#4,D4,E4,F4,F#4  C4,C#4,D#4,E4,F#4,G#4,
+pcsPath             0,1,2,4,5        0,1,2,4,5,6          0,1,3,4,6,8,10        
+scPath              5-3A             6-4                  7-34                  
+durFraction         1(25%)           1(25%)               1(25%)                
+                    ............................................................
+                         0,2,3,7       
+                    A#4  C4,D4,D#4,G4  
+                         0,2,3,7       
+                         4-14A         
+                         1(25%)        
+TI References: none.
+</code></pre>
+<p>As is clear from the PIv display above, when a Multiset in a Path is entered as
+a Set class, a pitch space and a pitch class space representation (psPath,
+pcsPath) are created from the normal-form of the desired SetClass.</p>
+<p>In order to display the complete collection of Paths available in the
+AthenaObject, the user enters PIls, for PathInstance list:</p>
+<p><strong>Listing Paths</strong></p>
+<pre><code>pi{pathB}ti{} :: pils
+PathInstances available:
+{name,TIrefs,scPath}
+   pathA            0  3-2B,4-9,3-11A,4-6  
+ + pathB            0  5-3A,6-4,7-34,4-14A 
+</code></pre>
+<p>Many displays provided by athenaCL are given in columns of data. After whatever
+header information is give, a key, in braces (&quot;{}&quot;), is provided to define the
+data provided in each column. In the example above, the key shows that each row
+contains the name of the PI, the number of TI references, the number of
+PathVoices, and an scPath representation of the Path. The &quot;+&quot; next to &quot;pathB&quot;
+illustrates that this PI is currently active. All &quot;ls&quot; commands use a similar
+designation.</p>
+<p>Many commands in athenaCL function by using an &quot;active&quot; object. The active PI
+defines which Path is used in many different commands. For example, the PIv
+command, when used without an argument for which Path to display, displays the
+active Path.</p>
+<p>To select a different PI as the active PI, simply enter PIo. The user is
+prompted to either enter the name of the Path to select, or its order number
+from the &quot;ls&quot; view (where 1 is pathA, 2 is pathB). Displaying the list of all
+PathInstances will confirm that pathA is now the selected PI.</p>
+<p><strong>Selecting Paths</strong></p>
+<pre><code>pi{pathB}ti{} :: pio
+select a path to activate: (name or number 1-2): pathA
+PI pathA now active.
+
+pi{pathA}ti{} :: pils
+PathInstances available:
+{name,TIrefs,scPath}
+ + pathA            0  3-2B,4-9,3-11A,4-6  
+   pathB            0  5-3A,6-4,7-34,4-14A 
+</code></pre>
+<p>Alternatively the user can enter the name of the Path to be selected as a
+command-line argument with the PIo command. After making pathA active, the user
+can make pathB active again by entering the following:</p>
+<p><strong>Selecting a Path with an argument</strong></p>
+<pre><code>pi{pathA}ti{} :: pio pathB
+PI pathB now active.
+</code></pre>
+<h2 id="copying-and-removing-pathinstances"><a class="header" href="#copying-and-removing-pathinstances">Copying and Removing PathInstances</a></h2>
+<p>In order to manage the collection of Paths in the AthenaObject, the user can
+copy and remove Paths. In all cases of copying and removing user-defined objects
+in athenaCL, the active object is never assumed to be the object that the
+command should be performed upon. Said another way, the user must always specify
+which object(s) to copy or remove.</p>
+<p>To copy a Path instance, enter PIcp and select a Path to copy:</p>
+<p><strong>Copying a Path with PIcp</strong></p>
+<pre><code>pi{pathB}ti{} :: picp
+select a path to copy: (name or number 1-2): pathB
+name the copy of path pathB: pathC
+PI pathC added to PathInstances.
+
+pi{pathC}ti{} :: pils
+PathInstances available:
+{name,TIrefs,scPath}
+   pathA            0  3-2B,4-9,3-11A,4-6  
+   pathB            0  5-3A,6-4,7-34,4-14A 
+ + pathC            0  5-3A,6-4,7-34,4-14A 
+</code></pre>
+<p>To delete a Path, enter PIrm and select a Path to delete as above. In the
+example below, the Path to delete is given with a command line argument:</p>
+<p><strong>Removing a Path with PIrm</strong></p>
+<pre><code>pi{pathC}ti{} :: pirm pathB
+PI pathB destroyed.
+</code></pre>
+<h2 id="editing-pathinstances"><a class="header" href="#editing-pathinstances">Editing PathInstances</a></h2>
+<p>A Path can be edited as a serial succession of Multisets with the standard
+assortment of serial operations: retrograde, rotation, and slice. Additionally,
+each Multiset in a Path can be changed, either by transposition or replacement.</p>
+<p>Whenever a serial edit is performed on a Path, the edited Path becomes a new,
+distinct Path and the original Path is left unchanged. For example, to create
+the retrograde of the active Path, enter PIret. The user must provide the name
+of the new Path:</p>
+<p><strong>Creating a retrograde of a Path with PIret</strong></p>
+<pre><code>pi{pathC}ti{} :: piret
+name this PathInstance: pathCret
+retrograde PI pathCret added to PathInstances.
+
+pi{pathCret}ti{} :: pils
+PathInstances available:
+{name,TIrefs,scPath}
+   pathA            0  3-2B,4-9,3-11A,4-6  
+   pathC            0  5-3A,6-4,7-34,4-14A 
+ + pathCret         0  4-14A,7-34,6-4,5-3A 
+</code></pre>
+<p>To create a rotation, the user, after entering PIrot, must enter the number of
+the Multiset to occupy the new first position. If the new first position is to
+be the second Multiset, the user would enter 2:</p>
+<p><strong>Creating a rotation of a Path with PIrot</strong></p>
+<pre><code>pi{pathCret}ti{} :: pirot
+name this PathInstance: pathCretRot
+which chord should start the rotation? (positions 2-4): 2
+rotation PI pathCretRot added to PathInstances.
+
+pi{pathCretRot}ti{} :: pils
+PathInstances available:
+{name,TIrefs,scPath}
+   pathA            0  3-2B,4-9,3-11A,4-6  
+   pathC            0  5-3A,6-4,7-34,4-14A 
+   pathCret         0  4-14A,7-34,6-4,5-3A 
+ + pathCretRot      0  7-34,6-4,5-3A,4-14A 
+</code></pre>
+<p>A slice will extract a segment from a Path. To create a slice, enter PIslc. The
+user is prompted for the name of the new Path, and the start and end Multiset
+positions. If the slice is to only contain the last two chords of a four chord
+Path, for example, the start and end positions would be 3,4:</p>
+<p><strong>Creating a slice of a Path with PIslc</strong></p>
+<pre><code>pi{pathCretRot}ti{} :: pislc
+name this slice of path pathCretRot: pathD
+which chords should bound the slice? (positions 1 - 4): 3,4
+slice PI pathD added to PathInstances.
+
+pi{pathD}ti{} :: pils
+PathInstances available:
+{name,TIrefs,scPath}
+   pathA            0  3-2B,4-9,3-11A,4-6  
+   pathC            0  5-3A,6-4,7-34,4-14A 
+   pathCret         0  4-14A,7-34,6-4,5-3A 
+   pathCretRot      0  7-34,6-4,5-3A,4-14A 
+ + pathD            0  5-3A,4-14A      
+</code></pre>
+<p>There are three ways to edit a single Multiset within a Path using the PIe
+command: by replacement, by transposition, or by inversion. In all cases, the
+number of elements in the Multiset must be maintained.</p>
+<p>To edit a single Multiset in a Path enter PIe:</p>
+<p><strong>Transposing a set within a Path</strong></p>
+<pre><code>pi{pathD}ti{} :: pie
+edit PI pathD
+enter position to edit (positions 1-2): 2
+replace, transpose, or invert set (0,2,3,7): (r, t, or i): t
+enter a transposition method: literal or modulus? (l or m): l
+enter a positive or negative transposition: 8
+PI pathD edited.
+
+pi{pathD}ti{} :: piv
+PI: pathD
+psPath              0,1,2,4,5        8,10,11,15      
+                    C4,C#4,D4,E4,F4  G#4,A#4,B4,D#5  
+pcsPath             0,1,2,4,5        8,10,11,3       
+scPath              5-3A             4-14A           
+durFraction         1(50%)           1(50%)          
+TI References: none.
+</code></pre>
+<p>Here the user has selected the Multiset in position &quot;2&quot; of PI &quot;pathD&quot; to
+edit. The user next selects to edit the set by transposition, entering
+&quot;t&quot;. There are two methods of transposition available: a &quot;literal&quot; transposition
+is done in pitch space, creating a new set in the range of all positive and
+negative integers; a &quot;modulus&quot; transposition is done in pitch-class space,
+creating a new set in the range of pitch-classes 0 through 11. In the example
+above the user has selected a literal (&quot;l&quot;) transposition and enters &quot;8&quot; as the
+transposition value.  This shifts each pitch in the Multiset up 8
+half-steps. Since this is a literal and not a modulus transposition, pitch 5
+becomes pitch 15, or D#5.</p>
+<p>Any Multiset in a Path can be replaced with a Multiset of equal size. For
+example, the same Multiset edited above can be replaced with any four-element
+Multiset:</p>
+<p><strong>Replacing a Multiset with a new Multiset</strong></p>
+<pre><code>pi{pathD}ti{} :: pie
+edit PI pathD
+enter position to edit (positions 1-2): 2
+replace, transpose, or invert set (8,10,11,15): (r, t, or i): r
+enter a pitch set, sieve, spectrum, or set-class: 2,2,4,4
+      SC 2-2 as (D4,D4,E4,E4)? (y, n, or cancel): y
+PI pathD edited.
+
+pi{pathD}ti{} :: piv
+PI: pathD
+psPath              0,1,2,4,5        2,2,4,4      
+                    C4,C#4,D4,E4,F4  D4,D4,E4,E4  
+pcsPath             0,1,2,4,5        2,2,4,4      
+scPath              5-3A             2-2          
+durFraction         1(50%)           1(50%)       
+TI References: none.
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="tutorial-4-creating-and-editing-textures"><a class="header" href="#tutorial-4-creating-and-editing-textures">Tutorial 4: Creating and Editing Textures</a></h1>
+<p>This tutorial demonstrates basic Texture creation, configuration, and deployment
+in musical structures. This chapter is essential for using athenaCL for
+algorithmic music production.</p>
+<h2 id="introduction-to-textures-and-parameterobjects"><a class="header" href="#introduction-to-textures-and-parameterobjects">Introduction to Textures and ParameterObjects</a></h2>
+<p>A TextureInstance (or a Texture or TI) is an algorithmic music layer. Like a
+track or a part, a Texture represents a single musical line somewhat analogous
+to the role of a single instrument in an ensemble. The music of a Texture need
+not be a single monophonic line: it may consist of chords and melody, multiple
+independent lines, or any combination or mixture. The general generative shape
+and potential of a Texture is defined by the TextureModule. A Texture is an
+instance of a TextureModule: a single TextureModule type can be used to create
+many independent instances of that type; each of these instances can be
+customized and edited independently. Collections of TextureInstances are used to
+create an EventList, or the musical output of all Textures.</p>
+<p>A TextureInstance consists of many configurable slots, or attributes. These
+attributes allow the user to customize each Texture. Attributes include such
+properties as timbre (instrument and parametric timbre specifications), rhythm
+(duration and tempo), frequency materials (Path, transposition, and octave
+position), and mixing (amplitude and panning). Other attributes may control
+particular features of the Texture, like the number of voices, position of
+chords, or formal properties.</p>
+<p>Most attributes of a TextureInstance are not fixed values. Unlike a track or a
+part, a Texture often does not have a fixed sequence of values for attributes
+like amplitude, or even fixed note-sequences. Rather, attributes of a Texture
+are algorithmic objects, or ParameterObjects. Rather than enter a value for
+amplitude, the user chooses a ParameterObject to produce values for the desired
+attribute, and enters settings to specialize the ParameterObject's
+behavior. Rather than enter note-sequences, the Texture selects and combines
+pitches from a Path, or a user-supplied sequence of pitch groups. In this way
+each attribute of a Texture can be given a range of motion and a degree of
+indeterminacy within user-composed boundaries.</p>
+<p>A TextureInstance is not a fixed entity: it is a collection of instructions on
+how to create events for a certain duration. Every time an EventList is created,
+each Texture is &quot;performed,&quot; or called into motion to produce events. Depending
+on the TextureModule and the Texture's configuration, the events produced may be
+different each time the EventList is created.</p>
+<p>athenaCL is designed to allow users work with broad outlines of musical
+parameters and materials, and from this higher level organize and control
+combinations of Textures. This should not be confused with a much higher level
+of algorithmic composition, where an algorithm is responsible for creating an
+entire composition: its style, form, parts, and surface. athenaCL is unlikely to
+produce such &quot;complete&quot; musical structures. Rather, athenaCL is designed to
+produce complex, detailed, and diverse musical structures and
+surfaces. Combinations of parts and construction of form are left to the user,
+and can be composed either in athenaCL or in a Digital Audio Workstation where
+athenaCL EventOutput formats, such as MIDI files or Csound-rendered audio files,
+can be mixed, processed, and combined in whatever desired
+fashion. Alternatively, MIDI files produced with athenaCL can be modified or
+combined in traditional sequencers and notation editors.</p>
+<h2 id="introduction-instrument-models"><a class="header" href="#introduction-instrument-models">Introduction Instrument Models</a></h2>
+<p>athenaCL features numerous integrated instrument models. In some cases these
+instrument models are references to external specifications; in other cases
+these instrument models contain complete source code necessary for instantiating
+synthesis systems. Textures are assigned an instrument from an Orchestra upon
+creation, and are able to control a wide variety of instrument-specific
+parameters.</p>
+<p>athenaCL features an integrated library of Csound instruments, providing
+automated control of both Csound score and orchestra generation and control. For
+details on installing and using Csound within athenaCL, see . Csound instruments
+are signal processing and synthesis instructions. These instructions designates
+a certain number of parameters to expose to the user of the instrument. These
+parameters allow events in the score to communicate information and settings to
+the instrument. athenaCL's integrated library of Csound instruments permits
+dynamically constructed orchestra files to be used with athenaCL-generated
+Csound scores. Alternatively, users can use external, custom orchestras with
+athenaCL-written score files. EventModes csoundNative, csoundExternal, and
+csoundSilence support diverse ways of working with Csound within athenaCL.</p>
+<p>athenaCL provides instrument collections (Orchestras) for working with other
+EventOutput formats. For working with MIDI systems, General MIDI (GM) instrument
+definitions are provided with the generalMidi and generalMidiPercussion
+EventModes.</p>
+<p>Whenever a Texture is created, an instrument must be specified by number. This
+is necessary because the Texture must be configured with additional
+ParameterObjects for instrument-specific parameter control. Instruments are
+always identified by a number, though within athenaCL descriptive names are
+provided when available.</p>
+<p>The instruments available during Texture creation are dependent on the active
+EventMode: that is, for any active EventMode, one Orchestra is available from
+which a Texture's instrument must be selected. In the following example, the
+user lists available EventModes to check that csoundNative is active, and then
+views the available instruments with the EMi command.</p>
+<p><strong>Listing available Instruments with EMi</strong></p>
+<pre><code>pi{}ti{} :: emls
+EventMode modes available:
+{name}
+   csoundExternal      
+ + csoundNative        
+   csoundSilence       
+   midi                
+   midiPercussion      
+   superColliderNative 
+
+pi{}ti{} :: emi
+csoundNative instruments:
+{number,name}
+   3      sineDrone                        
+   4      sineUnitEnvelope                 
+   5      sawDrone                         
+   6      sawUnitEnvelope                  
+   11     noiseWhite                       
+   12     noisePitched                     
+   13     noiseUnitEnvelope                
+   14     noiseTambourine                  
+   15     noiseUnitEnvelopeBandpass        
+   16     noiseSahNoiseUnitEnvelope        
+   17     noiseSahNoiseUnitEnvelopeDistort 
+   20     fmBasic                          
+   21     fmClarinet                       
+   22     fmWoodDrum                       
+   23     fmString                         
+   30     samplerReverb                    
+   31     samplerRaw                       
+   32     samplerUnitEnvelope              
+   33     samplerUnitEnvelopeBandpass      
+   34     samplerUnitEnvelopeDistort       
+   35     samplerUnitEnvelopeParametric    
+   36     samplerSahNoiseUnitEnvelope      
+   40     vocodeNoiseSingle                
+   41     vocodeNoiseSingleGlissando       
+   42     vocodeNoiseQuadRemap             
+   43     vocodeNoiseQuadScale             
+   44     vocodeNoiseQuadScaleRemap        
+   45     vocodeNoiseOctScale              
+   46     vocodeNoiseOctScaleRemap         
+   47     vocodeNoiseBiOctScale            
+   48     vocodeNoiseTriOctScale           
+   50     guitarNylonNormal                
+   51     guitarNylonLegato                
+   52     guitarNylonHarmonic              
+   60     additiveBellBright               
+   61     additiveBellDark                 
+   62     additiveBellClear                
+   70     synthRezzy                       
+   71     synthWaveformVibrato             
+   72     synthVcoAudioEnvelopeSineQuad    
+   73     synthVcoAudioEnvelopeSquareQuad  
+   74     synthVcoDistort                  
+   80     pluckTamHats                     
+   81     pluckFormant                     
+   82     pluckUnitEnvelope                
+   110    noiseAudioEnvelopeSineQuad       
+   111    noiseAudioEnvelopeSquareQuad     
+   130    samplerAudioEnvelopeSineQuad     
+   131    samplerAudioEnvelopeSquareQuad   
+   132    samplerAudioFileEnvelopeFilter   
+   133    samplerAudioFileEnvelopeFollow   
+   140    vocodeSineOctScale               
+   141    vocodeSineOctScaleRemap          
+   142    vocodeSineBiOctScale             
+   143    vocodeSineTriOctScale            
+   144    vocodeSineQuadOctScale           
+   145    vocodeSinePentOctScale           
+   146    vocodeSineHexOctScale            
+   230    samplerVarispeed                 
+   231    samplerVarispeedAudioSine        
+   232    samplerVarispeedReverb           
+   233    samplerVarispeedDistort          
+   234    samplerVarispeedSahNoiseDistort  
+   240    vocodeVcoOctScale                
+   241    vocodeVcoOctScaleRemap    
+</code></pre>
+<p>Other EventModes provide other Orchestras for use in Textures. In the example
+below, the user selects the EventMode midiPercussion with the EMo command and
+examines the available instruments with the EMi command:</p>
+<p><strong>Examining additional Instruments with EMi</strong></p>
+<pre><code>pi{}ti{} :: emo mp
+EventMode mode set to: midiPercussion.
+
+pi{}ti{} :: emi
+generalMidiPercussion instruments:
+{number,name}
+   35     acousticBassDrum 
+   36     bassDrum1        
+   37     sideStick        
+   38     acousticSnare    
+   39     handClap         
+   40     electricSnare    
+   41     lowFloorTom      
+   42     closedHiHat      
+   43     highFloorTom     
+   44     pedalHiHat       
+   45     lowTom           
+   46     openHiHat        
+   47     lowMidTom        
+   48     hiMidTom         
+   49     crashCymbal1     
+   50     highTom          
+   51     rideCymbal1      
+   52     chineseCymbal    
+   53     rideBell         
+   54     tambourine       
+   55     splashCymbal     
+   56     cowBell          
+   57     crashCymbal2     
+   58     vibraSlap        
+   59     rideCymbal2      
+   60     hiBongo          
+   61     lowBongo         
+   62     muteHiConga      
+   63     openHiConga      
+   64     lowConga         
+   65     highTimbale      
+   66     lowTimbale       
+   67     highAgogo        
+   68     lowAgogo         
+   69     cabasa           
+   70     maracas          
+   71     shortWhistle     
+   72     longWhistle      
+   73     shortGuiro       
+   74     longGuiro        
+   75     claves           
+   76     hiWoodBlock      
+   77     lowWoodBlock     
+   78     muteCuica        
+   79     openCuica        
+   80     muteTriangle     
+   81     openTriangle    
+</code></pre>
+<h2 id="selecting-and-viewing-texturemodules"><a class="header" href="#selecting-and-viewing-texturemodules">Selecting and Viewing TextureModules</a></h2>
+<p>A Texture is an instance of a TextureModule. Every time a Texture is created,
+athenaCL creates an independent instance of the active TextureModule. To display
+a complete list of all available TextureModules, enter the command TMls:</p>
+<p><strong>Listing TextureModules with TMls</strong></p>
+<pre><code>pi{}ti{} :: tmls
+TextureModules available:
+{name,TIreferences}
+   DroneArticulate    0
+   DroneSustain       0
+   HarmonicAssembly   0
+   HarmonicShuffle    0
+   InterpolateFill    0
+   InterpolateLine    0
+   IntervalExpansion  0
+   LineCluster        0
+ + LineGroove         0
+   LiteralHorizontal  0
+   LiteralVertical    0
+   MonophonicOrnament 0
+   TimeFill           0
+   TimeSegment        0
+</code></pre>
+<p>As in other athenaCL displays, the first line of the display is a key, telling
+the user that the list consists of a name followed by the number of TI
+references. This number displays the count of TextureInstances referenced from a
+parent TextureModule. The &quot;+&quot; designates the active TextureModule. When creating
+a new TextureInstance, athenaCL uses the active TextureModule.</p>
+<p>To select a different TextureModule, the user enters TMo. The user is prompted
+to enter the name or number (as represented in the list order) of the desired
+TextureModule. The TMls command can be used to confirm the change.</p>
+<p><strong>Selecting the active TextureModule with TMo</strong></p>
+<pre><code>pi{}ti{} :: tmo 
+which TextureModule to activate? (name or number 1-14): da
+TextureModule DroneArticulate now active.
+
+pi{}ti{} :: tmls
+TextureModules available:
+{name,TIreferences}
+ + DroneArticulate    0
+   DroneSustain       0
+   HarmonicAssembly   0
+   HarmonicShuffle    0
+   InterpolateFill    0
+   InterpolateLine    0
+   IntervalExpansion  0
+   LineCluster        0
+   LineGroove         0
+   LiteralHorizontal  0
+   LiteralVertical    0
+   MonophonicOrnament 0
+   TimeFill           0
+   TimeSegment        0
+</code></pre>
+<p>Here the user has entered &quot;da&quot;, to select the TextureModule
+DroneArticulate. Whenever selecting objects in athenaCL the user may enter the
+acronym (formed from the leading character and all following capitals), the
+literal name (&quot;dronearticulate&quot;), or the ordinal number as displayed in the
+corresponding list display.</p>
+<p>To learn what a particular TextureModule does, as well what types of Texture
+options are available, enter the command TMv, for TextureModule View. In this
+example, the user, with TIo, selects the TextureModule &quot;LineGroove&quot; (with a
+command-line argument) before entering the TMv command.</p>
+<p><strong>Viewing details of the active TextureModule</strong></p>
+<pre><code>pi{}ti{} :: tmo linegroove
+TextureModule LineGroove now active.
+
+pi{}ti{} :: tmv
+TextureModule: LineGroove; author: athenaCL native
+This TextureModule performs each set of a Path as a simple monophonic line;
+pitches are chosen from sets in the Path based on the pitch selector control.
+texture (s)tatic
+parallelMotionList    Description: List is a collection of transpositions
+                      created above every Texture-generated base note. The
+                      timeDelay value determines the amount of time in seconds
+                      between each successive transposition in the
+                      transpositionList. Arguments: (1) name, (2)
+                      transpositionList, (3) timeDelay
+pitchSelectorControl  Description: Define the selector method of Path pitch
+                      selection used by a Texture. Arguments: (1) name, (2)
+                      selectionString {'randomChoice', 'randomWalk',
+                      'randomPermutate', 'orderedCyclic',
+                      'orderedCyclicRetrograde', 'orderedOscillate'}
+levelFieldMonophonic  Description: Toggle between selection of local field
+                      (transposition) values per set of the Texture Path, or per
+                      event. Arguments: (1) name, (2) level {'set', 'event'}
+levelOctaveMonophonic Description: Toggle between selection of local octave
+                      (transposition) values per set of the Texture Path, or per
+                      event. Arguments: (1) name, (2) level {'set', 'event'}
+texture (d)ynamic
+</code></pre>
+<p>The TMv command displays the name of the TextureModule along with the author of
+its code. Following the author designation is a description of how the module
+performs. Following this is documentation for all TextureStatic parameter
+objects, or Texture-specific options and user-configurable settings pertinent to
+the particular TextureModule's algorithmic design.</p>
+<h2 id="creating-selecting-and-viewing-textureinstances"><a class="header" href="#creating-selecting-and-viewing-textureinstances">Creating, Selecting, and Viewing TextureInstances</a></h2>
+<p>A TextureInstance is always linked to a Path. If no Paths exists when the
+Texture is created, a default Path is automatically created consisting of a
+single Multiset with a single pitch (middle C, or C4). If Paths exists when the
+Texture is created, the active PathInstance is assigned to the Texture. A
+TextureInstance's Path can be later edited. For a complete introduction to Paths
+see .</p>
+<p>A new TextureInstance is always created from the active TextureModule; the user
+must then always select the desired TextureModule before creating a Texture of
+the desired type. A TextureInstance's type, or TextureModule, cannot be changed
+after the Texture is created.</p>
+<p>A new Texture is created with the TIn command, for TextureInstance New. The user
+is prompted to name the new Texture and select an instrument by number. If the
+number of the desired instrument is not known, a &quot;?&quot; can be entered to display a
+list of instruments. In the example below the user selects TextureMode
+LineGroove, EventMode midiPercussion, and then creates a texture named &quot;a1&quot; with
+instrument 64 (&quot;lowConga&quot;).</p>
+<p><strong>Creating a new TextureInstance with TIn</strong></p>
+<pre><code>pi{}ti{} :: tmo linegroove
+TextureModule LineGroove now active.
+
+pi{}ti{} :: emo mp
+EventMode mode set to: midiPercussion.
+
+pi{}ti{} :: tin
+name this texture: a1
+enter instrument number:
+(35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,6
+1,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81)
+or &quot;?&quot; for instrument help: 64
+TI a1 created.
+</code></pre>
+<p>To hear the resulting musical structure, enter the command ELn. (For more
+information on using ELn, see . The resulting MIDI file may be opened with the
+ELh command.</p>
+<p><strong>Creating a new EventList with ELn</strong></p>
+<pre><code>pi{auto-lowConga}ti{a1} :: eln
+command.py: temporary file: /Volumes/xdisc/_scratch/ath2010.07.02.17.51.42.xml 
+      EventList ath2010.07.02.17.51.42 complete:
+/Volumes/xdisc/_scratch/ath2010.07.02.17.51.42.mid
+/Volumes/xdisc/_scratch/ath2010.07.02.17.51.42.xml
+</code></pre>
+<p>After creating a Texture, the TIv command can be used to view the active
+Texture:</p>
+<p><strong>Viewing a TextureInstance</strong></p>
+<pre><code>pi{auto-lowConga}ti{a1} :: tiv
+TI: a1, TM: LineGroove, TC: 0, TT: TwelveEqual
+pitchMode: pitchSpace, silenceMode: off, postMapMode: on
+midiProgram: piano1
+      status: +, duration: 000.0--20.06
+(i)nstrument        64 (generalMidiPercussion: lowConga)
+(t)ime range        00.0--20.0
+(b)pm               constant, 120
+(r)hythm            pulseTriple, (constant, 4), (basketGen, randomPermutate,
+                    (1,1,2,3)), (constant, 1), (constant, 0.75)
+(p)ath              auto-lowConga
+                    (E4)
+                    20.00(s)
+local (f)ield       constant, 0
+local (o)ctave      constant, 0
+(a)mplitude         randomBeta, 0.4, 0.4, (constant, 0.7), (constant, 0.9)
+pan(n)ing           constant, 0.5
+au(x)iliary         none
+texture (s)tatic
+      s0            parallelMotionList, (), 0.0
+      s1            pitchSelectorControl, randomPermutate
+      s2            levelFieldMonophonic, event
+      s3            levelOctaveMonophonic, event
+texture (d)ynamic   none
+</code></pre>
+<p>The TIv command displays all essential attributes of a Texture. Each label in
+the display corresponds to an attribute in the TextureInstance. The TIv display
+is in two-blocks. The first block gives parameters that are constant. The first
+line displays the name of the TextureInstance (a1), the name of the parent
+TextureModule (LineGroove), the number of TextureClones (0), and the active
+TextureTemperament (TwelveEqual). The second line displays the PitchMode
+(pitchSpace), the silenceMode (off), and the postMapMode (on). The third line
+provides the GM MIDI program name (piano1). The fourth, indented line displays
+the TextureInstance's mute status (where a &quot;o&quot; is muted and a &quot;+&quot; is non-muted)
+and the absolute duration the Texture's events.</p>
+<p>The second block lists the primary algorithmic controls of the Texture. The
+names of these attributes use parenthesis to designate a single-letter
+abbreviation. The instrument attribute is displayed first, with the value
+following the label: instrument number (64), the name of the orchestra
+(generalMidiPercussion) and the name of the instrument (lowConga). The next
+attribute is time-range, the start and end time in seconds from the beginning of
+the EventList. A new Texture is given a default time-range of twenty seconds
+(00.0--20.0). New Textures, when created, get their time-range from the active
+Texture.</p>
+<p>The bpm attribute is the tempo in beats per minute. The value is set with the
+ParameterObject &quot;constant&quot; to produce a tempo of 120 BPM. In most cases, the bpm
+control is used to calculate the duration of rhythms and pulses used in a
+Texture.</p>
+<p>The rhythm attribute designates a Rhythm ParameterObject to control the
+generation of event durations. Rhythm ParameterObjects often notate rhythms as
+lists of Pulses. A Pulse is designated as a list of three elements: (divisor,
+multiplier, accent). The duration of a rhythm is calculated by dividing the time
+of a beat (from the bpm parameter) by the Pulse divisor, then multiplying the
+result by the Pulse multiplier. The value of the &quot;accent&quot; determines if a
+duration is a note or a rest, where 1 or a &quot;+&quot; designates a note, 0 or a &quot;o&quot;
+designates a rest. Thus an eighth note is given as (2,1,1), a dotted-quarter
+note as (2,3,1), and dotted-eighth rest as (4,3,0). In the example above, the
+ParameterObject &quot;loop&quot; is used with three Pulses: two sixteenth notes (4,1,1)
+and a duration equal to a quarter-note tied to a sixteenth note (4,5,1).</p>
+<p>The Path attribute gives the name of the PathInstance used by this Texture,
+followed on the next line by the Multiset pitches that will be
+used. PathInstances are linked to the Texture. Thus, if a change is made to a
+Path (with PIe, for example), all Textures that use that Path will reflect the
+change. Each TextureInstance, however, can control the interpretation of a Path
+in numerous ways. The Texture PitchMode setting, for example, determines if
+pitches are derived from a Path in pitchSpace, pitchClassSpace, or as a
+setClass. The local field and local octave attributes permit each Texture to
+transpose pitches from the Path independently.</p>
+<p>The attribute &quot;local field&quot; stores a ParameterObject that controls local
+transposition of Path pitches. Values are given in semitones, and can include
+microtonal transpositions as floating-point values following the semitone
+integer. Thus, a transposition of five half-steps and a quarter-tone would be
+equal to 5.5. A transposition of a major tenth would be 16. In the example above
+the attribute value instructs the Texture to use a ParameterObject called
+&quot;constant.&quot; Note: some EventOutput formats do not support microtonal pitch
+specification. In such cases microtones are rounded to the nearest semitone. The
+attribute &quot;local octave,&quot; similar to local field, controls the octave position
+of Path pitches. Each integer represents an octave shift, where 0 is no octave
+shift, each Path pitch retaining its original octave register.</p>
+<p>The amplitude attribute designates a ParameterObject to control the amplitude of
+the Texture, measured in a symbolic range from 0 to 1. The panning attribute
+designates the ParameterObject used to control spatial location in stereo or
+quadraphonic space. Values are along the unit interval, from 0 to 1.</p>
+<p>The attributes that make up the &quot;auxiliary&quot; listing provide any number of
+additional ParameterObjects to control instrument specific parameter fields. The
+number of parameter fields is determined by the instrument definition.</p>
+<p>The last attributes, &quot;texture static&quot; and &quot;texture dynamic,&quot; designate controls
+specific to particular TextureModules. The values here can be edited like other
+attributes.</p>
+<p>A second Texture will be created with TIn named &quot;b1&quot; and using
+instrument 62. The Texture, after creation, is displayed with the TIv command.</p>
+<p><strong>Creating and viewing a TextureInstance</strong></p>
+<pre><code>pi{auto-lowConga}ti{a1} :: tin
+name this texture: b1
+enter instrument number:
+(35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,6
+1,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81)
+or &quot;?&quot; for instrument help: 62
+TI b1 created.
+
+pi{auto-muteHiConga}ti{b1} :: tiv
+TI: b1, TM: LineGroove, TC: 0, TT: TwelveEqual
+pitchMode: pitchSpace, silenceMode: off, postMapMode: on
+midiProgram: piano1
+      status: +, duration: 000.0--20.06
+(i)nstrument        62 (generalMidiPercussion: muteHiConga)
+(t)ime range        00.0--20.0
+(b)pm               constant, 120
+(r)hythm            pulseTriple, (constant, 4), (basketGen, randomPermutate,
+                    (1,1,2,3)), (constant, 1), (constant, 0.75)
+(p)ath              auto-muteHiConga
+                    (D4)
+                    20.00(s)
+local (f)ield       constant, 0
+local (o)ctave      constant, 0
+(a)mplitude         randomBeta, 0.4, 0.4, (constant, 0.7), (constant, 0.9)
+pan(n)ing           constant, 0.5
+au(x)iliary         none
+texture (s)tatic
+      s0            parallelMotionList, (), 0.0
+      s1            pitchSelectorControl, randomPermutate
+      s2            levelFieldMonophonic, event
+      s3            levelOctaveMonophonic, event
+texture (d)ynamic   none
+</code></pre>
+<p>This new Texture, though created with the same TextureModule, is a completely
+autonomous object. No changes to &quot;a1&quot; will have any effect on &quot;b1&quot;.</p>
+<p>During an athenaCL session a user can create any number of TextureInstances and
+save this collection in an AthenaObject file for latter use. For more
+information on saving, loading, and merging AthenaObjects see . To view a list
+of all current Textures, enter the command TIls, for TextureInstance List.</p>
+<p><strong>Listing all TextureInstances</strong></p>
+<pre><code>pi{auto-muteHiConga}ti{b1} :: tils
+TextureInstances available:
+{name,status,TM,PI,instrument,time,TC}
+   a1               + LineGroove  auto-lowConga    64  00.0--20.0   0
+ + b1               + LineGroove  auto-muteHiConga 62  00.0--20.0   0
+</code></pre>
+<p>This display shows a list of all Textures, each Texture on a single line. The
+information given, in order from left to right, is the name, the mute-status,
+the parent TM, the PathInstance, the instrument number, the time-range, and the
+number of TextureClones. Notice the &quot;+&quot; in front of Texture &quot;b1&quot;: this
+designates that this Texture is active. To change the active Texture, enter the
+command TIo either with a command-line argument or alone:</p>
+<p><strong>Selecting the active TextureInstance</strong></p>
+<pre><code>pi{auto-muteHiConga}ti{b1} :: tio a1
+TI a1 now active.
+
+pi{auto-muteHiConga}ti{a1} :: 
+</code></pre>
+<p>In order to compare a single attribute of all Textures, the user can enter the
+command TEv, for TextureEnsemble View. TextureEnsemble refers to the collection
+of all Textures, and all TE commands process all Textures simultaneously. The
+user will be prompted to enter an abbreviation for the desired
+attribute. Attribute abbreviations are notated in the TIv display labels. Thus
+the attribute abbreviation for &quot;(a)mplitude&quot; is &quot;a&quot;; the attribute abbreviation
+for &quot;pan(n)ing&quot; is &quot;n.&quot; As with other commands, use of command-line arguments
+provides flexible control:</p>
+<p><strong>Viewing parameter values for all Textures</strong></p>
+<pre><code>pi{auto-muteHiConga}ti{a1} :: tev
+compare texture parameters: which parameter? a
+compare parameters: amplitude
+{name,value,}
+a1                  randomBeta, 0.4, 0.4, (constant, 0.7), (constant, 0.9)  
+b1                  randomBeta, 0.4, 0.4, (constant, 0.7), (constant, 0.9) 
+
+pi{auto-muteHiConga}ti{a1} :: tev i
+compare parameters: instrument
+{name,value,}
+a1                  64 (generalMidiPercussion: lowConga)     
+b1                  62 (generalMidiPercussion: muteHiConga)  
+</code></pre>
+<h2 id="copying-and-removing-texture-instances"><a class="header" href="#copying-and-removing-texture-instances">Copying and Removing Texture Instances</a></h2>
+<p>TextureInstances can be duplicated with the command TIcp. The user is prompted
+to enter the name of the Texture to be copied, and then the name of the
+copy. The copy can be confirmed by listing all Textures with the command TIls.</p>
+<p><strong>Copying a TextureInstance</strong></p>
+<pre><code>pi{auto-muteHiConga}ti{a1} :: ticp
+which TextureInstnace to copy? (name or number 1-2): b1
+name this copy of TI 'b1': b2
+TextureInstance b2 created.
+
+pi{auto-muteHiConga}ti{b2} :: tils
+TextureInstances available:
+{name,status,TM,PI,instrument,time,TC}
+   a1               + LineGroove  auto-lowConga    64  00.0--20.0   0
+   b1               + LineGroove  auto-muteHiConga 62  00.0--20.0   0
+ + b2               + LineGroove  auto-muteHiConga 62  00.0--20.0   0
+</code></pre>
+<p>Textures can be deleted with the command TIrm, for TextureInstance Remove. The
+user is prompted to enter the name of the Texture to be deleted. The removal can
+be confirmed by listing all Textures with the command TIls.</p>
+<p><strong>Removing a TextureInstance</strong></p>
+<pre><code>pi{auto-muteHiConga}ti{b2} :: tirm
+which TextureInstnace to delete? (name or number 1-3): b2
+are you sure you want to delete texture b2? (y, n, or cancel): y
+TI b2 destroyed.
+
+pi{auto-muteHiConga}ti{b1} :: tils
+TextureInstances available:
+{name,status,TM,PI,instrument,time,TC}
+   a1               + LineGroove  auto-lowConga    64  00.0--20.0   0
+ + b1               + LineGroove  auto-muteHiConga 62  00.0--20.0   0   
+
+pi{auto-muteHiConga}ti{b1} :: 
+</code></pre>
+<p>When the active Texture is deleted, as it is above, athenaCL chooses a new
+Texture to activate, here choosing &quot;b1.&quot; To select a different Texture, use the
+command TIo.</p>
+<h2 id="editing-textureinstance-attributes"><a class="header" href="#editing-textureinstance-attributes">Editing TextureInstance Attributes</a></h2>
+<p>Each attribute of a Texture can be edited to specialize its performance. Some
+attributes such as instrument, time-range, and Path are static: they do not
+change over the duration of a Texture. Other attributes are dynamic, such as
+bpm, rhythm, local field, local octave, amplitude and panning, and can be
+configured with a wide range of ParameterObjects.</p>
+<p>Texture attributes are edited with the TIe command. The command first prompts
+the user to select which attribute to edit. Attributes are named by a
+single-letter abbreviation, as notated in the TIv display with
+parenthesis. Next, the current value of the attribute is displayed, followed by
+a prompt for the new value. In the following example the time range of Texture
+&quot;a1&quot; is edited:</p>
+<p><strong>Editing a TextureInstance</strong></p>
+<pre><code>pi{auto-muteHiConga}ti{b1} :: tie
+edit TI b1
+which parameter? (i,t,b,r,p,f,o,a,n,x,s,d): t
+current time range: 0.0, 20.0
+new value: 5, 20
+TI b1: parameter time range updated.
+
+pi{auto-muteHiConga}ti{b1} :: tiv
+TI: b1, TM: LineGroove, TC: 0, TT: TwelveEqual
+pitchMode: pitchSpace, silenceMode: off, postMapMode: on
+midiProgram: piano1
+      status: +, duration: 005.0--19.97
+(i)nstrument        62 (generalMidiPercussion: muteHiConga)
+(t)ime range        05.0--20.0
+(b)pm               constant, 120
+(r)hythm            pulseTriple, (constant, 4), (basketGen, randomPermutate,
+                    (1,1,2,3)), (constant, 1), (constant, 0.75)
+(p)ath              auto-muteHiConga
+                    (D4)
+                    15.00(s)
+local (f)ield       constant, 0
+local (o)ctave      constant, 0
+(a)mplitude         randomBeta, 0.4, 0.4, (constant, 0.7), (constant, 0.9)
+pan(n)ing           constant, 0.5
+au(x)iliary         none
+texture (s)tatic
+      s0            parallelMotionList, (), 0.0
+      s1            pitchSelectorControl, randomPermutate
+      s2            levelFieldMonophonic, event
+      s3            levelOctaveMonophonic, event
+texture (d)ynamic   none
+</code></pre>
+<p>In the example above the user select &quot;t&quot; to edit the active Texture's time-range
+attribute. In general, new values for attributes must be entered with the same
+syntax with which they are displayed. In this example, time-range values are
+given as two numbers separated by a comma. Deviation from this syntax will
+return an error. The user enters 5, 20 to set the time-range attribute to the
+duration from 5 to 20 seconds.</p>
+<p>The command TEe, for TextureEnsemble Edit can be used to edit the entire
+collection of Textures with one command. In the following example the user
+selects the amplitude attribute with &quot;a&quot; and then enters a new ParameterObject:
+randomUniform. The randomUniform parameterObject produces random values with a
+uniform distribution between the required arguments for minimum and
+maximum. After this edit, TEv, with the command-line argument &quot;a&quot;, can be used
+to view the amplitude for all Textures and confirm the edit.</p>
+<p><strong>Editing a single parameter of all Textures with TEe</strong></p>
+<pre><code>
+pi{auto-muteHiConga}ti{b1} :: tee
+edit all TextureInstances
+which parameter? (i,t,b,r,p,f,o,a,n,x): a
+sample amplitude: randomBeta, 0.4, 0.4, (constant, 0.7), (constant, 0.9)
+new value: ru, .6, 1
+TI a1: parameter amplitude updated.
+TI b1: parameter amplitude updated.
+
+pi{auto-muteHiConga}ti{b1} :: tev a
+compare parameters: amplitude
+{name,value,}
+a1                  randomUniform, (constant, 0.6), (constant, 1)  
+b1                  randomUniform, (constant, 0.6), (constant, 1) ```
+</code></pre>
+<p>Using ELn, the current collection of Textures can be used to create an
+EventList, and ELh may be used to audition the results. (For more information on
+using ELn, see .) The random fluctuation of amplitude values should provide a
+variety of accent patterns to the fixed rhythmic loop.</p>
+<p>The collection of Textures can be displayed in a graphical and textual diagram
+produced by the TEmap command. This command lists each Texture and Clone within
+the current AthenaObject and provides a proportional representation of their
+respective start and end times.</p>
+<p><strong>Generating a graphical display of Texture position with TEmap</strong></p>
+<pre><code>pi{auto-muteHiConga}ti{b1} :: temap
+TextureEnsemble Map:
+19.97s              |      .       |      .       |      .      |       .      |
+a1                  ____________________________________________________________
+b1                                 _____________________________________________
+</code></pre>
+<h2 id="muting-textures"><a class="header" href="#muting-textures">Muting Textures</a></h2>
+<p>Textures can be muted to disable the inclusion of their events in all
+EventOutputs. Textures and their Clones (see ) can be muted independently. The
+command TImute, if no arguments are given, toggles the current Texture's mute
+status. The following example demonstrates muting Texture a1, listing all
+Textures with with TIls, and then displaying the collection of Textures with the
+TEmap command. Notice that in the TIls display, the &quot;status&quot; of Texture a1 is
+set to &quot;o&quot;, meaning that it is muted.</p>
+<p><strong>Muting a Texture with TImute</strong></p>
+<pre><code>
+pi{auto-muteHiConga}ti{b1} :: timute
+TI b1 is now muted.
+
+pi{auto-muteHiConga}ti{b1} :: tils
+TextureInstances available:
+{name,status,TM,PI,instrument,time,TC}
+   a1               + LineGroove  auto-lowConga    64  00.0--20.0   0
+ + b1               o LineGroove  auto-muteHiConga 62  05.0--20.0   0
+
+pi{auto-muteHiConga}ti{b1} :: temap
+TextureEnsemble Map:
+19.97s              |      .       |      .       |      .      |       .      |
+a1                  ____________________________________________________________
+b1                                 _____________________________________________
+</code></pre>
+<p>By providing the name of one or more Textures as command-line arguments,
+numerous Texture's mute status can be toggled. In the following example, Texture
+a1 is given as an argument to the TImute command. The TIls command shows that
+the Texture is no longer muted.</p>
+<p><strong>Removing mute status with TImute</strong></p>
+<pre><code>pi{auto-muteHiConga}ti{b1} :: timute a1
+TI a1 is now muted.
+
+pi{auto-muteHiConga}ti{b1} :: tils
+TextureInstances available:
+{name,status,TM,PI,instrument,time,TC}
+   a1               o LineGroove  auto-lowConga    64  00.0--20.0   0
+ + b1               o LineGroove  auto-muteHiConga 62  05.0--20.0   0
+
+pi{auto-muteHiConga}ti{b1} :: timute a1
+TI a1 is no longer muted.
+
+pi{auto-muteHiConga}ti{b1} :: timute b1
+TI b1 is no longer muted.
+</code></pre>
+<h2 id="viewing-and-searching-parameterobjects"><a class="header" href="#viewing-and-searching-parameterobjects">Viewing and Searching ParameterObjects</a></h2>
+<p>For each dynamic attribute of a TextureInstance, a ParameterObject can be
+assigned to produce values over the duration of the Texture. Complete
+documentation for all ParameterObjects can be found in . Texture attributes for
+bpm, local field, local octave, amplitude, panning, and all auxiliary parameters
+(if required by the instrument) can have independent ParameterObjects.</p>
+<p>ParameterObjects are applied to a Texture attribute with an argument
+list. athenaCL accepts lists in the same comma-separated format of Python list
+data structures. A list can consist of elements like strings, numbers, and other
+lists, each separated by a comma. Within athenaCL, text strings need not be in
+quotes, and sub-lists can be given with either parenthesis or brackets. Each
+entry in the ParameterObject argument list corresponds, by ordered-position, to
+an internal setting within the ParameterObject. The first entry in the argument
+list is always the name of the ParameterObject. ParameterObject names, as well
+as all ParameterObject configuration strings, can always be accessed with
+acronyms.</p>
+<p>To display a list if all available ParameterObjects, enter the command TPls, for
+TextureParameter list:</p>
+<p><strong>Displaying all ParameterObjects with TPls</strong></p>
+<pre><code>pi{auto-muteHiConga}ti{b1} :: tpls
+Generator ParameterObject
+{name}
+   accumulator                
+   basketFill                 
+   basketFillSelect           
+   basketGen                  
+   basketSelect               
+   breakGraphFlat             
+   breakGraphHalfCosine       
+   breakGraphLinear           
+   breakGraphPower            
+   breakPointFlat             
+   breakPointHalfCosine       
+   breakPointLinear           
+   breakPointPower            
+   caList                     
+   caValue                    
+   constant                   
+   constantFile               
+   cyclicGen                  
+   directorySelect            
+   envelopeGeneratorAdsr      
+   envelopeGeneratorTrapezoid 
+   envelopeGeneratorUnit      
+   feedbackModelLibrary       
+   fibonacciSeries            
+   funnelBinary               
+   grammarTerminus            
+   henonBasket                
+   iterateCross               
+   iterateGroup               
+   iterateHold                
+   iterateSelect              
+   iterateWindow              
+   lineSegment                
+   listPrime                  
+   logisticMap                
+   lorenzBasket               
+   markovGeneratorAnalysis    
+   markovValue                
+   mask                       
+   maskReject                 
+   maskScale                  
+   noise                      
+   oneOver                    
+   operatorAdd                
+   operatorCongruence         
+   operatorDivide             
+   operatorMultiply           
+   operatorPower              
+   operatorSubtract           
+   pathRead                   
+   quantize                   
+   randomBeta                 
+   randomBilateralExponential 
+   randomCauchy               
+   randomExponential          
+   randomGauss                
+   randomInverseExponential   
+   randomInverseLinear        
+   randomInverseTriangular    
+   randomLinear               
+   randomTriangular           
+   randomUniform              
+   randomWeibull              
+   sampleAndHold              
+   sampleSelect               
+   sieveFunnel                
+   sieveList                  
+   staticInst                 
+   staticRange                
+   typeFormat                 
+   valuePrime                 
+   valueSieve                 
+   waveCosine                 
+   waveHalfPeriodCosine       
+   waveHalfPeriodPulse        
+   waveHalfPeriodSine         
+   waveHalfPeriodTriangle     
+   wavePowerDown              
+   wavePowerUp                
+   wavePulse                  
+   waveSawDown                
+   waveSawUp                  
+   waveSine                   
+   waveTriangle               
+
+Rhythm Generator ParameterObject
+{name}
+   binaryAccent         
+   convertSecond        
+   convertSecondTriple  
+   gaRhythm             
+   iterateRhythmGroup   
+   iterateRhythmHold    
+   iterateRhythmWindow  
+   loop                 
+   markovPulse          
+   markovRhythmAnalysis 
+   pulseSieve           
+   pulseTriple          
+   rhythmSieve          
+
+Filter ParameterObject
+{name}
+   bypass               
+   filterAdd            
+   filterDivide         
+   filterDivideAnchor   
+   filterFunnelBinary   
+   filterMultiply       
+   filterMultiplyAnchor 
+   filterPower          
+   filterQuantize       
+   maskFilter           
+   maskScaleFilter      
+   orderBackward        
+   orderRotate          
+   pipeLine             
+   replace              
+</code></pre>
+<p>To display detailed documentation for a ParameterObject, enter the command TPv,
+for Texture Parameter view. In the following example the user views the
+ParameterObjects &quot;wavePowerDown&quot; and &quot;noise&quot; by providing command-line arguments
+for the desired ParameterObject name:</p>
+<p><strong>Viewing ParameterObject reference information</strong></p>
+<pre><code>pi{auto-muteHiConga}ti{b1} :: tpv wpd
+Generator ParameterObject
+{name,documentation}
+WavePowerDown       wavePowerDown, stepString, parameterObject, phase, exponent,
+                    min, max
+                    Description: Provides a power down wave between 0 and 1 at a
+                    rate given in either time or events per period. Depending on
+                    the stepString argument, the period rate (frequency) may be
+                    specified in spc (seconds per cycle) or eps (events per
+                    cycle). This value is scaled within the range designated by
+                    min and max; min and max may be specified with
+                    ParameterObjects. The phase argument is specified as a value
+                    between 0 and 1. Note: conventional cycles per second (cps
+                    or Hz) are not used for frequency. Arguments: (1) name, (2)
+                    stepString {'event', 'time'}, (3) parameterObject
+                    {secPerCycle}, (4) phase, (5) exponent, (6) min, (7) max
+
+pi{auto-muteHiConga}ti{b1} :: tpv noise
+Generator ParameterObject
+{name,documentation}
+Noise               noise, resolution, parameterObject, min, max
+                    Description: Fractional noise (1/fn) Generator, capable of
+                    producing states and transitions between 1/f white, pink,
+                    brown, and black noise. Resolution is an integer that
+                    describes how many generators are used. The gamma argument
+                    determines what type of noise is created. All gamma values
+                    are treated as negative. A gamma of 0 is white noise; a
+                    gamma of 1 is pink noise; a gamma of 2 is brown noise; and
+                    anything greater is black noise. Gamma can be controlled by
+                    a dynamic ParameterObject. The value produced by the noise
+                    generator is scaled within the unit interval. This
+                    normalized value is then scaled within the range designated
+                    by min and max; min and max may be specified by
+                    ParameterObjects. Arguments: (1) name, (2) resolution, (3)
+                    parameterObject {gamma value as string or number}, (4) min,
+                    (5) max
+</code></pre>
+<p>The command TPmap provides graphical displays of ParameterObject-generated
+values. (To configure athenaCL graphics output, see .) The user must supply the
+name of the ParamaterObject library (Generator, Rhythm, or Filter), the number
+of events to generate, and the ParameterObject argument list.</p>
+<p><strong>ParameterObject Map display with TPmap</strong></p>
+<pre><code>pi{auto-muteHiConga}ti{b1} :: tpmap
+select a library: Generator, Rhythm, or Filter. (g, r, f): g
+number of events: 120
+enter a Generator ParameterObject argument: wpd, e, 30, 0, 2
+
+wavePowerDown, event, (constant, 30), 0, 2, (constant, 0), (constant, 1)
+TPmap display complete.
+</code></pre>
+<p>The TPmap, like other athenaCL commands, can be used with command-line
+arguments. In the following example, the user produces a TPmap display of the
+noise ParameterObject, generating &quot;brown&quot; fractional noise:</p>
+<p><strong>ParameterObject Map display with TPmap</strong></p>
+<pre><code>pi{auto-muteHiConga}ti{b1} :: tpmap 120 n,50,(c,2),0,1
+
+noise, 50, (constant, 2), (constant, 0), (constant, 1)
+TPmap display complete.
+</code></pre>
+<h2 id="editing-parameterobjects"><a class="header" href="#editing-parameterobjects">Editing ParameterObjects</a></h2>
+<p>To edit an attribute of Texture, a user enters a new ParameterObject argument
+list. The command TIe, as before, first prompts the user to select which
+attribute to edit. Next, the current value of the attribute is displayed,
+followed by a prompt for the new value. TIv can be used to confirm the changed
+value. In the following example, the panning of Texture &quot;a1&quot; is assigned a
+fractional noise (1/f) ParameterObject:</p>
+<p><strong>Editing the panning of a TextureInstance</strong></p>
+<pre><code>pi{auto-muteHiConga}ti{b1} :: tie
+edit TI b1
+which parameter? (i,t,b,r,p,f,o,a,n,x,s,d): n
+current panning: constant, 0.5
+new value: n, 50, (cg, ud, 1, 3, .2), .5, 1
+TI b1: parameter panning updated.
+
+pi{auto-muteHiConga}ti{b1} :: tiv
+TI: b1, TM: LineGroove, TC: 0, TT: TwelveEqual
+pitchMode: pitchSpace, silenceMode: off, postMapMode: on
+midiProgram: piano1
+      status: o, duration: 005.0--19.97
+(i)nstrument        62 (generalMidiPercussion: muteHiConga)
+(t)ime range        05.0--20.0
+(b)pm               constant, 120
+(r)hythm            pulseTriple, (constant, 4), (basketGen, randomPermutate,
+                    (1,1,2,3)), (constant, 1), (constant, 0.75)
+(p)ath              auto-muteHiConga
+                    (D4)
+                    15.00(s)
+local (f)ield       constant, 0
+local (o)ctave      constant, 0
+(a)mplitude         randomUniform, (constant, 0.6), (constant, 1)
+pan(n)ing           noise, 50, (cyclicGen, upDown, 1, 3, 0.2), (constant, 0.5),
+                    (constant, 1)
+au(x)iliary         none
+texture (s)tatic
+      s0            parallelMotionList, (), 0.0
+      s1            pitchSelectorControl, randomPermutate
+      s2            levelFieldMonophonic, event
+      s3            levelOctaveMonophonic, event
+texture (d)ynamic   none
+</code></pre>
+<p>The noise ParameterObject has been given an embedded ParameterObject to control
+the gamma argument. Notice that instead of entering &quot;noise&quot;, &quot;cyclicGen&quot; or
+&quot;upDown&quot; the user can enter the acronyms &quot;n&quot;, &quot;cg&quot;, and &quot;ud&quot;. All
+ParameterObjects support automatic acronym expansion of argument strings. This
+is an important and time-saving shortcut.</p>
+<p>The previous example edited the panning of Texture &quot;a1&quot; such that it produces
+values within the range of .5 to 1. This limits the spatial location of the
+sound to the upper half of the range (the middle to right stereo position). To
+limit the spatial location of &quot;b1&quot; in a complementary fashion, the Texture is
+edited to produce values within the range 0 to .5, corresponding to the lower
+half of the range (the middle to left stereo position). In the example below,
+TIo is used to select &quot;b1&quot; before entering the TIe command. TEv is then used to
+compare panning values for all Textures.</p>
+<p><strong>Editing the panning of a TextureInstance</strong></p>
+<pre><code>pi{auto-muteHiConga}ti{b1} :: tio b1
+TI b1 now active.
+
+pi{auto-muteHiConga}ti{b1} :: tie n wpd,e,15,.25,2.5,0,.5
+TI b1: parameter panning updated.
+
+pi{auto-muteHiConga}ti{b1} :: tiv
+TI: b1, TM: LineGroove, TC: 0, TT: TwelveEqual
+pitchMode: pitchSpace, silenceMode: off, postMapMode: on
+midiProgram: piano1
+      status: o, duration: 005.0--20.06
+(i)nstrument        62 (generalMidiPercussion: muteHiConga)
+(t)ime range        05.0--20.0
+(b)pm               constant, 120
+(r)hythm            pulseTriple, (constant, 4), (basketGen, randomPermutate,
+                    (1,1,2,3)), (constant, 1), (constant, 0.75)
+(p)ath              auto-muteHiConga
+                    (D4)
+                    15.00(s)
+local (f)ield       constant, 0
+local (o)ctave      constant, 0
+(a)mplitude         randomUniform, (constant, 0.6), (constant, 1)
+pan(n)ing           wavePowerDown, event, (constant, 15), 0.25, 2.5, (constant,
+                    0), (constant, 0.5)
+au(x)iliary         none
+texture (s)tatic
+      s0            parallelMotionList, (), 0.0
+      s1            pitchSelectorControl, randomPermutate
+      s2            levelFieldMonophonic, event
+      s3            levelOctaveMonophonic, event
+texture (d)ynamic   none
+
+pi{auto-muteHiConga}ti{b1} :: tev n
+compare parameters: panning
+{name,value,}
+a1                  constant, 0.5
+b1                  wavePowerDown, event, (constant, 15), 0.25, 2.5, (constant,
+                    0), (constant, 0.5)
+</code></pre>
+<p>Notice that, in the above example, the user provided complete command-line
+arguments for the TIe command. When entering a ParameterObject from the
+command-line, no spaces, and only commas, can be used between ParameterObject
+arguments. As command-line arguments are space delimited (and ParameterObject
+arguments are comma delimited), a ParameterObject on the command line must be
+given without spaces between arguments. When providing a ParameterObject to a
+TIe prompt, however, spaces may be provided.</p>
+<h2 id="editing-rhythm-parameterobjects"><a class="header" href="#editing-rhythm-parameterobjects">Editing Rhythm ParameterObjects</a></h2>
+<p>Rhythm ParameterObjects are ParameterObjects specialized for generating time and
+rhythm information. Many Rhythm ParameterObjects use Pulse object notations to
+define proportional rhythms and reference a Texture's dynamic bpm
+attribute. Other ParameterObjects are independent of bpm and can use raw timing
+information provided by one or more Generator ParameterObjects.</p>
+<p>When using proportional rhythms, athenaCL uses Pulse objects. Pulses represent a
+ratio of duration in relation to the duration of beat (specified in BPM and
+obtained from the Texture). For details on Pulse notation, enter &quot;help pulse&quot;:</p>
+<p><strong>View Pulse and Rhythm help</strong></p>
+<pre><code>pi{auto-muteHiConga}ti{b1} :: help pulse
+{topic,documentation}
+Pulse and Rhythm    Pulses represent a duration value derived from ratio and a
+                    beat-duration. Beat duration is always obtained from a
+                    Texture. Pulses are noted as a list of three values: a
+                    divisor, a multiplier, and an accent. The divisor and
+                    multiplier must be positive integers greater than zero.
+                    Accent values must be between 0 and 1, where 0 is a measured
+                    silence and 1 is a fully sounding event. Accent values my
+                    alternatively be notated as + (for 1) and o (for 0). If a
+                    beat of a given duration is equal to a quarter note, a Pulse
+                    of (1,1,1) is a quarter note, equal in duration to a beat. A
+                    Pulse of (2,1,0) is an eighth-note rest: the beat is divided
+                    by two and then multiplied by one; the final zero designates
+                    a rest. A Pulse of (4,3,1) is a dotted eight note: the beat
+                    is divided by four (a sixteenth note) and then multiplied by
+                    three; the final one designates a sounding event. A Rhythm
+                    is designated as list of Pulses. For example: ((4,2,1),
+                    (4,2,1), (4,3,1)).
+</code></pre>
+<p>To edit the rhythms used by Texture b1, enter TIe followed by an &quot;r&quot; to access
+the rhythm attribute. As before, the user is presented with the current value,
+then prompted for a new value. In the following example, the ParameterObject
+&quot;loop&quot; is examined first with the TPv, then the active Texture is edited by
+providing an random walk over an expanded rhythm. Finally, the rhythm attribute
+of all Textures is viewed with TEv.</p>
+<p><strong>Editing Rhythm ParameterObjects with TIe</strong></p>
+<pre><code>pi{auto-muteHiConga}ti{b1} :: tpv loop
+Rhythm Generator ParameterObject
+{name,documentation}
+Loop                loop, pulseList, selectionString
+                    Description: Deploys a fixed list of rhythms. Pulses are
+                    chosen from this list using the selector specified by the
+                    selectionString argument. Arguments: (1) name, (2) pulseList
+                    {a list of Pulse notations}, (3) selectionString
+                    {'randomChoice', 'randomWalk', 'randomPermutate',
+                    'orderedCyclic', 'orderedCyclicRetrograde',
+                    'orderedOscillate'}
+
+pi{auto-muteHiConga}ti{b1} :: tie
+command.py: raw args  
+edit TI b1
+which parameter? (i,t,b,r,p,f,o,a,n,x,s,d): r
+current rhythm: pulseTriple, (constant, 4), (basketGen, randomPermutate,
+(1,1,2,3)), (constant, 1), (constant, 0.75)
+new value: l, ((4,1,1),(4,1,1),(4,2,1),(4,3,1),(4,5,1),(4,3,1)), rw
+TI b1: parameter rhythm updated.
+
+pi{auto-muteHiConga}ti{b1} :: tev r
+compare parameters: rhythm
+{name,value,}
+a1                  pulseTriple, (constant, 4), (basketGen, randomPermutate,
+                    (1,1,2,3)), (constant, 1), (constant, 0.75)
+b1                  loop, ((4,1,+),(4,1,+),(4,2,+),(4,3,+),(4,5,+),(4,3,+)),
+                    randomWalk
+</code></pre>
+<p>Notice that, as with all ParameterObjects, abbreviations can be used for
+argument strings. The user need only enter the string &quot;l&quot; to select the &quot;loop&quot;
+RhythmObject, and &quot;rw&quot; to select the randomWalk selection method.</p>
+<p>To edit Texture a1, the user must first make a1 the active texture with TIo. In
+the following example, the user applies a zero-order Markov chain to generate
+pulses. The user fist consults the documentation for ParameterObject
+markovPulse. For more information about Markov transition strings (Ariza 2006
+[AN#1343]), enter &quot;help markov&quot;. After selecting and editing the Texture, the
+Rhythms are compared with TEv:</p>
+<p><strong>Editing Rhythm ParameterObjects with TIe</strong></p>
+<pre><code>pi{auto-muteHiConga}ti{b1} :: tpv markovp
+Rhythm Generator ParameterObject
+{name,documentation}
+markovPulse         markovPulse, transitionString, parameterObject
+                    Description: Produces Pulse sequences by means of a Markov
+                    transition string specification and a dynamic transition
+                    order generator. The Markov transition string must define
+                    symbols that specify valid Pulses. Markov transition order
+                    is specified by a ParameterObject that produces values
+                    between 0 and the maximum order available in the Markov
+                    transition string. If generated-orders are greater than
+                    those available, the largest available transition order will
+                    be used. Floating-point order values are treated as
+                    probabilistic weightings: for example, a transition of 1.5
+                    offers equal probability of first or second order selection.
+                    Arguments: (1) name, (2) transitionString, (3)
+                    parameterObject {order value}
+
+pi{auto-muteHiConga}ti{b1} :: tio a1
+TI a1 now active.
+
+pi{auto-muteHiConga}ti{a1} :: tie
+edit TI a1
+which parameter? (i,t,b,r,p,f,o,a,n,x,s,d): r
+current rhythm: pulseTriple, (constant, 4), (basketGen, randomPermutate,
+(1,1,2,3)), (constant, 1), (constant, 0.75)
+new value: mp, a{8,1,1}b{4,3,1}c{4,2,1}d{4,5,1}:{a=1|b=3|c=4|d=7}, (c,0)
+TI a1: parameter rhythm updated.
+
+pi{auto-muteHiConga}ti{a1} :: tev r
+compare parameters: rhythm
+{name,value,}
+a1                  markovPulse,
+                    a{8,1,1}b{4,3,1}c{4,2,1}d{4,5,1}:{a=1|b=3|c=4|d=7},
+                    (constant, 0)
+b1                  loop, ((4,1,+),(4,1,+),(4,2,+),(4,3,+),(4,5,+),(4,3,+)),
+                    randomWalk
+                    
+</code></pre>
+<p>In the previous example, the user supplies four Pulses; each pulses is weighted
+such that the shortest, (8,1,1), is the least frequent (weight of 1), and the
+longest, (4,5,1), is the most frequent (weight of 7).</p>
+<p>Using ELn, the current collection of Textures can be used to create an
+EventList, and ELh may be used to audition the results. (For more information on
+using ELn, see .) Each time an EventList is created, different sequences of
+rhythms will be generated: for Texture a1, these rhythms will be the result of a
+zero-order Markov chain; for Texture b1, these rhythms will be the result of a
+random walk on an ordered list of Pulses.</p>
+<p>A final alternation can be made to the metric performance of these
+Textures. Using the TEe command, both Texture's bpm attribute can be altered to
+cause a gradual accelerando from 120 BPM to 300 BPM. In the following example,
+the user applies a wavePowerUp ParameterObject to the bpm attribute of both
+Textures by using the TEe command with complete command-line arguments:</p>
+<p><strong>Editing BPM with TEe</strong></p>
+<pre><code>pi{auto-muteHiConga}ti{a1} :: tee b wpu,t,20,0,2,120,300
+TI a1: parameter bpm updated.
+TI b1: parameter bpm updated.
+</code></pre>
+<h2 id="editing-instruments-and-altering-eventmode"><a class="header" href="#editing-instruments-and-altering-eventmode">Editing Instruments and Altering EventMode</a></h2>
+<p>A Texture's instrument can be edited like other Texture attributes. The
+instruments available for editing, just as when creating a Texture, are
+dependent on the active EventMode. To use instruments from another EventMode,
+the active EventMode must first be changed, and then the Texture may be assigned
+an instrument.</p>
+<p>In the following example, the user changes the EventMode to csoundNative with
+EMo, examines the available instruments with EMi, and then assigns each Texture
+instrument 80:</p>
+<p><strong>Changing EventMode and editing Texture instrument</strong></p>
+<pre><code>pi{auto-muteHiConga}ti{a1} :: emo cn
+EventMode mode set to: csoundNative.
+
+pi{auto-muteHiConga}ti{a1} :: emi
+csoundNative instruments:
+{number,name}
+   3      sineDrone                        
+   4      sineUnitEnvelope                 
+   5      sawDrone                         
+   6      sawUnitEnvelope                  
+   11     noiseWhite                       
+   12     noisePitched                     
+   13     noiseUnitEnvelope                
+   14     noiseTambourine                  
+   15     noiseUnitEnvelopeBandpass        
+   16     noiseSahNoiseUnitEnvelope        
+   17     noiseSahNoiseUnitEnvelopeDistort 
+   20     fmBasic                          
+   21     fmClarinet                       
+   22     fmWoodDrum                       
+   23     fmString                         
+   30     samplerReverb                    
+   31     samplerRaw                       
+   32     samplerUnitEnvelope              
+   33     samplerUnitEnvelopeBandpass      
+   34     samplerUnitEnvelopeDistort       
+   35     samplerUnitEnvelopeParametric    
+   36     samplerSahNoiseUnitEnvelope      
+   40     vocodeNoiseSingle                
+   41     vocodeNoiseSingleGlissando       
+   42     vocodeNoiseQuadRemap             
+   43     vocodeNoiseQuadScale             
+   44     vocodeNoiseQuadScaleRemap        
+   45     vocodeNoiseOctScale              
+   46     vocodeNoiseOctScaleRemap         
+   47     vocodeNoiseBiOctScale            
+   48     vocodeNoiseTriOctScale           
+   50     guitarNylonNormal                
+   51     guitarNylonLegato                
+   52     guitarNylonHarmonic              
+   60     additiveBellBright               
+   61     additiveBellDark                 
+   62     additiveBellClear                
+   70     synthRezzy                       
+   71     synthWaveformVibrato             
+   72     synthVcoAudioEnvelopeSineQuad    
+   73     synthVcoAudioEnvelopeSquareQuad  
+   74     synthVcoDistort                  
+   80     pluckTamHats                     
+   81     pluckFormant                     
+   82     pluckUnitEnvelope                
+   110    noiseAudioEnvelopeSineQuad       
+   111    noiseAudioEnvelopeSquareQuad     
+   130    samplerAudioEnvelopeSineQuad     
+   131    samplerAudioEnvelopeSquareQuad   
+   132    samplerAudioFileEnvelopeFilter   
+   133    samplerAudioFileEnvelopeFollow   
+   140    vocodeSineOctScale               
+   141    vocodeSineOctScaleRemap          
+   142    vocodeSineBiOctScale             
+   143    vocodeSineTriOctScale            
+   144    vocodeSineQuadOctScale           
+   145    vocodeSinePentOctScale           
+   146    vocodeSineHexOctScale            
+   230    samplerVarispeed                 
+   231    samplerVarispeedAudioSine        
+   232    samplerVarispeedReverb           
+   233    samplerVarispeedDistort          
+   234    samplerVarispeedSahNoiseDistort  
+   240    vocodeVcoOctScale                
+   241    vocodeVcoOctScaleRemap              
+
+pi{auto-muteHiConga}ti{a1} :: tie i 80
+baseTexture.py: WARNING: new Texture auxiliary value 2 
+TI a1: parameter instrument updated.
+
+pi{auto-muteHiConga}ti{a1} :: tio b1
+TI b1 now active.
+
+pi{auto-muteHiConga}ti{b1} :: tie i 80
+baseTexture.py: WARNING: new Texture auxiliary value 2 
+TI b1: parameter instrument updated.
+
+pi{auto-muteHiConga}ti{b1} :: tiv
+TI: b1, TM: LineGroove, TC: 0, TT: TwelveEqual
+pitchMode: pitchSpace, silenceMode: off, postMapMode: on
+midiProgram: piano1
+      status: o, duration: 005.0--20.12
+(i)nstrument        80 (csoundNative: pluckTamHats)
+(t)ime range        05.0--20.0
+(b)pm               wavePowerUp, time, (constant, 20), 0, 2, (constant, 120),
+                    (constant, 300)
+(r)hythm            loop, ((4,1,+),(4,1,+),(4,2,+),(4,3,+),(4,5,+),(4,3,+)),
+                    randomWalk
+(p)ath              auto-muteHiConga
+                    (D4)
+                    15.00(s)
+local (f)ield       constant, 0
+local (o)ctave      constant, 0
+(a)mplitude         randomUniform, (constant, 0.6), (constant, 1)
+pan(n)ing           wavePowerDown, event, (constant, 15), 0.25, 2.5, (constant,
+                    0), (constant, 0.5)
+au(x)iliary
+      x0            cyclicGen, up, 0.1, 0.9, 0.1
+      x1            cyclicGen, down, 800, 16000, 200
+texture (s)tatic
+      s0            parallelMotionList, (), 0.0
+      s1            pitchSelectorControl, randomPermutate
+      s2            levelFieldMonophonic, event
+      s3            levelOctaveMonophonic, event
+texture (d)ynamic   none
+</code></pre>
+<p>Notice that, after editing the Texture, a warning is issued. This warning tells
+the user that additional auxiliary ParameterObjects have been added. As a
+Csound-based instrument, each event of instrument 80 can accept two additional
+synthesis parameters. When viewing a Texture with this instrument, as shown
+above, the auxiliary display shows two additional ParameterObjects, x0 and
+x1. To learn what these auxiliary ParameterObjects control, the command TIdoc ma
+be used:</p>
+<p><strong>Examining Texture documentation with TIdoc</strong></p>
+<pre><code>pi{auto-muteHiConga}ti{b1} :: tidoc
+TI: b1, TM: LineGroove
+(i)nstrument        80 (csoundNative: pluckTamHats)
+(b)pm               (1) name, (2) stepString {'event', 'time'}, (3)
+                    parameterObject {secPerCycle}, (4) phase, (5) exponent, (6)
+                    min, (7) max
+(r)hythm            (1) name, (2) pulseList {a list of Pulse notations}, (3)
+                    selectionString {'randomChoice', 'randomWalk',
+                    'randomPermutate', 'orderedCyclic',
+                    'orderedCyclicRetrograde', 'orderedOscillate'}
+local (f)ield       (1) name, (2) value
+local (o)ctave      (1) name, (2) value
+(a)mplitude         (1) name, (2) min, (3) max
+pan(n)ing           (1) name, (2) stepString {'event', 'time'}, (3)
+                    parameterObject {secPerCycle}, (4) phase, (5) exponent, (6)
+                    min, (7) max
+au(x)iliary
+      x0            iparm (0-1)
+                    (1) name, (2) directionString {'upDown', 'downUp', 'up',
+                    'down'}, (3) min, (4) max, (5) increment
+      x1            low-pass filter frequency
+                    (1) name, (2) directionString {'upDown', 'downUp', 'up',
+                    'down'}, (3) min, (4) max, (5) increment
+texture (s)tatic
+      s0            (1) name, (2) transpositionList, (3) timeDelay
+      s1            (1) name, (2) selectionString {'randomChoice', 'randomWalk',
+                    'randomPermutate', 'orderedCyclic',
+                    'orderedCyclicRetrograde', 'orderedOscillate'}
+      s2            (1) name, (2) level {'set', 'event'}
+      s3            (1) name, (2) level {'set', 'event'}
+texture (d)ynamic   none
+</code></pre>
+<p>Assuming that Csound is properly configured, a new set of EventLists can be
+created. As the user is now in EventMode csoundNative and has csoundNative
+textures, both a Csound score and a MIDI file are created. (See for more
+information on working with Csound in athenaCL.) The user may render the Csound
+score with ELr, and then audition the results with the ELh command.</p>
+<p><strong>Creating a new EventList with ELn</strong></p>
+<pre><code>pi{auto-muteHiConga}ti{b1} :: eln
+      EventList ath2010.07.03.18.40.11 complete:
+/Volumes/xdisc/_scratch/ath2010.07.03.18.40.11.bat
+/Volumes/xdisc/_scratch/ath2010.07.03.18.40.11.csd
+/Volumes/xdisc/_scratch/ath2010.07.03.18.40.11.mid
+/Volumes/xdisc/_scratch/ath2010.07.03.18.40.11.xml
+audio rendering initiated: /Volumes/xdisc/_scratch/ath2010.07.03.18.40.11.bat
+EventList hear initiated: /Volumes/xdisc/_scratch/ath2010.07.03.18.40.11.aif
+EventList hear initiated: /Volumes/xdisc/_scratch/ath2010.07.03.18.40.11.mid
+</code></pre>
+<h2 id="displaying-texture-parameter-values"><a class="header" href="#displaying-texture-parameter-values">Displaying Texture Parameter Values</a></h2>
+<p>It is often useful to view the values produced by a Texture with a graphical
+diagram. The command TImap provides a multi-parameter display of all raw values
+input from ParameterObjects into the Texture. The values displayed by TImap are
+pre-TextureModule, meaning that they are the raw values produced by the
+ParameterObjects; the final parametric event values may be altered or completely
+changed by the Texture's internal processing (its TextureModule) to produce
+different arrangements of events. The TImap command thus only provides a partial
+representation of what a Texture produces.</p>
+<p>To view a TImap display, the user's graphic preferences must be properly set
+(see for more information). The command TImap displays the active Texture:</p>
+<p><strong>Viewing a Texture with TImap</strong></p>
+<pre><code>pi{auto-muteHiConga}ti{b1} :: timap
+TImap (event-base, pre-TM) display complete.
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="tutorial-5-textures-and-paths"><a class="header" href="#tutorial-5-textures-and-paths">Tutorial 5: Textures and Paths</a></h1>
+<p>This tutorial demonstrates basic use of Paths within Textures. This chapter is
+essential for understanding the use of Paths in algorithmic music production.</p>
+<h2 id="path-linking-and-pitch-formation-redundancy"><a class="header" href="#path-linking-and-pitch-formation-redundancy">Path Linking and Pitch Formation Redundancy</a></h2>
+<p>Textures link to Paths. Said another way, a Texture contains a reference to a
+Path object stored in the AthenaObject. Numerous Textures can thus share the
+same Path; further, if a change is made to this Path, all Textures will
+reference the newly updated version of the Path.</p>
+<p>Events generated by a Texture can derive pitch values from a sequence of many
+transformations. These transformations allow the user to work with Pitch
+materials in a wide variety of orientations and parametric specifications. One
+or more Textures may share a single Path to derive pitch class or pitch space
+pitch values. Each Texture has independent ParameterObject control of a local
+transposition (local field) and a local register position (local octave), and
+with most TextureModules this control can be configured to be applied once per
+event or once per Path set. Finally, each Texture has a modular Temperament
+object to provide microtonal and dynamic final pitch tuning. Ultimately, the
+TextureModule is responsible for interpreting this final pitch value into a
+linear, horizontal, or other event arrangement.</p>
+<p>For example, a Texture may be linked to simple Path consisting of a single
+pitch. This pitch will serve as a referential pitch value for all pitch
+generation and transformation within the Texture. The Texture's local field and
+local octave controls could then be used to produce a diverse collection of
+Pitch values. Changing the single pitch of the Path would then provide global
+transposition of Texture-based pitch processes. Alternatively, a Path may
+specify a complex sequence of chord changes. Numerous Textures, linked to this
+single Path, could each apply different local octave settings to distinguish
+register, and could each apply different microtonal tunings with local field and
+Temperament settings.</p>
+<h2 id="creating-a-path-with-a-duration-fraction"><a class="header" href="#creating-a-path-with-a-duration-fraction">Creating a Path with a Duration Fraction</a></h2>
+<p>First, the user creates a path consisting of three Multisets. As demonstrated in
+, there are many ways to create and edit a Path. In the following example, the
+user creates a new path named q1 by simply providing pitch space values using
+conventional note names. The path is the then viewed with the PIv command, and
+auditioned with the PIh command.</p>
+<p><strong>Creating a Path with PIn</strong></p>
+<pre><code>pi{}ti{} :: pin
+name this PathInstance: q1
+enter a pitch set, sieve, spectrum, or set-class: D2,G#3,A3,D3,E2,B2,A2
+      SC 5-29A as (D2,G#3,A3,D3,E2,B2,A2)? (y, n, or cancel): y
+      add another set? (y, n, or cancel): y
+enter a pitch set, sieve, spectrum, or set-class: C4,C#4,F#3,G4,A3
+      SC 5-19A as (C4,C#4,F#3,G4,A3)? (y, n, or cancel): y
+      add another set? (y, n, or cancel): y
+enter a pitch set, sieve, spectrum, or set-class: G#5,A4,D#4,E5
+      SC 4-8 as (G#5,A4,D#4,E5)? (y, n, or cancel): y
+      add another set? (y, n, or cancel): n
+PI q1 added to PathInstances.
+
+pi{q1}ti{} :: piv
+PI: q1
+psPath              -22,-4,-3,-10,-20,-13,-15  0,1,-6,7,-3       20,9,3,16      
+                    D2,G#3,A3,D3,E2,B2,A2      C4,C#4,F#3,G4,A3  G#5,A4,D#4,E5  
+pcsPath             2,8,9,2,4,11,9             0,1,6,7,9         8,9,3,4        
+scPath              5-29A                      5-19A             4-8            
+durFraction         1(33%)                     1(33%)            1(33%)         
+TI References: none.
+
+pi{q1}ti{} :: pih
+PI q1 hear with TM LineGroove complete.
+(/Volumes/xdisc/_scratch/ath2010.07.03.19.05.21.mid)
+</code></pre>
+<p>As should be clear from the psPath display or the auditioned MIDI file, Path q1
+covers a wide pitch range, from E2 to G#5. Notice also that the &quot;durFraction&quot;
+specifies that each Multiset in the Path has an equal duration weighting (1, or
+33%). The durFraction of a Path is a means of providing a proportional temporal
+weighting to each Multiset in the Path. When a Texture interprets a Path, it
+partitions its duration into as many segments as there are Path Multisets, and
+each segment is given a duration proportional to the Path durFraction. The
+command PIdf can be used to alter a Path's duration weighting. The user must
+supply a list of values, either as percentages (floating point or integer) or
+simply as numeric weightings. In the following example, after calling PIdf, the
+command PIh is used to audition the results of an altered durFraction:</p>
+<p><strong>Altering a Path's durFraction with PIdf</strong></p>
+<pre><code>pi{q1}ti{} :: pidf
+edit PI q1
+enter a list of duration fractions: 8,5,3
+PI q1 edited.
+
+pi{q1}ti{} :: piv
+PI: q1
+psPath              -22,-4,-3,-10,-20,-13,-15  0,1,-6,7,-3       20,9,3,16      
+                    D2,G#3,A3,D3,E2,B2,A2      C4,C#4,F#3,G4,A3  G#5,A4,D#4,E5  
+pcsPath             2,8,9,2,4,11,9             0,1,6,7,9         8,9,3,4        
+scPath              5-29A                      5-19A             4-8            
+durFraction         8(50%)                     5(31%)            3(19%)         
+TI References: none.
+
+pi{q1}ti{} :: pih
+PI q1 hear with TM LineGroove complete.
+(/Volumes/xdisc/_scratch/ath2010.07.03.19.08.09.mid)
+</code></pre>
+<p>The PIv display shows that the Multisets are weighted such that the first is
+given 50%, the second 31%, and the last 19%. The MIDI file created with PIh
+should confirm this distribution.</p>
+<h2 id="setting-eventmode-and-creating-a-texture"><a class="header" href="#setting-eventmode-and-creating-a-texture">Setting EventMode and Creating a Texture</a></h2>
+<p>As explained in , the athenaCL EventMode determines what instruments are
+available for Texture creation. In the following example, the EventMode is set
+to midi, the TextureModule LiteralVertical is selected, a new Texture is created
+with instrument 0, and the Texture is displayed with TIv.</p>
+<p><strong>Creating a Texture with TM LiteralVertical</strong></p>
+<pre><code>pi{q1}ti{} :: emo midi
+EventMode mode set to: midi.
+
+pi{q1}ti{} :: tmls
+TextureModules available:
+{name,TIreferences}
+   DroneArticulate    0
+   DroneSustain       0
+   HarmonicAssembly   0
+   HarmonicShuffle    0
+   InterpolateFill    0
+   InterpolateLine    0
+   IntervalExpansion  0
+   LineCluster        0
+ + LineGroove         0
+   LiteralHorizontal  0
+   LiteralVertical    0
+   MonophonicOrnament 0
+   TimeFill           0
+   TimeSegment        0
+
+pi{q1}ti{} :: tmo lv
+TextureModule LiteralVertical now active.
+
+pi{q1}ti{} :: tin a1 0
+TI a1 created.
+
+pi{q1}ti{a1} :: tiv
+TI: a1, TM: LiteralVertical, TC: 0, TT: TwelveEqual
+pitchMode: pitchSpace, silenceMode: off, postMapMode: on
+midiProgram: piano1
+      status: +, duration: 000.0--19.94
+(i)nstrument        0 (generalMidi: piano1)
+(t)ime range        00.0--20.0
+(b)pm               constant, 120
+(r)hythm            pulseTriple, (constant, 4), (basketGen, randomPermutate,
+                    (1,1,2,3)), (constant, 1), (constant, 0.75)
+(p)ath              q1
+                    (D2,G#3,A3,D3,E2,B2,A2),(C4,C#4,F#3,G4,A3),(G#5,A4,D#4,E5)
+                    10.00(s), 6.25(s), 3.75(s)
+local (f)ield       constant, 0
+local (o)ctave      constant, 0
+(a)mplitude         randomBeta, 0.4, 0.4, (constant, 0.7), (constant, 0.9)
+pan(n)ing           constant, 0.5
+au(x)iliary         none
+texture (s)tatic
+      s0            loopWithinSet, on
+      s1            maxTimeOffset, 0.03
+      s2            levelFieldPolyphonic, event
+      s3            levelOctavePolyphonic, event
+      s4            pathDurationFraction, on
+texture (d)ynamic   none     
+</code></pre>
+<p>Notice that the Texture's Path attribute is set to q1. In all cases, a Texture,
+when created, links to the active Path. The Path a Texture links to can be
+edited later if necessary. Notice also that the Path listing in the TIv display
+shows the pitches of the Path, as well as timings for each set: 10, 6.25, and
+3.74 seconds respectively. These times are the result of the duration fraction
+applied to the Texture's duration.</p>
+<p>To hear this Texture, create an EventList as explained in . After using the ELn
+command, the ELh command can be used to open the MIDI file. Notice that each
+chord lasts the appropriate duration fraction of the total twenty-second
+duration of the Texture.</p>
+<p>A few small edits to this Texture will make it more interesting. In the
+following example, both the rhythm and amplitude are edited: the rhythm is given
+more Pulses and made to oscillate back and forth along the specified series; the
+amplitude randomly selects from a list of four amplitudes.</p>
+<p><strong>Editing a Texture</strong></p>
+<pre><code>pi{q1}ti{a1} :: tie r l, ((4,1,1), (4,1,1), (4,3,0), (2,3,1), (3,2,1), (3,2,1)), oo
+TI a1: parameter rhythm updated.
+
+pi{q1}ti{a1} :: tie a bg, rc, (.5,.6,.8,1) 
+TI a1: parameter amplitude updated.
+</code></pre>
+<p>Again, ELn and ELh can be used to create and audition the resulting musical
+structure.</p>
+<h2 id="pitchmode"><a class="header" href="#pitchmode">PitchMode</a></h2>
+<p>PitchMode is a Texture attribute that controls the interpretation of the Path
+from inside a TextureInstance.</p>
+<p>PitchMode determines if a Path is represented to the Texture as a pitch space
+set, a pitch class set, or set class. As a pitch space set, a Texture performs
+register information included in a Path. The set (1,11,24), performed as a pitch
+space set, would consist of a C-sharp, a B-natural a minor seventh above the
+lowest pitch, and C-natural an octave and major-seventh above the lowest
+pitch. The set (1,11,24) performed as a pitch-class set, would be interpreted as
+the set (1,11,0): register information is removed, while pitch class is
+retained. The set (1,11,24), performed as a set-class, would be interpreted as
+the set (0,1,2): register and pitch-class are removed, while the normal-form of
+the set-class is retained.</p>
+<p>In the following example, a new Texture is created from TextureModule
+LineGroove. First, the TM must be selected with the TMo command. Next, a new
+Texture named b1 is created with the TIn command. The TImode command can be used
+to edit many Texture options. In this example, pitchMode is selected and &quot;pcs,&quot;
+for pitch class space, is selected. Finally, the Texture is given a more
+interesting rhythm, by use of the Rhythm ParameterObject markovPulse, and is
+panned to the right with a constant value:</p>
+<p><strong>Editing PitchMode of a TextureInstance</strong></p>
+<pre><code>pi{q1}ti{a1} :: tmo lg
+TextureModule LineGroove now active.
+
+pi{q1}ti{a1} :: tin b1 0
+TI b1 created.
+
+pi{q1}ti{b1} :: timode
+edit TI b1: Pitch, Polyphony, Silence, or PostMap Mode? (p, y, s, m): p
+      current Pitch Mode: pitchSpace. enter new mode (sc, pcs, ps): pcs
+Pitch Mode changed to pitchClass
+
+pi{q1}ti{b1} :: tie
+edit TI b1
+which parameter? (i,t,b,r,p,f,o,a,n,x,s,d): r
+current rhythm: pulseTriple, (constant, 4), (basketGen, randomPermutate,
+(1,1,2,3)), (constant, 1), (constant, 0.75)
+new value: mp, a{6,1,1}b{3,2,0}c{3,5,1}:{a=5|b=3|c=2}, (c,0)
+TI b1: parameter rhythm updated.
+
+pi{q1}ti{b1} :: tie n c,.9
+TI b1: parameter panning updated.
+
+pi{q1}ti{b1} :: tiv
+TI: b1, TM: LineGroove, TC: 0, TT: TwelveEqual
+pitchMode: pitchClass, silenceMode: off, postMapMode: on
+midiProgram: piano1
+      status: +, duration: 000.0--19.83
+(i)nstrument        0 (generalMidi: piano1)
+(t)ime range        00.0--20.0
+(b)pm               constant, 120
+(r)hythm            markovPulse, a{6,1,1}b{3,2,0}c{3,5,1}:{a=5|b=3|c=2},
+                    (constant, 0)
+(p)ath              q1
+                    (D2,G#3,A3,D3,E2,B2,A2),(C4,C#4,F#3,G4,A3),(G#5,A4,D#4,E5)
+                    10.00(s), 6.25(s), 3.75(s)
+local (f)ield       constant, 0
+local (o)ctave      constant, 0
+(a)mplitude         randomBeta, 0.4, 0.4, (constant, 0.7), (constant, 0.9)
+pan(n)ing           constant, 0.9
+au(x)iliary         none
+texture (s)tatic
+      s0            parallelMotionList, (), 0.0
+      s1            pitchSelectorControl, randomPermutate
+      s2            levelFieldMonophonic, event
+      s3            levelOctaveMonophonic, event
+texture (d)ynamic   none
+</code></pre>
+<p>Because Path q1 is still active, this new Texture is assigned the same Path as
+Texture a1. After setting the Texture's pitchMode to pitchClassSpace, however,
+Texture b1 will receive only pitch class values from Path q1: all register
+information, as performed in Texture a1, is stripped. By creating a new
+EventList with ELn and auditioning the results, it should be clear that both
+Textures share the same pitch information and duration weighting. Notice that
+the faster-moving single-note line Texture b1, however, stays within a single
+register. When a Texture is in pitchClassSpace Pitch mode, all pitches from a
+Path are interpreted within the octave from C4 to C5.</p>
+<h2 id="editing-local-octave"><a class="header" href="#editing-local-octave">Editing Local Octave</a></h2>
+<p>With a Texture's local field and local octave controls, ParameterObjects can be
+used to alter the pitches derived from a Path. In most TextureModules, the
+transformation offered by field and octave control can be applied either once
+per Multiset, or once per event. This is set by editing the TextureStatic
+options levelField and levelOctave.</p>
+<p>In the following example, the local octave attribute of Texture b1 is edited
+such that octaves are chosen in order from a list of possibilities, creating a
+sequence of octave transpositions. An octave value of 0 means no transposition;
+an octave of -2 means a transposition two octaves down.</p>
+<p><strong>Editing Local Octave</strong></p>
+<pre><code>pi{q1}ti{b1} :: tie
+command.py: raw args  
+edit TI b1
+which parameter? (i,t,b,r,p,f,o,a,n,x,s,d): o
+current local octave: constant, 0
+new value: bg, oc, [-3,-2,2,-1]
+TI b1: parameter local octave updated.
+
+pi{q1}ti{b1} :: tiv
+TI: b1, TM: LineGroove, TC: 0, TT: TwelveEqual
+pitchMode: pitchClass, silenceMode: off, postMapMode: on
+midiProgram: piano1
+      status: +, duration: 000.0--19.83
+(i)nstrument        0 (generalMidi: piano1)
+(t)ime range        00.0--20.0
+(b)pm               constant, 120
+(r)hythm            markovPulse, a{6,1,1}b{3,2,0}c{3,5,1}:{a=5|b=3|c=2},
+                    (constant, 0)
+(p)ath              q1
+                    (D2,G#3,A3,D3,E2,B2,A2),(C4,C#4,F#3,G4,A3),(G#5,A4,D#4,E5)
+                    10.00(s), 6.25(s), 3.75(s)
+local (f)ield       constant, 0
+local (o)ctave      basketGen, orderedCyclic, (-3,-2,2,-1)
+(a)mplitude         randomBeta, 0.4, 0.4, (constant, 0.7), (constant, 0.9)
+pan(n)ing           constant, 0.9
+au(x)iliary         none
+texture (s)tatic
+      s0            parallelMotionList, (), 0.0
+      s1            pitchSelectorControl, randomPermutate
+      s2            levelFieldMonophonic, event
+      s3            levelOctaveMonophonic, event
+texture (d)ynamic   none
+</code></pre>
+<p>Listening to the results of the previous edit (with ELn and ELh), it should be
+clear that a new octave is applied to each event of Texture b1, creating an
+regular oscillation of register independent of Path Multiset.</p>
+<p>Alternatively, the user may desire local octave and field controls to only be
+applied once per Multiset. This option can be set for TextureModule LineGroove
+by editing the TextureStatic parameter &quot;levelOctaveMonophonic.&quot; In the following
+example, the user examines the documentation of ParameterObject
+levelOctaveMonophonic, and a copy of Texture b1 is created named b2. Next, this
+Texture's panning is edited, and then the TextureStatic option
+levelOctaveMonophonic is changed from &quot;event&quot; to &quot;set&quot;:</p>
+<p><strong>Editing TextureStatic</strong></p>
+<pre><code>pi{q1}ti{b1} :: tpv leveloctave
+Texture Static ParameterObject
+{name,documentation}
+levelOctaveMonophonic levelOctaveMonophonic, level
+                      Description: Toggle between selection of local octave
+                      (transposition) values per set of the Texture Path, or per
+                      event. Arguments: (1) name, (2) level {'set', 'event'}
+levelOctavePolyphonic levelOctavePolyphonic, level
+                      Description: Toggle between selection of local octave
+                      (transposition) values per set of the Texture Path, per
+                      event, or per polyphonic voice event. Arguments: (1) name,
+                      (2) level {'set', 'event', 'voice'}
+
+pi{q1}ti{b1} :: ticp b1 b2
+TextureInstance b2 created.
+
+pi{q1}ti{b2} :: tie 
+edit TI b2
+which parameter? (i,t,b,r,p,f,o,a,n,x,s,d): s
+select a texture static parameter to edit, from s0 to s3: 3
+current value for s3: event
+new value: set
+TI b2: parameter texture static updated.
+
+pi{q1}ti{b2} :: tie n c,.1
+TI b2: parameter panning updated.
+</code></pre>
+<p>Listening to a new EventList created with these three Textures (with ELn and
+ELh), it should be clear that all pitch information is synchronized by use of a
+common Path. In the case of Texture a1, the pitches are taken directly from the
+Path with register. In the case of Texture b1 (right channel), the Path pitches,
+without register, are transposed into various registers for each event. In the
+case of Texture b2 (left channel), the Path pitches, also without register, are
+transposed into various registers only once per Multiset.</p>
+<h2 id="editing-local-field-and-temperament"><a class="header" href="#editing-local-field-and-temperament">Editing Local Field and Temperament</a></h2>
+<p>Within athenaCL, any pitch can be tuned to microtonal specifications, allowing
+the user to apply non-equal tempered frequencies to each pitch in either a fixed
+relationship or a dynamic, algorithmically generated manner. Within athenaCL
+Textures there are two ways to provide microtonal tunings. First, pitches can be
+transposed and tuned with any ParameterObject by using the Texture local field
+attribute. Each integer represents a half-step transposition, and floating point
+values can provide any detail of microtonal specification. Second, each Texture
+can have a different Temperament, or tuning system based on either pitch class,
+pitch space, or algorithmic specification. The command TTls allows the user to
+list the available TextureTemperaments.</p>
+<p><strong>Listing all TextureTemperaments</strong></p>
+<pre><code>pi{q1}ti{b2} :: ttls
+TextureTemperaments available for TI b2:
+{name,tunning}
+ + TwelveEqual       
+   Pythagorean       
+   Just              
+   MeanTone          
+   Split24Upper      
+   Split24Lower      
+   Interleave24Even  
+   Interleave24Odd   
+   NoiseLight        
+   NoiseMedium       
+   NoiseHeavy        
+</code></pre>
+<p>The temperament &quot;TwelveEqual&quot; is the active Temperament for current Texture
+b2. This temperament produces equal-tempered frequencies. To select a different
+temperament for the active Texture, enter the command TTo. In the example below
+the user selects the temperament NoiseLight for Textures b2 and Texture b1, and
+then selects the temperament NoiseMedium for Texture a1. In the last case, two
+command are given on the some command line. As is the UNIX convention, the
+commands and arguments are separated by a semicolon:</p>
+<p><strong>Selecting Texture Temperament with TTo</strong></p>
+<pre><code>pi{q1}ti{b2} :: tto
+select a TextureTemperament for TI b2: (name or number 1-11): nl
+TT NoiseLight now active for TI b2.
+
+pi{q1}ti{b2} :: tio b1
+TI b1 now active.
+
+pi{q1}ti{b1} :: tto nl
+TT NoiseLight now active for TI b1.
+
+pi{q1}ti{b1} :: tio a1; tto nm
+TI a1 now active.
+
+TT NoiseMedium now active for TI a1.
+</code></pre>
+<p>Not all EventOutputs can perform microtones. MIDI files, for example, cannot
+store microtonal specifications of pitch. Though such pitches will be generated
+within athenaCL, they will be rounded when written to the MIDI
+file. EventOutputs for Csound, however, can handle microtones.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="tutorial-6-textures-and-clones"><a class="header" href="#tutorial-6-textures-and-clones">Tutorial 6: Textures and Clones</a></h1>
+<p>This tutorial demonstrates basic Clone creation, configuration, and deployment
+in musical structures. Clones provide an additional layer of algorithmic music
+production, processing the literal output of Textures.</p>
+<h2 id="introduction-to-clones"><a class="header" href="#introduction-to-clones">Introduction to Clones</a></h2>
+<p>A TextureClone (or a Clone or TC) is a musical part made from transformations of
+the exact events produced by a single Texture. Said another way, a Clone is not
+a copy of a Texture, but a transformed copy of the events produced by a
+Texture. Textures are not static entities, but algorithmic instructions that are
+&quot;performed&quot; each time an EventList is created. In order to capture and process
+the events of a single Texture, one or more Clones can be created in association
+with a single Texture.</p>
+<p>Clones use Filter ParameterObjects to parametrically modify events produced from
+the parent Texture. Clones can be used to achieve a variety of musical
+structures. An echo is a simple example: by shifting the start time of events, a
+Clone can be used to create a time-shifted duplicate of a Texture's
+events. Clones can be used with a Texture to produce transformed motivic
+quotations of events, or can be used to thicken or harmonize a Texture with
+itself, for instance by filtering event pitch values.</p>
+<p>Clones are also capable of non-parametric transformations that use CloneStatic
+ParameterObjects. For example a Clone, using a retrograde transformation, can
+reverse the events of a Texture.</p>
+<h2 id="creating-and-editing-clones"><a class="header" href="#creating-and-editing-clones">Creating and Editing Clones</a></h2>
+<p>First, using EventMode midi and instrument 0, a Texture with a descending
+melodic arc will be created. The Texture's time range is set from 0 to 6. The
+Texture's rhythm employs the ParameterObject convertSecond and uses a standard
+Generator ParameterObject to create raw duration values in seconds. Finally,
+This Texture, using a Path only as a reference pitch, employs the Texture's
+local field to provide harmonic shape.</p>
+<p><strong>Creating a Texture</strong></p>
+<pre><code>pi{}ti{} :: emo m
+EventMode mode set to: midi.
+
+pi{}ti{} :: tin a1 0
+TI a1 created.
+
+pi{auto}ti{a1} :: tie t 0,6
+TI a1: parameter time range updated.
+
+pi{auto}ti{a1} :: tie r cs,(wpd,e,16,2,0,.6,.02)
+TI a1: parameter rhythm updated.
+
+pi{auto}ti{a1} :: tie f wpd,e,16,2,0,12,-24
+TI a1: parameter local field updated.
+
+pi{auto}ti{a1} :: tiv
+TI: a1, TM: LineGroove, TC: 0, TT: TwelveEqual
+pitchMode: pitchSpace, silenceMode: off, postMapMode: on
+midiProgram: piano1
+      status: +, duration: 00.0--6.41
+(i)nstrument        0 (generalMidi: piano1)
+(t)ime range        0.0--6.0
+(b)pm               constant, 120
+(r)hythm            convertSecond, (wavePowerDown, event, (constant, 16), 2, 0,
+                    (constant, 0.6), (constant, 0.02))
+(p)ath              auto
+                    (C4)
+                    6.00(s)
+local (f)ield       wavePowerDown, event, (constant, 16), 2, 0, (constant, 12),
+                    (constant, -24)
+local (o)ctave      constant, 0
+(a)mplitude         randomBeta, 0.4, 0.4, (constant, 0.7), (constant, 0.9)
+pan(n)ing           constant, 0.5
+au(x)iliary         none
+texture (s)tatic
+      s0            parallelMotionList, (), 0.0
+      s1            pitchSelectorControl, randomPermutate
+      s2            levelFieldMonophonic, event
+      s3            levelOctaveMonophonic, event
+texture (d)ynamic   none
+</code></pre>
+<p>After creating a Texture, a Clone can be created with the command TCn, for
+TextureClone New. The user is prompted to enter the name of the new Clone. By
+default, the Filter ParameterObject filterAdd is applied to the start time of
+all events with a duration equal to one Pulse. A Clone can be displayed with the
+TCv command. After displaying the Clone, the user examines the documentation for
+ParameterObject filterAdd:</p>
+<p><strong>Creating and Viewing a Clone with TCn and TCv</strong></p>
+<pre><code>pi{auto}ti{a1} :: tcn
+name this TextureClone: w1
+TC w1 created.
+
+pi{auto}ti{a1} :: tcv
+TC: w1, TI: a1
+      status: +, duration: 00.5--6.91
+(t)ime              filterAdd, (loop, ((1,1,+)), orderedCyclic) 
+s(u)stain           bypass                                      
+a(c)cent            bypass                                      
+local (f)ield       bypass                                      
+local (o)ctave      bypass                                      
+(a)mplitude         bypass                                      
+pan(n)ing           bypass                                      
+au(x)iliary         none                                        
+clone (s)tatic                                                  
+      s0            timeReferenceSource, textureTime            
+      s1            retrogradeMethodToggle, off 
+</code></pre>
+<p>The Filter ParameterObject bypass is the default for most Clone attributes. This
+ParameterObject simply passes values through to the Clone unaltered.</p>
+<p>Upon creating a new EventList and auditioning the results (with ELn and ELh, see
+for more information), the descending melodic line of a1 can be heard echoed by
+Clone w1. In the following example, another Clone is created called w2. This
+Clone is then edited to have a time value that, rather than shifted by a
+constant, is scaled by a value that oscillates between 1 and 2. The Clone's
+local field filter is also set to transpose the Texture's pitches seven
+half-steps down. The procedure for editing Clone ParameterObjects is similar to
+that for editing Textures, except for that only Filter ParameterObjects can be
+provided.</p>
+<p><strong>Editing a Clone with TCe</strong></p>
+<pre><code>pi{auto}ti{a1} :: tcn w2
+TC w2 created.
+
+pi{auto}ti{a1} :: tpv fma
+Filter ParameterObject
+{name,documentation}
+FilterMultiplyAnchor filterMultiplyAnchor, anchorString, parameterObject
+                     Description: All input values are first shifted so that the
+                     position specified by anchor is zero; then each value is
+                     multiplied by the value produced by the parameterObject.
+                     All values are then re-shifted so that zero returns to its
+                     former position. Arguments: (1) name, (2) anchorString
+                     {'lower', 'upper', 'average', 'median'}, (3)
+                     parameterObject {operator value generator}
+
+pi{auto}ti{a1} :: tce t fma, l, (ws, e, 8, 0, 1, 2)
+TC w2: parameter time updated.
+
+pi{auto}ti{a1} :: tce f fa,(c,-7)
+TC w2: parameter local field updated.
+
+pi{auto}ti{a1} :: tcv
+TC: w2, TI: a1
+      status: +, duration: 000.0--11.41
+(t)ime              filterMultiplyAnchor, lower, (waveSine, event, (constant,
+                    8), 0, (constant, 1), (constant, 2))
+s(u)stain           bypass
+a(c)cent            bypass
+local (f)ield       filterAdd, (constant, -7)
+local (o)ctave      bypass
+(a)mplitude         bypass
+pan(n)ing           bypass
+au(x)iliary         none
+clone (s)tatic
+      s0            timeReferenceSource, textureTime
+      s1            retrogradeMethodToggle, off
+
+</code></pre>
+<p>As with Textures and other objects in athenaCL, Clones can be listed with the
+TCls command, and the active Clone can be selected with the TCo
+command. Further, upon examining the parent Texture with TIls, notice that two
+Clones are now displayed under the TC heading:</p>
+<p><strong>Listing and Selecting Clones with TCls and TCo</strong></p>
+<pre><code>pi{auto}ti{a1} :: tcls
+TextureClones of TI a1
+{name,status,duration}
+   w1               + 00.5--6.91      
+ + w2               + 000.0--11.41 
+
+pi{auto}ti{a1} :: tco w1
+TC w1 of TI a1 now active.
+
+pi{auto}ti{a1} :: tils
+TextureInstances available:
+{name,status,TM,PI,instrument,time,TC}
+ + a1               + LineGroove  auto        0   0.0--6.0   2
+</code></pre>
+<p>Clones features special transformations selected by CloneStatic
+ParameterObjects. In the following example, a new Clone is created named w3. The
+CloneStatic ParameterObject retrogradeMethodToggle is set to timeInverse,
+causing the Clone to create a retrograde presentation of the Texture's
+events. Additionally, the Clone's time attribute is set with a
+filterMultuplyAnchor ParameterObject and the Clone's field attributes is set
+with a filterAdd ParameterObject:</p>
+<p><strong>Creating and Editing Clones</strong></p>
+<pre><code>pi{auto}ti{a1} :: tpv retrograde
+Clone Static ParameterObject
+{name,documentation}
+retrogradeMethodToggle retrogradeMethodToggle, name
+                       Description: Selects type of retrograde transformation
+                       applied to Texture events. Arguments: (1) name, (2) name
+                       {'timeInverse', 'eventInverse', 'off'}
+
+pi{auto}ti{a1} :: tcn w3
+TC w3 created.
+
+pi{auto}ti{a1} :: tce 
+edit TC a1
+which parameter? (t,u,c,f,o,a,n,x,s): s
+select a clone static parameter to edit, from s0 to s1: 1
+current value for c1: off
+new value: timeinverse
+TC w3: parameter clone static updated.
+
+pi{auto}ti{a1} :: tce t fma,l,(c,2.5)
+TC w3: parameter time updated.
+
+pi{auto}ti{a1} :: tce f fa,(c,7)
+TC w3: parameter local field updated.
+</code></pre>
+<p>The TEmap command displays all Textures as well as all Texture Clones. Texture
+Clones appear under their parent Texture. Textures and Clones, further, can be
+muted independently.</p>
+<p><strong>Viewing Textures and Clones with TEmap</strong></p>
+<pre><code>pi{auto}ti{a1} :: temap
+TextureEnsemble Map:
+15.22s              |      .       |      .       |      .      |       .      |
+a1                  _________________________                                   
+      w3            ............................................................
+      w2               .............................................
+      w1                 .........................
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="tutorial-7-scripting-athenacl-in-python"><a class="header" href="#tutorial-7-scripting-athenacl-in-python">Tutorial 7: Scripting athenaCL in Python</a></h1>
+<p>This tutorial demonstrates some of the ways the athenaCL system can be
+automated, scripted, and used from within the Python programming language.</p>
+<h2 id="creating-an-athenacl-interpreter-within-python"><a class="header" href="#creating-an-athenacl-interpreter-within-python">Creating an athenaCL Interpreter within Python</a></h2>
+<p>Within a Python interpreter or a Python script on any platform, one or more
+instances of the athenaCL Interpreter can be created and programmatically
+controlled. Programming a sequence of athenaCL commands via a Python script
+provides maximal control and flexibility in using athenaCL. Loops, external
+procedures, and a variety of programming designs can be combined with the
+high-level syntax of the athenaCL command line. Furthermore, command sequences
+can be stored, edited, and developed.</p>
+<p>The cmd() method of the athenaCL Interpreter can be used to be pass strings or
+Python data structures. The cmd() method will raise an exception on error. The
+following example creates an athenaCL Interpter instance named ath and sends it
+a number of commands to generate a drum beat.</p>
+<p><strong>An athenaCL Interpreter in Python</strong></p>
+<pre><code>from athenaCL.libATH import athenaObj
+ath = athenaObj.Interpreter()
+ath.cmd('emo mp')
+ath.cmd('tmo lg')
+
+ath.cmd('tin a1 36')
+ath.cmd('tie r l,((4,3,1),(4,3,0),(4,2,1)),rc')
+
+ath.cmd('tin b1 37')
+ath.cmd('tie r l,((4,6,1),(4,1,1),(4,3,1)),rc')
+
+ath.cmd('tin c1 53')
+ath.cmd('tie r l,((4,1,1),(4,1,1),(4,6,0)),rw')
+
+ath.cmd('tee a bg,rc,(.5,.7,.75,.8,1)')
+ath.cmd('tee b ws,t,4,0,122,118')
+
+ath.cmd('eln; elh')
+</code></pre>
+<p>For advanced and/or extended work with athenaCL, automating command string
+execution is highly recommended. Included with the athenaCL distribution is over
+30 Python files demonstrating fundamental concepts of working with the
+system. These files can be found in the demo directory and also in .</p>
+<h2 id="creating-athenacl-generator-parameterobjects-within-python"><a class="header" href="#creating-athenacl-generator-parameterobjects-within-python">Creating athenaCL Generator ParameterObjects within Python</a></h2>
+<p>Components of the athenaCL system can be used in isolation as resources within
+Python. Generator ParameterObjects offer particularly useful resources for a
+range of generative activities.</p>
+<p>To create a Generator ParameterObject, a Python list of ParameterObject
+arguments must be passed to the factory() function of the parameter module. This
+list of arguments must provide proper data objects for each argument.</p>
+<p>The returned ParameterObject instance has many useful attributes and
+methods. The doc attribute provides the ParameterObject documentation
+string. The <code>__str__</code> method, accessed with the built-in str() function, returns
+the complete formatted argument string. The <code>__call__</code> method, accessed by
+calling the instance name, takes a single argument and returns the next value,
+or the value at the specified argument time value.</p>
+<p><strong>Creating a Generator ParameterObject</strong></p>
+<pre><code class="language-&gt;&gt;&gt; from athenaCL.libATH.libPmtr import parameter">&gt;&gt;&gt;  po = parameter.factory(['ws','t',6,0,-1,1])
+&gt;&gt;&gt; str(po)
+'waveSine, time, (constant, 6), 0, (constant, -1), (constant, 1)'
+&gt;&gt;&gt; po.doc
+'Provides sinusoid oscillation between 0 and 1 at a rate given in either time or events per period. This value is scaled within the range designated by min and max; min and max may be specified with ParameterObjects. Depending on the stepString argument, the period rate (frequency) may be specified in spc (seconds per cycle) or eps (events per cycle). The phase argument is specified as a value between 0 and 1. Note: conventional cycles per second (cps or Hz) are not used for frequency.' 
+&gt;&gt;&gt; po(1)
+0.8660254037844386
+&gt;&gt;&gt; po(5)
+-0.86602540378443904
+</code></pre>
+<h2 id="creating-athenacl-generator-parameterobjects-within-csound"><a class="header" href="#creating-athenacl-generator-parameterobjects-within-csound">Creating athenaCL Generator ParameterObjects within Csound</a></h2>
+<p>Within Csound 5.0 orchestras, Python scripts can be written and objects from
+Python libraries can be instantiated and processed. Numerous Generator
+ParameterObjects and other athenaCL objects can be created, modified, and called
+from within Csound instruments. For complete examples, see the detailed articles
+on the topic (Ariza [AN#1824], [AN#1990]).</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+        <script>
+        window.addEventListener('load', function() {
+            window.setTimeout(window.print, 100);
+        });
+        </script>
+
+    </div>
+    </body>
+</html>

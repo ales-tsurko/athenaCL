@@ -1,0 +1,520 @@
+<!DOCTYPE HTML>
+<html lang="en" class="coal" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Tutorial 3: Creating and Editing Paths - athenaCL Manual</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "coal";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('coal')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="prfc01.html"><strong aria-hidden="true">1.</strong> Preface</a></li><li class="chapter-item expanded "><a href="getstart01.html"><strong aria-hidden="true">2.</strong> Getting Started</a></li><li class="chapter-item expanded "><a href="chap01.html"><strong aria-hidden="true">3.</strong> Tutorial 1: The Interactive Command Line Interface</a></li><li class="chapter-item expanded "><a href="chap02.html"><strong aria-hidden="true">4.</strong> Tutorial 2: AthenaObjects and EventModes</a></li><li class="chapter-item expanded "><a href="chap03.html" class="active"><strong aria-hidden="true">5.</strong> Tutorial 3: Creating and Editing Paths</a></li><li class="chapter-item expanded "><a href="chap04.html"><strong aria-hidden="true">6.</strong> Tutorial 4: Creating and Editing Textures</a></li><li class="chapter-item expanded "><a href="chap05.html"><strong aria-hidden="true">7.</strong> Tutorial 5: Textures and Paths</a></li><li class="chapter-item expanded "><a href="chap06.html"><strong aria-hidden="true">8.</strong> Tutorial 6: Textures and Clones</a></li><li class="chapter-item expanded "><a href="chap07.html"><strong aria-hidden="true">9.</strong> Tutorial 7: Scripting athenaCL in Python</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">athenaCL Manual</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/ales-tsurko/athenaCL" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="tutorial-3-creating-and-editing-paths"><a class="header" href="#tutorial-3-creating-and-editing-paths">Tutorial 3: Creating and Editing Paths</a></h1>
+<p>This tutorial demonstrates the basic features of the Path, including creating,
+storing, examining, and editing Paths.</p>
+<h2 id="introduction-to-paths"><a class="header" href="#introduction-to-paths">Introduction to Paths</a></h2>
+<p>A PathInstance (or a Path or PI) is an ordered collection of pitch groups. A
+pitch group, or a Multiset, is the simultaneous representation of pitch-space,
+pitch-class space, and set-class information for a collection of
+microtonally-specified pitches. This collection can be treated as an ordered or
+unordered collection, can be edited by transposition, replacement, or serial
+re-ordering, and can be used by one or more Textures to provide pitch materials
+that are then independently transposed and interpreted by the Texture and its
+ParameterObjects.</p>
+<p>A PathInstance allows the representation of ordered content groups, and presents
+this representation as a multifaceted object. Paths can be of any length, from
+one to many Multisets long. A Multiset can be specified in terms of pitch class
+(excluding octave information with integers from 0 to 11), or in terms of
+pitch-space (including octave information with integers below 0 or above 11, or
+with register-specific note names such as C3 and G#12). A Multiset can also be
+specified as a group, set, or scale sequence such as a Forte set-class (Forte
+1973 [AN#161]) or a Xenakis sieve (Ariza 2005 [AN#613]). Finally, Multisets can
+be derived from spectrums and frequency analysis information provided from the
+cross-platform audio editor Audacity (enter &quot;help audacity&quot; for more
+information).</p>
+<p>A Path can be developed as a network of intervallic and motivic
+associations. The interpretation of a Path by a Texture provides access to
+diverse pitch representations for a variety of musical contexts, and permits
+numerous Textures to share identical or related pitch information. The use of a
+Path in a Texture, however, is optional: a Path can function, at a minimum,
+simply as a referential point in Pitch space from which subsequent Texture
+transpositions are referenced.</p>
+<h2 id="creating-selecting-and-viewing-pathinstances"><a class="header" href="#creating-selecting-and-viewing-pathinstances">Creating, Selecting, and Viewing PathInstances</a></h2>
+<p>To create a PathInstance, enter PIn (for PathInstance new) at the athenaCL
+prompt. You must name the new Path, and then supply a pitch group, Forte-number,
+Xenakis sieve, or alternative pitch representation (enter &quot;help pitch&quot; for more
+information on pitch representations).</p>
+<p><strong>Creating a new PathInstance with PIn</strong></p>
+<pre><code>pi{}ti{} :: pin
+name this PathInstance: pathA
+enter a pitch set, sieve, spectrum, or set-class: e$, e, c#
+      SC 3-2B as (D#4,E4,C#4)? (y, n, or cancel): y
+      add another set? (y, n, or cancel): y
+enter a pitch set, sieve, spectrum, or set-class: 0,1,6,7
+      SC 4-9 as (C4,C#4,F#4,G4)? (y, n, or cancel): y
+      add another set? (y, n, or cancel): y
+enter a pitch set, sieve, spectrum, or set-class: 3-11
+      SC 3-11A as (C4,D#4,G4)? (y, n, or cancel): y
+      add another set? (y, n, or cancel): y
+enter a pitch set, sieve, spectrum, or set-class: 7@3|6@4, g2, c4
+      SC 4-6 as (A#2,B2,F3,B3,C4)? (y, n, or cancel): y
+      add another set? (y, n, or cancel): n
+PI pathA added to PathInstances.
+
+pi{pathA}ti{} :: 
+</code></pre>
+<p>Note that after successfully creating a Path, the athenaCL cursor tool changes
+to reflect the active Path: the name in parenthesis following &quot;pi&quot; designates
+the active Path (&quot;pathA&quot;). The same information is provided for a
+TextureInstance following the &quot;ti&quot; prefix. To view the active PI, enter PIv at
+the athenaCL prompt:</p>
+<p><strong>Viewing a Path with PIv</strong></p>
+<pre><code>pi{pathA}ti{} :: piv
+PI: pathA
+psPath              3,4,1       0,1,6,7        0,3,7      -14,-13,-7,-1,0  
+                    D#4,E4,C#4  C4,C#4,F#4,G4  C4,D#4,G4  A#2,B2,F3,B3,C4  
+pcsPath             3,4,1       0,1,6,7        0,3,7      10,11,5,11,0     
+scPath              3-2B        4-9            3-11A      4-6              
+durFraction         1(25%)      1(25%)         1(25%)     1(25%)           
+TI References: none.
+</code></pre>
+<p>This display provides all essential information about a Path. The header
+contains the name of the Path (&quot;pathA&quot;). The parallel presentation of psPath,
+pcsPath, and scPath illustrates the simultaneous availability of pitch space,
+pitch class space, and set class representations. The label &quot;TI references&quot;,
+when needed, provides information on which TextureInstances link to this
+PathInstance.</p>
+<p>In order to hear a possible interpretation of this Path, the command PIh
+generates a MIDI file based on a simple interpretation of the Path with the
+active TextureModule. The resulting musical structure is only provided to
+audition the Path, and uses default values for all musical parameters. The MIDI
+file is written in the user-specified scratch directory (see ) and is opened via
+the operating system.</p>
+<p><strong>Creating a MIDI file with PIh</strong></p>
+<pre><code>pi{pathA}ti{} :: pih
+PI pathA hear with TM LineGroove complete.
+(/Volumes/xdisc/_scratch/ath2010.07.02.16.29.39.mid)
+</code></pre>
+<p>A second Path can be created exclusively with Forte set class numbers. In this
+example, all arguments are provided via the command line:</p>
+<p><strong>Creating a Path with Forte numbers</strong></p>
+<pre><code>pi{pathA}ti{} :: pin pathB 5-3 6-4 7-34 4-14
+PI pathB added to PathInstances.
+</code></pre>
+<p>A newly-created Path always becomes the active Path. Entering PIv will display
+the details of the newly created Path:</p>
+<p><strong>Displaying a Path</strong></p>
+<pre><code>pi{pathB}ti{} :: piv
+PI: pathB
+psPath              0,1,2,4,5        0,1,2,4,5,6          0,1,3,4,6,8,10        
+                    C4,C#4,D4,E4,F4  C4,C#4,D4,E4,F4,F#4  C4,C#4,D#4,E4,F#4,G#4,
+pcsPath             0,1,2,4,5        0,1,2,4,5,6          0,1,3,4,6,8,10        
+scPath              5-3A             6-4                  7-34                  
+durFraction         1(25%)           1(25%)               1(25%)                
+                    ............................................................
+                         0,2,3,7       
+                    A#4  C4,D4,D#4,G4  
+                         0,2,3,7       
+                         4-14A         
+                         1(25%)        
+TI References: none.
+</code></pre>
+<p>As is clear from the PIv display above, when a Multiset in a Path is entered as
+a Set class, a pitch space and a pitch class space representation (psPath,
+pcsPath) are created from the normal-form of the desired SetClass.</p>
+<p>In order to display the complete collection of Paths available in the
+AthenaObject, the user enters PIls, for PathInstance list:</p>
+<p><strong>Listing Paths</strong></p>
+<pre><code>pi{pathB}ti{} :: pils
+PathInstances available:
+{name,TIrefs,scPath}
+   pathA            0  3-2B,4-9,3-11A,4-6  
+ + pathB            0  5-3A,6-4,7-34,4-14A 
+</code></pre>
+<p>Many displays provided by athenaCL are given in columns of data. After whatever
+header information is give, a key, in braces (&quot;{}&quot;), is provided to define the
+data provided in each column. In the example above, the key shows that each row
+contains the name of the PI, the number of TI references, the number of
+PathVoices, and an scPath representation of the Path. The &quot;+&quot; next to &quot;pathB&quot;
+illustrates that this PI is currently active. All &quot;ls&quot; commands use a similar
+designation.</p>
+<p>Many commands in athenaCL function by using an &quot;active&quot; object. The active PI
+defines which Path is used in many different commands. For example, the PIv
+command, when used without an argument for which Path to display, displays the
+active Path.</p>
+<p>To select a different PI as the active PI, simply enter PIo. The user is
+prompted to either enter the name of the Path to select, or its order number
+from the &quot;ls&quot; view (where 1 is pathA, 2 is pathB). Displaying the list of all
+PathInstances will confirm that pathA is now the selected PI.</p>
+<p><strong>Selecting Paths</strong></p>
+<pre><code>pi{pathB}ti{} :: pio
+select a path to activate: (name or number 1-2): pathA
+PI pathA now active.
+
+pi{pathA}ti{} :: pils
+PathInstances available:
+{name,TIrefs,scPath}
+ + pathA            0  3-2B,4-9,3-11A,4-6  
+   pathB            0  5-3A,6-4,7-34,4-14A 
+</code></pre>
+<p>Alternatively the user can enter the name of the Path to be selected as a
+command-line argument with the PIo command. After making pathA active, the user
+can make pathB active again by entering the following:</p>
+<p><strong>Selecting a Path with an argument</strong></p>
+<pre><code>pi{pathA}ti{} :: pio pathB
+PI pathB now active.
+</code></pre>
+<h2 id="copying-and-removing-pathinstances"><a class="header" href="#copying-and-removing-pathinstances">Copying and Removing PathInstances</a></h2>
+<p>In order to manage the collection of Paths in the AthenaObject, the user can
+copy and remove Paths. In all cases of copying and removing user-defined objects
+in athenaCL, the active object is never assumed to be the object that the
+command should be performed upon. Said another way, the user must always specify
+which object(s) to copy or remove.</p>
+<p>To copy a Path instance, enter PIcp and select a Path to copy:</p>
+<p><strong>Copying a Path with PIcp</strong></p>
+<pre><code>pi{pathB}ti{} :: picp
+select a path to copy: (name or number 1-2): pathB
+name the copy of path pathB: pathC
+PI pathC added to PathInstances.
+
+pi{pathC}ti{} :: pils
+PathInstances available:
+{name,TIrefs,scPath}
+   pathA            0  3-2B,4-9,3-11A,4-6  
+   pathB            0  5-3A,6-4,7-34,4-14A 
+ + pathC            0  5-3A,6-4,7-34,4-14A 
+</code></pre>
+<p>To delete a Path, enter PIrm and select a Path to delete as above. In the
+example below, the Path to delete is given with a command line argument:</p>
+<p><strong>Removing a Path with PIrm</strong></p>
+<pre><code>pi{pathC}ti{} :: pirm pathB
+PI pathB destroyed.
+</code></pre>
+<h2 id="editing-pathinstances"><a class="header" href="#editing-pathinstances">Editing PathInstances</a></h2>
+<p>A Path can be edited as a serial succession of Multisets with the standard
+assortment of serial operations: retrograde, rotation, and slice. Additionally,
+each Multiset in a Path can be changed, either by transposition or replacement.</p>
+<p>Whenever a serial edit is performed on a Path, the edited Path becomes a new,
+distinct Path and the original Path is left unchanged. For example, to create
+the retrograde of the active Path, enter PIret. The user must provide the name
+of the new Path:</p>
+<p><strong>Creating a retrograde of a Path with PIret</strong></p>
+<pre><code>pi{pathC}ti{} :: piret
+name this PathInstance: pathCret
+retrograde PI pathCret added to PathInstances.
+
+pi{pathCret}ti{} :: pils
+PathInstances available:
+{name,TIrefs,scPath}
+   pathA            0  3-2B,4-9,3-11A,4-6  
+   pathC            0  5-3A,6-4,7-34,4-14A 
+ + pathCret         0  4-14A,7-34,6-4,5-3A 
+</code></pre>
+<p>To create a rotation, the user, after entering PIrot, must enter the number of
+the Multiset to occupy the new first position. If the new first position is to
+be the second Multiset, the user would enter 2:</p>
+<p><strong>Creating a rotation of a Path with PIrot</strong></p>
+<pre><code>pi{pathCret}ti{} :: pirot
+name this PathInstance: pathCretRot
+which chord should start the rotation? (positions 2-4): 2
+rotation PI pathCretRot added to PathInstances.
+
+pi{pathCretRot}ti{} :: pils
+PathInstances available:
+{name,TIrefs,scPath}
+   pathA            0  3-2B,4-9,3-11A,4-6  
+   pathC            0  5-3A,6-4,7-34,4-14A 
+   pathCret         0  4-14A,7-34,6-4,5-3A 
+ + pathCretRot      0  7-34,6-4,5-3A,4-14A 
+</code></pre>
+<p>A slice will extract a segment from a Path. To create a slice, enter PIslc. The
+user is prompted for the name of the new Path, and the start and end Multiset
+positions. If the slice is to only contain the last two chords of a four chord
+Path, for example, the start and end positions would be 3,4:</p>
+<p><strong>Creating a slice of a Path with PIslc</strong></p>
+<pre><code>pi{pathCretRot}ti{} :: pislc
+name this slice of path pathCretRot: pathD
+which chords should bound the slice? (positions 1 - 4): 3,4
+slice PI pathD added to PathInstances.
+
+pi{pathD}ti{} :: pils
+PathInstances available:
+{name,TIrefs,scPath}
+   pathA            0  3-2B,4-9,3-11A,4-6  
+   pathC            0  5-3A,6-4,7-34,4-14A 
+   pathCret         0  4-14A,7-34,6-4,5-3A 
+   pathCretRot      0  7-34,6-4,5-3A,4-14A 
+ + pathD            0  5-3A,4-14A      
+</code></pre>
+<p>There are three ways to edit a single Multiset within a Path using the PIe
+command: by replacement, by transposition, or by inversion. In all cases, the
+number of elements in the Multiset must be maintained.</p>
+<p>To edit a single Multiset in a Path enter PIe:</p>
+<p><strong>Transposing a set within a Path</strong></p>
+<pre><code>pi{pathD}ti{} :: pie
+edit PI pathD
+enter position to edit (positions 1-2): 2
+replace, transpose, or invert set (0,2,3,7): (r, t, or i): t
+enter a transposition method: literal or modulus? (l or m): l
+enter a positive or negative transposition: 8
+PI pathD edited.
+
+pi{pathD}ti{} :: piv
+PI: pathD
+psPath              0,1,2,4,5        8,10,11,15      
+                    C4,C#4,D4,E4,F4  G#4,A#4,B4,D#5  
+pcsPath             0,1,2,4,5        8,10,11,3       
+scPath              5-3A             4-14A           
+durFraction         1(50%)           1(50%)          
+TI References: none.
+</code></pre>
+<p>Here the user has selected the Multiset in position &quot;2&quot; of PI &quot;pathD&quot; to
+edit. The user next selects to edit the set by transposition, entering
+&quot;t&quot;. There are two methods of transposition available: a &quot;literal&quot; transposition
+is done in pitch space, creating a new set in the range of all positive and
+negative integers; a &quot;modulus&quot; transposition is done in pitch-class space,
+creating a new set in the range of pitch-classes 0 through 11. In the example
+above the user has selected a literal (&quot;l&quot;) transposition and enters &quot;8&quot; as the
+transposition value.  This shifts each pitch in the Multiset up 8
+half-steps. Since this is a literal and not a modulus transposition, pitch 5
+becomes pitch 15, or D#5.</p>
+<p>Any Multiset in a Path can be replaced with a Multiset of equal size. For
+example, the same Multiset edited above can be replaced with any four-element
+Multiset:</p>
+<p><strong>Replacing a Multiset with a new Multiset</strong></p>
+<pre><code>pi{pathD}ti{} :: pie
+edit PI pathD
+enter position to edit (positions 1-2): 2
+replace, transpose, or invert set (8,10,11,15): (r, t, or i): r
+enter a pitch set, sieve, spectrum, or set-class: 2,2,4,4
+      SC 2-2 as (D4,D4,E4,E4)? (y, n, or cancel): y
+PI pathD edited.
+
+pi{pathD}ti{} :: piv
+PI: pathD
+psPath              0,1,2,4,5        2,2,4,4      
+                    C4,C#4,D4,E4,F4  D4,D4,E4,E4  
+pcsPath             0,1,2,4,5        2,2,4,4      
+scPath              5-3A             2-2          
+durFraction         1(50%)           1(50%)       
+TI References: none.
+</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="chap02.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="chap04.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="chap02.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="chap04.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>
