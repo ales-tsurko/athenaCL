@@ -1,5 +1,5 @@
 #!/usr/local/bin/python
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 # Name:          csoundNative.py
 # Purpose:       native csound instrument definitions instruments.
 #
@@ -7,7 +7,7 @@
 #
 # Copyright:     (c) 2001-2010 Christopher Ariza
 # License:       GPL
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 
 import time
 import unittest, doctest
@@ -16,20 +16,22 @@ import unittest, doctest
 from athenaCL.libATH import drawer
 from athenaCL.libATH import language
 from athenaCL.libATH import pitchTools
+
 lang = language.LangObj()
 from athenaCL.libATH.libOrc import baseOrc
 
 
 class CsoundNative(baseOrc.Orchestra):
     """built-in csound instruments"""
+
     def __init__(self):
         """
         >>> a = CsoundNative()
         """
         baseOrc.Orchestra.__init__(self)
 
-        self.name = 'csoundNative'
-        self.srcStr = None # string representation for writing
+        self.name = "csoundNative"
+        self.srcStr = None  # string representation for writing
 
         self._headMono = """
 sr       = 44100
@@ -51,16 +53,15 @@ nchnls = 4
 """
         # needed in score, not in orchestra
 
-# f syntax
+        # f syntax
 
-# p1 -- Table number by which the stored function will be known. A negative number requests that the table be destroyed.
-# p2 Action time of function generation (or destruction) in beats.
-# p3 Size of function table (i.e. number of points) Must be a power of 2, or a power-of-2 plus 1 (see below). Maximum table size is 16777216 (2**24) points.
-# p4 Number of the GEN routine to be called A negative value will cause rescaling to be omitted.
-# p5 
-# p6 Parameters whose meaning is determined by the particular GEN routine.
+        # p1 -- Table number by which the stored function will be known. A negative number requests that the table be destroyed.
+        # p2 Action time of function generation (or destruction) in beats.
+        # p3 Size of function table (i.e. number of points) Must be a power of 2, or a power-of-2 plus 1 (see below). Maximum table size is 16777216 (2**24) points.
+        # p4 Number of the GEN routine to be called A negative value will cause rescaling to be omitted.
+        # p5
+        # p6 Parameters whose meaning is determined by the particular GEN routine.
 
-        
         self._fTables = """
 ;f-tables--shared
     f 1  0 16384 10  1                                                      ; sine wave
@@ -98,38 +99,85 @@ nchnls = 4
         # instrument to add:
         # x. a huge bank of filters, each with an oscillating cf and variable bandwidth. subtractive, but possible fm operations at high enough fqs...
 
-        self._instrNumbers = (3,4,5,6,
-                         11,12,13,14,15,16,
-                            17, # 1.4.3
-                         20,21,22,23,
-                         30,31,32,33,34, 
-                            35, # parametric filter
-                            36,
-                            #37,    # cross synthesis working yet
-                         40,41, # 1.4.2
-                         42,43,44,45,46,47,48, # 1.4.3 vocoder
-                         50,51,52,
-                         60,61,62,
-                         70,71,72,73,74,
-                         80,81,82,
-                         #90 # physical models here do not work yet
-                         #100 # pvoc file problems prohibit analysis use
-                         110, 111, # 1.4.3
-                         130, 131, 132, 133, # 1.4.3
-                         140,141,142,143,144,145,146, # 1.4.3 vocoder
-                         230, 231, 232, 233, 234, # 1.4.3
-                         240, 241, # 1.4.3
-                         )
-        
+        self._instrNumbers = (
+            3,
+            4,
+            5,
+            6,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,  # 1.4.3
+            20,
+            21,
+            22,
+            23,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,  # parametric filter
+            36,
+            # 37,    # cross synthesis working yet
+            40,
+            41,  # 1.4.2
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,  # 1.4.3 vocoder
+            50,
+            51,
+            52,
+            60,
+            61,
+            62,
+            70,
+            71,
+            72,
+            73,
+            74,
+            80,
+            81,
+            82,
+            # 90 # physical models here do not work yet
+            # 100 # pvoc file problems prohibit analysis use
+            110,
+            111,  # 1.4.3
+            130,
+            131,
+            132,
+            133,  # 1.4.3
+            140,
+            141,
+            142,
+            143,
+            144,
+            145,
+            146,  # 1.4.3 vocoder
+            230,
+            231,
+            232,
+            233,
+            234,  # 1.4.3
+            240,
+            241,  # 1.4.3
+        )
+
         # on initialization, load a dictionary of objects for use
         self._instrObjDict = {}
         globalDict = globals()
         for iNo in self._instrNumbers:
-            objAttr = globalDict['Inst%i' % iNo]
-            self._instrObjDict[iNo] = objAttr() # instantiate obj
-        
+            objAttr = globalDict["Inst%i" % iNo]
+            self._instrObjDict[iNo] = objAttr()  # instantiate obj
 
-    #-----------------------------------------------------------------------||--
+    # -----------------------------------------------------------------------||--
     def instNoValid(self, iNo):
         """test if an instrument number is valid
 
@@ -145,23 +193,23 @@ nchnls = 4
     def instNoList(self, format=None):
         """return a list of instrument numbers; if
         a list is not availabe, return None"""
-        if format == 'user':
+        if format == "user":
             return drawer.listToStr(self._instrNumbers)
         return self._instrNumbers
 
     def _orcTitle(self):
         msg = []
-        msg.append(';athenaCL\n')
-        msg.append(';%s\n' % lang.msgAthURL)
-        msg.append((';%s\n\n' % time.asctime(time.localtime())))
-        return ''.join(msg)
+        msg.append(";athenaCL\n")
+        msg.append(";%s\n" % lang.msgAthURL)
+        msg.append((";%s\n\n" % time.asctime(time.localtime())))
+        return "".join(msg)
 
     def getInstObj(self, iNo):
-        if iNo in list(self._instrObjDict.keys()): # already loaded
-            return self._instrObjDict[iNo] # call attribute of module to get object
+        if iNo in list(self._instrObjDict.keys()):  # already loaded
+            return self._instrObjDict[iNo]  # call attribute of module to get object
         else:
-            raise ValueError('bad insturment number given: %s' % iNo)
-            
+            raise ValueError("bad insturment number given: %s" % iNo)
+
     def getScoFtables(self):
         """public method as needed in score
         this may not be necessary but for external processing as needed"""
@@ -169,7 +217,7 @@ nchnls = 4
 
     def constructOrc(self, noChannels=2, instList=None):
         """buildes a string of an entire orchestra
-        provides proper header and output sections based on 
+        provides proper header and output sections based on
         number of channels
 
         >>> a = CsoundNative()
@@ -180,23 +228,23 @@ nchnls = 4
         self.noChannels = noChannels
         msg = []
         msg.append(self._orcTitle())
-        if self.noChannels  == 1:
+        if self.noChannels == 1:
             msg.append(self._headMono)
         elif self.noChannels == 2:
             msg.append(self._headStereo)
         elif self.noChannels == 4:
             msg.append(self._headQuad)
 
-        #self.instrObjDict = {}
-        if instList == None: # if not given, add all instruments
+        # self.instrObjDict = {}
+        if instList == None:  # if not given, add all instruments
             instList = self.instNoList()
         for number in instList:
             if not self.instNoValid(number):
-                print(lang.WARN, 'instrument %i not available.' % number)
+                print(lang.WARN, "instrument %i not available." % number)
                 continue
             instrObj = self.getInstObj(number)
             msg.append(instrObj.buildInstrDef(noChannels))
-        self.srcStr = ''.join(msg)
+        self.srcStr = "".join(msg)
 
     def getInstInfo(self, iNo=None):
         """returns a dictionary of instrNo : (Name, pNo, pInfo)
@@ -208,31 +256,35 @@ nchnls = 4
         ({3: ('sineDrone', 6, {})}, [3])
         """
         if iNo == None:
-            instrList = self.instNoList() # use method
+            instrList = self.instNoList()  # use method
         else:
-            instrList = [iNo,]
-        #self.instrObjDict = {} # this used to store inst obj data
+            instrList = [
+                iNo,
+            ]
+        # self.instrObjDict = {} # this used to store inst obj data
         instInfoDict = {}
         for number in instrList:
             instrObj = self.getInstObj(number)
-            instInfoDict[number] = (instrObj.name, 
-                                            instrObj.pmtrFields,
-                                            instrObj.pmtrInfo)
+            instInfoDict[number] = (
+                instrObj.name,
+                instrObj.pmtrFields,
+                instrObj.pmtrInfo,
+            )
         return instInfoDict, instrList
 
     def getInstPreset(self, iNo, auxNo=None):
         """returns a dictionary of default values for one instrument
-    
+
         >>> a = CsoundNative()
         >>> a.getInstPreset(6)
         {'auxQ0': ('c', 0.5), 'auxQ1': ('c', 0.5), 'auxQ2': ('c', 10000), 'auxQ3': ('c', 400), 'auxQ4': ('c', 1)}
         """
         instrObj = self.getInstObj(iNo)
-        presetDict = instrObj.getPresetDict() # converts to aux0 fist pos
+        presetDict = instrObj.getPresetDict()  # converts to aux0 fist pos
         return presetDict
 
     def getInstName(self, iNo):
-        'returns a string of name'
+        "returns a string of name"
         instrObj = self.getInstObj(iNo)
         return instrObj.name
 
@@ -251,16 +303,16 @@ nchnls = 4
         instrObj = self.getInstObj(iNo)
         # numbers are shifted by pmtrCountDefault
         # this orchestra uses 'pmtr' instead of 'auxQ'
-        key = 'pmtr%s' % (pmtrNo + 1 + instrObj.pmtrCountDefault)
+        key = "pmtr%s" % (pmtrNo + 1 + instrObj.pmtrCountDefault)
         if instrObj.pmtrInfo != {}:
             return instrObj.pmtrInfo[key]
         else:
-            return 'no information available'
-        
-    #-----------------------------------------------------------------------||--
+            return "no information available"
+
+    # -----------------------------------------------------------------------||--
     # mappings of psReal, amp, pan; only applied of mix mode is on
     # mapings done before limits
-    
+
     # dp amp values in csound
     # 60 dB = 1000
     # 66 dB = 1995.262
@@ -276,7 +328,7 @@ nchnls = 4
         8.0...
         """
         return pitchTools.psToPch(val)
-        
+
     def _postMapAmp(self, iNo, val, orcMapMode=1):
         """
         >>> a = CsoundNative()
@@ -286,41 +338,41 @@ nchnls = 4
         # get max/min amp value form inst, as well as scale factor
         instrObj = self.getInstObj(iNo)
         ampMax = float(instrObj.postMapAmp[1])
-        if orcMapMode: # optional map; allow values greater then 1
-            val = val * ampMax # temp: assume max amp of 90
+        if orcMapMode:  # optional map; allow values greater then 1
+            val = val * ampMax  # temp: assume max amp of 90
         # always limit
-        if val < 0: val = 0 # we can assume tt amps are never negative
+        if val < 0:
+            val = 0  # we can assume tt amps are never negative
         return val
-        
+
     def _postMapPan(self, iNo, val, orcMapMode=1):
         """
         >>> a = CsoundNative()
         >>> a._postMapPan(6, .5)
         0.5
         """
-        if orcMapMode: # optional map
-            pass # values are expected b/n 0 and 1
-        # always limit: modulo 1    
-        if val < 0 or val > 1: val = val % 1.0
+        if orcMapMode:  # optional map
+            pass  # values are expected b/n 0 and 1
+        # always limit: modulo 1
+        if val < 0 or val > 1:
+            val = val % 1.0
         return val
 
 
-        
-        
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 class InstrumentCsound(baseOrc.Instrument):
     # outputs expect and instrument to have a single final signal, calld "aMixSig
     # this bit of codes gets appended to end of inst def
     def __init__(self):
         baseOrc.Instrument.__init__(self)
-        self.author = 'athenaCL native' # attribution
-        self.scoSample = ''
-        self.pmtrCountDefault = 6 # 6 built in values
+        self.author = "athenaCL native"  # attribution
+        self.scoSample = ""
+        self.pmtrCountDefault = 6  # 6 built in values
         self.pmtrFields = self.pmtrCountDefault
         # postMap values for scaling
-        self.postMapAmp = (0,90, 'linear') # most amps are in db
-        self.postMapPan = (0,1, 'linear')  # all pan values assume 0-1 maping
-        
+        self.postMapAmp = (0, 90, "linear")  # most amps are in db
+        self.postMapPan = (0, 1, "linear")  # all pan values assume 0-1 maping
+
         self.monoOutput = """
     ; mono panning around 90 degrees
     out              aMixSig
@@ -346,14 +398,14 @@ class InstrumentCsound(baseOrc.Instrument):
 """
 
     def getInstrHeader(self):
-        return '\n;--i%i--%s' % (self.instNo, self.name)
+        return "\n;--i%i--%s" % (self.instNo, self.name)
 
     def buildInstrDef(self, noChannels):
         """returns a string of all the code needed for this instrument"""
         orcString = self.getInstrHeader()
         orcString = orcString + self.orcCode
         self.noChannels = noChannels
-        if self.noChannels  == 1:
+        if self.noChannels == 1:
             orcString = orcString + self.monoOutput
         elif self.noChannels == 2:
             orcString = orcString + self.stereoOutput
@@ -365,17 +417,17 @@ class InstrumentCsound(baseOrc.Instrument):
 # these classes inherit all functions from InstrumentCsound
 
 
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 class Inst3(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 3
-        self.name = 'sineDrone'
-        self.info = 'A simple sine wave drone.'
+        self.name = "sineDrone"
+        self.info = "A simple sine wave drone."
         self.auxNo = 0
-        self.postMapAmp = (0,90, 'linear') # most amps are in db
+        self.postMapAmp = (0, 90, "linear")  # most amps are in db
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
-        self.pmtrDefault = {} 
+        self.pmtrDefault = {}
         self.orcCode = """
 instr %s
     iDur    = p3
@@ -405,7 +457,9 @@ instr %s
     a2    oscil (k1 * .8), ((iFreq * .5) + (k4 * .5)), 1
     
     aMixSig          = (a1 + a2)
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
         self.scoSample = """
 ;p1 p2       p3   p4     p5  p6
@@ -413,24 +467,26 @@ instr %s
 i3      68.00 00.500 95 5.08    .5
 i3      68.66 00.500 75 6.11    .5
 """
-#-----------------------------------------------------------------||||||||||||--
+
+
+# -----------------------------------------------------------------||||||||||||--
 class Inst4(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 4
-        self.name = 'sineUnitEnvelope'
-        self.info = 'A sine with a proportional linear envelope.'
+        self.name = "sineUnitEnvelope"
+        self.info = "A sine with a proportional linear envelope."
         self.auxNo = 2
-        self.postMapAmp = (0,90, 'linear') # most amps are in db
+        self.postMapAmp = (0, 90, "linear")  # most amps are in db
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'sustain percent within unit interval',
-          'pmtr8'   : 'sustain center within unit interval',
-          }
+            "pmtr7": "sustain percent within unit interval",
+            "pmtr8": "sustain center within unit interval",
+        }
         self.pmtrDefault = {
-          'pmtr7'   : ('c', .5),
-          'pmtr8'   : ('c', .5),
-          } 
+            "pmtr7": ("c", 0.5),
+            "pmtr8": ("c", 0.5),
+        }
         self.orcCode = """
 instr %s
     iDur    = p3
@@ -450,7 +506,9 @@ instr %s
     aSig            oscil         kAmp, iFreq, 1         
     aMixSig     = aSig
     
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
         self.scoSample = """
 ;p1 p2       p3   p4     p5  p6
@@ -459,17 +517,18 @@ i3      68.00 00.500 95 5.08    .5
 i3      68.66 00.500 75 6.11    .5
 """
 
-#-----------------------------------------------------------------||||||||||||--
+
+# -----------------------------------------------------------------||||||||||||--
 class Inst5(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 5
-        self.name = 'sawDrone'
-        self.info = 'A simple saw wave drone.'
+        self.name = "sawDrone"
+        self.info = "A simple saw wave drone."
         self.auxNo = 0
-        self.postMapAmp = (0,90, 'linear') # most amps are in db
+        self.postMapAmp = (0, 90, "linear")  # most amps are in db
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
-        self.pmtrDefault = {} 
+        self.pmtrDefault = {}
         self.orcCode = """
 instr %s
     iDur    = p3
@@ -499,7 +558,9 @@ instr %s
     a2 oscil     (k1*.8), ((iFreq * .5) + (k4 *.5)), 1
 
     aMixSig          = (a1+a2)
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
         self.scoSample = """
 ;p1  p2  p3   p4      p5         p6
@@ -507,30 +568,32 @@ inst    start dur    amp     PCH        pan
 i5      12.00 1.000  95  7.09     .5
 i5      12.10 1.000  84  8.09     .5
 """
-#-----------------------------------------------------------------||||||||||||--
+
+
+# -----------------------------------------------------------------||||||||||||--
 class Inst6(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 6
-        self.name = 'sawUnitEnvelope'
-        self.info = 'A square wave with a proportional linear envelope and a variable low-pass filter.'
+        self.name = "sawUnitEnvelope"
+        self.info = "A square wave with a proportional linear envelope and a variable low-pass filter."
         self.auxNo = 5
-        self.postMapAmp = (0,90, 'linear') # most amps are in db
+        self.postMapAmp = (0, 90, "linear")  # most amps are in db
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'sustain percent within unit interval',
-          'pmtr8'   : 'sustain center within unit interval',
-          'pmtr9'   : 'low-pass filter start cutoff frequency in Hz',
-          'pmtr10'  : 'low-pass filter end cutoff frequency in Hz',
-          'pmtr11'  : 'low-pass filter resonance between 1 and 500',
-          }
+            "pmtr7": "sustain percent within unit interval",
+            "pmtr8": "sustain center within unit interval",
+            "pmtr9": "low-pass filter start cutoff frequency in Hz",
+            "pmtr10": "low-pass filter end cutoff frequency in Hz",
+            "pmtr11": "low-pass filter resonance between 1 and 500",
+        }
         self.pmtrDefault = {
-          'pmtr7'   : ('c', .5),
-          'pmtr8'   : ('c', .5),
-          'pmtr9'   : ('c', 10000),
-          'pmtr10'  : ('c', 400),
-          'pmtr11'  : ('c', 1),
-          } 
+            "pmtr7": ("c", 0.5),
+            "pmtr8": ("c", 0.5),
+            "pmtr9": ("c", 10000),
+            "pmtr10": ("c", 400),
+            "pmtr11": ("c", 1),
+        }
         self.orcCode = """
 instr %s
     iDur    = p3
@@ -556,7 +619,9 @@ instr %s
     aSig            lowpass2     aSig, kFreq, kq 
     aMixSig     = aSig
     
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
         self.scoSample = """
 ;p1 p2       p3   p4     p5  p6
@@ -565,17 +630,18 @@ i3      68.00 00.500 95 5.08    .5
 i3      68.66 00.500 75 6.11    .5
 """
 
-#-----------------------------------------------------------------||||||||||||--
+
+# -----------------------------------------------------------------||||||||||||--
 class Inst11(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 11
-        self.name = 'noiseWhite'
-        self.info = 'A simple noise instrument.'
+        self.name = "noiseWhite"
+        self.info = "A simple noise instrument."
         self.auxNo = 0
-        self.postMapAmp = (0,90, 'linear') # most amps are in db
+        self.postMapAmp = (0, 90, "linear")  # most amps are in db
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
-        self.pmtrDefault = {} 
+        self.pmtrDefault = {}
         self.orcCode = """
 instr %s
     iDur     = p3
@@ -585,27 +651,29 @@ instr %s
     a1      random  -1, 1
     k1      linen     iAmp, .1, iDur, .1
     aMixSig = (k1 * a1)
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
 
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 class Inst12(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 12
-        self.name = 'noisePitched'
-        self.info = 'A noise instrument with a filter.'
+        self.name = "noisePitched"
+        self.info = "A noise instrument with a filter."
         self.auxNo = 2
-        self.postMapAmp = (0,90, 'linear') # most amps are in db
+        self.postMapAmp = (0, 90, "linear")  # most amps are in db
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'filter center frequency',
-          'pmtr8'   : 'filter bandwidth',
-            }
+            "pmtr7": "filter center frequency",
+            "pmtr8": "filter bandwidth",
+        }
         self.pmtrDefault = {
-          'pmtr7'   : ('cyclicGen', 'linearUpDown', 400, 800, 20), 
-          'pmtr8'   : ('cyclicGen', 'linearUpDown', 1, 5, .2),
-          }
+            "pmtr7": ("cyclicGen", "linearUpDown", 400, 800, 20),
+            "pmtr8": ("cyclicGen", "linearUpDown", 1, 5, 0.2),
+        }
         # this instrument is strange...
         self.orcCode = """
 instr %s
@@ -627,7 +695,9 @@ instr %s
     a2    reson  a1, p7, p8
 
     aMixSig = (k1 * a2)
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
         self.scoSample = """
 ;ins     strt    dur     amp    fq      pan  fltr     fltr  
@@ -635,31 +705,32 @@ instr %s
 i56 00.0     2.0     .9  10000 .2       440   2  
 """
 
-#-----------------------------------------------------------------||||||||||||--
+
+# -----------------------------------------------------------------||||||||||||--
 class Inst13(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 13
-        self.name = 'noiseUnitEnvelope'
-        self.info = 'A noise generator with a proportional linear envelope and a variable low-pass filter'
+        self.name = "noiseUnitEnvelope"
+        self.info = "A noise generator with a proportional linear envelope and a variable low-pass filter"
         self.auxNo = 5
-        self.postMapAmp = (0, 90, 'linear') # assume amps not greater tn 10
+        self.postMapAmp = (0, 90, "linear")  # assume amps not greater tn 10
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'sustain percent within unit interval',
-          'pmtr8'   : 'sustain center within unit interval',
-          'pmtr9'   : 'low-pass filter start cutoff frequency in Hz',
-          'pmtr10'  : 'low-pass filter end cutoff frequency in Hz',
-          'pmtr11'  : 'low-pass filter resonance between 1 and 500',
-          }
+            "pmtr7": "sustain percent within unit interval",
+            "pmtr8": "sustain center within unit interval",
+            "pmtr9": "low-pass filter start cutoff frequency in Hz",
+            "pmtr10": "low-pass filter end cutoff frequency in Hz",
+            "pmtr11": "low-pass filter resonance between 1 and 500",
+        }
         self.pmtrDefault = {
-          'pmtr7'   : ('c', .5),
-          'pmtr8'   : ('c', .5),
-          'pmtr9'   : ('c', 18000),
-          'pmtr10'  : ('c', 8000),
-          'pmtr11'  : ('c', 1),
-          }
-        self.author = 'athenaCL native' # attribution
+            "pmtr7": ("c", 0.5),
+            "pmtr8": ("c", 0.5),
+            "pmtr9": ("c", 18000),
+            "pmtr10": ("c", 8000),
+            "pmtr11": ("c", 1),
+        }
+        self.author = "athenaCL native"  # attribution
         self.orcCode = """
 instr %s
     iDur = p3
@@ -688,22 +759,24 @@ instr %s
     
     aMixSig   = a1 * kAmp
     
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
 
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 class Inst14(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 14
-        self.name = 'noiseTambourine'
-        self.info = 'A tambourine-like instrument.'
+        self.name = "noiseTambourine"
+        self.info = "A tambourine-like instrument."
         self.auxNo = 0
-        self.postMapAmp = (0,90, 'linear') # most amps are in db
+        self.postMapAmp = (0, 90, "linear")  # most amps are in db
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrDefault = {
-          'rhythmQ' : ('loop', ((16,1,1), (16,1,1), (16,5,1))) ,
-            }
+            "rhythmQ": ("loop", ((16, 1, 1), (16, 1, 1), (16, 5, 1))),
+        }
         self.orcCode = """
 instr %s
     ;duration  = p3
@@ -736,37 +809,38 @@ a4        butterbp a4, ifrq4, 400
 
 aenv      expon 1, 0.1, 0.1
           aMixSig = (a1 + a2 + a3 + a4) * aenv * iAmp
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
-#-----------------------------------------------------------------||||||||||||--
+
+# -----------------------------------------------------------------||||||||||||--
 class Inst15(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 15
-        self.name = 'noiseUnitEnvelopeBandpass'
-        self.info = 'A noise generator with a proportional linear envelope and a variable band pass filter.'
+        self.name = "noiseUnitEnvelopeBandpass"
+        self.info = "A noise generator with a proportional linear envelope and a variable band pass filter."
         self.auxNo = 6
-        self.postMapAmp = (0, 90, 'linear') # assume amps not greater tn 10
+        self.postMapAmp = (0, 90, "linear")  # assume amps not greater tn 10
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'sustain percent within unit interval',
-          'pmtr8'   : 'sustain center within unit interval',
-          'pmtr9'  : 'band pass filter start center frequency in Hz',
-          'pmtr10'  : 'band pass filter end center frequency in Hz',
-          'pmtr11'  : 'band pass filter start badnwidth in Hz',
-          'pmtr12'  : 'band pass filter end badnwidth in Hz',
-          
-          }
+            "pmtr7": "sustain percent within unit interval",
+            "pmtr8": "sustain center within unit interval",
+            "pmtr9": "band pass filter start center frequency in Hz",
+            "pmtr10": "band pass filter end center frequency in Hz",
+            "pmtr11": "band pass filter start badnwidth in Hz",
+            "pmtr12": "band pass filter end badnwidth in Hz",
+        }
         self.pmtrDefault = {
-          'pmtr7'   : ('c', .5),
-          'pmtr8'   : ('c', .5),
-          'pmtr9'   : ('c', 800),
-          'pmtr10'  : ('c', 2000),
-          'pmtr11'  : ('c', 50),
-          'pmtr12'  : ('c', 100),
-
-          }
-        self.author = 'athenaCL native' # attribution
+            "pmtr7": ("c", 0.5),
+            "pmtr8": ("c", 0.5),
+            "pmtr9": ("c", 800),
+            "pmtr10": ("c", 2000),
+            "pmtr11": ("c", 50),
+            "pmtr12": ("c", 100),
+        }
+        self.author = "athenaCL native"  # attribution
         self.orcCode = """
 instr %s
     iDur = p3
@@ -796,47 +870,50 @@ instr %s
     aSig             butterbp  aSig, kband, kbandWidth    
     aMixSig   = aSig * kAmp
     
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
-#-----------------------------------------------------------------||||||||||||--
+
+# -----------------------------------------------------------------||||||||||||--
 class Inst16(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 16
-        self.name = 'noiseSahNoiseUnitEnvelope'
-        self.info = 'A noise source with a third order sample and hold filter, a variable high-pass filter, a proportional linear envelope, and a variable low-pass filter.'
+        self.name = "noiseSahNoiseUnitEnvelope"
+        self.info = "A noise source with a third order sample and hold filter, a variable high-pass filter, a proportional linear envelope, and a variable low-pass filter."
         self.auxNo = 12
-        self.postMapAmp = (0, 90, 'linear') # assume amps not greater tn 10
+        self.postMapAmp = (0, 90, "linear")  # assume amps not greater tn 10
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'sustain percent within unit interval',
-          'pmtr8'   : 'sustain center within unit interval',
-          'pmtr9'   : 'low-pass filter start cutoff frequency in Hz',
-          'pmtr10'  : 'low-pass filter end cutoff frequency in Hz',
-          'pmtr11'  : 'low-pass filter resonance between 1 and 500',
-          'pmtr12'  : 'high-pass filter start cutoff frequency in Hz',
-          'pmtr13'  : 'high-pass filter end cutoff frequency in Hz',          
-          'pmtr14'  : 'first order rate low in Hz',
-          'pmtr15'  : 'first order rate high in Hz',
-          'pmtr16'  : 'second order rate low in Hz',
-          'pmtr17'  : 'second order rate high in Hz',
-          'pmtr18'  : 'third order rate in Hz',
-          }
+            "pmtr7": "sustain percent within unit interval",
+            "pmtr8": "sustain center within unit interval",
+            "pmtr9": "low-pass filter start cutoff frequency in Hz",
+            "pmtr10": "low-pass filter end cutoff frequency in Hz",
+            "pmtr11": "low-pass filter resonance between 1 and 500",
+            "pmtr12": "high-pass filter start cutoff frequency in Hz",
+            "pmtr13": "high-pass filter end cutoff frequency in Hz",
+            "pmtr14": "first order rate low in Hz",
+            "pmtr15": "first order rate high in Hz",
+            "pmtr16": "second order rate low in Hz",
+            "pmtr17": "second order rate high in Hz",
+            "pmtr18": "third order rate in Hz",
+        }
         self.pmtrDefault = {
-          'pmtr7'   : ('c', .5),
-          'pmtr8'   : ('c', .5),
-          'pmtr9'   : ('c', 18000),
-          'pmtr10'  : ('c', 8000),
-          'pmtr11'  : ('c', 1),
-          'pmtr12'  : ('c', 20),
-          'pmtr13'  : ('c', 30),
-          'pmtr14'  : ('c', 1.25),
-          'pmtr15'  : ('c', 10),
-          'pmtr16'  : ('c', .75),
-          'pmtr17'  : ('c', .85),
-          'pmtr18'  : ('c', .5),          
-          }
-        self.author = 'athenaCL native' # attribution
+            "pmtr7": ("c", 0.5),
+            "pmtr8": ("c", 0.5),
+            "pmtr9": ("c", 18000),
+            "pmtr10": ("c", 8000),
+            "pmtr11": ("c", 1),
+            "pmtr12": ("c", 20),
+            "pmtr13": ("c", 30),
+            "pmtr14": ("c", 1.25),
+            "pmtr15": ("c", 10),
+            "pmtr16": ("c", 0.75),
+            "pmtr17": ("c", 0.85),
+            "pmtr18": ("c", 0.5),
+        }
+        self.author = "athenaCL native"  # attribution
         self.orcCode = """
 instr %s
     iDur = p3
@@ -893,64 +970,62 @@ instr %s
     
     aMixSig   = aSig * kAmp
     
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
 
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 class Inst17(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 17
-        self.name = 'noiseSahNoiseUnitEnvelopeDistort'
-        self.info = 'A noise source with a third order sample and hold filter, a variable high-pass filter, a proportional linear envelope, a resonant low-pass filter, and a variable low-pass filter.'
+        self.name = "noiseSahNoiseUnitEnvelopeDistort"
+        self.info = "A noise source with a third order sample and hold filter, a variable high-pass filter, a proportional linear envelope, a resonant low-pass filter, and a variable low-pass filter."
         self.auxNo = 18
-        self.postMapAmp = (0, 90, 'linear') # assume amps not greater tn 10
+        self.postMapAmp = (0, 90, "linear")  # assume amps not greater tn 10
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'sustain percent within unit interval',
-          'pmtr8'   : 'sustain center within unit interval',
-          'pmtr9'   : 'low-pass filter start cutoff frequency in Hz',
-          'pmtr10'  : 'low-pass filter end cutoff frequency in Hz',
-          'pmtr11'  : 'low-pass filter resonance between 1 and 500',
-          
-          'pmtr12'  : 'high-pass filter start cutoff frequency in Hz',
-          'pmtr13'  : 'high-pass filter end cutoff frequency in Hz',          
-          'pmtr14'  : 'first order rate low in Hz',
-          'pmtr15'  : 'first order rate high in Hz',
-          'pmtr16'  : 'second order rate low in Hz',
-          'pmtr17'  : 'second order rate high in Hz',
-          'pmtr18'  : 'third order rate in Hz',
-          
-          'pmtr19'  : 'resonant filter start cutoff frequency in Hz',
-          'pmtr20'  : 'resonant filter end cutoff frequency in Hz',
-          'pmtr21'  : 'resonant filter start resonance (0-2)',
-          'pmtr22'  : 'resonant filter end resonance (0-2)',
-          'pmtr23'  : 'resonant filter start distortion (0-10)',
-          'pmtr24'  : 'resonant filter end distortion (0-10)',
-          }
+            "pmtr7": "sustain percent within unit interval",
+            "pmtr8": "sustain center within unit interval",
+            "pmtr9": "low-pass filter start cutoff frequency in Hz",
+            "pmtr10": "low-pass filter end cutoff frequency in Hz",
+            "pmtr11": "low-pass filter resonance between 1 and 500",
+            "pmtr12": "high-pass filter start cutoff frequency in Hz",
+            "pmtr13": "high-pass filter end cutoff frequency in Hz",
+            "pmtr14": "first order rate low in Hz",
+            "pmtr15": "first order rate high in Hz",
+            "pmtr16": "second order rate low in Hz",
+            "pmtr17": "second order rate high in Hz",
+            "pmtr18": "third order rate in Hz",
+            "pmtr19": "resonant filter start cutoff frequency in Hz",
+            "pmtr20": "resonant filter end cutoff frequency in Hz",
+            "pmtr21": "resonant filter start resonance (0-2)",
+            "pmtr22": "resonant filter end resonance (0-2)",
+            "pmtr23": "resonant filter start distortion (0-10)",
+            "pmtr24": "resonant filter end distortion (0-10)",
+        }
         self.pmtrDefault = {
-          'pmtr7'   : ('c', .5),
-          'pmtr8'   : ('c', .5),
-          'pmtr9'   : ('c', 18000),
-          'pmtr10'  : ('c', 8000),
-          'pmtr11'  : ('c', 1),
-
-          'pmtr12'  : ('c', 20),
-          'pmtr13'  : ('c', 30),
-          'pmtr14'  : ('c', 1.25),
-          'pmtr15'  : ('c', 40),
-          'pmtr16'  : ('c', .75),
-          'pmtr17'  : ('c', .85),
-          'pmtr18'  : ('c', .5),
-          
-          'pmtr19'  : ('c', 1000),
-          'pmtr20'  : ('c', 6000),
-          'pmtr21'  : ('c', .8),
-          'pmtr22'  : ('c', .2),
-          'pmtr23'  : ('c', 100),
-          'pmtr24'  : ('c', 0),
-          }
-        self.author = 'athenaCL native' # attribution
+            "pmtr7": ("c", 0.5),
+            "pmtr8": ("c", 0.5),
+            "pmtr9": ("c", 18000),
+            "pmtr10": ("c", 8000),
+            "pmtr11": ("c", 1),
+            "pmtr12": ("c", 20),
+            "pmtr13": ("c", 30),
+            "pmtr14": ("c", 1.25),
+            "pmtr15": ("c", 40),
+            "pmtr16": ("c", 0.75),
+            "pmtr17": ("c", 0.85),
+            "pmtr18": ("c", 0.5),
+            "pmtr19": ("c", 1000),
+            "pmtr20": ("c", 6000),
+            "pmtr21": ("c", 0.8),
+            "pmtr22": ("c", 0.2),
+            "pmtr23": ("c", 100),
+            "pmtr24": ("c", 0),
+        }
+        self.author = "athenaCL native"  # attribution
         self.orcCode = """
 instr %s
     iDur = p3
@@ -1024,35 +1099,32 @@ instr %s
         
     aMixSig   = aSig * kAmp
     
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
 
-
-
-
-
-
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 class Inst20(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 20
-        self.name = 'fmBasic'
-        self.info = 'A basic FM instrument.'
+        self.name = "fmBasic"
+        self.info = "A basic FM instrument."
         self.auxNo = 2
-        self.postMapAmp = (0,90, 'linear') # most amps are in db
+        self.postMapAmp = (0, 90, "linear")  # most amps are in db
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'fm factor',
-          'pmtr8'   : 'modulation index',
-          }
+            "pmtr7": "fm factor",
+            "pmtr8": "modulation index",
+        }
         self.pmtrDefault = {
-          'rhythmQ' : ('binaryAccent', ((7,1,1),(7,5,1))) ,
-          #'ampQ'    : ('cyclicGen', 'linearDown', 60.00, 76.00, 2.00) ,
-          'pmtr7'   : ('cyclicGen', 'linearUpDown', 0.01, 8.00, 0.10),
-          'pmtr8'   : ('cyclicGen', 'linearUpDown', 1.00, 6.00, 0.10),
-          }
-        self.author = '"basicfm.orc" from Csound Book examples' # attribution
+            "rhythmQ": ("binaryAccent", ((7, 1, 1), (7, 5, 1))),
+            #'ampQ'    : ('cyclicGen', 'linearDown', 60.00, 76.00, 2.00) ,
+            "pmtr7": ("cyclicGen", "linearUpDown", 0.01, 8.00, 0.10),
+            "pmtr8": ("cyclicGen", "linearUpDown", 1.00, 6.00, 0.10),
+        }
+        self.author = '"basicfm.orc" from Csound Book examples'  # attribution
         self.orcCode = """
 instr %s
     iPan         =            p6
@@ -1069,7 +1141,9 @@ instr %s
     aSig         oscili   ampenv,i2+amod,203              ; CARRIER OSCILLATOR
 
     aMixSig  = aSig
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
         self.scoSample = """
 ;p1  p2  p3   p4      p5              p6        p7              p8
@@ -1079,24 +1153,25 @@ instr %s
 ;i1     7    5                7.06        .5        1.414    
 """
 
-#-----------------------------------------------------------------||||||||||||--
+
+# -----------------------------------------------------------------||||||||||||--
 class Inst21(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 21
-        self.name = 'fmClarinet'
-        self.info = 'A FM instrument tuned to sound clarinet-like.'
+        self.name = "fmClarinet"
+        self.info = "A FM instrument tuned to sound clarinet-like."
         self.auxNo = 1
-        self.postMapAmp = (0,90, 'linear') # most amps are in db
+        self.postMapAmp = (0, 90, "linear")  # most amps are in db
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'imax value',
-          }
+            "pmtr7": "imax value",
+        }
         self.pmtrDefault = {
-          'rhythmQ' : ('binaryAccent', ((7,3,1),(7,5,1)) ),
-          #'ampQ'    : ('cyclicGen', 'linearDown', 60.00, 70.00, 1.00) ,
-          'pmtr7'   : ('cyclicGen', 'linearUpDown', 1.50, 6.00, 0.20),
-          }
+            "rhythmQ": ("binaryAccent", ((7, 3, 1), (7, 5, 1))),
+            #'ampQ'    : ('cyclicGen', 'linearDown', 60.00, 70.00, 1.00) ,
+            "pmtr7": ("cyclicGen", "linearUpDown", 1.50, 6.00, 0.20),
+        }
         self.author = """
 FMclarinet.orc from amsterdam catalog
 ACCCI:    20_10_4.ORC
@@ -1105,7 +1180,7 @@ synthesis: FM(20),
               clarinet settings(3)
 source:   Chowning (1973)
 coded:    jpg 8/92
-""" # attribution
+"""  # attribution
         self.orcCode = """
 instr %s
     iDur     = p3
@@ -1129,7 +1204,9 @@ instr %s
     a1      oscili  aenv, ifq1+amod, if1                      ; carrier
 
     aMixSig          = a1
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
         self.scoSample = """
 ;p1  p2  p3   p4      p5        p6       p7 
@@ -1140,21 +1217,33 @@ i1      +       .       .        8.02               .
 i1      .       .       .        8.04               .
 """
 
-#-----------------------------------------------------------------||||||||||||--
+
+# -----------------------------------------------------------------||||||||||||--
 class Inst22(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 22
-        self.name = 'fmWoodDrum'
-        self.info = 'A FM instrument tuned to sound wood-drum-like.'
+        self.name = "fmWoodDrum"
+        self.info = "A FM instrument tuned to sound wood-drum-like."
         self.auxNo = 0
-        self.postMapAmp = (0,90, 'linear') # most amps are in db
+        self.postMapAmp = (0, 90, "linear")  # most amps are in db
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrDefault = {
-          'rhythmQ' : ('loop', ((8,3,1),(8,3,1),(8,3,1),(8,1,0),(4,1,1),
-                                        (4,1,1),(8,1,1),(8,1,0))) ,
-          #'ampQ'    : ('cyclicGen', 'linearDown', 80.00, 81.00, 1.00) ,
-          }
+            "rhythmQ": (
+                "loop",
+                (
+                    (8, 3, 1),
+                    (8, 3, 1),
+                    (8, 3, 1),
+                    (8, 1, 0),
+                    (4, 1, 1),
+                    (4, 1, 1),
+                    (8, 1, 1),
+                    (8, 1, 0),
+                ),
+            ),
+            #'ampQ'    : ('cyclicGen', 'linearDown', 80.00, 81.00, 1.00) ,
+        }
         self.author = """
 FMwoodDrum.orc from amsterdam catalog
 ACCCI:    20_10_2.ORC
@@ -1163,7 +1252,7 @@ synthesis: FM(20),
               wood-drum settings(2)
 source:   Chowning(1973)
 coded:    jpg 8/92
-""" # attribution
+"""  # attribution
         self.orcCode = """
 instr %s
     iDur     = p3
@@ -1183,7 +1272,9 @@ instr %s
     a1      oscili  aenv, ifq1+amod, if1                  ; carrier
 
     aMixSig = a1
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
         self.scoSample = """
 ;p1  p2  p3   p4      p5        p6       p7 
@@ -1193,33 +1284,45 @@ instr %s
 ;i1  +       .       .        3.02   .
 """
 
-#-----------------------------------------------------------------||||||||||||--
+
+# -----------------------------------------------------------------||||||||||||--
 class Inst23(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 23
-        self.name = 'fmString'
-        self.info = 'A FM instrument tuned to sound string-like.'
+        self.name = "fmString"
+        self.info = "A FM instrument tuned to sound string-like."
         self.auxNo = 5
-        self.postMapAmp = (0,90, 'linear') # most amps are in db
+        self.postMapAmp = (0, 90, "linear")  # most amps are in db
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'irise, percentage of rise-time, around .2',
-          'pmtr8'   : 'idec, percentage of dec time, around .2',
-          'pmtr9'   : 'ivibdel, vibrato delay, around .35', 
-          'pmtr10'  : 'ivibwth, vibrato width, around .01', 
-          'pmtr11'  : 'ivibrte, vibrato rate, around 2.5', 
-          }
+            "pmtr7": "irise, percentage of rise-time, around .2",
+            "pmtr8": "idec, percentage of dec time, around .2",
+            "pmtr9": "ivibdel, vibrato delay, around .35",
+            "pmtr10": "ivibwth, vibrato width, around .01",
+            "pmtr11": "ivibrte, vibrato rate, around 2.5",
+        }
         self.pmtrDefault = {
-          'rhythmQ' : ('loop', ((8,3,1),(8,3,1),(8,3,1),(8,1,0),
-                                        (4,1,1),(4,1,1),(8,1,1),(8,1,0))) ,
-          #'ampQ'    : ('cyclicGen', 'linearDown', 80.00, 81.00, 1.00) ,
-          'pmtr7'   : ('basketGen', 'randomChoice', (.15, .2, .25)),
-          'pmtr8'   : ('basketGen', 'randomChoice', (.15, .2, .25)),
-          'pmtr9'   : ('basketGen', 'randomChoice', (.3, .35, .25)), 
-          'pmtr10'  : ('basketGen', 'randomChoice', (.01, .0025, .005, .0075)), 
-          'pmtr11'  : ('basketGen', 'randomChoice', (2.5, 2.2, 3.1)), 
-          }
+            "rhythmQ": (
+                "loop",
+                (
+                    (8, 3, 1),
+                    (8, 3, 1),
+                    (8, 3, 1),
+                    (8, 1, 0),
+                    (4, 1, 1),
+                    (4, 1, 1),
+                    (8, 1, 1),
+                    (8, 1, 0),
+                ),
+            ),
+            #'ampQ'    : ('cyclicGen', 'linearDown', 80.00, 81.00, 1.00) ,
+            "pmtr7": ("basketGen", "randomChoice", (0.15, 0.2, 0.25)),
+            "pmtr8": ("basketGen", "randomChoice", (0.15, 0.2, 0.25)),
+            "pmtr9": ("basketGen", "randomChoice", (0.3, 0.35, 0.25)),
+            "pmtr10": ("basketGen", "randomChoice", (0.01, 0.0025, 0.005, 0.0075)),
+            "pmtr11": ("basketGen", "randomChoice", (2.5, 2.2, 3.1)),
+        }
         self.author = """
 FMstring.orc from amsterdam catalog
 ACCCI:    20_70_1.ORC
@@ -1228,7 +1331,7 @@ synthesis: FM(20),
               string-like(1)
 source:   Schottstaedt(1977)
 coded:    Russell Pinkston, University of Texas at Austin 
-""" # attribution
+"""  # attribution
         self.orcCode = """
 instr %s
     iDur      = p3
@@ -1269,39 +1372,39 @@ instr %s
     aSig      oscili     iAmp, (ifqc+amod1+amod2+amod3)*(1+kvib), iTable
     aSig      linen  aSig+attack, irise, iDur, idec
     aMixSig = aSig
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
 
-
-
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 class Inst30(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 30
-        self.name = 'samplerReverb'
-        self.info = 'A simple sampler with reverb. A linear envelope is given in absolute time values.'
+        self.name = "samplerReverb"
+        self.info = "A simple sampler with reverb. A linear envelope is given in absolute time values."
         self.auxNo = 6
-        self.postMapAmp = (0, 9, 'linear') # assume amps not greater tn 10
+        self.postMapAmp = (0, 9, "linear")  # assume amps not greater tn 10
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'time to read into the file',
-          'pmtr8'   : 'absolute atack time',
-          'pmtr9'   : 'absolute release time',
-          'pmtr10'  : 'reverb time',
-          'pmtr11'  : 'reverb gain',
-          'pmtr12'  : 'file path to desired sound file',
-          }
+            "pmtr7": "time to read into the file",
+            "pmtr8": "absolute atack time",
+            "pmtr9": "absolute release time",
+            "pmtr10": "reverb time",
+            "pmtr11": "reverb gain",
+            "pmtr12": "file path to desired sound file",
+        }
         self.pmtrDefault = {
-          'rhythmQ' : ('binaryAccent', ((9,6,1),(9,2,1)) ), 
-          'pmtr7'   : ('constant', 0),
-          'pmtr8'   : ('cyclicGen', 'linearUp', .03, .10, .01),
-          'pmtr9'   : ('constant', 0.1),
-          'pmtr10'  : ('cyclicGen', 'linearUp', .5, 2.1, .2),
-          'pmtr11'  : ('cyclicGen', 'linearUp', .00, .50, .05),
-          'pmtr12'  : ('sampleSelect', ('drum01.aif', 'latch01.aif')),
-          }
-        self.author = 'athenaCL native' # attribution
+            "rhythmQ": ("binaryAccent", ((9, 6, 1), (9, 2, 1))),
+            "pmtr7": ("constant", 0),
+            "pmtr8": ("cyclicGen", "linearUp", 0.03, 0.10, 0.01),
+            "pmtr9": ("constant", 0.1),
+            "pmtr10": ("cyclicGen", "linearUp", 0.5, 2.1, 0.2),
+            "pmtr11": ("cyclicGen", "linearUp", 0.00, 0.50, 0.05),
+            "pmtr12": ("sampleSelect", ("drum01.aif", "latch01.aif")),
+        }
+        self.author = "athenaCL native"  # attribution
         self.orcCode = """
 instr %s
     iDur = p3
@@ -1329,27 +1432,28 @@ instr %s
 
     aMixSig   =  arampsig + arvbreturn
     
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
 
-
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 class Inst31(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 31
-        self.name = 'samplerRaw'
-        self.info = 'A simple sampler of single audio files. Audio files are given with a complete file path. Amplitude values are used only to scale amplitude'
+        self.name = "samplerRaw"
+        self.info = "A simple sampler of single audio files. Audio files are given with a complete file path. Amplitude values are used only to scale amplitude"
         self.auxNo = 1
-        self.postMapAmp = (0, 9, 'linear') # most amps are in db
+        self.postMapAmp = (0, 9, "linear")  # most amps are in db
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-                      'pmtr7'  : 'file path chooser',
-                     } # holds discription, preset for each pmtr in a dictionary
+            "pmtr7": "file path chooser",
+        }  # holds discription, preset for each pmtr in a dictionary
         self.pmtrDefault = {
-          'rhythmQ' : ('binaryAccent', ((9,6,1),(9,2,1)) ), 
-          'pmtr7'   : ('sampleSelect', ('drum01.aif', 'latch01.aif')),
-          }
+            "rhythmQ": ("binaryAccent", ((9, 6, 1), (9, 2, 1))),
+            "pmtr7": ("sampleSelect", ("drum01.aif", "latch01.aif")),
+        }
         self.orcCode = """
 instr %s
     iDur = p3
@@ -1365,37 +1469,40 @@ instr %s
     kAmp            linen        iAmp, 0, iDur, 0
     aSig            soundin  iSamplePath, iSkiptime
     aMixSig  = kAmp * aSig
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
-#-----------------------------------------------------------------||||||||||||--
+
+# -----------------------------------------------------------------||||||||||||--
 class Inst32(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 32
-        self.name = 'samplerUnitEnvelope'
-        self.info = 'A simple sampler with a proportional linear envelope and a variable low-pass filter.'
+        self.name = "samplerUnitEnvelope"
+        self.info = "A simple sampler with a proportional linear envelope and a variable low-pass filter."
         self.auxNo = 7
-        self.postMapAmp = (0, 9, 'linear') # assume amps not greater tn 10
+        self.postMapAmp = (0, 9, "linear")  # assume amps not greater tn 10
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'sustain percent within unit interval',
-          'pmtr8'   : 'sustain center within unit interval',
-          'pmtr9'   : 'low-pass filter start cutoff frequency in Hz',
-          'pmtr10'  : 'low-pass filter end cutoff frequency in Hz',
-          'pmtr11'  : 'low-pass filter resonance between 1 and 500',
-          'pmtr12'  : 'start time within audio file',
-          'pmtr13'  : 'file path to desired sound file',
-          }
+            "pmtr7": "sustain percent within unit interval",
+            "pmtr8": "sustain center within unit interval",
+            "pmtr9": "low-pass filter start cutoff frequency in Hz",
+            "pmtr10": "low-pass filter end cutoff frequency in Hz",
+            "pmtr11": "low-pass filter resonance between 1 and 500",
+            "pmtr12": "start time within audio file",
+            "pmtr13": "file path to desired sound file",
+        }
         self.pmtrDefault = {
-          'pmtr7'   : ('c', .5),
-          'pmtr8'   : ('c', .5),
-          'pmtr9'   : ('c', 18000),
-          'pmtr10'  : ('c', 8000),
-          'pmtr11'  : ('c', 1),
-          'pmtr12'  : ('c', 0),
-          'pmtr13'  : ('sampleSelect', ('drum01.aif', 'latch01.aif')),
-          }
-        self.author = 'athenaCL native' # attribution
+            "pmtr7": ("c", 0.5),
+            "pmtr8": ("c", 0.5),
+            "pmtr9": ("c", 18000),
+            "pmtr10": ("c", 8000),
+            "pmtr11": ("c", 1),
+            "pmtr12": ("c", 0),
+            "pmtr13": ("sampleSelect", ("drum01.aif", "latch01.aif")),
+        }
+        self.author = "athenaCL native"  # attribution
         self.orcCode = """
 instr %s
     iDur = p3
@@ -1425,39 +1532,42 @@ instr %s
     
     aMixSig   = aSig * kAmp
     
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
-#-----------------------------------------------------------------||||||||||||--
+
+# -----------------------------------------------------------------||||||||||||--
 class Inst33(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 33
-        self.name = 'samplerUnitEnvelopeBandpass'
-        self.info = 'A simple sampler with a proportional linear envelope and a band-pass filter.'
+        self.name = "samplerUnitEnvelopeBandpass"
+        self.info = "A simple sampler with a proportional linear envelope and a band-pass filter."
         self.auxNo = 8
-        self.postMapAmp = (0, 9, 'linear') # assume amps not greater tn 10
+        self.postMapAmp = (0, 9, "linear")  # assume amps not greater tn 10
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'sustain percent within unit interval',
-          'pmtr8'   : 'sustain center within unit interval',
-          'pmtr9'   : 'band pass filter start center frequency in Hz',
-          'pmtr10'  : 'band pass filter end center frequency in Hz',
-          'pmtr11'  : 'band pass filter start bandwidth in Hz',
-          'pmtr12'  : 'band pass filter end bandwidth in Hz',
-          'pmtr13'  : 'start time within audio file',
-          'pmtr14'  : 'file path to desired sound file',
-          }
+            "pmtr7": "sustain percent within unit interval",
+            "pmtr8": "sustain center within unit interval",
+            "pmtr9": "band pass filter start center frequency in Hz",
+            "pmtr10": "band pass filter end center frequency in Hz",
+            "pmtr11": "band pass filter start bandwidth in Hz",
+            "pmtr12": "band pass filter end bandwidth in Hz",
+            "pmtr13": "start time within audio file",
+            "pmtr14": "file path to desired sound file",
+        }
         self.pmtrDefault = {
-          'pmtr7'   : ('c', .5),
-          'pmtr8'   : ('c', .5),
-          'pmtr9'   : ('c', 2000),
-          'pmtr10'  : ('c', 8000),
-          'pmtr11'  : ('c', 100),
-          'pmtr12'  : ('c', 200),
-          'pmtr13'  : ('c', 0),
-          'pmtr14'  : ('sampleSelect', ('drum01.aif', 'latch01.aif')),
-          }
-        self.author = 'athenaCL native' # attribution
+            "pmtr7": ("c", 0.5),
+            "pmtr8": ("c", 0.5),
+            "pmtr9": ("c", 2000),
+            "pmtr10": ("c", 8000),
+            "pmtr11": ("c", 100),
+            "pmtr12": ("c", 200),
+            "pmtr13": ("c", 0),
+            "pmtr14": ("sampleSelect", ("drum01.aif", "latch01.aif")),
+        }
+        self.author = "athenaCL native"  # attribution
         self.orcCode = """
 instr %s
     iDur = p3
@@ -1490,45 +1600,48 @@ instr %s
     aSig            butterbp     aSig, kbandCf, kbandWidth          
     aMixSig  = aSig * kAmp
     
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
-#-----------------------------------------------------------------||||||||||||--
+
+# -----------------------------------------------------------------||||||||||||--
 class Inst34(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 34
-        self.name = 'samplerUnitEnvelopeDistort'
-        self.info = 'A sampler with a proportional linear envelope, a distortion processor, and a low-pass filter.'
+        self.name = "samplerUnitEnvelopeDistort"
+        self.info = "A sampler with a proportional linear envelope, a distortion processor, and a low-pass filter."
         self.auxNo = 11
-        self.postMapAmp = (0, 9, 'linear') # assume amps not greater tn 10
+        self.postMapAmp = (0, 9, "linear")  # assume amps not greater tn 10
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'sustain percent within unit interval',
-          'pmtr8'   : 'sustain center within unit interval',
-          'pmtr9'   : 'distortion input gain; 1 gives a slight distortion',
-          'pmtr10'  : 'distortion output gain',
-          'pmtr11'  : 'postive wave shaping curve; 0 gives a flat clip',
-          'pmtr12'  : 'negative wave shaping curve',             
-          'pmtr13'  : 'low-pass filter start cutoff frequency in Hz',
-          'pmtr14'  : 'low-pass filter end cutoff frequency in Hz',
-          'pmtr15'  : 'low-pass filter resonance between 1 and 500',
-          'pmtr16'  : 'start time within audio file',
-          'pmtr17'  : 'file path to desired sound file',
-          }
+            "pmtr7": "sustain percent within unit interval",
+            "pmtr8": "sustain center within unit interval",
+            "pmtr9": "distortion input gain; 1 gives a slight distortion",
+            "pmtr10": "distortion output gain",
+            "pmtr11": "postive wave shaping curve; 0 gives a flat clip",
+            "pmtr12": "negative wave shaping curve",
+            "pmtr13": "low-pass filter start cutoff frequency in Hz",
+            "pmtr14": "low-pass filter end cutoff frequency in Hz",
+            "pmtr15": "low-pass filter resonance between 1 and 500",
+            "pmtr16": "start time within audio file",
+            "pmtr17": "file path to desired sound file",
+        }
         self.pmtrDefault = {
-          'pmtr7'   : ('c', .5),
-          'pmtr8'   : ('c', .5),
-          'pmtr9'   : ('c', 1),
-          'pmtr10'  : ('c', 1),
-          'pmtr11'  : ('c', 0),
-          'pmtr12'  : ('c', 0),
-          'pmtr13'  : ('c', 4000),
-          'pmtr14'  : ('c', 8000),
-          'pmtr15'  : ('c', 1),
-          'pmtr16'  : ('c', 0),
-          'pmtr17'  : ('sampleSelect', ('drum01.aif', 'latch01.aif')),
-          }
-        self.author = 'athenaCL native' # attribution
+            "pmtr7": ("c", 0.5),
+            "pmtr8": ("c", 0.5),
+            "pmtr9": ("c", 1),
+            "pmtr10": ("c", 1),
+            "pmtr11": ("c", 0),
+            "pmtr12": ("c", 0),
+            "pmtr13": ("c", 4000),
+            "pmtr14": ("c", 8000),
+            "pmtr15": ("c", 1),
+            "pmtr16": ("c", 0),
+            "pmtr17": ("sampleSelect", ("drum01.aif", "latch01.aif")),
+        }
+        self.author = "athenaCL native"  # attribution
         self.orcCode = """
 instr %s
     iDur = p3
@@ -1561,49 +1674,48 @@ instr %s
     a1              lowpass2     aSig, kFreq, iLpfQ 
     aMixSig  = a1 * kAmp
     
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
-#-----------------------------------------------------------------||||||||||||--
+
+# -----------------------------------------------------------------||||||||||||--
 class Inst35(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 35
-        self.name = 'samplerUnitEnvelopeParametric'
-        self.info = 'A simple sampler with a proportional linear envelope and a multi-function parametric filter.'
+        self.name = "samplerUnitEnvelopeParametric"
+        self.info = "A simple sampler with a proportional linear envelope and a multi-function parametric filter."
         self.auxNo = 11
-        self.postMapAmp = (0, 5, 'linear') # assume amps not greater tn 10
+        self.postMapAmp = (0, 5, "linear")  # assume amps not greater tn 10
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'sustain percent within unit interval',
-          'pmtr8'   : 'sustain center within unit interval',
-          'pmtr9'   : 'parametric filter start center frequency in Hz',
-          'pmtr10'  : 'parametric filter end center frequency in Hz',
-          'pmtr11'  : 'parametric filter start Q',
-          'pmtr12'  : 'parametric filter end Q',
-          'pmtr13'  : 'parametric filter start amp scalar, where 1 is flat',
-          'pmtr14'  : 'parametric filter end amp scalar, where 1 is flat',
-
-          'pmtr15'  : 'parametric filter type, where 0 is peaking, 1 is low shelving, 2 is high shelving.',
-
-          'pmtr16'  : 'start time within audio file',
-          'pmtr17'  : 'file path to desired sound file',
-          }
+            "pmtr7": "sustain percent within unit interval",
+            "pmtr8": "sustain center within unit interval",
+            "pmtr9": "parametric filter start center frequency in Hz",
+            "pmtr10": "parametric filter end center frequency in Hz",
+            "pmtr11": "parametric filter start Q",
+            "pmtr12": "parametric filter end Q",
+            "pmtr13": "parametric filter start amp scalar, where 1 is flat",
+            "pmtr14": "parametric filter end amp scalar, where 1 is flat",
+            "pmtr15": "parametric filter type, where 0 is peaking, 1 is low shelving, 2 is high shelving.",
+            "pmtr16": "start time within audio file",
+            "pmtr17": "file path to desired sound file",
+        }
         self.pmtrDefault = {
-          'pmtr7'   : ('c', .9),
-          'pmtr8'   : ('c', .5),
-          'pmtr9'   : ('c', 400),
-          'pmtr10'  : ('c', 2000),
-          'pmtr11'  : ('c', 6),
-          'pmtr12'  : ('c', 6),
-
-          'pmtr13'  : ('c', 3), # 2 is 6 db, .5 is -6 dB, 
-          'pmtr14'  : ('c', 3),
-
-          'pmtr15'  : ('c', 0),
-          'pmtr16'  : ('c', 0),
-          'pmtr17'  : ('sampleSelect', ('drum01.aif', 'latch01.aif')),
-          }
-        self.author = 'athenaCL native' # attribution
+            "pmtr7": ("c", 0.9),
+            "pmtr8": ("c", 0.5),
+            "pmtr9": ("c", 400),
+            "pmtr10": ("c", 2000),
+            "pmtr11": ("c", 6),
+            "pmtr12": ("c", 6),
+            "pmtr13": ("c", 3),  # 2 is 6 db, .5 is -6 dB,
+            "pmtr14": ("c", 3),
+            "pmtr15": ("c", 0),
+            "pmtr16": ("c", 0),
+            "pmtr17": ("sampleSelect", ("drum01.aif", "latch01.aif")),
+        }
+        self.author = "athenaCL native"  # attribution
         # note that rbjeq does not work
         self.orcCode = """
 instr %s
@@ -1642,53 +1754,54 @@ instr %s
     aSig            pareq        aSig, kbandCf, kbandGain, kbandQ, iFilterType    
     aMixSig  = aSig * kAmp
     
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
 
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 class Inst36(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 36
-        self.name = 'samplerSahNoiseUnitEnvelope'
-        self.info = 'A simple sampler with third order sample and hold filter, a variable high-pass filter, a proportional linear envelope, and a variable low-pass filter.'
+        self.name = "samplerSahNoiseUnitEnvelope"
+        self.info = "A simple sampler with third order sample and hold filter, a variable high-pass filter, a proportional linear envelope, and a variable low-pass filter."
         self.auxNo = 14
-        self.postMapAmp = (0, 9, 'linear') # assume amps not greater tn 10
+        self.postMapAmp = (0, 9, "linear")  # assume amps not greater tn 10
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'sustain percent within unit interval',
-          'pmtr8'   : 'sustain center within unit interval',
-          'pmtr9'   : 'low-pass filter start cutoff frequency in Hz',
-          'pmtr10'  : 'low-pass filter end cutoff frequency in Hz',
-          'pmtr11'  : 'low-pass filter resonance between 1 and 500',
-          'pmtr12'  : 'start time within audio file',
-          'pmtr13'  : 'file path to desired sound file',
-          'pmtr14'  : 'high-pass filter start cutoff frequency in Hz',
-          'pmtr15'  : 'high-pass filter end cutoff frequency in Hz',          
-          'pmtr16'  : 'first order rate low in Hz',
-          'pmtr17'  : 'first order rate high in Hz',
-          'pmtr18'  : 'second order rate low in Hz',
-          'pmtr19'  : 'second order rate high in Hz',
-          'pmtr20'  : 'third order rate in Hz',
-          
-          }
+            "pmtr7": "sustain percent within unit interval",
+            "pmtr8": "sustain center within unit interval",
+            "pmtr9": "low-pass filter start cutoff frequency in Hz",
+            "pmtr10": "low-pass filter end cutoff frequency in Hz",
+            "pmtr11": "low-pass filter resonance between 1 and 500",
+            "pmtr12": "start time within audio file",
+            "pmtr13": "file path to desired sound file",
+            "pmtr14": "high-pass filter start cutoff frequency in Hz",
+            "pmtr15": "high-pass filter end cutoff frequency in Hz",
+            "pmtr16": "first order rate low in Hz",
+            "pmtr17": "first order rate high in Hz",
+            "pmtr18": "second order rate low in Hz",
+            "pmtr19": "second order rate high in Hz",
+            "pmtr20": "third order rate in Hz",
+        }
         self.pmtrDefault = {
-          'pmtr7'   : ('c', .5),
-          'pmtr8'   : ('c', .5),
-          'pmtr9'   : ('c', 18000),
-          'pmtr10'  : ('c', 8000),
-          'pmtr11'  : ('c', 1),
-          'pmtr12'  : ('c', 0),
-          'pmtr13'  : ('sampleSelect', ('metal01.aif', 'latch01.aif')),
-          'pmtr14'  : ('c', 20),
-          'pmtr15'  : ('c', 30),
-          'pmtr16'  : ('c', 400),
-          'pmtr17'  : ('c', 600),
-          'pmtr18'  : ('c', 10),
-          'pmtr19'  : ('c', 20),
-          'pmtr20'  : ('c', .5),          
-          }
-        self.author = 'athenaCL native' # attribution
+            "pmtr7": ("c", 0.5),
+            "pmtr8": ("c", 0.5),
+            "pmtr9": ("c", 18000),
+            "pmtr10": ("c", 8000),
+            "pmtr11": ("c", 1),
+            "pmtr12": ("c", 0),
+            "pmtr13": ("sampleSelect", ("metal01.aif", "latch01.aif")),
+            "pmtr14": ("c", 20),
+            "pmtr15": ("c", 30),
+            "pmtr16": ("c", 400),
+            "pmtr17": ("c", 600),
+            "pmtr18": ("c", 10),
+            "pmtr19": ("c", 20),
+            "pmtr20": ("c", 0.5),
+        }
+        self.author = "athenaCL native"  # attribution
         self.orcCode = """
 instr %s
     iDur = p3
@@ -1747,49 +1860,50 @@ instr %s
     
     aMixSig   = aSig * kAmp
     
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
 
-
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 class Inst37(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 37
-        self.name = 'samplerCrossUnitEnvelope'
-        self.info = 'A cross synthesis sampler with a proportional linear envelope and a variable low-pass filter.'
+        self.name = "samplerCrossUnitEnvelope"
+        self.info = "A cross synthesis sampler with a proportional linear envelope and a variable low-pass filter."
         self.auxNo = 12
-        self.postMapAmp = (0, 6, 'linear') # assume amps not greater tn 10
+        self.postMapAmp = (0, 6, "linear")  # assume amps not greater tn 10
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'sustain percent within unit interval',
-          'pmtr8'   : 'sustain center within unit interval',
-          'pmtr9'   : 'low-pass filter start cutoff frequency in Hz',
-          'pmtr10'  : 'low-pass filter end cutoff frequency in Hz',
-          'pmtr11'  : 'low-pass filter resonance between 1 and 500',
-          'pmtr12'  : 'start time within audio file A',
-          'pmtr13'  : 'file path to desired sound file A, stimulus sound',
-          'pmtr14'  : 'start time within audio file B',
-          'pmtr15'  : 'file path to desired sound file B, modulating sound',
-          'pmtr16'  : 'size of fft, larger the size, better the fq response, worse the time response. 4096 is a good value',
-          'pmtr17'  : 'cross synthesis bias start (between 0 and 1)',
-          'pmtr18'  : 'cross synthesis bias end (between 0 and 1)',
-          }
+            "pmtr7": "sustain percent within unit interval",
+            "pmtr8": "sustain center within unit interval",
+            "pmtr9": "low-pass filter start cutoff frequency in Hz",
+            "pmtr10": "low-pass filter end cutoff frequency in Hz",
+            "pmtr11": "low-pass filter resonance between 1 and 500",
+            "pmtr12": "start time within audio file A",
+            "pmtr13": "file path to desired sound file A, stimulus sound",
+            "pmtr14": "start time within audio file B",
+            "pmtr15": "file path to desired sound file B, modulating sound",
+            "pmtr16": "size of fft, larger the size, better the fq response, worse the time response. 4096 is a good value",
+            "pmtr17": "cross synthesis bias start (between 0 and 1)",
+            "pmtr18": "cross synthesis bias end (between 0 and 1)",
+        }
         self.pmtrDefault = {
-          'pmtr7'   : ('c', .5),
-          'pmtr8'   : ('c', .5),
-          'pmtr9'   : ('c', 18000),
-          'pmtr10'  : ('c', 8000),
-          'pmtr11'  : ('c', 1),
-          'pmtr12'  : ('c', 0),
-          'pmtr13'  : ('sampleSelect', ('metal01.aif', 'metal02.aif')),
-          'pmtr14'  : ('c', 0),
-          'pmtr15'  : ('sampleSelect', ('drum01.aif', 'grains01.aif')),
-          'pmtr16'  : ('c', 256), # 2048, 4096, 1024, 512, 256, 128
-          'pmtr17'  : ('c', 1),
-          'pmtr18'  : ('c', 1),
-          }
-        self.author = 'athenaCL native' # attribution
+            "pmtr7": ("c", 0.5),
+            "pmtr8": ("c", 0.5),
+            "pmtr9": ("c", 18000),
+            "pmtr10": ("c", 8000),
+            "pmtr11": ("c", 1),
+            "pmtr12": ("c", 0),
+            "pmtr13": ("sampleSelect", ("metal01.aif", "metal02.aif")),
+            "pmtr14": ("c", 0),
+            "pmtr15": ("sampleSelect", ("drum01.aif", "grains01.aif")),
+            "pmtr16": ("c", 256),  # 2048, 4096, 1024, 512, 256, 128
+            "pmtr17": ("c", 1),
+            "pmtr18": ("c", 1),
+        }
+        self.author = "athenaCL native"  # attribution
         self.orcCode = """
 instr %s
     iDur = p3
@@ -1834,40 +1948,42 @@ instr %s
     
     aMixSig   = a1 * kAmp
     
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
 
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 class Inst40(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 40
-        self.name = 'vocodeNoiseSingle'
-        self.info = 'A one channel vocoder with variable mapping.'
+        self.name = "vocodeNoiseSingle"
+        self.info = "A one channel vocoder with variable mapping."
         self.auxNo = 8
-        self.postMapAmp = (0, 40, 'linear') # assume amps not greater tn 10
+        self.postMapAmp = (0, 40, "linear")  # assume amps not greater tn 10
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'sustain percent within unit interval',
-          'pmtr8'   : 'sustain center within unit interval',
-          'pmtr9'   : 'analysis audio file start time',
-          'pmtr10'  : 'analysis file path to desired sound file',
-          'pmtr11'  : 'analysis low-pass filter cutoff frequency in Hz',
-          'pmtr12'  : 'analysis band-pass bw, from 10 to 500',
-          'pmtr13'  : 'analysis 1 band-pass center frequency in Hz',
-          'pmtr14'  : 'generator 1 band-pass center frequency in Hz',
-          }
+            "pmtr7": "sustain percent within unit interval",
+            "pmtr8": "sustain center within unit interval",
+            "pmtr9": "analysis audio file start time",
+            "pmtr10": "analysis file path to desired sound file",
+            "pmtr11": "analysis low-pass filter cutoff frequency in Hz",
+            "pmtr12": "analysis band-pass bw, from 10 to 500",
+            "pmtr13": "analysis 1 band-pass center frequency in Hz",
+            "pmtr14": "generator 1 band-pass center frequency in Hz",
+        }
         self.pmtrDefault = {
-          'pmtr7'   : ('c', .9),
-          'pmtr8'   : ('c', .5),
-          'pmtr9'   : ('c', 0),
-          'pmtr10'  : ('sampleSelect', ('drum01.aif', 'latch01.aif')),
-          'pmtr11'  : ('c', 40),
-          'pmtr12'  : ('c', 50), # band width, 20 is well pitched
-          'pmtr13'  : ('c', 400),
-          'pmtr14'  : ('c', 1000),
-          }
-        self.author = 'athenaCL native' # attribution
+            "pmtr7": ("c", 0.9),
+            "pmtr8": ("c", 0.5),
+            "pmtr9": ("c", 0),
+            "pmtr10": ("sampleSelect", ("drum01.aif", "latch01.aif")),
+            "pmtr11": ("c", 40),
+            "pmtr12": ("c", 50),  # band width, 20 is well pitched
+            "pmtr13": ("c", 400),
+            "pmtr14": ("c", 1000),
+        }
+        self.author = "athenaCL native"  # attribution
         self.orcCode = """
 instr %s
     iDur = p3
@@ -1917,42 +2033,46 @@ instr %s
     kAmp            linen        iAmp, iAttack, iDur, iRelease  
     aMixSig     = aSig * kAmp
     
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
 
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 class Inst41(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 41
-        self.name = 'vocodeNoiseSingleGlissando'
-        self.info = 'A one channel vocoder with variable mapping between two frequencies'
+        self.name = "vocodeNoiseSingleGlissando"
+        self.info = (
+            "A one channel vocoder with variable mapping between two frequencies"
+        )
         self.auxNo = 9
-        self.postMapAmp = (0, 40, 'linear') # assume amps not greater tn 10
+        self.postMapAmp = (0, 40, "linear")  # assume amps not greater tn 10
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'sustain percent within unit interval',
-          'pmtr8'   : 'sustain center within unit interval',
-          'pmtr9'   : 'analysis audio file start time',
-          'pmtr10'  : 'analysis file path to desired sound file',
-          'pmtr11'  : 'analysis low-pass filter cutoff frequency in Hz',
-          'pmtr12'  : 'analysis band-pass bw, from 10 to 500',
-          'pmtr13'  : 'analysis 1 band-pass center frequency in Hz',
-          'pmtr14'  : 'generator 1 start band-pass center frequency in Hz',
-          'pmtr15'  : 'generator 1 end band-pass center frequency in Hz',
-          }
+            "pmtr7": "sustain percent within unit interval",
+            "pmtr8": "sustain center within unit interval",
+            "pmtr9": "analysis audio file start time",
+            "pmtr10": "analysis file path to desired sound file",
+            "pmtr11": "analysis low-pass filter cutoff frequency in Hz",
+            "pmtr12": "analysis band-pass bw, from 10 to 500",
+            "pmtr13": "analysis 1 band-pass center frequency in Hz",
+            "pmtr14": "generator 1 start band-pass center frequency in Hz",
+            "pmtr15": "generator 1 end band-pass center frequency in Hz",
+        }
         self.pmtrDefault = {
-          'pmtr7'   : ('c', .9),
-          'pmtr8'   : ('c', .5),
-          'pmtr9'   : ('c', 0),
-          'pmtr10'  : ('sampleSelect', ('drum01.aif', 'latch01.aif')),
-          'pmtr11'  : ('c', 40),
-          'pmtr12'  : ('c', 50), # band width, 20 is well pitched
-          'pmtr13'  : ('c', 400),
-          'pmtr14'  : ('c', 1000),
-          'pmtr15'  : ('c', 2000),
-          }
-        self.author = 'athenaCL native' # attribution
+            "pmtr7": ("c", 0.9),
+            "pmtr8": ("c", 0.5),
+            "pmtr9": ("c", 0),
+            "pmtr10": ("sampleSelect", ("drum01.aif", "latch01.aif")),
+            "pmtr11": ("c", 40),
+            "pmtr12": ("c", 50),  # band width, 20 is well pitched
+            "pmtr13": ("c", 400),
+            "pmtr14": ("c", 1000),
+            "pmtr15": ("c", 2000),
+        }
+        self.author = "athenaCL native"  # attribution
         self.orcCode = """
 instr %s
     iDur = p3
@@ -2006,65 +2126,60 @@ instr %s
     kAmp            linen        iAmp, iAttack, iDur, iRelease  
     aMixSig     = aSig * kAmp
     
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
 
-
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 class Inst42(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 42
-        self.name = 'vocodeNoiseQuadRemap'
-        self.info = 'A four channel vocoder with variable mapping.'
+        self.name = "vocodeNoiseQuadRemap"
+        self.info = "A four channel vocoder with variable mapping."
         self.auxNo = 17
-        self.postMapAmp = (0, 40, 'linear') # assume amps not greater tn 10
+        self.postMapAmp = (0, 40, "linear")  # assume amps not greater tn 10
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'sustain percent within unit interval',
-          'pmtr8'   : 'sustain center within unit interval',
-          'pmtr9'   : 'analysis audio file start time',
-          'pmtr10'  : 'analysis file path to desired sound file',
-          'pmtr11'  : 'analysis file play back speed',
-          
-          'pmtr12'  : 'analysis low-pass filter cutoff frequency in Hz',
-          'pmtr13'  : 'analysis band-pass bw (not q), from 10 to 500',
-          
-          'pmtr14'  : 'analysis 1 band-pass center frequency in Hz',
-          'pmtr15'  : 'analysis 2 band-pass center frequency in Hz',
-          'pmtr16'  : 'analysis 3 band-pass center frequency in Hz',
-          'pmtr17'  : 'analysis 4 band-pass center frequency in Hz',
-          'pmtr18'  : 'generator 1 band-pass center frequency in Hz',
-          'pmtr19'  : 'generator 2 band-pass center frequency in Hz',
-          'pmtr20'  : 'generator 3 band-pass center frequency in Hz',
-          'pmtr21'  : 'generator 4 band-pass center frequency in Hz',
-          
-          'pmtr22'  : 'low-pass filter start cutoff frequency in Hz',
-          'pmtr23'  : 'low-pass filter end cutoff frequency in Hz',
-          }
+            "pmtr7": "sustain percent within unit interval",
+            "pmtr8": "sustain center within unit interval",
+            "pmtr9": "analysis audio file start time",
+            "pmtr10": "analysis file path to desired sound file",
+            "pmtr11": "analysis file play back speed",
+            "pmtr12": "analysis low-pass filter cutoff frequency in Hz",
+            "pmtr13": "analysis band-pass bw (not q), from 10 to 500",
+            "pmtr14": "analysis 1 band-pass center frequency in Hz",
+            "pmtr15": "analysis 2 band-pass center frequency in Hz",
+            "pmtr16": "analysis 3 band-pass center frequency in Hz",
+            "pmtr17": "analysis 4 band-pass center frequency in Hz",
+            "pmtr18": "generator 1 band-pass center frequency in Hz",
+            "pmtr19": "generator 2 band-pass center frequency in Hz",
+            "pmtr20": "generator 3 band-pass center frequency in Hz",
+            "pmtr21": "generator 4 band-pass center frequency in Hz",
+            "pmtr22": "low-pass filter start cutoff frequency in Hz",
+            "pmtr23": "low-pass filter end cutoff frequency in Hz",
+        }
         self.pmtrDefault = {
-          'pmtr7'   : ('c', .9),
-          'pmtr8'   : ('c', .5),
-          'pmtr9'   : ('c', 0),
-          'pmtr10'  : ('sampleSelect', ('drum01.aif', 'latch01.aif')),
-          'pmtr11'  : ('c', 1),
-
-          'pmtr12'  : ('c', 40), # analysis cut-off fq
-          'pmtr13'  : ('c', 50), # band width, 20 is well pitched
-          
-          'pmtr14'  : ('c', 400),
-          'pmtr15'  : ('c', 800),
-          'pmtr16'  : ('c', 1000),
-          'pmtr17'  : ('c', 1200),
-          'pmtr18'  : ('c', 400),
-          'pmtr19'  : ('c', 800),
-          'pmtr20'  : ('c', 200),
-          'pmtr21'  : ('c', 1000),
-
-          'pmtr22'  : ('c', 50),
-          'pmtr23'  : ('c', 1000),
-          }
-        self.author = 'athenaCL native' # attribution
+            "pmtr7": ("c", 0.9),
+            "pmtr8": ("c", 0.5),
+            "pmtr9": ("c", 0),
+            "pmtr10": ("sampleSelect", ("drum01.aif", "latch01.aif")),
+            "pmtr11": ("c", 1),
+            "pmtr12": ("c", 40),  # analysis cut-off fq
+            "pmtr13": ("c", 50),  # band width, 20 is well pitched
+            "pmtr14": ("c", 400),
+            "pmtr15": ("c", 800),
+            "pmtr16": ("c", 1000),
+            "pmtr17": ("c", 1200),
+            "pmtr18": ("c", 400),
+            "pmtr19": ("c", 800),
+            "pmtr20": ("c", 200),
+            "pmtr21": ("c", 1000),
+            "pmtr22": ("c", 50),
+            "pmtr23": ("c", 1000),
+        }
+        self.author = "athenaCL native"  # attribution
         self.orcCode = """
 instr %s
     iDur = p3
@@ -2152,57 +2267,52 @@ instr %s
     kAmp            linen        iAmp, iAttack, iDur, iRelease  
     aMixSig     = aSig * kAmp
     
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
-#-----------------------------------------------------------------||||||||||||--
+
+# -----------------------------------------------------------------||||||||||||--
 class Inst43(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 43
-        self.name = 'vocodeNoiseQuadScale'
-        self.info = 'A four channel vocoder with scaled mapping.'
+        self.name = "vocodeNoiseQuadScale"
+        self.info = "A four channel vocoder with scaled mapping."
         self.auxNo = 13
-        self.postMapAmp = (0, 40, 'linear') # assume amps not greater tn 10
+        self.postMapAmp = (0, 40, "linear")  # assume amps not greater tn 10
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'sustain percent within unit interval',
-          'pmtr8'   : 'sustain center within unit interval',
-          'pmtr9'   : 'analysis audio file start time',
-          'pmtr10'  : 'analysis file path to desired sound file',
-          'pmtr11'  : 'analysis file play back speed',
-          
-          'pmtr12'  : 'analysis low-pass filter cutoff frequency in Hz',
-          'pmtr13'  : 'analysis band-pass bw (not q), from 10 to 500',
-
-          'pmtr14'  : 'analysis frequency base in Hz',
-          'pmtr15'  : 'analysis frequency scalar',        
-
-          'pmtr16'  : 'generator frequency base in Hz',
-          'pmtr17'  : 'generator frequency scalar',          
-          
-          'pmtr18'  : 'low-pass filter start cutoff frequency in Hz',
-          'pmtr19'  : 'low-pass filter end cutoff frequency in Hz',
-          }
+            "pmtr7": "sustain percent within unit interval",
+            "pmtr8": "sustain center within unit interval",
+            "pmtr9": "analysis audio file start time",
+            "pmtr10": "analysis file path to desired sound file",
+            "pmtr11": "analysis file play back speed",
+            "pmtr12": "analysis low-pass filter cutoff frequency in Hz",
+            "pmtr13": "analysis band-pass bw (not q), from 10 to 500",
+            "pmtr14": "analysis frequency base in Hz",
+            "pmtr15": "analysis frequency scalar",
+            "pmtr16": "generator frequency base in Hz",
+            "pmtr17": "generator frequency scalar",
+            "pmtr18": "low-pass filter start cutoff frequency in Hz",
+            "pmtr19": "low-pass filter end cutoff frequency in Hz",
+        }
         self.pmtrDefault = {
-          'pmtr7'   : ('c', .9),
-          'pmtr8'   : ('c', .5),
-          'pmtr9'   : ('c', 0),
-          'pmtr10'  : ('sampleSelect', ('drum01.aif', 'latch01.aif')),
-          'pmtr11'  : ('c', 1),
-
-          'pmtr12'  : ('c', 40), # analysis cut-off fq
-          'pmtr13'  : ('c', 50), # band width, 20 is well pitched
-          
-          'pmtr14'  : ('c', 800),
-          'pmtr15'  : ('c', 1.3333333333),
-
-          'pmtr16'  : ('c', 400),
-          'pmtr17'  : ('c', 1.6666666666),
-          
-          'pmtr18'  : ('c', 100),
-          'pmtr19'  : ('c', 4000),
-          }
-        self.author = 'athenaCL native' # attribution
+            "pmtr7": ("c", 0.9),
+            "pmtr8": ("c", 0.5),
+            "pmtr9": ("c", 0),
+            "pmtr10": ("sampleSelect", ("drum01.aif", "latch01.aif")),
+            "pmtr11": ("c", 1),
+            "pmtr12": ("c", 40),  # analysis cut-off fq
+            "pmtr13": ("c", 50),  # band width, 20 is well pitched
+            "pmtr14": ("c", 800),
+            "pmtr15": ("c", 1.3333333333),
+            "pmtr16": ("c", 400),
+            "pmtr17": ("c", 1.6666666666),
+            "pmtr18": ("c", 100),
+            "pmtr19": ("c", 4000),
+        }
+        self.author = "athenaCL native"  # attribution
         self.orcCode = """
 instr %s
     iDur = p3
@@ -2292,79 +2402,70 @@ instr %s
     kAmp            linen        iAmp, iAttack, iDur, iRelease  
     aMixSig     = aSig * kAmp
     
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
-#-----------------------------------------------------------------||||||||||||--
+
+# -----------------------------------------------------------------||||||||||||--
 class Inst44(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 44
-        self.name = 'vocodeNoiseQuadScaleRemap'
-        self.info = 'A four channel vocoder with variable remapping.'
+        self.name = "vocodeNoiseQuadScaleRemap"
+        self.info = "A four channel vocoder with variable remapping."
         self.auxNo = 21
-        self.postMapAmp = (0, 40, 'linear') # assume amps not greater tn 10
+        self.postMapAmp = (0, 40, "linear")  # assume amps not greater tn 10
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'sustain percent within unit interval',
-          'pmtr8'   : 'sustain center within unit interval',
-          'pmtr9'   : 'analysis audio file start time',
-          'pmtr10'  : 'analysis file path to desired sound file',
-          'pmtr11'  : 'analysis file play back speed',
-          
-          'pmtr12'  : 'analysis low-pass filter cutoff frequency in Hz',
-          'pmtr13'  : 'analysis band-pass bw (not q), from 10 to 500',
+            "pmtr7": "sustain percent within unit interval",
+            "pmtr8": "sustain center within unit interval",
+            "pmtr9": "analysis audio file start time",
+            "pmtr10": "analysis file path to desired sound file",
+            "pmtr11": "analysis file play back speed",
+            "pmtr12": "analysis low-pass filter cutoff frequency in Hz",
+            "pmtr13": "analysis band-pass bw (not q), from 10 to 500",
+            "pmtr14": "analysis frequency base in Hz",
+            "pmtr15": "analysis frequency scalar",
+            "pmtr16": "generator frequency base in Hz",
+            "pmtr17": "generator frequency scalar",
+            "pmtr18": "generator 1 channel frequency source (1-4)",
+            "pmtr19": "generator 2 channel frequency source (1-4)",
+            "pmtr20": "generator 3 channel frequency source (1-4)",
+            "pmtr21": "generator 4 channel frequency source (1-4)",
+            "pmtr22": "generator 1 post scale (0-1)",
+            "pmtr23": "generator 2 post scale (0-1)",
+            "pmtr24": "generator 3 post scale (0-1)",
+            "pmtr25": "generator 4 post scale (0-1)",
+            "pmtr26": "low-pass filter start cutoff frequency in Hz",
+            "pmtr27": "low-pass filter end cutoff frequency in Hz",
+        }
 
-          'pmtr14'  : 'analysis frequency base in Hz',
-          'pmtr15'  : 'analysis frequency scalar',        
-
-          'pmtr16'  : 'generator frequency base in Hz',
-          'pmtr17'  : 'generator frequency scalar',         
-
-          'pmtr18'  : 'generator 1 channel frequency source (1-4)',
-          'pmtr19'  : 'generator 2 channel frequency source (1-4)',           
-          'pmtr20'  : 'generator 3 channel frequency source (1-4)',
-          'pmtr21'  : 'generator 4 channel frequency source (1-4)',           
-
-          'pmtr22'  : 'generator 1 post scale (0-1)',
-          'pmtr23'  : 'generator 2 post scale (0-1)',           
-          'pmtr24'  : 'generator 3 post scale (0-1)',
-          'pmtr25'  : 'generator 4 post scale (0-1)',    
-          
-          'pmtr26'  : 'low-pass filter start cutoff frequency in Hz',
-          'pmtr27'  : 'low-pass filter end cutoff frequency in Hz',
-          }
-          
         self.pmtrDefault = {
-          'pmtr7'   : ('c', .9),
-          'pmtr8'   : ('c', .5),
-          'pmtr9'   : ('c', 0),
-          'pmtr10'  : ('sampleSelect', ('drum01.aif', 'latch01.aif')),
-          'pmtr11'  : ('c', 1),
-          
-          'pmtr12'  : ('c', 40), # analysis cut-off fq
-          'pmtr13'  : ('c', 40), # band width, 20 is well pitched
-          
-          'pmtr14'  : ('c', 800),
-          'pmtr15'  : ('c', 1.333333333333),
+            "pmtr7": ("c", 0.9),
+            "pmtr8": ("c", 0.5),
+            "pmtr9": ("c", 0),
+            "pmtr10": ("sampleSelect", ("drum01.aif", "latch01.aif")),
+            "pmtr11": ("c", 1),
+            "pmtr12": ("c", 40),  # analysis cut-off fq
+            "pmtr13": ("c", 40),  # band width, 20 is well pitched
+            "pmtr14": ("c", 800),
+            "pmtr15": ("c", 1.333333333333),
+            "pmtr16": ("c", 400),
+            "pmtr17": ("c", 1.666666666666),
+            "pmtr18": ("c", 1),
+            "pmtr19": ("c", 2),
+            "pmtr20": ("c", 3),
+            "pmtr21": ("c", 4),
+            "pmtr22": ("c", 1),
+            "pmtr23": ("c", 1),
+            "pmtr24": ("c", 1),
+            "pmtr25": ("c", 1),
+            "pmtr26": ("c", 100),
+            "pmtr27": ("c", 2000),
+        }
 
-          'pmtr16'  : ('c', 400),
-          'pmtr17'  : ('c', 1.666666666666),
-          
-          'pmtr18'  : ('c', 1),
-          'pmtr19'  : ('c', 2),
-          'pmtr20'  : ('c', 3),
-          'pmtr21'  : ('c', 4),
-          
-          'pmtr22'  : ('c', 1),
-          'pmtr23'  : ('c', 1),
-          'pmtr24'  : ('c', 1),
-          'pmtr25'  : ('c', 1),
-          
-          'pmtr26'  : ('c', 100),
-          'pmtr27'  : ('c', 2000),
-          }
-          
-        self.author = 'athenaCL native' # attribution
+        self.author = "athenaCL native"  # attribution
         self.orcCode = """
 instr %s
     iDur = p3
@@ -2469,66 +2570,57 @@ instr %s
     kAmp            linen        iAmp, iAttack, iDur, iRelease  
     aMixSig     = aSig * kAmp
     
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
 
-
-
-
-
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 # 8 ch
 
 # this instrument had an incorrect aux value of 12
 
+
 class Inst45(InstrumentCsound):
     def __init__(self):
-        InstrumentCsound.__init__(self) 
+        InstrumentCsound.__init__(self)
         self.instNo = 45
-        self.name = 'vocodeNoiseOctScale'
-        self.info = 'An eight channel vocoder with scaled mapping.'
+        self.name = "vocodeNoiseOctScale"
+        self.info = "An eight channel vocoder with scaled mapping."
         self.auxNo = 13
-        self.postMapAmp = (0, 40, 'linear') # assume amps not greater tn 10
+        self.postMapAmp = (0, 40, "linear")  # assume amps not greater tn 10
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'sustain percent within unit interval',
-          'pmtr8'   : 'sustain center within unit interval',
-          'pmtr9'   : 'analysis audio file start time',
-          'pmtr10'  : 'analysis file path to desired sound file',
-          'pmtr11'  : 'analysis file play back speed',
-          
-          'pmtr12'  : 'analysis low-pass filter cutoff frequency in Hz',
-          'pmtr13'  : 'analysis band-pass bw (not q), from 10 to 500',
-
-          'pmtr14'  : 'analysis frequency base in Hz',
-          'pmtr15'  : 'analysis frequency scalar',        
-
-          'pmtr16'  : 'generator frequency base in Hz',
-          'pmtr17'  : 'generator frequency scalar', 
-          
-          'pmtr18'  : 'low-pass filter start cutoff frequency in Hz',
-          'pmtr19'  : 'low-pass filter end cutoff frequency in Hz',
-          }
+            "pmtr7": "sustain percent within unit interval",
+            "pmtr8": "sustain center within unit interval",
+            "pmtr9": "analysis audio file start time",
+            "pmtr10": "analysis file path to desired sound file",
+            "pmtr11": "analysis file play back speed",
+            "pmtr12": "analysis low-pass filter cutoff frequency in Hz",
+            "pmtr13": "analysis band-pass bw (not q), from 10 to 500",
+            "pmtr14": "analysis frequency base in Hz",
+            "pmtr15": "analysis frequency scalar",
+            "pmtr16": "generator frequency base in Hz",
+            "pmtr17": "generator frequency scalar",
+            "pmtr18": "low-pass filter start cutoff frequency in Hz",
+            "pmtr19": "low-pass filter end cutoff frequency in Hz",
+        }
         self.pmtrDefault = {
-          'pmtr7'   : ('c', .9),
-          'pmtr8'   : ('c', .5),
-          'pmtr9'   : ('c', 0),
-          'pmtr10'  : ('sampleSelect', ('drum01.aif', 'latch01.aif')),
-          'pmtr11'  : ('c', 1),
-
-          'pmtr12'  : ('c', 40), # analysis cut-off fq
-          'pmtr13'  : ('c', 50), # band width, 20 is well pitched
-          
-          'pmtr14'  : ('c', 500),
-          'pmtr15'  : ('c', 1.333333333333),
-
-          'pmtr16'  : ('c', 500),
-          'pmtr17'  : ('c', 1.333333333333),
-          
-          'pmtr18'  : ('c', 100),
-          'pmtr19'  : ('c', 8000),
-          }
-        self.author = 'athenaCL native' # attribution
+            "pmtr7": ("c", 0.9),
+            "pmtr8": ("c", 0.5),
+            "pmtr9": ("c", 0),
+            "pmtr10": ("sampleSelect", ("drum01.aif", "latch01.aif")),
+            "pmtr11": ("c", 1),
+            "pmtr12": ("c", 40),  # analysis cut-off fq
+            "pmtr13": ("c", 50),  # band width, 20 is well pitched
+            "pmtr14": ("c", 500),
+            "pmtr15": ("c", 1.333333333333),
+            "pmtr16": ("c", 500),
+            "pmtr17": ("c", 1.333333333333),
+            "pmtr18": ("c", 100),
+            "pmtr19": ("c", 8000),
+        }
+        self.author = "athenaCL native"  # attribution
         self.orcCode = """
 instr %s
     iDur = p3
@@ -2659,96 +2751,87 @@ instr %s
     kAmp            linen        iAmp, iAttack, iDur, iRelease  
     aMixSig     = aSig * kAmp
     
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
-#-----------------------------------------------------------------||||||||||||--
+
+# -----------------------------------------------------------------||||||||||||--
 # 8 ch
 class Inst46(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 46
-        self.name = 'vocodeNoiseOctScaleRemap'
-        self.info = 'An eight channel vocoder with variable remapping.'
+        self.name = "vocodeNoiseOctScaleRemap"
+        self.info = "An eight channel vocoder with variable remapping."
         self.auxNo = 29
-        self.postMapAmp = (0, 40, 'linear') # assume amps not greater tn 10
+        self.postMapAmp = (0, 40, "linear")  # assume amps not greater tn 10
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'sustain percent within unit interval',
-          'pmtr8'   : 'sustain center within unit interval',
-          'pmtr9'   : 'analysis audio file start time',
-          'pmtr10'  : 'analysis file path to desired sound file',
-          'pmtr11'  : 'analysis file play back speed',
+            "pmtr7": "sustain percent within unit interval",
+            "pmtr8": "sustain center within unit interval",
+            "pmtr9": "analysis audio file start time",
+            "pmtr10": "analysis file path to desired sound file",
+            "pmtr11": "analysis file play back speed",
+            "pmtr12": "analysis low-pass filter cutoff frequency in Hz",
+            "pmtr13": "analysis band-pass bw (not q), from 10 to 500",
+            "pmtr14": "analysis frequency base in Hz",
+            "pmtr15": "analysis frequency scalar",
+            "pmtr16": "generator frequency base in Hz",
+            "pmtr17": "generator frequency scalar",
+            "pmtr18": "generator 1 channel frequency source (1-8)",
+            "pmtr19": "generator 2 channel frequency source (1-8)",
+            "pmtr20": "generator 3 channel frequency source (1-8)",
+            "pmtr21": "generator 4 channel frequency source (1-8)",
+            "pmtr22": "generator 5 channel frequency source (1-8)",
+            "pmtr23": "generator 6 channel frequency source (1-8)",
+            "pmtr24": "generator 7 channel frequency source (1-8)",
+            "pmtr25": "generator 8 channel frequency source (1-8)",
+            "pmtr26": "generator 1 post scale (0-1)",
+            "pmtr27": "generator 2 post scale (0-1)",
+            "pmtr28": "generator 3 post scale (0-1)",
+            "pmtr29": "generator 4 post scale (0-1)",
+            "pmtr30": "generator 5 post scale (0-1)",
+            "pmtr31": "generator 6 post scale (0-1)",
+            "pmtr32": "generator 7 post scale (0-1)",
+            "pmtr33": "generator 8 post scale (0-1)",
+            "pmtr34": "low-pass filter start cutoff frequency in Hz",
+            "pmtr35": "low-pass filter end cutoff frequency in Hz",
+        }
 
-          'pmtr12'  : 'analysis low-pass filter cutoff frequency in Hz',
-          'pmtr13'  : 'analysis band-pass bw (not q), from 10 to 500',
-
-          'pmtr14'  : 'analysis frequency base in Hz',
-          'pmtr15'  : 'analysis frequency scalar',        
-
-          'pmtr16'  : 'generator frequency base in Hz',
-          'pmtr17'  : 'generator frequency scalar',         
-
-          'pmtr18'  : 'generator 1 channel frequency source (1-8)',
-          'pmtr19'  : 'generator 2 channel frequency source (1-8)',           
-          'pmtr20'  : 'generator 3 channel frequency source (1-8)',
-          'pmtr21'  : 'generator 4 channel frequency source (1-8)',           
-          'pmtr22'  : 'generator 5 channel frequency source (1-8)',
-          'pmtr23'  : 'generator 6 channel frequency source (1-8)',           
-          'pmtr24'  : 'generator 7 channel frequency source (1-8)',
-          'pmtr25'  : 'generator 8 channel frequency source (1-8)',           
-
-          'pmtr26'  : 'generator 1 post scale (0-1)',
-          'pmtr27'  : 'generator 2 post scale (0-1)',           
-          'pmtr28'  : 'generator 3 post scale (0-1)',
-          'pmtr29'  : 'generator 4 post scale (0-1)',           
-          'pmtr30'  : 'generator 5 post scale (0-1)',
-          'pmtr31'  : 'generator 6 post scale (0-1)',           
-          'pmtr32'  : 'generator 7 post scale (0-1)',
-          'pmtr33'  : 'generator 8 post scale (0-1)',           
-
-          'pmtr34'  : 'low-pass filter start cutoff frequency in Hz',
-          'pmtr35'  : 'low-pass filter end cutoff frequency in Hz',
-          }
-          
         self.pmtrDefault = {
-          'pmtr7'   : ('c', .9),
-          'pmtr8'   : ('c', .5),
-          'pmtr9'   : ('c', 0),
-          'pmtr10'  : ('sampleSelect', ('drum01.aif', 'latch01.aif')),
-          'pmtr11'  : ('c', 1),
-          
-          'pmtr12'  : ('c', 40), # analysis cut-off fq
-          'pmtr13'  : ('c', 40), # band width, 20 is well pitched
-          
-          'pmtr14'  : ('c', 400),
-          'pmtr15'  : ('c', 1.33333333333),
+            "pmtr7": ("c", 0.9),
+            "pmtr8": ("c", 0.5),
+            "pmtr9": ("c", 0),
+            "pmtr10": ("sampleSelect", ("drum01.aif", "latch01.aif")),
+            "pmtr11": ("c", 1),
+            "pmtr12": ("c", 40),  # analysis cut-off fq
+            "pmtr13": ("c", 40),  # band width, 20 is well pitched
+            "pmtr14": ("c", 400),
+            "pmtr15": ("c", 1.33333333333),
+            "pmtr16": ("c", 100),
+            "pmtr17": ("c", 1.6666666666),
+            "pmtr18": ("c", 1),
+            "pmtr19": ("c", 2),
+            "pmtr20": ("c", 3),
+            "pmtr21": ("c", 4),
+            "pmtr22": ("c", 5),
+            "pmtr23": ("c", 6),
+            "pmtr24": ("c", 7),
+            "pmtr25": ("c", 8),
+            "pmtr26": ("c", 1),
+            "pmtr27": ("c", 1),
+            "pmtr28": ("c", 1),
+            "pmtr29": ("c", 1),
+            "pmtr30": ("c", 1),
+            "pmtr31": ("c", 1),
+            "pmtr32": ("c", 1),
+            "pmtr33": ("c", 1),
+            "pmtr34": ("c", 100),
+            "pmtr35": ("c", 4000),
+        }
 
-          'pmtr16'  : ('c', 100),
-          'pmtr17'  : ('c', 1.6666666666),
-          
-          'pmtr18'  : ('c', 1),
-          'pmtr19'  : ('c', 2),
-          'pmtr20'  : ('c', 3),
-          'pmtr21'  : ('c', 4),
-          'pmtr22'  : ('c', 5),
-          'pmtr23'  : ('c', 6),
-          'pmtr24'  : ('c', 7),
-          'pmtr25'  : ('c', 8),
-          
-          'pmtr26'  : ('c', 1),
-          'pmtr27'  : ('c', 1),
-          'pmtr28'  : ('c', 1),
-          'pmtr29'  : ('c', 1),
-          'pmtr30'  : ('c', 1),
-          'pmtr31'  : ('c', 1),
-          'pmtr32'  : ('c', 1),
-          'pmtr33'  : ('c', 1),
-          
-          'pmtr34'  : ('c', 100),
-          'pmtr35'  : ('c', 4000),
-          }
-          
-        self.author = 'athenaCL native' # attribution
+        self.author = "athenaCL native"  # attribution
         self.orcCode = """
 instr %s
     iDur = p3
@@ -2902,60 +2985,55 @@ instr %s
     kAmp            linen        iAmp, iAttack, iDur, iRelease  
     aMixSig     = aSig * kAmp
     
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
 
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 # 16 ch
+
 
 class Inst47(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 47
-        self.name = 'vocodeNoiseBiOctScale'
-        self.info = 'An sixteen channel vocoder with scaled mapping.'
+        self.name = "vocodeNoiseBiOctScale"
+        self.info = "An sixteen channel vocoder with scaled mapping."
         self.auxNo = 13
-        self.postMapAmp = (0, 40, 'linear') # assume amps not greater tn 10
+        self.postMapAmp = (0, 40, "linear")  # assume amps not greater tn 10
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'sustain percent within unit interval',
-          'pmtr8'   : 'sustain center within unit interval',
-          'pmtr9'   : 'analysis audio file start time',
-          'pmtr10'  : 'analysis file path to desired sound file',
-          'pmtr11'  : 'analysis file play back speed',
-
-          'pmtr12'  : 'analysis low-pass filter cutoff frequency in Hz',
-          'pmtr13'  : 'analysis band-pass bw (not q), from 10 to 500',
-
-          'pmtr14'  : 'analysis frequency base in Hz',
-          'pmtr15'  : 'analysis frequency scalar',        
-
-          'pmtr16'  : 'generator frequency base in Hz',
-          'pmtr17'  : 'generator frequency scalar',
-          
-          'pmtr18'  : 'low-pass filter start cutoff frequency in Hz',
-          'pmtr19'  : 'low-pass filter end cutoff frequency in Hz',
-          }
+            "pmtr7": "sustain percent within unit interval",
+            "pmtr8": "sustain center within unit interval",
+            "pmtr9": "analysis audio file start time",
+            "pmtr10": "analysis file path to desired sound file",
+            "pmtr11": "analysis file play back speed",
+            "pmtr12": "analysis low-pass filter cutoff frequency in Hz",
+            "pmtr13": "analysis band-pass bw (not q), from 10 to 500",
+            "pmtr14": "analysis frequency base in Hz",
+            "pmtr15": "analysis frequency scalar",
+            "pmtr16": "generator frequency base in Hz",
+            "pmtr17": "generator frequency scalar",
+            "pmtr18": "low-pass filter start cutoff frequency in Hz",
+            "pmtr19": "low-pass filter end cutoff frequency in Hz",
+        }
         self.pmtrDefault = {
-          'pmtr7'   : ('c', .9),
-          'pmtr8'   : ('c', .5),
-          'pmtr9'   : ('c', 0),
-          'pmtr10'  : ('sampleSelect', ('drum01.aif', 'latch01.aif')),
-          'pmtr11'  : ('c', 1),
-
-          'pmtr12'  : ('c', 40), # analysis cut-off fq
-          'pmtr13'  : ('c', 5), # band width, 20 is well pitched
-          
-          'pmtr14'  : ('c', 120),
-          'pmtr15'  : ('c', 1.33333333),
-
-          'pmtr16'  : ('c', 120),
-          'pmtr17'  : ('c', 1.33333333),
-          
-          'pmtr18'  : ('c', 100),
-          'pmtr19'  : ('c', 4000),
-          }
-        self.author = 'athenaCL native' # attribution
+            "pmtr7": ("c", 0.9),
+            "pmtr8": ("c", 0.5),
+            "pmtr9": ("c", 0),
+            "pmtr10": ("sampleSelect", ("drum01.aif", "latch01.aif")),
+            "pmtr11": ("c", 1),
+            "pmtr12": ("c", 40),  # analysis cut-off fq
+            "pmtr13": ("c", 5),  # band width, 20 is well pitched
+            "pmtr14": ("c", 120),
+            "pmtr15": ("c", 1.33333333),
+            "pmtr16": ("c", 120),
+            "pmtr17": ("c", 1.33333333),
+            "pmtr18": ("c", 100),
+            "pmtr19": ("c", 4000),
+        }
+        self.author = "athenaCL native"  # attribution
         self.orcCode = """
 instr %s
     iDur = p3
@@ -3170,60 +3248,53 @@ instr %s
     kAmp            linen        iAmp, iAttack, iDur, iRelease  
     aMixSig     = aSig * kAmp
     
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
 
-
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 # 24 ch
 class Inst48(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 48
-        self.name = 'vocodeNoiseTriOctScale'
-        self.info = 'A twenty-four channel vocoder with scaled mapping.'
+        self.name = "vocodeNoiseTriOctScale"
+        self.info = "A twenty-four channel vocoder with scaled mapping."
         self.auxNo = 13
-        self.postMapAmp = (0, 40, 'linear') # assume amps not greater tn 10
+        self.postMapAmp = (0, 40, "linear")  # assume amps not greater tn 10
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'sustain percent within unit interval',
-          'pmtr8'   : 'sustain center within unit interval',
-          'pmtr9'   : 'analysis audio file start time',
-          'pmtr10'  : 'analysis file path to desired sound file',
-          'pmtr11'  : 'analysis file play back speed',
-
-          'pmtr12'  : 'analysis low-pass filter cutoff frequency in Hz',
-          'pmtr13'  : 'analysis band-pass bw (not q), from 10 to 500',
-
-          'pmtr14'  : 'analysis frequency base in Hz',
-          'pmtr15'  : 'analysis frequency scalar',        
-
-          'pmtr16'  : 'generator frequency base in Hz',
-          'pmtr17'  : 'generator frequency scalar',
-          
-          'pmtr18'  : 'low-pass filter start cutoff frequency in Hz',
-          'pmtr19'  : 'low-pass filter end cutoff frequency in Hz',
-          }
+            "pmtr7": "sustain percent within unit interval",
+            "pmtr8": "sustain center within unit interval",
+            "pmtr9": "analysis audio file start time",
+            "pmtr10": "analysis file path to desired sound file",
+            "pmtr11": "analysis file play back speed",
+            "pmtr12": "analysis low-pass filter cutoff frequency in Hz",
+            "pmtr13": "analysis band-pass bw (not q), from 10 to 500",
+            "pmtr14": "analysis frequency base in Hz",
+            "pmtr15": "analysis frequency scalar",
+            "pmtr16": "generator frequency base in Hz",
+            "pmtr17": "generator frequency scalar",
+            "pmtr18": "low-pass filter start cutoff frequency in Hz",
+            "pmtr19": "low-pass filter end cutoff frequency in Hz",
+        }
         self.pmtrDefault = {
-          'pmtr7'   : ('c', .9),
-          'pmtr8'   : ('c', .5),
-          'pmtr9'   : ('c', 0),
-          'pmtr10'  : ('sampleSelect', ('drum01.aif', 'latch01.aif')),
-          'pmtr11'  : ('c', 1),
-
-          'pmtr12'  : ('c', 40), # analysis cut-off fq
-          'pmtr13'  : ('c', 1.0), # band width, 20 is well pitched
-          
-          'pmtr14'  : ('c', 80),
-          'pmtr15'  : ('c', 1.25),
-
-          'pmtr16'  : ('c', 80),
-          'pmtr17'  : ('c', 1.25),
-          
-          'pmtr18'  : ('c', 100),
-          'pmtr19'  : ('c', 20000),
-          }
-        self.author = 'athenaCL native' # attribution
+            "pmtr7": ("c", 0.9),
+            "pmtr8": ("c", 0.5),
+            "pmtr9": ("c", 0),
+            "pmtr10": ("sampleSelect", ("drum01.aif", "latch01.aif")),
+            "pmtr11": ("c", 1),
+            "pmtr12": ("c", 40),  # analysis cut-off fq
+            "pmtr13": ("c", 1.0),  # band width, 20 is well pitched
+            "pmtr14": ("c", 80),
+            "pmtr15": ("c", 1.25),
+            "pmtr16": ("c", 80),
+            "pmtr17": ("c", 1.25),
+            "pmtr18": ("c", 100),
+            "pmtr19": ("c", 20000),
+        }
+        self.author = "athenaCL native"  # attribution
         self.orcCode = """
 instr %s
     iDur = p3
@@ -3530,53 +3601,47 @@ instr %s
     kAmp            linen        iAmp, iAttack, iDur, iRelease  
     aMixSig     = aSig * kAmp
     
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
 
-
-
-
-
-
-
-
-
-
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 # this only works if file name is given as a number
 # cant get it to accept a complete path
+
 
 class Inst101(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 101
-        self.name = 'phaseVocodeRead'
-        self.info = 'A simple phase voice reader instrument.'
+        self.name = "phaseVocodeRead"
+        self.info = "A simple phase voice reader instrument."
         self.auxNo = 5
         # dont know what amp scaling is necessary here
-        self.postMapAmp = (0, 74, 'linear') # most amps are in db
+        self.postMapAmp = (0, 74, "linear")  # most amps are in db
 
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-                      'pmtr7'   : 'pvc analysis file to use',
-                     } # holds discription, preset for each pmtr in a dictionary
+            "pmtr7": "pvc analysis file to use",
+        }  # holds discription, preset for each pmtr in a dictionary
         self.pmtrDefault = {
-          #'ampQ'    : ('cyclicGen', 'linearDown', 2.00, 9.00, 0.25),
-          #'pmtr7'   : ('analysisSelect', ('harmonica.1',)),
-          'pmtr7'   : ('constant', 1),
-          #'pmtr7'   : ('constant', '"/Volumes/xdisc/_scratch/pvoc.1"'),
-          'pmtr8'   : ('sl', '3|5|13|19', 1, 60, 'integer', 'rw'),
-          'pmtr9'   : ('constant', 0.5),
-          'pmtr10'  : ('constant', .001),
-          'pmtr11'  : ('constant', .001),
-          }
+            #'ampQ'    : ('cyclicGen', 'linearDown', 2.00, 9.00, 0.25),
+            #'pmtr7'   : ('analysisSelect', ('harmonica.1',)),
+            "pmtr7": ("constant", 1),
+            #'pmtr7'   : ('constant', '"/Volumes/xdisc/_scratch/pvoc.1"'),
+            "pmtr8": ("sl", "3|5|13|19", 1, 60, "integer", "rw"),
+            "pmtr9": ("constant", 0.5),
+            "pmtr10": ("constant", 0.001),
+            "pmtr11": ("constant", 0.001),
+        }
 
-# ; p4 is max amp (in db)
-# ; p7 is file no
-# ; p8 is bin
-# ; p9 is start time in analysis
-# ; p10 is fade in time in sec.
-# ; p11 is fade out time in sec.
+        # ; p4 is max amp (in db)
+        # ; p7 is file no
+        # ; p8 is bin
+        # ; p9 is start time in analysis
+        # ; p10 is fade in time in sec.
+        # ; p11 is fade out time in sec.
 
         self.orcCode = """
 instr %s
@@ -3591,30 +3656,29 @@ instr %s
     aSig              oscili     kAmp, kFreq, 1
     
     aMixSig =     aSig * kenv
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
 
-
-
-
-
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 class Inst50(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 50
-        self.name = 'guitarNylonNormal'
-        self.info = 'A simple nylon-string guitar instrument.'
+        self.name = "guitarNylonNormal"
+        self.info = "A simple nylon-string guitar instrument."
         self.auxNo = 0
-        self.postMapAmp = (0, 90, 'linear') # most amps are in db
+        self.postMapAmp = (0, 90, "linear")  # most amps are in db
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
-        self.pmtrInfo = {
-                     } # holds discription, preset for each pmtr in a dictionary
+        self.pmtrInfo = {}  # holds discription, preset for each pmtr in a dictionary
         self.pmtrDefault = {
-          'rhythmQ' : ('loop', (
-                          (6,1,1), (6,1,1), (6,1,1), (6,5,1), (6, 2, 0))), 
-          #'ampQ'    : ('cyclicGen', 'linearDown', 80.00, 86.00, 0.25),
-          }
+            "rhythmQ": (
+                "loop",
+                ((6, 1, 1), (6, 1, 1), (6, 1, 1), (6, 5, 1), (6, 2, 0)),
+            ),
+            #'ampQ'    : ('cyclicGen', 'linearDown', 80.00, 86.00, 0.25),
+        }
         self.orcCode = """
 instr %s
     iDur    = p3
@@ -3631,29 +3695,36 @@ instr %s
     af2         reson       aSig, 220, 100
     af3         reson       aSig, 440, 80
     aMixSig     balance 0.6 * af1 + af2 + 0.6 * af3 + 0.4 * aSig, aSig
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
-#-----------------------------------------------------------------||||||||||||--
+
+# -----------------------------------------------------------------||||||||||||--
 class Inst51(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 51
-        self.name = 'guitarNylonLegato'
-        self.info = 'A simple nylon-string guitar instrument, with hammer-on / pull-off attack'
+        self.name = "guitarNylonLegato"
+        self.info = (
+            "A simple nylon-string guitar instrument, with hammer-on / pull-off attack"
+        )
         self.auxNo = 2
-        self.postMapAmp = (0, 90, 'linear') # most amps are in db
+        self.postMapAmp = (0, 90, "linear")  # most amps are in db
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'pitch of note departing-from, in PCH notation',
-          'pmtr8'   : 'percentage of note departing, between 0 and 1',
-            }
+            "pmtr7": "pitch of note departing-from, in PCH notation",
+            "pmtr8": "percentage of note departing, between 0 and 1",
+        }
         self.pmtrDefault = {
-          'rhythmQ' : ('loop', 
-                          ((6,1,1), (6,1,1), (6,1,1), (6,5,1), (6,2,0))), 
-          #'ampQ'    : ('cyclicGen', 'linearDown', 80.00, 86.00, 0.25),
-          'pmtr7'   : ('basketGen', 'randomChoice', (6.09, 5.03)),
-          'pmtr8'   : ('basketGen', 'randomChoice', (.25, .75)),
-          }
+            "rhythmQ": (
+                "loop",
+                ((6, 1, 1), (6, 1, 1), (6, 1, 1), (6, 5, 1), (6, 2, 0)),
+            ),
+            #'ampQ'    : ('cyclicGen', 'linearDown', 80.00, 86.00, 0.25),
+            "pmtr7": ("basketGen", "randomChoice", (6.09, 5.03)),
+            "pmtr8": ("basketGen", "randomChoice", (0.25, 0.75)),
+        }
         self.orcCode = """
 instr %s
     iDur      = p3
@@ -3670,24 +3741,29 @@ instr %s
     af2      reson  aSig, 220, 100
     af3      reson  aSig, 440, 80
     aMixSig  balance 0.6*af1+af2+0.6*af3+0.4*aSig, aSig
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
-#-----------------------------------------------------------------||||||||||||--
+
+# -----------------------------------------------------------------||||||||||||--
 class Inst52(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 52
-        self.name = 'guitarNylonHarmonic'
-        self.info = 'A simple nylon-string guitar instrument, harmonic attack'
+        self.name = "guitarNylonHarmonic"
+        self.info = "A simple nylon-string guitar instrument, harmonic attack"
         self.auxNo = 0
-        self.postMapAmp = (0, 90, 'linear') # most amps are in db
+        self.postMapAmp = (0, 90, "linear")  # most amps are in db
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {}
-        self.pmtrDefault      = {
-          'rhythmQ' : ('loop', 
-                          ((6,1,1), (6,1,1), (6,1,1), (6,5,1), (6,2,0))), 
-          #'ampQ'    : ('cyclicGen', 'linearDown', 80.00, 86.00, 0.25),
-                     }
+        self.pmtrDefault = {
+            "rhythmQ": (
+                "loop",
+                ((6, 1, 1), (6, 1, 1), (6, 1, 1), (6, 5, 1), (6, 2, 0)),
+            ),
+            #'ampQ'    : ('cyclicGen', 'linearDown', 80.00, 86.00, 0.25),
+        }
         self.orcCode = """
 instr %s
     iDur    = p3
@@ -3697,24 +3773,28 @@ instr %s
 
     kAmp            linseg 0.0, 0.015, iAmp, p3-0.035, iAmp, 0.02, 0.0
     aMixSig     pluck kAmp, iFreq, iFreq, 0, 6
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
-#-----------------------------------------------------------------||||||||||||--
+
+# -----------------------------------------------------------------||||||||||||--
+
 
 class Inst60(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 60
-        self.name = 'additiveBellBright'
-        self.info = 'A simple bell made with 12 partials, each with their own envelope, then mixed together. Based on design by C. Risset.'
+        self.name = "additiveBellBright"
+        self.info = "A simple bell made with 12 partials, each with their own envelope, then mixed together. Based on design by C. Risset."
         self.auxNo = 0
-        self.postMapAmp = (0, 90, 'linear') # most amps are in db
+        self.postMapAmp = (0, 90, "linear")  # most amps are in db
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
-        self.pmtrInfo = {} # infor for aux perameters (greater than six)
+        self.pmtrInfo = {}  # infor for aux perameters (greater than six)
         self.pmtrDefault = {
-          'rhythmQ' : ('binaryAccent', ((16, 1), (16, 3))),
-          #'ampQ'    : ('cyclicGen', 'linearUp', 60, 70, 1),
-          } 
+            "rhythmQ": ("binaryAccent", ((16, 1), (16, 3))),
+            #'ampQ'    : ('cyclicGen', 'linearUp', 60, 70, 1),
+        }
         self.orcCode = """
     instr %s
         iPan     = p6
@@ -3778,7 +3858,9 @@ class Inst60(InstrumentCsound):
     
         ;output assignments
         aMixSig          = (aoscili1 + aoscili2 + aoscili3 + aoscili4 + aoscili5 + aoscili6 + aoscili7 + aoscili8 + aoscili9 + aoscili10 + aoscili11)
-    """ % str(self.instNo)
+    """ % str(
+            self.instNo
+        )
 
         self.scoSample = """
     ;p1  p2  p3   p4      p5         p6
@@ -3788,21 +3870,21 @@ class Inst60(InstrumentCsound):
     """
 
 
-#-----------------------------------------------------------------||||||||||||--
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 class Inst61(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 61
-        self.name = 'additiveBellDark'
-        self.info = 'A simple bell made with 12 partials, each with their own envelope, then mixed together. Based on design by C. Risset.'
+        self.name = "additiveBellDark"
+        self.info = "A simple bell made with 12 partials, each with their own envelope, then mixed together. Based on design by C. Risset."
         self.auxNo = 0
-        self.postMapAmp = (0, 90, 'linear') # most amps are in db
+        self.postMapAmp = (0, 90, "linear")  # most amps are in db
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrDefault = {
-          'rhythmQ' : ('binaryAccent', ((4, 5), (4, 5))),
-          #'ampQ'    : ('cyclicGen', 'linearUp', 60, 66, .8) ,
-          } 
+            "rhythmQ": ("binaryAccent", ((4, 5), (4, 5))),
+            #'ampQ'    : ('cyclicGen', 'linearUp', 60, 66, .8) ,
+        }
         self.orcCode = """
 instr %s
     iPan     = p6
@@ -3864,7 +3946,9 @@ instr %s
     aoscili11 oscili     koscil11, iFreq11, 3
 
     aMixSig          = (aoscili1+aoscili2+aoscili3+aoscili4+aoscili5 + aoscili6+aoscili7+aoscili8+aoscili9+aoscili10+aoscili11)
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
         self.scoSample = """
 ;p1  p2  p3   p4      p5         p6
@@ -3874,20 +3958,20 @@ i2      12.10 1.000  84  8.09     .5
 """
 
 
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 class Inst62(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 62
-        self.name = 'additiveBellClear'
-        self.info = 'A simple bell made with 12 partials, each with their own envelope, then mixed together. Based on design by C. Risset.'
+        self.name = "additiveBellClear"
+        self.info = "A simple bell made with 12 partials, each with their own envelope, then mixed together. Based on design by C. Risset."
         self.auxNo = 0
-        self.postMapAmp = (0, 90, 'linear') # most amps are in db
+        self.postMapAmp = (0, 90, "linear")  # most amps are in db
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrDefault = {
-          'rhythmQ' : ('loop', ((2,1,1),(2,3,1),(4,3,0))),       
-          #'ampQ'    : ('cyclicGen', 'linearUp', 60, 70, 1),
-          } 
+            "rhythmQ": ("loop", ((2, 1, 1), (2, 3, 1), (4, 3, 0))),
+            #'ampQ'    : ('cyclicGen', 'linearUp', 60, 70, 1),
+        }
         self.orcCode = """
 instr %s
     iPan     = p6
@@ -3962,7 +4046,9 @@ instr %s
 
     ;output assignments
     aMixSig          = (aoscili1+aoscili2+aoscili3+aoscili4+aoscili5 + aoscili6+aoscili7+aoscili8+aoscili9+aoscili10+aoscili11)
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
         self.scoSample = """
 
@@ -3973,28 +4059,27 @@ i9      12.10 1.000  84  8.09     .5
 """
 
 
-
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 class Inst70(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 70
-        self.name = 'synthRezzy'
-        self.info = 'A highly resonated synth sound.'
+        self.name = "synthRezzy"
+        self.info = "A highly resonated synth sound."
         self.auxNo = 3
-        self.postMapAmp = (0, 84, 'linear') # most amps are in db
+        self.postMapAmp = (0, 84, "linear")  # most amps are in db
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'fq sweep (ms time or fq?)',
-          'pmtr8'   : 'irez',
-          'pmtr9'   : 'itabl1 (f-table to choose from)',
-          } 
+            "pmtr7": "fq sweep (ms time or fq?)",
+            "pmtr8": "irez",
+            "pmtr9": "itabl1 (f-table to choose from)",
+        }
         self.pmtrDefault = {
-          'rhythmQ' : ('binaryAccent', ((12,1,1),(3,1,1))) ,
-          'pmtr7'   : ('cyclicGen', 'linearUpDown', 20.00, 8000.00, 40.00),
-          'pmtr8'   : ('cyclicGen', 'linearUpDown', 1.00, 20.00, 1.20),
-          'pmtr9'   : ('cyclicGen', 'linearUpDown', 4, 5, 1),    
-          }
+            "rhythmQ": ("binaryAccent", ((12, 1, 1), (3, 1, 1))),
+            "pmtr7": ("cyclicGen", "linearUpDown", 20.00, 8000.00, 40.00),
+            "pmtr8": ("cyclicGen", "linearUpDown", 1.00, 20.00, 1.20),
+            "pmtr9": ("cyclicGen", "linearUpDown", 4, 5, 1),
+        }
         self.orcCode = """
 instr %s
     iDur     = p3
@@ -4035,41 +4120,44 @@ instr %s
     aynm1 = ayn
     
     aMixSig = (kaenv*aout)
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
-#-----------------------------------------------------------------||||||||||||--
+
+# -----------------------------------------------------------------||||||||||||--
 class Inst71(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 71
-        self.name = 'synthWaveformVibrato'
-        self.info = 'A waveform derived instrument that has vibrato controls.'
+        self.name = "synthWaveformVibrato"
+        self.info = "A waveform derived instrument that has vibrato controls."
         self.auxNo = 8
-        self.postMapAmp = (0, 90, 'linear') # most amps are in db
+        self.postMapAmp = (0, 90, "linear")  # most amps are in db
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'attack',
-          'pmtr8'   : 'release rate',
-          'pmtr9'   : 'vibrato depth',
-          'pmtr10'  : 'vibrato delay',
-          'pmtr11'  : 'vibrato fq',
-          'pmtr12'  : 'start',
-          'pmtr13'  : 'end',
-          'pmtr14'  : 'xtime',
-          }
+            "pmtr7": "attack",
+            "pmtr8": "release rate",
+            "pmtr9": "vibrato depth",
+            "pmtr10": "vibrato delay",
+            "pmtr11": "vibrato fq",
+            "pmtr12": "start",
+            "pmtr13": "end",
+            "pmtr14": "xtime",
+        }
         self.pmtrDefault = {
-          'rhythmQ' : ('binaryAccent', ((9, 6), (9, 2))), 
-          #'ampQ'    : ('cyclicGen', 'linearDown', 60, 70, 4),
-          'pmtr7'   : ('cyclicGen', 'linearUp', 1, 4, 1),       
-          'pmtr8'   : ('cyclicGen', 'linearUp', 2, 3, 1),
-          'pmtr9'   : ('cyclicGen', 'linearUp', 2, 4, 1),       
-          'pmtr10'  : ('cyclicGen', 'linearUp', 2, 4, 1),         
-          'pmtr11'  : ('cyclicGen', 'linearUp', .2, 2, .1), 
-          'pmtr12'  : ('cyclicGen', 'linearUp', 1, 6, 1),    
-          'pmtr13'  : ('cyclicGen', 'linearUp', 1, 5, 1),    
-          'pmtr14'  : ('cyclicGen', 'linearUp', .6, .8, .01),    
-          } 
-        self.author = '' # attribution
+            "rhythmQ": ("binaryAccent", ((9, 6), (9, 2))),
+            #'ampQ'    : ('cyclicGen', 'linearDown', 60, 70, 4),
+            "pmtr7": ("cyclicGen", "linearUp", 1, 4, 1),
+            "pmtr8": ("cyclicGen", "linearUp", 2, 3, 1),
+            "pmtr9": ("cyclicGen", "linearUp", 2, 4, 1),
+            "pmtr10": ("cyclicGen", "linearUp", 2, 4, 1),
+            "pmtr11": ("cyclicGen", "linearUp", 0.2, 2, 0.1),
+            "pmtr12": ("cyclicGen", "linearUp", 1, 6, 1),
+            "pmtr13": ("cyclicGen", "linearUp", 1, 5, 1),
+            "pmtr14": ("cyclicGen", "linearUp", 0.6, 0.8, 0.01),
+        }
+        self.author = ""  # attribution
         self.orcCode = """
 instr %s
     iPan     = p6
@@ -4100,71 +4188,67 @@ instr %s
     afunc2 = (1 - kfade) * (a4+a5+a6)
 
     aMixSig          = (afunc1 + afunc2)
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
 
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 class Inst72(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 72
-        self.name = 'synthVcoAudioEnvelopeSineQuad'
-        self.info = 'A vco saw, square, or triangle waveform, a proportional linear envelope, and a variable low-pass filter with an audio rate sine envelope.'
+        self.name = "synthVcoAudioEnvelopeSineQuad"
+        self.info = "A vco saw, square, or triangle waveform, a proportional linear envelope, and a variable low-pass filter with an audio rate sine envelope."
         self.auxNo = 20
-        self.postMapAmp = (0, 90, 'linear') # assume amps not greater tn 1
+        self.postMapAmp = (0, 90, "linear")  # assume amps not greater tn 1
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'sustain percent within unit interval',
-          'pmtr8'   : 'sustain center within unit interval',
-          'pmtr9'   : 'low-pass filter start cutoff frequency in Hz',
-          'pmtr10'  : 'low-pass filter end cutoff frequency in Hz',
-          'pmtr11'  : 'low-pass filter resonance between 1 and 500',
-          'pmtr12'  : 'vco wave form index integer (1-3)',
-          'pmtr13'  : 'vco start width (0-2)',
-          'pmtr14'  : 'vco end width (0-2)',
-          
-          'pmtr15'  : 'tremelo sine 1 start frequency in Hz',
-          'pmtr16'  : 'tremelo sine 1 end frequency in Hz',
-          'pmtr17'  : 'tremelo sine 1 amp (0-1)',
-          'pmtr18'  : 'tremelo sine 2 start frequency in Hz',
-          'pmtr19'  : 'tremelo sine 2 end frequency in Hz',
-          'pmtr20'  : 'tremelo sine 2 amp (0-1)',
-          'pmtr21'  : 'tremelo sine 3 start frequency in Hz',
-          'pmtr22'  : 'tremelo sine 3 end frequency in Hz',
-          'pmtr23'  : 'tremelo sine 3 amp (0-1)',
-          'pmtr24'  : 'tremelo sine 4 start frequency in Hz',
-          'pmtr25'  : 'tremelo sine 4 end frequency in Hz',
-          'pmtr26'  : 'tremelo sine 4 amp (0-1)',            
-          }
-          
+            "pmtr7": "sustain percent within unit interval",
+            "pmtr8": "sustain center within unit interval",
+            "pmtr9": "low-pass filter start cutoff frequency in Hz",
+            "pmtr10": "low-pass filter end cutoff frequency in Hz",
+            "pmtr11": "low-pass filter resonance between 1 and 500",
+            "pmtr12": "vco wave form index integer (1-3)",
+            "pmtr13": "vco start width (0-2)",
+            "pmtr14": "vco end width (0-2)",
+            "pmtr15": "tremelo sine 1 start frequency in Hz",
+            "pmtr16": "tremelo sine 1 end frequency in Hz",
+            "pmtr17": "tremelo sine 1 amp (0-1)",
+            "pmtr18": "tremelo sine 2 start frequency in Hz",
+            "pmtr19": "tremelo sine 2 end frequency in Hz",
+            "pmtr20": "tremelo sine 2 amp (0-1)",
+            "pmtr21": "tremelo sine 3 start frequency in Hz",
+            "pmtr22": "tremelo sine 3 end frequency in Hz",
+            "pmtr23": "tremelo sine 3 amp (0-1)",
+            "pmtr24": "tremelo sine 4 start frequency in Hz",
+            "pmtr25": "tremelo sine 4 end frequency in Hz",
+            "pmtr26": "tremelo sine 4 amp (0-1)",
+        }
+
         self.pmtrDefault = {
-          'pmtr7'   : ('c', .5),
-          'pmtr8'   : ('c', .5),
-          'pmtr9'   : ('c', 18000),
-          'pmtr10'  : ('c', 8000),
-          'pmtr11'  : ('c', 1),
-          
-          'pmtr12'  : ('bg', 'rc', (1,2,3)),
-          'pmtr13'  : ('c', 0.1),
-          'pmtr14'  : ('c', 1.9),
-
-          'pmtr15'  : ('c', 2),
-          'pmtr16'  : ('c', 4),
-          'pmtr17'  : ('c', .25),
-          
-          'pmtr18'  : ('c', 2),
-          'pmtr19'  : ('c', .125),
-          'pmtr20'  : ('c', 0),
-          
-          'pmtr21'  : ('c', 32),
-          'pmtr22'  : ('c', 16),
-          'pmtr23'  : ('c', 0),
-
-          'pmtr24'  : ('c', .43),
-          'pmtr25'  : ('c', 200),
-          'pmtr26'  : ('c', 0),          
-          }
-        self.author = 'athenaCL native' # attribution
+            "pmtr7": ("c", 0.5),
+            "pmtr8": ("c", 0.5),
+            "pmtr9": ("c", 18000),
+            "pmtr10": ("c", 8000),
+            "pmtr11": ("c", 1),
+            "pmtr12": ("bg", "rc", (1, 2, 3)),
+            "pmtr13": ("c", 0.1),
+            "pmtr14": ("c", 1.9),
+            "pmtr15": ("c", 2),
+            "pmtr16": ("c", 4),
+            "pmtr17": ("c", 0.25),
+            "pmtr18": ("c", 2),
+            "pmtr19": ("c", 0.125),
+            "pmtr20": ("c", 0),
+            "pmtr21": ("c", 32),
+            "pmtr22": ("c", 16),
+            "pmtr23": ("c", 0),
+            "pmtr24": ("c", 0.43),
+            "pmtr25": ("c", 200),
+            "pmtr26": ("c", 0),
+        }
+        self.author = "athenaCL native"  # attribution
         self.orcCode = """
 instr %s
     iDur = p3
@@ -4238,70 +4322,67 @@ instr %s
     ; apply tremelo, then macro envelope
     aMixSig     = aSig * aTrem01 * aTrem02 * aTrem03 * aTrem04
     
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
-#-----------------------------------------------------------------||||||||||||--
+
+# -----------------------------------------------------------------||||||||||||--
 class Inst73(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 73
-        self.name = 'synthVcoAudioEnvelopeSquareQuad'
-        self.info = 'A vco saw, square, or triangle waveform, a proportional linear envelope, and a variable low-pass filter with an audio rate square envelope.'
+        self.name = "synthVcoAudioEnvelopeSquareQuad"
+        self.info = "A vco saw, square, or triangle waveform, a proportional linear envelope, and a variable low-pass filter with an audio rate square envelope."
         self.auxNo = 20
-        self.postMapAmp = (0, 90, 'linear') # assume amps not greater tn 1
+        self.postMapAmp = (0, 90, "linear")  # assume amps not greater tn 1
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'sustain percent within unit interval',
-          'pmtr8'   : 'sustain center within unit interval',
-          'pmtr9'   : 'low-pass filter start cutoff frequency in Hz',
-          'pmtr10'  : 'low-pass filter end cutoff frequency in Hz',
-          'pmtr11'  : 'low-pass filter resonance between 1 and 500',
-          'pmtr12'  : 'vco wave form index integer (1-3)',
-          'pmtr13'  : 'vco start width (0-2)',
-          'pmtr14'  : 'vco end width (0-2)',
-          
-          'pmtr15'  : 'tremelo square 1 start frequency in Hz',
-          'pmtr16'  : 'tremelo square 1 end frequency in Hz',
-          'pmtr17'  : 'tremelo square 1 amp (0-1)',
-          'pmtr18'  : 'tremelo square 2 start frequency in Hz',
-          'pmtr19'  : 'tremelo square 2 end frequency in Hz',
-          'pmtr20'  : 'tremelo square 2 amp (0-1)',
-          'pmtr21'  : 'tremelo square 3 start frequency in Hz',
-          'pmtr22'  : 'tremelo square 3 end frequency in Hz',
-          'pmtr23'  : 'tremelo square 3 amp (0-1)',
-          'pmtr24'  : 'tremelo square 4 start frequency in Hz',
-          'pmtr25'  : 'tremelo square 4 end frequency in Hz',
-          'pmtr26'  : 'tremelo square 4 amp (0-1)',         
-          }
-          
+            "pmtr7": "sustain percent within unit interval",
+            "pmtr8": "sustain center within unit interval",
+            "pmtr9": "low-pass filter start cutoff frequency in Hz",
+            "pmtr10": "low-pass filter end cutoff frequency in Hz",
+            "pmtr11": "low-pass filter resonance between 1 and 500",
+            "pmtr12": "vco wave form index integer (1-3)",
+            "pmtr13": "vco start width (0-2)",
+            "pmtr14": "vco end width (0-2)",
+            "pmtr15": "tremelo square 1 start frequency in Hz",
+            "pmtr16": "tremelo square 1 end frequency in Hz",
+            "pmtr17": "tremelo square 1 amp (0-1)",
+            "pmtr18": "tremelo square 2 start frequency in Hz",
+            "pmtr19": "tremelo square 2 end frequency in Hz",
+            "pmtr20": "tremelo square 2 amp (0-1)",
+            "pmtr21": "tremelo square 3 start frequency in Hz",
+            "pmtr22": "tremelo square 3 end frequency in Hz",
+            "pmtr23": "tremelo square 3 amp (0-1)",
+            "pmtr24": "tremelo square 4 start frequency in Hz",
+            "pmtr25": "tremelo square 4 end frequency in Hz",
+            "pmtr26": "tremelo square 4 amp (0-1)",
+        }
+
         self.pmtrDefault = {
-          'pmtr7'   : ('c', .5),
-          'pmtr8'   : ('c', .5),
-          'pmtr9'   : ('c', 18000),
-          'pmtr10'  : ('c', 8000),
-          'pmtr11'  : ('c', 1),
-          
-          'pmtr12'  : ('bg', 'rc', (1,2,3)),
-          'pmtr13'  : ('c', 0.1),
-          'pmtr14'  : ('c', 1.9),
-
-          'pmtr15'  : ('c', 2),
-          'pmtr16'  : ('c', 4),
-          'pmtr17'  : ('c', .25),
-          
-          'pmtr18'  : ('c', 2),
-          'pmtr19'  : ('c', .125),
-          'pmtr20'  : ('c', 0),
-          
-          'pmtr21'  : ('c', 32),
-          'pmtr22'  : ('c', 16),
-          'pmtr23'  : ('c', 0),
-
-          'pmtr24'  : ('c', .43),
-          'pmtr25'  : ('c', 200),
-          'pmtr26'  : ('c', 0),          
-          }
-        self.author = 'athenaCL native' # attribution
+            "pmtr7": ("c", 0.5),
+            "pmtr8": ("c", 0.5),
+            "pmtr9": ("c", 18000),
+            "pmtr10": ("c", 8000),
+            "pmtr11": ("c", 1),
+            "pmtr12": ("bg", "rc", (1, 2, 3)),
+            "pmtr13": ("c", 0.1),
+            "pmtr14": ("c", 1.9),
+            "pmtr15": ("c", 2),
+            "pmtr16": ("c", 4),
+            "pmtr17": ("c", 0.25),
+            "pmtr18": ("c", 2),
+            "pmtr19": ("c", 0.125),
+            "pmtr20": ("c", 0),
+            "pmtr21": ("c", 32),
+            "pmtr22": ("c", 16),
+            "pmtr23": ("c", 0),
+            "pmtr24": ("c", 0.43),
+            "pmtr25": ("c", 200),
+            "pmtr26": ("c", 0),
+        }
+        self.author = "athenaCL native"  # attribution
         self.orcCode = """
 instr %s
     iDur = p3
@@ -4375,58 +4456,55 @@ instr %s
     ; apply tremelo, then macro envelope
     aMixSig     = aSig * aTrem01 * aTrem02 * aTrem03 * aTrem04
     
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
 
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 class Inst74(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 74
-        self.name = 'synthVcoDistort'
-        self.info = 'A vco saw, square, or triangle waveform, a proportional linear envelope, and a variable low-pass filter with an lpf distortion unit.'
+        self.name = "synthVcoDistort"
+        self.info = "A vco saw, square, or triangle waveform, a proportional linear envelope, and a variable low-pass filter with an lpf distortion unit."
         self.auxNo = 14
-        self.postMapAmp = (0, 90, 'linear') # assume amps not greater tn 1
+        self.postMapAmp = (0, 90, "linear")  # assume amps not greater tn 1
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'sustain percent within unit interval',
-          'pmtr8'   : 'sustain center within unit interval',
-          'pmtr9'   : 'low-pass filter start cutoff frequency in Hz',
-          'pmtr10'  : 'low-pass filter end cutoff frequency in Hz',
-          'pmtr11'  : 'low-pass filter resonance between 1 and 500',
-          
-          'pmtr12'  : 'vco wave form index integer (1-3)',
-          'pmtr13'  : 'vco start width (0-2)',
-          'pmtr14'  : 'vco end width (0-2)',
-          
-          'pmtr15'  : 'resonant filter start cutoff frequency in Hz',
-          'pmtr16'  : 'resonant filter end cutoff frequency in Hz',
-          'pmtr17'  : 'resonant filter start resonance (0-2)',
-          'pmtr18'  : 'resonant filter end resonance (0-2)',
-          'pmtr19'  : 'resonant filter start distortion (0-10)',
-          'pmtr20'  : 'resonant filter end distortion (0-10)',        
-          }
-          
+            "pmtr7": "sustain percent within unit interval",
+            "pmtr8": "sustain center within unit interval",
+            "pmtr9": "low-pass filter start cutoff frequency in Hz",
+            "pmtr10": "low-pass filter end cutoff frequency in Hz",
+            "pmtr11": "low-pass filter resonance between 1 and 500",
+            "pmtr12": "vco wave form index integer (1-3)",
+            "pmtr13": "vco start width (0-2)",
+            "pmtr14": "vco end width (0-2)",
+            "pmtr15": "resonant filter start cutoff frequency in Hz",
+            "pmtr16": "resonant filter end cutoff frequency in Hz",
+            "pmtr17": "resonant filter start resonance (0-2)",
+            "pmtr18": "resonant filter end resonance (0-2)",
+            "pmtr19": "resonant filter start distortion (0-10)",
+            "pmtr20": "resonant filter end distortion (0-10)",
+        }
+
         self.pmtrDefault = {
-          'pmtr7'   : ('c', .5),
-          'pmtr8'   : ('c', .5),
-          'pmtr9'   : ('c', 18000),
-          'pmtr10'  : ('c', 8000),
-          'pmtr11'  : ('c', 1),
-          
-          'pmtr12'  : ('bg', 'rc', (1,2,3)),
-          'pmtr13'  : ('c', 0.1),
-          'pmtr14'  : ('c', 0.9),
-
-          'pmtr15'  : ('c', 6000),
-          'pmtr16'  : ('c', 1000),
-          'pmtr17'  : ('c', .8),
-          'pmtr18'  : ('c', .1),
-          'pmtr19'  : ('c', 1000),
-          'pmtr20'  : ('c', 10),
-
-          }
-        self.author = 'athenaCL native' # attribution
+            "pmtr7": ("c", 0.5),
+            "pmtr8": ("c", 0.5),
+            "pmtr9": ("c", 18000),
+            "pmtr10": ("c", 8000),
+            "pmtr11": ("c", 1),
+            "pmtr12": ("bg", "rc", (1, 2, 3)),
+            "pmtr13": ("c", 0.1),
+            "pmtr14": ("c", 0.9),
+            "pmtr15": ("c", 6000),
+            "pmtr16": ("c", 1000),
+            "pmtr17": ("c", 0.8),
+            "pmtr18": ("c", 0.1),
+            "pmtr19": ("c", 1000),
+            "pmtr20": ("c", 10),
+        }
+        self.author = "athenaCL native"  # attribution
         self.orcCode = """
 instr %s
     iDur = p3
@@ -4476,36 +4554,31 @@ instr %s
     ; apply tremelo, then macro envelope
     aMixSig     = aSig * kAmp
     
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
 
-
-
-
-
-
-
-
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 class Inst80(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 80
-        self.name = 'pluckTamHats'
-        self.info = 'Percussive sound somewhere between tam-tam and high-hat.'
+        self.name = "pluckTamHats"
+        self.info = "Percussive sound somewhere between tam-tam and high-hat."
         self.auxNo = 2
-        self.postMapAmp = (0, 80, 'linear') # most amps are in db
+        self.postMapAmp = (0, 80, "linear")  # most amps are in db
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'iparm (0-1)', 
-          'pmtr8'   : 'low-pass filter frequency',  
-          }
+            "pmtr7": "iparm (0-1)",
+            "pmtr8": "low-pass filter frequency",
+        }
         self.pmtrDefault = {
-          'rhythmQ' : ('binaryAccent', ((16, 1), (4, 2))) ,
-          #'ampQ'    : ('cyclicGen', 'linearUp', 60, 70, 4) ,
-          'pmtr7'   : ('cyclicGen', 'linearUp', .1, .9, .1), 
-          'pmtr8'   : ('cyclicGen', 'linearDown', 800, 16000, 200),   
-          } 
+            "rhythmQ": ("binaryAccent", ((16, 1), (4, 2))),
+            #'ampQ'    : ('cyclicGen', 'linearUp', 60, 70, 4) ,
+            "pmtr7": ("cyclicGen", "linearUp", 0.1, 0.9, 0.1),
+            "pmtr8": ("cyclicGen", "linearDown", 800, 16000, 200),
+        }
         self.orcCode = """
 instr %s
     iDur     = p3
@@ -4526,44 +4599,47 @@ instr %s
     a3          = ((a1 + a2 + a4) * k1)
     a6          tone        a3, ilp_fq
     aMixSig          = (a6 * 2) 
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
-#-----------------------------------------------------------------||||||||||||--
+
+# -----------------------------------------------------------------||||||||||||--
 class Inst81(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 81
-        self.name = 'pluckFormant'
-        self.info = 'A pluck that slowly morphs into a vocal, formant derived sound.'
+        self.name = "pluckFormant"
+        self.info = "A pluck that slowly morphs into a vocal, formant derived sound."
         self.auxNo = 10
-        self.postMapAmp = (0, 90, 'linear') # most amps are in db
+        self.postMapAmp = (0, 90, "linear")  # most amps are in db
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'ipluckamp, % of total amp, 1=dB amp as in p4',
-          'pmtr8'   : 'ipluckdur, % of total dur, 1=entire dur of note',
-          'pmtr9'   : 'ifmamp, % of total amp, 1=dB amp as in p4', 
-          'pmtr10'  : 'ifmrise, % of total dur, 1=entire dur of note', 
-          'pmtr11'  : 'ifmdec, % of total duration', 
-          'pmtr12'  : 'index',   
-          'pmtr13'  : 'ivibdepth',   
-          'pmtr14'  : 'ivibrate',
-          'pmtr15'  : 'iformantamp, % of total amp, 1=dB amp as in p4',  
-          'pmtr16'  : 'iformantrise, % of total dur, 1=entire dur of note',  
-          } 
+            "pmtr7": "ipluckamp, % of total amp, 1=dB amp as in p4",
+            "pmtr8": "ipluckdur, % of total dur, 1=entire dur of note",
+            "pmtr9": "ifmamp, % of total amp, 1=dB amp as in p4",
+            "pmtr10": "ifmrise, % of total dur, 1=entire dur of note",
+            "pmtr11": "ifmdec, % of total duration",
+            "pmtr12": "index",
+            "pmtr13": "ivibdepth",
+            "pmtr14": "ivibrate",
+            "pmtr15": "iformantamp, % of total amp, 1=dB amp as in p4",
+            "pmtr16": "iformantrise, % of total dur, 1=entire dur of note",
+        }
         self.pmtrDefault = {
-          'rhythmQ' : ('binaryAccent', ((2, 3), (2, 9))), 
-          #'ampQ'    : ('cyclicGen', 'linearUp', 60, 70, 4),
-          'pmtr7'   : ('basketGen', 'randomChoice', (0.80,0.95,0.90)),
-          'pmtr8'   : ('basketGen', 'randomChoice', (0.70,0.60,0.80)),
-          'pmtr9'   : ('basketGen', 'randomChoice', (0.80,0.90,0.70,0.95)), 
-          'pmtr10'  : ('basketGen', 'randomChoice', (0.05,0.10,0.15,0.20)), 
-          'pmtr11'  : ('basketGen', 'randomChoice', (0.70,0.85,0.95)), 
-          'pmtr12'  : ('cyclicGen', 'linearUpDown', 6.00, 8.00, 1.00),    
-          'pmtr13'  : ('cyclicGen', 'linearUpDown', 1.00, 1.00, 0.00),   
-          'pmtr14'  : ('cyclicGen', 'linearUp', 4.00, 6.00, 1.00),
-          'pmtr15'  : ('basketGen', 'randomChoice', (0.90,0.95)),  
-          'pmtr16'  : ('basketGen', 'randomChoice', (0.50,0.30,0.10)),    
-          } 
+            "rhythmQ": ("binaryAccent", ((2, 3), (2, 9))),
+            #'ampQ'    : ('cyclicGen', 'linearUp', 60, 70, 4),
+            "pmtr7": ("basketGen", "randomChoice", (0.80, 0.95, 0.90)),
+            "pmtr8": ("basketGen", "randomChoice", (0.70, 0.60, 0.80)),
+            "pmtr9": ("basketGen", "randomChoice", (0.80, 0.90, 0.70, 0.95)),
+            "pmtr10": ("basketGen", "randomChoice", (0.05, 0.10, 0.15, 0.20)),
+            "pmtr11": ("basketGen", "randomChoice", (0.70, 0.85, 0.95)),
+            "pmtr12": ("cyclicGen", "linearUpDown", 6.00, 8.00, 1.00),
+            "pmtr13": ("cyclicGen", "linearUpDown", 1.00, 1.00, 0.00),
+            "pmtr14": ("cyclicGen", "linearUp", 4.00, 6.00, 1.00),
+            "pmtr15": ("basketGen", "randomChoice", (0.90, 0.95)),
+            "pmtr16": ("basketGen", "randomChoice", (0.50, 0.30, 0.10)),
+        }
         self.orcCode = """
 instr %s                                    
     iAmp             = ampdb(p4) / 2    ; amplitude, scaled for two sources
@@ -4603,7 +4679,9 @@ instr %s
     aformnt      =            kfrmnt * (afrmnt1+afrmnt2)
 
     aMixSig          = (apluck + afm + aformnt)
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
         self.scoSample = """
                                      ;values b/n 0 & 1.
@@ -4615,42 +4693,41 @@ i13 54.77  6     80 7.09    .5       .8 .3    .7     .2 .4       6    1 4    3  
 i13 56.00  8     80 7.09    .5       .8 .3    .7     .2 .4       6    1 5    3    .6
 """
 
-#-----------------------------------------------------------------||||||||||||--
+
+# -----------------------------------------------------------------||||||||||||--
 class Inst82(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 82
-        self.name = 'pluckUnitEnvelope'
-        self.info = 'A single pluck with a unit envelope and variable low pass filter.'
+        self.name = "pluckUnitEnvelope"
+        self.info = "A single pluck with a unit envelope and variable low pass filter."
         self.auxNo = 9
-        self.postMapAmp = (0, 84, 'linear') # amps are in db
+        self.postMapAmp = (0, 84, "linear")  # amps are in db
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'pluck function table (integer)', 
-          'pmtr8'   : 'pluck method (integers 1 through 6)', 
-          'pmtr9'   : 'pluck parameter 1 (0-1)', 
-          'pmtr10'  : 'pluck parameter 2 (0-1)', 
-
-          'pmtr11'  : 'sustain percent within unit interval',
-          'pmtr12'  : 'sustain center within unit interval',
-          'pmtr13'  : 'low-pass filter start cutoff frequency in Hz',
-          'pmtr14'  : 'low-pass filter end cutoff frequency in Hz',
-          'pmtr15'  : 'low-pass filter resonance between 1 and 500',
-          }
+            "pmtr7": "pluck function table (integer)",
+            "pmtr8": "pluck method (integers 1 through 6)",
+            "pmtr9": "pluck parameter 1 (0-1)",
+            "pmtr10": "pluck parameter 2 (0-1)",
+            "pmtr11": "sustain percent within unit interval",
+            "pmtr12": "sustain center within unit interval",
+            "pmtr13": "low-pass filter start cutoff frequency in Hz",
+            "pmtr14": "low-pass filter end cutoff frequency in Hz",
+            "pmtr15": "low-pass filter resonance between 1 and 500",
+        }
         self.pmtrDefault = {
-          'rhythmQ' : ('l', ((4, 1), (4, 2))) ,
-          #'ampQ'    : ('cyclicGen', 'linearUp', 60, 70, 4) ,
-          'pmtr7'   : ('c', 0), 
-          'pmtr8'   : ('c', 3),   
-          'pmtr9'   : ('c', .5), 
-          'pmtr10'  : ('c', 1),   
-
-          'pmtr11'  : ('c', .7), 
-          'pmtr12'  : ('c', .01),    
-          'pmtr13'  : ('c', 18000), 
-          'pmtr14'  : ('c', 18000), 
-          'pmtr15'  : ('c', .8),    
-          } 
+            "rhythmQ": ("l", ((4, 1), (4, 2))),
+            #'ampQ'    : ('cyclicGen', 'linearUp', 60, 70, 4) ,
+            "pmtr7": ("c", 0),
+            "pmtr8": ("c", 3),
+            "pmtr9": ("c", 0.5),
+            "pmtr10": ("c", 1),
+            "pmtr11": ("c", 0.7),
+            "pmtr12": ("c", 0.01),
+            "pmtr13": ("c", 18000),
+            "pmtr14": ("c", 18000),
+            "pmtr15": ("c", 0.8),
+        }
         self.orcCode = """
 instr %s
 
@@ -4684,38 +4761,37 @@ instr %s
     aSig            lowpass2     aSig, kFreq, kq 
     aMixSig     = aSig
 
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
 
-
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 # physical models here in the 90s; not all work yet
 class Inst90(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 90
-        self.name = 'modelSekere'
-        self.info = 'Physical model of sekere percusion instrument.'
+        self.name = "modelSekere"
+        self.info = "Physical model of sekere percusion instrument."
         self.auxNo = 4
-        self.postMapAmp = (0, 1, 'linear') # most amps are in db
+        self.postMapAmp = (0, 1, "linear")  # most amps are in db
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-  'pmtr7'  : 'period of time over which all sound is stopped', 
-  'pmtr8'  : 'the number of beads, teeth, bells, timbrels, etc',     
-  'pmtr9'  : 'the damping factor, between 0 and 1', 
-  'pmtr10' : 'amount of energy to add back into the system, between 0 and 1',     
-
-          }
+            "pmtr7": "period of time over which all sound is stopped",
+            "pmtr8": "the number of beads, teeth, bells, timbrels, etc",
+            "pmtr9": "the damping factor, between 0 and 1",
+            "pmtr10": "amount of energy to add back into the system, between 0 and 1",
+        }
         self.pmtrDefault = {
-          'pmtr7'   : ('c', .01), 
-          'pmtr8'   : ('c', 64),    
-          'pmtr9'   : ('c', .5), 
-          'pmtr10'  : ('c', .1),    
-          } 
-          
-          
-# imaxshake (optional) -- amount of energy to add back into the system. The value should be in range 0 to 1.          
-          
+            "pmtr7": ("c", 0.01),
+            "pmtr8": ("c", 64),
+            "pmtr9": ("c", 0.5),
+            "pmtr10": ("c", 0.1),
+        }
+
+        # imaxshake (optional) -- amount of energy to add back into the system. The value should be in range 0 to 1.
+
         self.orcCode = """
 instr %s
     iDur     = p3
@@ -4734,45 +4810,47 @@ instr %s
     ;master mix
 
     aMixSig          = a1
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
 
-
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 # this only works if file name is given as a number
 # cant get it to accept a complete path
+
 
 class Inst100(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 100
-        self.name = 'phaseVocodeRead'
-        self.info = 'A simple phase voice reader instrument.'
+        self.name = "phaseVocodeRead"
+        self.info = "A simple phase voice reader instrument."
         self.auxNo = 5
         # dont know what amp scaling is necessary here
-        self.postMapAmp = (0, 74, 'linear') # most amps are in db
+        self.postMapAmp = (0, 74, "linear")  # most amps are in db
 
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-                      'pmtr7'   : 'pvc analysis file to use',
-                     } # holds discription, preset for each pmtr in a dictionary
+            "pmtr7": "pvc analysis file to use",
+        }  # holds discription, preset for each pmtr in a dictionary
         self.pmtrDefault = {
-          #'ampQ'    : ('cyclicGen', 'linearDown', 2.00, 9.00, 0.25),
-          #'pmtr7'   : ('analysisSelect', ('harmonica.1',)),
-          'pmtr7'   : ('constant', 1),
-          #'pmtr7'   : ('constant', '"/Volumes/xdisc/_scratch/pvoc.1"'),
-          'pmtr8'   : ('sl', '3|5|13|19', 1, 60, 'integer', 'rw'),
-          'pmtr9'   : ('constant', 0.5),
-          'pmtr10'  : ('constant', .001),
-          'pmtr11'  : ('constant', .001),
-          }
+            #'ampQ'    : ('cyclicGen', 'linearDown', 2.00, 9.00, 0.25),
+            #'pmtr7'   : ('analysisSelect', ('harmonica.1',)),
+            "pmtr7": ("constant", 1),
+            #'pmtr7'   : ('constant', '"/Volumes/xdisc/_scratch/pvoc.1"'),
+            "pmtr8": ("sl", "3|5|13|19", 1, 60, "integer", "rw"),
+            "pmtr9": ("constant", 0.5),
+            "pmtr10": ("constant", 0.001),
+            "pmtr11": ("constant", 0.001),
+        }
 
-# ; p4 is max amp (in db)
-# ; p7 is file no
-# ; p8 is bin
-# ; p9 is start time in analysis
-# ; p10 is fade in time in sec.
-# ; p11 is fade out time in sec.
+        # ; p4 is max amp (in db)
+        # ; p7 is file no
+        # ; p8 is bin
+        # ; p9 is start time in analysis
+        # ; p10 is fade in time in sec.
+        # ; p11 is fade out time in sec.
 
         self.orcCode = """
 instr %s
@@ -4787,61 +4865,55 @@ instr %s
     aSig              oscili     kAmp, kFreq, 1
     
     aMixSig =     aSig * kenv
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
 
-
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 # 8 ch
+
 
 class Inst140(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 140
-        self.name = 'vocodeSineOctScale'
-        self.info = 'An eight channel vocoder with scaled mapping and a sine generator.'
+        self.name = "vocodeSineOctScale"
+        self.info = "An eight channel vocoder with scaled mapping and a sine generator."
         self.auxNo = 13
-        self.postMapAmp = (0, 10, 'linear') # amps from experiment
+        self.postMapAmp = (0, 10, "linear")  # amps from experiment
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'sustain percent within unit interval',
-          'pmtr8'   : 'sustain center within unit interval',
-          'pmtr9'   : 'analysis audio file start time',
-          'pmtr10'  : 'analysis file path to desired sound file',
-          'pmtr11'  : 'analysis file play back speed',
-          
-          'pmtr12'  : 'analysis low-pass filter cutoff frequency in Hz',
-          'pmtr13'  : 'analysis band-pass bw (not q), from 10 to 500',
-
-          'pmtr14'  : 'analysis frequency base in Hz',
-          'pmtr15'  : 'analysis frequency scalar',        
-
-          'pmtr16'  : 'generator frequency base in Hz',
-          'pmtr17'  : 'generator frequency scalar',       
-
-          'pmtr18'  : 'low-pass filter start cutoff frequency in Hz',
-          'pmtr19'  : 'low-pass filter end cutoff frequency in Hz',
-          }
+            "pmtr7": "sustain percent within unit interval",
+            "pmtr8": "sustain center within unit interval",
+            "pmtr9": "analysis audio file start time",
+            "pmtr10": "analysis file path to desired sound file",
+            "pmtr11": "analysis file play back speed",
+            "pmtr12": "analysis low-pass filter cutoff frequency in Hz",
+            "pmtr13": "analysis band-pass bw (not q), from 10 to 500",
+            "pmtr14": "analysis frequency base in Hz",
+            "pmtr15": "analysis frequency scalar",
+            "pmtr16": "generator frequency base in Hz",
+            "pmtr17": "generator frequency scalar",
+            "pmtr18": "low-pass filter start cutoff frequency in Hz",
+            "pmtr19": "low-pass filter end cutoff frequency in Hz",
+        }
         self.pmtrDefault = {
-          'pmtr7'   : ('c', .9),
-          'pmtr8'   : ('c', .5),
-          'pmtr9'   : ('c', 0),
-          'pmtr10'  : ('sampleSelect', ('drum01.aif', 'latch01.aif')),
-          'pmtr11'  : ('c', 1),
-
-          'pmtr12'  : ('c', 40), # analysis cut-off fq
-          'pmtr13'  : ('c', 50), # band width, 20 is well pitched
-          
-          'pmtr14'  : ('c', 500),
-          'pmtr15'  : ('c', 1.333333333333),
-
-          'pmtr16'  : ('c', 500),
-          'pmtr17'  : ('c', 1.333333333333),
-
-          'pmtr18'  : ('c', 100),
-          'pmtr19'  : ('c', 2000),
-          }
-        self.author = 'athenaCL native' # attribution
+            "pmtr7": ("c", 0.9),
+            "pmtr8": ("c", 0.5),
+            "pmtr9": ("c", 0),
+            "pmtr10": ("sampleSelect", ("drum01.aif", "latch01.aif")),
+            "pmtr11": ("c", 1),
+            "pmtr12": ("c", 40),  # analysis cut-off fq
+            "pmtr13": ("c", 50),  # band width, 20 is well pitched
+            "pmtr14": ("c", 500),
+            "pmtr15": ("c", 1.333333333333),
+            "pmtr16": ("c", 500),
+            "pmtr17": ("c", 1.333333333333),
+            "pmtr18": ("c", 100),
+            "pmtr19": ("c", 2000),
+        }
+        self.author = "athenaCL native"  # attribution
         self.orcCode = """
 instr %s
     iDur = p3
@@ -4956,96 +5028,89 @@ instr %s
     ; scale by macro envelope        
     aMixSig     = aSig * kAmp
     
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
-#-----------------------------------------------------------------||||||||||||--
+
+# -----------------------------------------------------------------||||||||||||--
 # 8 ch
 class Inst141(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 141
-        self.name = 'vocodeSineOctScaleRemap'
-        self.info = 'An eight channel vocoder with variable remapping and a sine generator.'
+        self.name = "vocodeSineOctScaleRemap"
+        self.info = (
+            "An eight channel vocoder with variable remapping and a sine generator."
+        )
         self.auxNo = 29
-        self.postMapAmp = (0, 10, 'linear') # assume amps not greater tn 10
+        self.postMapAmp = (0, 10, "linear")  # assume amps not greater tn 10
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'sustain percent within unit interval',
-          'pmtr8'   : 'sustain center within unit interval',
-          'pmtr9'   : 'analysis audio file start time',
-          'pmtr10'  : 'analysis file path to desired sound file',
-          'pmtr11'  : 'analysis file play back speed',
+            "pmtr7": "sustain percent within unit interval",
+            "pmtr8": "sustain center within unit interval",
+            "pmtr9": "analysis audio file start time",
+            "pmtr10": "analysis file path to desired sound file",
+            "pmtr11": "analysis file play back speed",
+            "pmtr12": "analysis low-pass filter cutoff frequency in Hz",
+            "pmtr13": "analysis band-pass bw (not q), from 10 to 500",
+            "pmtr14": "analysis frequency base in Hz",
+            "pmtr15": "analysis frequency scalar",
+            "pmtr16": "generator frequency base in Hz",
+            "pmtr17": "generator frequency scalar",
+            "pmtr18": "generator 1 channel frequency source (1-8)",
+            "pmtr19": "generator 2 channel frequency source (1-8)",
+            "pmtr20": "generator 3 channel frequency source (1-8)",
+            "pmtr21": "generator 4 channel frequency source (1-8)",
+            "pmtr22": "generator 5 channel frequency source (1-8)",
+            "pmtr23": "generator 6 channel frequency source (1-8)",
+            "pmtr24": "generator 7 channel frequency source (1-8)",
+            "pmtr25": "generator 8 channel frequency source (1-8)",
+            "pmtr26": "generator 1 post scale (0-1)",
+            "pmtr27": "generator 2 post scale (0-1)",
+            "pmtr28": "generator 3 post scale (0-1)",
+            "pmtr29": "generator 4 post scale (0-1)",
+            "pmtr30": "generator 5 post scale (0-1)",
+            "pmtr31": "generator 6 post scale (0-1)",
+            "pmtr32": "generator 7 post scale (0-1)",
+            "pmtr33": "generator 8 post scale (0-1)",
+            "pmtr34": "low-pass filter start cutoff frequency in Hz",
+            "pmtr35": "low-pass filter end cutoff frequency in Hz",
+        }
 
-          'pmtr12'  : 'analysis low-pass filter cutoff frequency in Hz',
-          'pmtr13'  : 'analysis band-pass bw (not q), from 10 to 500',
-
-          'pmtr14'  : 'analysis frequency base in Hz',
-          'pmtr15'  : 'analysis frequency scalar',        
-
-          'pmtr16'  : 'generator frequency base in Hz',
-          'pmtr17'  : 'generator frequency scalar',         
-
-          'pmtr18'  : 'generator 1 channel frequency source (1-8)',
-          'pmtr19'  : 'generator 2 channel frequency source (1-8)',           
-          'pmtr20'  : 'generator 3 channel frequency source (1-8)',
-          'pmtr21'  : 'generator 4 channel frequency source (1-8)',           
-          'pmtr22'  : 'generator 5 channel frequency source (1-8)',
-          'pmtr23'  : 'generator 6 channel frequency source (1-8)',           
-          'pmtr24'  : 'generator 7 channel frequency source (1-8)',
-          'pmtr25'  : 'generator 8 channel frequency source (1-8)',           
-
-          'pmtr26'  : 'generator 1 post scale (0-1)',
-          'pmtr27'  : 'generator 2 post scale (0-1)',           
-          'pmtr28'  : 'generator 3 post scale (0-1)',
-          'pmtr29'  : 'generator 4 post scale (0-1)',           
-          'pmtr30'  : 'generator 5 post scale (0-1)',
-          'pmtr31'  : 'generator 6 post scale (0-1)',           
-          'pmtr32'  : 'generator 7 post scale (0-1)',
-          'pmtr33'  : 'generator 8 post scale (0-1)',           
-
-          'pmtr34'  : 'low-pass filter start cutoff frequency in Hz',
-          'pmtr35'  : 'low-pass filter end cutoff frequency in Hz',
-          }
-          
         self.pmtrDefault = {
-          'pmtr7'   : ('c', .9),
-          'pmtr8'   : ('c', .5),
-          'pmtr9'   : ('c', 0),
-          'pmtr10'  : ('sampleSelect', ('drum01.aif', 'latch01.aif')),
-          'pmtr11'  : ('c', 1),
-          
-          'pmtr12'  : ('c', 40), # analysis cut-off fq
-          'pmtr13'  : ('c', 40), # band width, 20 is well pitched
-          
-          'pmtr14'  : ('c', 400),
-          'pmtr15'  : ('c', 1.33333333333),
+            "pmtr7": ("c", 0.9),
+            "pmtr8": ("c", 0.5),
+            "pmtr9": ("c", 0),
+            "pmtr10": ("sampleSelect", ("drum01.aif", "latch01.aif")),
+            "pmtr11": ("c", 1),
+            "pmtr12": ("c", 40),  # analysis cut-off fq
+            "pmtr13": ("c", 40),  # band width, 20 is well pitched
+            "pmtr14": ("c", 400),
+            "pmtr15": ("c", 1.33333333333),
+            "pmtr16": ("c", 100),
+            "pmtr17": ("c", 1.6666666666),
+            "pmtr18": ("c", 1),
+            "pmtr19": ("c", 2),
+            "pmtr20": ("c", 3),
+            "pmtr21": ("c", 4),
+            "pmtr22": ("c", 5),
+            "pmtr23": ("c", 6),
+            "pmtr24": ("c", 7),
+            "pmtr25": ("c", 8),
+            "pmtr26": ("c", 1),
+            "pmtr27": ("c", 1),
+            "pmtr28": ("c", 1),
+            "pmtr29": ("c", 1),
+            "pmtr30": ("c", 1),
+            "pmtr31": ("c", 1),
+            "pmtr32": ("c", 1),
+            "pmtr33": ("c", 1),
+            "pmtr34": ("c", 100),
+            "pmtr35": ("c", 4000),
+        }
 
-          'pmtr16'  : ('c', 100),
-          'pmtr17'  : ('c', 1.6666666666),
-          
-          'pmtr18'  : ('c', 1),
-          'pmtr19'  : ('c', 2),
-          'pmtr20'  : ('c', 3),
-          'pmtr21'  : ('c', 4),
-          'pmtr22'  : ('c', 5),
-          'pmtr23'  : ('c', 6),
-          'pmtr24'  : ('c', 7),
-          'pmtr25'  : ('c', 8),
-          
-          'pmtr26'  : ('c', 1),
-          'pmtr27'  : ('c', 1),
-          'pmtr28'  : ('c', 1),
-          'pmtr29'  : ('c', 1),
-          'pmtr30'  : ('c', 1),
-          'pmtr31'  : ('c', 1),
-          'pmtr32'  : ('c', 1),
-          'pmtr33'  : ('c', 1),
-          
-          'pmtr34'  : ('c', 100),
-          'pmtr35'  : ('c', 4000),
-          }
-          
-        self.author = 'athenaCL native' # attribution
+        self.author = "athenaCL native"  # attribution
         self.orcCode = """
 instr %s
     iDur = p3
@@ -5193,61 +5258,57 @@ instr %s
     kAmp            linen        iAmp, iAttack, iDur, iRelease  
     aMixSig     = aSig * kAmp
     
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
 
-
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 # 16 ch; 141 saved for 8 ch remap sine version
+
 
 class Inst142(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 142
-        self.name = 'vocodeSineBiOctScale'
-        self.info = 'A sixteen channel vocoder with scaled mapping and a sine generator.'
+        self.name = "vocodeSineBiOctScale"
+        self.info = (
+            "A sixteen channel vocoder with scaled mapping and a sine generator."
+        )
         self.auxNo = 13
-        self.postMapAmp = (0, 10, 'linear') # amps from experiment
+        self.postMapAmp = (0, 10, "linear")  # amps from experiment
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'sustain percent within unit interval',
-          'pmtr8'   : 'sustain center within unit interval',
-          'pmtr9'   : 'analysis audio file start time',
-          'pmtr10'  : 'analysis file path to desired sound file',
-          'pmtr11'  : 'analysis file play back speed',
-
-          'pmtr12'  : 'analysis low-pass filter cutoff frequency in Hz',
-          'pmtr13'  : 'analysis band-pass bw (not q), from 10 to 500',
-
-          'pmtr14'  : 'analysis frequency base in Hz',
-          'pmtr15'  : 'analysis frequency scalar',        
-
-          'pmtr16'  : 'generator frequency base in Hz',
-          'pmtr17'  : 'generator frequency scalar',       
-
-          'pmtr18'  : 'low-pass filter start cutoff frequency in Hz',
-          'pmtr19'  : 'low-pass filter end cutoff frequency in Hz',
-          }
+            "pmtr7": "sustain percent within unit interval",
+            "pmtr8": "sustain center within unit interval",
+            "pmtr9": "analysis audio file start time",
+            "pmtr10": "analysis file path to desired sound file",
+            "pmtr11": "analysis file play back speed",
+            "pmtr12": "analysis low-pass filter cutoff frequency in Hz",
+            "pmtr13": "analysis band-pass bw (not q), from 10 to 500",
+            "pmtr14": "analysis frequency base in Hz",
+            "pmtr15": "analysis frequency scalar",
+            "pmtr16": "generator frequency base in Hz",
+            "pmtr17": "generator frequency scalar",
+            "pmtr18": "low-pass filter start cutoff frequency in Hz",
+            "pmtr19": "low-pass filter end cutoff frequency in Hz",
+        }
         self.pmtrDefault = {
-          'pmtr7'   : ('c', .9),
-          'pmtr8'   : ('c', .5),
-          'pmtr9'   : ('c', 0),
-          'pmtr10'  : ('sampleSelect', ('drum01.aif', 'latch01.aif')),
-          'pmtr11'  : ('c', 1),
-
-          'pmtr12'  : ('c', 40), # analysis cut-off fq
-          'pmtr13'  : ('c', 10), # band width, 20 is well pitched
-          
-          'pmtr14'  : ('c', 200),
-          'pmtr15'  : ('c', 1.333333333333),
-
-          'pmtr16'  : ('c', 200),
-          'pmtr17'  : ('c', 1.333333333333),
-
-          'pmtr18'  : ('c', 100),
-          'pmtr19'  : ('c', 12000),
-          }
-        self.author = 'athenaCL native' # attribution
+            "pmtr7": ("c", 0.9),
+            "pmtr8": ("c", 0.5),
+            "pmtr9": ("c", 0),
+            "pmtr10": ("sampleSelect", ("drum01.aif", "latch01.aif")),
+            "pmtr11": ("c", 1),
+            "pmtr12": ("c", 40),  # analysis cut-off fq
+            "pmtr13": ("c", 10),  # band width, 20 is well pitched
+            "pmtr14": ("c", 200),
+            "pmtr15": ("c", 1.333333333333),
+            "pmtr16": ("c", 200),
+            "pmtr17": ("c", 1.333333333333),
+            "pmtr18": ("c", 100),
+            "pmtr19": ("c", 12000),
+        }
+        self.author = "athenaCL native"  # attribution
         self.orcCode = """
 instr %s
     iDur = p3
@@ -5430,60 +5491,57 @@ instr %s
     ; scale by macro envelope        
     aMixSig     = aSig * kAmp
     
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
 
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 # 24 ch
+
 
 class Inst143(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 143
-        self.name = 'vocodeSineTriOctScale'
-        self.info = 'A twenty four channel vocoder with scaled mapping and a sine generator.'
+        self.name = "vocodeSineTriOctScale"
+        self.info = (
+            "A twenty four channel vocoder with scaled mapping and a sine generator."
+        )
         self.auxNo = 13
-        self.postMapAmp = (0, 10, 'linear') # amps from experiment
+        self.postMapAmp = (0, 10, "linear")  # amps from experiment
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'sustain percent within unit interval',
-          'pmtr8'   : 'sustain center within unit interval',
-          'pmtr9'   : 'analysis audio file start time',
-          'pmtr10'  : 'analysis file path to desired sound file',
-          'pmtr11'  : 'analysis file play back speed',
-
-          'pmtr12'  : 'analysis low-pass filter cutoff frequency in Hz',
-          'pmtr13'  : 'analysis band-pass bw (not q), from 10 to 500',
-
-          'pmtr14'  : 'analysis frequency base in Hz',
-          'pmtr15'  : 'analysis frequency scalar',        
-
-          'pmtr16'  : 'generator frequency base in Hz',
-          'pmtr17'  : 'generator frequency scalar',       
-
-          'pmtr18'  : 'low-pass filter start cutoff frequency in Hz',
-          'pmtr19'  : 'low-pass filter end cutoff frequency in Hz',
-          }
+            "pmtr7": "sustain percent within unit interval",
+            "pmtr8": "sustain center within unit interval",
+            "pmtr9": "analysis audio file start time",
+            "pmtr10": "analysis file path to desired sound file",
+            "pmtr11": "analysis file play back speed",
+            "pmtr12": "analysis low-pass filter cutoff frequency in Hz",
+            "pmtr13": "analysis band-pass bw (not q), from 10 to 500",
+            "pmtr14": "analysis frequency base in Hz",
+            "pmtr15": "analysis frequency scalar",
+            "pmtr16": "generator frequency base in Hz",
+            "pmtr17": "generator frequency scalar",
+            "pmtr18": "low-pass filter start cutoff frequency in Hz",
+            "pmtr19": "low-pass filter end cutoff frequency in Hz",
+        }
         self.pmtrDefault = {
-          'pmtr7'   : ('c', .9),
-          'pmtr8'   : ('c', .5),
-          'pmtr9'   : ('c', 0),
-          'pmtr10'  : ('sampleSelect', ('drum01.aif', 'latch01.aif')),
-          'pmtr11'  : ('c', 1),
-          
-          'pmtr12'  : ('c', 40), # analysis cut-off fq
-          'pmtr13'  : ('c', 10), # band width, 20 is well pitched
-          
-          'pmtr14'  : ('c', 80),
-          'pmtr15'  : ('c', 1.2),
-
-          'pmtr16'  : ('c', 80),
-          'pmtr17'  : ('c', 1.2),
-
-          'pmtr18'  : ('c', 100),
-          'pmtr19'  : ('c', 20000),
-          }
-        self.author = 'athenaCL native' # attribution
+            "pmtr7": ("c", 0.9),
+            "pmtr8": ("c", 0.5),
+            "pmtr9": ("c", 0),
+            "pmtr10": ("sampleSelect", ("drum01.aif", "latch01.aif")),
+            "pmtr11": ("c", 1),
+            "pmtr12": ("c", 40),  # analysis cut-off fq
+            "pmtr13": ("c", 10),  # band width, 20 is well pitched
+            "pmtr14": ("c", 80),
+            "pmtr15": ("c", 1.2),
+            "pmtr16": ("c", 80),
+            "pmtr17": ("c", 1.2),
+            "pmtr18": ("c", 100),
+            "pmtr19": ("c", 20000),
+        }
+        self.author = "athenaCL native"  # attribution
         self.orcCode = """
 instr %s
     iDur = p3
@@ -5738,61 +5796,57 @@ instr %s
     ; scale by macro envelope        
     aMixSig     = aSig * kAmp
     
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
 
-
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 # 32 ch
+
 
 class Inst144(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 144
-        self.name = 'vocodeSineQuadOctScale'
-        self.info = 'A thirty two channel vocoder with scaled mapping and a sine generator.'
+        self.name = "vocodeSineQuadOctScale"
+        self.info = (
+            "A thirty two channel vocoder with scaled mapping and a sine generator."
+        )
         self.auxNo = 13
-        self.postMapAmp = (0, 10, 'linear') # amps from experiment
+        self.postMapAmp = (0, 10, "linear")  # amps from experiment
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'sustain percent within unit interval',
-          'pmtr8'   : 'sustain center within unit interval',
-          'pmtr9'   : 'analysis audio file start time',
-          'pmtr10'  : 'analysis file path to desired sound file',
-          'pmtr11'  : 'analysis file play back speed',
-
-          'pmtr12'  : 'analysis low-pass filter cutoff frequency in Hz',
-          'pmtr13'  : 'analysis band-pass bw (not q), from 10 to 500',
-
-          'pmtr14'  : 'analysis frequency base in Hz',
-          'pmtr15'  : 'analysis frequency scalar',        
-
-          'pmtr16'  : 'generator frequency base in Hz',
-          'pmtr17'  : 'generator frequency scalar',       
-
-          'pmtr18'  : 'low-pass filter start cutoff frequency in Hz',
-          'pmtr19'  : 'low-pass filter end cutoff frequency in Hz',
-          }
+            "pmtr7": "sustain percent within unit interval",
+            "pmtr8": "sustain center within unit interval",
+            "pmtr9": "analysis audio file start time",
+            "pmtr10": "analysis file path to desired sound file",
+            "pmtr11": "analysis file play back speed",
+            "pmtr12": "analysis low-pass filter cutoff frequency in Hz",
+            "pmtr13": "analysis band-pass bw (not q), from 10 to 500",
+            "pmtr14": "analysis frequency base in Hz",
+            "pmtr15": "analysis frequency scalar",
+            "pmtr16": "generator frequency base in Hz",
+            "pmtr17": "generator frequency scalar",
+            "pmtr18": "low-pass filter start cutoff frequency in Hz",
+            "pmtr19": "low-pass filter end cutoff frequency in Hz",
+        }
         self.pmtrDefault = {
-          'pmtr7'   : ('c', .9),
-          'pmtr8'   : ('c', .5),
-          'pmtr9'   : ('c', 0),
-          'pmtr10'  : ('sampleSelect', ('drum01.aif', 'latch01.aif')),
-          'pmtr11'  : ('c', 1),
-
-          'pmtr12'  : ('c', 40), # analysis cut-off fq
-          'pmtr13'  : ('c', 10), # band width, 20 is well pitched
-          
-          'pmtr14'  : ('c', 40),
-          'pmtr15'  : ('c', 1.2),
-
-          'pmtr16'  : ('c', 40),
-          'pmtr17'  : ('c', 1.2),
-
-          'pmtr18'  : ('c', 2000),
-          'pmtr19'  : ('c', 20000),
-          }
-        self.author = 'athenaCL native' # attribution
+            "pmtr7": ("c", 0.9),
+            "pmtr8": ("c", 0.5),
+            "pmtr9": ("c", 0),
+            "pmtr10": ("sampleSelect", ("drum01.aif", "latch01.aif")),
+            "pmtr11": ("c", 1),
+            "pmtr12": ("c", 40),  # analysis cut-off fq
+            "pmtr13": ("c", 10),  # band width, 20 is well pitched
+            "pmtr14": ("c", 40),
+            "pmtr15": ("c", 1.2),
+            "pmtr16": ("c", 40),
+            "pmtr17": ("c", 1.2),
+            "pmtr18": ("c", 2000),
+            "pmtr19": ("c", 20000),
+        }
+        self.author = "athenaCL native"  # attribution
         self.orcCode = """
 instr %s
     iDur = p3
@@ -6117,59 +6171,55 @@ instr %s
     ; scale by macro envelope        
     aMixSig     = aSig * kAmp
     
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
-#-----------------------------------------------------------------||||||||||||--
+
+# -----------------------------------------------------------------||||||||||||--
 # 40 ch
+
 
 class Inst145(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 145
-        self.name = 'vocodeSinePentOctScale'
-        self.info = 'A forty channel vocoder with scaled mapping and a sine generator.'
+        self.name = "vocodeSinePentOctScale"
+        self.info = "A forty channel vocoder with scaled mapping and a sine generator."
         self.auxNo = 13
-        self.postMapAmp = (0, 10, 'linear') # amps from experiment
+        self.postMapAmp = (0, 10, "linear")  # amps from experiment
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'sustain percent within unit interval',
-          'pmtr8'   : 'sustain center within unit interval',
-          'pmtr9'   : 'analysis audio file start time',
-          'pmtr10'  : 'analysis file path to desired sound file',
-          'pmtr11'  : 'analysis file play back speed',
-
-          'pmtr12'  : 'analysis low-pass filter cutoff frequency in Hz',
-          'pmtr13'  : 'analysis band-pass bw (not q), from 10 to 500',
-
-          'pmtr14'  : 'analysis frequency base in Hz',
-          'pmtr15'  : 'analysis frequency scalar',        
-
-          'pmtr16'  : 'generator frequency base in Hz',
-          'pmtr17'  : 'generator frequency scalar',       
-
-          'pmtr18'  : 'low-pass filter start cutoff frequency in Hz',
-          'pmtr19'  : 'low-pass filter end cutoff frequency in Hz',
-          }
+            "pmtr7": "sustain percent within unit interval",
+            "pmtr8": "sustain center within unit interval",
+            "pmtr9": "analysis audio file start time",
+            "pmtr10": "analysis file path to desired sound file",
+            "pmtr11": "analysis file play back speed",
+            "pmtr12": "analysis low-pass filter cutoff frequency in Hz",
+            "pmtr13": "analysis band-pass bw (not q), from 10 to 500",
+            "pmtr14": "analysis frequency base in Hz",
+            "pmtr15": "analysis frequency scalar",
+            "pmtr16": "generator frequency base in Hz",
+            "pmtr17": "generator frequency scalar",
+            "pmtr18": "low-pass filter start cutoff frequency in Hz",
+            "pmtr19": "low-pass filter end cutoff frequency in Hz",
+        }
         self.pmtrDefault = {
-          'pmtr7'   : ('c', .9),
-          'pmtr8'   : ('c', .5),
-          'pmtr9'   : ('c', 0),
-          'pmtr10'  : ('sampleSelect', ('drum01.aif', 'latch01.aif')),
-          'pmtr11'  : ('c', 1),
-
-          'pmtr12'  : ('c', 40), # analysis cut-off fq
-          'pmtr13'  : ('c', 10), # band width, 20 is well pitched
-          
-          'pmtr14'  : ('c', 40),
-          'pmtr15'  : ('c', 1.15),
-
-          'pmtr16'  : ('c', 40),
-          'pmtr17'  : ('c', 1.15),
-
-          'pmtr18'  : ('c', 100),
-          'pmtr19'  : ('c', 20000),
-          }
-        self.author = 'athenaCL native' # attribution
+            "pmtr7": ("c", 0.9),
+            "pmtr8": ("c", 0.5),
+            "pmtr9": ("c", 0),
+            "pmtr10": ("sampleSelect", ("drum01.aif", "latch01.aif")),
+            "pmtr11": ("c", 1),
+            "pmtr12": ("c", 40),  # analysis cut-off fq
+            "pmtr13": ("c", 10),  # band width, 20 is well pitched
+            "pmtr14": ("c", 40),
+            "pmtr15": ("c", 1.15),
+            "pmtr16": ("c", 40),
+            "pmtr17": ("c", 1.15),
+            "pmtr18": ("c", 100),
+            "pmtr19": ("c", 20000),
+        }
+        self.author = "athenaCL native"  # attribution
         self.orcCode = """
 instr %s
     iDur = p3
@@ -6563,60 +6613,57 @@ instr %s
     ; scale by macro envelope        
     aMixSig     = aSig * kAmp
     
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
 
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 # 48 ch
+
 
 class Inst146(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 146
-        self.name = 'vocodeSineHexOctScale'
-        self.info = 'A forty eight channel vocoder with scaled mapping and a sine generator.'
+        self.name = "vocodeSineHexOctScale"
+        self.info = (
+            "A forty eight channel vocoder with scaled mapping and a sine generator."
+        )
         self.auxNo = 13
-        self.postMapAmp = (0, 10, 'linear') # amps from experiment
+        self.postMapAmp = (0, 10, "linear")  # amps from experiment
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'sustain percent within unit interval',
-          'pmtr8'   : 'sustain center within unit interval',
-          'pmtr9'   : 'analysis audio file start time',
-          'pmtr10'  : 'analysis file path to desired sound file',
-          'pmtr11'  : 'analysis file play back speed',
-
-          'pmtr12'  : 'analysis low-pass filter cutoff frequency in Hz',
-          'pmtr13'  : 'analysis band-pass bw (not q), from 10 to 500',
-
-          'pmtr14'  : 'analysis frequency base in Hz',
-          'pmtr15'  : 'analysis frequency scalar',        
-
-          'pmtr16'  : 'generator frequency base in Hz',
-          'pmtr17'  : 'generator frequency scalar',       
-
-          'pmtr18'  : 'low-pass filter start cutoff frequency in Hz',
-          'pmtr19'  : 'low-pass filter end cutoff frequency in Hz',
-          }
+            "pmtr7": "sustain percent within unit interval",
+            "pmtr8": "sustain center within unit interval",
+            "pmtr9": "analysis audio file start time",
+            "pmtr10": "analysis file path to desired sound file",
+            "pmtr11": "analysis file play back speed",
+            "pmtr12": "analysis low-pass filter cutoff frequency in Hz",
+            "pmtr13": "analysis band-pass bw (not q), from 10 to 500",
+            "pmtr14": "analysis frequency base in Hz",
+            "pmtr15": "analysis frequency scalar",
+            "pmtr16": "generator frequency base in Hz",
+            "pmtr17": "generator frequency scalar",
+            "pmtr18": "low-pass filter start cutoff frequency in Hz",
+            "pmtr19": "low-pass filter end cutoff frequency in Hz",
+        }
         self.pmtrDefault = {
-          'pmtr7'   : ('c', .9),
-          'pmtr8'   : ('c', .5),
-          'pmtr9'   : ('c', 0),
-          'pmtr10'  : ('sampleSelect', ('drum01.aif', 'latch01.aif')),
-          'pmtr11'  : ('c', 1),
-
-          'pmtr12'  : ('c', 40), # analysis cut-off fq
-          'pmtr13'  : ('c', 10), # band width, 20 is well pitched
-          
-          'pmtr14'  : ('c', 40),
-          'pmtr15'  : ('c', 1.125),
-
-          'pmtr16'  : ('c', 40),
-          'pmtr17'  : ('c', 1.125),
-
-          'pmtr18'  : ('c', 2000),
-          'pmtr19'  : ('c', 20000),
-          }
-        self.author = 'athenaCL native' # attribution
+            "pmtr7": ("c", 0.9),
+            "pmtr8": ("c", 0.5),
+            "pmtr9": ("c", 0),
+            "pmtr10": ("sampleSelect", ("drum01.aif", "latch01.aif")),
+            "pmtr11": ("c", 1),
+            "pmtr12": ("c", 40),  # analysis cut-off fq
+            "pmtr13": ("c", 10),  # band width, 20 is well pitched
+            "pmtr14": ("c", 40),
+            "pmtr15": ("c", 1.125),
+            "pmtr16": ("c", 40),
+            "pmtr17": ("c", 1.125),
+            "pmtr18": ("c", 2000),
+            "pmtr19": ("c", 20000),
+        }
+        self.author = "athenaCL native"  # attribution
         self.orcCode = """
 instr %s
     iDur = p3
@@ -7079,68 +7126,60 @@ instr %s
     ; scale by macro envelope        
     aMixSig     = aSig * kAmp
     
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
 
-
-
-
-
-
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 class Inst110(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 110
-        self.name = 'noiseAudioEnvelopeSineQuad'
-        self.info = 'A noise generator with an audio-rate sine envelope, a proportional linear envelope, and a variable low-pass filter'
+        self.name = "noiseAudioEnvelopeSineQuad"
+        self.info = "A noise generator with an audio-rate sine envelope, a proportional linear envelope, and a variable low-pass filter"
         self.auxNo = 17
-        self.postMapAmp = (0, 90, 'linear') # assume amps not greater tn 10
+        self.postMapAmp = (0, 90, "linear")  # assume amps not greater tn 10
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'sustain percent within unit interval',
-          'pmtr8'   : 'sustain center within unit interval',
-          'pmtr9'   : 'low-pass filter start cutoff frequency in Hz',
-          'pmtr10'  : 'low-pass filter end cutoff frequency in Hz',
-          'pmtr11'  : 'low-pass filter resonance between 1 and 500',
-
-          'pmtr12'  : 'tremelo sine 1 start frequency in Hz',
-          'pmtr13'  : 'tremelo sine 1 end frequency in Hz',
-          'pmtr14'  : 'tremelo sine 1 amp (0-1)',
-          'pmtr15'  : 'tremelo sine 2 start frequency in Hz',
-          'pmtr16'  : 'tremelo sine 2 end frequency in Hz',
-          'pmtr17'  : 'tremelo sine 2 amp (0-1)',
-          'pmtr18'  : 'tremelo sine 3 start frequency in Hz',
-          'pmtr19'  : 'tremelo sine 3 end frequency in Hz',
-          'pmtr20'  : 'tremelo sine 3 amp (0-1)',
-          'pmtr21'  : 'tremelo sine 4 start frequency in Hz',
-          'pmtr22'  : 'tremelo sine 4 end frequency in Hz',
-          'pmtr23'  : 'tremelo sine 4 amp (0-1)',            
-          }
+            "pmtr7": "sustain percent within unit interval",
+            "pmtr8": "sustain center within unit interval",
+            "pmtr9": "low-pass filter start cutoff frequency in Hz",
+            "pmtr10": "low-pass filter end cutoff frequency in Hz",
+            "pmtr11": "low-pass filter resonance between 1 and 500",
+            "pmtr12": "tremelo sine 1 start frequency in Hz",
+            "pmtr13": "tremelo sine 1 end frequency in Hz",
+            "pmtr14": "tremelo sine 1 amp (0-1)",
+            "pmtr15": "tremelo sine 2 start frequency in Hz",
+            "pmtr16": "tremelo sine 2 end frequency in Hz",
+            "pmtr17": "tremelo sine 2 amp (0-1)",
+            "pmtr18": "tremelo sine 3 start frequency in Hz",
+            "pmtr19": "tremelo sine 3 end frequency in Hz",
+            "pmtr20": "tremelo sine 3 amp (0-1)",
+            "pmtr21": "tremelo sine 4 start frequency in Hz",
+            "pmtr22": "tremelo sine 4 end frequency in Hz",
+            "pmtr23": "tremelo sine 4 amp (0-1)",
+        }
         self.pmtrDefault = {
-          'pmtr7'   : ('c', .5),
-          'pmtr8'   : ('c', .5),
-          'pmtr9'   : ('c', 14000),
-          'pmtr10'  : ('c', 100),
-          'pmtr11'  : ('c', 1),
-
-          'pmtr12'  : ('c', 1),
-          'pmtr13'  : ('c', 16),
-          'pmtr14'  : ('c', 1),
-          
-          'pmtr15'  : ('c', 2),
-          'pmtr16'  : ('c', .125),
-          'pmtr17'  : ('c', .5),
-          
-          'pmtr18'  : ('c', 32),
-          'pmtr19'  : ('c', 16),
-          'pmtr20'  : ('c', .9),
-
-          'pmtr21'  : ('c', .43),
-          'pmtr22'  : ('c', 200),
-          'pmtr23'  : ('c', 0),          
-          }
-        self.author = 'athenaCL native' # attribution
+            "pmtr7": ("c", 0.5),
+            "pmtr8": ("c", 0.5),
+            "pmtr9": ("c", 14000),
+            "pmtr10": ("c", 100),
+            "pmtr11": ("c", 1),
+            "pmtr12": ("c", 1),
+            "pmtr13": ("c", 16),
+            "pmtr14": ("c", 1),
+            "pmtr15": ("c", 2),
+            "pmtr16": ("c", 0.125),
+            "pmtr17": ("c", 0.5),
+            "pmtr18": ("c", 32),
+            "pmtr19": ("c", 16),
+            "pmtr20": ("c", 0.9),
+            "pmtr21": ("c", 0.43),
+            "pmtr22": ("c", 200),
+            "pmtr23": ("c", 0),
+        }
+        self.author = "athenaCL native"  # attribution
         self.orcCode = """
 instr %s
     iDur = p3
@@ -7204,63 +7243,60 @@ instr %s
     aSig            lowpass2     aSig, kFreq, kq 
     aMixSig     = aSig * kAmp * aTrem01 * aTrem02 * aTrem03 * aTrem04
     
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
 
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 class Inst111(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 111
-        self.name = 'noiseAudioEnvelopeSquareQuad'
-        self.info = 'A noise generator with an audio-rate square envelope, a proportional linear envelope, and a variable low-pass filter'
+        self.name = "noiseAudioEnvelopeSquareQuad"
+        self.info = "A noise generator with an audio-rate square envelope, a proportional linear envelope, and a variable low-pass filter"
         self.auxNo = 17
-        self.postMapAmp = (0, 90, 'linear') # assume amps not greater tn 10
+        self.postMapAmp = (0, 90, "linear")  # assume amps not greater tn 10
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'sustain percent within unit interval',
-          'pmtr8'   : 'sustain center within unit interval',
-          'pmtr9'   : 'low-pass filter start cutoff frequency in Hz',
-          'pmtr10'  : 'low-pass filter end cutoff frequency in Hz',
-          'pmtr11'  : 'low-pass filter resonance between 1 and 500',
-
-          'pmtr12'  : 'tremelo square 1 start frequency in Hz',
-          'pmtr13'  : 'tremelo square 1 end frequency in Hz',
-          'pmtr14'  : 'tremelo square 1 amp (0-1)',
-          'pmtr15'  : 'tremelo square 2 start frequency in Hz',
-          'pmtr16'  : 'tremelo square 2 end frequency in Hz',
-          'pmtr17'  : 'tremelo square 2 amp (0-1)',
-          'pmtr18'  : 'tremelo square 3 start frequency in Hz',
-          'pmtr19'  : 'tremelo square 3 end frequency in Hz',
-          'pmtr20'  : 'tremelo square 3 amp (0-1)',
-          'pmtr21'  : 'tremelo square 4 start frequency in Hz',
-          'pmtr22'  : 'tremelo square 4 end frequency in Hz',
-          'pmtr23'  : 'tremelo square 4 amp (0-1)',         
-          }
+            "pmtr7": "sustain percent within unit interval",
+            "pmtr8": "sustain center within unit interval",
+            "pmtr9": "low-pass filter start cutoff frequency in Hz",
+            "pmtr10": "low-pass filter end cutoff frequency in Hz",
+            "pmtr11": "low-pass filter resonance between 1 and 500",
+            "pmtr12": "tremelo square 1 start frequency in Hz",
+            "pmtr13": "tremelo square 1 end frequency in Hz",
+            "pmtr14": "tremelo square 1 amp (0-1)",
+            "pmtr15": "tremelo square 2 start frequency in Hz",
+            "pmtr16": "tremelo square 2 end frequency in Hz",
+            "pmtr17": "tremelo square 2 amp (0-1)",
+            "pmtr18": "tremelo square 3 start frequency in Hz",
+            "pmtr19": "tremelo square 3 end frequency in Hz",
+            "pmtr20": "tremelo square 3 amp (0-1)",
+            "pmtr21": "tremelo square 4 start frequency in Hz",
+            "pmtr22": "tremelo square 4 end frequency in Hz",
+            "pmtr23": "tremelo square 4 amp (0-1)",
+        }
         self.pmtrDefault = {
-          'pmtr7'   : ('c', .5),
-          'pmtr8'   : ('c', .5),
-          'pmtr9'   : ('c', 14000),
-          'pmtr10'  : ('c', 100),
-          'pmtr11'  : ('c', 1),
-
-          'pmtr12'  : ('c', 2),
-          'pmtr13'  : ('c', 32),
-          'pmtr14'  : ('c', 1),
-          
-          'pmtr15'  : ('c', 2),
-          'pmtr16'  : ('c', .125),
-          'pmtr17'  : ('c', .5),
-          
-          'pmtr18'  : ('c', 32),
-          'pmtr19'  : ('c', 16),
-          'pmtr20'  : ('c', 0),
-
-          'pmtr21'  : ('c', .43),
-          'pmtr22'  : ('c', 200),
-          'pmtr23'  : ('c', 0),          
-          }
-        self.author = 'athenaCL native' # attribution
+            "pmtr7": ("c", 0.5),
+            "pmtr8": ("c", 0.5),
+            "pmtr9": ("c", 14000),
+            "pmtr10": ("c", 100),
+            "pmtr11": ("c", 1),
+            "pmtr12": ("c", 2),
+            "pmtr13": ("c", 32),
+            "pmtr14": ("c", 1),
+            "pmtr15": ("c", 2),
+            "pmtr16": ("c", 0.125),
+            "pmtr17": ("c", 0.5),
+            "pmtr18": ("c", 32),
+            "pmtr19": ("c", 16),
+            "pmtr20": ("c", 0),
+            "pmtr21": ("c", 0.43),
+            "pmtr22": ("c", 200),
+            "pmtr23": ("c", 0),
+        }
+        self.author = "athenaCL native"  # attribution
         self.orcCode = """
 instr %s
     iDur = p3
@@ -7326,69 +7362,65 @@ instr %s
     aSig            lowpass2     aSig, kFreq, kq 
     aMixSig     = aSig * kAmp * aTrem01 * aTrem02 * aTrem03 * aTrem04
     
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
 
-
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 class Inst130(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 130
-        self.name = 'samplerAudioEnvelopeSineQuad'
-        self.info = 'A sampler with an audio-rate sine summed envelope, a proportional linear envelope, and a variable low-pass filter.'
+        self.name = "samplerAudioEnvelopeSineQuad"
+        self.info = "A sampler with an audio-rate sine summed envelope, a proportional linear envelope, and a variable low-pass filter."
         self.auxNo = 19
-        self.postMapAmp = (0, 9, 'linear') # assume amps not greater tn 1
+        self.postMapAmp = (0, 9, "linear")  # assume amps not greater tn 1
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'sustain percent within unit interval',
-          'pmtr8'   : 'sustain center within unit interval',
-          'pmtr9'   : 'low-pass filter start cutoff frequency in Hz',
-          'pmtr10'  : 'low-pass filter end cutoff frequency in Hz',
-          'pmtr11'  : 'low-pass filter resonance between 1 and 500',
-          'pmtr12'  : 'start time within audio file',
-          'pmtr13'  : 'file path to desired sound file',
-          
-          'pmtr14'  : 'tremelo sine 1 start frequency in Hz',
-          'pmtr15'  : 'tremelo sine 1 end frequency in Hz',
-          'pmtr16'  : 'tremelo sine 1 amp (0-1)',
-          'pmtr17'  : 'tremelo sine 2 start frequency in Hz',
-          'pmtr18'  : 'tremelo sine 2 end frequency in Hz',
-          'pmtr19'  : 'tremelo sine 2 amp (0-1)',
-          'pmtr20'  : 'tremelo sine 3 start frequency in Hz',
-          'pmtr21'  : 'tremelo sine 3 end frequency in Hz',
-          'pmtr22'  : 'tremelo sine 3 amp (0-1)',
-          'pmtr23'  : 'tremelo sine 4 start frequency in Hz',
-          'pmtr24'  : 'tremelo sine 4 end frequency in Hz',
-          'pmtr25'  : 'tremelo sine 4 amp (0-1)',            
-          }
-          
+            "pmtr7": "sustain percent within unit interval",
+            "pmtr8": "sustain center within unit interval",
+            "pmtr9": "low-pass filter start cutoff frequency in Hz",
+            "pmtr10": "low-pass filter end cutoff frequency in Hz",
+            "pmtr11": "low-pass filter resonance between 1 and 500",
+            "pmtr12": "start time within audio file",
+            "pmtr13": "file path to desired sound file",
+            "pmtr14": "tremelo sine 1 start frequency in Hz",
+            "pmtr15": "tremelo sine 1 end frequency in Hz",
+            "pmtr16": "tremelo sine 1 amp (0-1)",
+            "pmtr17": "tremelo sine 2 start frequency in Hz",
+            "pmtr18": "tremelo sine 2 end frequency in Hz",
+            "pmtr19": "tremelo sine 2 amp (0-1)",
+            "pmtr20": "tremelo sine 3 start frequency in Hz",
+            "pmtr21": "tremelo sine 3 end frequency in Hz",
+            "pmtr22": "tremelo sine 3 amp (0-1)",
+            "pmtr23": "tremelo sine 4 start frequency in Hz",
+            "pmtr24": "tremelo sine 4 end frequency in Hz",
+            "pmtr25": "tremelo sine 4 amp (0-1)",
+        }
+
         self.pmtrDefault = {
-          'pmtr7'   : ('c', .5),
-          'pmtr8'   : ('c', .5),
-          'pmtr9'   : ('c', 18000),
-          'pmtr10'  : ('c', 8000),
-          'pmtr11'  : ('c', 1),
-          'pmtr12'  : ('c', 0),
-          'pmtr13'  : ('sampleSelect', ('drum01.aif', 'latch01.aif')),
-
-          'pmtr14'  : ('c', 32),
-          'pmtr15'  : ('c', 16),
-          'pmtr16'  : ('c', 1),
-          
-          'pmtr17'  : ('c', 2),
-          'pmtr18'  : ('c', .125),
-          'pmtr19'  : ('c', .5),
-          
-          'pmtr20'  : ('c', 32),
-          'pmtr21'  : ('c', 16),
-          'pmtr22'  : ('c', 0),
-
-          'pmtr23'  : ('c', .43),
-          'pmtr24'  : ('c', 200),
-          'pmtr25'  : ('c', 0),          
-          }
-        self.author = 'athenaCL native' # attribution
+            "pmtr7": ("c", 0.5),
+            "pmtr8": ("c", 0.5),
+            "pmtr9": ("c", 18000),
+            "pmtr10": ("c", 8000),
+            "pmtr11": ("c", 1),
+            "pmtr12": ("c", 0),
+            "pmtr13": ("sampleSelect", ("drum01.aif", "latch01.aif")),
+            "pmtr14": ("c", 32),
+            "pmtr15": ("c", 16),
+            "pmtr16": ("c", 1),
+            "pmtr17": ("c", 2),
+            "pmtr18": ("c", 0.125),
+            "pmtr19": ("c", 0.5),
+            "pmtr20": ("c", 32),
+            "pmtr21": ("c", 16),
+            "pmtr22": ("c", 0),
+            "pmtr23": ("c", 0.43),
+            "pmtr24": ("c", 200),
+            "pmtr25": ("c", 0),
+        }
+        self.author = "athenaCL native"  # attribution
         self.orcCode = """
 instr %s
     iDur = p3
@@ -7459,68 +7491,65 @@ instr %s
     ; apply tremelo, then macro envelope
     aMixSig     = aSig * kAmp * aTrem01 * aTrem02 * aTrem03 * aTrem04
     
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
 
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 class Inst131(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 131
-        self.name = 'samplerAudioEnvelopeSquareQuad'
-        self.info = 'A sampler with an audio-rate square envelope, a proportional linear envelope, and a variable low-pass filter.'
+        self.name = "samplerAudioEnvelopeSquareQuad"
+        self.info = "A sampler with an audio-rate square envelope, a proportional linear envelope, and a variable low-pass filter."
         self.auxNo = 19
-        self.postMapAmp = (0, 9, 'linear') # assume amps not greater tn 1
+        self.postMapAmp = (0, 9, "linear")  # assume amps not greater tn 1
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'sustain percent within unit interval',
-          'pmtr8'   : 'sustain center within unit interval',
-          'pmtr9'   : 'low-pass filter start cutoff frequency in Hz',
-          'pmtr10'  : 'low-pass filter end cutoff frequency in Hz',
-          'pmtr11'  : 'low-pass filter resonance between 1 and 500',
-          'pmtr12'  : 'start time within audio file',
-          'pmtr13'  : 'file path to desired sound file',
-          
-          'pmtr14'  : 'tremelo sine 1 start frequency in Hz',
-          'pmtr15'  : 'tremelo sine 1 end frequency in Hz',
-          'pmtr16'  : 'tremelo sine 1 amp (0-1)',
-          'pmtr17'  : 'tremelo sine 2 start frequency in Hz',
-          'pmtr18'  : 'tremelo sine 2 end frequency in Hz',
-          'pmtr19'  : 'tremelo sine 2 amp (0-1)',
-          'pmtr20'  : 'tremelo sine 3 start frequency in Hz',
-          'pmtr21'  : 'tremelo sine 3 end frequency in Hz',
-          'pmtr22'  : 'tremelo sine 3 amp (0-1)',
-          'pmtr23'  : 'tremelo sine 4 start frequency in Hz',
-          'pmtr24'  : 'tremelo sine 4 end frequency in Hz',
-          'pmtr25'  : 'tremelo sine 4 amp (0-1)',            
-          }
-          
+            "pmtr7": "sustain percent within unit interval",
+            "pmtr8": "sustain center within unit interval",
+            "pmtr9": "low-pass filter start cutoff frequency in Hz",
+            "pmtr10": "low-pass filter end cutoff frequency in Hz",
+            "pmtr11": "low-pass filter resonance between 1 and 500",
+            "pmtr12": "start time within audio file",
+            "pmtr13": "file path to desired sound file",
+            "pmtr14": "tremelo sine 1 start frequency in Hz",
+            "pmtr15": "tremelo sine 1 end frequency in Hz",
+            "pmtr16": "tremelo sine 1 amp (0-1)",
+            "pmtr17": "tremelo sine 2 start frequency in Hz",
+            "pmtr18": "tremelo sine 2 end frequency in Hz",
+            "pmtr19": "tremelo sine 2 amp (0-1)",
+            "pmtr20": "tremelo sine 3 start frequency in Hz",
+            "pmtr21": "tremelo sine 3 end frequency in Hz",
+            "pmtr22": "tremelo sine 3 amp (0-1)",
+            "pmtr23": "tremelo sine 4 start frequency in Hz",
+            "pmtr24": "tremelo sine 4 end frequency in Hz",
+            "pmtr25": "tremelo sine 4 amp (0-1)",
+        }
+
         self.pmtrDefault = {
-          'pmtr7'   : ('c', .5),
-          'pmtr8'   : ('c', .5),
-          'pmtr9'   : ('c', 18000),
-          'pmtr10'  : ('c', 8000),
-          'pmtr11'  : ('c', 1),
-          'pmtr12'  : ('c', 0),
-          'pmtr13'  : ('sampleSelect', ('drum01.aif', 'latch01.aif')),
-
-          'pmtr14'  : ('c', 32),
-          'pmtr15'  : ('c', 16),
-          'pmtr16'  : ('c', 1),
-          
-          'pmtr17'  : ('c', 2),
-          'pmtr18'  : ('c', .125),
-          'pmtr19'  : ('c', .5),
-          
-          'pmtr20'  : ('c', 32),
-          'pmtr21'  : ('c', 16),
-          'pmtr22'  : ('c', 0),
-
-          'pmtr23'  : ('c', .43),
-          'pmtr24'  : ('c', 200),
-          'pmtr25'  : ('c', 0),          
-          }
-        self.author = 'athenaCL native' # attribution
+            "pmtr7": ("c", 0.5),
+            "pmtr8": ("c", 0.5),
+            "pmtr9": ("c", 18000),
+            "pmtr10": ("c", 8000),
+            "pmtr11": ("c", 1),
+            "pmtr12": ("c", 0),
+            "pmtr13": ("sampleSelect", ("drum01.aif", "latch01.aif")),
+            "pmtr14": ("c", 32),
+            "pmtr15": ("c", 16),
+            "pmtr16": ("c", 1),
+            "pmtr17": ("c", 2),
+            "pmtr18": ("c", 0.125),
+            "pmtr19": ("c", 0.5),
+            "pmtr20": ("c", 32),
+            "pmtr21": ("c", 16),
+            "pmtr22": ("c", 0),
+            "pmtr23": ("c", 0.43),
+            "pmtr24": ("c", 200),
+            "pmtr25": ("c", 0),
+        }
+        self.author = "athenaCL native"  # attribution
         self.orcCode = """
 instr %s
     iDur = p3
@@ -7591,56 +7620,51 @@ instr %s
     ; apply tremelo, then macro envelope
     aMixSig     = aSig * kAmp * aTrem01 * aTrem02 * aTrem03 * aTrem04
     
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
 
-
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 class Inst132(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 132
-        self.name = 'samplerAudioFileEnvelopeFilter'
-        self.info = 'A sampler with an audio-rate envelope generated by another audio file, a proportional linear envelope, and a variable low-pass filter.'
+        self.name = "samplerAudioFileEnvelopeFilter"
+        self.info = "A sampler with an audio-rate envelope generated by another audio file, a proportional linear envelope, and a variable low-pass filter."
         self.auxNo = 12
-        self.postMapAmp = (0, 12, 'linear') # a bit louder than audio file
+        self.postMapAmp = (0, 12, "linear")  # a bit louder than audio file
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'sustain percent within unit interval',
-          'pmtr8'   : 'sustain center within unit interval',
-          'pmtr9'   : 'low-pass filter start cutoff frequency in Hz',
-          'pmtr10'  : 'low-pass filter end cutoff frequency in Hz',
-          'pmtr11'  : 'low-pass filter resonance between 1 and 500',
-        
-          'pmtr12'  : 'analysis audio file start time',
-          'pmtr13'  : 'analysis audio file file path',
-          'pmtr14'  : 'analysis audio play back speed',          
+            "pmtr7": "sustain percent within unit interval",
+            "pmtr8": "sustain center within unit interval",
+            "pmtr9": "low-pass filter start cutoff frequency in Hz",
+            "pmtr10": "low-pass filter end cutoff frequency in Hz",
+            "pmtr11": "low-pass filter resonance between 1 and 500",
+            "pmtr12": "analysis audio file start time",
+            "pmtr13": "analysis audio file file path",
+            "pmtr14": "analysis audio play back speed",
+            "pmtr15": "analysis low-pass filter cutoff frequency in Hz",
+            "pmtr16": "source audio file start time",
+            "pmtr17": "source audio file path",
+            "pmtr18": "source audio play back speed",
+        }
 
-          'pmtr15'  : 'analysis low-pass filter cutoff frequency in Hz',            
-
-          'pmtr16'  : 'source audio file start time',
-          'pmtr17'  : 'source audio file path',
-          'pmtr18'  : 'source audio play back speed',
-          }
-          
         self.pmtrDefault = {
-          'pmtr7'   : ('c', .5),
-          'pmtr8'   : ('c', .5),
-          'pmtr9'   : ('c', 18000),
-          'pmtr10'  : ('c', 8000),
-          'pmtr11'  : ('c', 1),
-          
-          'pmtr12'  : ('c', 0),
-          'pmtr13'  : ('sampleSelect', ('drum01.aif', 'latch01.aif')),
-          'pmtr14'  : ('c', 2),
-          
-          'pmtr15'  : ('c', 40),
-          
-          'pmtr16'  : ('c', 0),
-          'pmtr17'  : ('sampleSelect', ('drum01.aif', 'latch01.aif')),
-          'pmtr18'  : ('c', .75),
-          }
-        self.author = 'athenaCL native' # attribution
+            "pmtr7": ("c", 0.5),
+            "pmtr8": ("c", 0.5),
+            "pmtr9": ("c", 18000),
+            "pmtr10": ("c", 8000),
+            "pmtr11": ("c", 1),
+            "pmtr12": ("c", 0),
+            "pmtr13": ("sampleSelect", ("drum01.aif", "latch01.aif")),
+            "pmtr14": ("c", 2),
+            "pmtr15": ("c", 40),
+            "pmtr16": ("c", 0),
+            "pmtr17": ("sampleSelect", ("drum01.aif", "latch01.aif")),
+            "pmtr18": ("c", 0.75),
+        }
+        self.author = "athenaCL native"  # attribution
         self.orcCode = """
 instr %s
     iDur = p3
@@ -7692,57 +7716,53 @@ instr %s
     ; apply tremelo, then macro envelope
     aMixSig     = aSig * kAmp * aAmpCh01
     
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
 
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 class Inst133(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 133
-        self.name = 'samplerAudioFileEnvelopeFollow'
-        self.info = 'A sampler with an audio-rate envelope generated by another audio file, a proportional linear envelope, and a variable low-pass filter.'
+        self.name = "samplerAudioFileEnvelopeFollow"
+        self.info = "A sampler with an audio-rate envelope generated by another audio file, a proportional linear envelope, and a variable low-pass filter."
         self.auxNo = 13
-        self.postMapAmp = (0, 22, 'linear') # a bit louder than audio file
+        self.postMapAmp = (0, 22, "linear")  # a bit louder than audio file
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'sustain percent within unit interval',
-          'pmtr8'   : 'sustain center within unit interval',
-          'pmtr9'   : 'low-pass filter start cutoff frequency in Hz',
-          'pmtr10'  : 'low-pass filter end cutoff frequency in Hz',
-          'pmtr11'  : 'low-pass filter resonance between 1 and 500',
-        
-          'pmtr12'  : 'analysis audio file start time',
-          'pmtr13'  : 'analysis audio file file path',
-          'pmtr14'  : 'analysis audio play back speed',          
+            "pmtr7": "sustain percent within unit interval",
+            "pmtr8": "sustain center within unit interval",
+            "pmtr9": "low-pass filter start cutoff frequency in Hz",
+            "pmtr10": "low-pass filter end cutoff frequency in Hz",
+            "pmtr11": "low-pass filter resonance between 1 and 500",
+            "pmtr12": "analysis audio file start time",
+            "pmtr13": "analysis audio file file path",
+            "pmtr14": "analysis audio play back speed",
+            "pmtr15": "analysis follow attack time in seconds",
+            "pmtr16": "analysis follow decay time in seconds",
+            "pmtr17": "source audio file start time",
+            "pmtr18": "source audio file path",
+            "pmtr19": "source audio play back speed",
+        }
 
-          'pmtr15'  : 'analysis follow attack time in seconds',         
-          'pmtr16'  : 'analysis follow decay time in seconds',        
-
-          'pmtr17'  : 'source audio file start time',
-          'pmtr18'  : 'source audio file path',
-          'pmtr19'  : 'source audio play back speed',
-          }
-          
         self.pmtrDefault = {
-          'pmtr7'   : ('c', .5),
-          'pmtr8'   : ('c', .5),
-          'pmtr9'   : ('c', 18000),
-          'pmtr10'  : ('c', 8000),
-          'pmtr11'  : ('c', 1),
-          
-          'pmtr12'  : ('c', 0),
-          'pmtr13'  : ('sampleSelect', ('drum01.aif', 'latch01.aif')),
-          'pmtr14'  : ('c', 2),
-          
-          'pmtr15'  : ('c', .1),
-          'pmtr16'  : ('c', .1),
-          
-          'pmtr17'  : ('c', 0),
-          'pmtr18'  : ('sampleSelect', ('drum01.aif', 'latch01.aif')),
-          'pmtr19'  : ('c', .75),
-          }
-        self.author = 'athenaCL native' # attribution
+            "pmtr7": ("c", 0.5),
+            "pmtr8": ("c", 0.5),
+            "pmtr9": ("c", 18000),
+            "pmtr10": ("c", 8000),
+            "pmtr11": ("c", 1),
+            "pmtr12": ("c", 0),
+            "pmtr13": ("sampleSelect", ("drum01.aif", "latch01.aif")),
+            "pmtr14": ("c", 2),
+            "pmtr15": ("c", 0.1),
+            "pmtr16": ("c", 0.1),
+            "pmtr17": ("c", 0),
+            "pmtr18": ("sampleSelect", ("drum01.aif", "latch01.aif")),
+            "pmtr19": ("c", 0.75),
+        }
+        self.author = "athenaCL native"  # attribution
         self.orcCode = """
 instr %s
     iDur = p3
@@ -7791,54 +7811,48 @@ instr %s
     ; apply tremelo, then macro envelope
     aMixSig     = aSig * kAmp * aAmpCh01
     
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
 
-
-
-
-
-
-
-
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 # vari speed sampler
+
 
 class Inst230(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 230
-        self.name = 'samplerVarispeed'
-        self.info = 'A sampler with a variable playback speed, a proportional linear envelope, and a variable low-pass filter.'
+        self.name = "samplerVarispeed"
+        self.info = "A sampler with a variable playback speed, a proportional linear envelope, and a variable low-pass filter."
         self.auxNo = 9
-        self.postMapAmp = (0, 9, 'linear') # assume amps not greater tn 1
+        self.postMapAmp = (0, 9, "linear")  # assume amps not greater tn 1
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'sustain percent within unit interval',
-          'pmtr8'   : 'sustain center within unit interval',
-          'pmtr9'   : 'low-pass filter start cutoff frequency in Hz',
-          'pmtr10'  : 'low-pass filter end cutoff frequency in Hz',
-          'pmtr11'  : 'low-pass filter resonance between 1 and 500',
-          'pmtr12'  : 'start time within audio file',
-          'pmtr13'  : 'file path to desired sound file',
-          
-          'pmtr14'  : 'file play back start speed (1 is normal)',
-          'pmtr15'  : 'file play back end speed (1 is normal)',
-          }
-          
-        self.pmtrDefault = {
-          'pmtr7'   : ('c', .5),
-          'pmtr8'   : ('c', .5),
-          'pmtr9'   : ('c', 18000),
-          'pmtr10'  : ('c', 8000),
-          'pmtr11'  : ('c', 1),
-          'pmtr12'  : ('c', 0),
-          'pmtr13'  : ('sampleSelect', ('drum01.aif', 'latch01.aif')),
+            "pmtr7": "sustain percent within unit interval",
+            "pmtr8": "sustain center within unit interval",
+            "pmtr9": "low-pass filter start cutoff frequency in Hz",
+            "pmtr10": "low-pass filter end cutoff frequency in Hz",
+            "pmtr11": "low-pass filter resonance between 1 and 500",
+            "pmtr12": "start time within audio file",
+            "pmtr13": "file path to desired sound file",
+            "pmtr14": "file play back start speed (1 is normal)",
+            "pmtr15": "file play back end speed (1 is normal)",
+        }
 
-          'pmtr14'  : ('c', .5),
-          'pmtr15'  : ('c', .75),
-          }
-        self.author = 'athenaCL native' # attribution
+        self.pmtrDefault = {
+            "pmtr7": ("c", 0.5),
+            "pmtr8": ("c", 0.5),
+            "pmtr9": ("c", 18000),
+            "pmtr10": ("c", 8000),
+            "pmtr11": ("c", 1),
+            "pmtr12": ("c", 0),
+            "pmtr13": ("sampleSelect", ("drum01.aif", "latch01.aif")),
+            "pmtr14": ("c", 0.5),
+            "pmtr15": ("c", 0.75),
+        }
+        self.author = "athenaCL native"  # attribution
         self.orcCode = """
 instr %s
     iDur = p3
@@ -7874,47 +7888,47 @@ instr %s
     ; apply tremelo, then macro envelope
     aMixSig     = aSig * kAmp
     
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
 
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 class Inst231(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 231
-        self.name = 'samplerVarispeedAudioSine'
-        self.info = 'A sampler with a sine-controlled playback speed, a proportional linear envelope, and a variable low-pass filter.'
+        self.name = "samplerVarispeedAudioSine"
+        self.info = "A sampler with a sine-controlled playback speed, a proportional linear envelope, and a variable low-pass filter."
         self.auxNo = 10
-        self.postMapAmp = (0, 1, 'linear') # assume amps not greater tn 1
+        self.postMapAmp = (0, 1, "linear")  # assume amps not greater tn 1
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'sustain percent within unit interval',
-          'pmtr8'   : 'sustain center within unit interval',
-          'pmtr9'   : 'low-pass filter start cutoff frequency in Hz',
-          'pmtr10'  : 'low-pass filter end cutoff frequency in Hz',
-          'pmtr11'  : 'low-pass filter resonance between 1 and 500',
-          'pmtr12'  : 'start time within audio file',
-          'pmtr13'  : 'file path to desired sound file',
-          
-          'pmtr14'  : 'file play back min speed (1 is normal)',
-          'pmtr15'  : 'file play back max speed (1 is normal)',
-          'pmtr16'  : 'file play back oscillation speed in Hz',
-          }
-          
-        self.pmtrDefault = {
-          'pmtr7'   : ('c', .5),
-          'pmtr8'   : ('c', .5),
-          'pmtr9'   : ('c', 16000),
-          'pmtr10'  : ('c', 2000),
-          'pmtr11'  : ('c', 1),
-          'pmtr12'  : ('c', 0),
-          'pmtr13'  : ('sampleSelect', ('drum01.aif', 'latch01.aif')),
+            "pmtr7": "sustain percent within unit interval",
+            "pmtr8": "sustain center within unit interval",
+            "pmtr9": "low-pass filter start cutoff frequency in Hz",
+            "pmtr10": "low-pass filter end cutoff frequency in Hz",
+            "pmtr11": "low-pass filter resonance between 1 and 500",
+            "pmtr12": "start time within audio file",
+            "pmtr13": "file path to desired sound file",
+            "pmtr14": "file play back min speed (1 is normal)",
+            "pmtr15": "file play back max speed (1 is normal)",
+            "pmtr16": "file play back oscillation speed in Hz",
+        }
 
-          'pmtr14'  : ('c', .25),
-          'pmtr15'  : ('c', 1.25),
-          'pmtr16'  : ('c', 200),
-          }
-        self.author = 'athenaCL native' # attribution
+        self.pmtrDefault = {
+            "pmtr7": ("c", 0.5),
+            "pmtr8": ("c", 0.5),
+            "pmtr9": ("c", 16000),
+            "pmtr10": ("c", 2000),
+            "pmtr11": ("c", 1),
+            "pmtr12": ("c", 0),
+            "pmtr13": ("sampleSelect", ("drum01.aif", "latch01.aif")),
+            "pmtr14": ("c", 0.25),
+            "pmtr15": ("c", 1.25),
+            "pmtr16": ("c", 200),
+        }
+        self.author = "athenaCL native"  # attribution
         self.orcCode = """
 instr %s
     iDur = p3
@@ -7954,53 +7968,51 @@ instr %s
     aSig            = aSig * aAmp
     aMixSig     = aSig
     
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
 
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 class Inst232(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 232
-        self.name = 'samplerVarispeedReverb'
-        self.info = 'A sampler with a variable playback speed that generates a wet reverb within a proportional linear envelope and a variable low-pass filter.'
+        self.name = "samplerVarispeedReverb"
+        self.info = "A sampler with a variable playback speed that generates a wet reverb within a proportional linear envelope and a variable low-pass filter."
         self.auxNo = 12
-        self.postMapAmp = (0, 9, 'linear') # assume amps not greater tn 1
+        self.postMapAmp = (0, 9, "linear")  # assume amps not greater tn 1
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'sustain percent within unit interval',
-          'pmtr8'   : 'sustain center within unit interval',
-          'pmtr9'   : 'low-pass filter start cutoff frequency in Hz',
-          'pmtr10'  : 'low-pass filter end cutoff frequency in Hz',
-          'pmtr11'  : 'low-pass filter resonance between 1 and 500',
-          'pmtr12'  : 'start time within audio file',
-          'pmtr13'  : 'file path to desired sound file',
-          
-          'pmtr14'  : 'file play back start speed (1 is normal)',
-          'pmtr15'  : 'file play back end speed (1 is normal)',
+            "pmtr7": "sustain percent within unit interval",
+            "pmtr8": "sustain center within unit interval",
+            "pmtr9": "low-pass filter start cutoff frequency in Hz",
+            "pmtr10": "low-pass filter end cutoff frequency in Hz",
+            "pmtr11": "low-pass filter resonance between 1 and 500",
+            "pmtr12": "start time within audio file",
+            "pmtr13": "file path to desired sound file",
+            "pmtr14": "file play back start speed (1 is normal)",
+            "pmtr15": "file play back end speed (1 is normal)",
+            "pmtr16": "reverb start time in seconds",
+            "pmtr17": "reverb end time in seconds",
+            "pmtr18": "reverb diffusion (0-1)",
+        }
 
-          'pmtr16'  : 'reverb start time in seconds',
-          'pmtr17'  : 'reverb end time in seconds',
-          'pmtr18'  : 'reverb diffusion (0-1)',
-          }
-          
         self.pmtrDefault = {
-          'pmtr7'   : ('c', .5),
-          'pmtr8'   : ('c', .5),
-          'pmtr9'   : ('c', 100),
-          'pmtr10'  : ('c', 2000),
-          'pmtr11'  : ('c', 1),
-          'pmtr12'  : ('c', 0),
-          'pmtr13'  : ('sampleSelect', ('drum01.aif', 'latch01.aif')),
-
-          'pmtr14'  : ('c', 1),
-          'pmtr15'  : ('c', .5),
-
-          'pmtr16'  : ('c', 20),
-          'pmtr17'  : ('c', .5),
-          'pmtr18'  : ('c', 0),  # non zero values seem to add hi fq noise
-          }
-        self.author = 'athenaCL native' # attribution
+            "pmtr7": ("c", 0.5),
+            "pmtr8": ("c", 0.5),
+            "pmtr9": ("c", 100),
+            "pmtr10": ("c", 2000),
+            "pmtr11": ("c", 1),
+            "pmtr12": ("c", 0),
+            "pmtr13": ("sampleSelect", ("drum01.aif", "latch01.aif")),
+            "pmtr14": ("c", 1),
+            "pmtr15": ("c", 0.5),
+            "pmtr16": ("c", 20),
+            "pmtr17": ("c", 0.5),
+            "pmtr18": ("c", 0),  # non zero values seem to add hi fq noise
+        }
+        self.author = "athenaCL native"  # attribution
         self.orcCode = """
 instr %s
     iDur = p3
@@ -8044,59 +8056,57 @@ instr %s
     ; apply macro envelope
     aMixSig     = aSig * kAmp
     
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
 
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 class Inst233(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 233
-        self.name = 'samplerVarispeedDistort'
-        self.info = 'A sampler with a variable playback speed distorted by a resonant low-pass filter within a proportional linear envelope and a variable low-pass filter.'
+        self.name = "samplerVarispeedDistort"
+        self.info = "A sampler with a variable playback speed distorted by a resonant low-pass filter within a proportional linear envelope and a variable low-pass filter."
         self.auxNo = 15
-        self.postMapAmp = (0, 90, 'linear') # assume amps not greater tn 1
+        self.postMapAmp = (0, 90, "linear")  # assume amps not greater tn 1
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'sustain percent within unit interval',
-          'pmtr8'   : 'sustain center within unit interval',
-          'pmtr9'   : 'low-pass filter start cutoff frequency in Hz',
-          'pmtr10'  : 'low-pass filter end cutoff frequency in Hz',
-          'pmtr11'  : 'low-pass filter resonance between 1 and 500',
-          'pmtr12'  : 'start time within audio file',
-          'pmtr13'  : 'file path to desired sound file',
-          
-          'pmtr14'  : 'file play back start speed (1 is normal)',
-          'pmtr15'  : 'file play back end speed (1 is normal)',
+            "pmtr7": "sustain percent within unit interval",
+            "pmtr8": "sustain center within unit interval",
+            "pmtr9": "low-pass filter start cutoff frequency in Hz",
+            "pmtr10": "low-pass filter end cutoff frequency in Hz",
+            "pmtr11": "low-pass filter resonance between 1 and 500",
+            "pmtr12": "start time within audio file",
+            "pmtr13": "file path to desired sound file",
+            "pmtr14": "file play back start speed (1 is normal)",
+            "pmtr15": "file play back end speed (1 is normal)",
+            "pmtr16": "resonant filter start cutoff frequency in Hz",
+            "pmtr17": "resonant filter end cutoff frequency in Hz",
+            "pmtr18": "resonant filter start resonance (0-2)",
+            "pmtr19": "resonant filter end resonance (0-2)",
+            "pmtr20": "resonant filter start distortion (0-10)",
+            "pmtr21": "resonant filter end distortion (0-10)",
+        }
 
-          'pmtr16'  : 'resonant filter start cutoff frequency in Hz',
-          'pmtr17'  : 'resonant filter end cutoff frequency in Hz',
-          'pmtr18'  : 'resonant filter start resonance (0-2)',
-          'pmtr19'  : 'resonant filter end resonance (0-2)',
-          'pmtr20'  : 'resonant filter start distortion (0-10)',
-          'pmtr21'  : 'resonant filter end distortion (0-10)',
-          }
-          
         self.pmtrDefault = {
-          'pmtr7'   : ('c', .95),
-          'pmtr8'   : ('c', .5),
-          'pmtr9'   : ('c', 10000),
-          'pmtr10'  : ('c', 2000),
-          'pmtr11'  : ('c', 1),
-          'pmtr12'  : ('c', 0),
-          'pmtr13'  : ('sampleSelect', ('drum01.aif', 'latch01.aif')),
-
-          'pmtr14'  : ('c', 1),
-          'pmtr15'  : ('c', 1),
-
-          'pmtr16'  : ('c', 1000),
-          'pmtr17'  : ('c', 6000),
-          'pmtr18'  : ('c', .8),
-          'pmtr19'  : ('c', .2),
-          'pmtr20'  : ('c', 100),
-          'pmtr21'  : ('c', 1),
-          }
-        self.author = 'athenaCL native' # attribution
+            "pmtr7": ("c", 0.95),
+            "pmtr8": ("c", 0.5),
+            "pmtr9": ("c", 10000),
+            "pmtr10": ("c", 2000),
+            "pmtr11": ("c", 1),
+            "pmtr12": ("c", 0),
+            "pmtr13": ("sampleSelect", ("drum01.aif", "latch01.aif")),
+            "pmtr14": ("c", 1),
+            "pmtr15": ("c", 1),
+            "pmtr16": ("c", 1000),
+            "pmtr17": ("c", 6000),
+            "pmtr18": ("c", 0.8),
+            "pmtr19": ("c", 0.2),
+            "pmtr20": ("c", 100),
+            "pmtr21": ("c", 1),
+        }
+        self.author = "athenaCL native"  # attribution
         self.orcCode = """
 instr %s
     iDur = p3
@@ -8149,75 +8159,70 @@ instr %s
     ; apply macro envelope
     aMixSig     = aSig * kAmp
     
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
 
-
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 class Inst234(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 234
-        self.name = 'samplerVarispeedSahNoiseDistort'
-        self.info = 'A sampler with third order sample and hold filter, a variable high-pass filter, a proportional linear envelope, a resonant low-pass filter, and a variable low-pass filter.'
+        self.name = "samplerVarispeedSahNoiseDistort"
+        self.info = "A sampler with third order sample and hold filter, a variable high-pass filter, a proportional linear envelope, a resonant low-pass filter, and a variable low-pass filter."
         self.auxNo = 22
-        self.postMapAmp = (0, 90, 'linear') # assume amps not greater tn 10
+        self.postMapAmp = (0, 90, "linear")  # assume amps not greater tn 10
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'sustain percent within unit interval',
-          'pmtr8'   : 'sustain center within unit interval',
-          'pmtr9'   : 'low-pass filter start cutoff frequency in Hz',
-          'pmtr10'  : 'low-pass filter end cutoff frequency in Hz',
-          'pmtr11'  : 'low-pass filter resonance between 1 and 500',
-          'pmtr12'  : 'start time within audio file',
-          'pmtr13'  : 'file path to desired sound file',
-          
-          'pmtr14'  : 'file play back start speed (1 is normal)',
-          'pmtr15'  : 'file play back end speed (1 is normal)',
-          
-          'pmtr16'  : 'high-pass filter start cutoff frequency in Hz',
-          'pmtr17'  : 'high-pass filter end cutoff frequency in Hz',          
-          'pmtr18'  : 'first order rate low in Hz',
-          'pmtr19'  : 'first order rate high in Hz',
-          'pmtr20'  : 'second order rate low in Hz',
-          'pmtr21'  : 'second order rate high in Hz',
-          'pmtr22'  : 'third order rate in Hz',
-          
-          'pmtr23'  : 'resonant filter start cutoff frequency in Hz',
-          'pmtr24'  : 'resonant filter end cutoff frequency in Hz',
-          'pmtr25'  : 'resonant filter start resonance (0-2)',
-          'pmtr26'  : 'resonant filter end resonance (0-2)',
-          'pmtr27'  : 'resonant filter start distortion (0-10)',
-          'pmtr28'  : 'resonant filter end distortion (0-10)',        
-          }
+            "pmtr7": "sustain percent within unit interval",
+            "pmtr8": "sustain center within unit interval",
+            "pmtr9": "low-pass filter start cutoff frequency in Hz",
+            "pmtr10": "low-pass filter end cutoff frequency in Hz",
+            "pmtr11": "low-pass filter resonance between 1 and 500",
+            "pmtr12": "start time within audio file",
+            "pmtr13": "file path to desired sound file",
+            "pmtr14": "file play back start speed (1 is normal)",
+            "pmtr15": "file play back end speed (1 is normal)",
+            "pmtr16": "high-pass filter start cutoff frequency in Hz",
+            "pmtr17": "high-pass filter end cutoff frequency in Hz",
+            "pmtr18": "first order rate low in Hz",
+            "pmtr19": "first order rate high in Hz",
+            "pmtr20": "second order rate low in Hz",
+            "pmtr21": "second order rate high in Hz",
+            "pmtr22": "third order rate in Hz",
+            "pmtr23": "resonant filter start cutoff frequency in Hz",
+            "pmtr24": "resonant filter end cutoff frequency in Hz",
+            "pmtr25": "resonant filter start resonance (0-2)",
+            "pmtr26": "resonant filter end resonance (0-2)",
+            "pmtr27": "resonant filter start distortion (0-10)",
+            "pmtr28": "resonant filter end distortion (0-10)",
+        }
         self.pmtrDefault = {
-          'pmtr7'   : ('c', .5),
-          'pmtr8'   : ('c', .5),
-          'pmtr9'   : ('c', 18000),
-          'pmtr10'  : ('c', 8000),
-          'pmtr11'  : ('c', 1),
-          'pmtr12'  : ('c', 0),
-          'pmtr13'  : ('sampleSelect', ('metal01.aif', 'latch01.aif')),
-          
-          'pmtr14'  : ('c', .25),
-          'pmtr15'  : ('c', 3),
-          
-          'pmtr16'  : ('c', 20),
-          'pmtr17'  : ('c', 30),
-          'pmtr18'  : ('c', 400),
-          'pmtr19'  : ('c', 600),
-          'pmtr20'  : ('c', 10),
-          'pmtr21'  : ('c', 20),
-          'pmtr22'  : ('c', .5),          
-          
-          'pmtr23'  : ('c', 1000),
-          'pmtr24'  : ('c', 6000),
-          'pmtr25'  : ('c', .6),
-          'pmtr26'  : ('c', .1),
-          'pmtr27'  : ('c', 50),
-          'pmtr28'  : ('c', 1),
-          }
-        self.author = 'athenaCL native' # attribution
+            "pmtr7": ("c", 0.5),
+            "pmtr8": ("c", 0.5),
+            "pmtr9": ("c", 18000),
+            "pmtr10": ("c", 8000),
+            "pmtr11": ("c", 1),
+            "pmtr12": ("c", 0),
+            "pmtr13": ("sampleSelect", ("metal01.aif", "latch01.aif")),
+            "pmtr14": ("c", 0.25),
+            "pmtr15": ("c", 3),
+            "pmtr16": ("c", 20),
+            "pmtr17": ("c", 30),
+            "pmtr18": ("c", 400),
+            "pmtr19": ("c", 600),
+            "pmtr20": ("c", 10),
+            "pmtr21": ("c", 20),
+            "pmtr22": ("c", 0.5),
+            "pmtr23": ("c", 1000),
+            "pmtr24": ("c", 6000),
+            "pmtr25": ("c", 0.6),
+            "pmtr26": ("c", 0.1),
+            "pmtr27": ("c", 50),
+            "pmtr28": ("c", 1),
+        }
+        self.author = "athenaCL native"  # attribution
         self.orcCode = """
 instr %s
     iDur = p3
@@ -8301,67 +8306,58 @@ instr %s
     
     aMixSig   = aSig * kAmp
     
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
 
-
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 class Inst240(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 240
-        self.name = 'vocodeVcoOctScale'
-        self.info = 'An eight channel vocoder with scaled mapping and a variable waveform generator.'
+        self.name = "vocodeVcoOctScale"
+        self.info = "An eight channel vocoder with scaled mapping and a variable waveform generator."
         self.auxNo = 16
-        self.postMapAmp = (0, 20, 'linear') # amps from experiment
+        self.postMapAmp = (0, 20, "linear")  # amps from experiment
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'sustain percent within unit interval',
-          'pmtr8'   : 'sustain center within unit interval',
-          'pmtr9'   : 'analysis audio file start time',
-          'pmtr10'  : 'analysis file path to desired sound file',
-          'pmtr11'  : 'analysis file play back speed',
-          
-          'pmtr12'  : 'vco wave form index integer (1-3)',
-          'pmtr13'  : 'vco start width (0-2)',
-          'pmtr14'  : 'vco end width (0-2)',
-          
-          'pmtr15'  : 'analysis low-pass filter cutoff frequency in Hz',
-          'pmtr16'  : 'analysis band-pass bw (not q), from 10 to 500',
-
-          'pmtr17'  : 'analysis frequency base in Hz',
-          'pmtr18'  : 'analysis frequency scalar',        
-
-          'pmtr19'  : 'generator frequency base in Hz',
-          'pmtr20'  : 'generator frequency scalar',       
-
-          'pmtr21'  : 'low-pass filter start cutoff frequency in Hz',
-          'pmtr22'  : 'low-pass filter end cutoff frequency in Hz',
-          }
+            "pmtr7": "sustain percent within unit interval",
+            "pmtr8": "sustain center within unit interval",
+            "pmtr9": "analysis audio file start time",
+            "pmtr10": "analysis file path to desired sound file",
+            "pmtr11": "analysis file play back speed",
+            "pmtr12": "vco wave form index integer (1-3)",
+            "pmtr13": "vco start width (0-2)",
+            "pmtr14": "vco end width (0-2)",
+            "pmtr15": "analysis low-pass filter cutoff frequency in Hz",
+            "pmtr16": "analysis band-pass bw (not q), from 10 to 500",
+            "pmtr17": "analysis frequency base in Hz",
+            "pmtr18": "analysis frequency scalar",
+            "pmtr19": "generator frequency base in Hz",
+            "pmtr20": "generator frequency scalar",
+            "pmtr21": "low-pass filter start cutoff frequency in Hz",
+            "pmtr22": "low-pass filter end cutoff frequency in Hz",
+        }
         self.pmtrDefault = {
-          'pmtr7'   : ('c', .9),
-          'pmtr8'   : ('c', .5),
-          'pmtr9'   : ('c', 0),
-          'pmtr10'  : ('sampleSelect', ('drum01.aif', 'latch01.aif')),
-          'pmtr11'  : ('c', 1),
-          
-          'pmtr12'  : ('c', 1),
-          'pmtr13'  : ('c', 0.1),
-          'pmtr14'  : ('c', 0.9),
-
-          'pmtr15'  : ('c', 40), # analysis cut-off fq
-          'pmtr16'  : ('c', 40), # band width, 20 is well pitched
-          
-          'pmtr17'  : ('c', 400),
-          'pmtr18'  : ('c', 1.333333333333),
-
-          'pmtr19'  : ('c', 100),
-          'pmtr20'  : ('c', 1.666666666666),
-
-          'pmtr21'  : ('c', 100),
-          'pmtr22'  : ('c', 4000),
-          }
-        self.author = 'athenaCL native' # attribution
+            "pmtr7": ("c", 0.9),
+            "pmtr8": ("c", 0.5),
+            "pmtr9": ("c", 0),
+            "pmtr10": ("sampleSelect", ("drum01.aif", "latch01.aif")),
+            "pmtr11": ("c", 1),
+            "pmtr12": ("c", 1),
+            "pmtr13": ("c", 0.1),
+            "pmtr14": ("c", 0.9),
+            "pmtr15": ("c", 40),  # analysis cut-off fq
+            "pmtr16": ("c", 40),  # band width, 20 is well pitched
+            "pmtr17": ("c", 400),
+            "pmtr18": ("c", 1.333333333333),
+            "pmtr19": ("c", 100),
+            "pmtr20": ("c", 1.666666666666),
+            "pmtr21": ("c", 100),
+            "pmtr22": ("c", 4000),
+        }
+        self.author = "athenaCL native"  # attribution
         self.orcCode = """
 instr %s
     iDur = p3
@@ -8480,106 +8476,93 @@ instr %s
     kAmp            linen        iAmp, iAttack, iDur, iRelease  
     aMixSig     = aSig * kAmp
     
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
 
-
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 # 8 ch
 class Inst241(InstrumentCsound):
     def __init__(self):
         InstrumentCsound.__init__(self)
         self.instNo = 241
-        self.name = 'vocodeVcoOctScaleRemap'
-        self.info = 'An eight channel vocoder and a variable waveform generator.'
+        self.name = "vocodeVcoOctScaleRemap"
+        self.info = "An eight channel vocoder and a variable waveform generator."
         self.auxNo = 32
-        self.postMapAmp = (0, 20, 'linear') # assume amps not greater tn 10
+        self.postMapAmp = (0, 20, "linear")  # assume amps not greater tn 10
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
         self.pmtrInfo = {
-          'pmtr7'   : 'sustain percent within unit interval',
-          'pmtr8'   : 'sustain center within unit interval',
-          'pmtr9'   : 'analysis audio file start time',
-          'pmtr10'  : 'analysis file path to desired sound file',
-          'pmtr11'  : 'analysis file play back speed',
+            "pmtr7": "sustain percent within unit interval",
+            "pmtr8": "sustain center within unit interval",
+            "pmtr9": "analysis audio file start time",
+            "pmtr10": "analysis file path to desired sound file",
+            "pmtr11": "analysis file play back speed",
+            "pmtr12": "vco wave form index integer (1-3)",
+            "pmtr13": "vco start width (0-2)",
+            "pmtr14": "vco end width (0-2)",
+            "pmtr15": "analysis low-pass filter cutoff frequency in Hz",
+            "pmtr16": "analysis band-pass bw (not q), from 10 to 500",
+            "pmtr17": "analysis frequency base in Hz",
+            "pmtr18": "analysis frequency scalar",
+            "pmtr19": "generator frequency base in Hz",
+            "pmtr20": "generator frequency scalar",
+            "pmtr21": "generator 1 channel frequency source (1-8)",
+            "pmtr22": "generator 2 channel frequency source (1-8)",
+            "pmtr23": "generator 3 channel frequency source (1-8)",
+            "pmtr24": "generator 4 channel frequency source (1-8)",
+            "pmtr25": "generator 5 channel frequency source (1-8)",
+            "pmtr26": "generator 6 channel frequency source (1-8)",
+            "pmtr27": "generator 7 channel frequency source (1-8)",
+            "pmtr28": "generator 8 channel frequency source (1-8)",
+            "pmtr29": "generator 1 post scale (0-1)",
+            "pmtr30": "generator 2 post scale (0-1)",
+            "pmtr31": "generator 3 post scale (0-1)",
+            "pmtr32": "generator 4 post scale (0-1)",
+            "pmtr33": "generator 5 post scale (0-1)",
+            "pmtr34": "generator 6 post scale (0-1)",
+            "pmtr35": "generator 7 post scale (0-1)",
+            "pmtr36": "generator 8 post scale (0-1)",
+            "pmtr37": "low-pass filter start cutoff frequency in Hz",
+            "pmtr38": "low-pass filter end cutoff frequency in Hz",
+        }
 
-          'pmtr12'  : 'vco wave form index integer (1-3)',
-          'pmtr13'  : 'vco start width (0-2)',
-          'pmtr14'  : 'vco end width (0-2)',
-
-          'pmtr15'  : 'analysis low-pass filter cutoff frequency in Hz',
-          'pmtr16'  : 'analysis band-pass bw (not q), from 10 to 500',
-
-          'pmtr17'  : 'analysis frequency base in Hz',
-          'pmtr18'  : 'analysis frequency scalar',        
-
-          'pmtr19'  : 'generator frequency base in Hz',
-          'pmtr20'  : 'generator frequency scalar',         
-
-          'pmtr21'  : 'generator 1 channel frequency source (1-8)',
-          'pmtr22'  : 'generator 2 channel frequency source (1-8)',           
-          'pmtr23'  : 'generator 3 channel frequency source (1-8)',
-          'pmtr24'  : 'generator 4 channel frequency source (1-8)',           
-          'pmtr25'  : 'generator 5 channel frequency source (1-8)',
-          'pmtr26'  : 'generator 6 channel frequency source (1-8)',           
-          'pmtr27'  : 'generator 7 channel frequency source (1-8)',
-          'pmtr28'  : 'generator 8 channel frequency source (1-8)',           
-
-          'pmtr29'  : 'generator 1 post scale (0-1)',
-          'pmtr30'  : 'generator 2 post scale (0-1)',           
-          'pmtr31'  : 'generator 3 post scale (0-1)',
-          'pmtr32'  : 'generator 4 post scale (0-1)',           
-          'pmtr33'  : 'generator 5 post scale (0-1)',
-          'pmtr34'  : 'generator 6 post scale (0-1)',           
-          'pmtr35'  : 'generator 7 post scale (0-1)',
-          'pmtr36'  : 'generator 8 post scale (0-1)',           
-
-          'pmtr37'  : 'low-pass filter start cutoff frequency in Hz',
-          'pmtr38'  : 'low-pass filter end cutoff frequency in Hz',
-          }
-          
         self.pmtrDefault = {
-          'pmtr7'   : ('c', .9),
-          'pmtr8'   : ('c', .5),
-          'pmtr9'   : ('c', 0),
-          'pmtr10'  : ('sampleSelect', ('drum01.aif', 'latch01.aif')),
-          'pmtr11'  : ('c', 1),
+            "pmtr7": ("c", 0.9),
+            "pmtr8": ("c", 0.5),
+            "pmtr9": ("c", 0),
+            "pmtr10": ("sampleSelect", ("drum01.aif", "latch01.aif")),
+            "pmtr11": ("c", 1),
+            "pmtr12": ("c", 1),
+            "pmtr13": ("c", 0.1),
+            "pmtr14": ("c", 0.9),
+            "pmtr15": ("c", 40),  # analysis cut-off fq
+            "pmtr16": ("c", 40),  # band width, 20 is well pitched
+            "pmtr17": ("c", 400),
+            "pmtr18": ("c", 1.33333333333),
+            "pmtr19": ("c", 100),
+            "pmtr20": ("c", 1.6666666666),
+            "pmtr21": ("c", 1),
+            "pmtr22": ("c", 2),
+            "pmtr23": ("c", 3),
+            "pmtr24": ("c", 4),
+            "pmtr25": ("c", 5),
+            "pmtr26": ("c", 6),
+            "pmtr27": ("c", 7),
+            "pmtr28": ("c", 8),
+            "pmtr29": ("c", 1),
+            "pmtr30": ("c", 1),
+            "pmtr31": ("c", 1),
+            "pmtr32": ("c", 1),
+            "pmtr33": ("c", 1),
+            "pmtr34": ("c", 1),
+            "pmtr35": ("c", 1),
+            "pmtr36": ("c", 1),
+            "pmtr37": ("c", 100),
+            "pmtr38": ("c", 4000),
+        }
 
-          'pmtr12'  : ('c', 1),
-          'pmtr13'  : ('c', 0.1),
-          'pmtr14'  : ('c', 0.9),
-          
-          'pmtr15'  : ('c', 40), # analysis cut-off fq
-          'pmtr16'  : ('c', 40), # band width, 20 is well pitched
-          
-          'pmtr17'  : ('c', 400),
-          'pmtr18'  : ('c', 1.33333333333),
-
-          'pmtr19'  : ('c', 100),
-          'pmtr20'  : ('c', 1.6666666666),
-          
-          'pmtr21'  : ('c', 1),
-          'pmtr22'  : ('c', 2),
-          'pmtr23'  : ('c', 3),
-          'pmtr24'  : ('c', 4),
-          'pmtr25'  : ('c', 5),
-          'pmtr26'  : ('c', 6),
-          'pmtr27'  : ('c', 7),
-          'pmtr28'  : ('c', 8),
-          
-          'pmtr29'  : ('c', 1),
-          'pmtr30'  : ('c', 1),
-          'pmtr31'  : ('c', 1),
-          'pmtr32'  : ('c', 1),
-          'pmtr33'  : ('c', 1),
-          'pmtr34'  : ('c', 1),
-          'pmtr35'  : ('c', 1),
-          'pmtr36'  : ('c', 1),
-          
-          'pmtr37'  : ('c', 100),
-          'pmtr38'  : ('c', 4000),
-          }
-          
-        self.author = 'athenaCL native' # attribution
+        self.author = "athenaCL native"  # attribution
         self.orcCode = """
 instr %s
     iDur = p3
@@ -8729,29 +8712,23 @@ instr %s
     kAmp            linen        iAmp, iAttack, iDur, iRelease  
     aMixSig     = aSig * kAmp
     
-""" % str(self.instNo)
+""" % str(
+            self.instNo
+        )
 
 
-
-
-
-
-
-
-
-
-
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 class Test(unittest.TestCase):
-    
+
     def runTest(self):
         pass
-            
+
     def testDummy(self):
         self.assertEqual(True, True)
 
 
-#-----------------------------------------------------------------||||||||||||--
-if __name__ == '__main__':
+# -----------------------------------------------------------------||||||||||||--
+if __name__ == "__main__":
     from athenaCL.test import baseTest
+
     baseTest.main(Test)

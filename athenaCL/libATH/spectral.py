@@ -1,4 +1,4 @@
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 # Name:          spectral.py
 # Purpose:       General audio spectrum processing tools
 #
@@ -6,8 +6,7 @@
 #
 # Copyright:     (c) 2004-2006 Christopher Ariza
 # License:       GPL
-#-----------------------------------------------------------------||||||||||||--
-
+# -----------------------------------------------------------------||||||||||||--
 
 
 import os, math, copy
@@ -18,156 +17,171 @@ from athenaCL.libATH import imageTools
 from athenaCL.libATH.libGfx import graphPmtr
 
 
-_MOD = 'spectral.py'
+_MOD = "spectral.py"
 
-#-----------------------------------------------------------------||||||||||||--
+
+# -----------------------------------------------------------------||||||||||||--
 # a class to read spectrum files
 class SpectrumData:
     """a class to read various spectrum data forms and provide the result
     in psReals
     """
+
     def __init__(self, usrStr):
         """usrStr may have a comma, and thus include data for
         the number of values to read; can also be set below
         w/ getPitch method"""
         if usrStr == None:
-            raise ValueError('bad file path given')
-        if usrStr.find(',') >= 0:
-            filePath, maxCount = usrStr.split(',')[:2]
-            maxCount = drawer.strToNum(maxCount, 'int')
-            #print _MOD, 'got maxCount of', maxCount
+            raise ValueError("bad file path given")
+        if usrStr.find(",") >= 0:
+            filePath, maxCount = usrStr.split(",")[:2]
+            maxCount = drawer.strToNum(maxCount, "int")
+            # print _MOD, 'got maxCount of', maxCount
         else:
             filePath = usrStr
-            maxCount = None # default
+            maxCount = None  # default
         if maxCount != None:
             self.maxCount = maxCount
-        else: self.maxCount = 10
+        else:
+            self.maxCount = 10
         # file path shuold always exists
         filePath = drawer.pathScrub(filePath)
-        if not os.path.exists(filePath) or os.path.isdir(filePath): 
-            raise ValueError('bad file path given')
+        if not os.path.exists(filePath) or os.path.isdir(filePath):
+            raise ValueError("bad file path given")
         self.filePath = filePath
-        self.forms = ['audacity.spectrum', 'audacity.autocorrelation']
+        self.forms = ["audacity.spectrum", "audacity.autocorrelation"]
         ok = self._parseFormat()
         if ok == None:
-            raise ValueError('bad file path given')
+            raise ValueError("bad file path given")
         self.dataEval, self.fmt = ok
-    
+
     def _parseFormat(self):
-        if self.filePath.endswith('.txt'):
+        if self.filePath.endswith(".txt"):
             f = open(self.filePath)
             fileStr = f.read()
             f.close()
-        else: return None # no other file types supported
-        dataEval = [] # evaluated data, sorted by val, fq, other
-        
+        else:
+            return None  # no other file types supported
+        dataEval = []  # evaluated data, sorted by val, fq, other
+
         # for some reason radline got strange results on macos x
         # manually reading line types
-        if fileStr.find('\r\n') >= 0: SEProw = '\r\n' # win 
-        elif '\r' in fileStr: SEProw = '\r' # macos
-        elif '\n' in fileStr: SEProw = '\n' # unix
-        else: return None # error, bad file
-        fileLines = fileStr.split(SEProw)               
+        if fileStr.find("\r\n") >= 0:
+            SEProw = "\r\n"  # win
+        elif "\r" in fileStr:
+            SEProw = "\r"  # macos
+        elif "\n" in fileStr:
+            SEProw = "\n"  # unix
+        else:
+            return None  # error, bad file
+        fileLines = fileStr.split(SEProw)
 
         # skip first line, as is key
         for line in fileLines:
-            if line == '': continue
+            if line == "":
+                continue
             # need to figure seperator
-            elif '\t' in line: SEPcol = '\t'
-            else: return None # error, bad file
+            elif "\t" in line:
+                SEPcol = "\t"
+            else:
+                return None  # error, bad file
             spectData = line.split(SEPcol)
-            #print _MOD, spectData
+            # print _MOD, spectData
             # tabbed lists should have either 2 or 3 items
             spectChunk = len(spectData)
             if spectChunk < 2 or spectChunk > 3:
                 continue
-            if spectChunk == 2: # assume audacity spectrum
+            if spectChunk == 2:  # assume audacity spectrum
                 # Frequency (Hz), Level (dB)
                 # return amp, fq
-                fmt = 'audacity.spectrum'
+                fmt = "audacity.spectrum"
                 fq = drawer.strToNum(spectData[0])
-                if fq == None: continue
+                if fq == None:
+                    continue
                 amp = drawer.strToNum(spectData[1])
-                if amp == None: continue
+                if amp == None:
+                    continue
                 dataEval.append((amp, fq))
-            elif spectChunk == 3: # assume audacity spectrum
+            elif spectChunk == 3:  # assume audacity spectrum
                 # Lag (seconds), Frequency (Hz), Level
-                fmt = 'audacity.autocorrelation'
+                fmt = "audacity.autocorrelation"
                 fq = drawer.strToNum(spectData[1])
-                if fq == None: continue
+                if fq == None:
+                    continue
                 amp = drawer.strToNum(spectData[2])
-                if amp == None: continue
+                if amp == None:
+                    continue
                 s = drawer.strToNum(spectData[0])
-                if s == None: continue
+                if s == None:
+                    continue
                 dataEval.append((amp, fq, s))
-        if len(dataEval) == 0: return None
+        if len(dataEval) == 0:
+            return None
         # sort so amps is ranked first
         dataEval.sort()
-        dataEval.reverse() # largest on top
+        dataEval.reverse()  # largest on top
         return dataEval, fmt
 
-    def getPitch(self, format='fq', maxCount=None):
+    def getPitch(self, format="fq", maxCount=None):
         """read frequencies from the list
         format is standard Pitch object formats
         macCount will be used, if supplied, otherwise use value
         given at init, or from default"""
         if maxCount == None:
-            maxCount = self.maxCount # use value set at init
+            maxCount = self.maxCount  # use value set at init
         maxLen = len(self.dataEval)
-        if maxCount > 0: # get top portion of sorted list
-            if maxCount > maxLen: maxCount = maxLen
+        if maxCount > 0:  # get top portion of sorted list
+            if maxCount > maxLen:
+                maxCount = maxLen
             posList = list(range(maxCount))
-        elif maxCount < 0: # get bottom portion of sorted list
-            if maxCount < -maxLen: maxCount = -maxLen
+        elif maxCount < 0:  # get bottom portion of sorted list
+            if maxCount < -maxLen:
+                maxCount = -maxLen
             posList = list(range(len(self.dataEval) + maxCount, len(self.dataEval)))
-        else: return [] # empty range
+        else:
+            return []  # empty range
         pitchList = []
-        assert format in ['fq', 'psReal']
+        assert format in ["fq", "psReal"]
         for i in posList:
             # fq is always second
-            if i >= len(self.dataEval): break
+            if i >= len(self.dataEval):
+                break
             fq = self.dataEval[i][1]
-            if format == 'fq': # do nothing
+            if format == "fq":  # do nothing
                 pitchList.append(fq)
-            elif format == 'psReal':
+            elif format == "psReal":
                 pitchList.append(pitchTools.fqToPs(fq))
         return pitchList
 
 
-
-
-
-
-
-
-
-
-
-#-----------------------------------------------------------------||||||||||||--          
+# -----------------------------------------------------------------||||||||||||--
 class PhaseAnalysis:
-    """csound pvoc analysis 
+    """csound pvoc analysis
     creates a file in the same dir as src file
     having a priblem generating images with csound 5
     see: http://www.csounds.com/manual/html/pvanal.html
     """
+
     def __init__(self, src):
         # assume an aif file
-        if not src.endswith('.aif'): raise ValueError
-        if not os.path.exists(src): raise ValueError
-    
+        if not src.endswith(".aif"):
+            raise ValueError
+        if not os.path.exists(src):
+            raise ValueError
+
         dir, fnSrc = os.path.split(src)
-    
-        fnBin = fnSrc.replace('.aif', '.pvc')
-        fnTxt = fnSrc.replace('.aif', '.txt')
 
-        self.frameSize = 1024 # must be power of 2
-        self.overlapFactor = 4 # default value of 4 seems good
-        
-        optStr = '-n %s' % self.frameSize 
+        fnBin = fnSrc.replace(".aif", ".pvc")
+        fnTxt = fnSrc.replace(".aif", ".txt")
 
-        # alternat method from csound command: csound -U pvanal 
-        cmd = 'cd %s; pvanal -V %s %s %s %s' % (dir, fnTxt, optStr, fnSrc, fnBin)
-    
+        self.frameSize = 1024  # must be power of 2
+        self.overlapFactor = 4  # default value of 4 seems good
+
+        optStr = "-n %s" % self.frameSize
+
+        # alternat method from csound command: csound -U pvanal
+        cmd = "cd %s; pvanal -V %s %s %s %s" % (dir, fnTxt, optStr, fnSrc, fnBin)
+
         os.system(cmd)
 
         # store this paths for external processing
@@ -175,14 +189,14 @@ class PhaseAnalysis:
         self.fpTxt = os.path.join(dir, fnTxt)
         self.fpPvc = os.path.join(dir, fnBin)
 
-        self.data = [] # a list of lists
+        self.data = []  # a list of lists
         self.binCount = None
-        self.header = [] # first 4 lines
+        self.header = []  # first 4 lines
 
-        self._parse() # fill all values, analyse file
+        self._parse()  # fill all values, analyse file
 
     def _parse(self):
-        self.data = [] # a list of lists
+        self.data = []  # a list of lists
 
         f = open(self.fpTxt)
         msg = f.readlines()
@@ -191,36 +205,37 @@ class PhaseAnalysis:
         self.header = msg[0:3]
 
         for line in msg[3:]:
-            if line.strip() == '': continue
+            if line.strip() == "":
+                continue
             # remove frame heade ra t beginng, will leave a number
-            line = line.replace('Frame ', '')
+            line = line.replace("Frame ", "")
             # replace 4 space, and 2 space boundaries w;/ one space
-            line = line.replace('    ', ' ')
-            line = line.replace('   ', ' ') 
-            line = line.replace('  ', ' ') 
+            line = line.replace("    ", " ")
+            line = line.replace("   ", " ")
+            line = line.replace("  ", " ")
             # split into a list, drop first element as it is row id
-            line = line.split(' ')[1:]
+            line = line.split(" ")[1:]
             post = []
             # bundle as pairs
             i = 0
-            while i < len(line)-2:
+            while i < len(line) - 2:
                 # note: reversing values so fq precedes amp
                 a = float(line[i])
-                f = float(line[i+1])
-                i = i + 2 
-                post.append((f,a))
+                f = float(line[i + 1])
+                i = i + 2
+                post.append((f, a))
             self.data.append(post)
         # number of bins is the length of the first row
         if self.data == []:
-            return 0 # failure, empty audio file, etcetera
+            return 0  # failure, empty audio file, etcetera
         else:
             self.binCount = len(self.data[0])
-            return 1 # good
-
+            return 1  # good
 
     def readAvg(self, bin):
         # for a given bin, get the average of all values for all frmaes
-        if bin > self.binCount - 1: raise ValueError('bin out of range')
+        if bin > self.binCount - 1:
+            raise ValueError("bin out of range")
         a = 0
         f = 0
 
@@ -231,7 +246,7 @@ class PhaseAnalysis:
         a = a / len(self.data)
         return f, a
 
-    def readCoord(self, fqRange=(20,20000), norm=1):
+    def readCoord(self, fqRange=(20, 20000), norm=1):
         amp = []
         fq = []
         for i in range(self.binCount):
@@ -254,7 +269,7 @@ class PhaseAnalysis:
         if norm:
             amp = unit.unitNormRange(amp)
             fq = unit.unitNormRange(fq)
-        
+
         coord = []
         # make pairs
         for i in range(len(amp)):
@@ -262,30 +277,25 @@ class PhaseAnalysis:
         return coord
 
 
-
-
-
-
-
-
 # this is experimental and incomplete
 # pabon game
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
+
 
 class SpectralComponent:
     def __init__(self, id, rInit, f):
         self.id = id
         self.x = 0
         self.y = 0
-        self.rInit = rInit # this is in degrees
-        self.r = copy.deepcopy(self.rInit) # phase, in degrees
+        self.rInit = rInit  # this is in degrees
+        self.r = copy.deepcopy(self.rInit)  # phase, in degrees
         self.f = f
         self.history = []
 
     def reset(self):
         self.x = 0
         self.y = 0
-        self.r = copy.deepcopy(self.rInit) # phase, in degrees
+        self.r = copy.deepcopy(self.rInit)  # phase, in degrees
 
     def _degreeToPhase(self, r):
         return (r % 360) / 360.0
@@ -307,37 +317,37 @@ class SpectralComponent:
         xShift = 0
         yShift = 0
 
-        self.r = r % 360 # reduce mod
-        rAdj = round(self.r, 6)       
+        self.r = r % 360  # reduce mod
+        rAdj = round(self.r, 6)
         # might need to round
         if rAdj in [0.0, 90.0, 180.0, 270.0]:
-            if rAdj == 0.0: # going left
-                xShift = -step 
-                yShift = 0 
-            elif rAdj == 90.0: # going up
-                xShift = 0
-                yShift = step 
-            elif rAdj == 180.0: # going right
-                xShift = step
-                yShift = 0 
-            elif rAdj == 270.0: # going down
+            if rAdj == 0.0:  # going left
                 xShift = -step
-                yShift = 0 
+                yShift = 0
+            elif rAdj == 90.0:  # going up
+                xShift = 0
+                yShift = step
+            elif rAdj == 180.0:  # going right
+                xShift = step
+                yShift = 0
+            elif rAdj == 270.0:  # going down
+                xShift = -step
+                yShift = 0
         # not on axis
         if rAdj > 0.0 and rAdj < 90.0:
             a, b = self._getSides(rAdj, step)
             xShift = -b
             yShift = a
         elif rAdj > 90.0 and rAdj < 180.0:
-            a, b = self._getSides(rAdj-90, step)
+            a, b = self._getSides(rAdj - 90, step)
             xShift = a
             yShift = b
         elif rAdj > 180.0 and rAdj < 270.0:
-            a, b = self._getSides(rAdj-180, step)
+            a, b = self._getSides(rAdj - 180, step)
             xShift = a
             yShift = -b
         elif rAdj > 270.0 and rAdj < 360.0:
-            a, b = self._getSides(rAdj-270, step)
+            a, b = self._getSides(rAdj - 270, step)
             xShift = -b
             yShift = -a
 
@@ -349,7 +359,7 @@ class SpectralComponent:
         is phase needed"""
         phase = self._degreeToPhase(self.rInit) + (t * self.f)
         # range is -1 to 1, phase is between 0 and 1
-        self.r = phase % 360             #self._phaseToDegree(phase)
+        self.r = phase % 360  # self._phaseToDegree(phase)
         # not sure what this value is for
         amp = math.sin(2.0 * math.pi * phase)
 
@@ -364,7 +374,7 @@ class SpectralComponent:
         """get distance from origin"""
         a = abs(self.x)
         b = abs(self.y)
-        h = pow((pow(a, 2) + pow(b, 2)), .5)
+        h = pow((pow(a, 2) + pow(b, 2)), 0.5)
         return h
 
     def postTime(self, time, step):
@@ -372,23 +382,28 @@ class SpectralComponent:
         self._step(step)
         self.history.append(self._amp())
 
-
     def __str__(self):
-        xStr = '%.2f' % (self.x)
-        yStr = '%.2f' % (self.y)
-        rStr = '%.2f' % (self.r)
-        fStr = '%.2f' % (self.f)
-        aStr = '%.2f' % (self._amp())
-        return "x: %s y: %s r: %s f: %s a: %s" % (xStr.ljust(6), yStr.ljust(6),
-                                        rStr.ljust(6), fStr.ljust(6), aStr.ljust(6))
+        xStr = "%.2f" % (self.x)
+        yStr = "%.2f" % (self.y)
+        rStr = "%.2f" % (self.r)
+        fStr = "%.2f" % (self.f)
+        aStr = "%.2f" % (self._amp())
+        return "x: %s y: %s r: %s f: %s a: %s" % (
+            xStr.ljust(6),
+            yStr.ljust(6),
+            rStr.ljust(6),
+            fStr.ljust(6),
+            aStr.ljust(6),
+        )
 
 
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
+
 
 class PabonGame:
     def __init__(self, partitionNo, signal=None):
         if signal == None:
-            self.signal = [.5, -.1, .9, .4, -.2, .8]
+            self.signal = [0.5, -0.1, 0.9, 0.4, -0.2, 0.8]
         else:
             self.signal = signal
 
@@ -406,65 +421,58 @@ class PabonGame:
 
         self.components = []
         rInit = 0
-        i = 0 # used for indexing position
+        i = 0  # used for indexing position
         for f in self.partitionFreq:
             self.components.append(SpectralComponent(i, rInit, f))
             i = i + 1
 
-
     def run(self):
         t = 0
         for step in self.signal:
-            print('step:', step, 'time:', t)
+            print("step:", step, "time:", t)
             for part in self.components:
                 part.postTime(t, step)
 
             print(self._repr())
             t = t + 1
 
-    def _repr(self, style=''):
+    def _repr(self, style=""):
         msg = []
         for part in self.components:
             msg.append(str(part))
-            msg.append('\n')
-        return ''.join(msg)
+            msg.append("\n")
+        return "".join(msg)
 
     def __str__(self):
         return self._repr()
 
-#-----------------------------------------------------------------||||||||||||--
+
+# -----------------------------------------------------------------||||||||||||--
 
 
 def testTone(dur, f, phaseInit, sr):
     samples = [0] * dur * sr
-    sampleDur =  1. / sr
+    sampleDur = 1.0 / sr
     t = 0
-    for x in range(0, (dur*sr)):
+    for x in range(0, (dur * sr)):
         phase = phaseInit + (t * f)
         samples[x] = math.sin(2.0 * math.pi * phase)
         t = t + sampleDur
     return samples
 
 
-
-
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 class Test:
     def __init__(self):
         a = PabonGame(6)
         a.run()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     Test()
 
 
-
-
-#-----------------------------------------------------------------||||||||||||--
-
-
-
+# -----------------------------------------------------------------||||||||||||--
 
 
 # from oscillator.py
@@ -477,39 +485,10 @@ if __name__ == '__main__':
 #            Function.__init__(self)
 #            self.frequency = frequency
 #            self.phase0 = phase0
-# 
+#
 #       def __call__(self, t):
 #            phase = self.phase0 + t * self.frequency
-# 
+#
 #            # range is -1 to 1, 2 units
 #            # need to shift up to 2 to 9, then divide by 2
 #            return (1.0 + sin(2.0 * pi * phase)) / 2.0
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

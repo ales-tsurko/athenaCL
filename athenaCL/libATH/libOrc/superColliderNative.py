@@ -1,5 +1,5 @@
 #!/usr/local/bin/python
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 # Name:          superColliderNative.py
 # Purpose:       native csound instrument definitions instruments.
 #
@@ -7,7 +7,7 @@
 #
 # Copyright:     (c) 2010 Christopher Ariza
 # License:       GPL
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 
 import time
 import unittest, doctest
@@ -15,37 +15,38 @@ import unittest, doctest
 from athenaCL.libATH import drawer
 from athenaCL.libATH import language
 from athenaCL.libATH import pitchTools
+
 lang = language.LangObj()
 from athenaCL.libATH.libOrc import baseOrc
 
-_MOD = 'superColliderNative.py'
+_MOD = "superColliderNative.py"
 from athenaCL.libATH import prefTools
+
 environment = prefTools.Environment(_MOD)
-
-
 
 
 class SuperColliderNative(baseOrc.Orchestra):
     """built-in csound instruments"""
+
     def __init__(self):
         baseOrc.Orchestra.__init__(self)
 
-        self.name = 'superColliderNative'
-        self.srcStr = None # string representation for writing
+        self.name = "superColliderNative"
+        self.srcStr = None  # string representation for writing
 
-        self._instrNumbers = [0,
-                              10,
-                             ]
-        
+        self._instrNumbers = [
+            0,
+            10,
+        ]
+
         # on initialization, load a dictionary of objects for use
         self._instrObjDict = {}
         globalDict = globals()
         for iNo in self._instrNumbers:
-            objAttr = globalDict['Inst%i' % iNo]
-            self._instrObjDict[iNo] = objAttr() # instantiate obj
-        
+            objAttr = globalDict["Inst%i" % iNo]
+            self._instrObjDict[iNo] = objAttr()  # instantiate obj
 
-    #-----------------------------------------------------------------------||--
+    # -----------------------------------------------------------------------||--
     def instNoValid(self, iNo):
         """test if an instrument number is valid"""
         if drawer.isInt(iNo) and iNo in self._instrNumbers:
@@ -56,35 +57,35 @@ class SuperColliderNative(baseOrc.Orchestra):
     def instNoList(self, format=None):
         """return a list of instrument numbers; if
         a list is not availabe, return None"""
-        if format == 'user':
+        if format == "user":
             return drawer.listToStr(self._instrNumbers)
         return self._instrNumbers
 
-
     def getInstObj(self, iNo):
-        if iNo in list(self._instrObjDict.keys()): # already loaded
-            return self._instrObjDict[iNo] # call attribute of module to get object
+        if iNo in list(self._instrObjDict.keys()):  # already loaded
+            return self._instrObjDict[iNo]  # call attribute of module to get object
         else:
-            raise ValueError('bad instrument number given: %s' % iNo)
-            
+            raise ValueError("bad instrument number given: %s" % iNo)
 
     def constructOrc(self, noChannels=2, instList=None):
         """buildes a string of an entire orchestra
-        provides proper header and output sections based on 
+        provides proper header and output sections based on
         number of channels
         """
         self.noChannels = noChannels
         msg = []
-        #self.instrObjDict = {}
-        if instList == None: # if not given, add all instruments
+        # self.instrObjDict = {}
+        if instList == None:  # if not given, add all instruments
             instList = self.instNoList()
         for number in instList:
             if not self.instNoValid(number):
-                environment.printWarn([lang.WARN, 'instrument %i not available.' % number])
+                environment.printWarn(
+                    [lang.WARN, "instrument %i not available." % number]
+                )
                 continue
             instrObj = self.getInstObj(number)
             msg.append(instrObj.buildInstrDef(noChannels))
-        self.srcStr = ''.join(msg)
+        self.srcStr = "".join(msg)
 
     def getInstInfo(self, iNo=None):
         """returns a dictionary of instrNo : (Name, pNo, pInfo)
@@ -92,25 +93,30 @@ class SuperColliderNative(baseOrc.Orchestra):
         pmtrFields includes 6 default values
         """
         if iNo == None:
-            instrList = self.instNoList() # use method
+            instrList = self.instNoList()  # use method
         else:
-            instrList = [iNo,]
-        #self.instrObjDict = {} # this used to store inst obj data
+            instrList = [
+                iNo,
+            ]
+        # self.instrObjDict = {} # this used to store inst obj data
         instInfoDict = {}
         for number in instrList:
             instrObj = self.getInstObj(number)
-            instInfoDict[number] = (instrObj.name, 
-                              instrObj.pmtrFields, instrObj.pmtrInfo)
+            instInfoDict[number] = (
+                instrObj.name,
+                instrObj.pmtrFields,
+                instrObj.pmtrInfo,
+            )
         return instInfoDict, instrList
 
     def getInstPreset(self, iNo, auxNo=None):
         """returns a dictionary of default values for one instrument"""
         instrObj = self.getInstObj(iNo)
-        presetDict = instrObj.getPresetDict() # converts to aux0 fist pos
+        presetDict = instrObj.getPresetDict()  # converts to aux0 fist pos
         return presetDict
 
     def getInstName(self, iNo):
-        'returns a string of name'
+        "returns a string of name"
         instrObj = self.getInstObj(iNo)
         return instrObj.name
 
@@ -124,37 +130,37 @@ class SuperColliderNative(baseOrc.Orchestra):
         instrObj = self.getInstObj(iNo)
         # numbers are shifted by pmtrCountDefault
         # this orchestra uses 'pmtr' instead of 'auxQ'
-        key = 'pmtr%s' % (pmtrNo + 1 + instrObj.pmtrCountDefault)
+        key = "pmtr%s" % (pmtrNo + 1 + instrObj.pmtrCountDefault)
         if instrObj.pmtrInfo != {}:
             return instrObj.pmtrInfo[key]
         else:
-            return 'no information available'
-        
-    #-----------------------------------------------------------------------||--
+            return "no information available"
+
+    # -----------------------------------------------------------------------||--
     def _postMapPs(self, iNo, val):
         return pitchTools.psToPch(val)
-        
+
     def _postMapAmp(self, iNo, val, orcMapMode=1):
         # get max/min amp value form inst, as well as scale factor
         instrObj = self.getInstObj(iNo)
         ampMax = float(instrObj.postMapAmp[1])
-        if orcMapMode: # optional map; allow values greater then 1
-            val = val * ampMax # temp: assume max amp of 90
+        if orcMapMode:  # optional map; allow values greater then 1
+            val = val * ampMax  # temp: assume max amp of 90
         # always limit
-        if val < 0: val = 0 # we can assume tt amps are never negative
+        if val < 0:
+            val = 0  # we can assume tt amps are never negative
         return val
-        
+
     def _postMapPan(self, iNo, val, orcMapMode=1):
-        if orcMapMode: # optional map
-            pass # values are expected b/n 0 and 1
-        # always limit: modulo 1    
-        if val < 0 or val > 1: val = val % 1.0
+        if orcMapMode:  # optional map
+            pass  # values are expected b/n 0 and 1
+        # always limit: modulo 1
+        if val < 0 or val > 1:
+            val = val % 1.0
         return val
 
 
-        
-        
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 class InstrumentSuperCollider(baseOrc.Instrument):
     # outputs expect and instrument to have a single final signal, calld "aMixSig
     # this bit of codes gets appended to end of inst def
@@ -163,14 +169,14 @@ class InstrumentSuperCollider(baseOrc.Instrument):
         >>> a = InstrumentSuperCollider()
         """
         baseOrc.Instrument.__init__(self)
-        self.author = 'athenaCL native' # attribution
+        self.author = "athenaCL native"  # attribution
 
-        self.pmtrCountDefault = 6 # 6 built in values
+        self.pmtrCountDefault = 6  # 6 built in values
         self.pmtrFields = self.pmtrCountDefault
         # postMap values for scaling
-        self.postMapAmp = (0,1, 'linear') # most amps are in db
-        self.postMapPan = (0,1, 'linear')  # all pan values assume 0-1 maping
-        
+        self.postMapAmp = (0, 1, "linear")  # most amps are in db
+        self.postMapPan = (0, 1, "linear")  # all pan values assume 0-1 maping
+
         self.instNo = None
         self.name = None
 
@@ -188,10 +194,13 @@ class InstrumentSuperCollider(baseOrc.Instrument):
         return msg
 
     def getInstFooter(self):
-        msg = """ }).writeDefFile;
+        msg = (
+            """ }).writeDefFile;
 s.sendSynthDef("%s");
 
-""" % self.name
+"""
+            % self.name
+        )
         return msg
 
     def buildInstrDef(self, noChannels):
@@ -216,11 +225,10 @@ s.sendSynthDef("%s");
         elif self.noChannels == 4:
             msg.append(self.quadOutput)
         msg.append(self.getInstFooter())
-        return ''.join(msg)
+        return "".join(msg)
 
 
-
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 # instruments 0 through 9 are unpitched percussion
 class Inst0(InstrumentSuperCollider):
     def __init__(self):
@@ -230,27 +238,27 @@ class Inst0(InstrumentSuperCollider):
         InstrumentSuperCollider.__init__(self)
 
         self.instNo = 0
-        self.name = 'noiseBasic'
-        self.info = 'A simple noise instrument.'
-        self.postMapAmp = (0, 1, 'linear') # assume amps not greater tn 1
+        self.name = "noiseBasic"
+        self.info = "A simple noise instrument."
+        self.postMapAmp = (0, 1, "linear")  # assume amps not greater tn 1
 
         self.pmtrInfo = {
-          'pmtr7'   : 'attack percent within unit interval',
-          'pmtr8'   : 'release percent within unit interval',
-          'pmtr9'   : 'cutoff frequency in midi pitch values',
-          }
-          
+            "pmtr7": "attack percent within unit interval",
+            "pmtr8": "release percent within unit interval",
+            "pmtr9": "cutoff frequency in midi pitch values",
+        }
+
         self.pmtrDefault = {
-          'panQ'   : ('rb', .2, .2, 0, 1),
-          'pmtr7'   : ('bg', 'rc', [.1, .2, .3, .4]),
-          'pmtr8'   : ('bg', 'rc', [.1, .2, .3, .4]),
-          'pmtr9'   : ('ru', 60, 120),
-          }
+            "panQ": ("rb", 0.2, 0.2, 0, 1),
+            "pmtr7": ("bg", "rc", [0.1, 0.2, 0.3, 0.4]),
+            "pmtr8": ("bg", "rc", [0.1, 0.2, 0.3, 0.4]),
+            "pmtr9": ("ru", 60, 120),
+        }
         self.auxNo = len(list(self.pmtrInfo.keys()))
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
-        self.pmtrFieldNames = ['sus', 'amp', 'pan'] + list(self.pmtrInfo.keys())
+        self.pmtrFieldNames = ["sus", "amp", "pan"] + list(self.pmtrInfo.keys())
 
-        self.author = 'athenaCL native' # attribution
+        self.author = "athenaCL native"  # attribution
 
         self.orcCode = """
    arg sus, amp, pan, attackPercent, releasePercent, cfMidi;
@@ -263,23 +271,22 @@ class Inst0(InstrumentSuperCollider):
 """
 
     def pmtrToOrcName(self, pmtr):
-        """Translate from native pmtr names to score pmtr names
-        """
-        if pmtr in ['sus', 'pan', 'amp']:
+        """Translate from native pmtr names to score pmtr names"""
+        if pmtr in ["sus", "pan", "amp"]:
             return pmtr
-        elif pmtr == 'inst':
+        elif pmtr == "inst":
             return self.name
-        elif pmtr == 'pmtr7':
-            return 'attackPercent'
-        elif pmtr == 'pmtr8':
-            return 'releasePercent'
-        elif pmtr == 'pmtr9':
-            return 'cfMidi'
+        elif pmtr == "pmtr7":
+            return "attackPercent"
+        elif pmtr == "pmtr8":
+            return "releasePercent"
+        elif pmtr == "pmtr9":
+            return "cfMidi"
         else:
-            raise Exception('canot translate parameter %s' % pmtr)
+            raise Exception("canot translate parameter %s" % pmtr)
 
 
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 # instruments 10 through 19 are pitched percussion
 class Inst10(InstrumentSuperCollider):
     def __init__(self):
@@ -289,25 +296,25 @@ class Inst10(InstrumentSuperCollider):
         InstrumentSuperCollider.__init__(self)
 
         self.instNo = 10
-        self.name = 'electroKick'
-        self.info = 'A basic elctronic kick.'
-        self.postMapAmp = (0, 1, 'linear') # assume amps not greater tn 1
+        self.name = "electroKick"
+        self.info = "A basic elctronic kick."
+        self.postMapAmp = (0, 1, "linear")  # assume amps not greater tn 1
 
         self.pmtrInfo = {
-          'pmtr7'   : 'envelope ratio',
-          'pmtr8'   : 'frequency decay',
-          }
-          
+            "pmtr7": "envelope ratio",
+            "pmtr8": "frequency decay",
+        }
+
         self.pmtrDefault = {
-          'panQ'   : ('rb', .2, .2, 0, 1),
-          'pmtr7'   : ('bg', 'rc', [3, 2, 1]),
-          'pmtr8'   : ('bg', 'rc', [.02, .05]),
-          }
+            "panQ": ("rb", 0.2, 0.2, 0, 1),
+            "pmtr7": ("bg", "rc", [3, 2, 1]),
+            "pmtr8": ("bg", "rc", [0.02, 0.05]),
+        }
         self.auxNo = len(list(self.pmtrInfo.keys()))
         self.pmtrFields = self.pmtrCountDefault + self.auxNo
-        self.pmtrFieldNames = ['sus', 'amp', 'pan', 'ps'] + list(self.pmtrInfo.keys())
+        self.pmtrFieldNames = ["sus", "amp", "pan", "ps"] + list(self.pmtrInfo.keys())
 
-        self.author = 'athenaCL native' # attribution
+        self.author = "athenaCL native"  # attribution
 
         self.orcCode = """
     arg ps= -10, sus=0.5, amp=1, pan=0.5, envlRatio=3, fqDecay=0.02;
@@ -320,32 +327,31 @@ class Inst10(InstrumentSuperCollider):
 """
 
     def pmtrToOrcName(self, pmtr):
-        """Translate from native pmtr names to score pmtr names
-        """
-        if pmtr in ['sus', 'pan', 'amp', 'ps']:
+        """Translate from native pmtr names to score pmtr names"""
+        if pmtr in ["sus", "pan", "amp", "ps"]:
             return pmtr
-        elif pmtr == 'inst':
+        elif pmtr == "inst":
             return self.name
-        elif pmtr == 'pmtr7':
-            return 'envlRatio'
-        elif pmtr == 'pmtr8':
-            return 'fqDecay'
+        elif pmtr == "pmtr7":
+            return "envlRatio"
+        elif pmtr == "pmtr8":
+            return "fqDecay"
         else:
-            raise Exception('canot translate parameter %s' % pmtr)
+            raise Exception("canot translate parameter %s" % pmtr)
 
 
-
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 class Test(unittest.TestCase):
-    
+
     def runTest(self):
         pass
-            
+
     def testDummy(self):
         self.assertEqual(True, True)
 
 
-#-----------------------------------------------------------------||||||||||||--
-if __name__ == '__main__':
+# -----------------------------------------------------------------||||||||||||--
+if __name__ == "__main__":
     from athenaCL.test import baseTest
+
     baseTest.main(Test)

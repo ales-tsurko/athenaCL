@@ -1,4 +1,4 @@
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 # Name:          command.py
 # Purpose:       define classes for all commands
 #                    provide a sub-class for each command, taking an ao as an arg.
@@ -7,7 +7,7 @@
 #
 # Copyright:     (c) 2003-2010 Christopher Ariza
 # License:       GPL
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 
 import sys, os, time, random, copy
 import unittest, doctest, traceback
@@ -24,6 +24,7 @@ from athenaCL.libATH import ioTools
 from athenaCL.libATH import language
 from athenaCL.libATH import markov
 from athenaCL.libATH import error
+
 lang = language.LangObj()
 from athenaCL.libATH import osTools
 from athenaCL.libATH import outFormat
@@ -38,19 +39,22 @@ from athenaCL.libATH.libPmtr import basePmtr
 from athenaCL.libATH.libTM import texture
 from athenaCL.libATH.libOrc import generalMidi
 from athenaCL.libATH.omde import rand
+
 # conditional imports that may fail but are not necessary
 try:
     from athenaCL.libATH.libGfx import graphPmtr
     from athenaCL.libATH.libGfx import graphEnsemble
     from athenaCL.libATH.libGfx import graphCellular
-except ImportError: # pil or tk may not be installed
+except ImportError:  # pil or tk may not be installed
     pass
 
-_MOD = 'command.py'
+_MOD = "command.py"
 from athenaCL.libATH import prefTools
+
 environment = prefTools.Environment(_MOD)
 
-#-----------------------------------------------------------------||||||||||||--
+
+# -----------------------------------------------------------------||||||||||||--
 class Command(object):
     """parent class for all athenacl commands
     commands can be two types: a normal command, and a subCmd
@@ -65,10 +69,11 @@ class Command(object):
         do method:
         what needs to happen: each step can return None, or a triple
             triple contains msg, warn, error ?
-            
+
     command objects _do_ have access to terminal object
     """
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         """
         >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
         >>> a = Command(ao)
@@ -76,24 +81,24 @@ class Command(object):
         """
         self.ao = ao
         self.termObj = self.ao.termObj
-        #self.scObj = self.ao.external.scObj
-        #self.mcObj = self.ao.external.mcObj
-        self.setFactory = multiset.MultisetFactory() # for building set objs
+        # self.scObj = self.ao.external.scObj
+        # self.mcObj = self.ao.external.mcObj
+        self.setFactory = multiset.MultisetFactory()  # for building set objs
 
         self.args = args
-        if 'verbose' in keywords:
-            self.verbose = keywords['verbose']
+        if "verbose" in keywords:
+            self.verbose = keywords["verbose"]
 
-        self.cmdStr = None #command name, give in subclass
-        self.processSwitch = 1 # if methods should be called
+        self.cmdStr = None  # command name, give in subclass
+        self.processSwitch = 1  # if methods should be called
         self.gatherSwitch = 1
 
         # necessary to avoid testing gfx arrangment and printing warnings
-        self.gfxSwitch = 0 # default is tt comands dont graphics: must open
-        self.processStatus = 0 # complete or not
-        self.gatherStatus = 0 # complete or not
+        self.gfxSwitch = 0  # default is tt comands dont graphics: must open
+        self.processStatus = 0  # complete or not
+        self.gatherStatus = 0  # complete or not
 
-        self.subCmd = 0 # subcommands are executed from method in interpreter
+        self.subCmd = 0  # subcommands are executed from method in interpreter
 
     def gather(self):
         """get args from user. should return None, unless error cancel
@@ -105,9 +110,9 @@ class Command(object):
         return a string to display or cancel"""
         pass
 
-    def log(self): # return an executable command str, subclass
+    def log(self):  # return an executable command str, subclass
         if self.gatherStatus and self.processStatus:
-            return '%s' % (self.cmdStr)
+            return "%s" % (self.cmdStr)
 
     def unprocess(self):
         pass
@@ -134,54 +139,55 @@ class Command(object):
         ok 1 is good, 0 is error
         """
         # init whenever do is called (may happen more than once
-        self.processStatus = 0 # complete or not
-        self.gatherStatus = 0 # complete or not
+        self.processStatus = 0  # complete or not
+        self.gatherStatus = 0  # complete or not
 
         # (1) get args
         if self.gatherSwitch:
             post = self.gather()
-            if post != None: # an error occured in the gather stage
-                ok = 0 
-                return ok, post 
-        self.gatherStatus = 1 # gather complete complete
+            if post != None:  # an error occured in the gather stage
+                ok = 0
+                return ok, post
+        self.gatherStatus = 1  # gather complete complete
         # (2) process
         if self.processSwitch:
-            # optional execution in separate thread         
+            # optional execution in separate thread
             post = self.process()
             if post != None:
                 ok = 0
                 return ok, post  # an error or cancel str
-        self.processStatus = 1 # process complete complete
+        self.processStatus = 1  # process complete complete
         # after gather and process, assume that no processing errors will happen
         ok = 1
-        if not self.subCmd: # not a sub command, return displays
-            if self.gfxSwitch: # command obj defines gfx method
+        if not self.subCmd:  # not a sub command, return displays
+            if self.gfxSwitch:  # command obj defines gfx method
                 okGfx, fmt, dir = self._validGfxSetup()
-                if okGfx: self.displayGfx(fmt, dir) # may be an empty method
+                if okGfx:
+                    self.displayGfx(fmt, dir)  # may be an empty method
             # return text display always
             return ok, self.display()
-        else: # its is a sub command, call result instead of display
-            return ok, self.result() # returns a dictionary of data
+        else:  # its is a sub command, call result instead of display
+            return ok, self.result()  # returns a dictionary of data
 
     def undo(self):
         pass
 
-    #-----------------------------------------------------------------------||--
+    # -----------------------------------------------------------------------||--
     # utility display functions
-    def _nameTest(self, name, charInclude = ''):
+    def _nameTest(self, name, charInclude=""):
         """makes sure a name has valid characters"""
         if len(name) > 40:
             return lang.msgBadNameLength
         for char in name:
             if char not in (lang.NAMECHARS + charInclude):
                 return lang.msgBadNameChars
-        return None # a good name
+        return None  # a good name
 
     def _nameReplace(self, name):
         """replace spaces with underscores
         called whenever a user gives a pi, ti, tc, or pv name
         replaces spaces before checking for conflicts"""
-        return name.replace(' ', '_')
+        return name.replace(" ", "_")
 
     def _fileNameTest(self, name):
         """test for a rational file name, presumably always with an extension
@@ -189,12 +195,12 @@ class Command(object):
         returs ok, msg
         """
         # possible problem with ancient platforms that do not support long filenames
-        if len(name) > 64 or len(name) <= 4: 
+        if len(name) > 64 or len(name) <= 4:
             return 0, lang.msgBadNameLength
         for char in name:
             if char not in (lang.FILECHARS):
                 return 0, lang.msgBadNameChars
-        return 1, '' # a good name
+        return 1, ""  # a good name
 
     def _getNoTI(self):
         """returns number of textures"""
@@ -216,19 +222,20 @@ class Command(object):
         """
         while 1:
             numStr = dialog.askStr(query, self.termObj)
-            if numStr == None: return None
+            if numStr == None:
+                return None
             numEval = drawer.strToNum(numStr, numType, min, max)
             if numEval == None:
                 dialog.msgOut(lang.msgIncorrectEntry, self.termObj)
                 continue
             else:
-              return numEval
+                return numEval
 
     def _strRawToData(self, usrStr, errorPreface=lang.ERROR):
         """Method for evaluating user strings provided for Texture editing.
         prohibits doing wack things, provides error messages
         calls restringulator to quote all char/sym sequences
-   
+
         >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
         >>> a = Command(ao)
         >>> a._strRawToData('ru, 0, 1')
@@ -236,39 +243,38 @@ class Command(object):
         >>> a._strRawToData('cf, "a quoted string"')
         (('cf', 'a quoted string'), '')
         """
-        if usrStr == None: 
-            return None, 'no user data provided'
-        msg = '' # no error
+        if usrStr == None:
+            return None, "no user data provided"
+        msg = ""  # no error
         # if user str is already an evaluated number, return it w/o error
-        if drawer.isNum(usrStr): 
-            return usrStr, msg # already evaluated
-        if usrStr.find('__') == 0:
-            msg = '%s: %s' % (errorPreface, 'Internal Access Attempt')
+        if drawer.isNum(usrStr):
+            return usrStr, msg  # already evaluated
+        if usrStr.find("__") == 0:
+            msg = "%s: %s" % (errorPreface, "Internal Access Attempt")
             usrDataEval = None
         else:
-            #environment.printDebug(['pre restringulator:', usrStr])
-            usrStr = drawer.restringulator(usrStr) # add quotes if necessary
+            # environment.printDebug(['pre restringulator:', usrStr])
+            usrStr = drawer.restringulator(usrStr)  # add quotes if necessary
             try:
                 usrDataEval = eval(usrStr)
-            except TypeError as e: 
-                msg = '%s %s' % (errorPreface, e) #'type-error')
+            except TypeError as e:
+                msg = "%s %s" % (errorPreface, e)  #'type-error')
                 usrDataEval = None
-            except SyntaxError as e: 
-                msg = '%s %s' % (errorPreface, e) #'syntax-error')
+            except SyntaxError as e:
+                msg = "%s %s" % (errorPreface, e)  #'syntax-error')
                 usrDataEval = None
-            except NameError as e: # if strings given without a quote not converted
-                msg = '%s %s' % (errorPreface, 'name-error (quote all strings)')
+            except NameError as e:  # if strings given without a quote not converted
+                msg = "%s %s" % (errorPreface, "name-error (quote all strings)")
                 usrDataEval = None
 
-        #environment.printDebug(['results of _strRawToData():', usrDataEval, msg])
+        # environment.printDebug(['results of _strRawToData():', usrDataEval, msg])
         return usrDataEval, msg
-
 
     def _strListToArgList(self, usrStr):
         """convert a list of strings to a string separated by spaces
         used in logging command line args"""
-        setStr = drawer.listScrub(usrStr, 'rmSpace', 'rmQuote')
-        setStr = setStr.replace(',', ' ') # replace quotes with spacess
+        setStr = drawer.listScrub(usrStr, "rmSpace", "rmQuote")
+        setStr = setStr.replace(",", " ")  # replace quotes with spacess
         return setStr
 
     def _setReturnError(self, rawSet):
@@ -282,35 +288,36 @@ class Command(object):
             rawSet[i] = rawSet[i] + 1
         return rawSet
 
-
-    def _chooseFromList(self, prompt, choiceList, caseSens='case', 
-                             parseMethod=None):
+    def _chooseFromList(self, prompt, choiceList, caseSens="case", parseMethod=None):
         """form a list of elements, allows user to select by name or number
         caseSense can be 'case' or 'noCase'
         tries 3 ways: parseMethod, choiceList, and by integer
         parseMethod can be a standard method that converts valid strings
-            and returns None on error """
+            and returns None on error"""
         if choiceList == None:
             return None
-        choiceList = list(choiceList) # make sure its a list
+        choiceList = list(choiceList)  # make sure its a list
         choiceList.sort()
-        prompt = prompt + ' (name or number 1-%s):' % len(choiceList)
+        prompt = prompt + " (name or number 1-%s):" % len(choiceList)
         name = dialog.askStr(prompt, self.termObj)
-        if name == None: return None
+        if name == None:
+            return None
         # if parseMethod exists, try first
         if parseMethod != None:
             found = parseMethod(name)
-            if found != None: return found
+            if found != None:
+                return found
         # otherwise, check if in list
         found = drawer.inList(name, choiceList, caseSens)
-        if found != None: return found
+        if found != None:
+            return found
         # last, look for an index number
-        try: # check for integer number
+        try:  # check for integer number
             listNumber = int(name)
         except (SyntaxError, NameError, TypeError, ValueError):
             return None
         if listNumber <= len(choiceList) and listNumber >= 1:
-            name = choiceList[listNumber - 1] # adjust index
+            name = choiceList[listNumber - 1]  # adjust index
             return name
         else:
             return None  # error message
@@ -321,9 +328,12 @@ class Command(object):
         returns None on failure
         input value as int or float, not string
         """
-        if value == None: return None
-        if value >= min and value <= max: return value
-        else: return None
+        if value == None:
+            return None
+        if value >= min and value <= max:
+            return value
+        else:
+            return None
 
     def _convertListRange(self, rangeStr, start, end, ADJ=1):
         """gets a tuple of two numbers separated by a comma
@@ -333,49 +343,56 @@ class Command(object):
         provide all option to automaticlal get all elements in a range
         correction value can be turned off by canging ADJ value
         """
-        if rangeStr == None or rangeStr == '' :
+        if rangeStr == None or rangeStr == "":
             return None
         elif rangeStr.lower() == lang.ALL:
-            return [start-ADJ, end-ADJ]
+            return [start - ADJ, end - ADJ]
         try:
             rangeStr = eval(rangeStr)
         except (SyntaxError, NameError):
             return None
         if drawer.isList(rangeStr):
             rangeList = list(rangeStr)
-        if drawer.isNum(rangeStr): # if one given, assume this and next
+        if drawer.isNum(rangeStr):  # if one given, assume this and next
             rangeList = list((rangeStr, rangeStr))
 
         # human correction to count from 1
         rangeList[0] = int(rangeList[0] - ADJ)
         rangeList[1] = int(rangeList[1] - ADJ)
-        if (rangeList[0] < (start-ADJ) or rangeList[0] > (end-ADJ) or
-             rangeList[1] < (start-ADJ) or rangeList[1] > (end-ADJ)):
+        if (
+            rangeList[0] < (start - ADJ)
+            or rangeList[0] > (end - ADJ)
+            or rangeList[1] < (start - ADJ)
+            or rangeList[1] > (end - ADJ)
+        ):
             return None
         else:
             return rangeList
 
-    #-----------------------------------------------------------------------||--
+    # -----------------------------------------------------------------------||--
     # file path utilities
     def _findFilePath(self, usrStr):
         """if a complete path, checks existence and returns
         if a file name, searches directories for file and
         returns complete file path
         """
-        if usrStr == None: return None
-        if usrStr.find(os.sep) >= 0: # a complete path
+        if usrStr == None:
+            return None
+        if usrStr.find(os.sep) >= 0:  # a complete path
             filePath = drawer.pathScrub(usrStr)
-            if (os.path.exists(filePath) == 1 and
-                os.path.isdir(filePath) != 1): #not a directory
+            if (
+                os.path.exists(filePath) == 1 and os.path.isdir(filePath) != 1
+            ):  # not a directory
                 return filePath
         else:
-            possibleDirs = [] # all demo dirs
-            possibleDirs += self.ao.external.demoDirList 
+            possibleDirs = []  # all demo dirs
+            possibleDirs += self.ao.external.demoDirList
             possibleDirs.append(self.ao.external.fpLibATH)
-            possibleDirs.append(self.ao.aoInfo['fpLastDir'])
-            possibleDirs.append(self.ao.aoInfo['fpLastDirEventList'])
+            possibleDirs.append(self.ao.aoInfo["fpLastDir"])
+            possibleDirs.append(self.ao.aoInfo["fpLastDirEventList"])
             dir = drawer.getcwd()
-            if dir != None: possibleDirs.append(dir)
+            if dir != None:
+                possibleDirs.append(dir)
             for directory in possibleDirs:
                 try:
                     dirContents = os.listdir(directory)
@@ -384,161 +401,175 @@ class Command(object):
                 if usrStr in dirContents:
                     filePath = os.path.join(directory, usrStr)
                     filePath = drawer.pathScrub(filePath)
-                    if (os.path.exists(filePath) == 1 and
-                        os.path.isdir(filePath) != 1): #not a directory
+                    if (
+                        os.path.exists(filePath) == 1 and os.path.isdir(filePath) != 1
+                    ):  # not a directory
                         return filePath
-            return None # failed to find anything
+            return None  # failed to find anything
 
-    #-----------------------------------------------------------------------||--
+    # -----------------------------------------------------------------------||--
     # high level string parsing or interactive path assignment
-    
+
     def _selectAppPath(self, usrStr, appType, appName, appPathPref):
         """get a path for an application type; either parse
         a string and test, or get interactively; will chnage path if different
         appPathPref     = ('external', 'csoundPath')
         """
-        #environment.printDebug(['_selectAppPath:', usrStr])
+        # environment.printDebug(['_selectAppPath:', usrStr])
         path = None
-        if usrStr != None: # raw command arg string
-            usrStr = drawer.pathScrub(usrStr) # scrub, expand, links
+        if usrStr != None:  # raw command arg string
+            usrStr = drawer.pathScrub(usrStr)  # scrub, expand, links
             # even if appStrKey == '', will return 0
             if os.path.exists(usrStr) and drawer.isApp(usrStr):
-                path = usrStr # good path
+                path = usrStr  # good path
                 changeAppPath = 1
-            else: changeAppPath = 0
-        else: # interactive
-            if appName != None:
-                appDialogQuery = 'select a %s application (%s):' % (appType,
-                                                                    appName)
             else:
-                appDialogQuery = 'select a %s application:' % (appType)          
-            appDialogError = 'this is not a %s application. try again.' % appType
+                changeAppPath = 0
+        else:  # interactive
+            if appName != None:
+                appDialogQuery = "select a %s application (%s):" % (appType, appName)
+            else:
+                appDialogQuery = "select a %s application:" % (appType)
+            appDialogError = "this is not a %s application. try again." % appType
             while 1:
-                dlgVisMet = self.ao.external.getPref('athena', 'dlgVisualMethod')
-                path, ok = dialog.promptGetFile(appDialogQuery, self.ao.aoInfo['fpLastDir'],'app', dlgVisMet, self.termObj)
-                if (not ok or path == None or not os.path.exists(path)):
-                    changeAppPath = 0    # dont change
+                dlgVisMet = self.ao.external.getPref("athena", "dlgVisualMethod")
+                path, ok = dialog.promptGetFile(
+                    appDialogQuery,
+                    self.ao.aoInfo["fpLastDir"],
+                    "app",
+                    dlgVisMet,
+                    self.termObj,
+                )
+                if not ok or path == None or not os.path.exists(path):
+                    changeAppPath = 0  # dont change
                     break
                 else:
-                    changeAppPath = 1    # path found
-                    break    # path ok
-                
+                    changeAppPath = 1  # path found
+                    break  # path ok
+
         if changeAppPath and path != None:
-            self.ao.external.writePref(appPathPref[0], appPathPref[1],
-                                                drawer.pathScrub(path))
+            self.ao.external.writePref(
+                appPathPref[0], appPathPref[1], drawer.pathScrub(path)
+            )
         # return path after change
         ok = 1
         if changeAppPath:
             return path, ok
-        else: return None, 0 # return None on failure
+        else:
+            return None, 0  # return None on failure
 
-
-    #-----------------------------------------------------------------------||--
+    # -----------------------------------------------------------------------||--
     # valid path and preference utilities
     def _validWritePath(self, usrStr, forceExtension=None, forceDir=None):
         """for use when a user supplies a command line arugment for writing
         a file; need to find complete path, check for invalid characters
         makes sure has extensions
-        
-        if forceDir is not error, and the user provides only name, and the 
-        the combined forceDir and name do not exists, tn a path is 
+
+        if forceDir is not error, and the user provides only name, and the
+        the combined forceDir and name do not exists, tn a path is
         auto constrcuted. this behaviour may be misleading...
-        
+
         do not accept a path unless it resolves to a complete path
         return None on error
-        
+
         note: this has a sideffect, as when eln happens the only file path that
         is provide is the .xml; wheres the event mode may create many other files
         the potential conflict will not be noticed.
         """
-        if usrStr == None or not drawer.isStr(usrStr): return None
+        if usrStr == None or not drawer.isStr(usrStr):
+            return None
         if forceExtension != None:
-            if usrStr[-len(forceExtension):] != forceExtension:
-                return None # if no extensions, return none
+            if usrStr[-len(forceExtension) :] != forceExtension:
+                return None  # if no extensions, return none
         # determine if an absolute or relative path was given _initially_
-        if usrStr.find(os.sep) >= 0: abs = 1
-        else: abs = 0
+        if usrStr.find(os.sep) >= 0:
+            abs = 1
+        else:
+            abs = 0
         # try to get a complete path; will not append cwd if just a name
         filePath = drawer.pathScrub(usrStr)
         # never try to replace a directory
         if os.path.exists(filePath) and os.path.isdir(filePath):
             return None
-            
+
         dir, fileName = os.path.split(filePath)
         # test for valid characters in file name
         ok, msg = self._fileNameTest(fileName)
-        if not ok: return None
+        if not ok:
+            return None
         # provide a dir if non given
-        if dir == '' and forceDir != None: # if not
+        if dir == "" and forceDir != None:  # if not
             # used to use getcwd here, but not sure this is a good idea?
-            if forceDir == 'fpLastDir' and self.ao.aoInfo['fpLastDir'] != '':
-                dir = self.ao.aoInfo['fpLastDir']
-            elif (forceDir == 'fpLastDirEventList' and 
-                self.ao.aoInfo['fpLastDirEventList'] != ''):
-                dir = self.ao.aoInfo['fpLastDirEventList']
+            if forceDir == "fpLastDir" and self.ao.aoInfo["fpLastDir"] != "":
+                dir = self.ao.aoInfo["fpLastDir"]
+            elif (
+                forceDir == "fpLastDirEventList"
+                and self.ao.aoInfo["fpLastDirEventList"] != ""
+            ):
+                dir = self.ao.aoInfo["fpLastDirEventList"]
             # may want to get cwd here, as this is standard behaviour
-            elif drawer.getcwd() != None: 
+            elif drawer.getcwd() != None:
                 dir = drawer.getcwd()
-            else: # no dir can be found
+            else:  # no dir can be found
                 return None
             # should already be set, user did not _initially_ provide abs path
-            abs = 0 # will not over-write existing file
+            abs = 0  # will not over-write existing file
             filePath = os.path.join(dir, fileName)
-            
+
         # check that there is a dir here
         # a dir of '' will return false for os.path.exists()
-        if not os.path.isdir(dir): #a directory
+        if not os.path.isdir(dir):  # a directory
             return None
         # overwrite existing file if abs path given
         # create a temporary eventList
         emObj = eventList.factory(self.ao.activeEventMode, self.ao)
         pathList = emObj.getWritePaths(filePath)
         if drawer.pathExists(pathList):
-            if abs: # overwrite only if initially given as abs path
+            if abs:  # overwrite only if initially given as abs path
                 return filePath
-            else: return None
-        else: # doesnt exist
+            else:
+                return None
+        else:  # doesnt exist
             return filePath
- 
- 
+
     def _validGfxPreference(self):
         """check if the user preference vis method is a available
         this is a time-suck only the first time it is called
         valid gfx methods are tk, pil, file, text"""
-        fmt = self.ao.external.getPref('athena','gfxVisualMethod')
+        fmt = self.ao.external.getPref("athena", "gfxVisualMethod")
         if fmt in self.ao.external.getVisualMethod():
-            if fmt == 'text': # not active in gfx presentations
+            if fmt == "text":  # not active in gfx presentations
                 return None
             return fmt
-        else: # set as pref but not available
+        else:  # set as pref but not available
             return None
 
-#     def _validScratchDir(self):
-#         """use to set valid scratch dir; get from user if necessary
-# 
-#         note that if this is called and the scratch directory
-#         is not set, an interactive prompt will begin
-# 
-#         TODO: use of this method should be phased out; instead
-#         temp files should be created if the scratch dir is not set
-#         """
-#         path = self.ao.external.getPref('athena', 'fpScratchDir')
-#         if not os.path.isdir(path):
-#             cmdObj = APdir(self.ao, '', argForce={'name':'fpScratchDir'})
-#             ok, msg = cmdObj.do() # will call gather, process, etcetera
-#         else: ok = 1
-#         if ok:
-#             path = self.ao.external.getPref('athena','fpScratchDir')
-#             return path
-#         else: return None
-            
-#     def _validScratchFp(self, ext='.xml'):
-#         """provide a valid xml file name
-#         return None on error"""
-#         path = self._validScratchDir()
-#         if path == None: return None
-#         else: return os.path.join(path, drawer.tempFileName(ext))
-         
+    #     def _validScratchDir(self):
+    #         """use to set valid scratch dir; get from user if necessary
+    #
+    #         note that if this is called and the scratch directory
+    #         is not set, an interactive prompt will begin
+    #
+    #         TODO: use of this method should be phased out; instead
+    #         temp files should be created if the scratch dir is not set
+    #         """
+    #         path = self.ao.external.getPref('athena', 'fpScratchDir')
+    #         if not os.path.isdir(path):
+    #             cmdObj = APdir(self.ao, '', argForce={'name':'fpScratchDir'})
+    #             ok, msg = cmdObj.do() # will call gather, process, etcetera
+    #         else: ok = 1
+    #         if ok:
+    #             path = self.ao.external.getPref('athena','fpScratchDir')
+    #             return path
+    #         else: return None
+
+    #     def _validScratchFp(self, ext='.xml'):
+    #         """provide a valid xml file name
+    #         return None on error"""
+    #         path = self._validScratchDir()
+    #         if path == None: return None
+    #         else: return os.path.join(path, drawer.tempFileName(ext))
+
     def _validGfxSetup(self):
         """check if the user preference scratch is a good dir
         get dir if not set
@@ -546,63 +577,63 @@ class Command(object):
         returns ok, and dir path
 
         """
-        fmt = self._validGfxPreference() # checks is pref fmt is available
-        if fmt == None: return 0, fmt, None # error 
+        fmt = self._validGfxPreference()  # checks is pref fmt is available
+        if fmt == None:
+            return 0, fmt, None  # error
         # check scratch dir for methods that write files
-        if fmt in ['jpg', 'png', 'eps']:              
-            # scratch dir can be None if not yet set; 
+        if fmt in ["jpg", "png", "eps"]:
+            # scratch dir can be None if not yet set;
             # temp file will be created in image tools methods
             fpScratchDir = environment.getScratchDirPath()
-            ok = 1 # fpScratchDir is good
-        else: # formats taht dont write files
-            ok = 1 # okay for graphics, scratch dir not needed
-            fpScratchDir = None # not needed for tk
+            ok = 1  # fpScratchDir is good
+        else:  # formats taht dont write files
+            ok = 1  # okay for graphics, scratch dir not needed
+            fpScratchDir = None  # not needed for tk
         # check format and resources available
-        if fmt == 'tk' and not imageTools.TK:
+        if fmt == "tk" and not imageTools.TK:
             environment.printWarn([lang.WARN, lang.msgGfxTkError])
             ok = 0
         # check if we are in idle and gfx is tk: this will not work
-        if fmt == 'tk' and drawer.isIdle():
+        if fmt == "tk" and drawer.isIdle():
             environment.printWarn([lang.WARN, lang.msgGfxIdleError])
             ok = 0
-        # see if pil module is available 
-        if fmt in ['jpg', 'png'] and not imageTools.PIL:
+        # see if pil module is available
+        if fmt in ["jpg", "png"] and not imageTools.PIL:
             environment.printWarn([lang.WARN, lang.msgGfxPilError])
             ok = 0
-                    
-        if ok: # get to get fpScratchDir again as set w/ APdir command
-            return ok, fmt, fpScratchDir # fpScratchDir is a directory
-        else: # not okay
+
+        if ok:  # get to get fpScratchDir again as set w/ APdir command
+            return ok, fmt, fpScratchDir  # fpScratchDir is a directory
+        else:  # not okay
             return ok, fmt, None
 
-    #-----------------------------------------------------------------------||--
+    # -----------------------------------------------------------------------||--
     def _numPmtrDetermineFormat(self, usrStr, srcFmt=None):
         """strip leading characters from aux, text, and dyn notations"""
-        allFormats = [basePmtr.AUXQ, basePmtr.TEXTQ, 
-                          basePmtr.DYNQ, basePmtr.CLONEQ]
+        allFormats = [basePmtr.AUXQ, basePmtr.TEXTQ, basePmtr.DYNQ, basePmtr.CLONEQ]
         fmt = None
-        noStr = ''
+        noStr = ""
         for stub in allFormats:
-            if usrStr[:len(stub)] == stub.lower():
+            if usrStr[: len(stub)] == stub.lower():
                 fmt = stub
-                noStr = usrStr[len(stub):]
-        if fmt == None: # check single character synonymes
-            if usrStr[:1] == 'p':
-                noStr = usrStr[1:] 
+                noStr = usrStr[len(stub) :]
+        if fmt == None:  # check single character synonymes
+            if usrStr[:1] == "p":
+                noStr = usrStr[1:]
                 fmt = basePmtr.AUXQ
-            elif usrStr[:1] == 'x':
-                noStr = usrStr[1:] 
+            elif usrStr[:1] == "x":
+                noStr = usrStr[1:]
                 fmt = basePmtr.AUXQ
-            elif usrStr[:1] in ['e', 's']: 
-                noStr = usrStr[1:] 
+            elif usrStr[:1] in ["e", "s"]:
+                noStr = usrStr[1:]
                 fmt = basePmtr.TEXTQ
-            elif usrStr[:1] in ['y', 'd']: 
-                noStr = usrStr[1:] # remvoe dynQ
+            elif usrStr[:1] in ["y", "d"]:
+                noStr = usrStr[1:]  # remvoe dynQ
                 fmt = basePmtr.DYNQ
-            elif usrStr[:1] == 'c':
-                noStr = usrStr[1:] # remvoe auxQ
+            elif usrStr[:1] == "c":
+                noStr = usrStr[1:]  # remvoe auxQ
                 fmt = basePmtr.CLONEQ
-            else: # failure: cannot find a match, may not be right label
+            else:  # failure: cannot find a match, may not be right label
                 # assume that usrStr is just a number, add srcFmt
                 fmt = srcFmt
                 noStr = usrStr
@@ -615,15 +646,19 @@ class Command(object):
         can use this w/ clones, as have same aux as t, and cloneQ is fixed
         """
         srcStr = copy.deepcopy(usrStr)
-        usrStr = drawer.strScrub(usrStr, 'l')
-        if usrStr == None: return None
+        usrStr = drawer.strScrub(usrStr, "l")
+        if usrStr == None:
+            return None
 
         fmt, noStr = self._numPmtrDetermineFormat(usrStr, srcFmt)
-        if fmt == None or fmt != srcFmt: # not a numeric label, not srcFmt
-            if force: return None # mark this as an error
-            else: return srcStr # return value unchanged
+        if fmt == None or fmt != srcFmt:  # not a numeric label, not srcFmt
+            if force:
+                return None  # mark this as an error
+            else:
+                return srcStr  # return value unchanged
 
-        if noStr == '': return None
+        if noStr == "":
+            return None
         try:
             no = int(noStr)
         except (NameError, ValueError, SyntaxError, ZeroDivisionError):
@@ -641,41 +676,49 @@ class Command(object):
         elif fmt == basePmtr.CLONEQ:
             if no not in list(range(0, self.ao.cloneLib.clonePmtrNo())):
                 return None
-        label = '%s%s' % (fmt, no)
+        label = "%s%s" % (fmt, no)
         return label
 
-    #-----------------------------------------------------------------------||--
+    # -----------------------------------------------------------------------||--
     def _getNumPmtr(self, pmtrType, tName, usrStr=None):
         """have user select a numeric parameter
         owrks w/ all types
         note: event w/ clones, clone name need not be provided"""
-        if pmtrType[:3] == 'aux':
+        if pmtrType[:3] == "aux":
             valMax = self.ao.textureLib[tName].auxNo - 1
             stub = basePmtr.AUXQ
-            title = 'an auxiliary'
-            char = 'x'
-        elif pmtrType[:4] == 'text':
+            title = "an auxiliary"
+            char = "x"
+        elif pmtrType[:4] == "text":
             valMax = self.ao.textureLib[tName].textPmtrNo - 1
             stub = basePmtr.TEXTQ
-            title = 'a texture static'
-            char = 's'
-        elif pmtrType[:5] == 'clone':
+            title = "a texture static"
+            char = "s"
+        elif pmtrType[:5] == "clone":
             valMax = self.ao.cloneLib.clonePmtrNo() - 1
             stub = basePmtr.CLONEQ
-            title = 'a clone static'
-            char = 's'
-        elif pmtrType[:3] == 'dyn':
+            title = "a clone static"
+            char = "s"
+        elif pmtrType[:3] == "dyn":
             valMax = 0
             stub = basePmtr.DYNQ
-            title = 'a texture dynamic'
-            char = 'd'
+            title = "a texture dynamic"
+            char = "d"
         # usr may have already provide nevessary numerica label
         if usrStr != None:
             label = self._numPmtrConvertLabel(usrStr, tName, stub, 1)
-            if label != None: return label # skip interface
+            if label != None:
+                return label  # skip interface
         while 1:
-            usrStr = dialog.askStr(('select %s parameter to edit, from %s0 to %s%s:' % (title, char, char, valMax)), self.termObj)
-            if usrStr == None: return None
+            usrStr = dialog.askStr(
+                (
+                    "select %s parameter to edit, from %s0 to %s%s:"
+                    % (title, char, char, valMax)
+                ),
+                self.termObj,
+            )
+            if usrStr == None:
+                return None
             label = self._numPmtrConvertLabel(usrStr, tName, stub, 1)
             if label == None:
                 dialog.msgOut(lang.msgDlgEnterIntRange % valMax, self.termObj)
@@ -683,17 +726,17 @@ class Command(object):
             else:
                 return label
 
-    #-----------------------------------------------------------------------||--
+    # -----------------------------------------------------------------------||--
     # sc display utilities
 
     def _scGetTnStr(self):
         if self.ao.tniMode == 1:
             classStr = lang.msgSCtni
-        else: classStr = lang.msgSCtn
-        return classStr 
+        else:
+            classStr = lang.msgSCtn
+        return classStr
 
-
-    #-----------------------------------------------------------------------||--
+    # -----------------------------------------------------------------------||--
     # these function are used to test the current state of all path instances
     def _piTestExistance(self):
         """checks if a path exists"""
@@ -701,6 +744,7 @@ class Command(object):
             return lang.msgPIcreateFirst
         else:
             return None
+
     def _piTestNameExists(self, name=None):
         """checks if a path name exists"""
         if name == None:
@@ -709,30 +753,30 @@ class Command(object):
             return lang.msgPImissingName
         else:
             return None
+
     def _piTestNoVL(self):
         """checks if a path voices are allowed"""
         try:
-            if self.ao.pathLib[self.ao.activePath].voiceType == 'none':
+            if self.ao.pathLib[self.ao.activePath].voiceType == "none":
                 return lang.msgPVnotAvailable
             else:
                 return None
         except:
             return lang.msgPVnotAvailable
 
-#     def _piTestCurrentPVgroupNameExists(self):
-#         """checks if a path voice name exists"""
-#         try:
-#             if (self.ao.pathLib[self.ao.activePath].activeVoice in 
-#                  self.ao.pathLib[self.ao.activePath].voiceNames()):
-#                 return None
-#             else:
-#                 return lang.msgPVgroupMissingName
-#         except:
-#             return lang.msgPVgroupMissingName
+    #     def _piTestCurrentPVgroupNameExists(self):
+    #         """checks if a path voice name exists"""
+    #         try:
+    #             if (self.ao.pathLib[self.ao.activePath].activeVoice in
+    #                  self.ao.pathLib[self.ao.activePath].voiceNames()):
+    #                 return None
+    #             else:
+    #                 return lang.msgPVgroupMissingName
+    #         except:
+    #             return lang.msgPVgroupMissingName
 
-
-    def _piAutoCreate(self, name='auto', psList=[0]):
-        """creates and loads a path, 
+    def _piAutoCreate(self, name="auto", psList=[0]):
+        """creates and loads a path,
         used for default, when a texture has lost its path
         for eventModes that requre a path
         will not overwrite existing paths with the same name"""
@@ -744,7 +788,7 @@ class Command(object):
 
     def _piAutoCreateMidiPercussion(self, inst):
         """utiliy method for event mode midi percussion instrument editing"""
-        pName = 'auto-%s' % generalMidi.getPercNameFromNoteName(inst)
+        pName = "auto-%s" % generalMidi.getPercNameFromNoteName(inst)
         # inst number is midi pitch; convert to psReal, put in list
         self._piAutoCreate(pName, [pitchTools.midiToPs(inst)])
         # return a reference
@@ -754,7 +798,8 @@ class Command(object):
         """asks user for a path name, checking against existing paths"""
         while 1:
             name = dialog.askStr(query, self.termObj)
-            if name == None: return None
+            if name == None:
+                return None
             name = self._nameReplace(name)
             if self._nameTest(name) != None:
                 dialog.msgOut(self._nameTest(name), self.termObj)
@@ -763,24 +808,26 @@ class Command(object):
             else:
                 return name
 
-              
     def _piGetPathPosition(self, query, start, end):
         """start and end are the limits of integers offered
-            does not performa list correct (suctracting one)"""
-        query = query + ' (positions %i-%i):' % (start, end)
+        does not performa list correct (suctracting one)"""
+        query = query + " (positions %i-%i):" % (start, end)
         while 1:
             usrStr = dialog.askStr(query, self.termObj)
-            if usrStr == None: return None
-            rotZero = drawer.strToNum(usrStr, 'int', start, end)
-            if rotZero != None: return rotZero
+            if usrStr == None:
+                return None
+            rotZero = drawer.strToNum(usrStr, "int", start, end)
+            if rotZero != None:
+                return rotZero
             else:
-                dialog.msgOut(('%sincorrect path position. try again.\n'%lang.TAB),
-                                    self.termObj)            
-        
+                dialog.msgOut(
+                    ("%sincorrect path position. try again.\n" % lang.TAB), self.termObj
+                )
+
     def _piGetIntegerRange(self, query, start, end):
         """gets a tuple of two numbers separated by a comma
-            start and end are given un-corrected
-            1 is subtracted from user values after being optained"""
+        start and end are given un-corrected
+        1 is subtracted from user values after being optained"""
         while 1:
             outputRangeStr = dialog.askStr(query, self.termObj)
             if outputRangeStr == None:
@@ -792,9 +839,7 @@ class Command(object):
             else:
                 return outputRangeTuple
 
-
-
-    #-----------------------------------------------------------------------||--
+    # -----------------------------------------------------------------------||--
     def _tiTestExistance(self):
         if len(self.ao.textureLib) == 0:
             return lang.msgTIcreateFirst
@@ -818,17 +863,18 @@ class Command(object):
                 continue
             # there are clonse
             elif tName in self.ao.cloneLib.tNames():
-                if not t.mute: # active texture; always add, no matter clone
+                if not t.mute:  # active texture; always add, no matter clone
                     activeCount = activeCount + 1
                 # check for clone activity
                 for cName in self.ao.cloneLib.cNames(tName):
                     c = self.ao.cloneLib.get(tName, cName)
-                    if not c.mute: # if not muted, give active value
+                    if not c.mute:  # if not muted, give active value
                         activeCount = activeCount + 1
-        #print _MOD, '_tiTestMustStatus', activeCount 
-        if activeCount > 0: return 0 # textures or clonse are active
-        else: return 1 # all sources are muted
-
+        # print _MOD, '_tiTestMustStatus', activeCount
+        if activeCount > 0:
+            return 0  # textures or clonse are active
+        else:
+            return 1  # all sources are muted
 
     def _tiTestNameExists(self, name=None):
         if name == None:
@@ -840,76 +886,86 @@ class Command(object):
 
     def _tiConvertPrePost(self, usrStr):
         ref = {
-            'pre' : ['pre', 'r'],
-            'post' : ['post', 's'],
-                }
-        return drawer.selectionParse(usrStr, ref) # may be None
+            "pre": ["pre", "r"],
+            "post": ["post", "s"],
+        }
+        return drawer.selectionParse(usrStr, ref)  # may be None
 
     def _tiConvertEventTime(self, usrStr):
         ref = {
-            'event' : ['event', 'e'],
-            'time' : ['time', 't'],
-                }
-        return drawer.selectionParse(usrStr, ref) # may be None
+            "event": ["event", "e"],
+            "time": ["time", "t"],
+        }
+        return drawer.selectionParse(usrStr, ref)  # may be None
 
-    def _tiGetDemo(self, tName, p, label, type='edit'):
+    def _tiGetDemo(self, tName, p, label, type="edit"):
         """p is the parameter key
         used edit commands to provide an exmaple to user of entry format
         label is string used to describe p
         """
-        if type == 'edit':
-            prefaceStr = 'current'
-            forbidden = ['inst']
-        elif type == 'listedit':
-            prefaceStr = 'sample'
-            forbidden = ['auxQ', 'textQ', 'dynQ']
+        if type == "edit":
+            prefaceStr = "current"
+            forbidden = ["inst"]
+        elif type == "listedit":
+            prefaceStr = "sample"
+            forbidden = ["auxQ", "textQ", "dynQ"]
         if p[:4] in forbidden or p[:5] in forbidden:
-            if p[:4] == 'auxQ':
+            if p[:4] == "auxQ":
                 return None, (lang.TAB + lang.msgTEnoAuxEdit)
-            if p[:5] == 'textQ':
+            if p[:5] == "textQ":
                 return None, (lang.TAB + lang.msgTEnoTextEdit)
-            if p[:4] == 'dynQ':
+            if p[:4] == "dynQ":
                 return None, (lang.TAB + lang.msgTEnoDynEdit)
 
         t = self.ao.textureLib[tName]
-        if p == 'path':
+        if p == "path":
             attribute_to_edit = t.path
             for pair in list(self.ao.pathLib.items()):
                 if pair[1] == attribute_to_edit:
                     old_name = pair[0]
-            path_string = t.path.repr('scPath')     
-            demo = '%s %s: %s: %s' % (prefaceStr, label, old_name, path_string)
-        elif p in ('inst', 'rhythmQ', 'tRange', 'beatT', 'fieldQ', 
-                        'octQ', 'ampQ', 'panQ'):
-            dataStr = t.pmtrObjDict[p].repr('argsOnly')
-            demo = '%s %s: %s' % (prefaceStr, label, dataStr)
-        elif p[:4] == 'auxQ':
-            demo = {} # here demo is a dictionary!!!
-            if t.auxNo < 1: return None, (lang.TAB + lang.msgTInoAuxEdit)
+            path_string = t.path.repr("scPath")
+            demo = "%s %s: %s: %s" % (prefaceStr, label, old_name, path_string)
+        elif p in (
+            "inst",
+            "rhythmQ",
+            "tRange",
+            "beatT",
+            "fieldQ",
+            "octQ",
+            "ampQ",
+            "panQ",
+        ):
+            dataStr = t.pmtrObjDict[p].repr("argsOnly")
+            demo = "%s %s: %s" % (prefaceStr, label, dataStr)
+        elif p[:4] == "auxQ":
+            demo = {}  # here demo is a dictionary!!!
+            if t.auxNo < 1:
+                return None, (lang.TAB + lang.msgTInoAuxEdit)
             for i, p in basePmtr.auxLabel(t.auxNo, 1):
-                dataStr = t.pmtrObjDict[p].repr('argsOnly')
-                demo[p] = '%s value for x%i: %s' % (prefaceStr, i, dataStr)
-        elif p[:5] == 'textQ':
-            demo = {} # here demo is a dictionary
-            if t.textPmtrNo < 1: return None, (lang.TAB + lang.msgTInoTextEdit)
+                dataStr = t.pmtrObjDict[p].repr("argsOnly")
+                demo[p] = "%s value for x%i: %s" % (prefaceStr, i, dataStr)
+        elif p[:5] == "textQ":
+            demo = {}  # here demo is a dictionary
+            if t.textPmtrNo < 1:
+                return None, (lang.TAB + lang.msgTInoTextEdit)
             for i, p in basePmtr.textLabel(t.textPmtrNo, 1):
-                dataStr = t.pmtrObjDict[p].repr('noType')
-                demo[p] = '%s value for s%i: %s' % (prefaceStr, i, dataStr)
-        elif p[:4] == 'dynQ':
-            demo = {} # here demo is a dictionary
-            if t.dynPmtrNo < 1: return None, (lang.TAB + lang.msgTInoDynEdit)
+                dataStr = t.pmtrObjDict[p].repr("noType")
+                demo[p] = "%s value for s%i: %s" % (prefaceStr, i, dataStr)
+        elif p[:4] == "dynQ":
+            demo = {}  # here demo is a dictionary
+            if t.dynPmtrNo < 1:
+                return None, (lang.TAB + lang.msgTInoDynEdit)
             for i, p in basePmtr.dynLabel(t.dynPmtrNo, 1):
-                dataStr = t.pmtrObjDict[p].repr('argsOnly')
-                demo[p] = '%s value for d%i: %s' % (prefaceStr, i, dataStr)
+                dataStr = t.pmtrObjDict[p].repr("argsOnly")
+                demo[p] = "%s value for d%i: %s" % (prefaceStr, i, dataStr)
         else:
             return None, lang.msgTIbadPmtrName
-        if drawer.isStr(demo): #adjust prompt
-            demo = demo + '\nnew value:'
-            demoAdjust = ''
-        else: # only for aux demo, as it is a list
-            demoAdjust = '\nnew value:'
+        if drawer.isStr(demo):  # adjust prompt
+            demo = demo + "\nnew value:"
+            demoAdjust = ""
+        else:  # only for aux demo, as it is a list
+            demoAdjust = "\nnew value:"
         return demo, demoAdjust
-
 
     def _tiEvalUsrStr(self, usrStr, p=None, tName=None):
         """Filter and evaluate user-entered string data. Used for all TIe commands, whenever user is giving complex arguments for ParameterObjects. Also used for command line TIe argument passing
@@ -929,23 +985,25 @@ class Command(object):
         (('cf', 'a quoted string'), '')
         """
         if tName != None:
-            if (p in self.ao.textureLib[tName].pmtrCommon and 
-                p not in self.ao.textureLib[tName].pmtrActive):
-                return None, 'no %s parameter in TI %s\n' % (p, tName)
+            if (
+                p in self.ao.textureLib[tName].pmtrCommon
+                and p not in self.ao.textureLib[tName].pmtrActive
+            ):
+                return None, "no %s parameter in TI %s\n" % (p, tName)
         usrDataEval, msg = self._strRawToData(usrStr, lang.msgTIeditArgError)
         # do parameter specific adjustments
-        if p == 'path': # given  a string arg, retrurn the reference to e path
+        if p == "path":  # given  a string arg, retrurn the reference to e path
             if usrDataEval not in list(self.ao.pathLib.keys()):
-                return None, 'no path named %s.\n' % str(usrDataEval)
-            usrDataEval = self.ao.pathLib[usrDataEval] # get reference of path
-        elif p == 'tRange': # must be a number
+                return None, "no path named %s.\n" % str(usrDataEval)
+            usrDataEval = self.ao.pathLib[usrDataEval]  # get reference of path
+        elif p == "tRange":  # must be a number
             if not drawer.isList(usrDataEval):
-                return None, 'enter two time values seperated by a comma.\n'
-        elif p == 'inst': # must be a number
-            if not drawer.isInt(usrDataEval):        
-                return None, 'instrument number must be an integer.\n'
-        elif p == None: # case of evaluating user parameter obs w/o a texture
-            pass #  may returns a string as usrDataEval; cannot check for errors
+                return None, "enter two time values seperated by a comma.\n"
+        elif p == "inst":  # must be a number
+            if not drawer.isInt(usrDataEval):
+                return None, "instrument number must be an integer.\n"
+        elif p == None:  # case of evaluating user parameter obs w/o a texture
+            pass  #  may returns a string as usrDataEval; cannot check for errors
         return usrDataEval, msg
 
     def _tiCompleteEditData(self, p, usrDataEval, textureName):
@@ -958,23 +1016,29 @@ class Command(object):
         (('ru', 0, 1), None)
 
         """
-        msg = None # if an error is found, store string 
-        if p == 'tRange':
-            evalData = ("staticRange", usrDataEval) 
-        elif p == 'inst':
-            evalData = ("staticInst", usrDataEval, 
-                            '%s' % (self.ao.orcObj.name))
-        elif p[:5] == 'textQ': # add option name
+        msg = None  # if an error is found, store string
+        if p == "tRange":
+            evalData = ("staticRange", usrDataEval)
+        elif p == "inst":
+            evalData = ("staticInst", usrDataEval, "%s" % (self.ao.orcObj.name))
+        elif p[:5] == "textQ":  # add option name
             # single arguments will not be evaluated as a list
             if not drawer.isList(usrDataEval):
-                usrDataEval = [usrDataEval,]
-            try: # this may raise a ValueError
+                usrDataEval = [
+                    usrDataEval,
+                ]
+            try:  # this may raise a ValueError
                 pmtrName = self.ao.textureLib[textureName].getTextStaticName(p)
-                evalData = tuple([pmtrName,] + list(usrDataEval))
+                evalData = tuple(
+                    [
+                        pmtrName,
+                    ]
+                    + list(usrDataEval)
+                )
             except ValueError as e:
                 evalData = None
-                msg = e # store error message
-        else:# all other parameters return unmodified
+                msg = e  # store error message
+        else:  # all other parameters return unmodified
             evalData = usrDataEval
         return evalData, msg
 
@@ -982,24 +1046,24 @@ class Command(object):
         """edits a parameter using a texture's built in method
         if p == None (no parameter given) will refresh all data
         by creating new scores; this is useful for mode changes and the like.
-        will update all clones if edit is succesful and refresh is true     
+        will update all clones if edit is succesful and refresh is true
         refresh: can turn off generating a new score"""
         # if this texture has any clones, those will need to be updated
         t = self.ao.textureLib[tName]
         ok, msg = t.editPmtrObj(p, usrDataEval, refresh)
         # do post edit updates external to the texture object
         if ok:
-            if p == 'inst': # if parameter is an instrument, update clone
+            if p == "inst":  # if parameter is an instrument, update clone
                 for cName in self.ao.cloneLib.cNames(tName):
                     c = self.ao.cloneLib.get(tName, cName)
-                    c.updatePmtrObj('inst', t.getRefClone())
-                # if 'midiPercussion' event mode, must also create a path   
-                if self.ao.activeEventMode == 'midiPercussion':
-                    if t.getInstOrcName() == 'generalMidiPercussion':
-                        environment.printWarn('creating and updating path')
+                    c.updatePmtrObj("inst", t.getRefClone())
+                # if 'midiPercussion' event mode, must also create a path
+                if self.ao.activeEventMode == "midiPercussion":
+                    if t.getInstOrcName() == "generalMidiPercussion":
+                        environment.printWarn("creating and updating path")
                         pRef = self._piAutoCreateMidiPercussion(t.getInst())
                         # must update path as well
-                        ok, msg = t.editPmtrObj('path', pRef, refresh)
+                        ok, msg = t.editPmtrObj("path", pRef, refresh)
 
             # rescoring all clones will update tRefAbs values
             if refresh:
@@ -1009,36 +1073,35 @@ class Command(object):
         return ok, msg
 
     def _tiRefresh(self, tName):
-        """refrsh textures and clones alone: not associated with editing a 
+        """refrsh textures and clones alone: not associated with editing a
         parameter; will create new esObj in textures, and pas these to clones
-        note: there is a different way to refresh inside the Performer and 
+        note: there is a different way to refresh inside the Performer and
         EventSequenceSplit objects; these are done all all textures
         when event lists are created
         """
         t = self.ao.textureLib[tName]
         ok = t.score()
         if not ok:
-            return ok, 'Texture %s contains incompatible ParameterObjects'
+            return ok, "Texture %s contains incompatible ParameterObjects"
         for cName in self.ao.cloneLib.cNames(tName):
             c = self.ao.cloneLib.get(tName, cName)
             c.score(t.getScore(), t.getRefClone())
-        return ok, '' # good
-                    
+        return ok, ""  # good
+
     def _tcEdit(self, tName, cName, p, usrDataEval, refresh=1):
         """edits clone parameter objects
         will provide clone with most recent texture esObj
         """
         t = self.ao.textureLib[tName]
         c = self.ao.cloneLib.get(tName, cName)
-        ok, msg = c.editPmtrObj(p, usrDataEval, t.getRefClone(), 
-                                        t.getScore(), refresh)
+        ok, msg = c.editPmtrObj(p, usrDataEval, t.getRefClone(), t.getScore(), refresh)
         return ok, msg
 
     def _tiGetNewName(self, query):
         """asks user for a texture name, checking against existing paths"""
         while 1:
             name = dialog.askStr(query, self.termObj)
-            if name == None or name == '' :
+            if name == None or name == "":
                 return None
             name = self._nameReplace(name)
             if self._nameTest(name) != None:
@@ -1048,93 +1111,98 @@ class Command(object):
             else:
                 return name
 
-    def _tiRemove(self, name): # args is name of texture 
+    def _tiRemove(self, name):  # args is name of texture
         if name in list(self.ao.textureLib.keys()):
             self.ao.textureLib[name].path.refDecr()
-            del self.ao.textureLib[name] # del object
-            if name in self.ao.cloneLib.tNames():   # del clone dict,if exists
-                self.ao.cloneLib.delete(name) # deletes all clones w/ this text
+            del self.ao.textureLib[name]  # del object
+            if name in self.ao.cloneLib.tNames():  # del clone dict,if exists
+                self.ao.cloneLib.delete(name)  # deletes all clones w/ this text
             if name == self.ao.activeTexture:
                 if len(list(self.ao.textureLib.keys())) == 0:
-                    self.ao.activeTexture = ''
-                else:# gets a random texture to replace
+                    self.ao.activeTexture = ""
+                else:  # gets a random texture to replace
                     self.ao.activeTexture = random.choice(
-                                                     list(self.ao.textureLib.keys())) 
-            return 'TI %s destroyed.\n' % name
+                        list(self.ao.textureLib.keys())
+                    )
+            return "TI %s destroyed.\n" % name
         else:
-            return None # error 
-
+            return None  # error
 
     def _tpConvertPmtrObj(self, usrStr):
         """convert pmtr string to pmtr obj"""
         # allow th use of direct integer number specifications
-        if usrStr == None: # if a bad string is given, for example
-            return 0, 'missing arguments'
-        usrNum, junk = drawer.strExtractNum(usrStr, '.') # accept period
-        if len(usrNum) == len(usrStr): # all numbers, no floats
-            usrStr = 'c,%s' % usrNum
+        if usrStr == None:  # if a bad string is given, for example
+            return 0, "missing arguments"
+        usrNum, junk = drawer.strExtractNum(usrStr, ".")  # accept period
+        if len(usrNum) == len(usrStr):  # all numbers, no floats
+            usrStr = "c,%s" % usrNum
         # perform nomal procedures
         usrDataEval, msg = self._tiEvalUsrStr(usrStr, None)
-        if usrDataEval == None: 
+        if usrDataEval == None:
             return 0, msg
-        try: obj = parameter.factory(usrDataEval, 'g')
+        try:
+            obj = parameter.factory(usrDataEval, "g")
         except error.ParameterObjectSyntaxError as e:
             return 0, e
         return 1, obj
-    
+
     def _tpGetPmtrObj(self, query):
         """returns None or a instantiated object"""
         while 1:
             poStr = dialog.askStr(query, self.termObj)
-            if poStr == None: return None
+            if poStr == None:
+                return None
             # msg may be object
             ok, msg = self._tpConvertPmtrObj(poStr)
             if not ok:
                 # note: this does not format correctly, may double tab
                 # may also preface as a TIe ERROR, though this is wrong
-                dialog.msgOut('%s%s\n' % (lang.TAB, msg), self.termObj)
+                dialog.msgOut("%s%s\n" % (lang.TAB, msg), self.termObj)
                 continue
-            return msg # msg is object
-
+            return msg  # msg is object
 
     def _teGetTimeMapDict(self):
-        tiMapDict = {} #clear
-        #muteList = self._tiMuteList()
+        tiMapDict = {}  # clear
+        # muteList = self._tiMuteList()
         for tName in list(self.ao.textureLib.keys()):
             t = self.ao.textureLib[tName]
-            tiMapDict[tName] = {} # add a dictionary w/ name for key
-            tiMapDict[tName]['tRange'] = t.timeRangeAbs # this is abs time
-            tiMapDict[tName]['muteStatus'] = t.mute
-            tiMapDict[tName]['cloneDict'] = {}
+            tiMapDict[tName] = {}  # add a dictionary w/ name for key
+            tiMapDict[tName]["tRange"] = t.timeRangeAbs  # this is abs time
+            tiMapDict[tName]["muteStatus"] = t.mute
+            tiMapDict[tName]["cloneDict"] = {}
             if tName in self.ao.cloneLib.tNames():
                 # need to get and esObj to get time range
                 for cName in self.ao.cloneLib.cNames(tName):
                     c = self.ao.cloneLib.get(tName, cName)
                     # need to suply ref dict to clone from parent texture
-                    tiMapDict[tName]['cloneDict'][cName] = {}
-                    tiMapDict[tName]['cloneDict'][cName]['tRange'] = c.timeRangeAbs
-                    tiMapDict[tName]['cloneDict'][cName]['muteStatus'] = c.mute
+                    tiMapDict[tName]["cloneDict"][cName] = {}
+                    tiMapDict[tName]["cloneDict"][cName]["tRange"] = c.timeRangeAbs
+                    tiMapDict[tName]["cloneDict"][cName]["muteStatus"] = c.mute
         return tiMapDict
 
     def _teGetTotalTimeRange(self, tiMapDict=None):
         """look at all textures and clones, find amximal range"""
-        if tiMapDict == None: tiMapDict = self._teGetTimeMapDict()
+        if tiMapDict == None:
+            tiMapDict = self._teGetTimeMapDict()
         startTime = 0
         endTime = 0
         for tName in list(tiMapDict.keys()):
-            s, e = tiMapDict[tName]['tRange']
-            if s <= startTime: startTime = s
-            if e >= endTime: endTime = e
-            for cName in list(tiMapDict[tName]['cloneDict'].keys()):
-                s, e = tiMapDict[tName]['cloneDict'][cName]['tRange']
-                # check for a clone that is longer               
-                if s <= startTime: startTime = s
-                if e >= endTime: endTime = e
+            s, e = tiMapDict[tName]["tRange"]
+            if s <= startTime:
+                startTime = s
+            if e >= endTime:
+                endTime = e
+            for cName in list(tiMapDict[tName]["cloneDict"].keys()):
+                s, e = tiMapDict[tName]["cloneDict"][cName]["tRange"]
+                # check for a clone that is longer
+                if s <= startTime:
+                    startTime = s
+                if e >= endTime:
+                    endTime = e
         totalDur = endTime - startTime
-        return startTime, endTime, totalDur # all in seconds
+        return startTime, endTime, totalDur  # all in seconds
 
-
-    #-----------------------------------------------------------------------||--
+    # -----------------------------------------------------------------------||--
     def _tcTestExistance(self, tName):
         """test if this texxture has any clones"""
         if self.ao.cloneLib.number(tName) == 0:
@@ -1146,7 +1214,8 @@ class Command(object):
         """asks user for a texture clone name, checking against existing paths"""
         while 1:
             name = dialog.askStr(query, self.termObj)
-            if name == None: return None
+            if name == None:
+                return None
             name = self._nameReplace(name)
             if self._nameTest(name) != None:
                 dialog.msgOut(self._nameTest(name), self.termObj)
@@ -1155,74 +1224,80 @@ class Command(object):
             else:
                 return name
 
-    def _tcGetDemo(self, tName, cName, p, label, type='edit'):
+    def _tcGetDemo(self, tName, cName, p, label, type="edit"):
         """p is the parameter key
         used edit commands to provide an exmaple to user of entry format
         label is string used to describe p
         """
-        if type == 'edit':
-            prefaceStr = 'current'
-            forbidden = [] # not used in clone
-        elif type == 'listedit':
-            prefaceStr = 'sample'
+        if type == "edit":
+            prefaceStr = "current"
+            forbidden = []  # not used in clone
+        elif type == "listedit":
+            prefaceStr = "sample"
             forbidden = []
 
         t = self.ao.textureLib[tName]
         c = self.ao.cloneLib.get(tName, cName)
-        if p in ('time', 'sus', 'acc', 'fieldQ', 'octQ', 'ampQ', 'panQ'):
-            dataStr = c.pmtrObjDict[p].repr('argsOnly')
-            demo = '%s %s: %s' % (prefaceStr, label, dataStr)
-        elif p[:4] == 'auxQ':
-            demo = {} # here demo is a dictionary!!!
-            if t.auxNo < 1: return None, (lang.TAB + lang.msgTCnoAuxEdit)
+        if p in ("time", "sus", "acc", "fieldQ", "octQ", "ampQ", "panQ"):
+            dataStr = c.pmtrObjDict[p].repr("argsOnly")
+            demo = "%s %s: %s" % (prefaceStr, label, dataStr)
+        elif p[:4] == "auxQ":
+            demo = {}  # here demo is a dictionary!!!
+            if t.auxNo < 1:
+                return None, (lang.TAB + lang.msgTCnoAuxEdit)
             for i, p in basePmtr.auxLabel(c.auxNo, 1):
-                dataStr = c.pmtrObjDict[p].repr('argsOnly')
-                demo[p] = '%s value for x%i: %s' % (prefaceStr, i, dataStr)
-        elif p[:6] == 'cloneQ':
-            demo = {} # here demo is a dictionary
-            if t.textPmtrNo < 1: return None, (lang.TAB + lang.msgTInoTextEdit)
+                dataStr = c.pmtrObjDict[p].repr("argsOnly")
+                demo[p] = "%s value for x%i: %s" % (prefaceStr, i, dataStr)
+        elif p[:6] == "cloneQ":
+            demo = {}  # here demo is a dictionary
+            if t.textPmtrNo < 1:
+                return None, (lang.TAB + lang.msgTInoTextEdit)
             for i, p in basePmtr.cloneLabel(c.clonePmtrNo, 1):
-                dataStr = c.pmtrObjDict[p].repr('noType')
-                demo[p] = '%s value for c%i: %s' % (prefaceStr, i, dataStr)
+                dataStr = c.pmtrObjDict[p].repr("noType")
+                demo[p] = "%s value for c%i: %s" % (prefaceStr, i, dataStr)
         else:
             return None, lang.msgTCbadPmtrName
 
-        if drawer.isStr(demo): #adjust prompt
-            demo = demo + '\nnew value:'
-            demoAdjust = ''
-        else: # only for aux demo, as it is a list
-            demoAdjust = '\nnew value:'
+        if drawer.isStr(demo):  # adjust prompt
+            demo = demo + "\nnew value:"
+            demoAdjust = ""
+        else:  # only for aux demo, as it is a list
+            demoAdjust = "\nnew value:"
         return demo, demoAdjust
 
-
     def _tcEvalUsrStr(self, usrStr, p):
-        """filter and evaluate user entered data
-        """
+        """filter and evaluate user entered data"""
         usrDataEval, msg = self._strRawToData(usrStr, lang.msgTCeditArgError)
         return usrDataEval, msg
 
     def _tcCompleteEditData(self, p, usrDataEval, tName, cName):
         """autocompletes special parameter argument lists"""
-        if p[:6] == 'cloneQ': # add option name
+        if p[:6] == "cloneQ":  # add option name
             # single arguments will not be evaluated as a list
             if not drawer.isList(usrDataEval):
-                usrDataEval = [usrDataEval,]
+                usrDataEval = [
+                    usrDataEval,
+                ]
             clone = self.ao.cloneLib.get(tName, cName)
             pmtrName = clone.getCloneStaticName(p)
-            evalData = tuple([pmtrName,] + list(usrDataEval))
-        else:# all other parameters return unmodified
+            evalData = tuple(
+                [
+                    pmtrName,
+                ]
+                + list(usrDataEval)
+            )
+        else:  # all other parameters return unmodified
             evalData = usrDataEval
         return evalData
 
-
-    #-----------------------------------------------------------------------||--         
+    # -----------------------------------------------------------------------||--
     def _elCheckInstrumentNo(self, instNo):
         """checks if instrument exists. if true, returns number
         if no inst, return None
         """
         if not drawer.isInt(instNo):
             try:
-                instNo = int(instNo) # covnert to int
+                instNo = int(instNo)  # covnert to int
             except (ValueError, SyntaxError, NameError, TypeError):
                 return None
         # test if number is valid
@@ -1230,27 +1305,27 @@ class Command(object):
             return instNo
         else:
             return None
-            
 
     def _elGetInstrumentNo(self):
-        """asks user for instrument number, displays list if asked
-        """
-        #instInfo, instNoList = self.ao.orcObj.getInstInfo()
+        """asks user for instrument number, displays list if asked"""
+        # instInfo, instNoList = self.ao.orcObj.getInstInfo()
         # get a user string for representing the list of instruments
-        instNoStr = self.ao.orcObj.instNoList('user')
+        instNoStr = self.ao.orcObj.instNoList("user")
         while 1:
             if instNoStr == None:
-                usrStr = dialog.askStr('enter any instrument number:', 
-                                                  self.termObj)
+                usrStr = dialog.askStr("enter any instrument number:", self.termObj)
             else:
                 usrStr = dialog.askStr(
-                    'enter instrument number:\n%s\nor "?" for instrument help:' % 
-                                        instNoStr, self.termObj)
-            if usrStr == None: return None
-            testCmdStr = usrStr.lower()
-            if testCmdStr == '':
+                    'enter instrument number:\n%s\nor "?" for instrument help:'
+                    % instNoStr,
+                    self.termObj,
+                )
+            if usrStr == None:
                 return None
-            elif testCmdStr in ['?', 'eli', 'i']:
+            testCmdStr = usrStr.lower()
+            if testCmdStr == "":
+                return None
+            elif testCmdStr in ["?", "eli", "i"]:
                 cmdObj = EMi(self.ao)
                 ok, instrumentInfo = cmdObj.do()
                 dialog.msgOut(instrumentInfo, self.termObj)
@@ -1262,14 +1337,9 @@ class Command(object):
                 return inst
 
 
-
-
-
-
-
-
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 # non standard commands
+
 
 # display cmds
 class w(Command):
@@ -1281,13 +1351,16 @@ class w(Command):
     >>> ok == True
     True
     """
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 0 # display only
-        self.gatherSwitch = 0 # display only
-        self.cmdStr = 'w'
-    def display(self): 
-        return '%s\n' % self.ao.help.w
+        self.processSwitch = 0  # display only
+        self.gatherSwitch = 0  # display only
+        self.cmdStr = "w"
+
+    def display(self):
+        return "%s\n" % self.ao.help.w
+
 
 class c(Command):
     """w display
@@ -1297,13 +1370,16 @@ class c(Command):
     >>> ok == True
     True
     """
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 0 # display only
-        self.gatherSwitch = 0 # display only
-        self.cmdStr = 'c'
-    def display(self): 
-        return '%s\n' % self.ao.help.c
+        self.processSwitch = 0  # display only
+        self.gatherSwitch = 0  # display only
+        self.cmdStr = "c"
+
+    def display(self):
+        return "%s\n" % self.ao.help.c
+
 
 class r(Command):
     """r display
@@ -1314,13 +1390,16 @@ class r(Command):
     >>> ok == True
     True
     """
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 0 # display only
-        self.gatherSwitch = 0 # display only
-        self.cmdStr = 'r'
-    def display(self): 
-        return '%s\n' % lang.msgCredits
+        self.processSwitch = 0  # display only
+        self.gatherSwitch = 0  # display only
+        self.cmdStr = "r"
+
+    def display(self):
+        return "%s\n" % lang.msgCredits
+
 
 class cmd(Command):
     """cmd display
@@ -1331,13 +1410,16 @@ class cmd(Command):
     >>> ok == True
     True
     """
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 0 # display only
-        self.gatherSwitch = 0 # display only
-        self.cmdStr = 'cmd'
-    def display(self): 
+        self.processSwitch = 0  # display only
+        self.gatherSwitch = 0  # display only
+        self.cmdStr = "cmd"
+
+    def display(self):
         return self.ao.cmdDisplay()
+
 
 class pypath(Command):
     """cmd display
@@ -1348,18 +1430,21 @@ class pypath(Command):
     >>> ok == True
     True
     """
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 0 # display only
-        self.gatherSwitch = 0 # display only
-        self.cmdStr = 'pypath'
-    def display(self): 
+        self.processSwitch = 0  # display only
+        self.gatherSwitch = 0  # display only
+        self.cmdStr = "pypath"
+
+    def display(self):
         msg = []
-        msg.append('Python module search paths:\n')
+        msg.append("Python module search paths:\n")
         for path in sys.path:
-            if path != '':
-                msg.append('%s\n' % (path))
-        return ''.join(msg)
+            if path != "":
+                msg.append("%s\n" % (path))
+        return "".join(msg)
+
 
 class bug(Command):
     """bug test command
@@ -1370,13 +1455,16 @@ class bug(Command):
     Traceback (most recent call last):
     TestError
     """
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
         self.processSwitch = 1
-        self.gatherSwitch    = 0 
-        self.cmdStr = 'bug'
+        self.gatherSwitch = 0
+        self.cmdStr = "bug"
+
     def process(self):
         raise error.TestError
+
 
 class clear(Command):
     """clear the screen
@@ -1384,30 +1472,34 @@ class clear(Command):
     >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> a = clear(ao)
     """
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
         self.processSwitch = 0
-        self.gatherSwitch    = 0 
-        self.cmdStr = 'clear'
+        self.gatherSwitch = 0
+        self.cmdStr = "clear"
 
     def display(self):
         self.termObj.clear()
-        
+
+
 class py(Command):
     """start a python interactive
 
     >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> a = py(ao)
     """
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
         self.processSwitch = 0
-        self.gatherSwitch    = 0 
-        self.subCmd = 1 # if 1, executed within method of interptreter
-        self.cmdStr = 'py'
+        self.gatherSwitch = 0
+        self.subCmd = 1  # if 1, executed within method of interptreter
+        self.cmdStr = "py"
 
     def result(self):
-        return {} # dict required return
+        return {}  # dict required return
+
 
 class shell(Command):
     """fire a shell command
@@ -1415,23 +1507,26 @@ class shell(Command):
     >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> a = shell(ao)
     """
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
         self.processSwitch = 0
-        self.gatherSwitch    = 1 
-        self.subCmd = 1 # if 1, executed within method of interptreter
-        self.cmdStr = 'shell'
+        self.gatherSwitch = 1
+        self.subCmd = 1  # if 1, executed within method of interptreter
+        self.cmdStr = "shell"
 
-    def gather(self): 
-        """ optional argument for command of help desired """
+    def gather(self):
+        """optional argument for command of help desired"""
         self.usrStr = None
-        if self.args != '':
-            self.args = argTools.ArgOps(self.args) # no strip
-            self.usrStr = self.args.get(0,'end', 'off', 'space')
-        else: return lang.msgReturnCancel
+        if self.args != "":
+            self.args = argTools.ArgOps(self.args)  # no strip
+            self.usrStr = self.args.get(0, "end", "off", "space")
+        else:
+            return lang.msgReturnCancel
 
     def result(self):
-        return {'shellCmd': self.usrStr} # dict required return
+        return {"shellCmd": self.usrStr}  # dict required return
+
 
 class help(Command):
     """translates ? to help in   Interpreter._lineCmdArgSplit
@@ -1443,25 +1538,26 @@ class help(Command):
     True
 
     """
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 0 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'help'
+        self.processSwitch = 0  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "help"
 
-    def gather(self): 
-        """ optional argument for command of help desired """
+    def gather(self):
+        """optional argument for command of help desired"""
         self.usrStr = None
-        if self.args != '':
-            self.args = argTools.ArgOps(self.args) # no strip
-            self.usrStr = self.args.get(0,'end','off','space')
+        if self.args != "":
+            self.args = argTools.ArgOps(self.args)  # no strip
+            self.usrStr = self.args.get(0, "end", "off", "space")
 
-    def display(self): 
+    def display(self):
         """of arg given, does help command. if no hard, help menu printed
         needs to be interpreter; in order to have access to Interpreter"""
-        if self.usrStr: # get help file
+        if self.usrStr:  # get help file
             return self.ao.help.reprCmd(self.usrStr)
-        else: # print listing of all commands
+        else:  # print listing of all commands
             # sorted commands by theose that exists, and those that have docs
             cmdsDoc, cmdsUndoc, helpTopics = self.ao.cmdDocManifest()
             h, w = self.termObj.size()
@@ -1469,18 +1565,18 @@ class help(Command):
             msg.append(lang.DIVIDER * w)
             msg.append(lang.msgDocAdditionalHelp)
             msg.append(lang.msgDocCmd)
-            #msg.append(lang.msgDocPrefix)
+            # msg.append(lang.msgDocPrefix)
             msg.append(lang.msgDocBrowser)
             msg.append(lang.msgDocHead)
             msg.append(lang.DIVIDER * w)
-            msg.append(typeset.formatEqCol('', cmdsDoc, 10, w))
+            msg.append(typeset.formatEqCol("", cmdsDoc, 10, w))
             if len(helpTopics) > 0:
                 msg.append(lang.DIVIDER * w)
-                msg.append(typeset.formatEqCol('', helpTopics, 10, w))
+                msg.append(typeset.formatEqCol("", helpTopics, 10, w))
             if len(cmdsUndoc) > 0:
                 msg.append(lang.DIVIDER * w)
-                msg.append(typeset.formatEqCol('', cmdsUndoc, 10, w))
-            return ''.join(msg)
+                msg.append(typeset.formatEqCol("", cmdsUndoc, 10, w))
+            return "".join(msg)
 
 
 class man(help):
@@ -1491,54 +1587,59 @@ class man(help):
     >>> ok == True
     True
     """
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         help.__init__(self, ao, args, **keywords)
+
 
 class quit(Command):
     "SUBCMD"
-    def __init__(self, ao, args='', **keywords):
-        Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 0 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'quit'
-        self.subCmd = 1 # if 1, executed within method of interptreter
 
-    def gather(self): 
+    def __init__(self, ao, args="", **keywords):
+        Command.__init__(self, ao, args, **keywords)
+        self.processSwitch = 0  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "quit"
+        self.subCmd = 1  # if 1, executed within method of interptreter
+
+    def gather(self):
         args = self.args
-        self.confirm = ''
-        if args != '':
+        self.confirm = ""
+        if args != "":
             args = argTools.ArgOps(args)
-            self.confirm = args.get(0,'end')
-        if self.confirm != 'confirm':
-            askUsr=dialog.askYesNo('exit athenaCL? ', 0, self.termObj)
-            if askUsr != 1: return lang.msgReturnCancel
-            self.confirm = 'confirm'
+            self.confirm = args.get(0, "end")
+        if self.confirm != "confirm":
+            askUsr = dialog.askYesNo("exit athenaCL? ", 0, self.termObj)
+            if askUsr != 1:
+                return lang.msgReturnCancel
+            self.confirm = "confirm"
 
             # only do this if user has interactively confirmed quit
-            if self.ao.external.logCheck() == 1: # log exists, submit
-                ckUser=dialog.askYesNo(lang.msgSubmitLog, 0, self.termObj)
+            if self.ao.external.logCheck() == 1:  # log exists, submit
+                ckUser = dialog.askYesNo(lang.msgSubmitLog, 0, self.termObj)
                 if ckUser == 1:
                     result = self.ao.external.logSend()
-                    if result == None: # nothing happend
+                    if result == None:  # nothing happend
                         dialog.msgOut(lang.msgSubmitLogFail, self.termObj)
                     else:
                         dialog.msgOut(lang.msgSubmitLogSuccess, self.termObj)
 
     def result(self):
-        return {'confirm':1}
+        return {"confirm": 1}
+
 
 class q(quit):
     """alias to quit command"""
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         quit.__init__(self, ao, args, **keywords)
 
 
+# -----------------------------------------------------------------||||||||||||--
 
-
-#-----------------------------------------------------------------||||||||||||--
 
 class PIals(Command):
-    """ list all attributes of a path,  a hidden function
+    """list all attributes of a path,  a hidden function
 
     >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> a = PIals(ao)
@@ -1546,39 +1647,47 @@ class PIals(Command):
     >>> ok == True
     True
     """
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 0 # display only
-        self.gatherSwitch = 0 # display only
-        self.cmdStr = 'PIals'
+        self.processSwitch = 0  # display only
+        self.gatherSwitch = 0  # display only
+        self.cmdStr = "PIals"
 
-    def gather(self): 
+    def gather(self):
         pass
 
-    def process(self): 
+    def process(self):
         pass
 
-    def display(self): 
-        if self._piTestExistance() != None: #check existance
+    def display(self):
+        if self._piTestExistance() != None:  # check existance
             return self._piTestExistance()
-        if self._piTestNameExists() != None: # check name
+        if self._piTestNameExists() != None:  # check name
             return self._piTestNameExists()
         directoryOfattributes = dir(self.ao.pathLib[self.ao.activePath])
         msg = []
-        msg.append('attributes of PI %s:\n' % self.ao.activePath)
+        msg.append("attributes of PI %s:\n" % self.ao.activePath)
         entryLines = []
         for entry in directoryOfattributes:
             value = getattr(self.ao.pathLib[self.ao.activePath], entry)
-            value = str(value).replace(' ','')
+            value = str(value).replace(" ", "")
             entryLines.append([entry, value])
-        headerKey    = ['name','value']
+        headerKey = ["name", "value"]
         minWidthList = [lang.LMARGINW, 0]
-        bufList      = [1, 1]
-        justList         = ['l','l']
-        table = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
-                                          bufList, justList, self.termObj, 'oneColumn')
-        msg.append('%s\n' % table)
-        return ''.join(msg)
+        bufList = [1, 1]
+        justList = ["l", "l"]
+        table = typeset.formatVariCol(
+            headerKey,
+            entryLines,
+            minWidthList,
+            bufList,
+            justList,
+            self.termObj,
+            "oneColumn",
+        )
+        msg.append("%s\n" % table)
+        return "".join(msg)
 
 
 class PIn(Command):
@@ -1598,26 +1707,27 @@ class PIn(Command):
     True
 
     """
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'PIn'
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "PIn"
 
     def _piGetMultisetList(self):
         """gets a list pitch space sets good for making a path"""
         objList = []
         currentPosition = 0
         while 1:
-            data = self.setFactory(self.ao, None) 
+            data = self.setFactory(self.ao, None)
             if data == None:
-                return None #lang.msgMCerrorCreatingChord
+                return None  # lang.msgMCerrorCreatingChord
             objList.append(data)
-            query = lang.TAB + 'add another set?'
-            askUsr = dialog.askYesNoCancel(query,1,self.termObj)
+            query = lang.TAB + "add another set?"
+            askUsr = dialog.askYesNoCancel(query, 1, self.termObj)
             if askUsr == 1:
                 currentPosition = currentPosition + 1
-                continue # return to top of loop if yes
+                continue  # return to top of loop if yes
             elif askUsr == -1:
                 return None
             elif askUsr == 0:
@@ -1627,46 +1737,54 @@ class PIn(Command):
         "used to convert object data into strings for log"
         msg = []
         for obj in objList:
-            msg.append(obj.repr('psReal'))
-        return ' '.join(msg) # separate with spaces
+            msg.append(obj.repr("psReal"))
+        return " ".join(msg)  # separate with spaces
 
-    def gather(self): 
+    def gather(self):
         args = self.args
         self.name = None
         self.dataList = None
-        if args != '':
+        if args != "":
             args = argTools.ArgOps(args, stripComma=True)
             self.name = args.get(0)
-            if self.name == None: return self._getUsage()
+            if self.name == None:
+                return self._getUsage()
             if self._nameTest(self.name) != None:
                 return self._getUsage(self._nameTest(self.name))
-            pssList = args.list(1,'end') #
-            if pssList == None: return self._getUsage()
+            pssList = args.list(1, "end")  #
+            if pssList == None:
+                return self._getUsage()
             self.dataList = []
-            for setStr in pssList: # converts to string
+            for setStr in pssList:  # converts to string
                 a = self.setFactory(self.ao, setStr)
-                if a == None: break
+                if a == None:
+                    break
                 self.dataList.append(a)
             if len(self.dataList) < 1:
                 self.dataList = None
-        if self.name==None or self.dataList==None: # get frm user
+        if self.name == None or self.dataList == None:  # get frm user
             self.name = self._piGetNewName(lang.msgPInameGet)
-            if self.name == None: return lang.msgReturnCancel
+            if self.name == None:
+                return lang.msgReturnCancel
             self.dataList = self._piGetMultisetList()
-            if self.dataList == None: return lang.msgPIcancel   
+            if self.dataList == None:
+                return lang.msgPIcancel
 
-    def process(self): 
+    def process(self):
         self.ao.pathLib[self.name] = pitchPath.PolyPath(self.name)
-        self.ao.pathLib[self.name].loadMultisetList(self.dataList) # does updates
+        self.ao.pathLib[self.name].loadMultisetList(self.dataList)  # does updates
         self.ao.activePath = self.name
 
     def log(self):
-        if self.gatherStatus and self.processStatus: # if complete
-            return '%s %s %s' % (self.cmdStr, self.name, 
-                                    self._piMultisetListToStr(self.dataList))
+        if self.gatherStatus and self.processStatus:  # if complete
+            return "%s %s %s" % (
+                self.cmdStr,
+                self.name,
+                self._piMultisetListToStr(self.dataList),
+            )
 
-    def display(self): 
-        return 'PI %s added to PathInstances.\n' % self.name
+    def display(self):
+        return "PI %s added to PathInstances.\n" % self.name
 
 
 class PIv(Command):
@@ -1684,112 +1802,142 @@ class PIv(Command):
     >>> ok == True
     True
     """
-    def __init__(self, ao, args='', **keywords):
-        Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 0 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'PIv'
 
-    def gather(self): 
+    def __init__(self, ao, args="", **keywords):
+        Command.__init__(self, ao, args, **keywords)
+        self.processSwitch = 0  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "PIv"
+
+    def gather(self):
         args = self.args
-        if args != '':
-            args = argTools.ArgOps(args) # no strip
+        if args != "":
+            args = argTools.ArgOps(args)  # no strip
             self.nameToView = args.get(0)
         else:
             self.nameToView = self.ao.activePath
-        if self._piTestExistance() != None: #check existance
+        if self._piTestExistance() != None:  # check existance
             return self._piTestExistance()
-        if self._piTestNameExists(self.nameToView) != None: # check name
+        if self._piTestNameExists(self.nameToView) != None:  # check name
             return self._piTestNameExists(self.nameToView)
 
-    def process(self): 
+    def process(self):
         pass
 
     def log(self):
-        if self.gatherStatus and self.processStatus: # if complete
-            return '%s %s' % (self.cmdStr, self.nameToView)
+        if self.gatherStatus and self.processStatus:  # if complete
+            return "%s %s" % (self.cmdStr, self.nameToView)
 
-    def display(self): 
+    def display(self):
         nameToView = self.nameToView
 
         msg = []
-        msg.append('PI: %s\n' % (nameToView))
+        msg.append("PI: %s\n" % (nameToView))
         entryLines = []
-        dataList = ['psPath',]
-        dataList = dataList + self.ao.pathLib[nameToView].reprList('psPath')
+        dataList = [
+            "psPath",
+        ]
+        dataList = dataList + self.ao.pathLib[nameToView].reprList("psPath")
         entryLines.append(dataList)
 
         # show ps note names
-        dataList = ['',] + self.ao.pathLib[nameToView].reprList('psName')
+        dataList = [
+            "",
+        ] + self.ao.pathLib[
+            nameToView
+        ].reprList("psName")
         entryLines.append(dataList)
 
-        dataList = ['pcsPath',]
-        dataList = dataList + self.ao.pathLib[nameToView].reprList('pcsPath')
+        dataList = [
+            "pcsPath",
+        ]
+        dataList = dataList + self.ao.pathLib[nameToView].reprList("pcsPath")
         entryLines.append(dataList)
 
-        dataList = ['scPath',]
-        dataList = dataList + self.ao.pathLib[nameToView].reprList('scPath')
+        dataList = [
+            "scPath",
+        ]
+        dataList = dataList + self.ao.pathLib[nameToView].reprList("scPath")
         entryLines.append(dataList)
 
-        dataList = ['durFraction',]
-        dataList = dataList + self.ao.pathLib[nameToView].reprList('dur')
+        dataList = [
+            "durFraction",
+        ]
+        dataList = dataList + self.ao.pathLib[nameToView].reprList("dur")
         entryLines.append(dataList)
 
-        headerKey    = []
+        headerKey = []
         minWidthList = (lang.LMARGINW,)
-        bufList      = [] # use default
-        justList         = [] # useDefault
-        tableA = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
-                bufList, justList,self.termObj, 'oneColumn', 'bundle', 2)
-        msg.append('%s\n' % tableA)
+        bufList = []  # use default
+        justList = []  # useDefault
+        tableA = typeset.formatVariCol(
+            headerKey,
+            entryLines,
+            minWidthList,
+            bufList,
+            justList,
+            self.termObj,
+            "oneColumn",
+            "bundle",
+            2,
+        )
+        msg.append("%s\n" % tableA)
         if self.ao.pathLib[nameToView].refCount == 0:
-            msg.append('TI References: none.\n')
+            msg.append("TI References: none.\n")
         else:
             entryLines = []
-            label = ('TI References (%s): ' %
-                        self.ao.pathLib[nameToView].refCount)
+            label = "TI References (%s): " % self.ao.pathLib[nameToView].refCount
             listOfTInames = []
             for tName in list(self.ao.textureLib.keys()):
-                if (self.ao.textureLib[tName].path.name == 
-                     self.ao.pathLib[nameToView].name):
+                if (
+                    self.ao.textureLib[tName].path.name
+                    == self.ao.pathLib[nameToView].name
+                ):
                     listOfTInames.append(tName)
             nameStr = []
             for entry in listOfTInames:
-                nameStr.append('%s' % entry)
-                if entry != listOfTInames[-1]: # not last
-                    nameStr.append(', ')
-            entryLines.append([label, ''.join(nameStr)])
-            headerKey    = []
+                nameStr.append("%s" % entry)
+                if entry != listOfTInames[-1]:  # not last
+                    nameStr.append(", ")
+            entryLines.append([label, "".join(nameStr)])
+            headerKey = []
             minWidthList = (lang.LMARGINW, 0)
-            bufList      = [0, 1]
-            justList         = ['c','l']
-            tableB = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
-                                        bufList, justList, self.termObj, 'oneColumn')
-            msg.append('%s\n' % tableB)
+            bufList = [0, 1]
+            justList = ["c", "l"]
+            tableB = typeset.formatVariCol(
+                headerKey,
+                entryLines,
+                minWidthList,
+                bufList,
+                justList,
+                self.termObj,
+                "oneColumn",
+            )
+            msg.append("%s\n" % tableB)
 
-#         if self.ao.pathLib[nameToView].voiceType == 'none':
-#             msg.append('PathVoices: none.\n')
-#         else:    ## this is the vl list command
-#             entryLines = []
-#             msg.append('PathVoices:\n')
-#             groupNames = self.ao.pathLib[nameToView].voiceNames()
-#             groupNames.sort()
-#             for name in groupNames:
-#                 if name == self.ao.pathLib[nameToView].activeVoice: 
-#                     status = lang.ACTIVE
-#                 else: status = lang.INACTIVE
-#                 mapStringList = self.ao.pathLib[nameToView].voiceRepr(name)
-#                 entryLines.append([status, name, mapStringList])
-#             headerKey    = []
-#             minWidthList = (lang.TABW, lang.NAMEW, 0)
-#             bufList      = [0, 1, 0]
-#             justList         = ['c','l','l']
-#             tableC = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
-#                                         bufList, justList, self.termObj,
-#                                         'twoColumn')
-#             msg.append('%s\n' % tableC)
+        #         if self.ao.pathLib[nameToView].voiceType == 'none':
+        #             msg.append('PathVoices: none.\n')
+        #         else:    ## this is the vl list command
+        #             entryLines = []
+        #             msg.append('PathVoices:\n')
+        #             groupNames = self.ao.pathLib[nameToView].voiceNames()
+        #             groupNames.sort()
+        #             for name in groupNames:
+        #                 if name == self.ao.pathLib[nameToView].activeVoice:
+        #                     status = lang.ACTIVE
+        #                 else: status = lang.INACTIVE
+        #                 mapStringList = self.ao.pathLib[nameToView].voiceRepr(name)
+        #                 entryLines.append([status, name, mapStringList])
+        #             headerKey    = []
+        #             minWidthList = (lang.TABW, lang.NAMEW, 0)
+        #             bufList      = [0, 1, 0]
+        #             justList         = ['c','l','l']
+        #             tableC = typeset.formatVariCol(headerKey, entryLines, minWidthList,
+        #                                         bufList, justList, self.termObj,
+        #                                         'twoColumn')
+        #             msg.append('%s\n' % tableC)
 
-        return ''.join(msg)
+        return "".join(msg)
 
 
 class PIe(Command):
@@ -1797,138 +1945,154 @@ class PIe(Command):
 
     TODO: does not yet accept command args, and thus cannot be remotely tested
     """
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'PIe'
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "PIe"
 
     def _piConvertEditType(self, usrStr):
         ref = {
-            't' : ['t', 'transpose'],
-            'r' : ['r', 'replace'],
-            'i' : ['i', 'invert'],
-                }
+            "t": ["t", "transpose"],
+            "r": ["r", "replace"],
+            "i": ["i", "invert"],
+        }
         usrStr = drawer.selectionParse(usrStr, ref)
-        return usrStr # may be None
+        return usrStr  # may be None
 
     def _piGetEditType(self, oldSet):
-        query = 'replace, transpose, or invert set %s: (r, t, or i):'
+        query = "replace, transpose, or invert set %s: (r, t, or i):"
         while 1:
-            usrStr = dialog.askStr(query % drawer.listToStr(oldSet),
-                                              self.termObj)
-            if usrStr == None: return None
+            usrStr = dialog.askStr(query % drawer.listToStr(oldSet), self.termObj)
+            if usrStr == None:
+                return None
             transType = self._piConvertEditType(usrStr)
-            if transType == None: continue
-            else: return transType # either l or m 
+            if transType == None:
+                continue
+            else:
+                return transType  # either l or m
 
     def _piConvertTransType(self, usrStr):
         ref = {
-            'l' : ['l', 'literal'],
-            'm' : ['m', 'modulus'],
-                }
+            "l": ["l", "literal"],
+            "m": ["m", "modulus"],
+        }
         usrStr = drawer.selectionParse(usrStr, ref)
-        return usrStr # may be None
-        
+        return usrStr  # may be None
+
     def _piGetTransType(self):
-        query = 'enter a transposition method: literal or modulus? (l or m):'
+        query = "enter a transposition method: literal or modulus? (l or m):"
         while 1:
             usrStr = dialog.askStr(query, self.termObj)
-            if usrStr == None: return None
+            if usrStr == None:
+                return None
             transType = self._piConvertTransType(usrStr)
-            if transType == None: continue
-            else: return transType # either l or m            
+            if transType == None:
+                continue
+            else:
+                return transType  # either l or m
 
     def _piConvertTransposition(self, usrStr, transType):
-        if usrStr == None: return None
-        transInt = drawer.strToNum(usrStr, 'int')
-        if transInt == None: return None
-        if transType == 'm': # modulous
+        if usrStr == None:
+            return None
+        transInt = drawer.strToNum(usrStr, "int")
+        if transInt == None:
+            return None
+        if transType == "m":  # modulous
             return transInt % 12
-        elif transType == 'l': # literal
+        elif transType == "l":  # literal
             return transInt
 
     def _piGetMatchingSet(self, sizeToMatch):
         """used pie to get a set of the smae size as a sorouce"""
         while 1:
             setObj = self.setFactory(self.ao, None)
-            if setObj == None: return None
+            if setObj == None:
+                return None
             if len(setObj) == sizeToMatch:
                 return setObj
             else:
-                query = '%sincorrect set size: enter a set of %s elements.\n' % (
-                          lang.TAB, sizeToMatch)
+                query = "%sincorrect set size: enter a set of %s elements.\n" % (
+                    lang.TAB,
+                    sizeToMatch,
+                )
                 dialog.msgOut(query, self.termObj)
                 continue
 
     def _piGetTransposition(self, transType):
         """gets transposition form user
-            modules does mod 12 to value entered
+        modules does mod 12 to value entered
         """
-        if transType == 'm':
-            query = 'enter a positive or negative transposition between 1 and 11:'
-        elif transType == 'l':
-            query = 'enter a positive or negative transposition:'
+        if transType == "m":
+            query = "enter a positive or negative transposition between 1 and 11:"
+        elif transType == "l":
+            query = "enter a positive or negative transposition:"
         while 1:
             trans = dialog.askStr(query, self.termObj)
-            if trans == None: return None
+            if trans == None:
+                return None
             trans = self._piConvertTransposition(trans, transType)
-            if trans == None: # error encountered
+            if trans == None:  # error encountered
                 continue
             else:
                 return trans
 
-    def gather(self): 
+    def gather(self):
         """does not yet accept command line args"""
         args = self.args
 
-        if self._piTestExistance() != None: #check existance
+        if self._piTestExistance() != None:  # check existance
             return self._piTestExistance()
-        if self._piTestNameExists() != None: # check name
+        if self._piTestNameExists() != None:  # check name
             return self._piTestNameExists()
 
-        name          = self.ao.activePath
-        oldUsrPath = self.ao.pathLib[name].get('psPath')
-        noSets    = len(oldUsrPath)
-        length    = len(self.ao.pathLib[name])
+        name = self.ao.activePath
+        oldUsrPath = self.ao.pathLib[name].get("psPath")
+        noSets = len(oldUsrPath)
+        length = len(self.ao.pathLib[name])
 
-        query = 'edit PI %s\nenter position to edit' % name
+        query = "edit PI %s\nenter position to edit" % name
         # start at 2, second position
-        locInt = self._piGetPathPosition(query, 1, noSets) 
-        if locInt == None: return lang.msgReturnCancel
-        locInt = locInt - 1 # correct to list spacing
-                
-        self.oldPos       = locInt 
+        locInt = self._piGetPathPosition(query, 1, noSets)
+        if locInt == None:
+            return lang.msgReturnCancel
+        locInt = locInt - 1  # correct to list spacing
+
+        self.oldPos = locInt
         oldSet = self.ao.pathLib[self.ao.activePath].copyMultiset(self.oldPos)
-        oldSetPsReal = oldSet.get('psReal')
+        oldSetPsReal = oldSet.get("psReal")
         oldSize = len(oldSet)
 
         self.editType = self._piGetEditType(oldSetPsReal)
-        if self.editType == None: return lang.msgReturnCancel 
-         
-        if self.editType == 't':        ## transpose
+        if self.editType == None:
+            return lang.msgReturnCancel
+
+        if self.editType == "t":  ## transpose
             transType = self._piGetTransType()
-            if transType == None: return lang.msgReturnCancel
+            if transType == None:
+                return lang.msgReturnCancel
             self.transInt = self._piGetTransposition(transType)
-            if self.transInt == None: return lang.msgReturnCancel
-        elif self.editType == 'r': # replace
+            if self.transInt == None:
+                return lang.msgReturnCancel
+        elif self.editType == "r":  # replace
             self.setObj = self._piGetMatchingSet(oldSize)
-            if self.setObj == None: return lang.msgReturnCancel
-        elif self.editType == 'i': # invert
-            pass # no args needed
+            if self.setObj == None:
+                return lang.msgReturnCancel
+        elif self.editType == "i":  # invert
+            pass  # no args needed
 
-    def process(self): 
+    def process(self):
         path = self.ao.pathLib[self.ao.activePath]
-        if self.editType == 't':
-            path.t(self.transInt, self.oldPos) # call invert method
-        elif self.editType == 'r': # replace
-            path.insert(self.setObj, self.oldPos) # call insert method
-        elif self.editType == 'i': # invert
-            path.i(self.oldPos) # call invert method
+        if self.editType == "t":
+            path.t(self.transInt, self.oldPos)  # call invert method
+        elif self.editType == "r":  # replace
+            path.insert(self.setObj, self.oldPos)  # call insert method
+        elif self.editType == "i":  # invert
+            path.i(self.oldPos)  # call invert method
 
-    def display(self): 
-        return 'PI %s edited.\n' % self.ao.activePath
-        
+    def display(self):
+        return "PI %s edited.\n" % self.ao.activePath
 
 
 class PIdf(Command):
@@ -1947,69 +2111,71 @@ class PIdf(Command):
     >>> ok == True
     True
     """
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'PIdf'
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "PIdf"
 
     def _piConvertDurFraction(self, length, usrStr):
         """checks a list for matching length and all values greater than 0"""
         # this will accept a singel argumetn, lije a string or number
         # without a comma or other, and turn into a list
-        durList = drawer.strToSequence(usrStr, length, ['num'])
-        if durList == None: # bad data given
+        durList = drawer.strToSequence(usrStr, length, ["num"])
+        if durList == None:  # bad data given
             return None
         for value in durList:
-            if value <= 0: # check for values less than 0
+            if value <= 0:  # check for values less than 0
                 return None
         return durList
 
     def _piGetDurFraction(self, length, name):
         """prompts user for a list of values, or values separated by a list"""
-        query = 'edit PI %s\nenter a list of duration fractions:' % name
+        query = "edit PI %s\nenter a list of duration fractions:" % name
         while 1:
             usrStr = dialog.askStr(query, self.termObj)
-            if usrStr == None: return None
+            if usrStr == None:
+                return None
             newDurFraction = self._piConvertDurFraction(length, usrStr)
             if newDurFraction == None:
                 dialog.msgOut((lang.msgPIbadDuration % length), self.termObj)
                 continue
             else:
-                return newDurFraction # list of values greater than 1         
+                return newDurFraction  # list of values greater than 1
 
-    def gather(self): 
+    def gather(self):
         args = self.args
 
-        if self._piTestExistance() != None: #check existance
+        if self._piTestExistance() != None:  # check existance
             return self._piTestExistance()
-        if self._piTestNameExists() != None: # check name
+        if self._piTestNameExists() != None:  # check name
             return self._piTestNameExists()
-        self.name       = self.ao.activePath 
-        oldDurFraction = self.ao.pathLib[self.name].get('durFraction')
-        length          = len(self.ao.pathLib[self.name])
+        self.name = self.ao.activePath
+        oldDurFraction = self.ao.pathLib[self.name].get("durFraction")
+        length = len(self.ao.pathLib[self.name])
         self.newDurFraction = None
 
-        if args != '':
+        if args != "":
             args = argTools.ArgOps(args)
-            self.newDurFraction = self._piConvertDurFraction(length, 
-                                                            args.get(0, 'end'))
-            if self.newDurFraction == None: return self._getUsage()
- 
-        if self.newDurFraction==None: # get frm user
-            self.newDurFraction = self._piGetDurFraction(length, self.name)
-            if self.newDurFraction == None: return lang.msgReturnCancel
+            self.newDurFraction = self._piConvertDurFraction(length, args.get(0, "end"))
+            if self.newDurFraction == None:
+                return self._getUsage()
 
-    def process(self): 
+        if self.newDurFraction == None:  # get frm user
+            self.newDurFraction = self._piGetDurFraction(length, self.name)
+            if self.newDurFraction == None:
+                return lang.msgReturnCancel
+
+    def process(self):
         self.ao.pathLib[self.name].loadDur(self.newDurFraction)
 
     def log(self):
-        if self.gatherStatus and self.processStatus: # if complete
-            return '%s %s' % (self.cmdStr, drawer.listScrub(self.newDurFraction)) 
+        if self.gatherStatus and self.processStatus:  # if complete
+            return "%s %s" % (self.cmdStr, drawer.listScrub(self.newDurFraction))
 
-    def display(self): 
-        return 'PI %s edited.\n' % self.name
-
+    def display(self):
+        return "PI %s edited.\n" % self.name
 
 
 class PIls(Command):
@@ -2027,40 +2193,50 @@ class PIls(Command):
     True
 
     """
-    def __init__(self, ao, args='', **keywords):
-        Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 0 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'PIls'
 
-    def gather(self): 
-        if self._piTestExistance() != None: #check existance
+    def __init__(self, ao, args="", **keywords):
+        Command.__init__(self, ao, args, **keywords)
+        self.processSwitch = 0  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "PIls"
+
+    def gather(self):
+        if self._piTestExistance() != None:  # check existance
             return self._piTestExistance()
 
-    def process(self): 
+    def process(self):
         pass
 
-    def display(self): 
+    def display(self):
         msg = []
-        msg.append('PathInstances available:\n')
+        msg.append("PathInstances available:\n")
         entryLines = []
         pathNames = list(self.ao.pathLib.keys())
         pathNames.sort()
         for name in pathNames:
-            pathStr = self.ao.pathLib[name].repr('scPath')
-            if name == self.ao.activePath: status = lang.ACTIVE
-            else: status = lang.INACTIVE
-            refNo        = self.ao.pathLib[name].refCount
-            #noGroup  = len(self.ao.pathLib[name].voiceNames())
+            pathStr = self.ao.pathLib[name].repr("scPath")
+            if name == self.ao.activePath:
+                status = lang.ACTIVE
+            else:
+                status = lang.INACTIVE
+            refNo = self.ao.pathLib[name].refCount
+            # noGroup  = len(self.ao.pathLib[name].voiceNames())
             entryLines.append([status, name, refNo, pathStr])
-        headerKey    = ['', 'name', 'TIrefs','scPath']
+        headerKey = ["", "name", "TIrefs", "scPath"]
         minWidthList = (lang.TABW, lang.NAMEW, 3, 3, 0)
-        bufList      = [0, 1, 1, 1, 0]
-        justList         = ['c','l', 'l', 'l', 'l']
-        table = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
-                                  bufList, justList, self.termObj, 'fourColumn')
-        msg.append('%s\n' % table)
-        return ''.join(msg)
+        bufList = [0, 1, 1, 1, 0]
+        justList = ["c", "l", "l", "l", "l"]
+        table = typeset.formatVariCol(
+            headerKey,
+            entryLines,
+            minWidthList,
+            bufList,
+            justList,
+            self.termObj,
+            "fourColumn",
+        )
+        msg.append("%s\n" % table)
+        return "".join(msg)
 
 
 class PIcp(Command):
@@ -2077,65 +2253,77 @@ class PIcp(Command):
     >>> ok == True
     True
     """
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'PIcp'
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "PIcp"
 
     def _piCopy(self, srcName, dstName):
         """copies one path to new path"""
-        if (srcName != dstName and srcName in self.ao.pathLib and 
-                                          dstName not in list(self.ao.pathLib.keys()))== 1:
+        if (
+            srcName != dstName
+            and srcName in self.ao.pathLib
+            and dstName not in list(self.ao.pathLib.keys())
+        ) == 1:
             # sets name attribute
             self.ao.pathLib[dstName] = self.ao.pathLib[srcName].copy(dstName)
             self.ao.activePath = dstName
-            return 'PI %s added to PathInstances.\n' % dstName
+            return "PI %s added to PathInstances.\n" % dstName
         else:
             return None
 
-    def gather(self): 
+    def gather(self):
         args = self.args
         self.cpList = []
         self.oldName = None
 
-        if self._piTestExistance() != None: #check existance
+        if self._piTestExistance() != None:  # check existance
             return self._piTestExistance()
-        if args != '':
+        if args != "":
             args = argTools.ArgOps(args, stripComma=True)
             msg = []
             self.oldName = drawer.inList(args.get(0), list(self.ao.pathLib.keys()))
-            if self.oldName == None: return self._getUsage()
-            if args.list(1, 'end') != None:
-                for newName in args.list(1, 'end'):
+            if self.oldName == None:
+                return self._getUsage()
+            if args.list(1, "end") != None:
+                for newName in args.list(1, "end"):
                     self.cpList.append(newName)
-            else: return self._getUsage()
+            else:
+                return self._getUsage()
 
         if self.cpList == []:
-            self.oldName = self._chooseFromList('select a path to copy:',
-                         list(self.ao.pathLib.keys()), 'case')
-            if self.oldName == None: return lang.msgPIbadName
-            query = 'name the copy of path %s:' % self.oldName 
+            self.oldName = self._chooseFromList(
+                "select a path to copy:", list(self.ao.pathLib.keys()), "case"
+            )
+            if self.oldName == None:
+                return lang.msgPIbadName
+            query = "name the copy of path %s:" % self.oldName
             name = self._piGetNewName(query)
-            if name == None: return lang.msgReturnCancel
+            if name == None:
+                return lang.msgReturnCancel
             self.cpList.append(name)
 
-    def process(self): 
+    def process(self):
         self.report = []
         for name in self.cpList:
             msg = self._piCopy(self.oldName, name)
-            if msg != None: # fall through if fails
+            if msg != None:  # fall through if fails
                 self.report.append(msg)
             else:
                 self.report.append(lang.msgBadArgFormat)
 
     def log(self):
-        if self.gatherStatus and self.processStatus: # if complete
-            return '%s %s %s' % (self.cmdStr, self.oldName, 
-                     self._strListToArgList(self.cpList))         
+        if self.gatherStatus and self.processStatus:  # if complete
+            return "%s %s %s" % (
+                self.cmdStr,
+                self.oldName,
+                self._strListToArgList(self.cpList),
+            )
 
-    def display(self): 
-        return ''.join(self.report)
+    def display(self):
+        return "".join(self.report)
 
 
 class PIrm(Command):
@@ -2151,56 +2339,64 @@ class PIrm(Command):
     >>> ok == True
     True
     """
-    def __init__(self, ao, args='', **keywords):
-        Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'PIrm'
 
-    def _piRemove(self, name): # args is name of path
+    def __init__(self, ao, args="", **keywords):
+        Command.__init__(self, ao, args, **keywords)
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "PIrm"
+
+    def _piRemove(self, name):  # args is name of path
         if name in list(self.ao.pathLib.keys()):
             # this is 0 when there are no longer any TIs that link to this path
-            if self.ao.pathLib[name].refCount != 0:  
-                return ('PI %s is being used by %i Textures. either delete Textures ("TIrm") or change their Path ("TIe").\n' % 
-                    (name, self.ao.pathLib[name].refCount))
+            if self.ao.pathLib[name].refCount != 0:
+                return (
+                    'PI %s is being used by %i Textures. either delete Textures ("TIrm") or change their Path ("TIe").\n'
+                    % (name, self.ao.pathLib[name].refCount)
+                )
             if name == self.ao.activePath:
-                self.ao.activePath = ''
+                self.ao.activePath = ""
             del self.ao.pathLib[name]
             if name == self.ao.activePath:
                 if len(list(self.ao.pathLib.keys())) == 0:
-                    self.ao.activePath = ''
+                    self.ao.activePath = ""
                 else:
                     self.ao.activePath = random.choice(list(self.ao.pathLib.keys()))
-            return 'PI %s destroyed.\n' % name
+            return "PI %s destroyed.\n" % name
         else:
-            return None # error
+            return None  # error
 
-    def gather(self): 
+    def gather(self):
         args = self.args
         self.rmList = []
 
-        if self._piTestExistance() != None: #check existance
+        if self._piTestExistance() != None:  # check existance
             return self._piTestExistance()
-        if args != '':
+        if args != "":
             args = argTools.ArgOps(args, stripComma=True)
             msg = []
-            if args.list(0, 'end') != None:
-                for name in args.list(0, 'end'):
+            if args.list(0, "end") != None:
+                for name in args.list(0, "end"):
                     name = drawer.inList(name, list(self.ao.pathLib.keys()))
-                    if name == None: return self._getUsage()
+                    if name == None:
+                        return self._getUsage()
                     self.rmList.append(name)
-            else: return self._getUsage()
+            else:
+                return self._getUsage()
         if self.rmList == []:
-            name = self._chooseFromList('select a path to delete:', 
-                     list(self.ao.pathLib.keys()), 'case')
-            if name == None: return lang.msgPIbadName
-            query = 'are you sure you want to delete path %s?'
+            name = self._chooseFromList(
+                "select a path to delete:", list(self.ao.pathLib.keys()), "case"
+            )
+            if name == None:
+                return lang.msgPIbadName
+            query = "are you sure you want to delete path %s?"
             askUsr = dialog.askYesNoCancel((query % name), 1, self.termObj)
             if askUsr == 1:
                 self.rmList.append(name)
-            else: return lang.msgReturnCancel
+            else:
+                return lang.msgReturnCancel
 
-    def process(self): 
+    def process(self):
         self.report = []
         for name in self.rmList:
             str = self._piRemove(name)
@@ -2210,11 +2406,11 @@ class PIrm(Command):
                 self.report.append(lang.msgBadArgFormat)
 
     def log(self):
-        if self.gatherStatus and self.processStatus: # if complete
-            return '%s %s' % (self.cmdStr, self._strListToArgList(self.rmList))  
+        if self.gatherStatus and self.processStatus:  # if complete
+            return "%s %s" % (self.cmdStr, self._strListToArgList(self.rmList))
 
-    def display(self): 
-        return ''.join(self.report)
+    def display(self):
+        return "".join(self.report)
 
 
 class PIo(Command):
@@ -2234,37 +2430,42 @@ class PIo(Command):
     >>> ok, result = a.do()
     >>> ok == True
     True
-    
-    """
-    def __init__(self, ao, args='', **keywords):
-        Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'PIo'
 
-    def gather(self): 
+    """
+
+    def __init__(self, ao, args="", **keywords):
+        Command.__init__(self, ao, args, **keywords)
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "PIo"
+
+    def gather(self):
         args = self.args
-        if self._piTestExistance() != None: #check existance
+        if self._piTestExistance() != None:  # check existance
             return self._piTestExistance()
         self.name = None
-        if args != '':
-            args = argTools.ArgOps(args) # no strip
+        if args != "":
+            args = argTools.ArgOps(args)  # no strip
             self.name = drawer.inList(args.get(0), list(self.ao.pathLib.keys()))
-            if self.name == None: return self._getUsage()
+            if self.name == None:
+                return self._getUsage()
         if self.name == None:
-            self.name = self._chooseFromList('select a path to activate:', 
-                              list(self.ao.pathLib.keys()), 'case')
-            if self.name == None: return lang.msgPIbadName
+            self.name = self._chooseFromList(
+                "select a path to activate:", list(self.ao.pathLib.keys()), "case"
+            )
+            if self.name == None:
+                return lang.msgPIbadName
 
-    def process(self): 
+    def process(self):
         self.ao.activePath = self.name
 
     def log(self):
-        if self.gatherStatus and self.processStatus: # if complete
-            return '%s %s' % (self.cmdStr, self.name)     
+        if self.gatherStatus and self.processStatus:  # if complete
+            return "%s %s" % (self.cmdStr, self.name)
 
-    def display(self): 
-        return 'PI %s now active.\n' % self.ao.activePath
+    def display(self):
+        return "PI %s now active.\n" % self.ao.activePath
+
 
 class PImv(Command):
     """
@@ -2280,61 +2481,65 @@ class PImv(Command):
     True
 
     """
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'PImv'
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "PImv"
 
     def _piMove(self, oldPathName, newPathName):
         """renames a path, appending underscore if duplicate
-            updates dependencies in self.ao.textureLib
+        updates dependencies in self.ao.textureLib
         """
         if newPathName == oldPathName:
             while newPathName == oldPathName:
-                newPathName = newPathName + '_'
-        else: pass # use args
+                newPathName = newPathName + "_"
+        else:
+            pass  # use args
         textureBinRef = self.ao.textureLib
         pathBinRef = self.ao.pathLib
 
         # this copies reference numbers (to TIs) (number, not name)
         pathBinRef[newPathName] = pathBinRef[oldPathName]
-        #set at init, must change after copy
-        pathBinRef[newPathName].name = newPathName 
-        for key in list(textureBinRef.keys()):        
+        # set at init, must change after copy
+        pathBinRef[newPathName].name = newPathName
+        for key in list(textureBinRef.keys()):
             ### change
-            if textureBinRef[key].path.name == oldPathName: # had old name
-                # sets attribute obj, name, value 
-                setattr(textureBinRef[key], 'path', pathBinRef[newPathName])
+            if textureBinRef[key].path.name == oldPathName:  # had old name
+                # sets attribute obj, name, value
+                setattr(textureBinRef[key], "path", pathBinRef[newPathName])
         del pathBinRef[oldPathName]
         return newPathName
 
-    def gather(self): 
+    def gather(self):
         args = self.args
 
-        if self._piTestExistance() != None: #check existance
+        if self._piTestExistance() != None:  # check existance
             return self._piTestExistance()
-        if self._piTestNameExists() != None: # check name
+        if self._piTestNameExists() != None:  # check name
             return self._piTestNameExists()
 
-        if args != '':
+        if args != "":
             args = argTools.ArgOps(args, stripComma=True)
             oldPathName = drawer.inList(args.get(0), list(self.ao.pathLib.keys()))
-            if oldPathName == None: return self._getUsage()
+            if oldPathName == None:
+                return self._getUsage()
             newPathName = args.get(1)
-            if newPathName == None: return self._getUsage()
-        else: # only works with args
+            if newPathName == None:
+                return self._getUsage()
+        else:  # only works with args
             return lang.msgReturnCancel
         self.newPathName = newPathName
         self.oldPathName = oldPathName
 
-    def process(self): 
+    def process(self):
         # may change name here
         self.newPathName = self._piMove(self.oldPathName, self.newPathName)
         self.ao.activePath = self.newPathName
 
-    def display(self): 
-        return 'PI %s moved to PI %s.\n' % (self.oldPathName, self.ao.activePath)
+    def display(self):
+        return "PI %s moved to PI %s.\n" % (self.oldPathName, self.ao.activePath)
 
 
 class PIret(Command):
@@ -2352,40 +2557,41 @@ class PIret(Command):
     True
 
     """
-    def __init__(self, ao, args='', **keywords):
-        Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'PIret'
 
-    def gather(self): 
+    def __init__(self, ao, args="", **keywords):
+        Command.__init__(self, ao, args, **keywords)
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "PIret"
+
+    def gather(self):
         args = self.args
 
-        if self._piTestExistance() != None: #check existance
+        if self._piTestExistance() != None:  # check existance
             return self._piTestExistance()
-        if self._piTestNameExists() != None: # check name
+        if self._piTestNameExists() != None:  # check name
             return self._piTestNameExists()
         newName = None
-        if args != '':
+        if args != "":
             args = argTools.ArgOps(args, stripComma=True)
             newName = args.get(0)
         if newName == None:
-            query = 'name this retrograde of path %s:' % self.ao.activePath
+            query = "name this retrograde of path %s:" % self.ao.activePath
             newName = self._piGetNewName(lang.msgPInameGet)
-            if newName == None: return lang.msgReturnCancel
+            if newName == None:
+                return lang.msgReturnCancel
         self.newName = newName
         self.oldName = self.ao.activePath
 
-    def process(self): 
-        self.ao.pathLib[self.newName] = self.ao.pathLib[self.oldName].copy(
-                                                  self.newName)
+    def process(self):
+        self.ao.pathLib[self.newName] = self.ao.pathLib[self.oldName].copy(self.newName)
         self.ao.pathLib[self.newName].retro()
         self.ao.activePath = self.newName
 
-    def display(self): 
-        return 'retrograde PI %s added to PathInstances.\n' % self.ao.activePath
-        
-        
+    def display(self):
+        return "retrograde PI %s added to PathInstances.\n" % self.ao.activePath
+
+
 class PIrot(Command):
     """create new path as a rotation of current path
     since this is a rotation, cannot copy old maps over to new PI
@@ -2402,52 +2608,53 @@ class PIrot(Command):
     >>> ok == True
     True
     """
-    def __init__(self, ao, args='', **keywords):
-        Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'PIrot'
 
-    def gather(self): 
+    def __init__(self, ao, args="", **keywords):
+        Command.__init__(self, ao, args, **keywords)
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "PIrot"
+
+    def gather(self):
         args = self.args
 
-        if self._piTestExistance() != None: #check existance
+        if self._piTestExistance() != None:  # check existance
             return self._piTestExistance()
-        if self._piTestNameExists() != None: # check name
+        if self._piTestNameExists() != None:  # check name
             return self._piTestNameExists()
         self.newName = None
         self.rotZero = None
         self.oldName = self.ao.activePath
         self.length = len(self.ao.pathLib[self.oldName])
 
-        if args != '':
+        if args != "":
             args = argTools.ArgOps(args, stripComma=True)
             self.newName = args.get(0)
-            if self.newName == None: return self._getUsage()
-            self.rotZero = args.get(1, 'single', 'eval')
-            self.rotZero = self._checkInRange(self.rotZero, 2, self.length) 
-            if self.rotZero == None: return self._getUsage()
+            if self.newName == None:
+                return self._getUsage()
+            self.rotZero = args.get(1, "single", "eval")
+            self.rotZero = self._checkInRange(self.rotZero, 2, self.length)
+            if self.rotZero == None:
+                return self._getUsage()
         if self.newName == None or self.rotZero == None:
-            query = 'name this rotation of path %s:' % self.ao.activePath
+            query = "name this rotation of path %s:" % self.ao.activePath
             self.newName = self._piGetNewName(lang.msgPInameGet)
-            if self.newName == None: return lang.msgReturnCancel
-            query = 'which chord should start the rotation?'
+            if self.newName == None:
+                return lang.msgReturnCancel
+            query = "which chord should start the rotation?"
             # start at 2, second position
-            self.rotZero = self._piGetPathPosition(query, 2, self.length) 
-            if self.rotZero == None: return lang.msgReturnCancel
+            self.rotZero = self._piGetPathPosition(query, 2, self.length)
+            if self.rotZero == None:
+                return lang.msgReturnCancel
 
-    def process(self): 
-        cut = self.rotZero - 1 # needs to be corrected 
-        self.ao.pathLib[self.newName] = self.ao.pathLib[self.oldName].copy(
-                                                         self.newName)
+    def process(self):
+        cut = self.rotZero - 1  # needs to be corrected
+        self.ao.pathLib[self.newName] = self.ao.pathLib[self.oldName].copy(self.newName)
         self.ao.pathLib[self.newName].rotate(cut)
         self.ao.activePath = self.newName
 
-    def display(self): 
-        return 'rotation PI %s added to PathInstances.\n' % self.newName
-        
-
-
+    def display(self):
+        return "rotation PI %s added to PathInstances.\n" % self.newName
 
 
 class PIslc(Command):
@@ -2465,48 +2672,51 @@ class PIslc(Command):
     >>> ok == True
     True
     """
-    def __init__(self, ao, args='', **keywords):
-        Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'PIslc'
 
-    def gather(self): 
+    def __init__(self, ao, args="", **keywords):
+        Command.__init__(self, ao, args, **keywords)
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "PIslc"
+
+    def gather(self):
         args = self.args
 
-        if self._piTestExistance() != None: #check existance
+        if self._piTestExistance() != None:  # check existance
             return self._piTestExistance()
-        if self._piTestNameExists() != None: # check name
+        if self._piTestNameExists() != None:  # check name
             return self._piTestNameExists()
         self.oldName = self.ao.activePath
         length = len(self.ao.pathLib[self.oldName])
         self.newName = None
         self.sl = None
-        if args != '':
+        if args != "":
             args = argTools.ArgOps(args, stripComma=True)
             self.newName = args.get(0)
             if self.newName == None or self.newName == self.oldName:
                 return self._getUsage()
             self.sl = self._convertListRange(args.get(1), 1, length)
-            if self.sl == None: return self._getUsage()
+            if self.sl == None:
+                return self._getUsage()
         if self.newName == None or self.sl == None:
-            query = 'name this slice of path %s:' % self.oldName
+            query = "name this slice of path %s:" % self.oldName
             self.newName = self._piGetNewName(query)
-            if self.newName == None: return lang.msgReturnCancel
-            query = 'which chords should bound the slice? (positions 1 - %i):'
+            if self.newName == None:
+                return lang.msgReturnCancel
+            query = "which chords should bound the slice? (positions 1 - %i):"
             self.sl = self._piGetIntegerRange(query % length, 1, length)
-            if self.sl == None: return lang.msgReturnCancel
+            if self.sl == None:
+                return lang.msgReturnCancel
 
-        self.sl[1] = self.sl[1] + 1 # add one for proper last position
+        self.sl[1] = self.sl[1] + 1  # add one for proper last position
 
-    def process(self): 
-        self.ao.pathLib[self.newName] = self.ao.pathLib[self.oldName].copy(
-                                                  self.newName)
+    def process(self):
+        self.ao.pathLib[self.newName] = self.ao.pathLib[self.oldName].copy(self.newName)
         self.ao.pathLib[self.newName].slice(self.sl)
         self.ao.activePath = self.newName
 
-    def display(self): 
-        return 'slice PI %s added to PathInstances.\n' % self.ao.activePath
+    def display(self):
+        return "slice PI %s added to PathInstances.\n" % self.ao.activePath
 
 
 class PIh(Command):
@@ -2520,54 +2730,55 @@ class PIh(Command):
 
     >>> a = PIh(ao) # running will open a player
     """
-    def __init__(self, ao, args='', **keywords):
-        Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'PIh'
 
-    def gather(self): 
-        if self._piTestExistance() != None: #check existance
+    def __init__(self, ao, args="", **keywords):
+        Command.__init__(self, ao, args, **keywords)
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "PIh"
+
+    def gather(self):
+        if self._piTestExistance() != None:  # check existance
             return self._piTestExistance()
         self.pName = self.ao.activePath
-        self.filePath = environment.getTempFile('.xml')
-        #self.filePath = self._validScratchFp() # return None on error
-        if self.filePath == None: return lang.msgReturnCancel
-        
+        self.filePath = environment.getTempFile(".xml")
+        # self.filePath = self._validScratchFp() # return None on error
+        if self.filePath == None:
+            return lang.msgReturnCancel
+
     def process(self):
         p = self.ao.pathLib[self.pName]
         # create a temporary texture w/ this path
         lclTimes = {}
-        lclTimes['tRange'] = ('staticRange', (0, 10))
-        lclTimes['beatT'] = ('c', 90)
+        lclTimes["tRange"] = ("staticRange", (0, 10))
+        lclTimes["beatT"] = ("c", 90)
         # use current texture module, ignore refresh status
-        t = texture.factory(self.ao.activeTextureModule, 'temp')
-        t.loadDefault(0, p, self.ao.aoInfo['fpAudioDirs'],
-                                lclTimes, 'generalMidi')
-        self.emObj = eventList.factory('midi', self.ao)
+        t = texture.factory(self.ao.activeTextureModule, "temp")
+        t.loadDefault(0, p, self.ao.aoInfo["fpAudioDirs"], lclTimes, "generalMidi")
+        self.emObj = eventList.factory("midi", self.ao)
         self.emObj.setRootPath(self.filePath)
         # provide a list of textures to process
         # turn off refreshing for faster processing`
         ok, msg, outComplete = self.emObj.process([t], [], 0)
-        self.pathMidi = self.emObj.outFormatToFilePath('midiFile')
+        self.pathMidi = self.emObj.outFormatToFilePath("midiFile")
 
-    def display(self): 
+    def display(self):
         msg = []
-        prefDict = self.ao.external.getPrefGroup('external')
+        prefDict = self.ao.external.getPrefGroup("external")
         failFlag = osTools.openMedia(self.pathMidi, prefDict)
-        if failFlag == 'failed':
+        if failFlag == "failed":
             msg.append(lang.msgELhearError % self.pathMidi)
         else:
-            #msg.append(lang.msgELhearInit % hPath)
-            msg.append('PI %s hear with TM %s complete.\n(%s)\n' % (self.pName,
-                                self.ao.activeTextureModule, self.pathMidi))
-        return ''.join(msg)
+            # msg.append(lang.msgELhearInit % hPath)
+            msg.append(
+                "PI %s hear with TM %s complete.\n(%s)\n"
+                % (self.pName, self.ao.activeTextureModule, self.pathMidi)
+            )
+        return "".join(msg)
 
 
+# -----------------------------------------------------------------||||||||||||--
 
-
-
-#-----------------------------------------------------------------||||||||||||--
 
 class TMo(Command):
     """selects currtne texture module
@@ -2579,35 +2790,43 @@ class TMo(Command):
     True
 
     """
-    def __init__(self, ao, args='', **keywords):
-        Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'TMo'
 
-    def gather(self): 
+    def __init__(self, ao, args="", **keywords):
+        Command.__init__(self, ao, args, **keywords)
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "TMo"
+
+    def gather(self):
         args = self.args
         choiceList = texture.tmObjs
         self.name = None
-        if args != '':
-            args = argTools.ArgOps(args) # no strip
+        if args != "":
+            args = argTools.ArgOps(args)  # no strip
             self.name = texture.tmTypeParser(args.get(0))
-            #self.name = drawer.inList(args.get(0), choiceList, 'noCase')
-            if self.name == None: return self._getUsage()
+            # self.name = drawer.inList(args.get(0), choiceList, 'noCase')
+            if self.name == None:
+                return self._getUsage()
         if self.name == None:
-            self.name = self._chooseFromList('which TextureModule to activate?', 
-                     choiceList, 'noCase', texture.tmTypeParser)
-            if self.name == None: return lang.msgTMbadName 
+            self.name = self._chooseFromList(
+                "which TextureModule to activate?",
+                choiceList,
+                "noCase",
+                texture.tmTypeParser,
+            )
+            if self.name == None:
+                return lang.msgTMbadName
 
-    def process(self): 
+    def process(self):
         self.ao.activeTextureModule = self.name
 
     def log(self):
-        if self.gatherStatus and self.processStatus: # if complete
-            return '%s %s' % (self.cmdStr, self.name)
+        if self.gatherStatus and self.processStatus:  # if complete
+            return "%s %s" % (self.cmdStr, self.name)
 
-    def display(self): 
-        return 'TextureModule %s now active.\n' % self.ao.activeTextureModule
+    def display(self):
+        return "TextureModule %s now active.\n" % self.ao.activeTextureModule
+
 
 class TMv(Command):
     """
@@ -2618,24 +2837,32 @@ class TMv(Command):
     True
 
     """
-    def __init__(self, ao, args='', **keywords):
-        Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 0 # display only
 
-    def process(self): 
+    def __init__(self, ao, args="", **keywords):
+        Command.__init__(self, ao, args, **keywords)
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 0  # display only
+
+    def process(self):
         self.mod = texture.factory(self.ao.activeTextureModule)
-        
-    def display(self): 
-        headList, entryLines = self.mod.reprDoc('entryLines')
-        headerKey    = []
+
+    def display(self):
+        headList, entryLines = self.mod.reprDoc("entryLines")
+        headerKey = []
         minWidthList = [lang.LMARGINW, 0]
-        bufList      = [1, 1]
-        justList         = ['l','l']
-        table = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
-                             bufList, justList, self.termObj,'oneColumn')
-        headList.append('%s\n' % table)
-        return ''.join(headList)
+        bufList = [1, 1]
+        justList = ["l", "l"]
+        table = typeset.formatVariCol(
+            headerKey,
+            entryLines,
+            minWidthList,
+            bufList,
+            justList,
+            self.termObj,
+            "oneColumn",
+        )
+        headList.append("%s\n" % table)
+        return "".join(headList)
 
 
 class TMls(Command):
@@ -2646,71 +2873,78 @@ class TMls(Command):
     >>> ok == True
     True
     """
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 0 # display only
-        self.cmdStr = 'TMls'
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 0  # display only
+        self.cmdStr = "TMls"
 
-    def gather(self): 
+    def gather(self):
         pass
 
-    def process(self): 
+    def process(self):
         pass
-        #self.ao.external.reloadTextures()
+        # self.ao.external.reloadTextures()
 
-    def display(self): 
+    def display(self):
         msg = []
-        msg.append('TextureModules available:\n')
+        msg.append("TextureModules available:\n")
         entryLines = []
         texture.tmObjs.sort()
         for name in texture.tmObjs:
-            if name == self.ao.activeTextureModule: activity = lang.ACTIVE
-            else: activity = lang.INACTIVE
+            if name == self.ao.activeTextureModule:
+                activity = lang.ACTIVE
+            else:
+                activity = lang.INACTIVE
             refCount = 0
             for textName in list(self.ao.textureLib.keys()):
                 # see if TIs are using this TM
-                if self.ao.textureLib[textName].tmName == name: 
+                if self.ao.textureLib[textName].tmName == name:
                     refCount = refCount + 1
             entryLines.append([activity, name, refCount])
 
-        headerKey    = ['', 'name','TIreferences']
+        headerKey = ["", "name", "TIreferences"]
         minWidthList = (lang.TABW, lang.NAMEW, 0)
-        bufList      = [0, 1, 0]
-        justList         = ['c','l','l']
-        table = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
-                                     bufList, justList, self.termObj)
-        msg.append('%s\n' % table)
-        return ''.join(msg)
+        bufList = [0, 1, 0]
+        justList = ["c", "l", "l"]
+        table = typeset.formatVariCol(
+            headerKey, entryLines, minWidthList, bufList, justList, self.termObj
+        )
+        msg.append("%s\n" % table)
+        return "".join(msg)
 
 
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 # texture paramter command get help for parameter objects and test parameter obj
 
 # parameter libraries
 
-#parameter.genPmtrObjs
-#parameter.rthmPmtrObjs
-#parameter.textPmtrObjs
+# parameter.genPmtrObjs
+# parameter.rthmPmtrObjs
+# parameter.textPmtrObjs
 
-#parameter.filterPmtrObjs
-#parameter.clonePmtrObjs
+# parameter.filterPmtrObjs
+# parameter.clonePmtrObjs
 
 
 class _CommandTP(Command):
 
-    def __init__(self, ao, args='', **keywords):
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
 
     def _tpGetLib(self, mode):
         """get a listing of texture parameters based on texture, clone mode"""
-        if mode == 'texture':
-            return ('genPmtrObjs', 'rthmPmtrObjs', 'textPmtrObjs')
-        elif mode == 'clone':
-            return ('filterPmtrObjs', 'clonePmtrObjs')
-        elif mode == 'all': # all general
-            return ('genPmtrObjs', 'rthmPmtrObjs', #'textPmtrObjs', 
-                      'filterPmtrObjs',) #'clonePmtrObjs')
+        if mode == "texture":
+            return ("genPmtrObjs", "rthmPmtrObjs", "textPmtrObjs")
+        elif mode == "clone":
+            return ("filterPmtrObjs", "clonePmtrObjs")
+        elif mode == "all":  # all general
+            return (
+                "genPmtrObjs",
+                "rthmPmtrObjs",  #'textPmtrObjs',
+                "filterPmtrObjs",
+            )  #'clonePmtrObjs')
 
     def _tpConvertLibType(self, usrStr):
         """Only provide access to three main types
@@ -2724,59 +2958,65 @@ class _CommandTP(Command):
         """
         try:
             usrStr = parameter.pmtrLibParser(usrStr)
-        except ValueError: # no such parameter
+        except ValueError:  # no such parameter
             return None
-        if usrStr not in ['genPmtrObjs', 'rthmPmtrObjs', 'filterPmtrObjs']:
+        if usrStr not in ["genPmtrObjs", "rthmPmtrObjs", "filterPmtrObjs"]:
             return None
         return usrStr
 
     def _tpGetLibType(self):
-        """Needed for interactive form of TPmap command
-        """
-        libNames = 'Generator, Rhythm, or Filter. (g, r, f)'
-        query = 'select a library: %s:' % libNames
+        """Needed for interactive form of TPmap command"""
+        libNames = "Generator, Rhythm, or Filter. (g, r, f)"
+        query = "select a library: %s:" % libNames
         while 1:
             usrStr = dialog.askStr(query, self.termObj)
-            if usrStr == None: return None
+            if usrStr == None:
+                return None
             lib = self._tpConvertLibType(usrStr)
-            if lib == None: continue
-            else: return lib # either l or m 
+            if lib == None:
+                continue
+            else:
+                return lib  # either l or m
 
     def _tpGetBundleFmt(self, lib):
-        """For a given library, determine the number and types of POs that 
-        are necessary to create an image 
+        """For a given library, determine the number and types of POs that
+        are necessary to create an image
         """
-        if lib == 'filterPmtrObjs':
-            bundle = ('filterPmtrObjs', 'genPmtrObjs')
-            eventListSplitFmt = 'pf'
+        if lib == "filterPmtrObjs":
+            bundle = ("filterPmtrObjs", "genPmtrObjs")
+            eventListSplitFmt = "pf"
             noPmtrObjs = 2
-        elif lib == 'rthmPmtrObjs':
-            bundle = ('rthmPmtrObjs',)
-            eventListSplitFmt = 'pr'
+        elif lib == "rthmPmtrObjs":
+            bundle = ("rthmPmtrObjs",)
+            eventListSplitFmt = "pr"
             noPmtrObjs = 1
-        elif lib == 'genPmtrObjs':
-            bundle = ('genPmtrObjs',)
-            eventListSplitFmt = 'pg'
+        elif lib == "genPmtrObjs":
+            bundle = ("genPmtrObjs",)
+            eventListSplitFmt = "pg"
             noPmtrObjs = 1
-        else: # an error
-            raise Exception('cannot accept library of type: %s' % lib)
+        else:  # an error
+            raise Exception("cannot accept library of type: %s" % lib)
         return bundle, eventListSplitFmt, noPmtrObjs
 
     def _tpGetExportFormat(self):
-        msgPre = '' # this format improves wrapping
+        msgPre = ""  # this format improves wrapping
         while 1:
-            query = 'enter an export format:'
-            if msgPre != '': query = '%s %s' % (msgPre, query)
+            query = "enter an export format:"
+            if msgPre != "":
+                query = "%s %s" % (msgPre, query)
             usrStr = dialog.askStr(query, self.termObj)
-            if usrStr == None: return None
+            if usrStr == None:
+                return None
             usrStr = outFormat.outputExportFormatParser(usrStr)
             if usrStr == None:
-                msgPre = 'format error: select %s:' % drawer.listToStrGrammar(
-                                list(outFormat.outputExportFormatNames.values()), 'or')
-                #dialog.msgOut(msg, self.termObj)
-            else: return usrStr
-                      
-                      
+                msgPre = "format error: select %s:" % drawer.listToStrGrammar(
+                    list(outFormat.outputExportFormatNames.values()), "or"
+                )
+                # dialog.msgOut(msg, self.termObj)
+            else:
+                return usrStr
+
+
 class TPls(_CommandTP):
     """displays texture parameter object information
 
@@ -2786,46 +3026,60 @@ class TPls(_CommandTP):
     >>> ok == True
     True
     """
-    def __init__(self, ao, args='', **keywords):
-        _CommandTP.__init__(self, ao, args, **keywords)
-        self.processSwitch = 0 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'TPls'
 
-    def gather(self): 
-        self.libList = self._tpGetLib('all') # clone or texture
+    def __init__(self, ao, args="", **keywords):
+        _CommandTP.__init__(self, ao, args, **keywords)
+        self.processSwitch = 0  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "TPls"
+
+    def gather(self):
+        self.libList = self._tpGetLib("all")  # clone or texture
         self.pmtrTitles = []
         self.pmtrObjList = []
         for name in self.libList:
             self.pmtrTitles.append(parameter.pmtrLibTitle(name))
             self.pmtrObjList.append(parameter.pmtrLibList(name))
 
-    def process(self): 
+    def process(self):
         pass
 
     def log(self):
-        if self.gatherStatus and self.processStatus: # if complete
-            return '%s' % (self.cmdStr,)
+        if self.gatherStatus and self.processStatus:  # if complete
+            return "%s" % (self.cmdStr,)
 
-    def display(self): 
+    def display(self):
         msg = []
         for i in range(0, len(self.pmtrTitles)):
             lib = self.libList[i]
             msg.append(self.pmtrTitles[i])
             entryLines = []
-            #entryLines.append(('%s' % self.pmtrTitles[i], ''))
+            # entryLines.append(('%s' % self.pmtrTitles[i], ''))
             for name in self.pmtrObjList[i]:
-                #doc = parameter.doc(name, lib, 'args')
-                entryLines.append(('', name))
-            headerKey = ['', 'name',]
-            minWidthList = (lang.TABW, lang.LMARGINW,)
-            bufList      = [0, 1]
-            justList         = ['l','l']
-            table = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
-                                         bufList, justList, self.termObj, 'oneColumn')
-            msg.append('%s\n' % table)
+                # doc = parameter.doc(name, lib, 'args')
+                entryLines.append(("", name))
+            headerKey = [
+                "",
+                "name",
+            ]
+            minWidthList = (
+                lang.TABW,
+                lang.LMARGINW,
+            )
+            bufList = [0, 1]
+            justList = ["l", "l"]
+            table = typeset.formatVariCol(
+                headerKey,
+                entryLines,
+                minWidthList,
+                bufList,
+                justList,
+                self.termObj,
+                "oneColumn",
+            )
+            msg.append("%s\n" % table)
 
-        return '\n'.join(msg)
+        return "\n".join(msg)
 
 
 class TPv(_CommandTP):
@@ -2837,46 +3091,50 @@ class TPv(_CommandTP):
     >>> ok == True
     True
     """
-    def __init__(self, ao, args='', **keywords):
-        _CommandTP.__init__(self, ao, args, **keywords)
-        self.processSwitch = 0 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'TPv'
 
-    def _tpGetFindString(self, argString=''):
+    def __init__(self, ao, args="", **keywords):
+        _CommandTP.__init__(self, ao, args, **keywords)
+        self.processSwitch = 0  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "TPv"
+
+    def _tpGetFindString(self, argString=""):
         """gets find string from user"""
-        if argString == '':
-            query = 'enter a search string:'
+        if argString == "":
+            query = "enter a search string:"
             while 1:
                 data = dialog.askStr(query, self.termObj)
-                if data == None: return None
-                else: return data
+                if data == None:
+                    return None
+                else:
+                    return data
         else:
             return argString
 
-    def gather(self): 
+    def gather(self):
         args = self.args
         # not the same as all, has static values as well
-        self.libList = self._tpGetLib('texture') + self._tpGetLib('clone') 
+        self.libList = self._tpGetLib("texture") + self._tpGetLib("clone")
         self.pmtrTitles = []
         self.pmtrObjList = []
         for name in self.libList:
             self.pmtrTitles.append(parameter.pmtrLibTitle(name))
             self.pmtrObjList.append(parameter.pmtrLibList(name))
 
-        if args != '':
+        if args != "":
             args = argTools.ArgOps(args)
             self.usrStr = args.get(0)
-        else: # get from user
+        else:  # get from user
             self.usrStr = self._tpGetFindString()
-            if self.usrStr == None: return lang.msgReturnCancel
+            if self.usrStr == None:
+                return lang.msgReturnCancel
 
         self.filterList = []
         for i in range(0, len(self.libList)):
             lib = self.libList[i]
             try:
                 obj, parsedUsrStr = parameter.locator(self.usrStr, lib)
-            except error.ParameterObjectSyntaxError: # failed
+            except error.ParameterObjectSyntaxError:  # failed
                 parsedUsrStr = None
             if parsedUsrStr != None:
                 self.filterList.append([parsedUsrStr])
@@ -2887,42 +3145,49 @@ class TPv(_CommandTP):
                 continue
             self.filterList.append([])
 
-    def process(self): 
+    def process(self):
         pass
 
     def log(self):
-        if self.gatherStatus and self.processStatus: # if complete
-            return '%s %s' % (self.cmdStr, self.usrStr)
+        if self.gatherStatus and self.processStatus:  # if complete
+            return "%s %s" % (self.cmdStr, self.usrStr)
 
-    def display(self): 
+    def display(self):
         msg = []
         foundCount = 0
         for i in range(0, len(self.pmtrTitles)):
             if len(self.filterList[i]) == 0:
-                continue # skip empty lists
+                continue  # skip empty lists
             lib = self.libList[i]
             msg.append(self.pmtrTitles[i])
             entryLines = []
-            #entryLines.append(('%s' % self.pmtrTitles[i], ''))
+            # entryLines.append(('%s' % self.pmtrTitles[i], ''))
             for name in self.filterList[i]:
                 foundCount = foundCount + 1
                 # creates an object and calls its 'reprDoc' method
-                doc = parameter.doc(name, lib, 'paragraph')
-                args = parameter.doc(name, lib, 'args')
+                doc = parameter.doc(name, lib, "paragraph")
+                args = parameter.doc(name, lib, "args")
                 entryLines.append((name, args))
-                entryLines.append(('', doc))
+                entryLines.append(("", doc))
 
-            headerKey = ['name', 'documentation']
+            headerKey = ["name", "documentation"]
             minWidthList = (lang.LMARGINW, 0)
-            bufList      = [1, 1]
-            justList         = ['l','l']
-            table = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
-                                         bufList, justList, self.termObj, 'oneColumn')
-            msg.append('%s\n' % table)
+            bufList = [1, 1]
+            justList = ["l", "l"]
+            table = typeset.formatVariCol(
+                headerKey,
+                entryLines,
+                minWidthList,
+                bufList,
+                justList,
+                self.termObj,
+                "oneColumn",
+            )
+            msg.append("%s\n" % table)
         if foundCount != 0:
-            return '\n'.join(msg)
+            return "\n".join(msg)
         else:
-            return 'no mathes found.\n'
+            return "no mathes found.\n"
 
 
 class TPmap(_CommandTP):
@@ -2933,14 +3198,15 @@ class TPmap(_CommandTP):
     >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> a = TPmap(ao, args='120 ru,0,1')
     """
-    def __init__(self, ao, args='', **keywords):
-        _CommandTP.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.gfxSwitch = 1 # display
-        self.cmdStr = 'TPmap'
 
-    def gather(self): 
+    def __init__(self, ao, args="", **keywords):
+        _CommandTP.__init__(self, ao, args, **keywords)
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.gfxSwitch = 1  # display
+        self.cmdStr = "TPmap"
+
+    def gather(self):
         """
         >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
         >>> a = TPmap(ao, args='120 ru,0,1')
@@ -2952,132 +3218,145 @@ class TPmap(_CommandTP):
         self.argBundle = []
         self.fp = None
 
-        if args != '':
-            args = argTools.ArgOps(args) # no strip
-            #lib = self._tpConvertLibType(args.get(0))
-            #if lib == None: return self._getUsage()
+        if args != "":
+            args = argTools.ArgOps(args)  # no strip
+            # lib = self._tpConvertLibType(args.get(0))
+            # if lib == None: return self._getUsage()
 
-            self.events = drawer.strToNum(args.get(0), 'int')
-            if self.events == None: return self._getUsage('number of events cannot be determined')
+            self.events = drawer.strToNum(args.get(0), "int")
+            if self.events == None:
+                return self._getUsage("number of events cannot be determined")
 
             # get lib by looking at the first parameter object given
             lib = parameter.pmtrNameToPmtrLib(args.get(1))
-            #environment.printDebug(['got first arg lib', lib])
+            # environment.printDebug(['got first arg lib', lib])
 
-            lib = self._tpConvertLibType(lib) # only certain libs are spported
-            if lib == None: 
-                return self._getUsage('cannot access parameter object from %s' % args.get(1))
+            lib = self._tpConvertLibType(lib)  # only certain libs are spported
+            if lib == None:
+                return self._getUsage(
+                    "cannot access parameter object from %s" % args.get(1)
+                )
 
-            bundle, self.eventListSplitFmt, noPmtrObjs = self._tpGetBundleFmt(
-                                                        lib)
-            if bundle == None: return self._getUsage('cannot determine library')
+            bundle, self.eventListSplitFmt, noPmtrObjs = self._tpGetBundleFmt(lib)
+            if bundle == None:
+                return self._getUsage("cannot determine library")
 
             pos = 1
             for subLib in bundle:
-                #environment.printDebug(['subLib', subLib])
+                # environment.printDebug(['subLib', subLib])
                 usrDataEval, msg = self._tiEvalUsrStr(args.get(pos), None)
-                if usrDataEval == None: return self._getUsage(msg)
+                if usrDataEval == None:
+                    return self._getUsage(msg)
                 self.argBundle.append((subLib, usrDataEval))
                 pos += 1
 
             # allow an optional final argument for abs file path
-            self.fp = args.get(pos) # may return None
+            self.fp = args.get(pos)  # may return None
             if self.fp != None and not os.path.isabs(self.fp):
                 self.fp = None
-                
+
         if self.argBundle == []:
             lib = self._tpGetLibType()
-            if lib == None: return lang.msgReturnCancel
-            self.events = self._getNumber('number of events:', 'int')
-            if self.events == None: return lang.msgReturnCancel
-            bundle, self.eventListSplitFmt, noPmtrObjs = self._tpGetBundleFmt(
-                                                         lib)
+            if lib == None:
+                return lang.msgReturnCancel
+            self.events = self._getNumber("number of events:", "int")
+            if self.events == None:
+                return lang.msgReturnCancel
+            bundle, self.eventListSplitFmt, noPmtrObjs = self._tpGetBundleFmt(lib)
             for subLib in bundle:
                 titleStr = parameter.pmtrLibTitle(subLib)
-                usrStr = dialog.askStr('enter a %s argument:' % titleStr,
-                                                    self.termObj)
-                if usrStr == None: return lang.msgReturnCancel
+                usrStr = dialog.askStr("enter a %s argument:" % titleStr, self.termObj)
+                if usrStr == None:
+                    return lang.msgReturnCancel
                 usrDataEval, errorMsg = self._tiEvalUsrStr(usrStr, None)
-                if usrDataEval == None: return errorMsg
+                if usrDataEval == None:
+                    return errorMsg
                 self.argBundle.append((subLib, usrDataEval))
             # a file path is no requested
 
-        self.noPmtrObjs = noPmtrObjs # only process necessary bundles
+        self.noPmtrObjs = noPmtrObjs  # only process necessary bundles
 
-    def process(self): 
+    def process(self):
         self.objBundle = []
-        self.msg = [] # store string representations
+        self.msg = []  # store string representations
         pmtrCount = 0
         self._textDisplay = 0
 
-        #environment.printDebug(['argBundle', self.argBundle])
+        # environment.printDebug(['argBundle', self.argBundle])
         # in the case of filter pos, need to have generator first
-        if len(self.argBundle) > 1 and self.argBundle[0][0] == 'filterPmtrObjs':
+        if len(self.argBundle) > 1 and self.argBundle[0][0] == "filterPmtrObjs":
             self.argBundle.reverse()
-        #environment.printDebug(['argBundlePost', self.argBundle])
+        # environment.printDebug(['argBundlePost', self.argBundle])
 
         for subLib, usrDataEval in self.argBundle:
-            #print _MOD, 'subLib, usrdataEval', subLib, usrDataEval
+            # print _MOD, 'subLib, usrdataEval', subLib, usrDataEval
             if pmtrCount >= self.noPmtrObjs:
-                environment.printDebug([lang.WARN, 'too many parameter objects given'])
+                environment.printDebug([lang.WARN, "too many parameter objects given"])
                 break
             try:
                 obj = parameter.factory(usrDataEval, subLib)
             except error.ParameterObjectSyntaxError as msg:
-                return '%s\n' % msg
+                return "%s\n" % msg
             ok, msg = obj.checkArgs()
             if not ok:
-                return '%s\n' % msg
+                return "%s\n" % msg
             # make sure this is not a string outputting parameter object
-            dlgVisMet = self.ao.external.getPref('athena', 'gfxVisualMethod')
-            if obj.outputFmt == 'str' or dlgVisMet == 'text':
-                self._textDisplay = 1 # this will stop gfx processing
-                
-            self.msg.append(obj.repr('argsOnly'))
+            dlgVisMet = self.ao.external.getPref("athena", "gfxVisualMethod")
+            if obj.outputFmt == "str" or dlgVisMet == "text":
+                self._textDisplay = 1  # this will stop gfx processing
+
+            self.msg.append(obj.repr("argsOnly"))
             titleStr = parameter.pmtrLibTitle(subLib)
             self.objBundle.append((titleStr, subLib, obj))
             pmtrCount += 1
 
-        #environment.printDebug(['objBundle', self.objBundle])
+        # environment.printDebug(['objBundle', self.objBundle])
 
-
-    def display(self): 
+    def display(self):
         # note: this is an unconventional use of aoInfo
         # in the future, ssdr and sadr should be moved into aoInfo anyways
         aoInfo = self.ao.aoInfo
-        if self._textDisplay: # this may override user preference
-            splitSco = eventList.EventSequenceSplit(self.objBundle, 
-                    self.eventListSplitFmt, self.events, 0, aoInfo)
-            splitSco.load('pre', 0) # 0 turns off string bypass
+        if self._textDisplay:  # this may override user preference
+            splitSco = eventList.EventSequenceSplit(
+                self.objBundle, self.eventListSplitFmt, self.events, 0, aoInfo
+            )
+            splitSco.load("pre", 0)  # 0 turns off string bypass
             for pmtr in splitSco.getKeys():
                 # xRelation will always be 'event' for parameter displays
                 self.msg.append(splitSco.getTitle(pmtr))
-                dataList = splitSco.getCoord(pmtr, 'event')
-                dataStr = ''.join(['%s%s\n' % (lang.TAB, y) for x, y in dataList])
+                dataList = splitSco.getCoord(pmtr, "event")
+                dataStr = "".join(["%s%s\n" % (lang.TAB, y) for x, y in dataList])
                 self.msg.append(str(dataStr))
 
-        self.msg.append('TPmap display complete.\n')
-        return '\n'.join(self.msg)
+        self.msg.append("TPmap display complete.\n")
+        return "\n".join(self.msg)
 
     def displayGfx(self, fmt, dir=None):
-        if self._textDisplay: return None
-        if self.events == None: return None
-        #print _MOD, 'self.objBundle', self.objBundle
-        obj = graphPmtr.TPmapCanvas(self.ao, self.objBundle,
-                        self.eventListSplitFmt, self.events, fmt)
-        prefDict = self.ao.external.getPrefGroup('external')
-        obj.show(dir, prefDict) # if writing a file, creates temporary path
+        if self._textDisplay:
+            return None
+        if self.events == None:
+            return None
+        # print _MOD, 'self.objBundle', self.objBundle
+        obj = graphPmtr.TPmapCanvas(
+            self.ao, self.objBundle, self.eventListSplitFmt, self.events, fmt
+        )
+        prefDict = self.ao.external.getPrefGroup("external")
+        obj.show(dir, prefDict)  # if writing a file, creates temporary path
 
     def displayGfxUtil(self, fmt, fp):
-        if self._textDisplay: return None
-        if self.events == None: return None
+        if self._textDisplay:
+            return None
+        if self.events == None:
+            return None
 
         # this method is for use in auto-documentation generation
         # can supply complete path rather than just a directory
-        obj = graphPmtr.TPmapCanvas(self.ao, self.objBundle,
-                              self.eventListSplitFmt, self.events, fmt)
+        obj = graphPmtr.TPmapCanvas(
+            self.ao, self.objBundle, self.eventListSplitFmt, self.events, fmt
+        )
         # second arg sets openMedia to false
-        obj.write(fp, 0) 
+        obj.write(fp, 0)
+
 
 class TPe(_CommandTP):
     """sub class TPmap for exporting generator values
@@ -3086,70 +3365,73 @@ class TPe(_CommandTP):
     >>> a = TPe(ao, args='pda 120 ru,0,1')
     >>> a.gather()
     """
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         _CommandTP.__init__(self, ao, args, **keywords)
         self.processSwitch = 1
-        self.gatherSwitch = 1 
-        self.gfxSwitch = 0 # display
-        self.cmdStr = 'TPe'
-        self.lib = 'genPmtrObjs' # fixed
-    
-    def gather(self): 
+        self.gatherSwitch = 1
+        self.gfxSwitch = 0  # display
+        self.cmdStr = "TPe"
+        self.lib = "genPmtrObjs"  # fixed
+
+    def gather(self):
         args = self.args
         self.fmt = None
         self.events = None
         self.argBundle = []
-        self.fp = None # optional file path arg
+        self.fp = None  # optional file path arg
 
-        if args != '':
+        if args != "":
             args = argTools.ArgOps(args)
             self.fmt = outFormat.outputExportFormatParser(args.get(0))
-            if self.fmt == None: 
+            if self.fmt == None:
                 opts = drawer.listToStrGrammar(
-                       list(outFormat.outputExportFormatNames.values()))
-                return self._getUsage('no format %s; select %s' % (args.get(0),
-                            opts))
+                    list(outFormat.outputExportFormatNames.values())
+                )
+                return self._getUsage("no format %s; select %s" % (args.get(0), opts))
 
-            self.events = drawer.strToNum(args.get(1), 'int')
-            if self.events == None: return self._getUsage()
+            self.events = drawer.strToNum(args.get(1), "int")
+            if self.events == None:
+                return self._getUsage()
 
-            bundle, self.eventListSplitFmt, noPmtrObjs = self._tpGetBundleFmt(
-                                                                 self.lib)
-            pos = 2 # 2 args already given
+            bundle, self.eventListSplitFmt, noPmtrObjs = self._tpGetBundleFmt(self.lib)
+            pos = 2  # 2 args already given
             for subLib in bundle:
                 usrDataEval, msg = self._tiEvalUsrStr(args.get(pos), None)
-                if usrDataEval == None: 
+                if usrDataEval == None:
                     return self._getUsage(msg)
                 self.argBundle.append((subLib, usrDataEval))
                 pos += 1
             # allow an optional final argument for abs file path
-            self.fp = args.get(pos) # may return None
+            self.fp = args.get(pos)  # may return None
             if self.fp != None and not os.path.isabs(self.fp):
                 self.fp = None
-                
+
         if self.argBundle == []:
             self.fmt = self._tpGetExportFormat()
-            if self.fmt == None: return lang.msgReturnCancel
+            if self.fmt == None:
+                return lang.msgReturnCancel
 
-            self.events = self._getNumber('number of events:', 'int')
-            if self.events == None: return lang.msgReturnCancel
-            
-            bundle, self.eventListSplitFmt, noPmtrObjs = self._tpGetBundleFmt(
-                                                                   self.lib)
+            self.events = self._getNumber("number of events:", "int")
+            if self.events == None:
+                return lang.msgReturnCancel
+
+            bundle, self.eventListSplitFmt, noPmtrObjs = self._tpGetBundleFmt(self.lib)
             for subLib in bundle:
                 titleStr = parameter.pmtrLibTitle(subLib)
-                usrStr = dialog.askStr('enter a %s argument:' % titleStr,
-                                                    self.termObj)
-                if usrStr == None: return lang.msgReturnCancel
+                usrStr = dialog.askStr("enter a %s argument:" % titleStr, self.termObj)
+                if usrStr == None:
+                    return lang.msgReturnCancel
                 usrDataEval, errorMsg = self._tiEvalUsrStr(usrStr, None)
                 # this may not catch all bad arguments; only evaluates
-                if usrDataEval == None: return errorMsg
+                if usrDataEval == None:
+                    return errorMsg
                 self.argBundle.append((subLib, usrDataEval))
             # a file path is not requested
 
-        self.noPmtrObjs = noPmtrObjs # only process necessary bundles
+        self.noPmtrObjs = noPmtrObjs  # only process necessary bundles
 
-    def process(self): 
+    def process(self):
         # adding an extra argument here to get control over file-path
         # settings; this is a temporary solution to a larger problem
         self.objBundle = []
@@ -3157,15 +3439,16 @@ class TPe(_CommandTP):
             try:
                 obj = parameter.factory(usrDataEval, subLib)
             except error.ParameterObjectSyntaxError as msg:
-                return '%s\n' % msg
+                return "%s\n" % msg
             ok, msg = obj.checkArgs()
             if not ok:
-                return '%s\n' % msg              
+                return "%s\n" % msg
             titleStr = parameter.pmtrLibTitle(subLib)
             self.objBundle.append((titleStr, subLib, obj))
 
-        self.splitSco = eventList.EventSequenceSplit(self.objBundle, 
-                            self.eventListSplitFmt, self.events)
+        self.splitSco = eventList.EventSequenceSplit(
+            self.objBundle, self.eventListSplitFmt, self.events
+        )
         self.splitSco.load()
         self.pathList = []
         # get out object
@@ -3173,37 +3456,37 @@ class TPe(_CommandTP):
         if self.fp == None:
             self.fp = environment.getTempFile(self.outObj.ext)
 
-        if self.outObj.name in ['textSpace', 'textTab']: # textSpace, textTab
-            if self.outObj.name == 'textSpace':
-                self.splitSco.writeTable(self.fp, ' ')
-            elif self.outObj.name == 'textTab':
-                self.splitSco.writeTable(self.fp, '\t')
-        elif self.outObj.name in ['pureDataArray']:
+        if self.outObj.name in ["textSpace", "textTab"]:  # textSpace, textTab
+            if self.outObj.name == "textSpace":
+                self.splitSco.writeTable(self.fp, " ")
+            elif self.outObj.name == "textTab":
+                self.splitSco.writeTable(self.fp, "\t")
+        elif self.outObj.name in ["pureDataArray"]:
             self.splitSco.writeOutputEngine(self.outObj.name, self.fp)
-        elif self.outObj.name in ['audioFile']: # use .aif, but use pref later
+        elif self.outObj.name in ["audioFile"]:  # use .aif, but use pref later
             self.splitSco.writeBuffer(self.fp)
 
         self.pathList.append(self.fp)
 
     def log(self):
-        if self.gatherStatus and self.processStatus: # if complete
-            pmtrStr = drawer.strScrub(self.objBundle[0][2].repr(), None, ' ')
-            return '%s %s %s %s' % (self.cmdStr, self.fmt, self.events, pmtrStr)
+        if self.gatherStatus and self.processStatus:  # if complete
+            pmtrStr = drawer.strScrub(self.objBundle[0][2].repr(), None, " ")
+            return "%s %s %s %s" % (self.cmdStr, self.fmt, self.events, pmtrStr)
 
-    def display(self): 
+    def display(self):
         msg = []
-        prefDict = self.ao.external.getPrefGroup('external')
+        prefDict = self.ao.external.getPrefGroup("external")
         for self.fp in self.pathList:
             failFlag = osTools.openMedia(self.fp, prefDict)
-            if failFlag == 'failed':
-                msg.append('cannot open: %s\n' % self.fp)
+            if failFlag == "failed":
+                msg.append("cannot open: %s\n" % self.fp)
             else:
-                msg.append('complete: (%s)\n' % self.fp)
-        return ''.join(msg)
+                msg.append("complete: (%s)\n" % self.fp)
+        return "".join(msg)
 
 
+# -----------------------------------------------------------------||||||||||||--
 
-#-----------------------------------------------------------------||||||||||||--
 
 class TIn(Command):
     """create a new texture instance
@@ -3215,90 +3498,101 @@ class TIn(Command):
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
     """
 
-    def __init__(self, ao, args='', **keywords):
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'TIn'
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "TIn"
 
     def _tiGetCurrentTextTime(self):
         """get data for loading pmtr obj"""
         lclTimes = None
-        if self.ao.activeTexture != '':
+        if self.ao.activeTexture != "":
             lclTimes = {}
             t = self.ao.textureLib[self.ao.activeTexture]
-            lclTimes['tRange'] = t.pmtrQDict['tRange']
-            lclTimes['beatT']    = t.pmtrQDict['beatT'] # get data
+            lclTimes["tRange"] = t.pmtrQDict["tRange"]
+            lclTimes["beatT"] = t.pmtrQDict["beatT"]  # get data
         return lclTimes
 
-    def gather(self): 
+    def gather(self):
         args = self.args
         self.name = None
         self.inst = None
-        self.auxNo = None # optional argument, used depending on eventMode
-        if args != '':
+        self.auxNo = None  # optional argument, used depending on eventMode
+        if args != "":
             args = argTools.ArgOps(args)
             self.name = args.get(0)
-            if self.name == None: return self._getUsage()
+            if self.name == None:
+                return self._getUsage()
             if self.name in list(self.ao.textureLib.keys()):
                 return self._getUsage()
             if self._nameTest(self.name) != None:
                 return self._getUsage(self._nameTest(self.name))
             self.inst = self._elCheckInstrumentNo(args.get(1))
-            if self.inst == None: return self._getUsage()
-            if self.ao.activeEventMode in ['csoundExternal']:
-                self.auxNo = drawer.strToNum(args.get(2), 'int', 0)
-                if self.auxNo == None: return self._getUsage()
-            # if midiController, must get info for each controller number   
-                
+            if self.inst == None:
+                return self._getUsage()
+            if self.ao.activeEventMode in ["csoundExternal"]:
+                self.auxNo = drawer.strToNum(args.get(2), "int", 0)
+                if self.auxNo == None:
+                    return self._getUsage()
+            # if midiController, must get info for each controller number
+
         if self.name == None or self.inst == None:
             self.name = self._tiGetNewName(lang.msgTIname)
-            if self.name == None: return lang.msgReturnCancel
+            if self.name == None:
+                return lang.msgReturnCancel
             self.inst = self._elGetInstrumentNo()
-            if self.inst == None: return lang.msgReturnCancel
-            if self.ao.activeEventMode in ['csoundExternal']:
-                query = 'provide number of auxiliary parameters:'
-                self.auxNo = self._getNumber(query, 'int', 0)
-                if self.auxNo == None: return lang.msgReturnCancel
-            # if midiController, must get info for each controller number   
+            if self.inst == None:
+                return lang.msgReturnCancel
+            if self.ao.activeEventMode in ["csoundExternal"]:
+                query = "provide number of auxiliary parameters:"
+                self.auxNo = self._getNumber(query, "int", 0)
+                if self.auxNo == None:
+                    return lang.msgReturnCancel
+            # if midiController, must get info for each controller number
 
-    def process(self): 
-        mod = self.ao.activeTextureModule # same as self.tmName
+    def process(self):
+        mod = self.ao.activeTextureModule  # same as self.tmName
         self.ao.textureLib[self.name] = texture.factory(mod, self.name)
         # if refresh mode is active, will auto-score to test
-        refresh = self.ao.aoInfo['refreshMode']
+        refresh = self.ao.aoInfo["refreshMode"]
         # get current texture values
         lclTimes = self._tiGetCurrentTextTime()
         # in some cases, supply (and create) a different path
-        if self.ao.activeEventMode == 'midiPercussion':
+        if self.ao.activeEventMode == "midiPercussion":
             # after, activePath as pName, returns a unused piRef not necessary
-            piRef = self._piAutoCreateMidiPercussion(self.inst) 
-        else: # check that current path exists
-            if (self._piTestExistance() != None or
-                self._piTestNameExists() != None): #check existance
+            piRef = self._piAutoCreateMidiPercussion(self.inst)
+        else:  # check that current path exists
+            if (
+                self._piTestExistance() != None or self._piTestNameExists() != None
+            ):  # check existance
                 # if not path exists, create
-                self._piAutoCreate() # will be named autp
-                        
-        pathObj = self.ao.pathLib[self.ao.activePath]  #this is a reference
-        self.ao.pathLib[self.ao.activePath].refIncr() # add ref
+                self._piAutoCreate()  # will be named autp
+
+        pathObj = self.ao.pathLib[self.ao.activePath]  # this is a reference
+        self.ao.pathLib[self.ao.activePath].refIncr()  # add ref
         # auxNo will be provided; if None, aux is taken from instrument
         # if given, will override aux provided from orchestra
-        self.ao.textureLib[self.name].loadDefault(self.inst, pathObj,
-                                self.ao.aoInfo['fpAudioDirs'], 
-                                lclTimes, self.ao.orcObj.name, 
-                                self.auxNo, refresh)
+        self.ao.textureLib[self.name].loadDefault(
+            self.inst,
+            pathObj,
+            self.ao.aoInfo["fpAudioDirs"],
+            lclTimes,
+            self.ao.orcObj.name,
+            self.auxNo,
+            refresh,
+        )
         self.ao.activeTexture = self.name
 
     def log(self):
-        if self.gatherStatus and self.processStatus: # if complete
-            return '%s %s %s' % (self.cmdStr, self.name, self.inst)   
+        if self.gatherStatus and self.processStatus:  # if complete
+            return "%s %s %s" % (self.cmdStr, self.name, self.inst)
 
-    def display(self): 
+    def display(self):
         return lang.msgTIcreated % self.ao.activeTexture
-            
 
 
 class TIo(Command):
@@ -3309,48 +3603,55 @@ class TIo(Command):
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     >>> a = TIn(ao, args='b 32')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     >>> a = TIo(ao, args='a')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
     """
-    def __init__(self, ao, args='', **keywords):
-        Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'TIo'
 
-    def gather(self): 
+    def __init__(self, ao, args="", **keywords):
+        Command.__init__(self, ao, args, **keywords)
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "TIo"
+
+    def gather(self):
         args = self.args
 
-        if self._tiTestExistance() != None: #check existance
+        if self._tiTestExistance() != None:  # check existance
             return self._tiTestExistance()
         self.name = None
-        if args != '':
-            args = argTools.ArgOps(args) # no strip
+        if args != "":
+            args = argTools.ArgOps(args)  # no strip
             self.name = drawer.inList(args.get(0), list(self.ao.textureLib.keys()))
-            if self.name == None: return self._getUsage()
+            if self.name == None:
+                return self._getUsage()
         if self.name == None:
-            self.name = self._chooseFromList('which TextureInstnace to make active?', 
-                     list(self.ao.textureLib.keys()), 'case')
-            if self.name == None: return lang.msgTIbadName
+            self.name = self._chooseFromList(
+                "which TextureInstnace to make active?",
+                list(self.ao.textureLib.keys()),
+                "case",
+            )
+            if self.name == None:
+                return lang.msgTIbadName
 
-    def process(self): 
+    def process(self):
         self.ao.activeTexture = self.name
 
     def log(self):
-        if self.gatherStatus and self.processStatus: # if complete
-            return '%s %s' % (self.cmdStr, self.name)
+        if self.gatherStatus and self.processStatus:  # if complete
+            return "%s %s" % (self.cmdStr, self.name)
 
-    def display(self): 
-        return 'TI %s now active.\n' % self.ao.activeTexture
+    def display(self):
+        return "TI %s now active.\n" % self.ao.activeTexture
+
 
 class TImute(Command):
     """mutes the current texture
@@ -3361,47 +3662,49 @@ class TImute(Command):
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     >>> a = TImute(ao)
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     """
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'TImute'
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "TImute"
 
     def _tiMute(self, nameToMute):
         if nameToMute in list(self.ao.textureLib.keys()):
             if self.ao.textureLib[nameToMute].mute:
                 self.ao.textureLib[nameToMute].mute = 0
-                return 'TI %s is no longer muted.\n' % nameToMute
+                return "TI %s is no longer muted.\n" % nameToMute
             else:
                 self.ao.textureLib[nameToMute].mute = 1
-                return 'TI %s is now muted.\n' % nameToMute
+                return "TI %s is now muted.\n" % nameToMute
         return None
 
-    def gather(self): 
+    def gather(self):
         args = self.args
         self.mList = []
-        if self._tiTestExistance() != None: #check existance
+        if self._tiTestExistance() != None:  # check existance
             return self._tiTestExistance()
-        if self._tiTestNameExists(self.ao.activeTexture) != None: # check name
+        if self._tiTestNameExists(self.ao.activeTexture) != None:  # check name
             return self._tiTestNameExists(self.ao.activeTexture)
-        if args != '':
+        if args != "":
             args = argTools.ArgOps(args, stripComma=True)
-            if args.list(0, 'end') != None: # if supplied
-                for name in args.list(0, 'end'):
+            if args.list(0, "end") != None:  # if supplied
+                for name in args.list(0, "end"):
                     self.mList.append(name)
-            else: return self._getUsage()
+            else:
+                return self._getUsage()
         else:
             self.mList.append(self.ao.activeTexture)
 
-    def process(self): 
+    def process(self):
         self.report = []
         for name in self.mList:
             msg = self._tiMute(name)
@@ -3411,12 +3714,12 @@ class TImute(Command):
                 self.report.append(lang.msgBadArgFormat)
 
     def log(self):
-        if self.gatherStatus and self.processStatus: # if complete
-            return '%s %s' % (self.cmdStr, 
-                     self._strListToArgList(self.mList))
+        if self.gatherStatus and self.processStatus:  # if complete
+            return "%s %s" % (self.cmdStr, self._strListToArgList(self.mList))
 
-    def display(self): 
-        return ''.join(self.report)
+    def display(self):
+        return "".join(self.report)
+
 
 class TImode(Command):
     """sets pitch, poly, silence, and postMap mode of current texture
@@ -3428,172 +3731,183 @@ class TImode(Command):
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     >>> a = TImode(ao, args='pitch ps')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
     """
 
-    def __init__(self, ao, args='', **keywords):
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'TImode'
-    
-    
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "TImode"
+
     def _tiConvertMode(self, usrStr):
         """converts strings to pitch or poly mode"""
         ref = {
-            'p' : ['pitch', 'p'],
-            's' : ['silence', 's'],
-            'm' : ['map', 'm', 'postmap', 'pm'],
-                }
+            "p": ["pitch", "p"],
+            "s": ["silence", "s"],
+            "m": ["map", "m", "postmap", "pm"],
+        }
         usrStr = drawer.selectionParse(usrStr, ref)
-        return usrStr # may be None
-                    
-#     def _tiConvertPolyMode(self, usrStr):
-#         """converts user entry to poly mode strings"""
-#         ref = {
-#             'set' : ['set', 's'],
-#             'part' : ['part', 'p'],
-#                 }
-#         usrStr = drawer.selectionParse(usrStr, ref)
-#         return usrStr # may be None     
+        return usrStr  # may be None
+
+    #     def _tiConvertPolyMode(self, usrStr):
+    #         """converts user entry to poly mode strings"""
+    #         ref = {
+    #             'set' : ['set', 's'],
+    #             'part' : ['part', 'p'],
+    #                 }
+    #         usrStr = drawer.selectionParse(usrStr, ref)
+    #         return usrStr # may be None
 
     def _tiConvertPitchMode(self, usrStr):
         """converts user entry to pitch mode strings"""
         ref = {
-            'sc'    : ['sc', 'setclass'],
-            'pcs' : ['pcs', 'pc', 'pitchclass'],
-            'ps'    : ['ps', 'pss', 'pitchspace'],
-                }
+            "sc": ["sc", "setclass"],
+            "pcs": ["pcs", "pc", "pitchclass"],
+            "ps": ["ps", "pss", "pitchspace"],
+        }
         usrStr = drawer.selectionParse(usrStr, ref)
-        return usrStr # may be None
+        return usrStr  # may be None
 
-    def gather(self): 
+    def gather(self):
         args = self.args
 
-        if self._tiTestExistance() != None: #check existance
+        if self._tiTestExistance() != None:  # check existance
             return self._tiTestExistance()
-        if self._tiTestNameExists() != None: # check name
+        if self._tiTestNameExists() != None:  # check name
             return self._tiTestNameExists()
         t = self.ao.textureLib[self.ao.activeTexture]
-        currentPitchMode = t.getPitchMode() # this does a string conversion
-        #currentPolyMode = t.polyphonyMode
+        currentPitchMode = t.getPitchMode()  # this does a string conversion
+        # currentPolyMode = t.polyphonyMode
         currentSilenceMode = t.silenceMode
         currentOrcMapMode = t.orcMapMode
 
         modeChoice = None
         modeValue = None
-        if args != '':
+        if args != "":
             args = argTools.ArgOps(args, stripComma=True)
             modeChoice = self._tiConvertMode(args.get(0))
-            if modeChoice == None: return self._getUsage()
-            if modeChoice == 'p':
+            if modeChoice == None:
+                return self._getUsage()
+            if modeChoice == "p":
                 modeValue = self._tiConvertPitchMode(args.get(1))
-                if modeValue == None: return self._getUsage()
-#             elif modeChoice == 'y':
-#                 modeValue = self._tiConvertPolyMode(args.get(1))
-#                 if modeValue == None: return self._getUsage()
-            elif modeChoice == 's':
+                if modeValue == None:
+                    return self._getUsage()
+            #             elif modeChoice == 'y':
+            #                 modeValue = self._tiConvertPolyMode(args.get(1))
+            #                 if modeValue == None: return self._getUsage()
+            elif modeChoice == "s":
                 modeValue = typeset.convertBool(args.get(1))
-                if modeValue == None: return self._getUsage()
-            elif modeChoice == 'm':
+                if modeValue == None:
+                    return self._getUsage()
+            elif modeChoice == "m":
                 modeValue = typeset.convertBool(args.get(1))
-                if modeValue == None: return self._getUsage()
-                
+                if modeValue == None:
+                    return self._getUsage()
+
         if modeChoice == None or modeValue == None:
-            modeChoice = dialog.askStr(lang.msgTImodeChoose % 
-                             self.ao.activeTexture, self.termObj)
-            if modeChoice == None: return lang.msgReturnCancel
+            modeChoice = dialog.askStr(
+                lang.msgTImodeChoose % self.ao.activeTexture, self.termObj
+            )
+            if modeChoice == None:
+                return lang.msgReturnCancel
             modeChoice = self._tiConvertMode(modeChoice)
-            if modeChoice == 'p':
+            if modeChoice == "p":
                 while modeValue == None:
                     query = lang.msgTImodePitchChoose % currentPitchMode
                     modeValue = dialog.askStr(query, self.termObj)
-                    if modeValue == None: return lang.msgReturnCancel
+                    if modeValue == None:
+                        return lang.msgReturnCancel
                     modeValue = self._tiConvertPitchMode(modeValue)
                     if modeValue == None:
                         dialog.msgOut(lang.msgTInoSuchPitchMode, self.termObj)
                         continue
-#             elif modeChoice == 'y':
-#                 while modeValue == None:
-#                     query = lang.msgTImodePolyChoose % currentPolyMode
-#                     modeValue = dialog.askStr(query, self.termObj)
-#                     if modeValue == None: return lang.msgReturnCancel
-#                     modeValue = self._tiConvertPolyMode(modeValue)
-#                     if modeValue == None:
-#                         dialog.msgOut(lang.msgTInoSuchPolyMode, self.termObj)
-#                         continue
-            elif modeChoice == 's':
+            #             elif modeChoice == 'y':
+            #                 while modeValue == None:
+            #                     query = lang.msgTImodePolyChoose % currentPolyMode
+            #                     modeValue = dialog.askStr(query, self.termObj)
+            #                     if modeValue == None: return lang.msgReturnCancel
+            #                     modeValue = self._tiConvertPolyMode(modeValue)
+            #                     if modeValue == None:
+            #                         dialog.msgOut(lang.msgTInoSuchPolyMode, self.termObj)
+            #                         continue
+            elif modeChoice == "s":
                 while modeValue == None:
                     query = lang.msgTImodeSilenceChoose % typeset.boolAsStr(
-                                                           currentSilenceMode)
+                        currentSilenceMode
+                    )
                     modeValue = dialog.askStr(query, self.termObj)
-                    if modeValue == None: return lang.msgReturnCancel
+                    if modeValue == None:
+                        return lang.msgReturnCancel
                     modeValue = typeset.convertBool(modeValue)
                     if modeValue == None:
                         dialog.msgOut(lang.msgTInoSuchSilenceMode, self.termObj)
                         continue
-            elif modeChoice == 'm':
+            elif modeChoice == "m":
                 while modeValue == None:
                     query = lang.msgTImodeMixChoose % typeset.boolAsStr(
-                                                        currentOrcMapMode)
+                        currentOrcMapMode
+                    )
                     modeValue = dialog.askStr(query, self.termObj)
-                    if modeValue == None: return lang.msgReturnCancel
+                    if modeValue == None:
+                        return lang.msgReturnCancel
                     modeValue = typeset.convertBool(modeValue)
                     if modeValue == None:
                         dialog.msgOut(lang.msgTInoSuchMapMode, self.termObj)
                         continue
-                        
-            else: return lang.msgTInoSuchMode
+
+            else:
+                return lang.msgTInoSuchMode
 
         self.modeChoice = modeChoice
         self.modeValue = modeValue
 
     def process(self):
-        """note: changing modes requires updating the internal esObj 
+        """note: changing modes requires updating the internal esObj
         representation; as such, _tiEdit must be called w/ a parameter
         to update all esObjs in textures and clones"""
         name = self.ao.activeTexture
 
-        if self.modeChoice == 'p':
+        if self.modeChoice == "p":
             self.ao.textureLib[name].pitchMode = self.modeValue
-#         elif self.modeChoice == 'y':
-#             if self.modeValue == 'part':
-#                 p = self.ao.textureLib[name].path
-#                 pSizeType = p.voiceType
-#                 if pSizeType != 'part':
-#                     return lang.msgTInoPolyModePath % p.name
-#             self.ao.textureLib[name].polyphonyMode = self.modeValue
-        elif self.modeChoice == 's':
+        #         elif self.modeChoice == 'y':
+        #             if self.modeValue == 'part':
+        #                 p = self.ao.textureLib[name].path
+        #                 pSizeType = p.voiceType
+        #                 if pSizeType != 'part':
+        #                     return lang.msgTInoPolyModePath % p.name
+        #             self.ao.textureLib[name].polyphonyMode = self.modeValue
+        elif self.modeChoice == "s":
             self.ao.textureLib[name].silenceMode = self.modeValue
-        elif self.modeChoice == 'm':
+        elif self.modeChoice == "m":
             self.ao.textureLib[name].orcMapMode = self.modeValue
         # update will be executed if refresh mode is on
-        if self.ao.aoInfo['refreshMode']:
-            ok, msg = self._tiRefresh(name) # force new esObj creation
-            if not ok: return msg
-        
-    def display(self): 
+        if self.ao.aoInfo["refreshMode"]:
+            ok, msg = self._tiRefresh(name)  # force new esObj creation
+            if not ok:
+                return msg
+
+    def display(self):
         t = self.ao.textureLib[self.ao.activeTexture]
-        if self.modeChoice == 'p':
+        if self.modeChoice == "p":
             modeStr = t.getPitchMode()
-            return 'Pitch Mode changed to %s\n' % modeStr
-#         elif self.modeChoice == 'y':
-#             modeStr = t.polyphonyMode 
-#             return 'Polyphony Mode changed to %s\n' % self.modeValue     
-        elif self.modeChoice == 's':
-            modeStr = t.silenceMode 
-            return 'Silence Mode changed to %s\n' % typeset.boolAsStr(
-                                                                 self.modeValue)    
-        elif self.modeChoice == 'm':
-            modeStr = t.orcMapMode 
-            return 'PostMap Mode changed to %s\n' % typeset.boolAsStr(
-                                                                 self.modeValue)    
-                                                                 
+            return "Pitch Mode changed to %s\n" % modeStr
+        #         elif self.modeChoice == 'y':
+        #             modeStr = t.polyphonyMode
+        #             return 'Polyphony Mode changed to %s\n' % self.modeValue
+        elif self.modeChoice == "s":
+            modeStr = t.silenceMode
+            return "Silence Mode changed to %s\n" % typeset.boolAsStr(self.modeValue)
+        elif self.modeChoice == "m":
+            modeStr = t.orcMapMode
+            return "PostMap Mode changed to %s\n" % typeset.boolAsStr(self.modeValue)
+
+
 class TImidi(Command):
     """sets midi settings for the current texture
         work done mostly from within midiTools.py
@@ -3604,39 +3918,40 @@ class TImidi(Command):
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     >>> a = TImidi(ao, args='pgm 3')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     >>> a = TImidi(ao, args='ch 2')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     """
 
-    def __init__(self, ao, args='', **keywords):
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'TImidi'
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "TImidi"
 
     def _tiConvertMidiPmtr(self, usrStr):
         """converts strings to pgm or channel mode"""
         ref = {
-            'p' : ['p', 'pgm', 'program'],
-            'c' : ['c', 'ch', 'channel'],
-                }
+            "p": ["p", "pgm", "program"],
+            "c": ["c", "ch", "channel"],
+        }
         usrStr = drawer.selectionParse(usrStr, ref)
-        return usrStr # may be None
-        
+        return usrStr  # may be None
+
     def _tiGetMidiProgram(self):
         while 1:
             pmtrValue = dialog.askStr(lang.msgTImidiPgmSel, self.termObj)
-            if pmtrValue == None: return None
+            if pmtrValue == None:
+                return None
             pmtrValue = generalMidi.getPgmNumber(pmtrValue)
             if pmtrValue == None:
                 dialog.msgOut(lang.msgTImidiPgmError, self.termObj)
@@ -3646,68 +3961,78 @@ class TImidi(Command):
 
     def _tiConvertMidiCh(self, usrStr):
         "convert usr usrStr to channel int, first ch as 1"
-        chInt = drawer.strToNum(usrStr, 'int', 1, 16)
-        return chInt # may be None
-        
+        chInt = drawer.strToNum(usrStr, "int", 1, 16)
+        return chInt  # may be None
+
     def _tiGetMidiCh(self):
-        query = 'enter a midi channel between 1 and 16:'
+        query = "enter a midi channel between 1 and 16:"
         while 1:
             pmtrValue = dialog.askStr(query, self.termObj)
-            if pmtrValue == None: return None
+            if pmtrValue == None:
+                return None
             pmtrValue = self._tiConvertMidiCh(pmtrValue)
             if pmtrValue == None:
                 continue
             else:
                 return pmtrValue
 
-    def gather(self): 
-        if self._tiTestExistance() != None: #check existance
+    def gather(self):
+        if self._tiTestExistance() != None:  # check existance
             return self._tiTestExistance()
-        if self._tiTestNameExists() != None: # check name
+        if self._tiTestNameExists() != None:  # check name
             return self._tiTestNameExists()
 
         args = self.args
         pmtrChoice = None
         pmtrValue = None
-        if args != '':
+        if args != "":
             args = argTools.ArgOps(args, stripComma=True)
             pmtrChoice = self._tiConvertMidiPmtr(args.get(0))
-            if pmtrChoice == None: return self._getUsage()
-            if pmtrChoice == 'p':
+            if pmtrChoice == None:
+                return self._getUsage()
+            if pmtrChoice == "p":
                 pmtrValue = generalMidi.getPgmNumber(args.get(1))
-                if pmtrValue == None: return self._getUsage()
-            elif pmtrChoice == 'c':
+                if pmtrValue == None:
+                    return self._getUsage()
+            elif pmtrChoice == "c":
                 pmtrValue = self._tiConvertMidiCh(args.get(1))
-                if pmtrValue == None: return self._getUsage()
+                if pmtrValue == None:
+                    return self._getUsage()
 
         if pmtrChoice == None or pmtrValue == None:
-            pmtrChoice = dialog.askStr(lang.msgTImidiPmtrSel % 
-                             self.ao.activeTexture, self.termObj)
-            if pmtrChoice == None: return lang.msgReturnCancel
+            pmtrChoice = dialog.askStr(
+                lang.msgTImidiPmtrSel % self.ao.activeTexture, self.termObj
+            )
+            if pmtrChoice == None:
+                return lang.msgReturnCancel
             pmtrChoice = self._tiConvertMidiPmtr(pmtrChoice)
-            if pmtrChoice == 'p':
+            if pmtrChoice == "p":
                 pmtrValue = self._tiGetMidiProgram()
-                if pmtrValue == None: return lang.msgReturnCancel
+                if pmtrValue == None:
+                    return lang.msgReturnCancel
             # channel not implemented yet
-            elif pmtrChoice == 'c':
+            elif pmtrChoice == "c":
                 pmtrValue = self._tiGetMidiCh()
-                if pmtrValue == None: return lang.msgReturnCancel
-            else: return lang.msgTImidiPmtrError
+                if pmtrValue == None:
+                    return lang.msgReturnCancel
+            else:
+                return lang.msgTImidiPmtrError
 
         self.pmtrChoice = pmtrChoice
         self.pmtrValue = pmtrValue
 
-    def process(self): 
-        if self.pmtrChoice == 'p': # set num
+    def process(self):
+        if self.pmtrChoice == "p":  # set num
             self.ao.textureLib[self.ao.activeTexture].midiPgm = self.pmtrValue[1]
-        elif self.pmtrChoice == 'c':
+        elif self.pmtrChoice == "c":
             self.ao.textureLib[self.ao.activeTexture].midiCh = self.pmtrValue
 
-    def display(self): 
-        if self.pmtrChoice == 'p': # set name
-            return 'midi program changed to %s\n' % self.pmtrValue[0]
-        elif self.pmtrChoice == 'c':
-            return 'midi channel changed to %s\n' % self.pmtrValue
+    def display(self):
+        if self.pmtrChoice == "p":  # set name
+            return "midi program changed to %s\n" % self.pmtrValue[0]
+        elif self.pmtrChoice == "c":
+            return "midi channel changed to %s\n" % self.pmtrValue
+
 
 class TIv(Command):
     """views the current texture, or name if provided with args
@@ -3718,53 +4043,60 @@ class TIv(Command):
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     >>> a = TIv(ao)
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     """
 
-    def __init__(self, ao, args='', **keywords):
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 0 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'TIv'
+        self.processSwitch = 0  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "TIv"
 
-    def gather(self): 
+    def gather(self):
         args = self.args
-        if args != '':
-            args = argTools.ArgOps(args) # no strip
+        if args != "":
+            args = argTools.ArgOps(args)  # no strip
             self.name = args.get(0)
         else:
             self.name = self.ao.activeTexture
-        if self._tiTestExistance() != None: #check existance
+        if self._tiTestExistance() != None:  # check existance
             return self._tiTestExistance()
-        if self._tiTestNameExists(self.name) != None: # check name
+        if self._tiTestNameExists(self.name) != None:  # check name
             return self._tiTestNameExists(self.name)
 
-    def process(self): pass
+    def process(self):
+        pass
 
     def log(self):
-        if self.gatherStatus and self.processStatus: # if complete
-            return '%s %s' % (self.cmdStr, self.name)
+        if self.gatherStatus and self.processStatus:  # if complete
+            return "%s %s" % (self.cmdStr, self.name)
 
-    def display(self): 
+    def display(self):
         nameToView = self.name
         extData = {}
-        extData['cloneNo'] = self.ao.cloneLib.number(nameToView)
-        headList, entryLines = self.ao.textureLib[nameToView].repr('full',
-                                                                 extData)
-        headerKey    = [] # removes header
+        extData["cloneNo"] = self.ao.cloneLib.number(nameToView)
+        headList, entryLines = self.ao.textureLib[nameToView].repr("full", extData)
+        headerKey = []  # removes header
         minWidthList = [lang.LMARGINW, 0]
-        bufList      = [0, 1]
-        justList         = ['l','l']
-        table = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
-                                    bufList, justList, self.termObj, 'oneColumn')
-        headList.append('%s\n' % table)
-        return ''.join(headList)
+        bufList = [0, 1]
+        justList = ["l", "l"]
+        table = typeset.formatVariCol(
+            headerKey,
+            entryLines,
+            minWidthList,
+            bufList,
+            justList,
+            self.termObj,
+            "oneColumn",
+        )
+        headList.append("%s\n" % table)
+        return "".join(headList)
 
 
 class TIe(Command):
@@ -3776,24 +4108,25 @@ class TIe(Command):
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     >>> a = TIv(ao, args='a ru,0,1')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
     """
-    def __init__(self, ao, args='', **keywords):
-        Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'TIe'
 
-    def gather(self): 
-        '''
+    def __init__(self, ao, args="", **keywords):
+        Command.__init__(self, ao, args, **keywords)
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "TIe"
+
+    def gather(self):
+        """
         >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
         >>> ao.setEventMode('m')
-    
+
         >>> a = TIn(ao, args='a 0')
         >>> ok, result = a.do()
 
@@ -3811,14 +4144,14 @@ class TIe(Command):
         >>> a.gather()
         >>> a.usrDataEval
         ('cf', 'path to file')
-        '''
+        """
 
         args = self.args
-        #environment.printDebug(['raw args', args])
+        # environment.printDebug(['raw args', args])
 
-        if self._tiTestExistance() != None: #check existance
+        if self._tiTestExistance() != None:  # check existance
             return self._tiTestExistance()
-        if self._tiTestNameExists() != None: # check name
+        if self._tiTestNameExists() != None:  # check name
             return self._tiTestNameExists()
         # get ref to method
         decodePmtrName = self.ao.textureLib[self.ao.activeTexture].decodePmtrName
@@ -3826,87 +4159,116 @@ class TIe(Command):
         usrDataEval = None
         tName = self.ao.activeTexture
 
-        if args != '':
-            args = argTools.ArgOps(args) # no strip
-            p, label = decodePmtrName(args.get(0), 'str')
+        if args != "":
+            args = argTools.ArgOps(args)  # no strip
+            p, label = decodePmtrName(args.get(0), "str")
             p = self._numPmtrConvertLabel(p, tName)
-            if p == None: 
+            if p == None:
                 return self._getUsage()
 
             if isinstance(args.get(1), basePmtr.Parameter):
                 usrDataEval = args.get(1)
-                msg = ''
-                environment.printDebug(['TIe', 'found Parameter subclass', usrDataEval])
+                msg = ""
+                environment.printDebug(["TIe", "found Parameter subclass", usrDataEval])
             else:
-            # note: here we are keeping spaces with args.get(). 
-            # this is important in the case of passing a file path s
-            # this may have potential side effects 
-                usrDataEval, msg = self._tiEvalUsrStr(args.get(1,'end',
-                               keepSpace=True), p, tName)
-                usrDataEval, msg = self._tiCompleteEditData(p, 
-                               usrDataEval, tName)
-            if usrDataEval == None: return self._getUsage(msg)
+                # note: here we are keeping spaces with args.get().
+                # this is important in the case of passing a file path s
+                # this may have potential side effects
+                usrDataEval, msg = self._tiEvalUsrStr(
+                    args.get(1, "end", keepSpace=True), p, tName
+                )
+                usrDataEval, msg = self._tiCompleteEditData(p, usrDataEval, tName)
+            if usrDataEval == None:
+                return self._getUsage(msg)
 
         if p == None or usrDataEval == None:
             p = dialog.askStr(lang.msgTIePmtrSel % tName, self.termObj)
-            p, label = decodePmtrName(p, 'str')
-            if p == None: return lang.msgTIbadPmtrName
-            demo, demoAdjust = self._tiGetDemo(tName, p, label, 'edit')
-            if demo == None: return demoAdjust # this is the error message
-            if p == 'path':
-                usrStr = self._chooseFromList(demo, list(self.ao.pathLib.keys()), 'case')
-                if usrStr == None: return lang.msgPIbadName
+            p, label = decodePmtrName(p, "str")
+            if p == None:
+                return lang.msgTIbadPmtrName
+            demo, demoAdjust = self._tiGetDemo(tName, p, label, "edit")
+            if demo == None:
+                return demoAdjust  # this is the error message
+            if p == "path":
+                usrStr = self._chooseFromList(
+                    demo, list(self.ao.pathLib.keys()), "case"
+                )
+                if usrStr == None:
+                    return lang.msgPIbadName
                 usrDataEval, errorMsg = self._tiEvalUsrStr(usrStr, p, tName)
-                if usrDataEval == None: return errorMsg
-            elif p in ('ampQ', 'panQ', 'fieldQ', 'octQ', 'beatT', 
-                          'tRange', 'inst', 'rhythmQ'):
-                if p == 'inst':
+                if usrDataEval == None:
+                    return errorMsg
+            elif p in (
+                "ampQ",
+                "panQ",
+                "fieldQ",
+                "octQ",
+                "beatT",
+                "tRange",
+                "inst",
+                "rhythmQ",
+            ):
+                if p == "inst":
                     usrStr = self._elGetInstrumentNo()
                 else:
                     usrStr = dialog.askStr(demo, self.termObj)
-                if usrStr == None: return lang.msgReturnCancel
-            elif p[:4] == 'auxQ':
-                p = self._getNumPmtr('aux', tName, p) # get properlabel
-                if p == None: return lang.msgReturnCancel
+                if usrStr == None:
+                    return lang.msgReturnCancel
+            elif p[:4] == "auxQ":
+                p = self._getNumPmtr("aux", tName, p)  # get properlabel
+                if p == None:
+                    return lang.msgReturnCancel
                 usrStr = dialog.askStr((demo[p] + demoAdjust), self.termObj)
-                if usrStr == None: return lang.msgReturnCancel
-            elif p[:5] == 'textQ':
-                p = self._getNumPmtr('text', tName, p) # get proper label
-                if p == None: return lang.msgReturnCancel
+                if usrStr == None:
+                    return lang.msgReturnCancel
+            elif p[:5] == "textQ":
+                p = self._getNumPmtr("text", tName, p)  # get proper label
+                if p == None:
+                    return lang.msgReturnCancel
                 usrStr = dialog.askStr((demo[p] + demoAdjust), self.termObj)
-                if usrStr == None: return lang.msgReturnCancel
-            elif p[:4] == 'dynQ':
-                p = self._getNumPmtr('dyn', tName, p) # get proper label
-                if p == None: return lang.msgReturnCancel
+                if usrStr == None:
+                    return lang.msgReturnCancel
+            elif p[:4] == "dynQ":
+                p = self._getNumPmtr("dyn", tName, p)  # get proper label
+                if p == None:
+                    return lang.msgReturnCancel
                 usrStr = dialog.askStr((demo[p] + demoAdjust), self.termObj)
-                if usrStr == None: return lang.msgReturnCancel
+                if usrStr == None:
+                    return lang.msgReturnCancel
             # eval data, evaluate and complete complete
             usrDataEval, errorMsg = self._tiEvalUsrStr(usrStr, p, tName)
-            if usrDataEval == None: return errorMsg
+            if usrDataEval == None:
+                return errorMsg
             usrDataEval, errorMsg = self._tiCompleteEditData(p, usrDataEval, tName)
-            if usrDataEval == None: return errorMsg
+            if usrDataEval == None:
+                return errorMsg
         self.p = p
         self.usrDataEval = usrDataEval
         self.label = label
 
-    def process(self): 
+    def process(self):
         tName = self.ao.activeTexture
-        refresh = self.ao.aoInfo['refreshMode']
+        refresh = self.ao.aoInfo["refreshMode"]
         self.ok, self.msg = self._tiEdit(tName, self.p, self.usrDataEval, refresh)
 
     def log(self):
-        if self.gatherStatus and self.ok != None: # if complete
-            return '%s %s %s' % (self.cmdStr, self.p, 
-                                        drawer.listToStr(self.usrDataEval))
+        if self.gatherStatus and self.ok != None:  # if complete
+            return "%s %s %s" % (
+                self.cmdStr,
+                self.p,
+                drawer.listToStr(self.usrDataEval),
+            )
 
     def display(self):
-        if not self.ok: # error encountered
-            return lang.TAB + 'TIe %s %s\n' % (lang.ERROR, self.msg)
+        if not self.ok:  # error encountered
+            return lang.TAB + "TIe %s %s\n" % (lang.ERROR, self.msg)
         else:
-            return 'TI %s: parameter %s updated.\n' % (self.ao.activeTexture,
-                                                                     self.label)
+            return "TI %s: parameter %s updated.\n" % (
+                self.ao.activeTexture,
+                self.label,
+            )
 
-            
+
 class TIls(Command):
     """
     >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
@@ -3915,22 +4277,23 @@ class TIls(Command):
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     >>> a = TIls(ao)
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     """
-    def __init__(self, ao, args='', **keywords):
-        Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 0 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'TIls'
 
-    def gather(self): 
-        if self._tiTestExistance() != None: #check existance
+    def __init__(self, ao, args="", **keywords):
+        Command.__init__(self, ao, args, **keywords)
+        self.processSwitch = 0  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "TIls"
+
+    def gather(self):
+        if self._tiTestExistance() != None:  # check existance
             return self._tiTestExistance()
 
     def _tiGetActiveStr(self, name):
@@ -3939,35 +4302,43 @@ class TIls(Command):
         else:
             return lang.INACTIVE
 
-    def process(self): 
+    def process(self):
         pass
 
-    def display(self): 
+    def display(self):
         msg = []
-        msg.append('TextureInstances available:\n')
+        msg.append("TextureInstances available:\n")
         tNames = list(self.ao.textureLib.keys())
         tNames.sort()
         entryLines = []
         for name in tNames:
-            muteOnOff = self.ao.textureLib[name].repr('mute')
+            muteOnOff = self.ao.textureLib[name].repr("mute")
             activity = self._tiGetActiveStr(name)
-            inst = self.ao.textureLib[name].pmtrObjDict['inst'].repr('argsOnly')
+            inst = self.ao.textureLib[name].pmtrObjDict["inst"].repr("argsOnly")
             text = self.ao.textureLib[name].tmName
             pathName = self.ao.textureLib[name].path.name
-            timeStr = self.ao.textureLib[name].pmtrObjDict['tRange'].repr()
+            timeStr = self.ao.textureLib[name].pmtrObjDict["tRange"].repr()
             noClones = self.ao.cloneLib.number(name)
-            entryLines.append([activity,name, muteOnOff, text, pathName, 
-                                    inst, timeStr, noClones])
-        headerKey    = ['', 'name',lang.MUTELABEL,'TM','PI','instrument',
-                             'time','TC']
+            entryLines.append(
+                [activity, name, muteOnOff, text, pathName, inst, timeStr, noClones]
+            )
+        headerKey = ["", "name", lang.MUTELABEL, "TM", "PI", "instrument", "time", "TC"]
         minWidthList = (lang.TABW, lang.NAMEW, 2, 12, 12, 4, 0, 3)
-        bufList      = [0, 1, 0, 1, 1, 0, 1, 0]
-        justList         = ['c','l', 'l', 'l', 'l', 'l', 'l', 'r']
-        table = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
-                                    bufList, justList, self.termObj, 'twoColumn')
-        msg.append('%s\n' % table)
-        return ''.join(msg)
-         
+        bufList = [0, 1, 0, 1, 1, 0, 1, 0]
+        justList = ["c", "l", "l", "l", "l", "l", "l", "r"]
+        table = typeset.formatVariCol(
+            headerKey,
+            entryLines,
+            minWidthList,
+            bufList,
+            justList,
+            self.termObj,
+            "twoColumn",
+        )
+        msg.append("%s\n" % table)
+        return "".join(msg)
+
+
 class TIrm(Command):
     """
     >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
@@ -3976,46 +4347,53 @@ class TIrm(Command):
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     >>> a = TIrm(ao, args='a')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
     """
-    def __init__(self, ao, args='', **keywords):
-        Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'TIrm'
 
-    def gather(self): 
+    def __init__(self, ao, args="", **keywords):
+        Command.__init__(self, ao, args, **keywords)
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "TIrm"
+
+    def gather(self):
         args = self.args
         self.rmList = []
 
-        if self._tiTestExistance() != None: #check existance
+        if self._tiTestExistance() != None:  # check existance
             return self._tiTestExistance()
-        if args != '':
+        if args != "":
             args = argTools.ArgOps(args, stripComma=True)
-            if args.list(0, 'end') != None: # if supplied
-                for name in args.list(0, 'end'):
+            if args.list(0, "end") != None:  # if supplied
+                for name in args.list(0, "end"):
                     name = drawer.inList(name, list(self.ao.textureLib.keys()))
-                    if name == None: return self._getUsage()
+                    if name == None:
+                        return self._getUsage()
                     self.rmList.append(name)
-            else: return self._getUsage()
+            else:
+                return self._getUsage()
 
         if self.rmList == []:
-            name = self._chooseFromList('which TextureInstnace to delete?', 
-                     list(self.ao.textureLib.keys()), 'case')
-            if name == None: return lang.msgTIbadName
-            query = 'are you sure you want to delete texture %s?' % name
+            name = self._chooseFromList(
+                "which TextureInstnace to delete?",
+                list(self.ao.textureLib.keys()),
+                "case",
+            )
+            if name == None:
+                return lang.msgTIbadName
+            query = "are you sure you want to delete texture %s?" % name
             askUsr = dialog.askYesNoCancel(query, 1, self.termObj)
-            if askUsr == 1:  #/* return to top of loop if yes */
+            if askUsr == 1:  # /* return to top of loop if yes */
                 self.rmList.append(name)
             else:
                 return lang.msgReturnCancel
-            
-    def process(self): 
+
+    def process(self):
         self.report = []
         for name in self.rmList:
             msg = self._tiRemove(name)
@@ -4025,12 +4403,12 @@ class TIrm(Command):
                 self.report.append(lang.msgBadArgFormat)
 
     def log(self):
-        if self.gatherStatus and self.processStatus: # if complete
-            return '%s %s' % (self.cmdStr, 
-                     self._strListToArgList(self.rmList))
+        if self.gatherStatus and self.processStatus:  # if complete
+            return "%s %s" % (self.cmdStr, self._strListToArgList(self.rmList))
 
-    def display(self): 
-        return ''.join(self.report)
+    def display(self):
+        return "".join(self.report)
+
 
 class TIcp(Command):
     """
@@ -4040,76 +4418,85 @@ class TIcp(Command):
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     >>> a = TIcp(ao, args='a b')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
     """
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'TIcp'
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "TIcp"
 
     def _tiCopy(self, srcName, copyName):
         """copies a texture"""
         if srcName != copyName and (srcName in self.ao.textureLib) == 1:
-            self.ao.textureLib[copyName] = self.ao.textureLib[srcName].copy(
-                                                                                      copyName)
+            self.ao.textureLib[copyName] = self.ao.textureLib[srcName].copy(copyName)
             # increment references for this path
             self.ao.textureLib[copyName].path.refIncr()
             self.ao.activeTexture = copyName
             # copy clones
             if srcName in self.ao.cloneLib.tNames():
                 self.ao.cloneLib.tCopy(srcName, copyName)
-            return 'TextureInstance %s created.\n' % copyName
+            return "TextureInstance %s created.\n" % copyName
         else:
             return None
 
-    def gather(self): 
+    def gather(self):
         args = self.args
         self.cpList = []
         self.oldName = None
 
-        if self._tiTestExistance() != None: #check existance
+        if self._tiTestExistance() != None:  # check existance
             return self._tiTestExistance()
-        if args != '':
+        if args != "":
             args = argTools.ArgOps(args, stripComma=True)
-            self.oldName = drawer.inList(args.get(0), 
-                                list(self.ao.textureLib.keys()))
-            if self.oldName == None: return self._getUsage()
-            if args.list(1, 'end') != None: # if supplied
-                for newName in args.list(1, 'end'):
+            self.oldName = drawer.inList(args.get(0), list(self.ao.textureLib.keys()))
+            if self.oldName == None:
+                return self._getUsage()
+            if args.list(1, "end") != None:  # if supplied
+                for newName in args.list(1, "end"):
                     self.cpList.append(newName)
-            else: return self._getUsage()
+            else:
+                return self._getUsage()
 
         if self.cpList == []:
-            self.oldName = self._chooseFromList('which TextureInstnace to copy?', 
-                list(self.ao.textureLib.keys()), 'case')
-            if self.oldName == None: return lang.msgTIbadName
-            query = 'name this copy of TI %s:' % (repr(self.oldName))
+            self.oldName = self._chooseFromList(
+                "which TextureInstnace to copy?",
+                list(self.ao.textureLib.keys()),
+                "case",
+            )
+            if self.oldName == None:
+                return lang.msgTIbadName
+            query = "name this copy of TI %s:" % (repr(self.oldName))
             name = self._tiGetNewName(query)
-            if name == None: return lang.msgReturnCancel
+            if name == None:
+                return lang.msgReturnCancel
             self.cpList.append(name)
 
-    def process(self): 
+    def process(self):
         self.report = []
         for newName in self.cpList:
             msg = self._tiCopy(self.oldName, newName)
-            if msg != None: # fall through if fails
+            if msg != None:  # fall through if fails
                 self.report.append(msg)
             else:
                 self.report.append(lang.msgBadArgFormat)
 
     def log(self):
-        if self.gatherStatus and self.processStatus: # if complete
-            return '%s %s %s' % (self.cmdStr, self.oldName, 
-                     self._strListToArgList(self.cpList))
+        if self.gatherStatus and self.processStatus:  # if complete
+            return "%s %s %s" % (
+                self.cmdStr,
+                self.oldName,
+                self._strListToArgList(self.cpList),
+            )
 
-    def display(self): 
-        return ''.join(self.report)
+    def display(self):
+        return "".join(self.report)
 
 
 class TImv(Command):
@@ -4120,19 +4507,20 @@ class TImv(Command):
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     >>> a = TImv(ao, args='a b')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     """
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'TImv'
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "TImv"
 
     def _tiMove(self, oldTextName, newTextName):
         """renames a textire, appending underscore if duplicate
@@ -4140,7 +4528,7 @@ class TImv(Command):
         """
         if newTextName == oldTextName:
             while newTextName == oldTextName:
-                newTextName = newTextName + '_'
+                newTextName = newTextName + "_"
         self.ao.textureLib[newTextName] = self.ao.textureLib[oldTextName]
         if oldTextName in self.ao.cloneLib.tNames():
             self.ao.cloneLib.tMove(oldTextName, newTextName)
@@ -4149,35 +4537,38 @@ class TImv(Command):
         self.ao.textureLib[newTextName].editName(newTextName)
         return newTextName
 
-    def gather(self): 
+    def gather(self):
         args = self.args
 
-        if self._tiTestExistance() != None: #check existance
+        if self._tiTestExistance() != None:  # check existance
             return self._tiTestExistance()
-        if self._tiTestNameExists() != None: # check name
+        if self._tiTestNameExists() != None:  # check name
             return self._tiTestNameExists()
 
-        if args != '':
+        if args != "":
             args = argTools.ArgOps(args, stripComma=True)
-            self.oldTextName = drawer.inList(args.get(0), 
-                                     list(self.ao.textureLib.keys()))
-            if self.oldTextName == None: return self._getUsage()
+            self.oldTextName = drawer.inList(
+                args.get(0), list(self.ao.textureLib.keys())
+            )
+            if self.oldTextName == None:
+                return self._getUsage()
             self.newTextName = args.get(1)
-            if self.newTextName == None: return self._getUsage()
-        else: # only works with args
+            if self.newTextName == None:
+                return self._getUsage()
+        else:  # only works with args
             return lang.msgReturnCancel
 
-    def process(self): 
+    def process(self):
         self.newTextName = self._tiMove(self.oldTextName, self.newTextName)
         self.ao.activeTexture = self.newTextName
 
     def log(self):
-        if self.gatherStatus and self.processStatus: # if complete
-            return '%s %s %s' % (self.cmdStr, self.oldTextName, self.newTextName)
+        if self.gatherStatus and self.processStatus:  # if complete
+            return "%s %s %s" % (self.cmdStr, self.oldTextName, self.newTextName)
 
-    def display(self): 
-        return 'TI %s moved to TI %s.\n' % (self.oldTextName,
-                                                        self.ao.activeTexture)
+    def display(self):
+        return "TI %s moved to TI %s.\n" % (self.oldTextName, self.ao.activeTexture)
+
 
 class TIdoc(Command):
     """displays all essential information about parameters
@@ -4190,53 +4581,60 @@ class TIdoc(Command):
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     >>> a = TIdoc(ao)
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     """
 
-    def __init__(self, ao, args='', **keywords):
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 0 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'TIdoc'
+        self.processSwitch = 0  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "TIdoc"
 
-    def gather(self): 
+    def gather(self):
         args = self.args
-        if args != '':
-            args = argTools.ArgOps(args) # no strip
+        if args != "":
+            args = argTools.ArgOps(args)  # no strip
             tName = args.get(0)
         else:
             tName = self.ao.activeTexture
 
-        if self._tiTestExistance() != None: #check existance
+        if self._tiTestExistance() != None:  # check existance
             return self._tiTestExistance()
-        if self._tiTestNameExists(tName) != None: # check name
+        if self._tiTestNameExists(tName) != None:  # check name
             return self._tiTestNameExists(tName)
         self.tName = tName
 
-    def display(self): 
+    def display(self):
         """this should be moved inside of texture"""
         tName = self.tName
         t = self.ao.textureLib[tName]
-        headList, entryLines = t.repr('doc')
+        headList, entryLines = t.repr("doc")
 
-        headerKey    = [] # removes header
+        headerKey = []  # removes header
         minWidthList = [lang.LMARGINW, 0]
-        bufList      = [0, 1]
-        justList         = ['l','l']
-        table = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
-                                    bufList, justList, self.termObj, 'oneColumn')
-        headList.append('%s\n' % table)
-        return ''.join(headList)
+        bufList = [0, 1]
+        justList = ["l", "l"]
+        table = typeset.formatVariCol(
+            headerKey,
+            entryLines,
+            minWidthList,
+            bufList,
+            justList,
+            self.termObj,
+            "oneColumn",
+        )
+        headList.append("%s\n" % table)
+        return "".join(headList)
 
 
 class TIals(Command):
-    """ list all attributes of a texture, a hidden command
+    """list all attributes of a texture, a hidden command
 
     >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> ao.setEventMode('m')
@@ -4245,47 +4643,55 @@ class TIals(Command):
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     >>> a = TIals(ao)
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     """
 
-    def __init__(self, ao, args='', **keywords):
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 0 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'TIals'
+        self.processSwitch = 0  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "TIals"
 
-    def gather(self): 
-        if self._tiTestExistance() != None: #check existance
+    def gather(self):
+        if self._tiTestExistance() != None:  # check existance
             return self._tiTestExistance()
-        if self._tiTestNameExists() != None: # check name
+        if self._tiTestNameExists() != None:  # check name
             return self._tiTestNameExists()
 
-    def process(self): 
+    def process(self):
         pass
 
-    def display(self): 
+    def display(self):
         directoryOfattributes = dir(self.ao.textureLib[self.ao.activeTexture])
         msg = []
-        msg.append('attributes of TI %s:\n' % self.ao.activeTexture)
+        msg.append("attributes of TI %s:\n" % self.ao.activeTexture)
         entryLines = []
         for entry in directoryOfattributes:
             value = getattr(self.ao.textureLib[self.ao.activeTexture], entry)
-            value = str(value).replace(' ','')
+            value = str(value).replace(" ", "")
             entryLines.append([entry, value])
-        headerKey    = ['name','value']
+        headerKey = ["name", "value"]
         minWidthList = [lang.LMARGINW, 0]
-        bufList      = [1, 1]
-        justList         = ['l','l']
-        table = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
-                                    bufList, justList, self.termObj, 'oneColumn')
-        msg.append('%s\n' % table)
-        return ''.join(msg) 
+        bufList = [1, 1]
+        justList = ["l", "l"]
+        table = typeset.formatVariCol(
+            headerKey,
+            entryLines,
+            minWidthList,
+            bufList,
+            justList,
+            self.termObj,
+            "oneColumn",
+        )
+        msg.append("%s\n" % table)
+        return "".join(msg)
+
 
 class TImap(Command):
     """
@@ -4294,58 +4700,65 @@ class TImap(Command):
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     >>> a = TImap(ao) # cannot test interactively
 
     """
-    def __init__(self, ao, args='', **keywords):
-        Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.gfxSwitch = 1 # display
-        self.cmdStr = 'TImap'
 
-    def gather(self): 
+    def __init__(self, ao, args="", **keywords):
+        Command.__init__(self, ao, args, **keywords)
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.gfxSwitch = 1  # display
+        self.cmdStr = "TImap"
+
+    def gather(self):
         args = self.args
-        if self._tiTestExistance() != None: #check existance
+        if self._tiTestExistance() != None:  # check existance
             return self._tiTestExistance()
-        self.tmRelation = 'pre' # default
-        self.xRelation = 'event' # 'event'/'time'default
+        self.tmRelation = "pre"  # default
+        self.xRelation = "event"  # 'event'/'time'default
         self.tName = self.ao.activeTexture
-            
-        if args != '':
-            args = argTools.ArgOps(args) # no strip
+
+        if args != "":
+            args = argTools.ArgOps(args)  # no strip
             self.xRelation = self._tiConvertEventTime(args.get(0))
-            if self.xRelation == None: return self._getUsage()
+            if self.xRelation == None:
+                return self._getUsage()
             self.tmRelation = self._tiConvertPrePost(args.get(1))
-            if self.tmRelation == None: return self._getUsage()
-        else: # use default
-            pass # get from user eventually
+            if self.tmRelation == None:
+                return self._getUsage()
+        else:  # use default
+            pass  # get from user eventually
 
     def process(self):
         # if refresh mode set to off
-        if not self.ao.aoInfo['refreshMode']:
-            ok, msg = self._tiRefresh(self.tName) # update esObj if refreshmode off
+        if not self.ao.aoInfo["refreshMode"]:
+            ok, msg = self._tiRefresh(self.tName)  # update esObj if refreshmode off
 
-    def display(self): 
-        return 'TImap (%s-base, %s-TM) display complete.\n' % (self.xRelation,                                        
-                                                           self.tmRelation)
+    def display(self):
+        return "TImap (%s-base, %s-TM) display complete.\n" % (
+            self.xRelation,
+            self.tmRelation,
+        )
 
     def displayGfx(self, fmt, dir=None):
-        prefDict = self.ao.external.getPrefGroup('external')
-        obj = graphPmtr.TImapCanvas(self.ao, self.tName, None, self.tmRelation, 
-                             self.xRelation, fmt)
+        prefDict = self.ao.external.getPrefGroup("external")
+        obj = graphPmtr.TImapCanvas(
+            self.ao, self.tName, None, self.tmRelation, self.xRelation, fmt
+        )
         obj.show(dir, prefDict)
-        
+
     def displayGfxUtil(self, fmt, fp):
-        obj = graphPmtr.TImapCanvas(self.ao, self.tName, None, self.tmRelation, 
-                             self.xRelation, fmt)
+        obj = graphPmtr.TImapCanvas(
+            self.ao, self.tName, None, self.tmRelation, self.xRelation, fmt
+        )
         # second arg sets openMedia to false
         obj.write(fp, 0)
 
 
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 class TEe(Command):
     """edits all textures
 
@@ -4355,34 +4768,33 @@ class TEe(Command):
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     >>> a = TIn(ao, args='b 2')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     >>> a = TEe(ao, args='a ru,.3,1')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     """
 
-    def __init__(self, ao, args='', **keywords):
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'TEe'
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "TEe"
 
-    def gather(self): 
-
-        '''
+    def gather(self):
+        """
         >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
         >>> ao.setEventMode('m')
         >>> a = TIn(ao, args='a 0')
         >>> ok, result = a.do()
-    
+
         >>> a = TEe(ao, args='a 0')
         >>> ok, result = a.do()
 
@@ -4400,12 +4812,12 @@ class TEe(Command):
         >>> a.gather()
         >>> a.usrDataEval
         ('cf', 'path to file')
-        '''
+        """
 
         args = self.args
-        if self._tiTestExistance() != None: #check existance
+        if self._tiTestExistance() != None:  # check existance
             return self._tiTestExistance()
-        if self._tiTestNameExists() != None: # check name
+        if self._tiTestNameExists() != None:  # check name
             return self._tiTestNameExists()
 
         decodePmtrName = self.ao.textureLib[self.ao.activeTexture].decodePmtrName
@@ -4414,76 +4826,93 @@ class TEe(Command):
         usrDataEval = None
         tName = self.ao.activeTexture
 
-        if args != '':
-            args = argTools.ArgOps(args) # no strip
-            p, label = decodePmtrName(args.get(0), 'str')
+        if args != "":
+            args = argTools.ArgOps(args)  # no strip
+            p, label = decodePmtrName(args.get(0), "str")
             p = self._numPmtrConvertLabel(p, tName)
-            if p == None: return self._getUsage()
+            if p == None:
+                return self._getUsage()
             else:
-                usrDataEval, msg = self._tiEvalUsrStr(args.get(1,'end',
-                                   keepSpace=True), p, tName)
+                usrDataEval, msg = self._tiEvalUsrStr(
+                    args.get(1, "end", keepSpace=True), p, tName
+                )
                 usrDataEval, msg = self._tiCompleteEditData(p, usrDataEval, tName)
-            if usrDataEval == None: return self._getUsage(msg)
+            if usrDataEval == None:
+                return self._getUsage(msg)
 
         # same as tie save query string
         if p == None or usrDataEval == None:
             p = dialog.askStr(lang.msgTEePmtrSel, self.termObj)
-            p, label = decodePmtrName(p, 'str')
-            if p == None: return lang.msgTIbadPmtrName
-            demo, demoAdjust = self._tiGetDemo(tName, p, label, 'listedit')
-            if demo == None: return demoAdjust # this is the error message
-    
-            if p=='path':
-                usrStr = self._chooseFromList(demo, list(self.ao.pathLib.keys()), 
-                                 'case')
-                if usrStr == None: return lang.msgPIbadName
-            elif p in ('ampQ', 'panQ', 'fieldQ', 'octQ', 'beatT', 'tRange', 
-                          'inst', 'rhythmQ'):
-                if p == 'inst':
+            p, label = decodePmtrName(p, "str")
+            if p == None:
+                return lang.msgTIbadPmtrName
+            demo, demoAdjust = self._tiGetDemo(tName, p, label, "listedit")
+            if demo == None:
+                return demoAdjust  # this is the error message
+
+            if p == "path":
+                usrStr = self._chooseFromList(
+                    demo, list(self.ao.pathLib.keys()), "case"
+                )
+                if usrStr == None:
+                    return lang.msgPIbadName
+            elif p in (
+                "ampQ",
+                "panQ",
+                "fieldQ",
+                "octQ",
+                "beatT",
+                "tRange",
+                "inst",
+                "rhythmQ",
+            ):
+                if p == "inst":
                     usrStr = self._elGetInstrumentNo()
                 else:
                     usrStr = dialog.askStr(demo, self.termObj)
-                if usrStr == None: return lang.msgReturnCancel
-            elif p[:4] == 'auxQ':# p7 already included
-                p = self._getNumPmtr('aux', tName, p)
-                if p == None: return lang.msgReturnCancel
+                if usrStr == None:
+                    return lang.msgReturnCancel
+            elif p[:4] == "auxQ":  # p7 already included
+                p = self._getNumPmtr("aux", tName, p)
+                if p == None:
+                    return lang.msgReturnCancel
                 usrStr = dialog.askStr((demo[p] + demoAdjust), self.termObj)
-                if usrStr == None: return lang.msgReturnCancel
+                if usrStr == None:
+                    return lang.msgReturnCancel
 
             # eval data, evaluate and complete complete
             usrDataEval, errorMsg = self._tiEvalUsrStr(usrStr, p)
-            if usrDataEval == None: return errorMsg
+            if usrDataEval == None:
+                return errorMsg
             usrDataEval, errorMsg = self._tiCompleteEditData(p, usrDataEval, tName)
-            if usrDataEval == None: return errorMsg
+            if usrDataEval == None:
+                return errorMsg
 
         self.p = p
         self.usrDataEval = usrDataEval
         self.label = label
 
-    def process(self): 
+    def process(self):
         self.report = []
-        refresh = self.ao.aoInfo['refreshMode']
+        refresh = self.ao.aoInfo["refreshMode"]
         # no errors: do final changes on ALL TEXTURES
         for tName in list(self.ao.textureLib.keys()):
             # if self.p is not part of this texture (w/ an aux, or text)
             # an errormsg will be returned
-            self.ok, msgEdit = self._tiEdit(tName, self.p, 
-                                                      self.usrDataEval, refresh)
-            if not self.ok: # error encountered
-                self.report.append('%sTIe %s %s\n' % (lang.TAB, lang.ERROR,
-                                                                  msgEdit))
+            self.ok, msgEdit = self._tiEdit(tName, self.p, self.usrDataEval, refresh)
+            if not self.ok:  # error encountered
+                self.report.append("%sTIe %s %s\n" % (lang.TAB, lang.ERROR, msgEdit))
             else:
-                self.report.append('TI %s: parameter %s updated.\n' % (
-                                                          tName, self.label))
+                self.report.append(
+                    "TI %s: parameter %s updated.\n" % (tName, self.label)
+                )
 
     def log(self):
-        if self.gatherStatus and self.ok != None: # if complete
-            return '%s %s %r' % (self.cmdStr, self.p, self.usrDataEval)
+        if self.gatherStatus and self.ok != None:  # if complete
+            return "%s %s %r" % (self.cmdStr, self.p, self.usrDataEval)
 
-    def display(self): 
-        return ''.join(self.report)
-
-
+    def display(self):
+        return "".join(self.report)
 
 
 class TEv(Command):
@@ -4495,92 +4924,100 @@ class TEv(Command):
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     >>> a = TIn(ao, args='b 2')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     >>> a = TEv(ao, args='a')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     """
 
-    def __init__(self, ao, args='', **keywords):
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'TEv'
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "TEv"
 
-    def gather(self): 
+    def gather(self):
         args = self.args
-        if self._tiTestExistance() != None: #check existance
+        if self._tiTestExistance() != None:  # check existance
             return self._tiTestExistance()
-        if self._tiTestNameExists() != None: # check name
+        if self._tiTestNameExists() != None:  # check name
             return self._tiTestNameExists()
 
         decodePmtrName = self.ao.textureLib[self.ao.activeTexture].decodePmtrName
 
-        if args != '':
+        if args != "":
             args = argTools.ArgOps(args, stripComma=True)
-            p, label = decodePmtrName(args.get(0), 'str')
-            if p == None: return self._getUsage()
+            p, label = decodePmtrName(args.get(0), "str")
+            if p == None:
+                return self._getUsage()
         else:
             p = dialog.askStr(lang.msgTIcompareParam, self.termObj)
-            p, label = decodePmtrName(p, 'str')
-            if p == None: return lang.msgTIbadPmtrName
+            p, label = decodePmtrName(p, "str")
+            if p == None:
+                return lang.msgTIbadPmtrName
         self.p = p
         self.label = label
 
-    def process(self): 
+    def process(self):
         pass
 
-    def display(self): 
-        p = self.p # this is the name of the texture 'self' variable
+    def display(self):
+        p = self.p  # this is the name of the texture 'self' variable
         label = self.label
 
         text_keys = list(self.ao.textureLib.keys())
         text_keys.sort()
         msg = []
-        msg.append('compare parameters: ')
+        msg.append("compare parameters: ")
         entryLines = []
 
-        if p == 'inst':
-            msg.append('%s\n' % label)
+        if p == "inst":
+            msg.append("%s\n" % label)
             for key in text_keys:
-                dataStr = self.ao.textureLib[key].pmtrObjDict['inst'].repr()
-                entryLines.append([key, dataStr, ''])
-        elif p == 'path':
-            msg.append('path\n')
+                dataStr = self.ao.textureLib[key].pmtrObjDict["inst"].repr()
+                entryLines.append([key, dataStr, ""])
+        elif p == "path":
+            msg.append("path\n")
             for key in text_keys:
-                name = 'unknown'
+                name = "unknown"
                 for pair in list(self.ao.pathLib.items()):
                     if pair[1] == self.ao.textureLib[key].path:
-                        name = pair[0]   
-                pathStr = self.ao.textureLib[key]._getPathList('string')
+                        name = pair[0]
+                pathStr = self.ao.textureLib[key]._getPathList("string")
                 entryLines.append([key, name, pathStr])
-        elif p in ('tRange', 'rhythmQ', 'beatT', 'fieldQ', 'octQ', 
-                    'ampQ', 'panQ'):
-            msg.append('%s\n' % label)
+        elif p in ("tRange", "rhythmQ", "beatT", "fieldQ", "octQ", "ampQ", "panQ"):
+            msg.append("%s\n" % label)
             for key in text_keys:
                 dataStr = self.ao.textureLib[key].pmtrObjDict[p].repr()
-                entryLines.append([key, dataStr, ''])
-        elif p in ['auxQ', 'textQ', 'dynQ']:
-            msg.append('no %s ensemble view available.\n' % label)
+                entryLines.append([key, dataStr, ""])
+        elif p in ["auxQ", "textQ", "dynQ"]:
+            msg.append("no %s ensemble view available.\n" % label)
 
-        if entryLines == []: # nothing found
-            return ''.join(msg)
-        headerKey    = ['name', 'value', '']
+        if entryLines == []:  # nothing found
+            return "".join(msg)
+        headerKey = ["name", "value", ""]
         minWidthList = [lang.LMARGINW, lang.NAMEW, 0]
-        bufList      = [1, 1, 1]
-        justList         = ['l','l','l']
-        table = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
-                                      bufList, justList, self.termObj, 'oneColumn')
-        msg.append('%s\n' % table)
-        return ''.join(msg)
+        bufList = [1, 1, 1]
+        justList = ["l", "l", "l"]
+        table = typeset.formatVariCol(
+            headerKey,
+            entryLines,
+            minWidthList,
+            bufList,
+            justList,
+            self.termObj,
+            "oneColumn",
+        )
+        msg.append("%s\n" % table)
+        return "".join(msg)
 
 
 class TEmap(Command):
@@ -4591,76 +5028,78 @@ class TEmap(Command):
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     >>> a = TIn(ao, args='b 2')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     >>> a = TEmap(ao, args='a')
 
     """
-    def __init__(self, ao, args='', **keywords):
-        Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.gfxSwitch = 1 # display
-        self.cmdStr = 'TEmap'
 
-    def gather(self): 
-        if self._tiTestExistance() != None: #check existance
+    def __init__(self, ao, args="", **keywords):
+        Command.__init__(self, ao, args, **keywords)
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.gfxSwitch = 1  # display
+        self.cmdStr = "TEmap"
+
+    def gather(self):
+        if self._tiTestExistance() != None:  # check existance
             return self._tiTestExistance()
 
-    def process(self): 
-        if not self.ao.aoInfo['refreshMode']: # if refresh mode is off
+    def process(self):
+        if not self.ao.aoInfo["refreshMode"]:  # if refresh mode is off
             for tName in list(self.ao.textureLib.keys()):
-                ok, msg = self._tiRefresh(tName) # update esObj if refreshmode off
+                ok, msg = self._tiRefresh(tName)  # update esObj if refreshmode off
         self.tiMapDict = self._teGetTimeMapDict()
 
-    def display(self): 
+    def display(self):
         tiMapDict = self.tiMapDict
         termWidth = self.termObj.w
         graphWidth = termWidth - lang.LMARGINW
         startTime, endTime, totalDur = self._teGetTotalTimeRange(tiMapDict)
 
-        durString = '%.2fs' % totalDur
-        ruler = '%s%s\n' % (durString.ljust(lang.LMARGINW), 
-                                  typeset.graphRuler(graphWidth))
+        durString = "%.2fs" % totalDur
+        ruler = "%s%s\n" % (
+            durString.ljust(lang.LMARGINW),
+            typeset.graphRuler(graphWidth),
+        )
         msg = []
-        msg.append('TextureEnsemble Map:\n')
+        msg.append("TextureEnsemble Map:\n")
         msg.append(ruler)
         tiNameList = list(tiMapDict.keys())
         tiNameList.sort()
         for tiName in tiNameList:
-            s, e = tiMapDict[tiName]['tRange']
-            graph = typeset.graphDuration(totalDur, s, e, graphWidth, '_')
-            msg.append('%s%s\n' % (tiName.ljust(lang.LMARGINW), graph))
-            for tcName in list(tiMapDict[tiName]['cloneDict'].keys()):
-                cloneS, cloneE = tiMapDict[tiName]['cloneDict'][tcName]['tRange']
-                graph = typeset.graphDuration(totalDur, cloneS, cloneE, 
-                                                      graphWidth, '.')
+            s, e = tiMapDict[tiName]["tRange"]
+            graph = typeset.graphDuration(totalDur, s, e, graphWidth, "_")
+            msg.append("%s%s\n" % (tiName.ljust(lang.LMARGINW), graph))
+            for tcName in list(tiMapDict[tiName]["cloneDict"].keys()):
+                cloneS, cloneE = tiMapDict[tiName]["cloneDict"][tcName]["tRange"]
+                graph = typeset.graphDuration(totalDur, cloneS, cloneE, graphWidth, ".")
                 nameLabel = lang.TAB + tcName.ljust((lang.LMARGINW - lang.TABW))
-                msg.append('%s%s\n' % (nameLabel, graph))
-        return ''.join(msg)
+                msg.append("%s%s\n" % (nameLabel, graph))
+        return "".join(msg)
 
     def displayGfx(self, fmt, dir=None):
-        prefDict = self.ao.external.getPrefGroup('external')
-        barHEIGHT = 8 #height of each texture-bar
-        winWIDTH = 700 #should be able to be set w/ cmd-line arg
-        obj = graphEnsemble.TEmapCanvas(self.ao, self.tiMapDict, barHEIGHT,
-                                          winWIDTH, fmt)
+        prefDict = self.ao.external.getPrefGroup("external")
+        barHEIGHT = 8  # height of each texture-bar
+        winWIDTH = 700  # should be able to be set w/ cmd-line arg
+        obj = graphEnsemble.TEmapCanvas(
+            self.ao, self.tiMapDict, barHEIGHT, winWIDTH, fmt
+        )
         obj.show(dir, prefDict)
 
     def displayGfxUtil(self, fmt, fp):
-        barHEIGHT = 8 #height of each texture-bar
-        winWIDTH = 540 #should be able to be set w/ cmd-line arg
-        obj = graphEnsemble.TEmapCanvas(self.ao, self.tiMapDict, barHEIGHT,
-                                          winWIDTH, fmt)
+        barHEIGHT = 8  # height of each texture-bar
+        winWIDTH = 540  # should be able to be set w/ cmd-line arg
+        obj = graphEnsemble.TEmapCanvas(
+            self.ao, self.tiMapDict, barHEIGHT, winWIDTH, fmt
+        )
         # second arg sets openMedia to false
         obj.write(fp, 0)
-        
-        
 
 
 class TEmidi(Command):
@@ -4673,51 +5112,53 @@ class TEmidi(Command):
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     >>> a = TIn(ao, args='b 2')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     >>> a = TEmidi(ao, args='230')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     """
 
-    def __init__(self, ao, args='', **keywords):
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'TEmidi'
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "TEmidi"
 
     def _teCheckTempo(self, usrStr):
         """util to check tempo values for midi master tempo
         must be an integer"""
-        usrVal = drawer.strToNum(usrStr, 'float', 0, 9999)
+        usrVal = drawer.strToNum(usrStr, "float", 0, 9999)
         if usrVal == None:
             return None
         else:
-            usrVal = int(round(usrVal)) # round to an integer
+            usrVal = int(round(usrVal))  # round to an integer
             return usrVal
 
-    def gather(self): 
+    def gather(self):
         args = self.args
 
-        if self._tiTestExistance() != None: #check existance
+        if self._tiTestExistance() != None:  # check existance
             return self._tiTestExistance()
         pmtrValue = None
-        if args != '':
+        if args != "":
             args = argTools.ArgOps(args, stripComma=True)
-            pmtrValue = self._teCheckTempo(args.get(0)) # get number
-            if pmtrValue == None: return self._getUsage()
+            pmtrValue = self._teCheckTempo(args.get(0))  # get number
+            if pmtrValue == None:
+                return self._getUsage()
         if pmtrValue == None:
             while 1:
                 query = lang.msgTEgetTempo % self.ao.midiTempo
                 pmtrValue = dialog.askStr(query, self.termObj)
-                if pmtrValue == None: return lang.msgReturnCancel
+                if pmtrValue == None:
+                    return lang.msgReturnCancel
                 pmtrValue = self._teCheckTempo(pmtrValue)
                 if pmtrValue == None:
                     dialog.msgOut(lang.msgTEtempoError, self.termObj)
@@ -4725,15 +5166,15 @@ class TEmidi(Command):
                 break
         self.pmtrValue = pmtrValue
 
-    def process(self): 
-        self.ao.midiTempo = self.pmtrValue # num
+    def process(self):
+        self.ao.midiTempo = self.pmtrValue  # num
 
-    def display(self): 
-        return 'midi tempo changed to %s.\n' % self.pmtrValue # name
+    def display(self):
+        return "midi tempo changed to %s.\n" % self.pmtrValue  # name
 
 
+# -----------------------------------------------------------------||||||||||||--
 
-#-----------------------------------------------------------------||||||||||||--
 
 class TCn(Command):
     """creates exact duplicate of texture instance at shifted time
@@ -4746,61 +5187,63 @@ class TCn(Command):
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     >>> a = TCn(ao, args='a')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     """
-    def __init__(self, ao, args='', **keywords):
-        Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'TCn'
 
-    def gather(self): 
+    def __init__(self, ao, args="", **keywords):
+        Command.__init__(self, ao, args, **keywords)
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "TCn"
+
+    def gather(self):
         args = self.args
 
-        if self._tiTestExistance() != None: #check existance
+        if self._tiTestExistance() != None:  # check existance
             return self._tiTestExistance()
-        if self._tiTestNameExists() != None: # check name
+        if self._tiTestNameExists() != None:  # check name
             return self._tiTestNameExists()
 
         # make copy to work on and replace: cretes new dict if necessary
-        #cloneDict = self.ao.cloneLib.getCloneDict(self.ao.activeTexture)
+        # cloneDict = self.ao.cloneLib.getCloneDict(self.ao.activeTexture)
         self.name = None
-        #self.timeShift = None # time shift value
+        # self.timeShift = None # time shift value
         self.tName = self.ao.activeTexture
 
-        if args != '':
+        if args != "":
             args = argTools.ArgOps(args)
             self.name = args.get(0)
-            if self.name == None: return self._getUsage()
+            if self.name == None:
+                return self._getUsage()
             if self._nameTest(self.name) != None:
                 return self._getUsage(self._nameTest(self.name))
             if self.ao.cloneLib.cExists(self.tName, self.name):
-                return self._getUsage() # 1 means that self.name exists
-        if self.name==None: # get frm user
-            query = 'name this TextureClone:'
+                return self._getUsage()  # 1 means that self.name exists
+        if self.name == None:  # get frm user
+            query = "name this TextureClone:"
             self.name = self._tcGetNewName(query, self.tName)
-            if self.name == None: return lang.msgReturnCancel
+            if self.name == None:
+                return lang.msgReturnCancel
 
     def process(self):
-        t = self.ao.textureLib[self.tName] 
+        t = self.ao.textureLib[self.tName]
         auxNo = t.auxNo
         auxFmt = t.getAuxOutputFmt()
         self.ao.cloneLib.loadDefault(self.tName, self.name, auxNo, auxFmt)
         # need to score clone to update absTime if refresh mode is on
-        if self.ao.aoInfo['refreshMode']: 
+        if self.ao.aoInfo["refreshMode"]:
             c = self.ao.cloneLib.get(self.tName, self.name)
             c.score(t.getScore(), t.getRefClone())
 
-    def display(self): 
-        msg = 'TC %s created.\n' % self.name
+    def display(self):
+        msg = "TC %s created.\n" % self.name
         return msg
-        
 
 
 class TCv(Command):
@@ -4812,65 +5255,73 @@ class TCv(Command):
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     >>> a = TCn(ao, args='a')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     >>> a = TCv(ao)
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     """
 
-    def __init__(self, ao, args='', **keywords):
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 0 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'TCv'
+        self.processSwitch = 0  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "TCv"
 
-    def gather(self): 
+    def gather(self):
         args = self.args
         self.tName = self.ao.activeTexture
 
-        if self._tiTestExistance() != None: #check existance
+        if self._tiTestExistance() != None:  # check existance
             return self._tiTestExistance()
-        if self._tiTestNameExists() != None: # check name
+        if self._tiTestNameExists() != None:  # check name
             return self._tiTestNameExists()
-        if self._tcTestExistance(self.tName) != None: # check if clones exist
+        if self._tcTestExistance(self.tName) != None:  # check if clones exist
             return self._tcTestExistance(self.tName)
 
         self.name = None
 
-        if args != '':
-            args = argTools.ArgOps(args) # no strip
+        if args != "":
+            args = argTools.ArgOps(args)  # no strip
             self.name = args.get(0)
             if not self.ao.cloneLib.cExists(self.tName, self.name):
                 return self._getUsage()
         else:
             self.name = self.ao.cloneLib.current(self.tName)
 
-    def process(self): pass
+    def process(self):
+        pass
 
     def log(self):
-        if self.gatherStatus and self.processStatus: # if complete
-            return '%s %s' % (self.cmdStr, self.name)
+        if self.gatherStatus and self.processStatus:  # if complete
+            return "%s %s" % (self.cmdStr, self.name)
 
-    def display(self): 
+    def display(self):
         extData = {}
         clone = self.ao.cloneLib.get(self.tName, self.name)
-        headList, entryLines = clone.repr('full', extData)
-        headerKey    = [] # removes header
+        headList, entryLines = clone.repr("full", extData)
+        headerKey = []  # removes header
         minWidthList = [lang.LMARGINW, 0]
-        bufList      = [0, 1]
-        justList         = ['l','l']
-        table = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
-                                    bufList, justList, self.termObj, 'oneColumn')
-        headList.append('%s\n' % table)
-        return ''.join(headList)
+        bufList = [0, 1]
+        justList = ["l", "l"]
+        table = typeset.formatVariCol(
+            headerKey,
+            entryLines,
+            minWidthList,
+            bufList,
+            justList,
+            self.termObj,
+            "oneColumn",
+        )
+        headList.append("%s\n" % table)
+        return "".join(headList)
 
 
 class TCo(Command):
@@ -4881,56 +5332,61 @@ class TCo(Command):
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     >>> a = TCn(ao, args='a')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     >>> a = TCn(ao, args='b')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     >>> a = TCo(ao, args='a')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     """
-    def __init__(self, ao, args='', **keywords):
-        Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'TCo'
 
-    def gather(self): 
+    def __init__(self, ao, args="", **keywords):
+        Command.__init__(self, ao, args, **keywords)
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "TCo"
+
+    def gather(self):
         args = self.args
 
         self.tName = self.ao.activeTexture
-        if self._tcTestExistance(self.tName) != None: #check existance
+        if self._tcTestExistance(self.tName) != None:  # check existance
             return self._tcTestExistance(self.tName)
         self.name = None
         cloneNames = self.ao.cloneLib.cNames(self.tName)
-        if args != '':
-            args = argTools.ArgOps(args) # no strip
+        if args != "":
+            args = argTools.ArgOps(args)  # no strip
             self.name = drawer.inList(args.get(0), cloneNames)
-            if self.name == None: return self._getUsage()
+            if self.name == None:
+                return self._getUsage()
         if self.name == None:
-            self.name = self._chooseFromList('which TextureClone to make active?', 
-                            cloneNames, 'case')
-            if self.name == None: return lang.msgTIbadName
+            self.name = self._chooseFromList(
+                "which TextureClone to make active?", cloneNames, "case"
+            )
+            if self.name == None:
+                return lang.msgTIbadName
 
-    def process(self): 
+    def process(self):
         self.ao.cloneLib.select(self.tName, self.name)
 
     def log(self):
-        if self.gatherStatus and self.processStatus: # if complete
-            return '%s %s' % (self.cmdStr, self.name)
+        if self.gatherStatus and self.processStatus:  # if complete
+            return "%s %s" % (self.cmdStr, self.name)
 
-    def display(self): 
-        return 'TC %s of TI %s now active.\n' % (self.name, self.tName)
+    def display(self):
+        return "TC %s of TI %s now active.\n" % (self.name, self.tName)
+
 
 class TCmute(Command):
     """mutes the current clone
@@ -4941,51 +5397,53 @@ class TCmute(Command):
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     >>> a = TCn(ao, args='a')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     >>> a = TCmute(ao)
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
     """
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'TCmute'
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "TCmute"
 
     def _tcMute(self, tName, cName):
         # will toggle
         self.ao.cloneLib.mute(tName, cName)
         if not self.ao.cloneLib.muteStatus(tName, cName):
-            return 'TC %s of TI %s is no longer muted.\n' % (cName, tName)
+            return "TC %s of TI %s is no longer muted.\n" % (cName, tName)
         else:
-            return 'TC %s of TI %s is now muted.\n' % (cName, tName)
+            return "TC %s of TI %s is now muted.\n" % (cName, tName)
         return None
 
-    def gather(self): 
+    def gather(self):
         args = self.args
         self.mList = []
         self.tName = self.ao.activeTexture
 
-        if self._tcTestExistance(self.tName) != None: #check existance
+        if self._tcTestExistance(self.tName) != None:  # check existance
             return self._tcTestExistance(self.tName)
 
-        if args != '':
+        if args != "":
             args = argTools.ArgOps(args, stripComma=True)
-            if args.list(0, 'end') != None: # if supplied
-                for name in args.list(0, 'end'):
+            if args.list(0, "end") != None:  # if supplied
+                for name in args.list(0, "end"):
                     self.mList.append(name)
-            else: return self._getUsage()
+            else:
+                return self._getUsage()
         else:
             self.mList.append(self.ao.cloneLib.current(self.tName))
 
-    def process(self): 
+    def process(self):
         self.report = []
         for name in self.mList:
             msg = self._tcMute(self.tName, name)
@@ -4995,15 +5453,15 @@ class TCmute(Command):
                 self.report.append(lang.msgBadArgFormat)
 
     def log(self):
-        if self.gatherStatus and self.processStatus: # if complete
-            return '%s %s' % (self.cmdStr, 
-                     self._strListToArgList(self.mList))
+        if self.gatherStatus and self.processStatus:  # if complete
+            return "%s %s" % (self.cmdStr, self._strListToArgList(self.mList))
 
-    def display(self): 
-        return ''.join(self.report)
+    def display(self):
+        return "".join(self.report)
+
 
 class TCls(Command):
-    """shows all clones for current texture, with adjust start and end 
+    """shows all clones for current texture, with adjust start and end
     times (ls for current textre)
     check for negative start times
 
@@ -5013,32 +5471,32 @@ class TCls(Command):
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     >>> a = TCn(ao, args='a')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     >>> a = TCls(ao)
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
     """
 
-    def __init__(self, ao, args='', **keywords):
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 0 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'TCls'
+        self.processSwitch = 0  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "TCls"
 
-    def gather(self): 
+    def gather(self):
         self.tName = self.ao.activeTexture
-        if self._tiTestExistance() != None: #check existance
+        if self._tiTestExistance() != None:  # check existance
             return self._tiTestExistance()
-        if self._tiTestNameExists() != None: # check name
+        if self._tiTestNameExists() != None:  # check name
             return self._tiTestNameExists()
-        if self._tcTestExistance(self.tName) != None: # check if clones exist
+        if self._tcTestExistance(self.tName) != None:  # check if clones exist
             return self._tcTestExistance(self.tName)
 
     def _tcGetActiveStr(self, cName):
@@ -5047,31 +5505,52 @@ class TCls(Command):
         else:
             return lang.INACTIVE
 
-    def process(self): 
+    def process(self):
         pass
 
-    def display(self): 
+    def display(self):
         tName = self.ao.activeTexture
         msg = []
-        msg.append('TextureClones of TI %s\n' % tName)
+        msg.append("TextureClones of TI %s\n" % tName)
         # need time range from texture
         refDict = self.ao.textureLib[tName].getRefClone()
         entryLines = []
         for cName in self.ao.cloneLib.cNames(tName):
             # add status to refDict
-            refDict['activeStr'] = self._tcGetActiveStr(cName)
+            refDict["activeStr"] = self._tcGetActiveStr(cName)
             clone = self.ao.cloneLib.get(tName, cName)
-            entryLines.append(clone.repr('list', refDict))
+            entryLines.append(clone.repr("list", refDict))
 
-        headerKey    = ['', 'name',lang.MUTELABEL,'duration',]
-        minWidthList = [lang.TABW, lang.NAMEW, 2, 16,]
-        bufList      = [0,1, 0, 1]
-        justList         = ['c','l','l','l',]
-        table = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
-                                    bufList, justList, self.termObj, 'oneColumn')
-        msg.append('%s\n' % table)
-        return ''.join(msg) 
-        
+        headerKey = [
+            "",
+            "name",
+            lang.MUTELABEL,
+            "duration",
+        ]
+        minWidthList = [
+            lang.TABW,
+            lang.NAMEW,
+            2,
+            16,
+        ]
+        bufList = [0, 1, 0, 1]
+        justList = [
+            "c",
+            "l",
+            "l",
+            "l",
+        ]
+        table = typeset.formatVariCol(
+            headerKey,
+            entryLines,
+            minWidthList,
+            bufList,
+            justList,
+            self.termObj,
+            "oneColumn",
+        )
+        msg.append("%s\n" % table)
+        return "".join(msg)
 
 
 class TCe(Command):
@@ -5083,35 +5562,35 @@ class TCe(Command):
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     >>> a = TCn(ao, args='a')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     >>> a = TCe(ao, args='a fa,(ru,0,1)')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     """
 
-    def __init__(self, ao, args='', **keywords):
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'TCe'
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "TCe"
 
-    def gather(self): 
+    def gather(self):
         args = self.args
-        if self._tiTestExistance() != None: #check existance
+        if self._tiTestExistance() != None:  # check existance
             return self._tiTestExistance()
-        if self._tiTestNameExists() != None: # check name
+        if self._tiTestNameExists() != None:  # check name
             return self._tiTestNameExists()
 
         tName = self.ao.activeTexture
-        if self._tcTestExistance(tName) != None: # check if clones exist
+        if self._tcTestExistance(tName) != None:  # check if clones exist
             return self._tcTestExistance(tName)
         # get ref to method
         decodePmtrName = self.ao.cloneLib.decodePmtrName
@@ -5119,39 +5598,50 @@ class TCe(Command):
         usrDataEval = None
         cName = self.ao.cloneLib.current(tName)
 
-        if args != '':
-            args = argTools.ArgOps(args) # no strip
-            p, label = decodePmtrName(args.get(0), 'str') # aprop to clone
+        if args != "":
+            args = argTools.ArgOps(args)  # no strip
+            p, label = decodePmtrName(args.get(0), "str")  # aprop to clone
             p = self._numPmtrConvertLabel(p, tName)
-            if p == None: return self._getUsage()
-            else: # do for path too
-                usrDataEval, msg = self._tcEvalUsrStr(args.get(1,'end', 
-                    keepSpace=True), p)
+            if p == None:
+                return self._getUsage()
+            else:  # do for path too
+                usrDataEval, msg = self._tcEvalUsrStr(
+                    args.get(1, "end", keepSpace=True), p
+                )
                 usrDataEval = self._tcCompleteEditData(p, usrDataEval, tName, cName)
-            if usrDataEval == None: return self._getUsage()
+            if usrDataEval == None:
+                return self._getUsage()
 
         if p == None or usrDataEval == None:
             p = dialog.askStr(lang.msgTCePmtrSel % tName, self.termObj)
-            p, label = decodePmtrName(p, 'str')
-            if p == None: return lang.msgTCbadPmtrName
-            demo, demoAdjust = self._tcGetDemo(tName, cName, p, label, 'edit')
-            if demo == None: return demoAdjust # this is the error message
-            if p in ('time', 'sus', 'acc', 'fieldQ', 'octQ', 'ampQ', 'panQ'):
+            p, label = decodePmtrName(p, "str")
+            if p == None:
+                return lang.msgTCbadPmtrName
+            demo, demoAdjust = self._tcGetDemo(tName, cName, p, label, "edit")
+            if demo == None:
+                return demoAdjust  # this is the error message
+            if p in ("time", "sus", "acc", "fieldQ", "octQ", "ampQ", "panQ"):
                 usrStr = dialog.askStr(demo, self.termObj)
-                if usrStr == None: return lang.msgReturnCancel
-            elif p[:4] == 'auxQ':
-                p = self._getNumPmtr('aux', tName, p)
-                if p == None: return lang.msgReturnCancel
+                if usrStr == None:
+                    return lang.msgReturnCancel
+            elif p[:4] == "auxQ":
+                p = self._getNumPmtr("aux", tName, p)
+                if p == None:
+                    return lang.msgReturnCancel
                 usrStr = dialog.askStr((demo[p] + demoAdjust), self.termObj)
-                if usrStr == None: return lang.msgReturnCancel
-            elif p[:6] == 'cloneQ':
-                p = self._getNumPmtr('clone', tName, p)
-                if p == None: return lang.msgReturnCancel
+                if usrStr == None:
+                    return lang.msgReturnCancel
+            elif p[:6] == "cloneQ":
+                p = self._getNumPmtr("clone", tName, p)
+                if p == None:
+                    return lang.msgReturnCancel
                 usrStr = dialog.askStr((demo[p] + demoAdjust), self.termObj)
-                if usrStr == None: return lang.msgReturnCancel
+                if usrStr == None:
+                    return lang.msgReturnCancel
             # eval data, evaluate and complete complete
             usrDataEval, errorMsg = self._tcEvalUsrStr(usrStr, p)
-            if usrDataEval == None: return errorMsg
+            if usrDataEval == None:
+                return errorMsg
             usrDataEval = self._tcCompleteEditData(p, usrDataEval, tName, cName)
         self.p = p
         self.usrDataEval = usrDataEval
@@ -5159,22 +5649,25 @@ class TCe(Command):
         self.tName = tName
         self.cName = cName
 
-    def process(self): 
-        refresh = self.ao.aoInfo['refreshMode']
-        self.ok, self.msg = self._tcEdit(self.tName, self.cName, 
-                                                    self.p, self.usrDataEval, refresh)
+    def process(self):
+        refresh = self.ao.aoInfo["refreshMode"]
+        self.ok, self.msg = self._tcEdit(
+            self.tName, self.cName, self.p, self.usrDataEval, refresh
+        )
 
     def log(self):
-        if self.gatherStatus and self.ok != None: # if complete
-            return '%s %s %s' % (self.cmdStr, self.p, 
-                                        drawer.listToStr(self.usrDataEval))
+        if self.gatherStatus and self.ok != None:  # if complete
+            return "%s %s %s" % (
+                self.cmdStr,
+                self.p,
+                drawer.listToStr(self.usrDataEval),
+            )
 
     def display(self):
-        if not self.ok: # error encountered
-            return lang.TAB + 'TCe %s %s\n' % (lang.ERROR, self.msg)
+        if not self.ok:  # error encountered
+            return lang.TAB + "TCe %s %s\n" % (lang.ERROR, self.msg)
         else:
-            return 'TC %s: parameter %s updated.\n' % (self.cName,
-                                                                     self.label)
+            return "TC %s: parameter %s updated.\n" % (self.cName, self.label)
 
 
 class TCcp(Command):
@@ -5185,83 +5678,96 @@ class TCcp(Command):
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     >>> a = TCn(ao, args='a')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     >>> a = TCcp(ao, args='a b')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     """
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'TCcp'
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "TCcp"
 
     def _tcCopy(self, srcName, copyName):
         """copies a texture"""
-        # self.ao.cloneLib      
-        if (srcName != copyName and self.ao.cloneLib.cExists(self.tName, srcName)
-            and copyName not in self.ao.cloneLib.cNames(self.tName)):
-            self.ao.cloneLib.cCopy(self.tName, srcName, copyName)             
-            return 'TC %s created.\n' % copyName
+        # self.ao.cloneLib
+        if (
+            srcName != copyName
+            and self.ao.cloneLib.cExists(self.tName, srcName)
+            and copyName not in self.ao.cloneLib.cNames(self.tName)
+        ):
+            self.ao.cloneLib.cCopy(self.tName, srcName, copyName)
+            return "TC %s created.\n" % copyName
         else:
             return None
 
-    def gather(self): 
+    def gather(self):
         args = self.args
         self.cpList = []
         self.oldName = None
 
         self.tName = self.ao.activeTexture
-        if self._tiTestExistance() != None: #check existance
+        if self._tiTestExistance() != None:  # check existance
             return self._tiTestExistance()
-        if self._tiTestNameExists() != None: # check name
+        if self._tiTestNameExists() != None:  # check name
             return self._tiTestNameExists()
-        if self._tcTestExistance(self.tName) != None: # check if clones exist
+        if self._tcTestExistance(self.tName) != None:  # check if clones exist
             return self._tcTestExistance(self.tName)
-            
-        if args != '':
+
+        if args != "":
             args = argTools.ArgOps(args, stripComma=True)
-            self.oldName = drawer.inList(args.get(0), 
-                                self.ao.cloneLib.cNames(self.tName))
-            if self.oldName == None: return self._getUsage()
-            if args.list(1, 'end') != None: # if supplied
-                for newName in args.list(1, 'end'):
+            self.oldName = drawer.inList(
+                args.get(0), self.ao.cloneLib.cNames(self.tName)
+            )
+            if self.oldName == None:
+                return self._getUsage()
+            if args.list(1, "end") != None:  # if supplied
+                for newName in args.list(1, "end"):
                     self.cpList.append(newName)
-            else: return self._getUsage()
+            else:
+                return self._getUsage()
 
         if self.cpList == []:
-            self.oldName = self._chooseFromList('which Clone to copy?', 
-                self.ao.cloneLib.cNames(self.tName), 'case')
-            if self.oldName == None: return lang.msgTCbadName
-            query = 'name this copy of TC %s:' % (repr(self.oldName))
+            self.oldName = self._chooseFromList(
+                "which Clone to copy?", self.ao.cloneLib.cNames(self.tName), "case"
+            )
+            if self.oldName == None:
+                return lang.msgTCbadName
+            query = "name this copy of TC %s:" % (repr(self.oldName))
             name = self._tcGetNewName(query, self.tName)
-            if name == None: return lang.msgReturnCancel
+            if name == None:
+                return lang.msgReturnCancel
             self.cpList.append(name)
 
-    def process(self): 
+    def process(self):
         self.report = []
         for newName in self.cpList:
             msg = self._tcCopy(self.oldName, newName)
-            if msg != None: # fall through if fails
+            if msg != None:  # fall through if fails
                 self.report.append(msg)
             else:
                 self.report.append(lang.msgBadArgFormat)
 
     def log(self):
-        if self.gatherStatus and self.processStatus: # if complete
-            return '%s %s %s' % (self.cmdStr, self.oldName, 
-                     self._strListToArgList(self.cpList))
+        if self.gatherStatus and self.processStatus:  # if complete
+            return "%s %s %s" % (
+                self.cmdStr,
+                self.oldName,
+                self._strListToArgList(self.cpList),
+            )
 
-    def display(self): 
-        return ''.join(self.report)
+    def display(self):
+        return "".join(self.report)
 
 
 class TCmap(Command):
@@ -5272,57 +5778,62 @@ class TCmap(Command):
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     >>> a = TCn(ao, args='a')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     >>> a = TCmap(ao) # cannot test interactively
 
     """
-    def __init__(self, ao, args='', **keywords):
-        Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.gfxSwitch = 1 # display
-        self.cmdStr = 'TCmap'
 
-    def gather(self): 
+    def __init__(self, ao, args="", **keywords):
+        Command.__init__(self, ao, args, **keywords)
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.gfxSwitch = 1  # display
+        self.cmdStr = "TCmap"
+
+    def gather(self):
         args = self.args
-        if self._tiTestExistance() != None: #check existance
+        if self._tiTestExistance() != None:  # check existance
             return self._tiTestExistance()
-        if self._tiTestNameExists() != None: # check name
+        if self._tiTestNameExists() != None:  # check name
             return self._tiTestNameExists()
 
         self.tName = self.ao.activeTexture
-        if self._tcTestExistance(self.tName) != None: # check if clones exist
+        if self._tcTestExistance(self.tName) != None:  # check if clones exist
             return self._tcTestExistance(self.tName)
 
         self.cName = self.ao.cloneLib.current(self.tName)
-        self.tmRelation = 'post' # cant change, always post for clone
-        self.xRelation = 'event' # can change to time
+        self.tmRelation = "post"  # cant change, always post for clone
+        self.xRelation = "event"  # can change to time
 
-        if args != '':
-            args = argTools.ArgOps(args) # no strip
+        if args != "":
+            args = argTools.ArgOps(args)  # no strip
             self.xRelation = self._tiConvertEventTime(args.get(0))
-            if self.xRelation == None: return self._getUsage()
-        else: # use default
-            pass # get from user eventually
-                        
+            if self.xRelation == None:
+                return self._getUsage()
+        else:  # use default
+            pass  # get from user eventually
+
     def process(self):
-        if not self.ao.aoInfo['refreshMode']: # if refeshmode off
-            ok, msg = self._tiRefresh(self.tName) # update esObj if refreshmode off
-                        
-    def display(self): 
-        return 'TCmap (%s-base, %s-TM) display complete.\n' % (self.xRelation,                                        
-                                                              self.tmRelation)
+        if not self.ao.aoInfo["refreshMode"]:  # if refeshmode off
+            ok, msg = self._tiRefresh(self.tName)  # update esObj if refreshmode off
+
+    def display(self):
+        return "TCmap (%s-base, %s-TM) display complete.\n" % (
+            self.xRelation,
+            self.tmRelation,
+        )
 
     def displayGfx(self, fmt, dir=None):
-        prefDict = self.ao.external.getPrefGroup('external')
-        obj = graphPmtr.TImapCanvas(self.ao, self.tName, self.cName,
-                self.tmRelation, self.xRelation, fmt)
+        prefDict = self.ao.external.getPrefGroup("external")
+        obj = graphPmtr.TImapCanvas(
+            self.ao, self.tName, self.cName, self.tmRelation, self.xRelation, fmt
+        )
         obj.show(dir, prefDict)
 
 
@@ -5337,47 +5848,48 @@ class TCdoc(Command):
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     >>> a = TCn(ao, args='a')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     >>> a = TCdoc(ao)
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     """
-    def __init__(self, ao, args='', **keywords):
-        Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 0 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'TCdoc'
 
-    def gather(self): 
+    def __init__(self, ao, args="", **keywords):
+        Command.__init__(self, ao, args, **keywords)
+        self.processSwitch = 0  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "TCdoc"
+
+    def gather(self):
         args = self.args
         self.tName = self.ao.activeTexture
 
-        if self._tiTestExistance() != None: #check existance
+        if self._tiTestExistance() != None:  # check existance
             return self._tiTestExistance()
-        if self._tiTestNameExists() != None: # check name
+        if self._tiTestNameExists() != None:  # check name
             return self._tiTestNameExists()
-        if self._tcTestExistance(self.tName) != None: # check if clones exist
+        if self._tcTestExistance(self.tName) != None:  # check if clones exist
             return self._tcTestExistance(self.tName)
 
         self.name = None
-        if args != '':
-            args = argTools.ArgOps(args) # no strip
+        if args != "":
+            args = argTools.ArgOps(args)  # no strip
             self.name = args.get(0)
         else:
             self.name = self.ao.cloneLib.current(self.tName)
-            
-    def process(self): 
+
+    def process(self):
         pass
 
-    def display(self): 
+    def display(self):
         """this should be moved inside of texture"""
         tName = self.tName
         t = self.ao.textureLib[tName]
@@ -5386,25 +5898,33 @@ class TCdoc(Command):
 
         # part of clone doc comes from texture; clone has no instrument rep
         # get clone static data, head
-        headList, entryLines = c.repr('docStandard')
+        headList, entryLines = c.repr("docStandard")
         # get inst, aux information from texture
-        
-        # can interleave aux info here
-        auxInterleave = drawer.listInterleave(t.repr('docAuxNames'),                             
-                                                            c.repr('docAuxArgs'), 1)
-        # inst not needed, not in tcv: t.repr('docInst')
-        entryLines = (entryLines + auxInterleave + c.repr('docStatic'))
 
-        headerKey    = [] # removes header
+        # can interleave aux info here
+        auxInterleave = drawer.listInterleave(
+            t.repr("docAuxNames"), c.repr("docAuxArgs"), 1
+        )
+        # inst not needed, not in tcv: t.repr('docInst')
+        entryLines = entryLines + auxInterleave + c.repr("docStatic")
+
+        headerKey = []  # removes header
         minWidthList = [lang.LMARGINW, 0]
-        bufList      = [0, 1]
-        justList         = ['l','l']
-        table = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
-                                    bufList, justList, self.termObj, 'oneColumn')
-        headList.append('%s\n' % table)
-        return ''.join(headList)
-        
-        
+        bufList = [0, 1]
+        justList = ["l", "l"]
+        table = typeset.formatVariCol(
+            headerKey,
+            entryLines,
+            minWidthList,
+            bufList,
+            justList,
+            self.termObj,
+            "oneColumn",
+        )
+        headList.append("%s\n" % table)
+        return "".join(headList)
+
+
 class TCrm(Command):
     """remove a clone from this textures clone dict
         check for negative start times
@@ -5415,61 +5935,65 @@ class TCrm(Command):
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     >>> a = TCn(ao, args='a')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     >>> a = TCrm(ao, args='a')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
     """
 
-    def __init__(self, ao, args='', **keywords):
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'TCrm'
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "TCrm"
 
     def _tcRemove(self, tiName, cloneName):
         if tiName in self.ao.cloneLib.tNames():
-            if self.ao.cloneLib.cExists(tiName, cloneName) == 1: # exists
+            if self.ao.cloneLib.cExists(tiName, cloneName) == 1:  # exists
                 self.ao.cloneLib.delete(tiName, cloneName)
-                return 'TC %s destroyed.\n' % cloneName
+                return "TC %s destroyed.\n" % cloneName
         else:
             return None
 
-    def gather(self): 
+    def gather(self):
         args = self.args
         self.rmList = []
 
         tiName = self.ao.activeTexture
 
-        if self._tiTestExistance() != None: #check existance
+        if self._tiTestExistance() != None:  # check existance
             return self._tiTestExistance()
-        if self._tiTestNameExists() != None: # check name
+        if self._tiTestNameExists() != None:  # check name
             return self._tiTestNameExists()
-        if self._tcTestExistance(tiName) != None: # check if clones exist
+        if self._tcTestExistance(tiName) != None:  # check if clones exist
             return self._tcTestExistance(tiName)
 
-        if args != '': # removes all in list
+        if args != "":  # removes all in list
             args = argTools.ArgOps(args, stripComma=True)
-            if args.list(0, 'end') != None: # if supplied
-                for name in args.list(0, 'end'):
+            if args.list(0, "end") != None:  # if supplied
+                for name in args.list(0, "end"):
                     name = drawer.inList(name, self.ao.cloneLib.cNames(tiName))
-                    if name == None: return self._getUsage()
+                    if name == None:
+                        return self._getUsage()
                     self.rmList.append(name)
-            else: return self._getUsage()
+            else:
+                return self._getUsage()
 
         if self.rmList == []:
-            choiceList = self.ao.cloneLib.cNames(tiName)                         
-            name = self._chooseFromList('select a TextureClone to delete:', 
-                            choiceList, 'case')
-            if name == None: return lang.msgTCbadName
-            query = 'are you sure you want to delete TextureClone %s? ' % name
+            choiceList = self.ao.cloneLib.cNames(tiName)
+            name = self._chooseFromList(
+                "select a TextureClone to delete:", choiceList, "case"
+            )
+            if name == None:
+                return lang.msgTCbadName
+            query = "are you sure you want to delete TextureClone %s? " % name
             askUsr = dialog.askYesNoCancel(query, 1, self.termObj)
             if askUsr == 1:
                 self.rmList.append(name)
@@ -5477,7 +6001,7 @@ class TCrm(Command):
                 return lang.msgReturnCancel
         self.tiName = tiName
 
-    def process(self): 
+    def process(self):
         self.report = []
         for name in self.rmList:
             msg = self._tcRemove(self.tiName, name)
@@ -5486,12 +6010,12 @@ class TCrm(Command):
             else:
                 self.report.append(lang.msgBadArgFormat)
 
-    def display(self): 
-        return ''.join(self.report)
+    def display(self):
+        return "".join(self.report)
 
 
 class TCals(Command):
-    """ list all attributes of a texture, a hidden command
+    """list all attributes of a texture, a hidden command
 
     >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> ao.setEventMode('m')
@@ -5499,60 +6023,69 @@ class TCals(Command):
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     >>> a = TCn(ao, args='a')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     >>> a = TCals(ao)
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     """
 
-    def __init__(self, ao, args='', **keywords):
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 0 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'TCals'
+        self.processSwitch = 0  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "TCals"
 
-    def gather(self): 
+    def gather(self):
         self.tName = self.ao.activeTexture
 
-        if self._tiTestExistance() != None: #check existance
+        if self._tiTestExistance() != None:  # check existance
             return self._tiTestExistance()
-        if self._tiTestNameExists() != None: # check name
+        if self._tiTestNameExists() != None:  # check name
             return self._tiTestNameExists()
-        if self._tcTestExistance(self.tName) != None: # check if clones exist
+        if self._tcTestExistance(self.tName) != None:  # check if clones exist
             return self._tcTestExistance(self.tName)
         self.name = self.ao.cloneLib.current(self.tName)
 
-    def process(self): 
+    def process(self):
         pass
 
-    def display(self): 
+    def display(self):
         clone = self.ao.cloneLib.get(self.tName, self.name)
         directoryOfattributes = dir(clone)
         msg = []
-        msg.append('attributes of TC %s:\n' % self.name)
+        msg.append("attributes of TC %s:\n" % self.name)
         entryLines = []
         for entry in directoryOfattributes:
             value = getattr(clone, entry)
-            value = str(value).replace(' ','')
+            value = str(value).replace(" ", "")
             entryLines.append([entry, value])
-        headerKey    = ['name','value']
+        headerKey = ["name", "value"]
         minWidthList = [lang.LMARGINW, 0]
-        bufList      = [1, 1]
-        justList         = ['l','l']
-        table = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
-                                    bufList, justList, self.termObj, 'oneColumn')
-        msg.append('%s\n' % table)
-        return ''.join(msg) 
+        bufList = [1, 1]
+        justList = ["l", "l"]
+        table = typeset.formatVariCol(
+            headerKey,
+            entryLines,
+            minWidthList,
+            bufList,
+            justList,
+            self.termObj,
+            "oneColumn",
+        )
+        msg.append("%s\n" % table)
+        return "".join(msg)
 
-#-----------------------------------------------------------------||||||||||||--
+
+# -----------------------------------------------------------------||||||||||||--
+
 
 class TTls(Command):
     """
@@ -5562,52 +6095,58 @@ class TTls(Command):
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     >>> a = TTls(ao)
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     """
-    def __init__(self, ao, args='', **keywords):
-        Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 0 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'TTls'
 
-    def gather(self): 
+    def __init__(self, ao, args="", **keywords):
+        Command.__init__(self, ao, args, **keywords)
+        self.processSwitch = 0  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "TTls"
+
+    def gather(self):
         # may need to limit this to textures of the same module
-        if self._tiTestExistance() != None: #check existance
+        if self._tiTestExistance() != None:  # check existance
             return self._tiTestExistance()
-        if self._tiTestNameExists() != None: # check name
+        if self._tiTestNameExists() != None:  # check name
             return self._tiTestNameExists()
 
-    def process(self): 
+    def process(self):
         pass
 
-    def display(self): 
+    def display(self):
         keyList = temperament.temperamentNames
         msg = []
-        msg.append('TextureTemperaments available for TI %s:\n' % 
-                      self.ao.activeTexture)
+        msg.append("TextureTemperaments available for TI %s:\n" % self.ao.activeTexture)
         entryLines = []
         for entry in keyList:
-            if entry == self.ao.textureLib[self.ao.activeTexture].temperamentName:  
+            if entry == self.ao.textureLib[self.ao.activeTexture].temperamentName:
                 status = lang.ACTIVE
             else:
                 status = lang.INACTIVE
             # tuning string takes too much space
-            entryLines.append([status, entry, ''])
-        headerKey    = ['', 'name','tunning']
+            entryLines.append([status, entry, ""])
+        headerKey = ["", "name", "tunning"]
         minWidthList = (lang.TABW, lang.NAMEW, 1)
-        bufList      = [0, 2, 1]
-        justList         = ['c','l', 'l']
-        table = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
-                                                  bufList, justList, self.termObj,
-                                                  'twoColumn')
-        msg.append('%s\n' % table)
-        return ''.join(msg)
+        bufList = [0, 2, 1]
+        justList = ["c", "l", "l"]
+        table = typeset.formatVariCol(
+            headerKey,
+            entryLines,
+            minWidthList,
+            bufList,
+            justList,
+            self.termObj,
+            "twoColumn",
+        )
+        msg.append("%s\n" % table)
+        return "".join(msg)
 
 
 class TTo(Command):
@@ -5618,60 +6157,67 @@ class TTo(Command):
     >>> a = TIn(ao, args='a 0')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     >>> a = TTo(ao, args='nl')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     """
-    def __init__(self, ao, args='', **keywords):
-        Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'TTo'
 
-    def gather(self): 
+    def __init__(self, ao, args="", **keywords):
+        Command.__init__(self, ao, args, **keywords)
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "TTo"
+
+    def gather(self):
         args = self.args
 
-        if self._tiTestExistance() != None: #check existance
+        if self._tiTestExistance() != None:  # check existance
             return self._tiTestExistance()
-        if self._tiTestNameExists() != None: # check name
+        if self._tiTestNameExists() != None:  # check name
             return self._tiTestNameExists()
 
-        #temperamentObj = temperament.Temperament() # generic
-        #keyList = temperament.temperamentNames
+        # temperamentObj = temperament.Temperament() # generic
+        # keyList = temperament.temperamentNames
 
         self.name = None
-        if args != '':
-            args = argTools.ArgOps(args) # no strip
+        if args != "":
+            args = argTools.ArgOps(args)  # no strip
             self.name = temperament.temperamentNameParser(args.get(0))
-            if self.name == None: return self._getUsage()
-        if self.name == None: # self.names are not translated
+            if self.name == None:
+                return self._getUsage()
+        if self.name == None:  # self.names are not translated
             query = lang.msgTTselectName % self.ao.activeTexture
-            self.name = self._chooseFromList(query, temperament.temperamentNames, 'noCase', temperament.temperamentNameParser)
-            if self.name == None: return lang.msgTTbadName
+            self.name = self._chooseFromList(
+                query,
+                temperament.temperamentNames,
+                "noCase",
+                temperament.temperamentNameParser,
+            )
+            if self.name == None:
+                return lang.msgTTbadName
 
-    def process(self): 
+    def process(self):
         self.ao.textureLib[self.ao.activeTexture].updateTemperament(self.name)
 
     def log(self):
-        if self.gatherStatus and self.processStatus: # if complete
-            return '%s %s' % (self.cmdStr, self.name)     
+        if self.gatherStatus and self.processStatus:  # if complete
+            return "%s %s" % (self.cmdStr, self.name)
 
-    def display(self): 
-        return 'TT %s now active for TI %s.\n' % (self.name, 
-                                                                self.ao.activeTexture)
-
+    def display(self):
+        return "TT %s now active for TI %s.\n" % (self.name, self.ao.activeTexture)
 
 
+# -----------------------------------------------------------------||||||||||||--
 
-#-----------------------------------------------------------------||||||||||||--
 
 class _CommandEO(Command):
     """parent of all eventMode commands"""
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
 
     def _emSelectOutputFormat(self):
@@ -5689,12 +6235,12 @@ class _CommandEO(Command):
             else:
                 return reply
 
-    def _emGetOutputFormats(self, format='data'):
-        prefList = self.ao.external.getPref('athena', 'eventOutput')
-        prefData = list(eval(prefList)) 
-        if format == 'data':
-            return prefData # return as list of strings
-        elif format == 'str':
+    def _emGetOutputFormats(self, format="data"):
+        prefList = self.ao.external.getPref("athena", "eventOutput")
+        prefData = list(eval(prefList))
+        if format == "data":
+            return prefData  # return as list of strings
+        elif format == "str":
             # using grammar version here without connector
             return drawer.listToStrGrammar(prefData, None)
 
@@ -5702,22 +6248,25 @@ class _CommandEO(Command):
         prefList = []
         for usrStr in fmtList:
             valStr = outFormat.outputFormatParser(usrStr)
-            if valStr == None: #error
-                environment.printWarn([lang.WARN, 'bad output format given: %s' % usrStr])
+            if valStr == None:  # error
+                environment.printWarn(
+                    [lang.WARN, "bad output format given: %s" % usrStr]
+                )
                 continue
-            if valStr not in prefList: # filter to remove redundancies
+            if valStr not in prefList:  # filter to remove redundancies
                 prefList.append(valStr)
         prefStr = repr(tuple(prefList))
-        self.ao.external.writePref('athena', 'eventOutput', prefStr)
-        
+        self.ao.external.writePref("athena", "eventOutput", prefStr)
+
 
 class EOo(_CommandEO):
     """add an output format"""
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         _CommandEO.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'EOo'
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "EOo"
 
     def gather(self):
         args = self.args
@@ -5725,19 +6274,23 @@ class EOo(_CommandEO):
         self.fmt = []
         self.update = 0
 
-        if args != '':
+        if args != "":
             args = argTools.ArgOps(args, stripComma=True)
-            argList = args.list(0,'end') # args.list will get a list
-            if argList == None: return self._getUsage()
+            argList = args.list(0, "end")  # args.list will get a list
+            if argList == None:
+                return self._getUsage()
             for fmt in argList:
                 fmt = outFormat.outputFormatParser(fmt)
-                if fmt == None: return self._getUsage()
-                else: self.fmt.append(fmt)
+                if fmt == None:
+                    return self._getUsage()
+                else:
+                    self.fmt.append(fmt)
 
-        if self.fmt == []: # get from user
+        if self.fmt == []:  # get from user
             self.fmt = self._emSelectOutputFormat()
-            if self.fmt == None: return lang.msgReturnCancel
-            self.fmt = [self.fmt] # make into a list
+            if self.fmt == None:
+                return lang.msgReturnCancel
+            self.fmt = [self.fmt]  # make into a list
 
         for fmt in self.fmt:
             if fmt not in self.currentFormat:
@@ -5749,24 +6302,26 @@ class EOo(_CommandEO):
             self._emSetOuptutFormats(self.currentFormat)
 
     def log(self):
-        if self.gatherStatus and self.processStatus: # if complete
-            fmtStr = drawer.listScrub(self.fmt, None, 'rmQuote')
-            return '%s %s' % (self.cmdStr, fmtStr)
+        if self.gatherStatus and self.processStatus:  # if complete
+            fmtStr = drawer.listScrub(self.fmt, None, "rmQuote")
+            return "%s %s" % (self.cmdStr, fmtStr)
 
-    def display(self): 
-        prefList = self._emGetOutputFormats('str')
+    def display(self):
+        prefList = self._emGetOutputFormats("str")
         if len(prefList) > 0:
-            return 'EventOutput formats: %s.\n' % prefList
+            return "EventOutput formats: %s.\n" % prefList
         else:
-            return 'EventOutput formats active: none.\n'
+            return "EventOutput formats active: none.\n"
+
 
 class EOrm(_CommandEO):
     """remove an output format"""
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         _CommandEO.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'EOrm'
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "EOrm"
 
     def gather(self):
         args = self.args
@@ -5774,19 +6329,23 @@ class EOrm(_CommandEO):
         self.fmt = []
         self.update = 0
 
-        if args != '':
+        if args != "":
             args = argTools.ArgOps(args, stripComma=True)
-            argList = args.list(0,'end') # args.list will get a list
-            if argList == None: return self._getUsage()
+            argList = args.list(0, "end")  # args.list will get a list
+            if argList == None:
+                return self._getUsage()
             for fmt in argList:
                 fmt = outFormat.outputFormatParser(fmt)
-                if fmt == None: return self._getUsage()
-                else: self.fmt.append(fmt)
+                if fmt == None:
+                    return self._getUsage()
+                else:
+                    self.fmt.append(fmt)
 
-        if self.fmt == []: # get from user
+        if self.fmt == []:  # get from user
             self.fmt = self._emSelectOutputFormat()
-            if self.fmt == None: return lang.msgReturnCancel
-            self.fmt = [self.fmt] # make into a list
+            if self.fmt == None:
+                return lang.msgReturnCancel
+            self.fmt = [self.fmt]  # make into a list
 
         for fmt in self.fmt:
             if fmt in self.currentFormat:
@@ -5798,80 +6357,95 @@ class EOrm(_CommandEO):
             self._emSetOuptutFormats(self.currentFormat)
 
     def log(self):
-        if self.gatherStatus and self.processStatus: # if complete
-            fmtStr = drawer.listScrub(self.fmt, None, 'rmQuote')
-            return '%s %s' % (self.cmdStr, fmtStr)
+        if self.gatherStatus and self.processStatus:  # if complete
+            fmtStr = drawer.listScrub(self.fmt, None, "rmQuote")
+            return "%s %s" % (self.cmdStr, fmtStr)
 
-    def display(self): 
-        prefList = self._emGetOutputFormats('str')
+    def display(self):
+        prefList = self._emGetOutputFormats("str")
         if len(prefList) > 0:
-            return 'EventOutput formats: %s.\n' % prefList
+            return "EventOutput formats: %s.\n" % prefList
         else:
-            return 'EventOutput formats active: none.\n'
+            return "EventOutput formats active: none.\n"
+
 
 class EOls(_CommandEO):
-    def __init__(self, ao, args='', **keywords):
+    def __init__(self, ao, args="", **keywords):
         _CommandEO.__init__(self, ao, args, **keywords)
-        self.processSwitch = 0 # display only
-        self.gatherSwitch = 0 # display only
-        self.cmdStr = 'EOls'
+        self.processSwitch = 0  # display only
+        self.gatherSwitch = 0  # display only
+        self.cmdStr = "EOls"
 
-    def gather(self): pass
+    def gather(self):
+        pass
 
-    def process(self): pass
+    def process(self):
+        pass
 
-    def display(self): 
+    def display(self):
         msg = []
-        msg.append('EventOutput active:\n')
+        msg.append("EventOutput active:\n")
         entryLines = []
         prefList = self._emGetOutputFormats()
         allEvents = list(outFormat.outputFormatNames.values())
         allEvents.sort()
         for entry in allEvents:
-            if entry in prefList:  
+            if entry in prefList:
                 status = lang.ACTIVE
             else:
                 status = lang.INACTIVE
             # tuning string takes too much space
             entryLines.append([status, entry])
-        headerKey    = ['', 'name']
+        headerKey = ["", "name"]
         minWidthList = (lang.TABW, lang.NAMEW)
-        bufList      = [0, 2]
-        justList         = ['c','l',]
-        table = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
-                   bufList, justList, self.termObj, 'twoColumn')
-        msg.append('%s\n' % table)
-        return ''.join(msg)
+        bufList = [0, 2]
+        justList = [
+            "c",
+            "l",
+        ]
+        table = typeset.formatVariCol(
+            headerKey,
+            entryLines,
+            minWidthList,
+            bufList,
+            justList,
+            self.termObj,
+            "twoColumn",
+        )
+        msg.append("%s\n" % table)
+        return "".join(msg)
 
 
-
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 class EMo(Command):
-    """switches value of self.ao.activeEventMode
-    """
-    def __init__(self, ao, args='', **keywords):
+    """switches value of self.ao.activeEventMode"""
+
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'EMo'
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "EMo"
 
     def _elConvertMode(self, usrStr):
         return eventList.eventModeParser(usrStr)
 
-    def gather(self): 
+    def gather(self):
         args = self.args
         self.modeVal = None
-        if args != '':
+        if args != "":
             args = argTools.ArgOps(args, stripComma=True)
-            modeStr = args.get(0,'end')
-            if modeStr == None: return self._getUsage()
+            modeStr = args.get(0, "end")
+            if modeStr == None:
+                return self._getUsage()
             self.modeVal = self._elConvertMode(modeStr)
-            if self.modeVal == None: return self._getUsage()
+            if self.modeVal == None:
+                return self._getUsage()
         if self.modeVal == None:
             while self.modeVal == None:
-                query = lang.msgEMselect 
+                query = lang.msgEMselect
                 self.modeVal = dialog.askStr(query, self.termObj)
-                if self.modeVal == None: return lang.msgReturnCancel
+                if self.modeVal == None:
+                    return lang.msgReturnCancel
                 self.modeVal = self._elConvertMode(self.modeVal)
                 if self.modeVal == None:
                     dialog.msgOut(lang.msgEMbadMode, self.termObj)
@@ -5880,200 +6454,235 @@ class EMo(Command):
     def process(self):
         # does necessary updating of self.ao.orcObj
         self.ao.setEventMode(self.modeVal)
-        self.ao.external.writePref('athena', 'eventMode', self.modeVal)
+        self.ao.external.writePref("athena", "eventMode", self.modeVal)
 
     def log(self):
-        if self.gatherStatus and self.processStatus: # if complete
-            return '%s %s' % (self.cmdStr, self.modeVal)
+        if self.gatherStatus and self.processStatus:  # if complete
+            return "%s %s" % (self.cmdStr, self.modeVal)
 
-    def display(self): 
+    def display(self):
         return lang.msgEMmodeSet % self.modeVal
 
 
 class EMls(Command):
-    def __init__(self, ao, args='', **keywords):
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 0 # display only
-        self.gatherSwitch = 0 # display only
-        self.cmdStr = 'EMls'
+        self.processSwitch = 0  # display only
+        self.gatherSwitch = 0  # display only
+        self.cmdStr = "EMls"
 
-    def gather(self): pass
-    
-    def process(self): pass
+    def gather(self):
+        pass
 
-    def display(self): 
+    def process(self):
+        pass
+
+    def display(self):
         msg = []
-        msg.append('EventMode modes available:\n')
+        msg.append("EventMode modes available:\n")
         entryLines = []
         names = list(eventList.eventModeNames.values())
         names.sort()
         for entry in names:
-            if entry == self.ao.activeEventMode:  
+            if entry == self.ao.activeEventMode:
                 status = lang.ACTIVE
             else:
                 status = lang.INACTIVE
             # tuning string takes too much space
             entryLines.append([status, entry])
-        headerKey    = ['', 'name']
+        headerKey = ["", "name"]
         minWidthList = (lang.TABW, lang.NAMEW)
-        bufList      = [0, 2]
-        justList         = ['c','l',]
-        table = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
-                              bufList, justList, self.termObj, 'twoColumn')
-        msg.append('%s\n' % table)
-        return ''.join(msg)
+        bufList = [0, 2]
+        justList = [
+            "c",
+            "l",
+        ]
+        table = typeset.formatVariCol(
+            headerKey,
+            entryLines,
+            minWidthList,
+            bufList,
+            justList,
+            self.termObj,
+            "twoColumn",
+        )
+        msg.append("%s\n" % table)
+        return "".join(msg)
 
 
 class EMv(Command):
-    def __init__(self, ao, args='', **keywords):
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 0 # display only
-        self.gatherSwitch = 0 # display only
-        self.cmdStr = 'EMv'
+        self.processSwitch = 0  # display only
+        self.gatherSwitch = 0  # display only
+        self.cmdStr = "EMv"
 
-    def gather(self): pass
-    
-    def process(self): pass
+    def gather(self):
+        pass
 
-    def display(self): 
+    def process(self):
+        pass
+
+    def display(self):
         emObj = eventList.factory(self.ao.activeEventMode, self.ao)
-        outRequest = self.ao.external.getPref('athena','eventOutput', 1)
-        
+        outRequest = self.ao.external.getPref("athena", "eventOutput", 1)
+
         headList, entryLines = emObj.reprDoc(outRequest)
-        headerKey    = []
+        headerKey = []
         minWidthList = [lang.LMARGINW, 0]
-        bufList      = [1, 1]
-        justList         = ['l','l']
-        table = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
-                             bufList, justList, self.termObj,'oneColumn')
-        headList.append('%s\n' % table)
-        return ''.join(headList)
+        bufList = [1, 1]
+        justList = ["l", "l"]
+        table = typeset.formatVariCol(
+            headerKey,
+            entryLines,
+            minWidthList,
+            bufList,
+            justList,
+            self.termObj,
+            "oneColumn",
+        )
+        headList.append("%s\n" % table)
+        return "".join(headList)
 
 
 class EMi(Command):
-    """prints a list of all instruments
-    """
-    def __init__(self, ao, args='', **keywords):
-        Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 0 
-        self.gatherSwitch = 1
-        self.cmdStr = 'EMi'
+    """prints a list of all instruments"""
 
-    def gather(self): 
+    def __init__(self, ao, args="", **keywords):
+        Command.__init__(self, ao, args, **keywords)
+        self.processSwitch = 0
+        self.gatherSwitch = 1
+        self.cmdStr = "EMi"
+
+    def gather(self):
         args = self.args
         self.instNoRange = None
-            
+
         self.instInfo, self.instNoList = self.ao.orcObj.getInstInfo()
         self.instNoList = list(self.instNoList)
         self.instNoList.sort()
         minInstNo = self.instNoList[0]
-        maxInstNo = self.instNoList[-1] # last should be max
-        if args != '':
-            args = argTools.ArgOps(args) # no strip
-            self.instNoRange = [drawer.strToNum(args.get(0), 'int', 
-                                      minInstNo, maxInstNo)]
+        maxInstNo = self.instNoList[-1]  # last should be max
+        if args != "":
+            args = argTools.ArgOps(args)  # no strip
+            self.instNoRange = [
+                drawer.strToNum(args.get(0), "int", minInstNo, maxInstNo)
+            ]
             if args.get(1) != None:
-                self.instNoRange.append(drawer.strToNum(args.get(1), 'int', 
-                                             minInstNo, maxInstNo))
+                self.instNoRange.append(
+                    drawer.strToNum(args.get(1), "int", minInstNo, maxInstNo)
+                )
             self.instNoRange.sort()
-        else: # use default
-            pass # get from user eventually
-            
+        else:  # use default
+            pass  # get from user eventually
+
     def display(self):
         msg = []
         msg.append(lang.msgEMinstAvail % self.ao.orcObj.name)
         entryLines = []
         for key in self.instNoList:
             if self.instNoRange != None:
-                if key < self.instNoRange[0]: continue
+                if key < self.instNoRange[0]:
+                    continue
                 if len(self.instNoRange) > 1:
-                    if key > self.instNoRange[1]: continue
+                    if key > self.instNoRange[1]:
+                        continue
             insts = str(self.instInfo[key][0])
-            entryLines.append(['', key, insts])
+            entryLines.append(["", key, insts])
 
-        headerKey    = ['', 'number', 'name']
+        headerKey = ["", "number", "name"]
         minWidthList = [lang.TABW, lang.SHIFTW, 0]
-        bufList      = [0, 1, 1]
-        justList         = ['l','l','l']
-        table = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
-                                 bufList, justList, self.termObj, 'oneColumn')
-        msg.append('%s\n' % table)
-        return ''.join(msg)
+        bufList = [0, 1, 1]
+        justList = ["l", "l", "l"]
+        table = typeset.formatVariCol(
+            headerKey,
+            entryLines,
+            minWidthList,
+            bufList,
+            justList,
+            self.termObj,
+            "oneColumn",
+        )
+        msg.append("%s\n" % table)
+        return "".join(msg)
 
 
+# -----------------------------------------------------------------||||||||||||--
 
-#-----------------------------------------------------------------||||||||||||--
 
 class ELn(Command):
-    """creates a score and all related files as needed
-    """
+    """creates a score and all related files as needed"""
 
-    def __init__(self, ao, args='', **keywords):
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'ELn'
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "ELn"
         # only difference w/ elw
         self.refresh = 1
 
-
-    def gather(self): 
-        if self._tiTestExistance() != None: #check existance
+    def gather(self):
+        if self._tiTestExistance() != None:  # check existance
             return self._tiTestExistance()
 
-      # if len(self.ao.textureLib) == len(self._tiMuteList()):
-      #  return lang.msgTIunmuteFirst
+        # if len(self.ao.textureLib) == len(self._tiMuteList()):
+        #  return lang.msgTIunmuteFirst
 
-        if self._tiTestMuteStatus(): # if all textures and clonse are muted
+        if self._tiTestMuteStatus():  # if all textures and clonse are muted
             return lang.msgTIunmuteFirst
 
-        self.scoPath = None      
-        if self.args != '':
-            self.args = argTools.ArgOps(self.args) # no strip
-            self.scoPath = self._validWritePath(self.args.get(0,'end'), 
-                                      '.xml', 'fpLastDirEventList')
-            if self.scoPath == None: return self._getUsage()
+        self.scoPath = None
+        if self.args != "":
+            self.args = argTools.ArgOps(self.args)  # no strip
+            self.scoPath = self._validWritePath(
+                self.args.get(0, "end"), ".xml", "fpLastDirEventList"
+            )
+            if self.scoPath == None:
+                return self._getUsage()
             scoDir, scoName = os.path.split(self.scoPath)
 
         if self.scoPath == None:
-            self.scoPath = environment.getTempFile('.xml')
-            if self.scoPath == None: return lang.msgReturnCancel
+            self.scoPath = environment.getTempFile(".xml")
+            if self.scoPath == None:
+                return lang.msgReturnCancel
             scoDir, scoName = os.path.split(self.scoPath)
 
-# remove to use temporary files
-#             if self.ao.aoInfo['fpLastDirEventList'] in ['', None]:
-#                 defaultScoPath = self.ao.aoInfo['fpLastDir']
-#             else:
-#                 defaultScoPath = self.ao.aoInfo['fpLastDirEventList']
-#             dlgVisMet = self.ao.external.getPref('athena', 'dlgVisualMethod')
-#             while 1: # to make sure you a get a .sco ending
-#                 self.scoPath, ok = dialog.promptPutFile(lang.msgELnameScore,
-#                     'ath.xml',  defaultScoPath, '.xml', dlgVisMet, self.termObj)
-#                 if ok != 1: return lang.msgReturnCancel
-#                 scoDir, scoName = os.path.split(self.scoPath)
-#                 if scoName[-4:] == '.xml': break
-#                 else:
-#                     dialog.msgOut(lang.msgELbadScoreName, self.termObj)
-#                     continue
+        # remove to use temporary files
+        #             if self.ao.aoInfo['fpLastDirEventList'] in ['', None]:
+        #                 defaultScoPath = self.ao.aoInfo['fpLastDir']
+        #             else:
+        #                 defaultScoPath = self.ao.aoInfo['fpLastDirEventList']
+        #             dlgVisMet = self.ao.external.getPref('athena', 'dlgVisualMethod')
+        #             while 1: # to make sure you a get a .sco ending
+        #                 self.scoPath, ok = dialog.promptPutFile(lang.msgELnameScore,
+        #                     'ath.xml',  defaultScoPath, '.xml', dlgVisMet, self.termObj)
+        #                 if ok != 1: return lang.msgReturnCancel
+        #                 scoDir, scoName = os.path.split(self.scoPath)
+        #                 if scoName[-4:] == '.xml': break
+        #                 else:
+        #                     dialog.msgOut(lang.msgELbadScoreName, self.termObj)
+        #                     continue
 
         # this is a dir, not a path
-        self.ao.aoInfo['fpLastDirEventList'] = scoDir 
-            
+        self.ao.aoInfo["fpLastDirEventList"] = scoDir
+
         # if csound native, check the csound path with APea
         # this most be done w/ eln, as batch files are written their
-        if self.ao.activeEventMode == 'csoundNative':
-            path = self.ao.external.getPref('external','csoundPath')
-            if path == '':
+        if self.ao.activeEventMode == "csoundNative":
+            path = self.ao.external.getPref("external", "csoundPath")
+            if path == "":
                 # call command with first arg for csoundCommand
-                cmdObj = APea(self.ao, 'cc')
+                cmdObj = APea(self.ao, "cc")
                 ok, msg = cmdObj.do()
-                if not ok: return lang.msgReturnCancel
-        
-    def process(self): 
+                if not ok:
+                    return lang.msgReturnCancel
+
+    def process(self):
         self.report = []
         # update last paths
-        self.ao.external.writePref('athena', 'fpLastDirEventList', 
-            self.ao.aoInfo['fpLastDirEventList'])                                            
+        self.ao.external.writePref(
+            "athena", "fpLastDirEventList", self.ao.aoInfo["fpLastDirEventList"]
+        )
         # create a score object, do score conversions
         # an orc object is created from activeEventMode inside emObj
         # do not store emObj
@@ -6081,274 +6690,300 @@ class ELn(Command):
         emObj.setRootPath(self.scoPath)
         # None processes all objects in the init ao
         # 1 gets evaluated preference string
-        outRequest = self.ao.external.getPref('athena','eventOutput', 1)
+        outRequest = self.ao.external.getPref("athena", "eventOutput", 1)
         ok, msg, outComplete = emObj.process(None, outRequest, self.refresh)
-        if ok: # scores exist
+        if ok:  # scores exist
             self.report.append(msg)
-        else: # no scores were created
-            return '%s %s' % (lang.msgELnoScores, msg)
+        else:  # no scores were created
+            return "%s %s" % (lang.msgELnoScores, msg)
         # writing an athenaobj happens outside of the eventmode
-        if 'xmlAthenaObject' in outRequest:
+        if "xmlAthenaObject" in outRequest:
             # getting pathe here from EventMode object
-            pathXml = emObj.outFormatToFilePath('xmlAthenaObject')
-            cmdObj = AOw(self.ao, pathXml, 'quite')
+            pathXml = emObj.outFormatToFilePath("xmlAthenaObject")
+            cmdObj = AOw(self.ao, pathXml, "quite")
             ok, result = cmdObj.do()
-            outComplete.append('xmlAthenaObject')
-            self.report.append('%s\n' % pathXml)
-        #print _MOD, 'output complete', outComplete
-        self.ao.aoInfo['outComplete'] = outComplete
-            
-    def log(self):
-        if self.gatherStatus and self.processStatus: # if complete
-            return '%s %s' % (self.cmdStr, self.scoPath)
+            outComplete.append("xmlAthenaObject")
+            self.report.append("%s\n" % pathXml)
+        # print _MOD, 'output complete', outComplete
+        self.ao.aoInfo["outComplete"] = outComplete
 
-    def display(self): 
+    def log(self):
+        if self.gatherStatus and self.processStatus:  # if complete
+            return "%s %s" % (self.cmdStr, self.scoPath)
+
+    def display(self):
         # only do auto render if in csound Native
-        if self.ao.activeEventMode not in ['csoundNative']:
-            return ''.join(self.report)
+        if self.ao.activeEventMode not in ["csoundNative"]:
+            return "".join(self.report)
         # check if auto on is happening
-        if self.ao.external.getPref('external','autoRenderOption') == 'autoOn':
+        if self.ao.external.getPref("external", "autoRenderOption") == "autoOn":
             cmdObj = ELr(self.ao)
             ok, msg = cmdObj.do()
             self.report.append(msg)
             cmdObj = ELh(self.ao)
             ok, msg = cmdObj.do()
             self.report.append(msg)
-        return ''.join(self.report)
+        return "".join(self.report)
 
 
 class ELw(ELn):
     """writes a score and all related files as needed
     does not refresh event lists, unless refresh mode is set
     """
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         ELn.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'ELw'
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "ELw"
         # only difference w/ eln
-        if not self.ao.aoInfo['refreshMode']: 
+        if not self.ao.aoInfo["refreshMode"]:
             # update esObj if refreshmode off; this is necessary as user may
             # have edited textures; if this procedes w/o refreshing, edits
             # will not have been made, and el will reflect its initial form
-            self.refresh = 1 
-        else:    
+            self.refresh = 1
+        else:
             self.refresh = 0
-        
-    
-    
-class ELr(Command):
-    """renders the most recent score in csound
-    """
 
-    def __init__(self, ao, args='', **keywords):
+
+class ELr(Command):
+    """renders the most recent score in csound"""
+
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'ELr'
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "ELr"
 
     def gather(self):
         # even though we just need the bat path, check to make sure
         # tt csd and sco/orc files are around
         # check last created files
-        
-        if self.ao.activeEventMode not in ['csoundNative']:
+
+        if self.ao.activeEventMode not in ["csoundNative"]:
             return lang.msgELrNotAvailable % self.ao.activeEventMode
-        outComplete = self.ao.aoInfo['outComplete']
-        if 'csoundData' in outComplete:
+        outComplete = self.ao.aoInfo["outComplete"]
+        if "csoundData" in outComplete:
             csd = 1
-        elif 'csoundScore' in outComplete and 'csoundOrchestra' in outComplete:
+        elif "csoundScore" in outComplete and "csoundOrchestra" in outComplete:
             csd = 0
         else:
             return lang.msgELcreateFirst
-                
+
         # these paths have nothing to do with what files are actually created
         # these paths are always created, regardless of success
         if csd:
-            csdPath = self.ao.aoInfo['fpCsd']
+            csdPath = self.ao.aoInfo["fpCsd"]
             if not os.path.isfile(csdPath):
                 return lang.msgELfileMoved % csdPath
         else:
-            scoPath = self.ao.aoInfo['fpSco']
-            orcPath = self.ao.aoInfo['fpOrc']
+            scoPath = self.ao.aoInfo["fpSco"]
+            orcPath = self.ao.aoInfo["fpOrc"]
             if not os.path.isfile(scoPath):
-                return lang.msgELfileMoved % scoPath  
+                return lang.msgELfileMoved % scoPath
             if not os.path.isfile(orcPath):
-                return lang.msgELfileMoved % orcPath  
+                return lang.msgELfileMoved % orcPath
         # if csound event type was created, then all paths created will be filled
-        self.batPath = self.ao.aoInfo['fpBat']
+        self.batPath = self.ao.aoInfo["fpBat"]
         if not os.path.isfile(self.batPath):
-            return lang.msgELfileMoved % self.batPath 
+            return lang.msgELfileMoved % self.batPath
 
-    def process(self):    
+    def process(self):
         pass
 
-    def display(self): 
+    def display(self):
         # include this is a display so as not to use separat thread?
         self.failFlag = osTools.launch(self.batPath)
-        if self.failFlag == 'failed':
+        if self.failFlag == "failed":
             msg = lang.msgELrenderError % self.batPath
         else:
             msg = lang.msgELrenderInit % self.batPath
         return msg
 
 
-
-
 class ELh(Command):
     """opens the audio file most recently created
     uses platform specific apps
     """
-    def __init__(self, ao, args='', **keywords):
-        Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'ELh'
 
-    def gather(self):     
-        outComplete = self.ao.aoInfo['outComplete']
+    def __init__(self, ao, args="", **keywords):
+        Command.__init__(self, ao, args, **keywords)
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "ELh"
+
+    def gather(self):
+        outComplete = self.ao.aoInfo["outComplete"]
         if outComplete == []:
             return lang.msgELcreateFirst
 
-        self.fmtFound = []      
+        self.fmtFound = []
         msg = []
-        
+
         # all outputs that produce an audio file
-        self.audioPath = self.ao.aoInfo['fpAudio']
-        if 'csoundData' in outComplete or 'csoundScore' in outComplete:
-            if os.path.isfile(self.audioPath):  #if file found
+        self.audioPath = self.ao.aoInfo["fpAudio"]
+        if "csoundData" in outComplete or "csoundScore" in outComplete:
+            if os.path.isfile(self.audioPath):  # if file found
                 self.fmtFound.append(self.audioPath)
-            else: # files was created but does not exists
+            else:  # files was created but does not exists
                 msg.append(lang.msgELaudioMoved % self.audioPath)
-    
+
         # only midi file prodiuces an output
-        self.midPath = self.ao.aoInfo['fpMidi']
-        if 'midiFile' in outComplete:
-            if os.path.isfile(self.midPath):     #if file found
+        self.midPath = self.ao.aoInfo["fpMidi"]
+        if "midiFile" in outComplete:
+            if os.path.isfile(self.midPath):  # if file found
                 self.fmtFound.append(self.midPath)
             else:
                 msg.append(lang.msgELaudioMoved % self.midPath)
         if self.fmtFound == []:
-            return ''.join(msg)
+            return "".join(msg)
 
     def process(self):
         # this file render prep should be done after EMr
-#         if os.name == 'mac': # must check that fp is in found
-#             if self.audioPath in self.fmtFound:
-#                 prefDict = self.ao.external.getPrefGroup('external')
-#                 audioTools.setMacAudioRsrc(prefDict['audioFormat'], 
-#                                                     self.audioPath, prefDict)
-        if os.name == 'posix':
+        #         if os.name == 'mac': # must check that fp is in found
+        #             if self.audioPath in self.fmtFound:
+        #                 prefDict = self.ao.external.getPrefGroup('external')
+        #                 audioTools.setMacAudioRsrc(prefDict['audioFormat'],
+        #                                                     self.audioPath, prefDict)
+        if os.name == "posix":
             pass
-        else: # win or other
+        else:  # win or other
             pass
 
-    def display(self): 
+    def display(self):
         msg = []
-        prefDict = self.ao.external.getPrefGroup('external')
-        for hPath in self.fmtFound: # audio path
+        prefDict = self.ao.external.getPrefGroup("external")
+        for hPath in self.fmtFound:  # audio path
             failFlag = osTools.openMedia(hPath, prefDict)
-            if failFlag == 'failed':
+            if failFlag == "failed":
                 msg.append(lang.msgELhearError % hPath)
             else:
                 msg.append(lang.msgELhearInit % hPath)
-        return ''.join(msg)
+        return "".join(msg)
+
 
 class ELv(Command):
     """displays the csound score file most recently created
     uses platform specific apps
     """
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'ELv'
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "ELv"
 
     def gather(self):
-        outComplete = self.ao.aoInfo['outComplete']
+        outComplete = self.ao.aoInfo["outComplete"]
         if outComplete == []:
             return lang.msgELcreateFirst
-        self.viewPath = self.ao.aoInfo['fpView']
-        if not os.path.isfile(self.viewPath):   #if not a rela file
+        self.viewPath = self.ao.aoInfo["fpView"]
+        if not os.path.isfile(self.viewPath):  # if not a rela file
             return lang.msgELfileMoved % self.viewPath
 
     def process(self):
         pass
 
-    def display(self): 
-        prefDict = self.ao.external.getPrefGroup('external')
+    def display(self):
+        prefDict = self.ao.external.getPrefGroup("external")
         failFlag = osTools.openMedia(self.viewPath, prefDict)
-        if failFlag == 'failed':
+        if failFlag == "failed":
             msg = lang.msgEMviewError % self.viewPath
         else:
             msg = lang.msgELviewInit % self.viewPath
         return msg
 
 
-
 class ELauto(Command):
-    """causes eln to auto render and hear a newly created score
-    """
-    def __init__(self, ao, args='', **keywords):
+    """causes eln to auto render and hear a newly created score"""
+
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 
-        self.gatherSwitch = 1 
-        self.cmdStr = 'ELauto'
+        self.processSwitch = 1
+        self.gatherSwitch = 1
+        self.cmdStr = "ELauto"
 
     def gather(self):
         args = self.args
         self.value = None
         # store current value
-        self.curValue = self.ao.external.getPref('external','autoRenderOption')
-        if args != '':
+        self.curValue = self.ao.external.getPref("external", "autoRenderOption")
+        if args != "":
             args = argTools.ArgOps(args, stripComma=True)
-            msg = args.get(0,'end')
-            if msg == None: return self._getUsage()
-            self.value = typeset.convertBool(msg) # will handly off/on
-            if self.value == None: return self._getUsage()
-            if self.value: self.value = 'autoOn' # if true
-            else: self.value = 'autoOff'
-        if self.value == None: # w/ no args it toggles
-            if self.curValue in ['', 'autoOff']:
-                self.value = 'autoOn'
-            else: self.value = 'autoOff'
+            msg = args.get(0, "end")
+            if msg == None:
+                return self._getUsage()
+            self.value = typeset.convertBool(msg)  # will handly off/on
+            if self.value == None:
+                return self._getUsage()
+            if self.value:
+                self.value = "autoOn"  # if true
+            else:
+                self.value = "autoOff"
+        if self.value == None:  # w/ no args it toggles
+            if self.curValue in ["", "autoOff"]:
+                self.value = "autoOn"
+            else:
+                self.value = "autoOff"
 
     def process(self):
-        if self.value != self.curValue: # only chang if changed
-            self.ao.external.writePref('external', 'autoRenderOption', self.value)
-        if self.value == 'autoOn': # get a string version
+        if self.value != self.curValue:  # only chang if changed
+            self.ao.external.writePref("external", "autoRenderOption", self.value)
+        if self.value == "autoOn":  # get a string version
             self.valueStr = lang.ON
-        else: self.valueStr = lang.OFF
+        else:
+            self.valueStr = lang.OFF
 
     def display(self):
         return lang.msgELauto % self.valueStr
 
 
-
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 class _CommandAO(Command):
     """parent class of all AO commands"""
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
 
-    #-----------------------------------------------------------------------||--
+    # -----------------------------------------------------------------------||--
     # methods for loading and files
-    
-    def _tiLoad(self, textureName, textureModName, pathName, 
-                    temperamentName, pitchMode, auxNo, pmtrQDict, 
-                    midiPgm, midiCh, mute, silenceMode, orcMapMode):
+
+    def _tiLoad(
+        self,
+        textureName,
+        textureModName,
+        pathName,
+        temperamentName,
+        pitchMode,
+        auxNo,
+        pmtrQDict,
+        midiPgm,
+        midiCh,
+        mute,
+        silenceMode,
+        orcMapMode,
+    ):
         """this method is needs to load a texture from dry parameter list
         it will call a .create() method from a TI
         called from AOload when load xml files
         """
-        self.ao.textureLib[textureName] = texture.factory(textureModName, 
-                                                     textureName)
+        self.ao.textureLib[textureName] = texture.factory(textureModName, textureName)
         # test to see if pathname exists
         pathObj = self.ao.pathLib[pathName]  ## this is a reference, not a copy
-        self.ao.textureLib[textureName].load(pmtrQDict, pathObj,
-           temperamentName, pitchMode, auxNo, self.ao.aoInfo['fpAudioDirs'],
-           midiPgm, midiCh, mute, silenceMode, orcMapMode)
-                                                 
+        self.ao.textureLib[textureName].load(
+            pmtrQDict,
+            pathObj,
+            temperamentName,
+            pitchMode,
+            auxNo,
+            self.ao.aoInfo["fpAudioDirs"],
+            midiPgm,
+            midiCh,
+            mute,
+            silenceMode,
+            orcMapMode,
+        )
+
     def _piUpdateAllReferences(self):
         """clears all ref counts on paths and recounts all uses of a path"""
         # clear all current values
@@ -6360,241 +6995,245 @@ class _CommandAO(Command):
             pathName = self.ao.textureLib[textureName].path.name
             if pathName in extantPaths:
                 self.ao.pathLib[pathName].refIncr()
-            else: # missing path check for auto, assign. no auto, create
-                if 'auto' not in extantPaths:
-                    self._piAutoCreate('auto')
-                self.ao.textureLib[textureName].path = self.ao.pathLib['auto']
-                self.ao.pathLib['auto'].refIncr()
+            else:  # missing path check for auto, assign. no auto, create
+                if "auto" not in extantPaths:
+                    self._piAutoCreate("auto")
+                self.ao.textureLib[textureName].path = self.ao.pathLib["auto"]
+                self.ao.pathLib["auto"].refIncr()
 
     def _aoLoadAthenaData(self, athenaData):
-        """ load an athena dictionary into current athenaObject"""
+        """load an athena dictionary into current athenaObject"""
         # version only written on output, not on load
         # set at startup
-        self.ao.audioChannels = copy.deepcopy(athenaData['audioChannels']) 
-        self.ao.audioRate = copy.deepcopy(athenaData['audioRate']) 
+        self.ao.audioChannels = copy.deepcopy(athenaData["audioChannels"])
+        self.ao.audioRate = copy.deepcopy(athenaData["audioRate"])
 
-        if athenaData['author'] != '': 
+        if athenaData["author"] != "":
             # set at startup
-            self.ao.author = copy.deepcopy(athenaData['author']) 
-        self.ao.tniMode = copy.deepcopy(athenaData['tniMode']) 
-        self.ao.setEventMode(athenaData['activeEventMode'])
+            self.ao.author = copy.deepcopy(athenaData["author"])
+        self.ao.tniMode = copy.deepcopy(athenaData["tniMode"])
+        self.ao.setEventMode(athenaData["activeEventMode"])
         # will set local orchestra as well
 
     def _aoSaveAthenaData(self):
-        """ save all athena data in a dictionary """
+        """save all athena data in a dictionary"""
         athenaData = {}
-        athenaData['audioChannels'] = self.ao.audioChannels
-        athenaData['audioRate'] = self.ao.audioRate
+        athenaData["audioChannels"] = self.ao.audioChannels
+        athenaData["audioRate"] = self.ao.audioRate
 
-        if self.ao.author == '': # only change if it has not been set
+        if self.ao.author == "":  # only change if it has not been set
             try:
-                self.ao.author = os.environ['USER']
+                self.ao.author = os.environ["USER"]
             except:
-                self.ao.author = '' # default value on startup
-        athenaData['author'] = self.ao.author
-        athenaData['tniMode'] = self.ao.tniMode
+                self.ao.author = ""  # default value on startup
+        athenaData["author"] = self.ao.author
+        athenaData["tniMode"] = self.ao.tniMode
         # remove date info from version representation
-        athenaData['version'] = self.ao.versionObj.repr('dot', 0) 
-        athenaData['date'] = time.asctime(time.localtime())
-        athenaData['activeEventMode'] = self.ao.activeEventMode
+        athenaData["version"] = self.ao.versionObj.repr("dot", 0)
+        athenaData["date"] = time.asctime(time.localtime())
+        athenaData["activeEventMode"] = self.ao.activeEventMode
         return athenaData
 
-    def _aoLoadPathData(self, pathData, replace='replace'):
-        """ load a path dictionary into current athenaObject
-        """
-        self.ao.activePath = copy.deepcopy(pathData['activePath'])
-        #self.ao.activeSetMeasure = copy.deepcopy(pathData['activeSetMeasure'])
-        if replace == 'replace': 
-            self.ao.pathLib = {}     # reinit path bin
-        else: # a name check must make sure that no paths with same name exist
-            pass # do nothing, and add paths
-        if len(list(pathData['pathLib'].keys())) > 0: # paths exist
-            for pathName in list(pathData['pathLib'].keys()):
+    def _aoLoadPathData(self, pathData, replace="replace"):
+        """load a path dictionary into current athenaObject"""
+        self.ao.activePath = copy.deepcopy(pathData["activePath"])
+        # self.ao.activeSetMeasure = copy.deepcopy(pathData['activeSetMeasure'])
+        if replace == "replace":
+            self.ao.pathLib = {}  # reinit path bin
+        else:  # a name check must make sure that no paths with same name exist
+            pass  # do nothing, and add paths
+        if len(list(pathData["pathLib"].keys())) > 0:  # paths exist
+            for pathName in list(pathData["pathLib"].keys()):
                 self.ao.pathLib[pathName] = pitchPath.PolyPath(pathName)
-                self.ao.pathLib[pathName].loadDataModel(
-                                                  pathData['pathLib'][pathName])
-        else: # no paths exist, create dummy plug
-            self._piAutoCreate('auto') # creates a path named 'auto'
+                self.ao.pathLib[pathName].loadDataModel(pathData["pathLib"][pathName])
+        else:  # no paths exist, create dummy plug
+            self._piAutoCreate("auto")  # creates a path named 'auto'
 
     def _aoSavePathData(self):
-        """ save all path data in a dictionary """
+        """save all path data in a dictionary"""
         pathData = {}
-        pathData['activePath'] = self.ao.activePath
-        pathData['pathLib'] = {}
-        if len(list(self.ao.pathLib.keys())) > 0: # paths exist
+        pathData["activePath"] = self.ao.activePath
+        pathData["pathLib"] = {}
+        if len(list(self.ao.pathLib.keys())) > 0:  # paths exist
             for pathName in list(self.ao.pathLib.keys()):
                 p = self.ao.pathLib[pathName].writeDataModel()
-                pathData['pathLib'][pathName] = p
-        else: # no paths exist, create dummy plug
+                pathData["pathLib"][pathName] = p
+        else:  # no paths exist, create dummy plug
             pass
         return pathData
 
-    def _aoLoadTextureData(self, textureData, replace='replace'):
-        """ load a texture dictionary into current athenaObject
-        supply a None for parameters that have are new and have not been 
+    def _aoLoadTextureData(self, textureData, replace="replace"):
+        """load a texture dictionary into current athenaObject
+        supply a None for parameters that have are new and have not been
         defined
         let updating go on in TMclass and below
         """
-        self.ao.midiTempo = copy.deepcopy(textureData['midiTempo'])
-        self.ao.activeTextureModule = copy.deepcopy(
-                                                textureData['activeTextureModule'])       
-        if replace == 'replace':
-            self.ao.activeTexture = copy.deepcopy(textureData['activeTexture'])
+        self.ao.midiTempo = copy.deepcopy(textureData["midiTempo"])
+        self.ao.activeTextureModule = copy.deepcopy(textureData["activeTextureModule"])
+        if replace == "replace":
+            self.ao.activeTexture = copy.deepcopy(textureData["activeTexture"])
             self.ao.textureLib = {}  # reinit path bin
-        if len(list(textureData['textureLib'].keys())) > 0: # textures exist
-            for textureName in list(textureData['textureLib'].keys()):
-                t = textureData['textureLib'][textureName]
-                pathName = copy.deepcopy(t['pathName'])
-                tmName = copy.deepcopy(t['tmName'])
-                #polyphonyMode = copy.deepcopy(t['polyphonyMode'])
-                temperamentName = copy.deepcopy(t['temperamentName'])
-                pitchMode = copy.deepcopy(t['pitchMode'])
-                silenceMode = copy.deepcopy(t['silenceMode'])
-                orcMapMode = copy.deepcopy(t['orcMapMode'])
-                auxNo = copy.deepcopy(t['auxNo'])
-                pmtrQDict = copy.deepcopy(t['pmtrQDict'])
-                midiPgm = copy.deepcopy(t['midiPgm'])
-                midiCh = copy.deepcopy(t['midiCh'])
-                mute = copy.deepcopy(t['mute'])
-                self._tiLoad(textureName, tmName, pathName, 
-                                 temperamentName, pitchMode, auxNo, 
-                                 pmtrQDict, midiPgm, midiCh, mute, 
-                                 silenceMode, orcMapMode)
-        if replace == 'replace':
+        if len(list(textureData["textureLib"].keys())) > 0:  # textures exist
+            for textureName in list(textureData["textureLib"].keys()):
+                t = textureData["textureLib"][textureName]
+                pathName = copy.deepcopy(t["pathName"])
+                tmName = copy.deepcopy(t["tmName"])
+                # polyphonyMode = copy.deepcopy(t['polyphonyMode'])
+                temperamentName = copy.deepcopy(t["temperamentName"])
+                pitchMode = copy.deepcopy(t["pitchMode"])
+                silenceMode = copy.deepcopy(t["silenceMode"])
+                orcMapMode = copy.deepcopy(t["orcMapMode"])
+                auxNo = copy.deepcopy(t["auxNo"])
+                pmtrQDict = copy.deepcopy(t["pmtrQDict"])
+                midiPgm = copy.deepcopy(t["midiPgm"])
+                midiCh = copy.deepcopy(t["midiCh"])
+                mute = copy.deepcopy(t["mute"])
+                self._tiLoad(
+                    textureName,
+                    tmName,
+                    pathName,
+                    temperamentName,
+                    pitchMode,
+                    auxNo,
+                    pmtrQDict,
+                    midiPgm,
+                    midiCh,
+                    mute,
+                    silenceMode,
+                    orcMapMode,
+                )
+        if replace == "replace":
             self.ao.cloneLib = clone.CloneManager()
-        for tag in list(textureData['cloneLib'].keys()):
-            post = tag.split(',') # comma separated
+        for tag in list(textureData["cloneLib"].keys()):
+            post = tag.split(",")  # comma separated
             tName, cName = post[0], post[1]
-            c = textureData['cloneLib'][tag]
-            mute = copy.deepcopy(c['mute'])
-            auxNo = copy.deepcopy(c['auxNo']) 
+            c = textureData["cloneLib"][tag]
+            mute = copy.deepcopy(c["mute"])
+            auxNo = copy.deepcopy(c["auxNo"])
             # always update from texture
             auxFmt = self.ao.textureLib[tName].getAuxOutputFmt()
             # now in pmtrQDicts
             # timeRef = copy.deepcopy(c['timeRef'])
-            pmtrQDict = copy.deepcopy(c['pmtrQDict'])
+            pmtrQDict = copy.deepcopy(c["pmtrQDict"])
             # load data into clone bin
             self.ao.cloneLib.load(tName, cName, pmtrQDict, auxNo, auxFmt, mute)
             # manually score each texture to refresh values
             t = self.ao.textureLib[tName]
             c = self.ao.cloneLib.get(tName, cName)
             c.score(t.getScore(), t.getRefDict())
-    
+
     def _aoSaveTextureData(self):
-        """ save all texture data in a dictionary """
+        """save all texture data in a dictionary"""
         textureData = {}
-        textureData['activeTexture'] = self.ao.activeTexture
-        textureData['activeTextureModule'] = self.ao.activeTextureModule
-        textureData['midiTempo'] = self.ao.midiTempo # added 1.1
-        textureData['textureLib'] = {}
-        if len(list(self.ao.textureLib.keys())) > 0: # textures exist
+        textureData["activeTexture"] = self.ao.activeTexture
+        textureData["activeTextureModule"] = self.ao.activeTextureModule
+        textureData["midiTempo"] = self.ao.midiTempo  # added 1.1
+        textureData["textureLib"] = {}
+        if len(list(self.ao.textureLib.keys())) > 0:  # textures exist
             for tName in list(self.ao.textureLib.keys()):
-                textureData['textureLib'][tName] = {}
-                t = textureData['textureLib'][tName]
-                t['pathName'] = self.ao.textureLib[tName].path.name
-                t['tmName'] = self.ao.textureLib[tName].tmName
-                #t['polyphonyMode'] = self.ao.textureLib[tName].polyphonyMode
-                t['temperamentName'] = self.ao.textureLib[tName].temperamentName
-                t['midiPgm'] = self.ao.textureLib[tName].midiPgm
-                t['midiCh']  = self.ao.textureLib[tName].midiCh
-                t['mute']  = self.ao.textureLib[tName].mute
-                t['pitchMode'] = self.ao.textureLib[tName].pitchMode
-                t['silenceMode'] = self.ao.textureLib[tName].silenceMode
-                t['orcMapMode'] = self.ao.textureLib[tName].orcMapMode
-                t['auxNo'] = self.ao.textureLib[tName].auxNo
-                t['pmtrQDict'] = self.ao.textureLib[tName].pmtrQDict
-        textureData['cloneLib'] = {}
+                textureData["textureLib"][tName] = {}
+                t = textureData["textureLib"][tName]
+                t["pathName"] = self.ao.textureLib[tName].path.name
+                t["tmName"] = self.ao.textureLib[tName].tmName
+                # t['polyphonyMode'] = self.ao.textureLib[tName].polyphonyMode
+                t["temperamentName"] = self.ao.textureLib[tName].temperamentName
+                t["midiPgm"] = self.ao.textureLib[tName].midiPgm
+                t["midiCh"] = self.ao.textureLib[tName].midiCh
+                t["mute"] = self.ao.textureLib[tName].mute
+                t["pitchMode"] = self.ao.textureLib[tName].pitchMode
+                t["silenceMode"] = self.ao.textureLib[tName].silenceMode
+                t["orcMapMode"] = self.ao.textureLib[tName].orcMapMode
+                t["auxNo"] = self.ao.textureLib[tName].auxNo
+                t["pmtrQDict"] = self.ao.textureLib[tName].pmtrQDict
+        textureData["cloneLib"] = {}
         for tName in self.ao.cloneLib.tNames():
             for cName in self.ao.cloneLib.cNames(tName):
-                tag = '%s,%s' % (tName, cName)
-                textureData['cloneLib'][tag] = {}
-                c = textureData['cloneLib'][tag]
+                tag = "%s,%s" % (tName, cName)
+                textureData["cloneLib"][tag] = {}
+                c = textureData["cloneLib"][tag]
                 clone = self.ao.cloneLib.get(tName, cName)
-                c['mute'] = clone.mute
-                c['auxNo'] = clone.auxNo
+                c["mute"] = clone.mute
+                c["auxNo"] = clone.auxNo
                 # do not store auxFmt; always update from load
                 # c['timeRef'] = clone.timeRef
-                c['pmtrQDict'] = clone.pmtrQDict
+                c["pmtrQDict"] = clone.pmtrQDict
         return textureData
 
     def _aoDetermineFileFormat(self, path):
         "check xml type of a file, or determine if it is an old pickled file"
         # added universal new line support; should provide cross-plat access
-        f = open(path, 'r')
+        f = open(path, "r")
         headerLine = f.readline()
         f.close()
         headerLine = headerLine.strip()
-        msg = 'ok'
-        if headerLine[:5] == '<?xml' or path[:-4] == '.xml':
+        msg = "ok"
+        if headerLine[:5] == "<?xml" or path[:-4] == ".xml":
             import xml.dom.minidom
-            try: # this may be a w wase of time
-                f = open(path, 'r') 
+
+            try:  # this may be a w wase of time
+                f = open(path, "r")
                 doc = xml.dom.minidom.parse(f)
             except IOError as errorMsg:
                 f.close()
-                return 'unknown', str(errorMsg) + '\n' + lang.msgAOerrorXML 
+                return "unknown", str(errorMsg) + "\n" + lang.msgAOerrorXML
             except xml.parsers.expat.ExpatError as errorMsg:
                 f.close()
-                return 'unknown', str(errorMsg) + '\n' + lang.msgAOerrorXML 
+                return "unknown", str(errorMsg) + "\n" + lang.msgAOerrorXML
             f.close()
             try:
                 # doc created above
                 for node in doc.childNodes:
                     # this gest primary entries
-                    if node.nodeType == node.ELEMENT_NODE: 
-                        if node.tagName != 'athenaObject':
+                    if node.nodeType == node.ELEMENT_NODE:
+                        if node.tagName != "athenaObject":
                             msg = lang.msgAOnotXML
-                            return 'unknown', msg
+                            return "unknown", msg
             except:
                 msg = lang.msgAOnotXML
-                return 'unknown', msg
+                return "unknown", msg
             # seems good
-            return 'xml', msg
+            return "xml", msg
         # pickled objects no longer supported
         else:
-            return 'unknown', lang.msgAOnotAOdoc
+            return "unknown", lang.msgAOnotAOdoc
 
-    #-----------------------------------------------------------------------||--
+    # -----------------------------------------------------------------------||--
     # tools for updating data imported from xml and evaluated, but not loaded
 
     def _aoRenameConflicts(self, pData, tData):
-        """takes path and texture dictionaries and compares to local 
+        """takes path and texture dictionaries and compares to local
         self.ao.pathLib and self.ao.textureLib
         corrects for name conflicts by appending underscore
         """
-        for mgTextureName in list(tData['textureLib'].keys()):
+        for mgTextureName in list(tData["textureLib"].keys()):
             if mgTextureName in list(self.ao.textureLib.keys()):
                 oldMgTextureName = copy.deepcopy(mgTextureName)
                 while 1:
-                    mgTextureName = mgTextureName + '_'
+                    mgTextureName = mgTextureName + "_"
                     if mgTextureName not in list(self.ao.textureLib.keys()):
                         break
-                newData = copy.deepcopy(
-                            tData['textureLib'][oldMgTextureName])
-                tData['textureLib'][mgTextureName] = newData
-                if oldMgTextureName in list(tData['cloneLib'].keys()):
-                     data = copy.deepcopy(
-                            tData['cloneLib'][oldMgTextureName])
-                     tData['cloneLib'][mgTextureName] = data
-                     del tData['cloneLib'][oldMgTextureName]
-                del tData['textureLib'][oldMgTextureName]
-        for mgPathName in list(pData['pathLib'].keys()):
+                newData = copy.deepcopy(tData["textureLib"][oldMgTextureName])
+                tData["textureLib"][mgTextureName] = newData
+                if oldMgTextureName in list(tData["cloneLib"].keys()):
+                    data = copy.deepcopy(tData["cloneLib"][oldMgTextureName])
+                    tData["cloneLib"][mgTextureName] = data
+                    del tData["cloneLib"][oldMgTextureName]
+                del tData["textureLib"][oldMgTextureName]
+        for mgPathName in list(pData["pathLib"].keys()):
             if mgPathName in list(self.ao.pathLib.keys()):
                 oldMgPathName = copy.deepcopy(mgPathName)
                 while 1:
-                    mgPathName = mgPathName + '_'
+                    mgPathName = mgPathName + "_"
                     if mgPathName not in list(self.ao.pathLib.keys()):
                         break
-                newData = copy.deepcopy(pData['pathLib'][oldMgPathName])
-                pData['pathLib'][mgPathName] = newData
-                for textureName in list(tData['textureLib'].keys()):
-                    thisPathName = tData[
-                                        'textureLib'][textureName]['pathName']
+                newData = copy.deepcopy(pData["pathLib"][oldMgPathName])
+                pData["pathLib"][mgPathName] = newData
+                for textureName in list(tData["textureLib"].keys()):
+                    thisPathName = tData["textureLib"][textureName]["pathName"]
                     if thisPathName == oldMgPathName:
-                        tData['textureLib'][textureName]['pathName'] = mgPathName
-                del pData['pathLib'][oldMgPathName]
+                        tData["textureLib"][textureName]["pathName"] = mgPathName
+                del pData["pathLib"][oldMgPathName]
         return pData, tData
-
 
 
 class AOl(_CommandAO):
@@ -6606,64 +7245,76 @@ class AOl(_CommandAO):
     >>> a = AOl(ao, args='empty01.xml')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     >>> a = AOl(ao, args='empty02.xml')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     """
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         _CommandAO.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'AOl'
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "AOl"
 
     def gather(self):
         args = self.args
 
         self.path = None
-        if args != '':
-            args = argTools.ArgOps(args) # no strip
-            self.path = self._findFilePath(args.get(0,'end'))
-            if self.path == None: return self._getUsage()
+        if args != "":
+            args = argTools.ArgOps(args)  # no strip
+            self.path = self._findFilePath(args.get(0, "end"))
+            if self.path == None:
+                return self._getUsage()
         if self.path == None:
-            dlgVisMet = self.ao.external.getPref('athena', 'dlgVisualMethod')
-            self.path, ok = dialog.promptGetFile(lang.msgAOselectFile, 
-                                 self.ao.aoInfo['fpLastDir'], 'file', dlgVisMet, self.termObj)
-            if ok != 1: return lang.msgReturnCancel
+            dlgVisMet = self.ao.external.getPref("athena", "dlgVisualMethod")
+            self.path, ok = dialog.promptGetFile(
+                lang.msgAOselectFile,
+                self.ao.aoInfo["fpLastDir"],
+                "file",
+                dlgVisMet,
+                self.termObj,
+            )
+            if ok != 1:
+                return lang.msgReturnCancel
         # problem if path is still == None
-            
+
     def process(self):
-        self.timer = rhythm.Timer() # start
+        self.timer = rhythm.Timer()  # start
         fileFormat, msg = self._aoDetermineFileFormat(self.path)
-        if fileFormat == 'unknown':
+        if fileFormat == "unknown":
             return msg
-        elif fileFormat == 'xml': # open xml
+        elif fileFormat == "xml":  # open xml
             aData, pData, tData = ioTools.extractXML(self.path)
             aData, pData, tData = ioTools.evalObjectDictionary(aData, pData, tData)
-            self.formatString = '%s xml' % aData['version']
+            self.formatString = "%s xml" % aData["version"]
         # check backwards compat issues
         aData, pData, tData = self.ao.backward.process(aData, pData, tData)
         # load data
-        self._aoLoadAthenaData(aData) 
-        self._aoLoadPathData(pData, 'replace')
-        self._aoLoadTextureData(tData, 'replace')
+        self._aoLoadAthenaData(aData)
+        self._aoLoadPathData(pData, "replace")
+        self._aoLoadTextureData(tData, "replace")
         self._piUpdateAllReferences()
         # only after self.path + texture data are loaded
         self.timer.stop()
         # update last paths
-        self.ao.aoInfo['fpLastDir'] = os.path.dirname(self.path)
-        self.ao.external.writePref('athena', 'fpLastDir', self.ao.aoInfo['fpLastDir'])
+        self.ao.aoInfo["fpLastDir"] = os.path.dirname(self.path)
+        self.ao.external.writePref("athena", "fpLastDir", self.ao.aoInfo["fpLastDir"])
 
     def log(self):
-        if self.gatherStatus and self.processStatus: # if complete
-            return '%s %s' % (self.cmdStr, self.path)
+        if self.gatherStatus and self.processStatus:  # if complete
+            return "%s %s" % (self.cmdStr, self.path)
 
-    def display(self): 
-        return '%s%s AthenaObject loaded (%s):\n%s\n' % (lang.TAB, 
-                          self.formatString, self.timer, self.path)
+    def display(self):
+        return "%s%s AthenaObject loaded (%s):\n%s\n" % (
+            lang.TAB,
+            self.formatString,
+            self.timer,
+            self.path,
+        )
 
 
 class AOw(_CommandAO):
@@ -6671,35 +7322,41 @@ class AOw(_CommandAO):
     uses _aoSave methods to create dictionaries w/ an xml shape
     these dictionaries are then passed to ioTools
     """
-    def __init__(self, ao, args='', verbose='normal', **keywords):
+
+    def __init__(self, ao, args="", verbose="normal", **keywords):
         _CommandAO.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
         self.verbose = verbose
-        self.cmdStr = 'AOw'
+        self.cmdStr = "AOw"
 
     def gather(self):
         args = self.args
 
         if len(self.ao.pathLib) == 0:
             return lang.msgAOcreateFirst
-        self.path = None         
+        self.path = None
 
-        if args != '':
-            args = argTools.ArgOps(args) # no strip
-            self.path = self._validWritePath(args.get(0,'end'), 
-                                      '.xml', 'fpLastDir')
-            if self.path == None: return self._getUsage()
+        if args != "":
+            args = argTools.ArgOps(args)  # no strip
+            self.path = self._validWritePath(args.get(0, "end"), ".xml", "fpLastDir")
+            if self.path == None:
+                return self._getUsage()
         if self.path == None:
-            dlgVisMet = self.ao.external.getPref('athena', 'dlgVisualMethod')
+            dlgVisMet = self.ao.external.getPref("athena", "dlgVisualMethod")
             prompt = lang.msgAOnameFile
-            while 1: ## to make sure you a get a .xml ending
-                self.path, ok = dialog.promptPutFile(prompt, 
-                              'ao.xml', self.ao.aoInfo['fpLastDir'], 
-                              '*',  dlgVisMet, self.termObj)
+            while 1:  ## to make sure you a get a .xml ending
+                self.path, ok = dialog.promptPutFile(
+                    prompt,
+                    "ao.xml",
+                    self.ao.aoInfo["fpLastDir"],
+                    "*",
+                    dlgVisMet,
+                    self.termObj,
+                )
                 if ok != 1:
                     return lang.msgReturnCancel
-                if self.path[-4:] == '.xml':
+                if self.path[-4:] == ".xml":
                     break
                 else:
                     dialog.msgOut(lang.msgAObadName, self.termObj)
@@ -6711,31 +7368,32 @@ class AOw(_CommandAO):
         textureData = self._aoSaveTextureData()
         try:
             ioTools.writeXML(self.path, athenaData, pathData, textureData)
-        except (IOError, OSError): # a bad path may be given
+        except (IOError, OSError):  # a bad path may be given
             return lang.msgFileError
 
         # sytem dependent adjustments to AO file
-        if os.name == 'mac':     
-            bbeditCreator = 'R*ch' 
-            osTools.rsrcSetCreator(self.path, bbeditCreator, 'TEXT')
+        if os.name == "mac":
+            bbeditCreator = "R*ch"
+            osTools.rsrcSetCreator(self.path, bbeditCreator, "TEXT")
             # used to be 'fLEx'
-        elif os.name == 'posix':
+        elif os.name == "posix":
             pass
-        else: # win or other
+        else:  # win or other
             pass
         # update last paths
-        self.ao.aoInfo['fpLastDir'] = os.path.dirname(self.path)
-        self.ao.external.writePref('athena', 'fpLastDir', self.ao.aoInfo['fpLastDir'])
+        self.ao.aoInfo["fpLastDir"] = os.path.dirname(self.path)
+        self.ao.external.writePref("athena", "fpLastDir", self.ao.aoInfo["fpLastDir"])
 
     def log(self):
-        if self.gatherStatus and self.processStatus: # if complete
-            return '%s %s' % (self.cmdStr, self.path)
+        if self.gatherStatus and self.processStatus:  # if complete
+            return "%s %s" % (self.cmdStr, self.path)
 
-    def display(self): 
-        if self.verbose == 'quite': # not return string
+    def display(self):
+        if self.verbose == "quite":  # not return string
             return
         else:
-            return lang.TAB + 'AthenaObject saved:\n%s\n' % self.path
+            return lang.TAB + "AthenaObject saved:\n%s\n" % self.path
+
 
 class AOmg(_CommandAO):
     """load path and texture data into the local athenaObject
@@ -6747,62 +7405,73 @@ class AOmg(_CommandAO):
     >>> a = AOl(ao, args='empty01.xml')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     >>> a = AOmg(ao, args='empty01.xml')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     """
 
-    def __init__(self, ao, args='', **keywords):
+    def __init__(self, ao, args="", **keywords):
         _CommandAO.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'AOmg'
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "AOmg"
 
     def gather(self):
         args = self.args
         self.path = None
-        if args != '':
-            args = argTools.ArgOps(args) # no strip
-            self.path = self._findFilePath(args.get(0,'end'))
-            if self.path == None: return self._getUsage()
+        if args != "":
+            args = argTools.ArgOps(args)  # no strip
+            self.path = self._findFilePath(args.get(0, "end"))
+            if self.path == None:
+                return self._getUsage()
         if self.path == None:
-            dlgVisMet = self.ao.external.getPref('athena', 'dlgVisualMethod')
-            self.path, ok = dialog.promptGetFile(lang.msgAOselectFile, 
-                          self.ao.aoInfo['fpLastDir'], 'file', dlgVisMet, self.termObj)
-            if ok != 1: return lang.msgReturnCancel
+            dlgVisMet = self.ao.external.getPref("athena", "dlgVisualMethod")
+            self.path, ok = dialog.promptGetFile(
+                lang.msgAOselectFile,
+                self.ao.aoInfo["fpLastDir"],
+                "file",
+                dlgVisMet,
+                self.termObj,
+            )
+            if ok != 1:
+                return lang.msgReturnCancel
 
     def process(self):
-        self.timer = rhythm.Timer() # starts
+        self.timer = rhythm.Timer()  # starts
         fileFormat, msg = self._aoDetermineFileFormat(self.path)
-        if fileFormat == 'unknown':
+        if fileFormat == "unknown":
             return msg
-        elif fileFormat == 'xml': # open xml
+        elif fileFormat == "xml":  # open xml
             aData, pData, tData = ioTools.extractXML(self.path)
             aData, pData, tData = ioTools.evalObjectDictionary(aData, pData, tData)
-            self.formatString = '%s xml' % aData['version']
+            self.formatString = "%s xml" % aData["version"]
         # check backwards compat issues
         aData, pData, tData = self.ao.backward.process(aData, pData, tData)
         pData, tData = self._aoRenameConflicts(pData, tData)
-        self._aoLoadPathData(pData, 'noReplace')
-        self._aoLoadTextureData(tData, 'noReplace')
-        self._piUpdateAllReferences() # only after path + ti data are loaded
+        self._aoLoadPathData(pData, "noReplace")
+        self._aoLoadTextureData(tData, "noReplace")
+        self._piUpdateAllReferences()  # only after path + ti data are loaded
 
         self.timer.stop()
         # update last paths
-        self.ao.aoInfo['fpLastDir'] = os.path.dirname(self.path)
-        self.ao.external.writePref('athena', 'fpLastDir', self.ao.aoInfo['fpLastDir'])
+        self.ao.aoInfo["fpLastDir"] = os.path.dirname(self.path)
+        self.ao.external.writePref("athena", "fpLastDir", self.ao.aoInfo["fpLastDir"])
 
     def log(self):
-        if self.gatherStatus and self.processStatus: # if complete
-            return '%s %s' % (self.cmdStr, self.path)
+        if self.gatherStatus and self.processStatus:  # if complete
+            return "%s %s" % (self.cmdStr, self.path)
 
-    def display(self): 
-        return '%s%s AthenaObject merged (%s):\n%s\n' % (lang.TAB, 
-                 self.formatString, self.timer, self.path)
+    def display(self):
+        return "%s%s AthenaObject merged (%s):\n%s\n" % (
+            lang.TAB,
+            self.formatString,
+            self.timer,
+            self.path,
+        )
 
 
 class AOals(_CommandAO):
@@ -6814,115 +7483,133 @@ class AOals(_CommandAO):
     >>> a = AOals(ao, args='empty01.xml')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     """
 
-    def __init__(self, ao, args='', **keywords):
+    def __init__(self, ao, args="", **keywords):
         _CommandAO.__init__(self, ao, args, **keywords)
-        self.processSwitch = 0 # display only
-        self.gatherSwitch = 0 # display only
-        self.cmdStr = 'AOals'
+        self.processSwitch = 0  # display only
+        self.gatherSwitch = 0  # display only
+        self.cmdStr = "AOals"
 
     def gather(self):
         pass
+
     def process(self):
         pass
-    def display(self): 
+
+    def display(self):
         directoryOfattributes = dir(self.ao)
         msg = []
-        msg.append('attributes of AthenaObject:\n')
+        msg.append("attributes of AthenaObject:\n")
         entryLines = []
         for entry in directoryOfattributes:
             value = getattr(self.ao, entry)
             entryLines.append([entry, value])
-        headerKey    = ['name','value'] # table settings
+        headerKey = ["name", "value"]  # table settings
         minWidthList = [lang.LMARGINW, 0]
-        bufList      = [1, 1]
-        justList         = ['l','l']
-        table = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
-                                  bufList, justList, self.termObj, 'oneColumn')
-        msg.append('%s\n' % table)
-        return ''.join(msg)
-        
+        bufList = [1, 1]
+        justList = ["l", "l"]
+        table = typeset.formatVariCol(
+            headerKey,
+            entryLines,
+            minWidthList,
+            bufList,
+            justList,
+            self.termObj,
+            "oneColumn",
+        )
+        msg.append("%s\n" % table)
+        return "".join(msg)
+
 
 class AOrm(_CommandAO):
     "SUBCMD"
-    def __init__(self, ao, args='', **keywords):
-        _CommandAO.__init__(self, ao, args, **keywords)
-        self.processSwitch = 0 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'AOrm'
-        self.subCmd = 1 # if 1, executed within method of interptreter
 
-    def gather(self): 
+    def __init__(self, ao, args="", **keywords):
+        _CommandAO.__init__(self, ao, args, **keywords)
+        self.processSwitch = 0  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "AOrm"
+        self.subCmd = 1  # if 1, executed within method of interptreter
+
+    def gather(self):
         args = self.args
-        self.confirm = ''
-        if args != '':
+        self.confirm = ""
+        if args != "":
             args = argTools.ArgOps(args)
-            self.confirm = args.get(0,'end')
-        if self.confirm != 'confirm':
-            askUsr=dialog.askYesNo('destroy the current AthenaObject? ', 
-                                                 0, self.termObj)
-            if askUsr != 1: return lang.msgReturnCancel
-            self.confirm = 'confirm'
+            self.confirm = args.get(0, "end")
+        if self.confirm != "confirm":
+            askUsr = dialog.askYesNo(
+                "destroy the current AthenaObject? ", 0, self.termObj
+            )
+            if askUsr != 1:
+                return lang.msgReturnCancel
+            self.confirm = "confirm"
 
     def process(self):
         pass
 
-    def log(self): # no history stored, as ao is removed
-        if self.gatherStatus and self.processStatus: # if complete
-            return '%s %s' % (self.cmdStr, self.confirm) 
+    def log(self):  # no history stored, as ao is removed
+        if self.gatherStatus and self.processStatus:  # if complete
+            return "%s %s" % (self.cmdStr, self.confirm)
 
     def result(self):
         return {}
 
-#-----------------------------------------------------------------||||||||||||--
+
+# -----------------------------------------------------------------||||||||||||--
 class APdlg(Command):
     """toggles between dialog modes"""
 
-    def __init__(self, ao, args='', **keywords):
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'APdlg'
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "APdlg"
 
     def _apConvertDlgFmt(self, usrStr):
         ref = {
-            'tk' : ['tk', 'k'],
-            'mac' : ['mac', 'm'],
-            'text' : ['text', 't'],
-                }
+            "tk": ["tk", "k"],
+            "mac": ["mac", "m"],
+            "text": ["text", "t"],
+        }
         usrStr = drawer.selectionParse(usrStr, ref)
-        return usrStr # may be None     
+        return usrStr  # may be None
 
     def _apGetDlgFmt(self):
         while 1:
-            dlgVisMet = self.ao.external.getPref('athena', 'dlgVisualMethod')
-            usrStr = dialog.askStr(lang.msgAPdlgSelect % dlgVisMet,
-                                                  self.termObj) 
-            if usrStr == None: return None
+            dlgVisMet = self.ao.external.getPref("athena", "dlgVisualMethod")
+            usrStr = dialog.askStr(lang.msgAPdlgSelect % dlgVisMet, self.termObj)
+            if usrStr == None:
+                return None
             usrStr = self._apConvertDlgFmt(usrStr)
-            if usrStr == None: continue
-            else: return usrStr
+            if usrStr == None:
+                continue
+            else:
+                return usrStr
 
     def gather(self):
         args = self.args
         self.formatStr = None
-        if args != '':
-            args = argTools.ArgOps(args) # no strip
-            self.formatStr = self._apConvertDlgFmt(args.get(0,'end'))
-            if self.formatStr == None: return self._getUsage()
+        if args != "":
+            args = argTools.ArgOps(args)  # no strip
+            self.formatStr = self._apConvertDlgFmt(args.get(0, "end"))
+            if self.formatStr == None:
+                return self._getUsage()
         if self.formatStr == None:
             self.formatStr = self._apGetDlgFmt()
-            if self.formatStr == None: return lang.msgReturnCancel
-    
-    def process(self):
-        self.ao.external.writePref('athena', 'dlgVisualMethod', self.formatStr)
+            if self.formatStr == None:
+                return lang.msgReturnCancel
 
-    def display(self): 
+    def process(self):
+        self.ao.external.writePref("athena", "dlgVisualMethod", self.formatStr)
+
+    def display(self):
         msg = lang.msgAPdlgConfirm % self.ao.external.getPref(
-                                              'athena','dlgVisualMethod')
+            "athena", "dlgVisualMethod"
+        )
         return msg
 
 
@@ -6933,114 +7620,127 @@ class APgfx(Command):
     all command objs that call graphics check the pref fmt against available fmts
     """
 
-    def __init__(self, ao, args='', **keywords):
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'APgfx'
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "APgfx"
 
     def _apGetGfxFmt(self):
         while 1:
-            dlgVisMet = self.ao.external.getPref('athena', 'gfxVisualMethod')
-            usrStr = dialog.askStr(lang.msgAPgfxSelect % dlgVisMet,
-                                                  self.termObj) 
-            if usrStr == None: return None
+            dlgVisMet = self.ao.external.getPref("athena", "gfxVisualMethod")
+            usrStr = dialog.askStr(lang.msgAPgfxSelect % dlgVisMet, self.termObj)
+            if usrStr == None:
+                return None
             usrStr = drawer.imageFormatParser(usrStr)
-            if usrStr == None: continue
-            else: return usrStr
+            if usrStr == None:
+                continue
+            else:
+                return usrStr
 
     def gather(self):
         args = self.args
         self.formatStr = None
-        if args != '':
-            args = argTools.ArgOps(args) # no strip
-            self.formatStr = drawer.imageFormatParser(args.get(0,'end'))
-            if self.formatStr == None: return self._getUsage()
+        if args != "":
+            args = argTools.ArgOps(args)  # no strip
+            self.formatStr = drawer.imageFormatParser(args.get(0, "end"))
+            if self.formatStr == None:
+                return self._getUsage()
         if self.formatStr == None:
             self.formatStr = self._apGetGfxFmt()
-            if self.formatStr == None: return lang.msgReturnCancel
+            if self.formatStr == None:
+                return lang.msgReturnCancel
 
     def process(self):
-        self.ao.external.writePref('athena', 'gfxVisualMethod', self.formatStr)
+        self.ao.external.writePref("athena", "gfxVisualMethod", self.formatStr)
 
-    def display(self): 
-        msg =    lang.msgAPgfxConfirm % self.ao.external.getPref(
-                                                'athena','gfxVisualMethod')
+    def display(self):
+        msg = lang.msgAPgfxConfirm % self.ao.external.getPref(
+            "athena", "gfxVisualMethod"
+        )
         return msg
+
 
 class APcurs(Command):
     """toggles between cursor modes"""
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 0 # display only
-        self.cmdStr = 'APcurs'
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 0  # display only
+        self.cmdStr = "APcurs"
 
     def process(self):
-        curVal = self.ao.external.getPref('athena', 'cursorToolOption')
-        if curVal in ['', 'cursorToolOn']:
-            self.ao.external.writePref('athena', 'cursorToolOption',
-                                                'cursorToolOff')
-            self.ao.aoInfo['cursorToolOption'] = 'cursorToolOff'
+        curVal = self.ao.external.getPref("athena", "cursorToolOption")
+        if curVal in ["", "cursorToolOn"]:
+            self.ao.external.writePref("athena", "cursorToolOption", "cursorToolOff")
+            self.ao.aoInfo["cursorToolOption"] = "cursorToolOff"
             self.value = lang.OFF
         else:
-            self.ao.external.writePref('athena', 'cursorToolOption', 
-                                                'cursorToolOn')
-            self.ao.aoInfo['cursorToolOption'] = 'cursorToolOn'
+            self.ao.external.writePref("athena", "cursorToolOption", "cursorToolOn")
+            self.ao.aoInfo["cursorToolOption"] = "cursorToolOn"
             self.value = lang.ON
 
-    def display(self): 
+    def display(self):
         return lang.msgAPcursorTool % self.value
+
 
 class APr(Command):
     """toggles refresh modes"""
-    def __init__(self, ao, args='', **keywords):
-        Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'APr'
 
-    def gather(self): 
+    def __init__(self, ao, args="", **keywords):
+        Command.__init__(self, ao, args, **keywords)
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "APr"
+
+    def gather(self):
         args = self.args
         self.modeVal = None
-        if args != '':
+        if args != "":
             args = argTools.ArgOps(args, stripComma=True)
-            modeStr = args.get(0,'end')
-            if modeStr == None: return self._getUsage()
+            modeStr = args.get(0, "end")
+            if modeStr == None:
+                return self._getUsage()
             self.modeVal = typeset.convertBool(modeStr)
-            if self.modeVal == None: return self._getUsage()
+            if self.modeVal == None:
+                return self._getUsage()
         # w/ no args it toggles
         if self.modeVal == None:
-            if self.ao.aoInfo['refreshMode']: self.modeVal = 0
-            else: self.modeVal = 1
+            if self.ao.aoInfo["refreshMode"]:
+                self.modeVal = 0
+            else:
+                self.modeVal = 1
 
     def process(self):
-        curVal = self.ao.external.getPref('athena', 'refreshMode', 1)
-        if self.modeVal != curVal: # change
-            self.ao.external.writePref('athena', 'refreshMode', str(self.modeVal))
-            self.ao.aoInfo['refreshMode'] = self.modeVal
-            
-    def display(self): 
-        curVal = typeset.convertBool(self.ao.aoInfo['refreshMode'])
+        curVal = self.ao.external.getPref("athena", "refreshMode", 1)
+        if self.modeVal != curVal:  # change
+            self.ao.external.writePref("athena", "refreshMode", str(self.modeVal))
+            self.ao.aoInfo["refreshMode"] = self.modeVal
+
+    def display(self):
+        curVal = typeset.convertBool(self.ao.aoInfo["refreshMode"])
         return lang.msgAPrefreshMode % typeset.boolAsStr(curVal)
+
 
 class APwid(Command):
     """manually sets screen width"""
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'APwid'
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "APwid"
 
     def _apConvertWidth(self, usrStr):
         """range checks width value"""
-        usrStr = drawer.strToNum(usrStr, 'int', 30, 300)
-        return usrStr # may be None
+        usrStr = drawer.strToNum(usrStr, "int", 30, 300)
+        return usrStr  # may be None
 
     def _apGetWidth(self):
         """quaries user for a screen width, returns None on error"""
         while 1:
-            usrString = dialog.askStr('enter a screen width:', self.termObj) 
+            usrString = dialog.askStr("enter a screen width:", self.termObj)
             if usrString == None:
                 return None
             number = self._apConvertWidth(usrString)
@@ -7054,40 +7754,42 @@ class APwid(Command):
         args = self.args
 
         width = None
-        if args != '':
-            args = argTools.ArgOps(args) # no strip
-            width = self._apConvertWidth(args.get(0,'end'))
-            if width == None: return self._getUsage()
+        if args != "":
+            args = argTools.ArgOps(args)  # no strip
+            width = self._apConvertWidth(args.get(0, "end"))
+            if width == None:
+                return self._getUsage()
         if width == None:
             width = self._apGetWidth()
-            if width == None: return lang.msgReturnCancel
+            if width == None:
+                return lang.msgReturnCancel
         self.width = width
 
     def process(self):
         self.termObj.setWidth(self.width)
 
-    def display(self): 
-        return 'screen width set to %s.\n' % self.width
+    def display(self):
+        return "screen width set to %s.\n" % self.width
+
 
 class APdir(Command):
 
-    def __init__(self, ao, args='', **keywords):
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'APdir'
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "APdir"
         # argForce is used here to reduce arg usage when called
         # by other commands, here, the do() method of Command
         # argForce gives a quasi interactive nature
-        if 'argForce' in list(keywords.keys()):
-            self.argForce = keywords['argForce']
+        if "argForce" in list(keywords.keys()):
+            self.argForce = keywords["argForce"]
         else:
             self.argForce = None
 
     def _updateTextureFilePaths(self):
         for name in list(self.ao.textureLib.keys()):
-            self.ao.textureLib[name].updateFilePaths(
-                self.ao.aoInfo['fpAudioDirs'])
+            self.ao.textureLib[name].updateFilePaths(self.ao.aoInfo["fpAudioDirs"])
 
     def _apConvertDirName(self, usrStr):
         """
@@ -7099,69 +7801,81 @@ class APdir(Command):
         'fpAudioDir'
         """
         ref = {
-            'fpAudioDir'  : ['a', 'ss', 'ssdir', 'audio'],
+            "fpAudioDir": ["a", "ss", "ssdir", "audio"],
             #'sadir'  : ['sa', 'sadir'],
-            'fpScratchDir' : ['c', 'x', 'scratch'], # must be perference key
-                }
+            "fpScratchDir": ["c", "x", "scratch"],  # must be perference key
+        }
         usrStr = drawer.selectionParse(usrStr, ref)
-        return usrStr # may be None
+        return usrStr  # may be None
 
     def _apGetName(self):
         """quaries user name"""
         while 1:
-            usrStr = dialog.askStr(lang.msgAOselAdirOrSdir, self.termObj) 
-            if usrStr == None: return None
+            usrStr = dialog.askStr(lang.msgAOselAdirOrSdir, self.termObj)
+            if usrStr == None:
+                return None
             formatStr = self._apConvertDirName(usrStr)
-            if usrStr == None: continue
-            else: return formatStr
+            if usrStr == None:
+                continue
+            else:
+                return formatStr
 
     def _apGetDir(self, name):
         # TODO: convert the name to a proper string to present to the user
-        # need a module-level way to convert preference values to 
+        # need a module-level way to convert preference values to
         # user strings
         while 1:
-            oldPath = self.ao.external.getPref('athena', ('%s' % name))
-            dlgVisMet = self.ao.external.getPref('athena', 'dlgVisualMethod')
-            path, ok = dialog.promptGetDir(('select a %s directory:\n' % name),
-                self.ao.aoInfo['fpLastDir'], dlgVisMet, self.termObj)
-            if ok != 1: # path canceled
+            oldPath = self.ao.external.getPref("athena", ("%s" % name))
+            dlgVisMet = self.ao.external.getPref("athena", "dlgVisualMethod")
+            path, ok = dialog.promptGetDir(
+                ("select a %s directory:\n" % name),
+                self.ao.aoInfo["fpLastDir"],
+                dlgVisMet,
+                self.termObj,
+            )
+            if ok != 1:  # path canceled
                 return None
             elif os.path.isdir(path) != 1:  ## true if file is missing
                 dialog.msgOut("this is not a directory", self.termObj)
                 continue
             else:
                 return path
-                
+
     def gather(self):
         args = self.args
         self.name = None
         self.dir = None
-        if args != '':
-            args = argTools.ArgOps(args) # no strip
+        if args != "":
+            args = argTools.ArgOps(args)  # no strip
             self.name = self._apConvertDirName(args.get(0))
-            if self.name == None: return self._getUsage()
-            self.dir = args.get(1, 'end')
-            if self.dir == None: return self._getUsage()
-            self.dir = drawer.pathScrub(self.dir) # scrub, expand, links
-            if not os.path.isdir(self.dir): return self._getUsage()
+            if self.name == None:
+                return self._getUsage()
+            self.dir = args.get(1, "end")
+            if self.dir == None:
+                return self._getUsage()
+            self.dir = drawer.pathScrub(self.dir)  # scrub, expand, links
+            if not os.path.isdir(self.dir):
+                return self._getUsage()
         if self.name == None:
-            if self.argForce == None: 
+            if self.argForce == None:
                 self.name = self._apGetName()
-                if self.name == None: return lang.msgReturnCancel
-            else: # use arg from argForce dict, called form another command
-                self.name = self.argForce['name']
+                if self.name == None:
+                    return lang.msgReturnCancel
+            else:  # use arg from argForce dict, called form another command
+                self.name = self.argForce["name"]
             self.dir = self._apGetDir(self.name)
-            if self.dir == None: return lang.msgReturnCancel
+            if self.dir == None:
+                return lang.msgReturnCancel
 
     def process(self):
-        self.ao.external.writePref('athena', '%s' % self.name, self.dir)
+        self.ao.external.writePref("athena", "%s" % self.name, self.dir)
         # must update local variable in athenaObject
-        self.ao.aoInfo['fpAudioDirs'] = self.ao.external.getFilePathAudio()    
-        #self.ao.fpAudioAnalysisDirs = self.ao.external.getFilePathAnalysis()
-        self._updateTextureFilePaths() # update ti objects
+        self.ao.aoInfo["fpAudioDirs"] = self.ao.external.getFilePathAudio()
+        # self.ao.fpAudioAnalysisDirs = self.ao.external.getFilePathAnalysis()
+        self._updateTextureFilePaths()  # update ti objects
 
-    def display(self): 
-        return 'user %s directory set to %s.\n' % (self.name, self.dir)
+    def display(self):
+        return "user %s directory set to %s.\n" % (self.name, self.dir)
 
 
 class APea(Command):
@@ -7169,103 +7883,113 @@ class APea(Command):
     for backwards compat
     the csound executable on mac, sets the creator type of the csound app
     """
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 0 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'APea'
+        self.processSwitch = 0  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "APea"
 
     def _apConvertAppType(self, usrStr):
         ref = {
-            'csoundCommand' : ['c', 'cc'],
-#             'superColliderSynth' : ['scs', 's'],
-#             'chucK'                 : ['ck']
-            'midiPlayer'     : ['m', 'mp'],
-            'audioPlayer'    : ['a', 'ap'],
-            'textReader'     : ['t', 'tr'],
-            'imageViewer'    : ['i', 'iv'],
-            'psViewer'       : ['p', 'pv', 'post'],
-                }
-        return drawer.selectionParse(usrStr, ref) # may be None
+            "csoundCommand": ["c", "cc"],
+            #             'superColliderSynth' : ['scs', 's'],
+            #             'chucK'                 : ['ck']
+            "midiPlayer": ["m", "mp"],
+            "audioPlayer": ["a", "ap"],
+            "textReader": ["t", "tr"],
+            "imageViewer": ["i", "iv"],
+            "psViewer": ["p", "pv", "post"],
+        }
+        return drawer.selectionParse(usrStr, ref)  # may be None
 
     def _apGetAppType(self):
-        query = 'enter a file path to set: csoundCommand, midiPlayer, audioPlayer, textReader, imageViewer, or psViewer? (cc, mp, ap, tr, iv, or pv):'
+        query = "enter a file path to set: csoundCommand, midiPlayer, audioPlayer, textReader, imageViewer, or psViewer? (cc, mp, ap, tr, iv, or pv):"
         while 1:
             usrStr = dialog.askStr(query, self.termObj)
-            if usrStr == None: return None
+            if usrStr == None:
+                return None
             appType = self._apConvertAppType(usrStr)
-            if appType == None: continue
-            else: return appType 
+            if appType == None:
+                continue
+            else:
+                return appType
 
     def gather(self):
-        #environment.printDebug(['raw args', self.args])
-        args = self.args    
-        args = argTools.ArgOps(args) # no strip
+        # environment.printDebug(['raw args', self.args])
+        args = self.args
+        args = argTools.ArgOps(args)  # no strip
 
-        # this method using a slight different order, as it is necessary to 
+        # this method using a slight different order, as it is necessary to
         # to issues this command w/ the first arg given programmatically
         # and the second arg given interactively; for this reason args are
         # accessed one at a time
-        
+
         appType = None
         path = None
-        
+
         if args.get(0) != None:
             appType = self._apConvertAppType(args.get(0))
-            if appType == None: return self._getUsage()
-        else: 
-            appType = self._apGetAppType() # interactive command
-            if appType == None: return lang.msgReturnCancel
-            
+            if appType == None:
+                return self._getUsage()
+        else:
+            appType = self._apGetAppType()  # interactive command
+            if appType == None:
+                return lang.msgReturnCancel
+
         # not used for all cases, this is default
-        appName = None # not necessary in all cases
+        appName = None  # not necessary in all cases
         # cases for each app class
-        if appType == 'csoundCommand': # will be presented to the user
-            appPathPref = ('external', 'csoundPath')
-            if os.name == 'posix':
-                appName = 'csound' 
-            else: # win or other
-                appName = 'winsound.exe'
-        elif appType == 'midiPlayer': # will be presented to the user
-            appPathPref = ('external', 'midiPlayerPath')
-        elif appType == 'audioPlayer': # will be presented to the user
-            appPathPref = ('external', 'audioPlayerPath')
-        elif appType == 'textReader': # will be presented to the user
-            appPathPref = ('external', 'textReaderPath')
-        elif appType == 'imageViewer': # will be presented to the user
-            appPathPref = ('external', 'imageViewerPath')
-        elif appType == 'psViewer': # will be presented to the user
-            appPathPref = ('external', 'psViewerPath')
-        else: 
-            raise Exception('unknown appType requested: %s' % appType)
-        
-        # get old path to present to user in interactive mode         
+        if appType == "csoundCommand":  # will be presented to the user
+            appPathPref = ("external", "csoundPath")
+            if os.name == "posix":
+                appName = "csound"
+            else:  # win or other
+                appName = "winsound.exe"
+        elif appType == "midiPlayer":  # will be presented to the user
+            appPathPref = ("external", "midiPlayerPath")
+        elif appType == "audioPlayer":  # will be presented to the user
+            appPathPref = ("external", "audioPlayerPath")
+        elif appType == "textReader":  # will be presented to the user
+            appPathPref = ("external", "textReaderPath")
+        elif appType == "imageViewer":  # will be presented to the user
+            appPathPref = ("external", "imageViewerPath")
+        elif appType == "psViewer":  # will be presented to the user
+            appPathPref = ("external", "psViewerPath")
+        else:
+            raise Exception("unknown appType requested: %s" % appType)
+
+        # get old path to present to user in interactive mode
         # args have already been converted above
-        if args.get(1, sumRange=True) != None: 
+        if args.get(1, sumRange=True) != None:
             path = args.get(1, sumRange=True, keepSpace=True)
-            #environment.printDebug(['arg path received', path])
+            # environment.printDebug(['arg path received', path])
             if os.path.exists(path):
-                path, ok = self._selectAppPath(path, appType, appName, 
-                                               appPathPref)                 
-            else: return self._getUsage()
-            if path == None: return self._getUsage() # also failure          
-            
-        else: # get from user
+                path, ok = self._selectAppPath(path, appType, appName, appPathPref)
+            else:
+                return self._getUsage()
+            if path == None:
+                return self._getUsage()  # also failure
+
+        else:  # get from user
             oldPath = self.ao.external.getPref(appPathPref[0], appPathPref[1])
-            if oldPath == '': oldPath = 'none' # give string to show user       
-            dialog.msgOut(lang.msgAPcurentAppPath % oldPath, self.termObj) 
-            path, ok = self._selectAppPath(None, appType, appName, appPathPref)                             
-            if path == None: return lang.msgReturnCancel
-      
-        self.path = path        
+            if oldPath == "":
+                oldPath = "none"  # give string to show user
+            dialog.msgOut(lang.msgAPcurentAppPath % oldPath, self.termObj)
+            path, ok = self._selectAppPath(None, appType, appName, appPathPref)
+            if path == None:
+                return lang.msgReturnCancel
+
+        self.path = path
         self.changed = ok
 
-    def display(self): 
+    def display(self):
         if self.changed:
-            msg = 'application file path changed:\n%s\n' % (self.path)
+            msg = "application file path changed:\n%s\n" % (self.path)
         else:
-            msg = 'no changes made to application file path.\n'
+            msg = "no changes made to application file path.\n"
         return msg
+
 
 class APa(Command):
     """set the value of the number of channels
@@ -7276,23 +8000,24 @@ class APa(Command):
     >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
     >>> ao.setEventMode('m')
 
-    >>> a = APa(ao, args='f aif')    
+    >>> a = APa(ao, args='f aif')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
     >>> post = a.log()
 
-    >>> a = APa(ao, args='ch 2')    
+    >>> a = APa(ao, args='ch 2')
     >>> ok, result = a.do()
     >>> ok == True
-    True    
+    True
 
     """
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'APa'
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "APa"
 
     def _apConvertAudioPrefName(self, usrStr):
         """
@@ -7304,18 +8029,19 @@ class APa(Command):
         'audioFormat'
         """
         ref = {
-            'audioFormat'  : ['f', 'format', 'ff', 'type'],
-            'audioChannels' : ['c', 'ch', 'channel', 'channels'], 
-            'audioRate' : ['r', 'rate', 'sr'], 
-                }
+            "audioFormat": ["f", "format", "ff", "type"],
+            "audioChannels": ["c", "ch", "channel", "channels"],
+            "audioRate": ["r", "rate", "sr"],
+        }
         usrStr = drawer.selectionParse(usrStr, ref)
-        return usrStr # may be None
+        return usrStr  # may be None
 
     def _apGetAudioPref(self):
-        query = 'select format, channels, or rate. (f,c,r):'
+        query = "select format, channels, or rate. (f,c,r):"
         while 1:
-            usrStr = dialog.askStr(query, self.termObj) 
-            if usrStr == None: return None
+            usrStr = dialog.askStr(query, self.termObj)
+            if usrStr == None:
+                return None
             post = self._apConvertAudioPrefName(usrStr)
             if post == None:
                 continue
@@ -7325,20 +8051,24 @@ class APa(Command):
     def _apConvertChannels(self, usrStr):
         """return an integer value"""
         ref = {
-            '1' : ['1', 'm', 'mono'],
-            '2' : ['2', 's', 'stereo'],
-            '4' : ['4', 'q', 'quad'],
-                }
+            "1": ["1", "m", "mono"],
+            "2": ["2", "s", "stereo"],
+            "4": ["4", "q", "quad"],
+        }
         usrStr = drawer.selectionParse(usrStr, ref)
         if usrStr != None:
-            usrStr = int(usrStr) # convert to int
-        return usrStr # may be None
-        
+            usrStr = int(usrStr)  # convert to int
+        return usrStr  # may be None
+
     def _apGetChannels(self):
-        query = 'current number of channels: %s.\nselect mono, stereo, or quad. (1,2,4):' % self.ao.audioChannels
+        query = (
+            "current number of channels: %s.\nselect mono, stereo, or quad. (1,2,4):"
+            % self.ao.audioChannels
+        )
         while 1:
-            usrStr = dialog.askStr(query, self.termObj) 
-            if usrStr == None: return None
+            usrStr = dialog.askStr(query, self.termObj)
+            if usrStr == None:
+                return None
             channels = self._apConvertChannels(usrStr)
             if channels == None:
                 continue
@@ -7347,13 +8077,19 @@ class APa(Command):
 
     def _apGetFileFormat(self):
         while 1:
-            audioFormat = self.ao.external.getPref('external','audioFormat')
-            usrStr = dialog.askStr('current audio file format: %s.\nselect aif, wav, or sd2. (a, w, or s):' %   audioFormat, self.termObj) 
-            if usrStr == None: return None
+            audioFormat = self.ao.external.getPref("external", "audioFormat")
+            usrStr = dialog.askStr(
+                "current audio file format: %s.\nselect aif, wav, or sd2. (a, w, or s):"
+                % audioFormat,
+                self.termObj,
+            )
+            if usrStr == None:
+                return None
             formatStr = audioTools.audioFormatParser(usrStr)
-            if usrStr == None: continue
-            else: return formatStr
-
+            if usrStr == None:
+                continue
+            else:
+                return formatStr
 
     def gather(self):
         args = self.args
@@ -7361,65 +8097,70 @@ class APa(Command):
         self.pref = None
         self.prefValue = None
 
-        if args != '':
-            args = argTools.ArgOps(args) # no strip
+        if args != "":
+            args = argTools.ArgOps(args)  # no strip
             self.pref = self._apConvertAudioPrefName(args.get(0))
 
-            if self.pref == None: return self._getUsage()
+            if self.pref == None:
+                return self._getUsage()
 
-            if self.pref == 'audioChannels':
-                self.prefValue = self._apConvertChannels(args.get(1,'end'))
-                if self.prefValue == None: return self._getUsage()
-            elif self.pref == 'audioRate':
+            if self.pref == "audioChannels":
+                self.prefValue = self._apConvertChannels(args.get(1, "end"))
+                if self.prefValue == None:
+                    return self._getUsage()
+            elif self.pref == "audioRate":
                 self.prefValue = 44100
-            elif self.pref == 'audioFormat':
-                self.prefValue = audioTools.audioFormatParser(args.get(1,'end'))
-                if self.prefValue == None: return self._getUsage()
+            elif self.pref == "audioFormat":
+                self.prefValue = audioTools.audioFormatParser(args.get(1, "end"))
+                if self.prefValue == None:
+                    return self._getUsage()
 
         if self.pref == None:
             self.pref = self._apGetAudioPref()
-            if self.pref == None: return lang.msgReturnCancel
+            if self.pref == None:
+                return lang.msgReturnCancel
 
-            if self.pref == 'audioChannels':
+            if self.pref == "audioChannels":
                 self.prefValue = self._apGetChannels()
-                if self.prefValue == None: return self._getUsage()
-            elif self.pref == 'audioRate':
+                if self.prefValue == None:
+                    return self._getUsage()
+            elif self.pref == "audioRate":
                 self.prefValue = 44100
-            elif self.pref == 'audioFormat':
+            elif self.pref == "audioFormat":
                 self.prefValue = self._apGetFileFormat()
-                if self.prefValue == None: return lang.msgReturnCancel
-
+                if self.prefValue == None:
+                    return lang.msgReturnCancel
 
     def process(self):
-        if self.pref == 'audioChannels':
+        if self.pref == "audioChannels":
             self.ao.audioChannels = self.prefValue
-        elif self.pref == 'audioRate':
+        elif self.pref == "audioRate":
             pass
-            #self.prefValue = 44100
-        elif self.pref == 'audioFormat':
-            self.ao.external.writePref('external', 'audioFormat', 
-                self.prefValue)
+            # self.prefValue = 44100
+        elif self.pref == "audioFormat":
+            self.ao.external.writePref("external", "audioFormat", self.prefValue)
 
     def log(self):
-        if self.gatherStatus and self.processStatus: # if complete
-            return '%s %s' % (self.pref, self.prefValue) 
+        if self.gatherStatus and self.processStatus:  # if complete
+            return "%s %s" % (self.pref, self.prefValue)
 
-    def display(self): 
-        label = self.pref.replace('audio', '').lower()
-        msg = 'audio %s set to %r.\n' % (label, self.prefValue)
+    def display(self):
+        label = self.pref.replace("audio", "").lower()
+        msg = "audio %s set to %r.\n" % (label, self.prefValue)
         return msg
+
 
 # class CPff(Command):
 #     """set the values of the audio foile format
 #     """
-# 
+#
 #     def __init__(self, ao, args='', **keywords):
 #         Command.__init__(self, ao, args, **keywords)
 #         self.processSwitch = 1 # display only
 #         self.gatherSwitch = 1 # display only
 #         self.cmdStr = 'CPff'
-# 
-# 
+#
+#
 #     def gather(self):
 #         args = self.args
 #         self.formatStr = None
@@ -7428,114 +8169,128 @@ class APa(Command):
 #             self.formatStr = audioTools.audioFormatParser(args.get(0,'end'))
 #             if self.formatStr == None: return self._getUsage()
 #         if self.formatStr == None:
-# 
+#
 #     def process(self):
 #         self.ao.external.writePref('external', 'audioFormat', self.formatStr)
-# 
+#
 #     def log(self):
 #         if self.gatherStatus and self.processStatus: # if complete
-#             return '%s %s' % (self.cmdStr, self.formatStr) 
-# 
-#     def display(self): 
-#         msg = 'audio file format changed to %s.\n' % ( 
+#             return '%s %s' % (self.cmdStr, self.formatStr)
+#
+#     def display(self):
+#         msg = 'audio file format changed to %s.\n' % (
 #                       self.ao.external.getPref('external', 'audioFormat'))
 #         return msg
-# 
-# 
+#
+#
 
-#-----------------------------------------------------------------||||||||||||--
+
+# -----------------------------------------------------------------||||||||||||--
 # athena history commands
 class AHls(Command):
     "list history"
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 0 # display only
-        self.gatherSwitch = 0 # display only
-        self.cmdStr = 'AHls'
+        self.processSwitch = 0  # display only
+        self.gatherSwitch = 0  # display only
+        self.cmdStr = "AHls"
 
-    def gather(self): 
+    def gather(self):
         pass
 
-    def process(self): 
+    def process(self):
         pass
 
-    def display(self): 
-        keys = list(self.ao.aoInfo['history'].keys())
+    def display(self):
+        keys = list(self.ao.aoInfo["history"].keys())
         keys.sort()
         if len(keys) == 0:
-            return 'no history.\n'
+            return "no history.\n"
 
         msg = []
-        msg.append('history:\n')
+        msg.append("history:\n")
         entryLines = []
         i = 1
         for key in keys:
-            timeStr = time.asctime(time.localtime(key)) # not displayed
+            timeStr = time.asctime(time.localtime(key))  # not displayed
             iStr = str(i)
-            cmdStr = '%s' % (self.ao.aoInfo['history'][key])
+            cmdStr = "%s" % (self.ao.aoInfo["history"][key])
             entryLines.append([iStr, cmdStr])
             i = i + 1
 
-        headerKey    = ['index', 'cmd'] # table settings
+        headerKey = ["index", "cmd"]  # table settings
         minWidthList = [lang.LMARGINW, 0]
-        bufList      = [1, 1]
-        justList         = ['l','l']
-        table = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
-                                  bufList, justList, self.termObj, 'oneColumn')
-        msg.append('%s\n' % table)
-        return ''.join(msg)
+        bufList = [1, 1]
+        justList = ["l", "l"]
+        table = typeset.formatVariCol(
+            headerKey,
+            entryLines,
+            minWidthList,
+            bufList,
+            justList,
+            self.termObj,
+            "oneColumn",
+        )
+        msg.append("%s\n" % table)
+        return "".join(msg)
+
 
 class AHrm(Command):
     "list history"
-    def __init__(self, ao, args='', **keywords):
-        Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 0 # display only
-        self.cmdStr = 'AHrm'
 
-    def gather(self): 
+    def __init__(self, ao, args="", **keywords):
+        Command.__init__(self, ao, args, **keywords)
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 0  # display only
+        self.cmdStr = "AHrm"
+
+    def gather(self):
         pass
 
-    def process(self): 
-        self.ao.aoInfo['history'] = {} # clear
+    def process(self):
+        self.ao.aoInfo["history"] = {}  # clear
 
-    def display(self): 
+    def display(self):
         msg = []
-        msg.append('history destroyed.\n')
-        return ''.join(msg)
+        msg.append("history destroyed.\n")
+        return "".join(msg)
+
 
 # athena history commands
 class AHexe(Command):
     "SUBCMD: execute history"
-    def __init__(self, ao, args='', **keywords):
-        Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'AHexe'
-        self.subCmd = 1 # if 1, executed within method of interptreter
 
-    def gather(self): 
-        self.keys = list(self.ao.aoInfo['history'].keys())
+    def __init__(self, ao, args="", **keywords):
+        Command.__init__(self, ao, args, **keywords)
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "AHexe"
+        self.subCmd = 1  # if 1, executed within method of interptreter
+
+    def gather(self):
+        self.keys = list(self.ao.aoInfo["history"].keys())
         self.keys.sort()
         if len(self.keys) == 0:
-            return 'no history.\n'
+            return "no history.\n"
 
         args = self.args
         self.cmdRange = None
-        if args != '':
-            args = argTools.ArgOps(args) # no strip
-            self.cmdRange = self._convertListRange(args.get(0, 'end'), 
-                                                                1, len(self.keys))
-            if self.cmdRange == None: return self._getUsage()
+        if args != "":
+            args = argTools.ArgOps(args)  # no strip
+            self.cmdRange = self._convertListRange(
+                args.get(0, "end"), 1, len(self.keys)
+            )
+            if self.cmdRange == None:
+                return self._getUsage()
 
         if self.cmdRange == None:
-            query = 'enter a command range, between %s and %s:' % (1, 
-                                                                        len(self.keys))
+            query = "enter a command range, between %s and %s:" % (1, len(self.keys))
             while 1:
                 usrStr = dialog.askStr(query, self.termObj)
-                if usrStr == None: return lang.msgReturnCancel
-                self.cmdRange = self._convertListRange(usrStr, 
-                                                     1, len(self.keys))
+                if usrStr == None:
+                    return lang.msgReturnCancel
+                self.cmdRange = self._convertListRange(usrStr, 1, len(self.keys))
                 if self.cmdRange == None:
                     dialog.msgOut("bad command range.", self.termObj)
                     continue
@@ -7546,487 +8301,565 @@ class AHexe(Command):
         self.cmdList = []
         i = 0
         for key in self.keys:
-            if i in range(self.cmdRange[0], self.cmdRange[1]+1):
-                self.cmdList.append(self.ao.aoInfo['history'][key])
+            if i in range(self.cmdRange[0], self.cmdRange[1] + 1):
+                self.cmdList.append(self.ao.aoInfo["history"][key])
             i = i + 1
 
-    def log(self): # may cause an infinite loop
-        if self.gatherStatus and self.processStatus: # if complete
-            return '%s %s' % (self.cmdStr, drawer.listScrub(
-                                    self._setReturnError(self.cmdRange))) 
-    def result(self):
-        return {'cmdList':self.cmdList}
+    def log(self):  # may cause an infinite loop
+        if self.gatherStatus and self.processStatus:  # if complete
+            return "%s %s" % (
+                self.cmdStr,
+                drawer.listScrub(self._setReturnError(self.cmdRange)),
+            )
 
-#-----------------------------------------------------------------||||||||||||--
+    def result(self):
+        return {"cmdList": self.cmdList}
+
+
+# -----------------------------------------------------------------||||||||||||--
 # athena utility commands
 class AUdoc(Command):
     "open html documentation"
-    
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 0 # display only
-        self.gatherSwitch = 0 # display only
-        self.cmdStr = 'AUdoc'
+        self.processSwitch = 0  # display only
+        self.gatherSwitch = 0  # display only
+        self.cmdStr = "AUdoc"
 
-    def log(self): # return an executable command str, subclass
+    def log(self):  # return an executable command str, subclass
         if self.gatherStatus and self.processStatus:
-            return '%s' % (self.cmdStr)
+            return "%s" % (self.cmdStr)
 
-    def display(self):  
-        import webbrowser # only w/ python 2.3 and later...
-        manName = 'athenaclManual.htm'
-        dst = 'online'
+    def display(self):
+        import webbrowser  # only w/ python 2.3 and later...
+
+        manName = "athenaclManual.htm"
+        dst = "online"
         if self.ao.external.fpDocDir != None:
             if manName in os.listdir(self.ao.external.fpDocDir):
-                dst = 'local'
-        if dst == 'local':
-            url = drawer.urlPrep(os.path.join(self.ao.external.fpDocDir,
-                                                         manName), 'file')
-            msg = 'local documentation opened.\n'
-        elif dst == 'online':
-            url = drawer.urlPrep(lang.msgAthDocURL, 'http')
-            msg = 'on-line documentation opened.\n'
+                dst = "local"
+        if dst == "local":
+            url = drawer.urlPrep(
+                os.path.join(self.ao.external.fpDocDir, manName), "file"
+            )
+            msg = "local documentation opened.\n"
+        elif dst == "online":
+            url = drawer.urlPrep(lang.msgAthDocURL, "http")
+            msg = "on-line documentation opened.\n"
         try:
             webbrowser.open(url)
         # this exception was found from a bug report on linux
-        except KeyboardInterrupt: 
-            msg = 'unable to open documentation: visit www.athenacl.org\n'
+        except KeyboardInterrupt:
+            msg = "unable to open documentation: visit www.athenacl.org\n"
         return msg
+
 
 class AUup(Command):
     "check for athenacl updates"
 
-    def __init__(self, ao, args='', **keywords):
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 0 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'AUup'
+        self.processSwitch = 0  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "AUup"
 
-    def gather(self): 
+    def gather(self):
         # update last version check even if connection not made
-        self.ao.external.writePref('athena', 'tLastVersionCheck', time.time())
+        self.ao.external.writePref("athena", "tLastVersionCheck", time.time())
 
         ok = dialog.askYesNo(lang.msgVersionCheck, self.termObj)
-        if ok != 1: return lang.msgReturnCancel
+        if ok != 1:
+            return lang.msgReturnCancel
 
         status, versionStr = self.ao.compareVersion()
-        if status == None: # problem, not online, not new
-            return lang.msgSubmitLogFail # not online
-        elif status == 'current': # up to date
-            return lang.msgUpTodate % self.ao.aoStr('human')
-        ok = dialog.askYesNo(lang.msgVersionUpdate % (status, versionStr), 
-                                          self.termObj)
-        if ok != 1: return lang.msgReturnCancel
-        
-    def log(self): # return an executable command str, subclass
+        if status == None:  # problem, not online, not new
+            return lang.msgSubmitLogFail  # not online
+        elif status == "current":  # up to date
+            return lang.msgUpTodate % self.ao.aoStr("human")
+        ok = dialog.askYesNo(lang.msgVersionUpdate % (status, versionStr), self.termObj)
+        if ok != 1:
+            return lang.msgReturnCancel
+
+    def log(self):  # return an executable command str, subclass
         if self.gatherStatus and self.processStatus:
-            return '%s' % (self.cmdStr)
-        
-    def display(self):  
+            return "%s" % (self.cmdStr)
+
+    def display(self):
         import webbrowser
+
         webbrowser.open(drawer.urlPrep(lang.msgAthDownloadURL))
-        return '%s.\n' % lang.COMPLETE
+        return "%s.\n" % lang.COMPLETE
+
 
 class AUlog(Command):
     "open the athenacl log file"
 
-    def __init__(self, ao, args='', **keywords):
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 0 # display only
-        self.gatherSwitch = 0 # display only
-        self.cmdStr = 'AUlog'
-        
-    def log(self): # return an executable command str, subclass
+        self.processSwitch = 0  # display only
+        self.gatherSwitch = 0  # display only
+        self.cmdStr = "AUlog"
+
+    def log(self):  # return an executable command str, subclass
         if self.gatherStatus and self.processStatus:
-            return '%s' % (self.cmdStr)
-        
-    def display(self):  
-        if self.ao.external.logCheck(): # if a log exists
-            prefDict = self.ao.external.getPrefGroup('external')
+            return "%s" % (self.cmdStr)
+
+    def display(self):
+        if self.ao.external.logCheck():  # if a log exists
+            prefDict = self.ao.external.getPrefGroup("external")
             osTools.openMedia(self.ao.external.logPath, prefDict)
-        return '%s.\n' % lang.COMPLETE
+        return "%s.\n" % lang.COMPLETE
+
 
 class AUsys(Command):
-    """provide a display about the system
-    """
-    def __init__(self, ao, args='', **keywords):
-        Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 0 # display only
-        self.gatherSwitch = 0 # display only
-        self.cmdStr = 'AUsys'
+    """provide a display about the system"""
 
-    def log(self): # return an executable command str, subclass
+    def __init__(self, ao, args="", **keywords):
+        Command.__init__(self, ao, args, **keywords)
+        self.processSwitch = 0  # display only
+        self.gatherSwitch = 0  # display only
+        self.cmdStr = "AUsys"
+
+    def log(self):  # return an executable command str, subclass
         if self.gatherStatus and self.processStatus:
-            return '%s' % (self.cmdStr)
-    
-    def display(self): 
+            return "%s" % (self.cmdStr)
+
+    def display(self):
         w = self.termObj.w
         tniStat = self._scGetTnStr()
         startTime, endTime, totalDur = self._teGetTotalTimeRange()
         msg = []
-        msg.append('athenaCL system:\n')
+        msg.append("athenaCL system:\n")
         msg.append(lang.DIVIDER * w)
-        msg.append('\n')
+        msg.append("\n")
         entryLines = []
-        entryLines.append(['athenaCL version:', self.ao.aoStr()])
-        entryLines.append(['python version:', self.ao.pyStr()])
-        entryLines.append(['os name, sys platform:', self.ao.osStr()])
-        entryLines.append(['', '']) # draw line
-        entryLines.append(['SC dictionary mode:', tniStat])
-        #entryLines.append(['current SetMeasure:', self.ao.activeSetMeasure])
-        entryLines.append(['current PathInstance:', self.ao.activePath])
-        entryLines.append(['total PI:', self._getNoPI()])
-        entryLines.append(['current TextureModule:', self.ao.activeTextureModule])
-        entryLines.append(['current TextureInstance:', self.ao.activeTexture])
-        entryLines.append(['total TI:', self._getNoTI()])
-        entryLines.append(['total duration:', ('%.1f' % totalDur)])
+        entryLines.append(["athenaCL version:", self.ao.aoStr()])
+        entryLines.append(["python version:", self.ao.pyStr()])
+        entryLines.append(["os name, sys platform:", self.ao.osStr()])
+        entryLines.append(["", ""])  # draw line
+        entryLines.append(["SC dictionary mode:", tniStat])
+        # entryLines.append(['current SetMeasure:', self.ao.activeSetMeasure])
+        entryLines.append(["current PathInstance:", self.ao.activePath])
+        entryLines.append(["total PI:", self._getNoPI()])
+        entryLines.append(["current TextureModule:", self.ao.activeTextureModule])
+        entryLines.append(["current TextureInstance:", self.ao.activeTexture])
+        entryLines.append(["total TI:", self._getNoTI()])
+        entryLines.append(["total duration:", ("%.1f" % totalDur)])
 
-        entryLines.append(['', '']) # draw line
-        entryLines.append(['current EventMode:', self.ao.activeEventMode])
-        
-        value = self.ao.external.getPref('athena','eventOutput')
-        valStr = drawer.listScrub(eval(value), None, 'noQuote')
-        entryLines.append(['current EventOutput formats:', valStr])
+        entryLines.append(["", ""])  # draw line
+        entryLines.append(["current EventMode:", self.ao.activeEventMode])
 
-        value = self.ao.external.getPref('external','autoRenderOption')                             
-        entryLines.append(['EventMode auto render:', typeset.boolAsStr(value)])
+        value = self.ao.external.getPref("athena", "eventOutput")
+        valStr = drawer.listScrub(eval(value), None, "noQuote")
+        entryLines.append(["current EventOutput formats:", valStr])
 
-        entryLines.append(['audio channels:', self.ao.audioChannels])
+        value = self.ao.external.getPref("external", "autoRenderOption")
+        entryLines.append(["EventMode auto render:", typeset.boolAsStr(value)])
 
-        value = self.ao.external.getPref('external','audioFormat')
-        entryLines.append(['audio file format:', value])
-        entryLines.append(['midi tempo:', self.ao.midiTempo])
+        entryLines.append(["audio channels:", self.ao.audioChannels])
 
-        entryLines.append(['', '']) # draw line
-        value = self.ao.external.getPref('athena','dlgVisualMethod')
-        entryLines.append(['dialog method:', value])
-        value = self.ao.external.getPref('athena','gfxVisualMethod')
-        entryLines.append(['graphics format:', value])
-        value = self.ao.external.getPref('athena','refreshMode', 1)
-        entryLines.append(['refresh mode:', typeset.boolAsStr(value)])
+        value = self.ao.external.getPref("external", "audioFormat")
+        entryLines.append(["audio file format:", value])
+        entryLines.append(["midi tempo:", self.ao.midiTempo])
 
-        entryLines.append(['', '']) # draw line
-        entryLines.append(['preferences:', drawer.getPrefsPath()])
+        entryLines.append(["", ""])  # draw line
+        value = self.ao.external.getPref("athena", "dlgVisualMethod")
+        entryLines.append(["dialog method:", value])
+        value = self.ao.external.getPref("athena", "gfxVisualMethod")
+        entryLines.append(["graphics format:", value])
+        value = self.ao.external.getPref("athena", "refreshMode", 1)
+        entryLines.append(["refresh mode:", typeset.boolAsStr(value)])
+
+        entryLines.append(["", ""])  # draw line
+        entryLines.append(["preferences:", drawer.getPrefsPath()])
         if self.ao.external.logCheck():
-            entryLines.append(['log:', self.ao.external.logPath])
-        value = self.ao.external.getPref('athena', 'fpScratchDir')
-        entryLines.append(['user scratch:', value])
-        value = self.ao.external.getPref('athena','fpAudioDir')
-        entryLines.append(['user audio:', value])
-#         value = self.ao.external.getPref('athena','sadir')
-#         entryLines.append(['user sadir:', value])
+            entryLines.append(["log:", self.ao.external.logPath])
+        value = self.ao.external.getPref("athena", "fpScratchDir")
+        entryLines.append(["user scratch:", value])
+        value = self.ao.external.getPref("athena", "fpAudioDir")
+        entryLines.append(["user audio:", value])
+        #         value = self.ao.external.getPref('athena','sadir')
+        #         entryLines.append(['user sadir:', value])
 
-        entryLines.append(['libATH:', self.ao.external.fpLibATH])
+        entryLines.append(["libATH:", self.ao.external.fpLibATH])
         value = drawer.getcwd()
-        if value == None: value = 'none'
-        entryLines.append(['working directory:', value])
-        entryLines.append(['python executable:', sys.executable])
-        entryLines.append(['python site:', osTools.findSiteLib()])
+        if value == None:
+            value = "none"
+        entryLines.append(["working directory:", value])
+        entryLines.append(["python executable:", sys.executable])
+        entryLines.append(["python site:", osTools.findSiteLib()])
 
-        for key, title in [('midiPlayerPath', 'midi player'), 
-                                 ('audioPlayerPath', 'audio player'), 
-                                 ('textReaderPath', 'text reader'), 
-                                 ('imageViewerPath', 'image viewer'), 
-                                 ('psViewerPath', 'postscript viewer'), 
-                                 ('csoundPath', 'csound path')]:
-            value = self.ao.external.getPref('external', key)
-            entryLines.append(['%s:' % title, value])
+        for key, title in [
+            ("midiPlayerPath", "midi player"),
+            ("audioPlayerPath", "audio player"),
+            ("textReaderPath", "text reader"),
+            ("imageViewerPath", "image viewer"),
+            ("psViewerPath", "postscript viewer"),
+            ("csoundPath", "csound path"),
+        ]:
+            value = self.ao.external.getPref("external", key)
+            entryLines.append(["%s:" % title, value])
 
-        headerKey    = [] # removes header
+        headerKey = []  # removes header
         minWidthList = [lang.MMARGINW, 0]
-        bufList      = [0, 1]
-        justList         = ['l','l']
-        table = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
-                                  bufList, justList, self.termObj, 'oneColumn')
-        msg.append('%s\n' % table)
-        return ''.join(msg)
-        
+        bufList = [0, 1]
+        justList = ["l", "l"]
+        table = typeset.formatVariCol(
+            headerKey,
+            entryLines,
+            minWidthList,
+            bufList,
+            justList,
+            self.termObj,
+            "oneColumn",
+        )
+        msg.append("%s\n" % table)
+        return "".join(msg)
+
 
 class AUbeat(Command):
     "utility to get a beat with tapping; not currently in use"
 
-    def __init__(self, ao, args='', **keywords):
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 0 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'AUbeat'
+        self.processSwitch = 0  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "AUbeat"
 
-    def gather(self): 
+    def gather(self):
         self.avgTempo, avgBeatT = dialog.getTempo()
 
-    def log(self): # return an executable command str, subclass
+    def log(self):  # return an executable command str, subclass
         if self.gatherStatus and self.processStatus:
-            return '%s' % (self.cmdStr)
+            return "%s" % (self.cmdStr)
 
     def display(self):
-        if self.avgTempo == None: # error or cancel
+        if self.avgTempo == None:  # error or cancel
             return lang.msgReturnCancel
         else:
-            return 'average tempo found: %f\n' % self.avgTempo #return as string
+            return "average tempo found: %f\n" % self.avgTempo  # return as string
+
 
 class AUpc(Command):
     "utility for pitch conversion"
 
-    def __init__(self, ao, args='', **keywords):
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 0 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'AUpc'
+        self.processSwitch = 0  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "AUpc"
 
-    def gather(self): 
+    def gather(self):
         args = self.args
         self.pObj = None
-        if args != '':
-            args = argTools.ArgOps(args) # no strip
-            self.pObj = multiset.getPitch(self.termObj, args.get(0,'end'))
-            if self.pObj == None: return self._getUsage()
+        if args != "":
+            args = argTools.ArgOps(args)  # no strip
+            self.pObj = multiset.getPitch(self.termObj, args.get(0, "end"))
+            if self.pObj == None:
+                return self._getUsage()
         if self.pObj == None:
             self.pObj = multiset.getPitch(self.termObj)
-            if self.pObj == None: return lang.msgReturnCancel
+            if self.pObj == None:
+                return lang.msgReturnCancel
 
-    def log(self): # return an executable command str, subclass
+    def log(self):  # return an executable command str, subclass
         if self.gatherStatus and self.processStatus:
             # get raw pitch srcData
-            return '%s %s' % (self.cmdStr, str(self.pObj.srcData))
+            return "%s %s" % (self.cmdStr, str(self.pObj.srcData))
 
-    def display(self): 
-        msg = ['AthenaUtility Pitch Converter\n']
+    def display(self):
+        msg = ["AthenaUtility Pitch Converter\n"]
 
         entryLines = self.pObj.report()
-        headerKey    = [] # removes header
+        headerKey = []  # removes header
         minWidthList = [lang.LMARGINW, 0]
-        bufList      = [0, 1]
-        justList         = ['l','l']
-        table = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
-                                  bufList, justList, self.termObj, 'oneColumn')
-        msg.append('%s\n' % table)
-        return ''.join(msg)
+        bufList = [0, 1]
+        justList = ["l", "l"]
+        table = typeset.formatVariCol(
+            headerKey,
+            entryLines,
+            minWidthList,
+            bufList,
+            justList,
+            self.termObj,
+            "oneColumn",
+        )
+        msg.append("%s\n" % table)
+        return "".join(msg)
 
 
 class AUmg(Command):
     "utility for markov generation"
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 
-        self.gatherSwitch = 1 
-        self.cmdStr = 'AUmg'
+        self.processSwitch = 1
+        self.gatherSwitch = 1
+        self.cmdStr = "AUmg"
 
     def _auGetMarkovTransition(self, mObj, query):
         while 1:
             tStr = dialog.askStr(query, self.termObj)
-            if tStr == None: return None
+            if tStr == None:
+                return None
             try:
                 self.mObj.loadTransition(tStr)
             except error.TransitionSyntaxError as e:
-                dialog.msgOut('%s%s\n' % (lang.TAB, e), self.termObj)
+                dialog.msgOut("%s%s\n" % (lang.TAB, e), self.termObj)
                 continue
             return tStr
 
-    def gather(self): 
+    def gather(self):
         args = self.args
         # create empty markov object
         self.count = None
         self.order = None
         self.mObj = markov.Transition()
-        self.post = None # store results
-        if args != '':
-            args = argTools.ArgOps(args) # no strip
-            self.count = args.get(0, 'single', 'eval')
-            self.count = self._checkInRange(self.count, 1, 999) 
-            if self.count == None: return self._getUsage()
-            self.order = args.get(1, 'single', 'eval')
-            self.order = self._checkInRange(self.order, 0, 10) 
-            if self.order == None: return self._getUsage()
+        self.post = None  # store results
+        if args != "":
+            args = argTools.ArgOps(args)  # no strip
+            self.count = args.get(0, "single", "eval")
+            self.count = self._checkInRange(self.count, 1, 999)
+            if self.count == None:
+                return self._getUsage()
+            self.order = args.get(1, "single", "eval")
+            self.order = self._checkInRange(self.order, 0, 10)
+            if self.order == None:
+                return self._getUsage()
             try:
-                self.mObj.loadTransition(args.get(2,'end','off','space'))
+                self.mObj.loadTransition(args.get(2, "end", "off", "space"))
             except error.TransitionSyntaxError as e:
-                return self._getUsage(e)             
-        if self.count == None: # get args from user
-            self.count = self._getNumber('number of generations:', 'int', 1, 999)
-            if self.count == None: return lang.msgReturnCancel
-            self.order = self._getNumber('desired order:', 'int', 0, 10)
-            if self.order == None: return lang.msgReturnCancel
-            msg = 'enter Markov transition string:'
-            post = self._auGetMarkovTransition(self.mObj, msg) # will load in 
-            if post == None: return lang.msgReturnCancel 
-            
+                return self._getUsage(e)
+        if self.count == None:  # get args from user
+            self.count = self._getNumber("number of generations:", "int", 1, 999)
+            if self.count == None:
+                return lang.msgReturnCancel
+            self.order = self._getNumber("desired order:", "int", 0, 10)
+            if self.order == None:
+                return lang.msgReturnCancel
+            msg = "enter Markov transition string:"
+            post = self._auGetMarkovTransition(self.mObj, msg)  # will load in
+            if post == None:
+                return lang.msgReturnCancel
+
     def process(self):
         self.post = []
         for x in range(self.count):
-            self.post.append(self.mObj.next(random.random(), self.post,
-                                  self.order))
-            
-    def log(self): # return an executable command str, subclass
-        if self.gatherStatus and self.processStatus:
-            return '%s %s %s %s' % (self.cmdStr, self.count, self.order, 
-                                            str(self.mObj))
+            self.post.append(self.mObj.next(random.random(), self.post, self.order))
 
-    def display(self): 
-        msg = ['AthenaUtility Markov Generator\n']
+    def log(self):  # return an executable command str, subclass
+        if self.gatherStatus and self.processStatus:
+            return "%s %s %s %s" % (self.cmdStr, self.count, self.order, str(self.mObj))
+
+    def display(self):
+        msg = ["AthenaUtility Markov Generator\n"]
         msg.append(typeset.anyDataToStr(self.post)[1:-1])
-        msg.append('\n')         
-        return ''.join(msg)
-        
+        msg.append("\n")
+        return "".join(msg)
+
 
 class AUma(Command):
     "utility for markov analysis"
 
-    def __init__(self, ao, args='', **keywords):
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 
-        self.gatherSwitch = 1 
-        self.cmdStr = 'AUma'
+        self.processSwitch = 1
+        self.gatherSwitch = 1
+        self.cmdStr = "AUma"
 
     def _auGetMarkovSequence(self, query):
         while 1:
             tStr = dialog.askStr(query, self.termObj)
-            if tStr == None: return None
+            if tStr == None:
+                return None
             return tStr
 
-    def gather(self): 
+    def gather(self):
         args = self.args
         # create empty markov object
         self.orderMax = None
         self.sequence = None
-        self.post = None # store string
-        if args != '':
-            args = argTools.ArgOps(args) # no strip
-            self.orderMax = args.get(0, 'single', 'eval')
-            if self.orderMax == None: return self._getUsage()
-            self.sequence = args.get(1, 'end', 'off', 'space')
-        if self.orderMax == None: # get args from user
-            self.orderMax = self._getNumber('maximum analysis order:','int',0,10)
-            if self.orderMax == None: return lang.msgReturnCancel
-            msg = 'enter space-separated string:'
-            self.sequence = self._auGetMarkovSequence(msg) 
-            if self.sequence == None: return lang.msgReturnCancel 
-                    
+        self.post = None  # store string
+        if args != "":
+            args = argTools.ArgOps(args)  # no strip
+            self.orderMax = args.get(0, "single", "eval")
+            if self.orderMax == None:
+                return self._getUsage()
+            self.sequence = args.get(1, "end", "off", "space")
+        if self.orderMax == None:  # get args from user
+            self.orderMax = self._getNumber("maximum analysis order:", "int", 0, 10)
+            if self.orderMax == None:
+                return lang.msgReturnCancel
+            msg = "enter space-separated string:"
+            self.sequence = self._auGetMarkovSequence(msg)
+            if self.sequence == None:
+                return lang.msgReturnCancel
+
     def process(self):
         mObj = markov.Transition()
         mObj.loadString(self.sequence, self.orderMax)
-        self.post = mObj.repr() # get repr of trans string
-        
-    def log(self): # return an executable command str, subclass
-        if self.gatherStatus and self.processStatus:
-            return '%s %s %s' % (self.cmdStr, self.orderMax, self.sequence)
+        self.post = mObj.repr()  # get repr of trans string
 
-    def display(self): 
-        msg = ['AthenaUtility Markov Analysis\n']
+    def log(self):  # return an executable command str, subclass
+        if self.gatherStatus and self.processStatus:
+            return "%s %s %s" % (self.cmdStr, self.orderMax, self.sequence)
+
+    def display(self):
+        msg = ["AthenaUtility Markov Analysis\n"]
         msg.append(self.post)
-        msg.append('\n')         
-        return ''.join(msg)
+        msg.append("\n")
+        return "".join(msg)
 
 
 class AUca(Command):
 
-    def __init__(self, ao, args='', **keywords):
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.gfxSwitch = 1 # display
-        self.cmdStr = 'AUca'
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.gfxSwitch = 1  # display
+        self.cmdStr = "AUca"
 
     def _auGetCaSpec(self, query):
         while 1:
             spec = dialog.askStr(query, self.termObj)
-            if spec == None: return None
+            if spec == None:
+                return None
             try:
                 specObj = automata.AutomataSpecification(spec)
             except error.AutomataSpecificationError as e:
-                dialog.msgOut('%s%s\n' % (lang.TAB, e), self.termObj)
+                dialog.msgOut("%s%s\n" % (lang.TAB, e), self.termObj)
                 continue
-            return spec # return spec, not object
+            return spec  # return spec, not object
 
-    def gather(self): 
+    def gather(self):
         self.specStr = None
         self.rule = None
         self.mutation = None
 
-        if self.args != '':
+        if self.args != "":
             args = argTools.ArgOps(self.args)
-            self.specStr = args.get(0, 'single')
+            self.specStr = args.get(0, "single")
             ok, msg = self._tpConvertPmtrObj(args.get(1))
-            if not ok: return self._getUsage('rule error: %s' % msg)
-            else: self.rule = msg # msg is object
-            if args.get(2) == None: # permit defualt of zero
-                ok, self.mutation = self._tpConvertPmtrObj('c,0') 
+            if not ok:
+                return self._getUsage("rule error: %s" % msg)
+            else:
+                self.rule = msg  # msg is object
+            if args.get(2) == None:  # permit defualt of zero
+                ok, self.mutation = self._tpConvertPmtrObj("c,0")
             else:
                 ok, msg = self._tpConvertPmtrObj(args.get(2))
-                if not ok: return self._getUsage('mutation error: %s' % msg)
-                else: self.mutation = msg # msg is object
-            
-        if self.specStr == None:
-            msg = 'enter a CA specification:'
-            self.specStr = self._auGetCaSpec(msg) # will load in 
-            if self.specStr == None: return lang.msgReturnCancel 
-            msg = 'enter a Generator ParameterObject for rule:'
-            self.rule = self._tpGetPmtrObj(msg)
-            if self.rule == None: return lang.msgReturnCancel
-            msg = 'enter a Generator ParameterObject for mutation:'
-            self.mutation = self._tpGetPmtrObj(msg)
-            if self.mutation == None: return lang.msgReturnCancel
+                if not ok:
+                    return self._getUsage("mutation error: %s" % msg)
+                else:
+                    self.mutation = msg  # msg is object
 
-    def process(self): 
+        if self.specStr == None:
+            msg = "enter a CA specification:"
+            self.specStr = self._auGetCaSpec(msg)  # will load in
+            if self.specStr == None:
+                return lang.msgReturnCancel
+            msg = "enter a Generator ParameterObject for rule:"
+            self.rule = self._tpGetPmtrObj(msg)
+            if self.rule == None:
+                return lang.msgReturnCancel
+            msg = "enter a Generator ParameterObject for mutation:"
+            self.mutation = self._tpGetPmtrObj(msg)
+            if self.mutation == None:
+                return lang.msgReturnCancel
+
+    def process(self):
         refDict = basePmtr.REFDICT_SIM
         ruleStart = self.rule(0, refDict)
         mutationStart = self.mutation(0, refDict)
         try:
             self.ca = automata.factory(self.specStr, ruleStart, mutationStart)
         except error.AutomataSpecificationError as e:
-            return 'error in CA specification: %s\n' % e
-        for i in range(1, self.ca.spec.get('yTotal')): # already got zero
+            return "error in CA specification: %s\n" % e
+        for i in range(1, self.ca.spec.get("yTotal")):  # already got zero
             self.ca.gen(1, self.rule(i, refDict), self.mutation(i, refDict))
 
     def log(self):
-        if self.gatherStatus and self.processStatus: # if complete
-            caStr = self.specStr # has been checked
-            mStr = self.mutation.repr('argsOnly').replace(' ','')
-            rStr = self.rule.repr('argsOnly').replace(' ','')
-            return '%s %s %s %s' % (self.cmdStr, caStr, rStr, mStr)
+        if self.gatherStatus and self.processStatus:  # if complete
+            caStr = self.specStr  # has been checked
+            mStr = self.mutation.repr("argsOnly").replace(" ", "")
+            rStr = self.rule.repr("argsOnly").replace(" ", "")
+            return "%s %s %s %s" % (self.cmdStr, caStr, rStr, mStr)
 
     def display(self):
-        return '%s\ncomplete.\n' % self.ca
+        return "%s\ncomplete.\n" % self.ca
 
     def displayGfx(self, fmt, dir=None):
         # supply self as first arg to get instance of command
-        prefDict = self.ao.external.getPrefGroup('external')
-        obj = graphCellular.CAmapCanvas(self.ao, self.ca.getCells('table', 0,        
-                self.ca.spec.get('s'), None, self.ca.spec.get('c'), 
-                self.ca.spec.get('w')), self.ca.dstValues, 
-                2, 2, fmt, None, self.ca.repr('line'))
+        prefDict = self.ao.external.getPrefGroup("external")
+        obj = graphCellular.CAmapCanvas(
+            self.ao,
+            self.ca.getCells(
+                "table",
+                0,
+                self.ca.spec.get("s"),
+                None,
+                self.ca.spec.get("c"),
+                self.ca.spec.get("w"),
+            ),
+            self.ca.dstValues,
+            2,
+            2,
+            fmt,
+            None,
+            self.ca.repr("line"),
+        )
         obj.show(dir, prefDict)
 
     def displayGfxUtil(self, fmt, fp):
         # this method is for use in auto-documentation generation
         # can supply complete path rather than just a directory
-        obj = graphCellular.CAmapCanvas(self.ao, self.ca.getCells('table', 0,        
-                self.ca.spec.get('s'), None, self.ca.spec.get('c'), 
-                self.ca.spec.get('w')), self.ca.dstValues, 
-                2, 2, fmt, None, self.ca.repr('line'))
+        obj = graphCellular.CAmapCanvas(
+            self.ao,
+            self.ca.getCells(
+                "table",
+                0,
+                self.ca.spec.get("s"),
+                None,
+                self.ca.spec.get("c"),
+                self.ca.spec.get("w"),
+            ),
+            self.ca.dstValues,
+            2,
+            2,
+            fmt,
+            None,
+            self.ca.repr("line"),
+        )
         # second arg sets openMedia to false
         obj.write(fp, 0)
 
+
 class AUbug(Command):
     "utility testing"
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 0 # display only
-        self.gatherSwitch = 0 # display only
-        self.cmdStr = 'AUpc'
-        a = 4/0 # raise an error
-        
+        self.processSwitch = 0  # display only
+        self.gatherSwitch = 0  # display only
+        self.cmdStr = "AUpc"
+        a = 4 / 0  # raise an error
+
+
 class TMsd(Command):
     "Sets the random seed for Texture Modules (only)."
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'TMsd'
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "TMsd"
         self.seed = None
         self.rng = None
-    
+
     def gather(self):
-        args = argTools.ArgOps(self.args) # no strip
+        args = argTools.ArgOps(self.args)  # no strip
         self.seed = args.get(0, evaluate=True)
 
     def process(self):
@@ -8035,195 +8868,233 @@ class TMsd(Command):
         self.log()
         self.display()
 
-    def log(self): # return an executable command str, subclass
+    def log(self):  # return an executable command str, subclass
         if self.gatherStatus and self.processStatus:
-            return '%s' % (self.cmdStr)
+            return "%s" % (self.cmdStr)
 
     def display(self):
-        if self.seed == None: # error or cancel
+        if self.seed == None:  # error or cancel
             return lang.msgReturnCancel
         else:
-            return 'TextureModule seed: %s\n' % (self.seed)
-     
+            return "TextureModule seed: %s\n" % (self.seed)
+
+
 class TPsd(Command):
     "Sets the random seed for Parameter Objects and all other RNGs (except Texture Modules)."
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1 # display only
-        self.gatherSwitch = 1 # display only
-        self.cmdStr = 'TPsd'
+        self.processSwitch = 1  # display only
+        self.gatherSwitch = 1  # display only
+        self.cmdStr = "TPsd"
         self.new_seed = None
         self.rng = None
 
     def gather(self):
-        args = argTools.ArgOps(self.args) # no strip
+        args = argTools.ArgOps(self.args)  # no strip
         self.seed = args.get(0, evaluate=True)
 
     def process(self):
         self.rng = random
         self.rng.seed(self.seed)
 
-    def log(self): # return an executable command str, subclass
+    def log(self):  # return an executable command str, subclass
         if self.gatherStatus and self.processStatus:
-            return '%s' % (self.cmdStr)
+            return "%s" % (self.cmdStr)
 
     def display(self):
-        if self.seed == None: # error or cancel
+        if self.seed == None:  # error or cancel
             return lang.msgReturnCancel
         else:
-            return 'TextureParameterObjects seed: %s\n' % (self.seed)
-        
-#-----------------------------------------------------------------||||||||||||--
+            return "TextureParameterObjects seed: %s\n" % (self.seed)
+
+
+# -----------------------------------------------------------------||||||||||||--
 # command directory commands
+
 
 class _Menu(Command):
     """base class for menu commands
     note: child classes have underscore appended to name
-    this underscore is removed in ao.cmdManifest, and 
+    this underscore is removed in ao.cmdManifest, and
     re-added in Interpreter._lineCmdArgSplit"""
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
         self.processSwitch = 0
-        self.gatherSwitch    = 1 
-        self.subCmd = 1 # if 1, executed within method of interptreter
-        self.cmdStr = 'menu'
+        self.gatherSwitch = 1
+        self.subCmd = 1  # if 1, executed within method of interptreter
+        self.cmdStr = "menu"
         # modify in subclasses
         self.prefix = None
 
     def gather(self):
-        """ optional argument for command of help desired """
-        args = self.args 
+        """optional argument for command of help desired"""
+        args = self.args
         self.usrStr = None
         self.name = self.ao.prefixName(self.prefix)
 
         args = self.args
-        if args != '':
-            args = argTools.ArgOps(args) # no strip
-            self.prefix = args.get(0) # can overide prefix w/ command line arg
+        if args != "":
+            args = argTools.ArgOps(args)  # no strip
+            self.prefix = args.get(0)  # can overide prefix w/ command line arg
             self.usrStr = args.get(1)
-        elif self.usrStr == None or self.prefix == None: # no command line args
-            dialog.msgOut(('%s (%s) commands:\n' % (self.prefix, self.name)),
-                                                                  self.termObj)
-            lowerPrefix = '%sCmd' % self.prefix.lower()
+        elif self.usrStr == None or self.prefix == None:  # no command line args
+            dialog.msgOut(
+                ("%s (%s) commands:\n" % (self.prefix, self.name)), self.termObj
+            )
+            lowerPrefix = "%sCmd" % self.prefix.lower()
             cmds, cmdNames = self.ao.prefixCmdGroup(lowerPrefix)
             entryLines = []
             for i in range(0, len(cmdNames)):
-                entryLines.append(['', cmds[i], cmdNames[i]])
-            headerKey    = [] # table setup
+                entryLines.append(["", cmds[i], cmdNames[i]])
+            headerKey = []  # table setup
             minWidthList = [lang.TABW, lang.NAMEW, 0]
-            bufList      = [0, 1, 1]
-            justList         = ['c','l','l']
-            table = typeset.formatVariCol(headerKey, entryLines, minWidthList, 
-                                 bufList, justList, self.termObj)
-            dialog.msgOut((table + '\n'), self.termObj)
-            self.usrStr = dialog.askStr('command?', self.termObj)
+            bufList = [0, 1, 1]
+            justList = ["c", "l", "l"]
+            table = typeset.formatVariCol(
+                headerKey, entryLines, minWidthList, bufList, justList, self.termObj
+            )
+            dialog.msgOut((table + "\n"), self.termObj)
+            self.usrStr = dialog.askStr("command?", self.termObj)
 
         self.usrCmd = self.ao.prefixMatch(self.prefix, self.usrStr)
 
     def log(self):
-        if self.gatherStatus and self.processStatus: # if complete
-            return '%s' % (self.usrCmd)
+        if self.gatherStatus and self.processStatus:  # if complete
+            return "%s" % (self.usrCmd)
 
     def result(self):
-        return {'command':self.usrCmd} # dict required return
+        return {"command": self.usrCmd}  # dict required return
+
 
 class PI_(_Menu):
     """menu command"""
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         _Menu.__init__(self, ao, args, **keywords)
-        self.prefix = 'PI'
+        self.prefix = "PI"
+
 
 class TM_(_Menu):
     """menu command"""
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         _Menu.__init__(self, ao, args, **keywords)
-        self.prefix = 'TM'
+        self.prefix = "TM"
+
 
 class TP_(_Menu):
     """menu command"""
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         _Menu.__init__(self, ao, args, **keywords)
-        self.prefix = 'TP'
+        self.prefix = "TP"
+
 
 class TI_(_Menu):
     """menu command"""
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         _Menu.__init__(self, ao, args, **keywords)
-        self.prefix = 'TI'
+        self.prefix = "TI"
+
 
 class TC_(_Menu):
     """menu command"""
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         _Menu.__init__(self, ao, args, **keywords)
-        self.prefix = 'TC'
+        self.prefix = "TC"
+
 
 class TT_(_Menu):
     """menu command"""
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         _Menu.__init__(self, ao, args, **keywords)
-        self.prefix = 'TT'
+        self.prefix = "TT"
+
 
 class TE_(_Menu):
     """menu command"""
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         _Menu.__init__(self, ao, args, **keywords)
-        self.prefix = 'TE'
+        self.prefix = "TE"
+
 
 class EO_(_Menu):
     """menu command"""
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         _Menu.__init__(self, ao, args, **keywords)
-        self.prefix = 'EO'
+        self.prefix = "EO"
+
 
 class EM_(_Menu):
     """menu command"""
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         _Menu.__init__(self, ao, args, **keywords)
-        self.prefix = 'EM'
+        self.prefix = "EM"
+
 
 class EL_(_Menu):
     """menu command"""
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         _Menu.__init__(self, ao, args, **keywords)
-        self.prefix = 'EL'
+        self.prefix = "EL"
+
 
 class AO_(_Menu):
     """menu command"""
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         _Menu.__init__(self, ao, args, **keywords)
-        self.prefix = 'AO'
+        self.prefix = "AO"
+
 
 class AP_(_Menu):
     """menu command"""
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         _Menu.__init__(self, ao, args, **keywords)
-        self.prefix = 'AP'
+        self.prefix = "AP"
+
 
 class AH_(_Menu):
     """menu command"""
-    def __init__(self, ao, args='', **keywords):
+
+    def __init__(self, ao, args="", **keywords):
         _Menu.__init__(self, ao, args, **keywords)
-        self.prefix = 'AH'
+        self.prefix = "AH"
+
 
 class AU_(_Menu):
     """menu command"""
-    def __init__(self, ao, args='', **keywords):
-        _Menu.__init__(self, ao, args, **keywords)
-        self.prefix = 'AU'
 
-#-----------------------------------------------------------------||||||||||||--
+    def __init__(self, ao, args="", **keywords):
+        _Menu.__init__(self, ao, args, **keywords)
+        self.prefix = "AU"
+
+
+# -----------------------------------------------------------------||||||||||||--
 class Test(unittest.TestCase):
-    
+
     def runTest(self):
         pass
-            
+
     def testDummy(self):
         self.assertEqual(True, True)
 
     def testTPv(self):
         from athenaCL.libATH import athenaObj
+
         ao = athenaObj.AthenaObject()
         from athenaCL.libATH.libPmtr import parameter
+
         # TODO: this takes a long time to do all;
         # thus, only doing the first 10
         # ultimate: do all
@@ -8231,27 +9102,30 @@ class Test(unittest.TestCase):
             a = TPv(ao, args=tp)
             ok, result = a.do()
             self.assertEqual(ok, True)
-            
+
     def testTMsd(self):
         from athenaCL.libATH import athenaObj
-        interpreter = athenaObj.Interpreter('terminal')    
-        interpreter.cmd('TMsd 200')
+
+        interpreter = athenaObj.Interpreter("terminal")
+        interpreter.cmd("TMsd 200")
         first = rand.UniformRNG().random()
-        interpreter.cmd('TMsd 200')
+        interpreter.cmd("TMsd 200")
         second = rand.UniformRNG().random()
         self.assertEqual(first, second)
-    
+
     def testTPsd(self):
         from athenaCL.libATH import athenaObj
-        interpreter = athenaObj.Interpreter('terminal')    
-        interpreter.cmd('TPsd 300')
+
+        interpreter = athenaObj.Interpreter("terminal")
+        interpreter.cmd("TPsd 300")
         first = random.random()
-        interpreter.cmd('TPsd 300')
+        interpreter.cmd("TPsd 300")
         second = random.random()
         self.assertEqual(first, second)
 
-#-----------------------------------------------------------------||||||||||||--
-if __name__ == '__main__':
-    from athenaCL.test import baseTest
-    baseTest.main(Test)
 
+# -----------------------------------------------------------------||||||||||||--
+if __name__ == "__main__":
+    from athenaCL.test import baseTest
+
+    baseTest.main(Test)

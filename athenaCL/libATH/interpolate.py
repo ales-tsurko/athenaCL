@@ -18,7 +18,7 @@ class OneDimensionalLinear:
             self.min = end
             self.max = start
             self.flip = 1
-            
+
         self.span = self.max - self.min
 
     def pos(self, unit):
@@ -27,12 +27,13 @@ class OneDimensionalLinear:
 
     def discrete(self, steps, digits=2):
         """get a list of values b/n e points"""
-        if steps < 2: raise ValueError
-        inc = 1.0 / (steps-1)
+        if steps < 2:
+            raise ValueError
+        inc = 1.0 / (steps - 1)
         post = []
 
         i = 0.0
-        for q in range(steps-1):
+        for q in range(steps - 1):
             post.append(round(self.pos(i), digits))
             i = i + inc
         # manually add last value
@@ -42,22 +43,20 @@ class OneDimensionalLinear:
         return post
 
 
-
-
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 class Test(unittest.TestCase):
-    
+
     def runTest(self):
         pass
-            
+
     def testDummy(self):
         self.assertEqual(True, True)
 
 
-#-----------------------------------------------------------------||||||||||||--
+# -----------------------------------------------------------------||||||||||||--
 
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     from athenaCL.test import baseTest
+
     baseTest.main(Test)
