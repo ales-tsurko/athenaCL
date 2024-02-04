@@ -12,7 +12,8 @@ Or, as described by the author more specifically, it is a tool for:
 ## Documentation
 
 The manual is built using [mdBook](https://rust-lang.github.io/mdBook) you will
-find the source code inside `doc/` directory.
+find the source code inside `doc/` directory. You can read it 
+[here](https://alestsurko.by/athenaCL/).
 
 
 
