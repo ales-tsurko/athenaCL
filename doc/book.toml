@@ -1,0 +1,10 @@
+[book]
+authors = ["Christopher Ariza"]
+language = "en"
+multilingual = false
+src = "src"
+title = "athenaCL Manual"
+
+[output.html]
+default-theme = "Coal"
+git-repository-url = "https://github.com/ales-tsurko/athenaCL"

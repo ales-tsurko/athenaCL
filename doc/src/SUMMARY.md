@@ -1,4 +1,4 @@
-# athenaCL Manual
+# SUMMARY
 
 - [Preface](prfc01.md)
 - [Getting Started](getstart01.md)

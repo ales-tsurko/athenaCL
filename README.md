@@ -6,7 +6,13 @@ Or, as described by the author more specifically, it is a tool for:
 > modular poly-paradigm algorithmic music composition in a cross-platform
 > interactive command-line environment.
 
-You can find the manual in the [doc](doc/index.md) directory.
+
+
+
+## Documentation
+
+The manual is built using [mdBook](https://rust-lang.github.io/mdBook) you will
+find the source code inside `doc/` directory.
 
 
 
