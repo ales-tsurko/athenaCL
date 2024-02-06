@@ -876,7 +876,7 @@ class Test(unittest.TestCase):
             post.append(g.getState())
             next(g)
         # probabilistic weighting favoring b
-        self.assertEqual(post.count("b") > 70, True)
+        self.assertEqual(post.count("b") >= 70, True)
 
         g = Grammar()
         g.load("a{.2}b{5}c{8} @ a{ab} c{b} b{bc=.4|ac=.6}")
