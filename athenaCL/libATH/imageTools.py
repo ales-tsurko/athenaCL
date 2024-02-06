@@ -139,12 +139,10 @@ def FloatToRGB(cellValue):
     negative shift will make darker"""
     # must invert cell value, so 1 is black, or 0
     cellValue = 1 - cellValue
-    # if not float return after reversing, could be a decimal
-    return (
-        float(str(cellValue)) * 255,
-        float(str(cellValue)) * 255,
-        float(str(cellValue)) * 255,
-    )
+
+    # Calculate RGB values and convert to integers
+    rgb_value = max(min(int(cellValue * 255), 255), 0)
+    return (rgb_value, rgb_value, rgb_value)
 
 
 #     if not drawer.isInt(cellValue):
