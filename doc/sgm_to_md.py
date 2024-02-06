@@ -1,25 +1,23 @@
 # converts the original documentation format (sgm) into markdown
 
 import argparse
+import re
 
 from bs4 import BeautifulSoup, NavigableString
 
+index = 0
 
 def main():
     args = parse_args()
     content = read_doc(args.path)
-    md = parse(content)
-    with open(args.output, 'w') as file:
-        file.write(md)
+    make_files(content)
 
     
 def parse_args():
     parser = argparse.ArgumentParser(description='sgm to md converter')
     parser.add_argument('-p', '--path', type=str, help='path to doc file (sgm format)')
-    parser.add_argument('-o', '--output', type=str, help='output file')
     args = parser.parse_args()
     assert args.path, "path to the source file should be specified"
-    assert args.output, "path to the output file should be specified"
     return args
 
 
@@ -28,39 +26,52 @@ def read_doc(path):
         return file.read()
 
 
-def parse(content):
+def make_files(content):
     soup = BeautifulSoup(content, 'html.parser')
     output = ""
     elements = soup.find_all(['chapter', 'preface'])
     children = [child for element in elements for child in element.children if not isinstance(child, NavigableString)]
-
+    filename = ""
+    
     for element in children:
         match element.name:
             case "title":
                 output += "# " + element.get_text() + "\n\n"
+                filename = make_filename(element.get_text())
             case "para":
                 output += element.get_text() + "\n"
             case "sect1":
-                output = parse_sect(element, output)
-            # case "graphic": # images are lost
-                # output = parse_image(element, output)
+                save_part(element)
 
-    return output
+    with open(filename, 'w') as file:
+        file.write(output)
 
-def parse_sect(sect, output):
+        
+def make_filename(title):
+    global index
+    index += 1
+    return "0" + str(index) + "-" + re.sub(r'[^\w\s]', '',
+                                title).lower().replace(" ", "-") + ".md"
+    
+
+def save_part(sect):
+    output = ""
+    filename = ""
     for element in sect.children:
         match element.name:
             case "title":
-                output += "\n\n\n## " + element.get_text() + "\n\n"
+                title = element.get_text()
+                output += "## " + title + "\n\n"
+                filename = make_filename(title)
             case "para":
                 output += element.get_text() + "\n"
             case "example":
                 output = parse_example(element, output)
-            # case "graphic":
-                # output = parse_image(element, output)
 
-    return output
+    with open(filename, 'w') as file:
+        file.write(output)
 
+        
 def parse_example(example, output):
     for element in example.children:
         match element.name:
@@ -71,6 +82,7 @@ def parse_example(example, output):
             # case "graphic":
                 # output = parse_image(element, output)
     return output
+
 
 def parse_image(element, output):
     return output + "\n![](" + element["fileref"] + ")\n"
