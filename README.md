@@ -18,6 +18,16 @@ find the source code inside `doc/` directory. You can read it
 
 
 
+## Tests
+
+```
+$ python3 -m unittest discover.athenaCL
+$ python3 -m unittest discover athenaCL.libATH -p "*.py"
+```
+
+
+
+
 ## About This Fork
 
 The last commit in the original repo pushed in 2011. It was written in Python 2,
