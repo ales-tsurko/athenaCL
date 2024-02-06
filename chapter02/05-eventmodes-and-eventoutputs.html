@@ -1,0 +1,286 @@
+<!DOCTYPE HTML>
+<html lang="en" class="coal" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>EventModes and EventOutputs - athenaCL Manual</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "coal";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('coal')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><li class="part-title">Getting Started</li><li class="chapter-item expanded "><a href="../preface/02-overview-of-the-athenacl-system.html"><strong aria-hidden="true">1.</strong> Overview of the athenaCL System</a></li><li class="chapter-item expanded "><a href="../preface/03-getting-started-and-advanced-work.html"><strong aria-hidden="true">2.</strong> Getting Started and Advanced Work</a></li><li class="chapter-item expanded "><a href="../preface/04-more-information.html"><strong aria-hidden="true">3.</strong> More Information</a></li><li class="chapter-item expanded "><a href="../preface/05-conventions-used-in-this-manual.html"><strong aria-hidden="true">4.</strong> Conventions Used in this Manual</a></li><li class="chapter-item expanded "><a href="../preface/06-production-of-this-manual.html"><strong aria-hidden="true">5.</strong> Production of this Manual</a></li><li class="chapter-item expanded "><a href="../getting-started.html"><strong aria-hidden="true">6.</strong> Installation</a></li><li class="chapter-item expanded affix "><li class="part-title">Tutorials</li><li class="chapter-item expanded "><a href="../chapter01/01-tutorial-1-the-interactive-command-line-interface.html"><strong aria-hidden="true">7.</strong> Tutorial 1: The Interactive Command Line Interface</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../chapter01/02-starting-the-athenacl-interpreter.html"><strong aria-hidden="true">7.1.</strong> Starting the athenaCL Interpreter</a></li><li class="chapter-item expanded "><a href="../chapter01/03-introduction-to-commands.html"><strong aria-hidden="true">7.2.</strong> Introduction to Command</a></li><li class="chapter-item expanded "><a href="../chapter01/04-viewing-command-names.html"><strong aria-hidden="true">7.3.</strong> Viewing Command Name</a></li><li class="chapter-item expanded "><a href="../chapter01/05-executing-commands.html"><strong aria-hidden="true">7.4.</strong> Rxecuting Command</a></li><li class="chapter-item expanded "><a href="../chapter01/06-getting-help-for-commands.html"><strong aria-hidden="true">7.5.</strong> Getting Help for Command</a></li><li class="chapter-item expanded "><a href="../chapter01/07-configuring-the-user-environment.html"><strong aria-hidden="true">7.6.</strong> Configuring the User Environmen</a></li></ol></li><li class="chapter-item expanded "><a href="../chapter02/01-tutorial-2-athenaobjects-and-eventmodes.html"><strong aria-hidden="true">8.</strong> Tutorial 2: AthenaObjects and EventModes</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../chapter02/02-introduction-to-athenaobjects.html"><strong aria-hidden="true">8.1.</strong> Introduction to AthenaObjects</a></li><li class="chapter-item expanded "><a href="../chapter02/03-file-dialogs-in-athenacl.html"><strong aria-hidden="true">8.2.</strong> File Dialogs in athenaCL</a></li><li class="chapter-item expanded "><a href="../chapter02/04-loading-and-removing-an-athenaobject.html"><strong aria-hidden="true">8.3.</strong> Loading and Removing an AthenaObject</a></li><li class="chapter-item expanded "><a href="../chapter02/05-eventmodes-and-eventoutputs.html" class="active"><strong aria-hidden="true">8.4.</strong> EventModes and EventOutputs</a></li><li class="chapter-item expanded "><a href="../chapter02/06-creating-an-eventlist.html"><strong aria-hidden="true">8.5.</strong> Creating an EventList</a></li><li class="chapter-item expanded "><a href="../chapter02/07-configuring-and-using-csound.html"><strong aria-hidden="true">8.6.</strong> Configuring and Using Csound</a></li><li class="chapter-item expanded "><a href="../chapter02/08-saving-and-merging-athenaobjects.html"><strong aria-hidden="true">8.7.</strong> Saving and Merging AthenaObjects</a></li></ol></li><li class="chapter-item expanded "><a href="../chapter03/01-tutorial-3-creating-and-editing-paths.html"><strong aria-hidden="true">9.</strong> Tutorial 3: Creating and Editing Paths</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../chapter03/02-introduction-to-paths.html"><strong aria-hidden="true">9.1.</strong> Introduction to Paths</a></li><li class="chapter-item expanded "><a href="../chapter03/03-creating-selecting-and-viewing-pathinstances.html"><strong aria-hidden="true">9.2.</strong> Creating Selecting and Viewing PathInstances</a></li><li class="chapter-item expanded "><a href="../chapter03/04-copying-and-removing-pathinstances.html"><strong aria-hidden="true">9.3.</strong> Copying and Removing PathInstances</a></li><li class="chapter-item expanded "><a href="../chapter03/05-editing-pathinstances.html"><strong aria-hidden="true">9.4.</strong> Editing PathInstances</a></li></ol></li><li class="chapter-item expanded "><a href="../chapter04/01-tutorial-4-creating-and-editing-textures.html"><strong aria-hidden="true">10.</strong> Tutorial 4: Creating and Editing Textures</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../chapter04/010-editing-parameterobjects.html"><strong aria-hidden="true">10.1.</strong> Editing ParameterObjects</a></li><li class="chapter-item expanded "><a href="../chapter04/011-editing-rhythm-parameterobjects.html"><strong aria-hidden="true">10.2.</strong> Editing Rhythm ParameterObjects</a></li><li class="chapter-item expanded "><a href="../chapter04/012-editing-instruments-and-altering-eventmode.html"><strong aria-hidden="true">10.3.</strong> Editing Instruments and Altering EventMode</a></li><li class="chapter-item expanded "><a href="../chapter04/013-displaying-texture-parameter-values.html"><strong aria-hidden="true">10.4.</strong> Displaying Texture Parameter Values</a></li><li class="chapter-item expanded "><a href="../chapter04/02-introduction-to-textures-and-parameterobjects.html"><strong aria-hidden="true">10.5.</strong> Introduction to Textures and ParameterObjects</a></li><li class="chapter-item expanded "><a href="../chapter04/03-introduction-instrument-models.html"><strong aria-hidden="true">10.6.</strong> Introduction Instrument Models</a></li><li class="chapter-item expanded "><a href="../chapter04/04-selecting-and-viewing-texturemodules.html"><strong aria-hidden="true">10.7.</strong> Selecting and Viewing TextureModules</a></li><li class="chapter-item expanded "><a href="../chapter04/05-creating-selecting-and-viewing-textureinstances.html"><strong aria-hidden="true">10.8.</strong> Creating Selecting and Viewing TextureInstances</a></li><li class="chapter-item expanded "><a href="../chapter04/06-copying-and-removing-texture-instances.html"><strong aria-hidden="true">10.9.</strong> Copying and Removing Texture instances</a></li><li class="chapter-item expanded "><a href="../chapter04/07-editing-textureinstance-attributes.html"><strong aria-hidden="true">10.10.</strong> Editing TextureInstance Attributes</a></li><li class="chapter-item expanded "><a href="../chapter04/08-muting-textures.html"><strong aria-hidden="true">10.11.</strong> Muting Textures</a></li><li class="chapter-item expanded "><a href="../chapter04/09-viewing-and-searching-parameterobjects.html"><strong aria-hidden="true">10.12.</strong> Viewing and Searching ParameterObjects</a></li></ol></li><li class="chapter-item expanded "><a href="../chapter05/01-tutorial-5-textures-and-paths.html"><strong aria-hidden="true">11.</strong> Tutorial 5: Textures and Paths</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../chapter05/02-path-linking-and-pitch-formation-redundancy.html"><strong aria-hidden="true">11.1.</strong> Path Linking and Pitch Formation Redundancy</a></li><li class="chapter-item expanded "><a href="../chapter05/03-creating-a-path-with-a-duration-fraction.html"><strong aria-hidden="true">11.2.</strong> Creating a Path With a Duration Fraction</a></li><li class="chapter-item expanded "><a href="../chapter05/04-setting-eventmode-and-creating-a-texture.html"><strong aria-hidden="true">11.3.</strong> Setting EventMode and Creating a Texture</a></li><li class="chapter-item expanded "><a href="../chapter05/05-pitchmode.html"><strong aria-hidden="true">11.4.</strong> PitchMode</a></li><li class="chapter-item expanded "><a href="../chapter05/06-editing-local-octave.html"><strong aria-hidden="true">11.5.</strong> Editing Local Octave</a></li><li class="chapter-item expanded "><a href="../chapter05/07-editing-local-field-and-temperament.html"><strong aria-hidden="true">11.6.</strong> Editing Local Field and Temperament</a></li></ol></li><li class="chapter-item expanded "><a href="../chapter06/01-tutorial-6-textures-and-clones.html"><strong aria-hidden="true">12.</strong> Tutorial 6: Textures and Clones</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../chapter06/02-introduction-to-clones.html"><strong aria-hidden="true">12.1.</strong> Introduction to Clones</a></li><li class="chapter-item expanded "><a href="../chapter06/03-creating-and-editing-clones.html"><strong aria-hidden="true">12.2.</strong> Creating and Editing Clones</a></li></ol></li><li class="chapter-item expanded "><a href="../chapter07/01-tutorial-7-scripting-athenacl-in-python.html"><strong aria-hidden="true">13.</strong> Tutorial 7: Scripting athenaCL in Python</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../chapter07/02-creating-an-athenacl-interpreter-within-python.html"><strong aria-hidden="true">13.1.</strong> Creating an athenaCL Interpreter Within Python</a></li><li class="chapter-item expanded "><a href="../chapter07/03-creating-athenacl-generator-parameterobjects-within-python.html"><strong aria-hidden="true">13.2.</strong> Creating athenaCL Generator ParameterObjects Within Python</a></li><li class="chapter-item expanded "><a href="../chapter07/04-creating-athenacl-generator-parameterobjects-within-csound.html"><strong aria-hidden="true">13.3.</strong> Creating athenaCL Generator ParameterObjects Within Csound</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">athenaCL Manual</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/ales-tsurko/athenaCL" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h2 id="eventmodes-and-eventoutputs"><a class="header" href="#eventmodes-and-eventoutputs">EventModes and EventOutputs</a></h2>
+<p>After loading a demonstration file containing TextureInstances, athenaCL can be used to create an EventList. As a poly-paradigm system with integrated instrument models, athenaCL supports numerous formats of EventLists and can work with a wide variety of sound sources, including Csound and MIDI. What types of EventLists are created depends on two settings within athenaCL: the EventMode and the EventOutput.</p>
+<p>The EventModes configure athenaCL for working with a particular sound source and Orchestra model, such as the internal Csound orchestra (csoundNative), external Csound orchestras (csoundExternal), various types of MIDI files (generalMidi an generalMidiPercussion), and others. The EventMode determines what instruments are available for Texture creation (see , as well as the operation of some EventList commands. In some cases, the EventMode forces certain EventOutput formats to be written as well.</p>
+<p>The EventOutputs select what file formats will be created when a new EventList is generated. athenaCL permits the user to create an EventList in numerous formats simultaneously. For example, a Csound score and orchestra, a MIDI file, and tab-delimited table can all be produced from one call to the EventList new command. Some EventOutput formats are created only if the AthenaObject contains Textures created in the appropriate EventMode. Other EventOutput formats can be created with any Texture in any EventMode. Such conflicts, however, are never a problem: athenaCL simply creates whatever EventOutput formats are appropriate based on the user-specified request.</p>
+<p>To view the current EventMode, enter EMls. To view the current list of selected EventOutputs, enter EOls. The following example demonstrates these commands:</p>
+<p><strong>Viewing EventMode and EventOutputs</strong></p>
+<pre><code>pi{y0}ti{a2} :: emls
+EventMode modes available:
+{name}
+   csoundExternal      
+ + csoundNative        
+   csoundSilence       
+   midi                
+   midiPercussion      
+   superColliderNative 
+
+pi{y0}ti{a2} :: eols
+EventOutput active:
+{name}
+   acToolbox         
+   audioFile         
+   csoundBatch       
+ + csoundData        
+   csoundOrchestra   
+   csoundScore       
+ + midiFile          
+   pureDataArray     
+   superColliderTask 
+   textSpace         
+   textTab           
+ + xmlAthenaObject  
+</code></pre>
+<p>To select an additional EventOutput to be requested when a new EventList is created, enter the command EOo, for EventOutput select. To remove an EventOutput, enter the command EOrm, for EventOutput remove. In the following example, the user adds a tab-delimited table output (&quot;textTab&quot;) and a specialized output file for the AC Toolbox (&quot;acToolbox&quot;). After viewing the EventOutput list, these EventOutputs are removed. Note: EventOutputs, like many selection in athenaCL, can be designated using automatic acronym expansion (AAE), the user providing only the leading character and capitals. </p>
+<p><strong>Adding and Removing EventOutputs</strong></p>
+<pre><code>pi{y0}ti{a2} :: eoo tt at
+EventOutput formats: midiFile, xmlAthenaObject, csoundData, textTab, acToolbox.
+
+pi{y0}ti{a2} :: eols
+EventOutput active:
+{name}
+ + acToolbox         
+   audioFile         
+   csoundBatch       
+ + csoundData        
+   csoundOrchestra   
+   csoundScore       
+ + midiFile          
+   pureDataArray     
+   superColliderTask 
+   textSpace         
+ + textTab           
+ + xmlAthenaObject  
+
+pi{y0}ti{a2} :: eorm tt at
+EventOutput formats: midiFile, xmlAthenaObject, csoundData.
+</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../chapter02/04-loading-and-removing-an-athenaobject.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../chapter02/06-creating-an-eventlist.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../chapter02/04-loading-and-removing-an-athenaobject.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../chapter02/06-creating-an-eventlist.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>
