@@ -177,7 +177,7 @@
                 <div id="content" class="content">
                     <main>
                         <h2 id="saving-and-merging-athenaobjects"><a class="header" href="#saving-and-merging-athenaobjects">Saving and Merging AthenaObjects</a></h2>
-<p>Loading a new AthenaObject will completely replace the current AthenaObject contents. For this reason, users should always save their work before loading a new AthenaObject. The user can, alternatively, merge AthenaObjects. Merging is a powerful tool: the user can combine many AthenaObjects that have been saved separately, or combine an AthenaObject numerous times with itself. In the example below, the user merges &quot;demo01.xml&quot;, loaded above, with another of the same AthenaObject &quot;demo01.xml&quot;. The file paths for athenaCL demonstration files are known to athenaCL, and thus the user can simply provide the name of the demonstration file as a command-line argument.</p>
+<p>Loading a new AthenaObject will completely replace the current AthenaObject contents. For this reason, users should always save their work before loading a new AthenaObject. The user can, alternatively, merge AthenaObjects. Merging is a powerful tool: the user can combine many AthenaObjects that have been saved separately, or combine an AthenaObject numerous times with itself. In the example below, the user merges "demo01.xml", loaded above, with another of the same AthenaObject "demo01.xml". The file paths for athenaCL demonstration files are known to athenaCL, and thus the user can simply provide the name of the demonstration file as a command-line argument.</p>
 <p><strong>Merging AthenaObjects with AOmg</strong></p>
 <pre><code>pi{y0}ti{a2} :: aomg demo01.xml
       1.3.1 xml AthenaObject merged (00:01):
@@ -185,7 +185,7 @@
 
 pi{y0}ti{a2} :: 
 </code></pre>
-<p>The command TIls can be used to confirm that the AthenaObjects have been merged. The AOmg command, in the case that two Paths or Textures have the same name, automatically alters the name by appending an underscore (&quot;_&quot;). In the case where an AthenaObject is merged with itself as in this example, each Texture and Path is duplicated.</p>
+<p>The command TIls can be used to confirm that the AthenaObjects have been merged. The AOmg command, in the case that two Paths or Textures have the same name, automatically alters the name by appending an underscore ("_"). In the case where an AthenaObject is merged with itself as in this example, each Texture and Path is duplicated.</p>
 <p><strong>Listing TextureInstances</strong></p>
 <pre><code>pi{y0}ti{a2} :: tils
 TextureInstances available:
@@ -201,7 +201,7 @@ TextureInstances available:
 
 </code></pre>
 <p>As shown above, the user may create a new MIDI or Csound EventList of this new AthenaObject and audition the results. As should be clear, the resulting musical structure will sound more dense due to the additional Textures. Due to algorithmic variation, each Texture will remain relatively independent.</p>
-<p>To save the current AthenaObject, the user may create an XML AthenaObject file. Although AthenaObject files may be created with the proper EventOutput selection and by use of the ELn command, in same cases the user my want to create the XML AthenaObject file alone. The command AOw, for AthenaObject Write, provides this functionality. The user must name the AthenaObject with a &quot;.xml&quot; extension. In the example below the user saves the merged files as a new AthenaObject named &quot;merged.xml&quot; using a command-line argument. If desired, the AOw command can be used without command-line arguments to select the location of the file with an interactive file dialog. (Replace &quot;/Volumes/xdisc/_scratch/&quot; with a complete file path to a suitable directory.)</p>
+<p>To save the current AthenaObject, the user may create an XML AthenaObject file. Although AthenaObject files may be created with the proper EventOutput selection and by use of the ELn command, in same cases the user my want to create the XML AthenaObject file alone. The command AOw, for AthenaObject Write, provides this functionality. The user must name the AthenaObject with a ".xml" extension. In the example below the user saves the merged files as a new AthenaObject named "merged.xml" using a command-line argument. If desired, the AOw command can be used without command-line arguments to select the location of the file with an interactive file dialog. (Replace "/Volumes/xdisc/_scratch/" with a complete file path to a suitable directory.)</p>
 <p><strong>Creating a new AthenaObject with AOw</strong></p>
 <pre><code>pi{y0}ti{a2} :: aow /Volumes/xdisc/_scratch/merged.xml
       AthenaObject saved:

@@ -178,7 +178,7 @@
                     <main>
                         <h2 id="editing-textureinstance-attributes"><a class="header" href="#editing-textureinstance-attributes">Editing TextureInstance Attributes</a></h2>
 <p>Each attribute of a Texture can be edited to specialize its performance. Some attributes such as instrument, time-range, and Path are static: they do not change over the duration of a Texture. Other attributes are dynamic, such as bpm, rhythm, local field, local octave, amplitude and panning, and can be configured with a wide range of ParameterObjects.</p>
-<p>Texture attributes are edited with the TIe command. The command first prompts the user to select which attribute to edit. Attributes are named by a single-letter abbreviation, as notated in the TIv display with parenthesis. Next, the current value of the attribute is displayed, followed by a prompt for the new value. In the following example the time range of Texture &quot;a1&quot; is edited:</p>
+<p>Texture attributes are edited with the TIe command. The command first prompts the user to select which attribute to edit. Attributes are named by a single-letter abbreviation, as notated in the TIv display with parenthesis. Next, the current value of the attribute is displayed, followed by a prompt for the new value. In the following example the time range of Texture "a1" is edited:</p>
 <p><strong>Editing a TextureInstance</strong></p>
 <pre><code>pi{auto-muteHiConga}ti{b1} :: tie
 edit TI b1
@@ -212,8 +212,8 @@ texture (s)tatic
       s3            levelOctaveMonophonic, event
 texture (d)ynamic   none
 </code></pre>
-<p>In the example above the user select &quot;t&quot; to edit the active Texture's time-range attribute. In general, new values for attributes must be entered with the same syntax with which they are displayed. In this example, time-range values are given as two numbers separated by a comma. Deviation from this syntax will return an error. The user enters 5, 20 to set the time-range attribute to the duration from 5 to 20 seconds.</p>
-<p>The command TEe, for TextureEnsemble Edit can be used to edit the entire collection of Textures with one command. In the following example the user selects the amplitude attribute with &quot;a&quot; and then enters a new ParameterObject: randomUniform. The randomUniform parameterObject produces random values with a uniform distribution between the required arguments for minimum and maximum. After this edit, TEv, with the command-line argument &quot;a&quot;, can be used to view the amplitude for all Textures and confirm the edit.</p>
+<p>In the example above the user select "t" to edit the active Texture's time-range attribute. In general, new values for attributes must be entered with the same syntax with which they are displayed. In this example, time-range values are given as two numbers separated by a comma. Deviation from this syntax will return an error. The user enters 5, 20 to set the time-range attribute to the duration from 5 to 20 seconds.</p>
+<p>The command TEe, for TextureEnsemble Edit can be used to edit the entire collection of Textures with one command. In the following example the user selects the amplitude attribute with "a" and then enters a new ParameterObject: randomUniform. The randomUniform parameterObject produces random values with a uniform distribution between the required arguments for minimum and maximum. After this edit, TEv, with the command-line argument "a", can be used to view the amplitude for all Textures and confirm the edit.</p>
 <p><strong>Editing a single parameter of all Textures with TEe</strong></p>
 <pre><code>
 pi{auto-muteHiConga}ti{b1} :: tee

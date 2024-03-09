@@ -178,7 +178,7 @@
                     <main>
                         <h2 id="editing-rhythm-parameterobjects"><a class="header" href="#editing-rhythm-parameterobjects">Editing Rhythm ParameterObjects</a></h2>
 <p>Rhythm ParameterObjects are ParameterObjects specialized for generating time and rhythm information. Many Rhythm ParameterObjects use Pulse object notations to define proportional rhythms and reference a Texture's dynamic bpm attribute. Other ParameterObjects are independent of bpm and can use raw timing information provided by one or more Generator ParameterObjects.</p>
-<p>When using proportional rhythms, athenaCL uses Pulse objects. Pulses represent a ratio of duration in relation to the duration of beat (specified in BPM and obtained from the Texture). For details on Pulse notation, enter &quot;help pulse&quot;:</p>
+<p>When using proportional rhythms, athenaCL uses Pulse objects. Pulses represent a ratio of duration in relation to the duration of beat (specified in BPM and obtained from the Texture). For details on Pulse notation, enter "help pulse":</p>
 <p><strong>View Pulse and Rhythm help</strong></p>
 <pre><code>pi{auto-muteHiConga}ti{b1} :: help pulse
 {topic,documentation}
@@ -200,7 +200,7 @@ Pulse and Rhythm    Pulses represent a duration value derived from ratio and a
                     is designated as list of Pulses. For example: ((4,2,1),
                     (4,2,1), (4,3,1)).
 </code></pre>
-<p>To edit the rhythms used by Texture b1, enter TIe followed by an &quot;r&quot; to access the rhythm attribute. As before, the user is presented with the current value, then prompted for a new value. In the following example, the ParameterObject &quot;loop&quot; is examined first with the TPv, then the active Texture is edited by providing an random walk over an expanded rhythm. Finally, the rhythm attribute of all Textures is viewed with TEv.</p>
+<p>To edit the rhythms used by Texture b1, enter TIe followed by an "r" to access the rhythm attribute. As before, the user is presented with the current value, then prompted for a new value. In the following example, the ParameterObject "loop" is examined first with the TPv, then the active Texture is edited by providing an random walk over an expanded rhythm. Finally, the rhythm attribute of all Textures is viewed with TEv.</p>
 <p><strong>Editing Rhythm ParameterObjects with TIe</strong></p>
 <pre><code>pi{auto-muteHiConga}ti{b1} :: tpv loop
 Rhythm Generator ParameterObject
@@ -231,8 +231,8 @@ a1                  pulseTriple, (constant, 4), (basketGen, randomPermutate,
 b1                  loop, ((4,1,+),(4,1,+),(4,2,+),(4,3,+),(4,5,+),(4,3,+)),
                     randomWalk
 </code></pre>
-<p>Notice that, as with all ParameterObjects, abbreviations can be used for argument strings. The user need only enter the string &quot;l&quot; to select the &quot;loop&quot; RhythmObject, and &quot;rw&quot; to select the randomWalk selection method.</p>
-<p>To edit Texture a1, the user must first make a1 the active texture with TIo. In the following example, the user applies a zero-order Markov chain to generate pulses. The user fist consults the documentation for ParameterObject markovPulse. For more information about Markov transition strings (Ariza 2006 [AN#1343]), enter &quot;help markov&quot;. After selecting and editing the Texture, the Rhythms are compared with TEv:</p>
+<p>Notice that, as with all ParameterObjects, abbreviations can be used for argument strings. The user need only enter the string "l" to select the "loop" RhythmObject, and "rw" to select the randomWalk selection method.</p>
+<p>To edit Texture a1, the user must first make a1 the active texture with TIo. In the following example, the user applies a zero-order Markov chain to generate pulses. The user fist consults the documentation for ParameterObject markovPulse. For more information about Markov transition strings (Ariza 2006 [AN#1343]), enter "help markov". After selecting and editing the Texture, the Rhythms are compared with TEv:</p>
 <p><strong>Editing Rhythm ParameterObjects with TIe</strong></p>
 <pre><code>pi{auto-muteHiConga}ti{b1} :: tpv markovp
 Rhythm Generator ParameterObject

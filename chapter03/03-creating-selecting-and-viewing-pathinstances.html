@@ -177,7 +177,7 @@
                 <div id="content" class="content">
                     <main>
                         <h2 id="creating-selecting-and-viewing-pathinstances"><a class="header" href="#creating-selecting-and-viewing-pathinstances">Creating, Selecting, and Viewing PathInstances</a></h2>
-<p>To create a PathInstance, enter PIn (for PathInstance new) at the athenaCL prompt. You must name the new Path, and then supply a pitch group, Forte-number, Xenakis sieve, or alternative pitch representation (enter &quot;help pitch&quot; for more information on pitch representations).</p>
+<p>To create a PathInstance, enter PIn (for PathInstance new) at the athenaCL prompt. You must name the new Path, and then supply a pitch group, Forte-number, Xenakis sieve, or alternative pitch representation (enter "help pitch" for more information on pitch representations).</p>
 <p><strong>Creating a new PathInstance with PIn</strong></p>
 <pre><code>pi{}ti{} :: pin
 name this PathInstance: pathA
@@ -197,7 +197,7 @@ PI pathA added to PathInstances.
 
 pi{pathA}ti{} :: 
 </code></pre>
-<p>Note that after successfully creating a Path, the athenaCL cursor tool changes to reflect the active Path: the name in parenthesis following &quot;pi&quot; designates the active Path (&quot;pathA&quot;). The same information is provided for a TextureInstance following the &quot;ti&quot; prefix. To view the active PI, enter PIv at the athenaCL prompt:</p>
+<p>Note that after successfully creating a Path, the athenaCL cursor tool changes to reflect the active Path: the name in parenthesis following "pi" designates the active Path ("pathA"). The same information is provided for a TextureInstance following the "ti" prefix. To view the active PI, enter PIv at the athenaCL prompt:</p>
 <p><strong>Viewing a Path with PIv</strong></p>
 <pre><code>pi{pathA}ti{} :: piv
 PI: pathA
@@ -208,7 +208,7 @@ scPath              3-2B        4-9            3-11A      4-6
 durFraction         1(25%)      1(25%)         1(25%)     1(25%)           
 TI References: none.
 </code></pre>
-<p>This display provides all essential information about a Path. The header contains the name of the Path (&quot;pathA&quot;). The parallel presentation of psPath, pcsPath, and scPath illustrates the simultaneous availability of pitch space, pitch class space, and set class representations. The label &quot;TI references&quot;, when needed, provides information on which TextureInstances link to this PathInstance.</p>
+<p>This display provides all essential information about a Path. The header contains the name of the Path ("pathA"). The parallel presentation of psPath, pcsPath, and scPath illustrates the simultaneous availability of pitch space, pitch class space, and set class representations. The label "TI references", when needed, provides information on which TextureInstances link to this PathInstance.</p>
 <p>In order to hear a possible interpretation of this Path, the command PIh generates a MIDI file based on a simple interpretation of the Path with the active TextureModule. The resulting musical structure is only provided to audition the Path, and uses default values for all musical parameters. The MIDI file is written in the user-specified scratch directory (see ) and is opened via the operating system.</p>
 <p><strong>Creating a MIDI file with PIh</strong></p>
 <pre><code>pi{pathA}ti{} :: pih
@@ -246,9 +246,9 @@ PathInstances available:
    pathA            0  3-2B,4-9,3-11A,4-6  
  + pathB            0  5-3A,6-4,7-34,4-14A 
 </code></pre>
-<p>Many displays provided by athenaCL are given in columns of data. After whatever header information is give, a key, in braces (&quot;{}&quot;), is provided to define the data provided in each column. In the example above, the key shows that each row contains the name of the PI, the number of TI references, the number of PathVoices, and an scPath representation of the Path. The &quot;+&quot; next to &quot;pathB&quot; illustrates that this PI is currently active. All &quot;ls&quot; commands use a similar designation.</p>
-<p>Many commands in athenaCL function by using an &quot;active&quot; object. The active PI defines which Path is used in many different commands. For example, the PIv command, when used without an argument for which Path to display, displays the active Path.</p>
-<p>To select a different PI as the active PI, simply enter PIo. The user is prompted to either enter the name of the Path to select, or its order number from the &quot;ls&quot; view (where 1 is pathA, 2 is pathB). Displaying the list of all PathInstances will confirm that pathA is now the selected PI.</p>
+<p>Many displays provided by athenaCL are given in columns of data. After whatever header information is give, a key, in braces ("{}"), is provided to define the data provided in each column. In the example above, the key shows that each row contains the name of the PI, the number of TI references, the number of PathVoices, and an scPath representation of the Path. The "+" next to "pathB" illustrates that this PI is currently active. All "ls" commands use a similar designation.</p>
+<p>Many commands in athenaCL function by using an "active" object. The active PI defines which Path is used in many different commands. For example, the PIv command, when used without an argument for which Path to display, displays the active Path.</p>
+<p>To select a different PI as the active PI, simply enter PIo. The user is prompted to either enter the name of the Path to select, or its order number from the "ls" view (where 1 is pathA, 2 is pathB). Displaying the list of all PathInstances will confirm that pathA is now the selected PI.</p>
 <p><strong>Selecting Paths</strong></p>
 <pre><code>pi{pathB}ti{} :: pio
 select a path to activate: (name or number 1-2): pathA

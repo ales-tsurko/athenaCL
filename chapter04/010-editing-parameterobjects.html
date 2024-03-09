@@ -177,7 +177,7 @@
                 <div id="content" class="content">
                     <main>
                         <h2 id="editing-parameterobjects"><a class="header" href="#editing-parameterobjects">Editing ParameterObjects</a></h2>
-<p>To edit an attribute of Texture, a user enters a new ParameterObject argument list. The command TIe, as before, first prompts the user to select which attribute to edit. Next, the current value of the attribute is displayed, followed by a prompt for the new value. TIv can be used to confirm the changed value. In the following example, the panning of Texture &quot;a1&quot; is assigned a fractional noise (1/f) ParameterObject:</p>
+<p>To edit an attribute of Texture, a user enters a new ParameterObject argument list. The command TIe, as before, first prompts the user to select which attribute to edit. Next, the current value of the attribute is displayed, followed by a prompt for the new value. TIv can be used to confirm the changed value. In the following example, the panning of Texture "a1" is assigned a fractional noise (1/f) ParameterObject:</p>
 <p><strong>Editing the panning of a TextureInstance</strong></p>
 <pre><code>pi{auto-muteHiConga}ti{b1} :: tie
 edit TI b1
@@ -212,8 +212,8 @@ texture (s)tatic
       s3            levelOctaveMonophonic, event
 texture (d)ynamic   none
 </code></pre>
-<p>The noise ParameterObject has been given an embedded ParameterObject to control the gamma argument. Notice that instead of entering &quot;noise&quot;, &quot;cyclicGen&quot; or &quot;upDown&quot; the user can enter the acronyms &quot;n&quot;, &quot;cg&quot;, and &quot;ud&quot;. All ParameterObjects support automatic acronym expansion of argument strings. This is an important and time-saving shortcut.</p>
-<p>The previous example edited the panning of Texture &quot;a1&quot; such that it produces values within the range of .5 to 1. This limits the spatial location of the sound to the upper half of the range (the middle to right stereo position). To limit the spatial location of &quot;b1&quot; in a complementary fashion, the Texture is edited to produce values within the range 0 to .5, corresponding to the lower half of the range (the middle to left stereo position). In the example below, TIo is used to select &quot;b1&quot; before entering the TIe command. TEv is then used to compare panning values for all Textures.</p>
+<p>The noise ParameterObject has been given an embedded ParameterObject to control the gamma argument. Notice that instead of entering "noise", "cyclicGen" or "upDown" the user can enter the acronyms "n", "cg", and "ud". All ParameterObjects support automatic acronym expansion of argument strings. This is an important and time-saving shortcut.</p>
+<p>The previous example edited the panning of Texture "a1" such that it produces values within the range of .5 to 1. This limits the spatial location of the sound to the upper half of the range (the middle to right stereo position). To limit the spatial location of "b1" in a complementary fashion, the Texture is edited to produce values within the range 0 to .5, corresponding to the lower half of the range (the middle to left stereo position). In the example below, TIo is used to select "b1" before entering the TIe command. TEv is then used to compare panning values for all Textures.</p>
 <p><strong>Editing the panning of a TextureInstance</strong></p>
 <pre><code>pi{auto-muteHiConga}ti{b1} :: tio b1
 TI b1 now active.
