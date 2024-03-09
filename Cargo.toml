@@ -1,8 +1,17 @@
 [package]
-name = "athenaCL"
+name = "athenacl"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+rustpython-pylib = { version = "0.3.0", features = ["freeze-stdlib"] }
+rustpython-stdlib = "0.3.0"
+rustpython-vm = { version = "0.3.0", features = ["freeze-stdlib"] }
+
+[profile.release]
+strip = true
+lto = true
+codegen-units = 1
+panic = "abort"

@@ -987,21 +987,6 @@ def findSubDir(goal="athenaCL"):
         srcPath = path  # reassign
 
 
-def findAthenaPath():
-    """this is the same method used in setup.py, athenacl.py, athenaObj.py"""
-    try:
-        import libATH  # assume we are in package dir
-    except ImportError:
-        try:
-            from athenaCL import libATH
-        except ImportError:  # if n a subdirectory of athena
-            return findSubDir("athenaCL")  # none if found, otherwise path
-    fpLibATH = libATH.__path__[0]  # list, get first item
-    if not os.path.isabs(fpLibATH):  # relative path, add cwd
-        fpLibATH = os.path.abspath(fpLibATH)
-    return os.path.dirname(fpLibATH)
-
-
 def findManPath(group=1, altSys=None):
     """on unix opperating systems find man path for given group
     returns None of no man path found

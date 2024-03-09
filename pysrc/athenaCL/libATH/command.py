@@ -387,7 +387,6 @@ class Command(object):
         else:
             possibleDirs = []  # all demo dirs
             possibleDirs += self.ao.external.demoDirList
-            possibleDirs.append(self.ao.external.fpLibATH)
             possibleDirs.append(self.ao.aoInfo["fpLastDir"])
             possibleDirs.append(self.ao.aoInfo["fpLastDirEventList"])
             dir = drawer.getcwd()
@@ -8332,26 +8331,16 @@ class AUdoc(Command):
             return "%s" % (self.cmdStr)
 
     def display(self):
-        import webbrowser  # only w/ python 2.3 and later...
+        import webbrowser
 
-        manName = "athenaclManual.htm"
-        dst = "online"
-        if self.ao.external.fpDocDir != None:
-            if manName in os.listdir(self.ao.external.fpDocDir):
-                dst = "local"
-        if dst == "local":
-            url = drawer.urlPrep(
-                os.path.join(self.ao.external.fpDocDir, manName), "file"
-            )
-            msg = "local documentation opened.\n"
-        elif dst == "online":
-            url = drawer.urlPrep(lang.msgAthDocURL, "http")
-            msg = "on-line documentation opened.\n"
+        url = drawer.urlPrep(lang.msgAthDocURL, "http")
+        msg = "on-line documentation opened.\n"
         try:
             webbrowser.open(url)
         # this exception was found from a bug report on linux
         except KeyboardInterrupt:
-            msg = "unable to open documentation: visit www.athenacl.org\n"
+            msg = "unable to open documentation: visit https://github.com/ales-tsurko/athenaCL\n"
+
         return msg
 
 
@@ -8479,10 +8468,7 @@ class AUsys(Command):
         entryLines.append(["user scratch:", value])
         value = self.ao.external.getPref("athena", "fpAudioDir")
         entryLines.append(["user audio:", value])
-        #         value = self.ao.external.getPref('athena','sadir')
-        #         entryLines.append(['user sadir:', value])
 
-        entryLines.append(["libATH:", self.ao.external.fpLibATH])
         value = drawer.getcwd()
         if value == None:
             value = "none"

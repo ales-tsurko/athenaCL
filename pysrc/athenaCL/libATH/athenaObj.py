@@ -23,7 +23,7 @@ __license__ = "GPL"
 
 
 # athenaObj.py needs correct dir information for writing
-# a file (prefs) and loading demos, and opening .xml and and other resources
+# a file (prefs) and loading demos, and opening .xml and other resources
 # External is sometimes called by itself, needs to find correct paths
 # this checks for correct path access, attempts to mangle sys.path to fix
 # imports if necssary
@@ -37,14 +37,6 @@ except ImportError:
         sys.stdout.write("athenaCL package cannot be found.\n")
         sys.exit()
 
-fpLibTM = list(libTM.__path__)[0]  # list, get first item
-fpLibATH = os.path.dirname(fpLibTM)  # libATH dir
-fpSrcDir = os.path.dirname(fpLibATH)  # athenaCL dir
-fpPackageDir = os.path.dirname(fpSrcDir)  # athenacl dir
-if fpPackageDir not in sys.path:
-    sys.path.append(fpPackageDir)
-
-# -----------------------------------------------------------------||||||||||||--
 from athenaCL.libATH import argTools
 from athenaCL.libATH import command
 from athenaCL.libATH import dialog
@@ -89,81 +81,12 @@ class External(object):
             self.termObj = None
             self.sessionType = "terminal"  # standard default
 
+
     def updateAll(self, verbose=0):
         """does all init updates, called whenever an ao is created"""
-        self._updateDirs(verbose)
         self._updateLogs()
         self.updatePrefs()
 
-    # -----------------------------------------------------------------------||--
-    def _updateDirs(self, verbose=0):
-        """called to get athenaCL directories and load modules
-        checks for libATH, libATH/libTM, libATH/libAS
-        verbose does not currently do anything
-        """
-        self.fpSrcDir = fpSrcDir  # global from mod loading, athenaCL package dir
-        srcDirContent = os.listdir(self.fpSrcDir)  # check 'libATH' directory
-        if "libATH" in srcDirContent:
-            self.fpLibATH = os.path.join(self.fpSrcDir, "libATH")
-            self.fpLibATH = drawer.pathScrub(self.fpLibATH)
-        else:
-            dialog.msgOut(lang.msgMissingLibATH, self.termObj)
-            temp = dialog.askStr(lang.msgReturnToExit, self.termObj)
-            sys.exit()
-
-        # check for texture module directory, demo dirs
-        libATHcontents = os.listdir(self.fpLibATH)
-        if "libTM" in libATHcontents:
-            self.fpLibTM = os.path.join(self.fpLibATH, "libTM")
-            self.fpLibTM = drawer.pathScrub(self.fpLibTM)
-        else:
-            dialog.msgOut(lang.msgMissingLibTM, self.termObj)
-            temp = dialog.askStr(lang.msgReturnToExit, self.termObj)
-            sys.exit()
-
-        # check for demo files
-        self.demoDirList = []
-        if "demo" in srcDirContent:
-            # all standard demo folders
-            for subDir in ["csound", "legacy", "midi", "supercollider", "manual"]:
-                demoPath = os.path.join(self.fpSrcDir, "demo", subDir)
-                self.demoDirList.append(drawer.pathScrub(demoPath))
-
-            demoTestPath = os.path.join(self.fpSrcDir, "test", "xml")
-            self.demoDirList.append(drawer.pathScrub(demoTestPath))
-
-        if ".svn" in srcDirContent:  # check if there is a cvs dir
-            self.svnDirPresent = 1
-        else:
-            self.svnDirPresent = 0
-
-        # a docs dir is only found in athenaCL dir in distribution
-        # package
-        if "doc" in srcDirContent:  # get docs path
-            self.fpDocDir = os.path.join(self.fpSrcDir, "doc")
-            self.fpDocDir = drawer.pathScrub(self.fpDocDir)
-        else:
-            self.fpDocDir = None
-
-        # assign a dir in which to write pref/log files
-
-    #         if os.name == 'mac': # macos 9
-    #             self.prefsDir = self.fpLibATH
-
-    #         if os.name == 'posix':
-    #             self.prefsDir = drawer.getud() # get active users dir
-    #         else: # win or other
-    #             self.prefsDir = drawer.getud()
-    #             if self.prefsDir == None: # cant use getcwd
-    #                 self.prefsDir = self.fpLibATH # used before and two versions 1.4.2
-
-    # -----------------------------------------------------------------------||--
-    def getCvsStat(self):
-        """return string if this is likely a cvs co"""
-        if self.svnDirPresent:
-            return "cvs"
-        else:
-            return "package"
 
     def _updateLogs(self):
         """update path for error log files"""
@@ -174,6 +97,7 @@ class External(object):
         else:  # win or other
             logFileName = ".athenacl-log.txt"
         self.logPath = os.path.join(drawer.getPrefsDir(), logFileName)
+
 
     def logWrite(self, dataLines):
         """for adding an error to= the error lig"""
@@ -334,21 +258,12 @@ class External(object):
             d[key] = self.prefDict[category][key]
         return d
 
-    # -----------------------------------------------------------------------||--
+
     def getFilePathAudio(self):
         """returns a list of file paths for samples"""
-        audioPath = os.path.join(self.fpSrcDir, "audio")
-        audioPath = drawer.pathScrub(audioPath)
         userAudioPath = self.getPref("athena", "fpAudioDir")
-        return [audioPath, userAudioPath]
+        return [userAudioPath]
 
-    #     def getFilePathAnalysis(self):
-    #         """returns a list of file paths for analysis"""
-    #         sadrPath = os.path.join(self.fpLibATH, 'sadir')
-    #         sadrPath = drawer.pathScrub(sadrPath)
-    #         sadrPathUsr = self.getPref('athena', 'sadir')
-    #         pathList = [sadrPath, sadrPathUsr]
-    #         return pathList
 
     def getVisualMethod(self, status="normal"):
         """checks to see if vis methods have been updated
@@ -367,29 +282,7 @@ class External(object):
                 self.visualMethod = drawer.imageFormats()
             return self.visualMethod
 
-    def getFilePathDemo(self, dirMatch=["midi"], extMatch=[".py"]):
-        """Get all demo file paths, matching by one or more directory and one or more file extension.
 
-        >>> e = External()
-        >>> e.updateAll()
-        >>> len(e.getFilePathDemo()) > 30
-        True
-        """
-        post = []
-        for fpDir in self.demoDirList:  # get dirs
-            for dir in dirMatch:
-                if fpDir.endswith(dir):
-                    for fn in os.listdir(fpDir):
-                        if fn.startswith("__"):
-                            continue  # pass __init__.py
-                        fp = os.path.join(fpDir, fn)
-                        for ext in extMatch:
-                            if fp.endswith(ext):
-                                post.append(fp)
-        return post
-
-
-# -----------------------------------------------------------------||||||||||||--
 class AthenaObject(object):
     """methods for internal processsing of done with command objecst from
     command.py
@@ -908,11 +801,10 @@ class AthenaObject(object):
 
     def infoStr(self):
         """used in sending error message w/ data stored in aoInfo"""
-        headStr = "%s-%s-%s-%s" % (
+        headStr = "%s-%s-%s" % (
             self.osStr(),
             self.pyStr(),
             self.aoStr(),
-            self.external.getCvsStat(),
         )
         return headStr
 

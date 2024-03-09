@@ -120,9 +120,9 @@ class LangEn:
     # strings
     msgCommentBreak = ("-" * 65) + ("|" * 12) + ("-" * 2)
     msgAth = "athenaCL"
-    msgAthURL = "www.athenacl.org"
-    msgAthDocURL = "www.flexatone.net/athenaDocs/"
-    msgAthDeveloperURL = "http://code.google.com/p/athenacl/"
+    msgAthURL = "github.com/ales-tsurko/athenaCL"
+    msgAthDocURL = "alestsurko.by/athenaCL"
+    msgAthDeveloperURL = "https://github.com/ales-tsurko/athenaCL"
     msgAuthor = "Christopher Ariza"
     msgAuthorEmail = "ariza@flexatone.net"
     msgBugReport = "athenacl@googlegroups.com"
