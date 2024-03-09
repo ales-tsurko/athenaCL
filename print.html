@@ -204,90 +204,15 @@ Constant width bold</p>
 <p>athenaCL produces both Csound and MIDI scores. Csound is free and runs on
 every platform. Download Csound here:
 https://csound.com/.</p>
-<p>athenaCL produces images with various Python-based graphic output systems.
-These output systems include the Python TkInter GUI library and the fork of
-Python Image Library (Pillow), and may require additional Python software. Most
-Python distributions include TkInter (MacOS systems may require additional
-configuration); Pillow is easily added to Python.  https://python-pillow.org/</p>
 <h2 id="quick-start"><a class="header" href="#quick-start">Quick-Start</a></h2>
-<ol>
-<li><code>$ python setup.py</code></li>
-<li><code>$ python athenaCL/athenacl.py</code></li>
-</ol>
-<p>Or via python prompt:</p>
-<ol>
-<li><code>&gt;&gt;&gt; import athenaCL.athenacl</code></li>
-</ol>
+<p><code>$ cargo run --release</code></p>
 <h2 id="installation"><a class="header" href="#installation">Installation</a></h2>
-<p>Two installation methods are available: (1) placing the athenaCL directory
-wherever desired, or (2) installing the athenaCL source into the Python library
-with the Python Distribution Utilities (distutils). Both permit using athenaCL
-as an interactive application and as a library imported in Python.</p>
-<p>Installing athenaCL consist of running the file "setup.py", a script that
-performs installation procedures.</p>
-<p>The setup.py script can take arguments to perform optional installation
-procedures. (1) the "tool" argument, on UNIX and macOS systems, will install a
-command-line utility launcher, "athenacl," as well as a corresponding man
-page. (2) the "install" argument, on all platforms, will perform a Python
-distutils installation into the Python site-packages directory. (3) the
-"uninstall" option will remove all athenaCL installation files and directories.</p>
-<h2 id="athenacl-via-command-line-interface"><a class="header" href="#athenacl-via-command-line-interface">athenaCL Via Command Line Interface</a></h2>
-<p>installing:</p>
-<ol>
-<li>place athenaCL directory wherever you like</li>
-<li>enter the athenaCL directory</li>
-<li><code>python setup.py</code></li>
-</ol>
-<p>or, to install the "athenacl" launcher and the athenaCL man page:</p>
-<ol start="3">
-<li><code>python setup.py tool</code></li>
-</ol>
-<p>or, to perform a distutils installation</p>
-<ol start="3">
-<li><code>python setup.py install</code></li>
-</ol>
-<p>launching from the command line interface:</p>
-<ol start="4">
-<li><code>python athenacl.py</code></li>
-</ol>
-<p>launching with the athenaCL tool:</p>
-<ol start="4">
-<li><code>/usr/local/bin/athenacl</code></li>
-</ol>
-<p>launching with the athenaCL tool and <code>/usr/local/bin</code> in <code>PATH</code>:</p>
-<ol start="4">
-<li><code>athenacl</code></li>
-</ol>
-<h2 id="athenacl-via-idle"><a class="header" href="#athenacl-via-idle">athenaCL Via Idle</a></h2>
-<p>installing:</p>
-<ol>
-<li>place athenaCL directory wherever you like</li>
-<li>enter the athenaCL directory</li>
-<li>double-click "setup.py"</li>
-</ol>
-<p>launching on Windows:</p>
-<ol start="4">
-<li>double-click "athenacl.py"</li>
-<li>enter "y" when asked to start athenaCL in IDLE</li>
-</ol>
-<p>launching from the command line interface:</p>
-<ol start="4">
-<li><code>$ python athenacl.py -s idle</code></li>
-</ol>
-<h2 id="athenacl-via-python-prompt"><a class="header" href="#athenacl-via-python-prompt">athenaCL Via Python Prompt</a></h2>
-<p>If the athenaCL setup.py script has been successfully completed, Python should
-already be aware of the location of the current athenaCL installation. If the
-athenaCL setup.py script has not been properly run, the directory containing
-athenaCL must be manually added to the Python sys.path:</p>
-<p>(if the athenaCL directory is located in the directory "/src")</p>
-<ol>
-<li><code>&gt;&gt;&gt; import sys</code></li>
-<li><code>&gt;&gt;&gt; sys.path.append('/src')</code></li>
-</ol>
-<p>launching:</p>
-<ol start="3">
-<li><code>&gt;&gt;&gt; import athenaCL.athenacl</code></li>
-</ol>
+<p>Run from source code directory:</p>
+<pre><code>$ cargo install --path . 
+</code></pre>
+<p>Then:</p>
+<pre><code>$ athenacl
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="tutorial-1-the-interactive-command-line-interface"><a class="header" href="#tutorial-1-the-interactive-command-line-interface">Tutorial 1: The Interactive Command Line Interface</a></h1>
 <p>This tutorial provides essential information and examples for using athenaCL's interactive command-line Interpreter. This material is essential for understanding basic athenaCL operation and how to obtain help within the program.</p>
 <div style="break-before: page; page-break-before: always;"></div><h2 id="starting-the-athenacl-interpreter"><a class="header" href="#starting-the-athenacl-interpreter">Starting the athenaCL Interpreter</a></h2>
