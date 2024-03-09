@@ -18,9 +18,10 @@ find the source code inside `doc/` directory. You can read it
 
 
 
-## Tests
+## Test Python Code
 
 ```
+$ cd pysrc
 $ python3 -m unittest discover.athenaCL
 $ python3 -m unittest discover athenaCL.libATH -p "*.py"
 ```
@@ -30,20 +31,15 @@ $ python3 -m unittest discover athenaCL.libATH -p "*.py"
 
 ## About This Fork
 
-The last commit in the original repo pushed in 2011. It was written in Python 2,
-this repo updates the code to Python 3.
+Initially this repo was forked to update the code to python3. But then I
+considered to build a GUI version of **athenaCL**. Today the code is adapted for
+GUI needs:
 
-So far all tests of the main module (`libATH`) passed and it seems like it works
-in the terminal.  But test coverage is far from 100% and many bugs introduced by
-the conversion may still exist.
+- it's modified to be easily embeddable into binary (using **RustPython** and
+  freezing);
+- some features related to CLI are removed, to make it work better with
+  **RustPython**;
+- while the CLI version might still work, it's not supported, so expect bugs.
 
-For now, I don't have any plans to introduce new features, but if you'll find
-any bugs, I'm ready to try to fix them when I have time. So fill free to open
-issues. Also, feel free to open PR's.
-
-When I finish with the manual and fixing bugs I'll find in the examples of
-tutorials, I'm going to keep it on "life support" - just fixing bugs, when I
-find some while using the application as a normal user (i.e. not a tester).
-
-I'd also like to add a front end to this application, but that would be a
-separate project.
+If you're interested in the original (CLI) version, check out the
+[`pregui`](https://github.com/ales-tsurko/athenaCL/releases/tag/pregui) tag.
