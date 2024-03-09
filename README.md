@@ -18,6 +18,17 @@ find the source code inside `doc/` directory. You can read it
 
 
 
+## Usage
+
+You don't need python. To run this program, just:
+
+```
+$ cargo run --release
+```
+
+
+
+
 ## Test Python Code
 
 ```
