@@ -26,16 +26,7 @@ You don't need python. To run this program, just:
 $ cargo run --release
 ```
 
-
-
-
-## Test Python Code
-
-```
-$ cd pysrc
-$ python3 -m unittest discover.athenaCL
-$ python3 -m unittest discover athenaCL.libATH -p "*.py"
-```
+`cargo test` will run not only rust tests, but python tests as well.
 
 
 

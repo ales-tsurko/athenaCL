@@ -10,6 +10,12 @@ rustpython-pylib = { version = "0.3.0", features = ["freeze-stdlib"] }
 rustpython-stdlib = "0.3.0"
 rustpython-vm = { version = "0.3.0", features = ["freeze-stdlib"] }
 
+[lints.clippy]
+all = "warn"
+
+[lints.rust]
+missing_docs = "warn"
+
 [profile.release]
 strip = true
 lto = true
