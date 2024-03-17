@@ -143,7 +143,7 @@ class TimeSegment(baseTexture.Texture):
         textTotalSegmentCount = self.getTextStatic("tsc", "count")
 
         segmentManifest = []  # store [count, segWeight, start, end]
-        # process segments first, determine events per segemtn
+        # process segments first, determine events per segment
         tSeg = 0
         if textLevelEventCount == "segment":  # event count per segement
             for q in range(textTotalSegmentCount):
@@ -183,13 +183,13 @@ class TimeSegment(baseTexture.Texture):
 
         for q in range(textTotalSegmentCount):
             s, m, e = segmentBounds[q]
-            segmentManifest[q].append(s * tDurSpan)
-            segmentManifest[q].append(e * tDurSpan)
+            segmentManifest[q].append(tStart + s * tDurSpan)
+            segmentManifest[q].append(tStart + e * tDurSpan)
 
         # print _MOD, 'segmentWidth', segmentManifest
 
         # get texture start time as init time
-        tCurrent = tStart  # defined abovie
+        tCurrent = tStart  # defined above
 
         # if field/oct vals are taken once per set, pre calculate and store
         # in a list; access from this list with pathPos index
@@ -209,7 +209,7 @@ class TimeSegment(baseTexture.Texture):
             segEventCount = segmentManifest[segPos][0]  # count is first in list
             tStartSeg = segmentManifest[segPos][1]
             tEndSeg = segmentManifest[segPos][2]
-            # create events for thsi segment
+            # create events for this segment
             # print _MOD, 'segPos', segPos
             for i in range(segEventCount):  #
                 # get generator value w/n unit interval

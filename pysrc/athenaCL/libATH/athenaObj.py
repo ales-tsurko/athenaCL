@@ -1507,11 +1507,6 @@ class Test(unittest.TestCase):
         for i in range(len(list(texture.tmNames.values()))):
             tmName = list(texture.tmNames.values())[i]
 
-            if tmName == "TimeSegment":
-                # TODO: time segment raise an error with
-                # TIcp t10 test2
-                continue
-
             name = "t%s" % i
             cmdListE.append("EMo cn")
             cmdListE.append("TMo %s" % tmName)

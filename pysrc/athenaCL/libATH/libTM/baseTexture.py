@@ -918,7 +918,7 @@ class Texture(object):
         """given a time value, return the path step position
         this is necessary for non-linear texture modules"""
         for i in range(len(self.clockPath)):
-            if i != len(self.clockPath) - 1:  # not last
+            if i == 0 or i != len(self.clockPath) - 1:  # not last
                 if t >= self.clockPath[i].tStart and t < self.clockPath[i].tEnd:
                     return i
             else:  # last, include top
