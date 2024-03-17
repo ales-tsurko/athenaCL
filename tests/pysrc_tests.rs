@@ -1,7 +1,6 @@
 // runs tests for python code
 
 use rustpython_vm as vm;
-use vm::py_freeze;
 
 #[test]
 fn test() {
@@ -15,5 +14,7 @@ fn test() {
         vm::PyResult::Ok(())
     });
 
-    interpreter.run(|_vm| result);
+    interpreter.run(|_vm| result.clone());
+
+    assert!(result.is_ok());
 }

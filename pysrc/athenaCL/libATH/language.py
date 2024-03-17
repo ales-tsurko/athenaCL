@@ -13,7 +13,7 @@
 
 
 import string, random
-import unittest, doctest
+import unittest
 
 # language must be set by this class reading a preference file
 # otherwise, works only as a global class

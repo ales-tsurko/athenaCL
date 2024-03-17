@@ -10,8 +10,8 @@
 # -----------------------------------------------------------------||||||||||||--
 
 
-import os, tempfile, time, shutil, time
-import unittest, doctest
+import os, shutil
+import unittest
 
 
 from athenaCL.libATH import drawer
@@ -935,21 +935,6 @@ def openMedia(path, prefDict=None):
 # python, ath utilies
 
 
-def findSiteLib():
-    """this replaces site.here, which is no longer around after python 2.3
-    /System/Library/Frameworks/Python.framework/Versions/2.3/lib/python2.3
-    sys.prefix: (note that exec_prefix is also possible)
-    '/System/Library/Frameworks/Python.framework/Versions/2.3'
-    the solution below seems to be the only good cross platform solution
-    """
-    return os.path.dirname(os.__file__)
-
-
-def findSitePackages():
-    """same as a above, but add site-packages"""
-    return os.path.join(os.path.dirname(os.__file__), "site-packages")
-
-
 def findFinkDir():
     """this command only works on unix systems
     finds base fink dir stub
@@ -1018,35 +1003,6 @@ def findManPath(group=1, altSys=None):
         return None
     else:
         return found[0]
-
-
-def _idlePathCandidate():
-    idlePath = []
-    idlePath.append(os.path.join(os.path.dirname(findSiteLib()), "Tools", "idle"))
-    idlePath.append(os.path.join(findSiteLib(), "idlelib"))
-
-
-def findIdle():
-    "finds idle on various platforms; returns dir with idle.py"
-    # all platforms use one of these forms
-    idlePath = []
-    idlePath.append(os.path.join(os.path.dirname(findSiteLib()), "Tools", "idle"))
-    idlePath.append(os.path.join(findSiteLib(), "idlelib"))
-    # python 2.3 has changed the location of idle on win
-    # site.here is "lib" dir in Python dir; must go up to tools
-    # dont need to move up from site.here; Tools below site.here
-    # py2.3 in macos x as framework install
-
-    for path in idlePath:  # search list of possible paths
-        if os.path.isdir(path) == 1:  # if a directory
-            dirOfIdlePath = os.listdir(path)
-            if "idle.py" in dirOfIdlePath:
-                return path
-            else:
-                pass
-        else:
-            pass
-    return None  # if nothing found
 
 
 # -----------------------------------------------------------------||||||||||||--

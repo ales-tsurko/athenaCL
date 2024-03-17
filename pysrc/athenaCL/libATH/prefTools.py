@@ -9,14 +9,14 @@
 # -----------------------------------------------------------------||||||||||||--
 
 
-import xml.dom.minidom
-import unittest, doctest
+import unittest
 import tempfile
 import os, sys
 
 # limit imports here to only these two modules
 from athenaCL.libATH import drawer
 from athenaCL.libATH import xmlTools
+from xmlToolsExt import xmlToPy
 
 _MOD = "prefTools.py"
 # -----------------------------------------------------------------||||||||||||--
@@ -232,22 +232,10 @@ def getXmlPrefDict(prefFilePath=None):
     """
     doc = None
     if prefFilePath != None:
-        f = open(prefFilePath, "r")
-        try:
-            doc = xml.dom.minidom.parse(f)
-        # this may be bad, but there could be many errors:
-        # xml.parsers.expat.ExpatError
-        # xml.sax._exceptions.SAXParseException
-        # not worth the risk; just get new prefs
-        except:  # catch all exceptions
-            # cant parse the preference files
-            doc = None
-        finally:
-            f.close()
-    else:
-        doc = None
+        with open(prefFilePath, "r") as f:
+            doc = f.read()
     if doc != None:
-        procData = xmlTools.xmlToPy(doc)
+        procData = xmlToPy(doc)
         return procData["preferences"]
     else:  # cant load this data, get new data
         return getDefaultPrefDict()

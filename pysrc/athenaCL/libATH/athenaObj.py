@@ -1564,10 +1564,10 @@ class Test(unittest.TestCase):
 
         cmdList = [
             # do all test load files
-            "AOl test01.xml",
+            "AOl tests/xml/test01.xml",
             #'AOl demo03.xml',
             #'AOl demo05.xml',
-            "AOmg demo01.xml",
+            "AOmg pysrc/athenaCL/demo/legacy/demo01.xml",
             # AOdlg
             "APwid 80",
             "APcurs",

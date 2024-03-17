@@ -23,7 +23,7 @@ lang = language.LangObj()
 from athenaCL.libATH.libPmtr import basePmtr
 from athenaCL.libATH.libPmtr import parameter
 from athenaCL.libATH import xmlTools
-import xml.dom.minidom
+from xmlToolsExt import xmlToPy
 
 _MOD = "ioTools.py"
 from athenaCL.libATH import prefTools
@@ -40,10 +40,10 @@ def extractXML(path):
     missing attributes are not added (backwards compat done in athenaObj
     """
     # added universal new line support; should provide cross-plat access
-    f = open(path, "r")
-    doc = xml.dom.minidom.parse(f)
-    f.close()
-    procData = xmlTools.xmlToPy(doc)
+    with open(path, 'r') as f:
+        doc = f.read()
+                                      
+    procData = xmlToPy(doc)
     aData = procData["athenaObject"]["athena"]  # athena Data
     pData = procData["athenaObject"]["paths"]  # path Data
     tData = procData["athenaObject"]["textures"]  # tData

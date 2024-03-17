@@ -32,6 +32,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "ahash"
+version = "0.8.11"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e89da841a80418a9b391ebaea17f5c112ffaaa96f621d2c285b5174da76b9011"
+dependencies = [
+ "cfg-if",
+ "getrandom 0.2.12",
+ "once_cell",
+ "version_check",
+ "zerocopy",
+]
+
+[[package]]
 name = "aho-corasick"
 version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -71,6 +84,8 @@ checksum = "d92bec98840b8f03a5ff5413de5293bfcd8bf96467cf5452609f939ec6f5de16"
 name = "athenacl"
 version = "0.1.0"
 dependencies = [
+ "ahash 0.8.11",
+ "quick-xml",
  "rustpython-pylib",
  "rustpython-stdlib",
  "rustpython-vm",
@@ -1123,6 +1138,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3b7e158a385023d209d6d5f2585c4b468f6dcb3dd5aca9b75c4f1678c05bb375"
 
 [[package]]
+name = "quick-xml"
+version = "0.31.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1004a344b30a54e2ee58d66a71b32d2db2feb0a31f9a2d302bf0536f15de2a33"
+dependencies = [
+ "memchr",
+]
+
+[[package]]
 name = "quote"
 version = "1.0.35"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1342,7 +1366,7 @@ version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "64534c30cdeec45117049dd803ac3b50966603cfcb0c52e8b9f16ab2d8953e3c"
 dependencies = [
- "ahash",
+ "ahash 0.7.8",
  "bitflags 2.4.2",
  "indexmap 1.9.3",
  "itertools 0.10.5",
@@ -1534,7 +1558,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "aee9a4e15f0384e58c5cb388d4091a06aabcda944e71adc316e2e84a51b2176a"
 dependencies = [
  "adler32",
- "ahash",
+ "ahash 0.7.8",
  "ascii",
  "base64",
  "blake2",
@@ -1600,7 +1624,7 @@ version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e2d39e99834033f1313cf80279a7d37f7a83b56a5fad8194f20790bdf303419a"
 dependencies = [
- "ahash",
+ "ahash 0.7.8",
  "ascii",
  "atty",
  "bitflags 2.4.2",
@@ -2528,3 +2552,23 @@ name = "xml-rs"
 version = "0.8.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0fcb9cbac069e033553e8bb871be2fbdffcab578eb25bd0f7c508cedc6dcd75a"
+
+[[package]]
+name = "zerocopy"
+version = "0.7.32"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "74d4d3961e53fa4c9a25a8637fc2bfaf2595b3d3ae34875568a5cf64787716be"
+dependencies = [
+ "zerocopy-derive",
+]
+
+[[package]]
+name = "zerocopy-derive"
+version = "0.7.32"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9ce1b18ccd8e73a9321186f97e46f9f04b778851177567b1975109d26a08d2a6"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.52",
+]

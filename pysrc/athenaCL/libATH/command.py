@@ -10,7 +10,8 @@
 # -----------------------------------------------------------------||||||||||||--
 
 import sys, os, time, random, copy
-import unittest, doctest, traceback
+import unittest
+import xml.etree.ElementTree as ET
 
 from athenaCL.libATH import argTools
 from athenaCL.libATH import audioTools
@@ -50,6 +51,8 @@ except ImportError:  # pil or tk may not be installed
 
 _MOD = "command.py"
 from athenaCL.libATH import prefTools
+
+from xmlToolsExt import checkFileFormat
 
 environment = prefTools.Environment(_MOD)
 
@@ -7160,41 +7163,10 @@ class _CommandAO(Command):
 
     def _aoDetermineFileFormat(self, path):
         "check xml type of a file, or determine if it is an old pickled file"
-        # added universal new line support; should provide cross-plat access
-        f = open(path, "r")
-        headerLine = f.readline()
-        f.close()
-        headerLine = headerLine.strip()
-        msg = "ok"
-        if headerLine[:5] == "<?xml" or path[:-4] == ".xml":
-            import xml.dom.minidom
+        with open(path, "r") as f:
+            content = f.read()
 
-            try:  # this may be a w wase of time
-                f = open(path, "r")
-                doc = xml.dom.minidom.parse(f)
-            except IOError as errorMsg:
-                f.close()
-                return "unknown", str(errorMsg) + "\n" + lang.msgAOerrorXML
-            except xml.parsers.expat.ExpatError as errorMsg:
-                f.close()
-                return "unknown", str(errorMsg) + "\n" + lang.msgAOerrorXML
-            f.close()
-            try:
-                # doc created above
-                for node in doc.childNodes:
-                    # this gest primary entries
-                    if node.nodeType == node.ELEMENT_NODE:
-                        if node.tagName != "athenaObject":
-                            msg = lang.msgAOnotXML
-                            return "unknown", msg
-            except:
-                msg = lang.msgAOnotXML
-                return "unknown", msg
-            # seems good
-            return "xml", msg
-        # pickled objects no longer supported
-        else:
-            return "unknown", lang.msgAOnotAOdoc
+        return checkFileFormat(content)
 
     # -----------------------------------------------------------------------||--
     # tools for updating data imported from xml and evaluated, but not loaded
@@ -8474,7 +8446,6 @@ class AUsys(Command):
             value = "none"
         entryLines.append(["working directory:", value])
         entryLines.append(["python executable:", sys.executable])
-        entryLines.append(["python site:", osTools.findSiteLib()])
 
         for key, title in [
             ("midiPlayerPath", "midi player"),
