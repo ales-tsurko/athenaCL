@@ -100,5 +100,5 @@ def run_tests(test_case_name=None):
         sys.exit(1)
 
 
-# run_tests("athenaCL.libATH.athenaObj.Test.testInterpreterLoad")
+# run_tests("athenaCL.libATH.athenaObj.Test.testInterpreterTextures")
 run_tests()

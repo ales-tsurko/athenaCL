@@ -8,8 +8,7 @@
 # License:       GPL
 # -----------------------------------------------------------------||||||||||||--
 
-import random, copy
-import unittest, doctest
+import unittest
 
 
 from athenaCL.libATH import unit

@@ -21,7 +21,7 @@ _MOD = "fontLibrary.py"
 # examples from: http://www.dsg4.com/04/extra/bitmap/index.html
 
 
-# calculate wdith algorithmically
+# calculate width algorithmically
 fontMicro = {  # a-o
     "a": (
         (0, 0, 0, 0, 0),

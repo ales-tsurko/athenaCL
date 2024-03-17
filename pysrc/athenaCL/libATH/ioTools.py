@@ -10,8 +10,7 @@
 # License:       GPL
 # -----------------------------------------------------------------||||||||||||--
 
-import copy, sys
-import unittest, doctest
+import unittest
 
 
 from athenaCL.libATH import drawer

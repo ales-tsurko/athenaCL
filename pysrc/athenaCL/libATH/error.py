@@ -9,7 +9,7 @@
 # -----------------------------------------------------------------||||||||||||--
 
 
-import unittest, doctest
+import unittest
 
 
 # now error.ParameterObjectSyntaxError

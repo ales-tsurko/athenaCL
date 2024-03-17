@@ -10,7 +10,7 @@
 
 
 import sys, os, string, types, random, time
-import unittest, doctest
+import unittest
 import tempfile
 
 # primitive module: do not import any larger mods.
@@ -27,10 +27,7 @@ def isList(usrData):
     >>> isList('')
     False
     """
-    if isinstance(usrData, list) or isinstance(usrData, tuple):
-        return True
-    else:
-        return False
+    return isinstance(usrData, list) or isinstance(usrData, tuple)
 
 
 def isNum(usrData):
@@ -43,15 +40,11 @@ def isNum(usrData):
     >>> isNum(3)
     True
     """
-    if (
+    return (
         isinstance(usrData, float)
         or isinstance(usrData, int)
         or isinstance(usrData, int)
-    ):
-        return True
-    else:
-        return False
-
+    )
 
 def isBool(usrData):
     """check if usr data is boolean, return boolean
@@ -61,10 +54,7 @@ def isBool(usrData):
     >>> isBool(0)
     False
     """
-    if isinstance(usrData, bool):
-        return True
-    else:
-        return False
+    return isinstance(usrData, bool)
 
 
 def isFloat(usrData):
@@ -75,10 +65,7 @@ def isFloat(usrData):
     >>> isFloat(3)
     False
     """
-    if isinstance(usrData, float):
-        return True
-    else:
-        return False
+    return isinstance(usrData, float)
 
 
 def isInt(usrData):
@@ -90,10 +77,7 @@ def isInt(usrData):
     >>> isInt('3')
     False
     """
-    if isinstance(usrData, int):
-        return True
-    else:
-        return False
+    return isinstance(usrData, int)
 
 
 def isStr(usrData):
@@ -104,10 +88,7 @@ def isStr(usrData):
     >>> isStr(3.2)
     False
     """
-    if isinstance(usrData, str):
-        return True
-    else:
-        return False
+    return isinstance(usrData, str)
 
 
 def isDict(usrData):
@@ -118,10 +99,7 @@ def isDict(usrData):
     >>> isDict('false')
     False
     """
-    if isinstance(usrData, dict):
-        return True
-    else:
-        return False
+    return isinstance(usrData, dict)
 
 
 def almostEquals(x, y=0.0, grain=1e-7):
@@ -131,10 +109,7 @@ def almostEquals(x, y=0.0, grain=1e-7):
     Borrowed from music21.
     """
 
-    if abs(x - y) < grain:
-        return True
-    else:
-        return False
+    return abs(x - y) < grain
 
 
 # -----------------------------------------------------------------||||||||||||--
@@ -150,10 +125,7 @@ def isMod(usrData):
     >>> isMod(True)
     False
     """
-    if isinstance(usrData, types.ModuleType):
-        return True
-    else:
-        return False
+    return isinstance(usrData, types.ModuleType)
 
 
 def isFunc(usrData):
@@ -165,10 +137,7 @@ def isFunc(usrData):
     >>> isFunc(False)
     False
     """
-    if isinstance(usrData, types.FunctionType):
-        return True
-    else:
-        return False
+    return isinstance(usrData, types.FunctionType)
 
 
 def isCharNum(usrData):
@@ -188,10 +157,7 @@ def isCharNum(usrData):
     for char in usrData:  # cannot have a comma here
         if char.isdigit() or char in [".", "-", " ", "+"]:
             count = count + 1
-    if count == match:
-        return True
-    else:
-        return False
+    return count == match
 
 
 # -----------------------------------------------------------------||||||||||||--
@@ -322,7 +288,7 @@ def gmtimeStr():
     """
     raw = time.gmtime()
     asc = time.asctime(raw)
-    asc = asc.replace(" ", " ")  # removie double spaces
+    asc = asc.replace(" ", " ")  # remove double spaces
     asc = asc.split(" ")
     msg = "%s, %s %s %s %s GMT" % (asc[0], raw[2], asc[1], raw[0], asc[3])
     return msg
@@ -335,7 +301,7 @@ def localtimeStr():
     """
     raw = time.localtime()
     asc = time.asctime(raw)
-    asc = asc.replace(" ", " ")  # removie double spaces
+    asc = asc.replace(" ", " ")  # remove double spaces
     asc = asc.split(" ")
     msg = "%s, %s %s %s %s EST" % (asc[0], raw[2], asc[1], raw[0], asc[3])
     return msg

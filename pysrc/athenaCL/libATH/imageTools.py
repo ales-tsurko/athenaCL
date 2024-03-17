@@ -10,7 +10,7 @@
 # -----------------------------------------------------------------||||||||||||--
 
 import os, random, string, copy, time, array
-import unittest, doctest
+import unittest
 
 
 from athenaCL.libATH import drawer

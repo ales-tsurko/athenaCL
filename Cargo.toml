@@ -23,3 +23,6 @@ strip = true
 lto = true
 codegen-units = 1
 panic = "abort"
+
+[profile.dev]
+opt-level = 2 # rustpython is too slow in debug mode, so we enable -O2

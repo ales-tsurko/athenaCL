@@ -13,7 +13,7 @@
 # -----------------------------------------------------------------||||||||||||--
 
 import sys, os, time, random, traceback, http.client, urllib.request, urllib.parse, urllib.error
-import unittest, doctest
+import unittest
 
 athVersion = "2.0.0a15"
 athBuild = "2010.07.07"

@@ -14,7 +14,7 @@
 # -----------------------------------------------------------------||||||||||||--
 
 import copy
-import unittest, doctest
+import unittest
 import codecs
 
 _MOD = "midiTools.py"
