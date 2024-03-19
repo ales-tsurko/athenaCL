@@ -97,9 +97,6 @@ class HelpDoc:
     cmd = "cmd: Displays a hierarchical menu of all athenaCL commands."
     cmd_usage = "cmd"
 
-    pypath = "pypath: Lists all file paths in the Python search path."
-    pypath_usage = "pypath"
-
     # -----------------------------------------------------------------------||--
 
     #     SCv = 'SCv: SetClass: View: Displays all data in the set class dictionary for the user-supplied pitch groups. %s For all pitch groups the SCv command interprets the values as a set class. The Normal Form, Invariance Vector and all N Class Vectors (for the active Tn/TnI mode) are displayed. N-Class Vectors, when necessary, are displayed in 20 register rows divided into two groups of 10 and divided with a dash (-). %s' % (_pitchGroups, _tniToggle)
@@ -450,9 +447,6 @@ class HelpDoc:
 
     APwid = "APwid: AthenaPreferences: Width: Manually set the number of characters displayed per line during an athenaCL session. Use of this preference is only necessary on platforms that do not provide a full-featured terminal envrionment."
     APwid_usage = "apwid characterWidth"
-
-    APdlg = 'APdlg: AthenaPreferences: Dialogs: Toggle between different dialog modes. Not all modes are available on every platform or Python installation. The "text" dialog mode works without a GUI, and is thus available on all platforms and Python installations.'
-    APdlg_usage = "apdlg dialogMode"
 
     APgfx = (
         "APgfx: AthenaPreferences: Graphics: Toggle between different graphic output formats. All modes may not be available on every platform or Python installation. %s"

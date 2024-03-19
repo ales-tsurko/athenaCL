@@ -40,6 +40,7 @@ from athenaCL.libATH.libPmtr import basePmtr
 from athenaCL.libATH.libTM import texture
 from athenaCL.libATH.libOrc import generalMidi
 from athenaCL.libATH.omde import rand
+import dialogExt
 
 # conditional imports that may fail but are not necessary
 try:
@@ -389,7 +390,6 @@ class Command(object):
                 return filePath
         else:
             possibleDirs = []  # all demo dirs
-            possibleDirs += self.ao.external.demoDirList
             possibleDirs.append(self.ao.aoInfo["fpLastDir"])
             possibleDirs.append(self.ao.aoInfo["fpLastDirEventList"])
             dir = drawer.getcwd()
@@ -419,6 +419,7 @@ class Command(object):
         """
         # environment.printDebug(['_selectAppPath:', usrStr])
         path = None
+        changeAppPath = None
         if usrStr != None:  # raw command arg string
             usrStr = drawer.pathScrub(usrStr)  # scrub, expand, links
             # even if appStrKey == '', will return 0
@@ -432,15 +433,10 @@ class Command(object):
                 appDialogQuery = "select a %s application (%s):" % (appType, appName)
             else:
                 appDialogQuery = "select a %s application:" % (appType)
-            appDialogError = "this is not a %s application. try again." % appType
             while 1:
-                dlgVisMet = self.ao.external.getPref("athena", "dlgVisualMethod")
-                path, ok = dialog.promptGetFile(
+                path, ok = dialogExt.promptChooseFile(
                     appDialogQuery,
-                    self.ao.aoInfo["fpLastDir"],
-                    "app",
-                    dlgVisMet,
-                    self.termObj,
+                    self.ao.aoInfo["fpLastDir"]
                 )
                 if not ok or path == None or not os.path.exists(path):
                     changeAppPath = 0  # dont change
@@ -1421,31 +1417,6 @@ class cmd(Command):
 
     def display(self):
         return self.ao.cmdDisplay()
-
-
-class pypath(Command):
-    """cmd display
-
-    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
-    >>> a = pypath(ao)
-    >>> ok, result = a.do()
-    >>> ok == True
-    True
-    """
-
-    def __init__(self, ao, args="", **keywords):
-        Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 0  # display only
-        self.gatherSwitch = 0  # display only
-        self.cmdStr = "pypath"
-
-    def display(self):
-        msg = []
-        msg.append("Python module search paths:\n")
-        for path in sys.path:
-            if path != "":
-                msg.append("%s\n" % (path))
-        return "".join(msg)
 
 
 class bug(Command):
@@ -6649,22 +6620,6 @@ class ELn(Command):
                 return lang.msgReturnCancel
             scoDir, scoName = os.path.split(self.scoPath)
 
-        # remove to use temporary files
-        #             if self.ao.aoInfo['fpLastDirEventList'] in ['', None]:
-        #                 defaultScoPath = self.ao.aoInfo['fpLastDir']
-        #             else:
-        #                 defaultScoPath = self.ao.aoInfo['fpLastDirEventList']
-        #             dlgVisMet = self.ao.external.getPref('athena', 'dlgVisualMethod')
-        #             while 1: # to make sure you a get a .sco ending
-        #                 self.scoPath, ok = dialog.promptPutFile(lang.msgELnameScore,
-        #                     'ath.xml',  defaultScoPath, '.xml', dlgVisMet, self.termObj)
-        #                 if ok != 1: return lang.msgReturnCancel
-        #                 scoDir, scoName = os.path.split(self.scoPath)
-        #                 if scoName[-4:] == '.xml': break
-        #                 else:
-        #                     dialog.msgOut(lang.msgELbadScoreName, self.termObj)
-        #                     continue
-
         # this is a dir, not a path
         self.ao.aoInfo["fpLastDirEventList"] = scoDir
 
@@ -7237,17 +7192,13 @@ class AOl(_CommandAO):
         self.path = None
         if args != "":
             args = argTools.ArgOps(args)  # no strip
-            self.path = self._findFilePath(args.get(0, "end"))
+            self.path = self._findFilePath(args.get(0))
             if self.path == None:
                 return self._getUsage()
         if self.path == None:
-            dlgVisMet = self.ao.external.getPref("athena", "dlgVisualMethod")
-            self.path, ok = dialog.promptGetFile(
+            self.path, ok = dialogExt.promptChooseFile(
                 lang.msgAOselectFile,
                 self.ao.aoInfo["fpLastDir"],
-                "file",
-                dlgVisMet,
-                self.termObj,
             )
             if ok != 1:
                 return lang.msgReturnCancel
@@ -7317,13 +7268,9 @@ class AOw(_CommandAO):
             dlgVisMet = self.ao.external.getPref("athena", "dlgVisualMethod")
             prompt = lang.msgAOnameFile
             while 1:  ## to make sure you a get a .xml ending
-                self.path, ok = dialog.promptPutFile(
+                self.path, ok = dialogExt.promptSaveFile(
                     prompt,
                     "ao.xml",
-                    self.ao.aoInfo["fpLastDir"],
-                    "*",
-                    dlgVisMet,
-                    self.termObj,
                 )
                 if ok != 1:
                     return lang.msgReturnCancel
@@ -7400,13 +7347,9 @@ class AOmg(_CommandAO):
             if self.path == None:
                 return self._getUsage()
         if self.path == None:
-            dlgVisMet = self.ao.external.getPref("athena", "dlgVisualMethod")
-            self.path, ok = dialog.promptGetFile(
+            self.path, ok = dialogExt.promptChooseFile(
                 lang.msgAOselectFile,
                 self.ao.aoInfo["fpLastDir"],
-                "file",
-                dlgVisMet,
-                self.termObj,
             )
             if ok != 1:
                 return lang.msgReturnCancel
@@ -7528,60 +7471,6 @@ class AOrm(_CommandAO):
 
     def result(self):
         return {}
-
-
-# -----------------------------------------------------------------||||||||||||--
-class APdlg(Command):
-    """toggles between dialog modes"""
-
-    def __init__(self, ao, args="", **keywords):
-        Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1  # display only
-        self.gatherSwitch = 1  # display only
-        self.cmdStr = "APdlg"
-
-    def _apConvertDlgFmt(self, usrStr):
-        ref = {
-            "tk": ["tk", "k"],
-            "mac": ["mac", "m"],
-            "text": ["text", "t"],
-        }
-        usrStr = drawer.selectionParse(usrStr, ref)
-        return usrStr  # may be None
-
-    def _apGetDlgFmt(self):
-        while 1:
-            dlgVisMet = self.ao.external.getPref("athena", "dlgVisualMethod")
-            usrStr = dialog.askStr(lang.msgAPdlgSelect % dlgVisMet, self.termObj)
-            if usrStr == None:
-                return None
-            usrStr = self._apConvertDlgFmt(usrStr)
-            if usrStr == None:
-                continue
-            else:
-                return usrStr
-
-    def gather(self):
-        args = self.args
-        self.formatStr = None
-        if args != "":
-            args = argTools.ArgOps(args)  # no strip
-            self.formatStr = self._apConvertDlgFmt(args.get(0, "end"))
-            if self.formatStr == None:
-                return self._getUsage()
-        if self.formatStr == None:
-            self.formatStr = self._apGetDlgFmt()
-            if self.formatStr == None:
-                return lang.msgReturnCancel
-
-    def process(self):
-        self.ao.external.writePref("athena", "dlgVisualMethod", self.formatStr)
-
-    def display(self):
-        msg = lang.msgAPdlgConfirm % self.ao.external.getPref(
-            "athena", "dlgVisualMethod"
-        )
-        return msg
 
 
 class APgfx(Command):
@@ -7773,8 +7662,7 @@ class APdir(Command):
         """
         ref = {
             "fpAudioDir": ["a", "ss", "ssdir", "audio"],
-            #'sadir'  : ['sa', 'sadir'],
-            "fpScratchDir": ["c", "x", "scratch"],  # must be perference key
+            "fpScratchDir": ["c", "x", "scratch"],  # must be preference key
         }
         usrStr = drawer.selectionParse(usrStr, ref)
         return usrStr  # may be None
@@ -7796,13 +7684,9 @@ class APdir(Command):
         # need a module-level way to convert preference values to
         # user strings
         while 1:
-            oldPath = self.ao.external.getPref("athena", ("%s" % name))
-            dlgVisMet = self.ao.external.getPref("athena", "dlgVisualMethod")
-            path, ok = dialog.promptGetDir(
+            path, ok = dialogExt.promptChooseDir(
                 ("select a %s directory:\n" % name),
                 self.ao.aoInfo["fpLastDir"],
-                dlgVisMet,
-                self.termObj,
             )
             if ok != 1:  # path canceled
                 return None

@@ -22,6 +22,7 @@ from athenaCL.libATH import language
 from athenaCL.libATH import spectral
 from athenaCL.libATH import sieve
 from athenaCL.libATH import error
+import dialogExt
 
 lang = language.LangObj()
 
@@ -1151,8 +1152,8 @@ class MultisetFactory:
                     psSet = self._parseTxt(usrStr)
                 # import will get a file dialog
                 elif usrStrType == "import":
-                    msg, ok = dialog.promptGetFile(
-                        lang.msgSCgetAudacity, fpLastDir, "file", dlgVisMet, termObj
+                    msg, ok = dialogExt.promptChooseFile(
+                        lang.msgSCgetAudacity, fpLastDir
                     )
                     count = self._getCount(termObj)  # count may be equal to None
                     # call parse text after getting file path

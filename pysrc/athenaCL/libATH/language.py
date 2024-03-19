@@ -511,10 +511,6 @@ Apple, Macintosh, Mac OS, and QuickTime are trademarks or registered trademarks 
     msgAOnotAOdoc = TAB + "this is not an AthenaObject document.\n"
     msgAOselAdirOrSdir = "select directory to set: scratch or audio. (x or a):"
 
-    msgAPdlgSelect = (
-        "active dialog visual method: %s.\nselect text, tk, or mac. (t, k, or m):"
-    )
-    msgAPdlgConfirm = "dialog visual method changed to %s.\n"
     msgAPgfxSelect = "active graphics format: %s.\nselect text, eps, tk, jpg, png. (t, e, k, j, or p):"
     msgAPgfxConfirm = "graphics format changed to %s.\n"
     msgAPcursorTool = "cursor tool set to %s.\n"

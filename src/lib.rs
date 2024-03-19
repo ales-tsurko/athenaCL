@@ -4,6 +4,7 @@ use rustpython_vm as vm;
 use vm::Interpreter;
 
 mod xml_tools_ext;
+mod dialog_ext;
 
 /// Initialize the python interpreter with precompiled stdlib and athenaCL (python modules).
 pub fn init_interpreter() -> Interpreter {
@@ -14,5 +15,6 @@ pub fn init_interpreter() -> Interpreter {
         vm.add_frozen(rustpython_pylib::FROZEN_STDLIB);
         vm.add_frozen(vm::py_freeze!(dir = "pysrc"));
         xml_tools_ext::make_module(vm);
+        dialog_ext::make_module(vm);
     })
 }
