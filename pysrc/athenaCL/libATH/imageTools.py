@@ -256,7 +256,7 @@ class Thumb:
 
 # -----------------------------------------------------------------||||||||||||--
 class GridGraphic:
-    """uess a list of lists as matrix for generating images"""
+    """uses a list of lists as matrix for generating images"""
 
     def __init__(self, gridData=None, dataType="float", transp=None):
         """if dataType == float values are interpreted as gray scale
@@ -308,18 +308,6 @@ class GridGraphic:
         self.imageObj = Image.new("RGB", (self.noCols, self.noRows))
         self.imageObj.putdata(self.RGBData)
 
-        # not needed for transparency create mask
-        # self.imageObj = self.imageObj.convert("RGBA")
-        # mask = Image.new("1", (self.noCols, self.noRows))
-        # self.imageObj.putalpha(mask)
-
-        # putalpha(band)
-        # To add an alpha (transparency) band to an "RGBA"-mode image,
-        # call this method and pass it an
-        # image of the same size having mode "L" or "1". The pixels of the band
-        # image replace the alpha
-        # band of the original image in place
-
     def _convertToRGB(self):
         "translate a list of cells to RGB"
         inputList = []  # self.gridData
@@ -336,7 +324,6 @@ class GridGraphic:
                 outputList.append(HTMLColorToRGB(cell))
             elif self.dataType == "rgb":
                 outputList.append(cell)
-        # for each in self.gridData._flatten(self.gridData):
         return outputList
 
     def scale(self, xMult, yMult):
@@ -370,65 +357,6 @@ class GridGraphic:
         return bundle
 
 
-class BarCode(GridGraphic):
-    def __init__(
-        self,
-        src=None,
-        width=120,
-        foreColor="#000000",
-        backColor="#aaaaaa",
-        xMult=1,
-        yMult=1,
-        horizontal=1,
-    ):
-        if width == None and src == None:
-            raise ValueError("not enough arguments")
-        # foreColor can be a list of colors that are chosen from at random
-        if not drawer.isList(foreColor):
-            foreColor = [
-                foreColor,
-            ]
-        if not drawer.isList(backColor):
-            backColor = [
-                backColor,
-            ]
-        if backColor[0] == None:  # if none, back it transparent
-            self.transp = 0  # black
-            backColor[0] = "#000000"  # make it black
-        else:
-            self.transp = None  # none is no transp
-
-        if width == None:
-            width = len(src)
-
-        # do not apply xmult yet, but account for it in the lineGraph
-        lineGraph = []
-        if src == None:  # creates a random distribution
-            for i in range(0, width):
-                pixel = random.choice((0, 1))  # choose on or off
-                lineGraph.append(pixel)
-        else:  # wrap src to fill width
-            for i in range(0, width):
-                pixel = src[i % len(src)]  # wrap
-                lineGraph.append(pixel)
-
-        gridRow = []
-        for pixel in lineGraph:
-            # choose random color
-            if pixel:  # if 1
-                color = random.choice(foreColor)
-            else:
-                color = random.choice(backColor)
-            for x in range(0, xMult):
-                gridRow.append(color)
-        gridData = [gridRow]
-
-        GridGraphic.__init__(self, gridData, "hex", self.transp)
-        self.scale(xMult, yMult)
-        if not horizontal:  # rotate 90 degrees
-            self.rotate(90)
-
-
 class GridText(GridGraphic):
     def __init__(
         self,
@@ -449,10 +377,14 @@ class GridText(GridGraphic):
             foreColor = [
                 foreColor,
             ]
+
         if not drawer.isList(backColor):
             backColor = [
                 backColor,
             ]
+        else:
+            backColor = []
+
         if backColor[0] == None:  # if none, back it transparent
             self.transp = 0  # black
             backColor[0] = "#000000"  # make it black
@@ -479,163 +411,12 @@ class GridText(GridGraphic):
             self.rotate(90)
 
 
-class GridBlend(GridGraphic):
-    def __init__(
-        self,
-        colorStart="#000000",
-        colorEnd="#333333",
-        length=20,
-        direction="x",
-        width=40,
-    ):
-        if direction == "y":
-            horizontal = 0
-        else:
-            horizontal = 1
-
-        colorListStart = HTMLColorToRGB(colorStart)
-        colorListEnd = HTMLColorToRGB(colorEnd)
-
-        colorArray = [[], [], []]
-
-        for i in range(3):  # for r g b
-            s = colorListStart[i]
-            e = colorListEnd[i]
-            interpObj = interpolate.OneDimensionalLinear(s, e)
-            for val in interpObj.discrete(length, 0):
-                colorArray[i].append(int(val))
-
-        gridData = []
-        for row in range(length):
-            rowData = []
-            code = RGBToHTMLColor(
-                (colorArray[0][row], colorArray[1][row], colorArray[2][row])
-            )
-            for col in range(width):
-                rowData.append(code)
-            gridData.append(rowData)
-
-        GridGraphic.__init__(self, gridData, "hex", None)
-        if not horizontal:  # rotate 90 degrees
-            self.rotate(90)
-
-
-# -----------------------------------------------------------------||||||||||||--
-class FontText:
-    """used for creating text chunk images for web pages"""
-
-    def __init__(
-        self,
-        text=None,
-        fontInfo=None,
-        size=None,
-        bg="#000000",
-        fg="#ffffff",
-        xMult=1,
-        yMult=1,
-        anti=0,
-    ):
-        if text == None:
-            text = string.ascii_letters
-        if fontInfo == None:  # default font
-            fontInfo = ("helvetica", "R", 12)
-        if FONTPATH == None:
-            font = ImageFont.load_default()  # get basic
-        else:
-            font = ImageFont.load(getFontPath(fontInfo))
-
-        # should be based on size of text
-        if size == None:  # area of background
-            width = len(text) * fontInfo[2]
-            height = fontInfo[2] * 2
-        else:
-            width, height = size
-
-        if bg == None:  # assume transparent
-            bg = "#000000"
-            self.transp = 0  # trans color is black?
-        else:
-            self.transp = None  # no transparency
-
-        bg = HTMLColorToRGB(bg)
-        fg = HTMLColorToRGB(fg)
-
-        self.im = Image.new("RGB", (width, height), bg)
-        draw = ImageDraw.Draw(self.im)
-        draw.text((0, 0), text, font=font, fill=fg)
-
-        # im = im.resize((width, height), Image.ANTIALIAS)
-        if anti:
-            self.im = self.im.resize((width * xMult, height * yMult), Image.ANTIALIAS)
-        else:
-            self.im = self.im.resize((width * xMult, height * yMult))
-
-        # self.im.show()
-
-    def write(self, filePath, openMedia=1):
-        "Saves the Image; .png and .jpg both work; format based on extensions"
-        self.filePath = filePath
-        if self.transp != None:
-            self.im.save(self.filePath, transparency=self.transp)
-        else:  # determine format from name
-            self.im.save(self.filePath)
-
-
-# -----------------------------------------------------------------||||||||||||--
-class WebText:
-    """writes a text image with special styles and mods on a transparent bkg"""
-
-    def __init__(self, text, fg, style):
-        if style in ["miniLargeA", "macro"]:
-            self.image = GridText(text, fg, None, "macro", 4, None, 1, 1)
-
-            # text = text.upper() # make all caps
-            # newText = []
-            # for char in text:
-            #    newText.append('%s ' % char)
-            # fontInfo = ('helvetica', 'R', 8)
-            # Text.__init__(self, ''.join(newText), fontInfo, None, None, fg, 2, 1)
-
-        elif style in ["miniSmallA", "micro"]:
-            wrapW = 60  # chars
-            self.image = GridText(text, fg, None, "micro", 2, None, 1, 1, 1, wrapW)
-
-            # fontInfo = ('helvetica', 'R', 8)
-            # Text.__init__(self, text, fontInfo, None, None, fg, 1, 1)
-
-        elif style in ["poster"]:
-            wrapW = 60  # chars
-            self.image = GridText(text, fg, None, "poster", 2, None, 1, 1, 1, wrapW)
-        elif style in ["strong"]:
-            wrapW = 60  # chars
-            self.image = GridText(text, fg, None, "strong", 2, None, 1, 1, 1, wrapW)
-        elif style in ["strongDouble"]:
-            wrapW = 60  # chars
-            self.image = GridText(text, fg, None, "strong", 2, None, 2, 2, 1, wrapW)
-        elif style in ["capitalSingle", "capital"]:
-            wrapW = 60  # chars
-            self.image = GridText(text, fg, None, "capital", 2, None, 1, 1, 1, wrapW)
-        elif style in ["capitalDouble"]:
-            wrapW = 60  # chars
-            self.image = GridText(text, fg, None, "capital", 2, None, 2, 2, 1, wrapW)
-        elif style in ["capitalQuad"]:
-            wrapW = 60  # chars
-            self.image = GridText(text, fg, None, "capital", 2, None, 4, 4, 1, wrapW)
-
-        else:
-            raise KeyError("no such style name %r" % style)
-
-    def write(self, filePath):
-        self.image.write(filePath)
-
-
-# -----------------------------------------------------------------||||||||||||--
 # -----------------------------------------------------------------||||||||||||--
 # note: these objects use PIL and TK, and only use pil
 
 
 class _CanvasBase:
-    """abstract convas object to allow for drawing in both PIL and tk
+    """abstract canvas object to allow for drawing in both PIL and tk
     all colors are in html style hex"""
 
     def __init__(self, w, h, bg, fmt="png", name="image", transp=None):
@@ -649,7 +430,7 @@ class _CanvasBase:
     def _gridCenter(self, point):
         """to find the center of a bitMap dimensions an off by 1 error
         occurs in the standard case. a 1 shift must be applied"""
-        return int(round((point * 0.5))) - 1
+        return int(point * 0.5)
 
     def _widthRound(self, width):
         """vector can hadle floating point widths
@@ -689,7 +470,7 @@ class _CanvasBase:
         gridData = obj.encode()
         xLen = len(gridData[0])  # get first row
         yLen = len(gridData)
-        if anchor == "nw":  # default for most applications: uppr left
+        if anchor == "nw":  # default for most applications: upper left
             xShift = 0
             yShift = 0
         elif anchor == "ne":  #
@@ -949,12 +730,7 @@ class PilCanvas(_CanvasBase):
         else:
             ext = ".%s" % self.subFmt
             filePath = environment.getTempFile(ext)
-            # filePath = drawer.tempFile(ext) # jpg/png
         self.write(filePath, 1, prefDict)
-        # if self.subFmt == 'jpg': # gets defaul pil format, which is jpeg
-        #    self.imageObj.show() # used to use show, but sometimes fails
-        # elif self.subFmt == 'png': # write a file
-        #    self.write()
 
 
 # -----------------------------------------------------------------||||||||||||--
@@ -2629,12 +2405,6 @@ class TestOld:
         self.testGraphText()
         self.testCanvas()
         self.testProcGraphCoord()
-
-    def testBarCode(self):
-        bg = "#000000"
-        fg = ["#666633", "#333366", "#336633"]
-        a = BarCode(None, 50, fg, bg, 1, 50, 1)
-        a.show()
 
     def testText(self):
         bg = "#000000"

@@ -15,7 +15,7 @@
 import sys, os, time, random, traceback, http.client, urllib.request, urllib.parse, urllib.error
 import unittest
 
-athVersion = "2.0.0a15"
+athVersion = "2.0.0"
 athBuild = "2010.07.07"
 athDate = "7 July 2010"  # human readable version
 __version__ = athVersion
@@ -587,7 +587,7 @@ class AthenaObject(object):
     # managing and displaying command names
 
     def cmdDisplay(self):
-        """get heirarchical display, scaled to screen widthw
+        """get heirarchical display, scaled to screen width
         used for cmd display
 
         >>> a = AthenaObject()
@@ -867,8 +867,8 @@ class Terminal(object):
         elif sessionType in ["cgi", "idle"]:
             self.termLive = 0
         # defaults spacings
-        self.defaultW = 72  # for plats that dont have termio
-        self.defaultH = 24
+        self.defaultW = 80  # for plats that dont have termio
+        self.defaultH = 40
         self.cursesTest = 0  # bool if curses test has been completed
         # do session type adjustments on default sizes
         if sessionType == "cgi":
@@ -948,7 +948,7 @@ class Interpreter(object):
     useful for developing parameter objects and textures
 
     verbose: determine amount of messages given back and forth
-        0: quite output: nothign returned
+        0: quite output: nothing returned
         1: return msg, no warning
         2: return msg, give warnings, errors,
 
@@ -992,7 +992,7 @@ class Interpreter(object):
     # -----------------------------------------------------------------------||--
     def out(self, msg):
         """main output filter for all text displays
-        all text output, when using the intereter, passes through here
+        all text output, when using the interpreter, passes through here
         if verbosity set to 0, not output is given at all
         """
         if self.verbose >= 1:
@@ -1171,13 +1171,16 @@ class Interpreter(object):
         return cmd, arg
 
     def cmd(self, line, *arguments, **keywords):
-        """Public interface for executing a single command line. This duplicates the functionality of _cmd(), above, yet provides features for a public interface.
+        """Public interface for executing a single command line. This duplicates
+        the functionality of _cmd(), above, yet provides features for a public
+        interface.
 
         The `errorMode` is a keyword argument; can be 'exception' or 'return.'
 
         Given cmdline, or cmd arguments; cmdline will be split if arg == None
         good for calling a single command from cgi, or external interpreter
-        return output as string, not printed. Does not log errors, does not keep a history.
+        return output as string, not printed. Does not log errors, does not keep
+        a history.
 
         >>> a = Interpreter()
         >>> post = a.cmd('pin a 3')
@@ -1228,7 +1231,7 @@ class Interpreter(object):
                     raise Exception("command level error: %s" % result.strip())
             except Exception:
                 raise  # raise the same Exception
-            return result
+            return ok, result
 
         # this error mode is for backwards compatibility
         elif errorMode == "return":
@@ -1266,7 +1269,7 @@ class Interpreter(object):
     def cmdExecute(self, cmdList):
         """Proess a list of commands.
 
-        Used for processing multiple comamnds when separated by semicolon.
+        Used for processing multiple commands when separated by semicolon.
 
         A list of commands is executed one at a time
         called from self.cmdLoop

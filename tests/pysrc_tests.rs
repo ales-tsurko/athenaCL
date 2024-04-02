@@ -4,7 +4,7 @@ use rustpython_vm as vm;
 
 #[test]
 fn test() {
-    let interpreter = athenacl::init_interpreter();
+    let interpreter = athenacl::init_py_interpreter();
 
     let result = interpreter.enter(|vm| {
         let scope = vm.new_scope_with_builtins();

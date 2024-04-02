@@ -16,12 +16,20 @@ pub(super) mod _inner {
     use rustpython_vm::{convert::ToPyObject, PyResult};
 
     #[pyfunction(name = "promptChooseDir")]
-    pub(crate) fn prompt_choose_dir(title: String, initial_dir: String, vm: &VirtualMachine) -> PyResult {
+    pub(crate) fn prompt_choose_dir(
+        title: String,
+        initial_dir: String,
+        vm: &VirtualMachine,
+    ) -> PyResult {
         prompt_dialog(title, initial_dir, PromptType::ChooseDir, vm)
     }
 
     #[pyfunction(name = "promptChooseFile")]
-    pub(crate) fn prompt_choose_file(title: String, initial_dir: String, vm: &VirtualMachine) -> PyResult {
+    pub(crate) fn prompt_choose_file(
+        title: String,
+        initial_dir: String,
+        vm: &VirtualMachine,
+    ) -> PyResult {
         prompt_dialog(title, initial_dir, PromptType::ChooseFile, vm)
     }
 

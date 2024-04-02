@@ -12,6 +12,7 @@
 import sys, os, time, random, copy
 import unittest
 import xml.etree.ElementTree as ET
+import json
 
 from athenaCL.libATH import argTools
 from athenaCL.libATH import audioTools
@@ -1533,23 +1534,39 @@ class help(Command):
         else:  # print listing of all commands
             # sorted commands by theose that exists, and those that have docs
             cmdsDoc, cmdsUndoc, helpTopics = self.ao.cmdDocManifest()
-            h, w = self.termObj.size()
             msg = []
-            msg.append(lang.DIVIDER * w)
             msg.append(lang.msgDocAdditionalHelp)
             msg.append(lang.msgDocCmd)
-            # msg.append(lang.msgDocPrefix)
             msg.append(lang.msgDocBrowser)
-            msg.append(lang.msgDocHead)
-            msg.append(lang.DIVIDER * w)
-            msg.append(typeset.formatEqCol("", cmdsDoc, 10, w))
-            if len(helpTopics) > 0:
-                msg.append(lang.DIVIDER * w)
-                msg.append(typeset.formatEqCol("", helpTopics, 10, w))
-            if len(cmdsUndoc) > 0:
-                msg.append(lang.DIVIDER * w)
-                msg.append(typeset.formatEqCol("", cmdsUndoc, 10, w))
-            return "".join(msg)
+            msg = "".join(msg)
+
+            description = {
+                    "type": "Paragraph",
+                    "params": msg
+                    }
+            divider = {
+                    "type": "Divider",
+                    }
+            header = {
+                    "type": "Header",
+                    "params": lang.msgDocHead
+                    }
+            links = {
+                    "type": "List",
+                    "params": []
+                    }
+
+            for cmd in cmdsDoc:
+                links["params"].append({
+                        "type": "Link",
+                        "params": {
+                            "text": cmd,
+                            "width": 100,
+                            "cmd": "help {}".format(cmd)
+                        }
+                    })
+
+            return json.dumps([description, divider, header, links])
 
 
 class man(help):

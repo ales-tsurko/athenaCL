@@ -95,4 +95,4 @@ def launch(sessionType, verbose, cmdList):
     interp.cmdLoop(cmdList)
 
 
-main()
+# main()

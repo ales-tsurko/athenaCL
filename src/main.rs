@@ -1,20 +1,18 @@
 //! The executable.
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")] // hide console window on Windows in release
 
-use std::process::ExitCode;
-
-use rustpython_vm as vm;
-use vm::Interpreter;
 use athenacl;
+use iced::Sandbox;
+use rustpython_vm as vm;
 
-fn main() -> ExitCode {
-    let interpreter = athenacl::init_interpreter();
-    let result = py_main(&interpreter);
-    ExitCode::from(interpreter.run(|_vm| result))
+fn main() -> iced::Result {
+    athenacl::App::run(athenacl::App::settings())
 }
 
-fn py_main(interp: &Interpreter) -> vm::PyResult<()> {
-    interp.enter(|vm| {
-        let _ = vm.import("athenaCL.athenacl", None, 0)?;
-        vm::PyResult::Ok(())
-    })
-}
+// fn main() -> vm::PyResult<()> {
+//     let interpreter = athenacl::init_py_interpreter();
+//     interpreter.enter(|vm| {
+//         let _ = vm.import("athenaCL.athenacl", None, 0)?;
+//         vm::PyResult::Ok(())
+//     })
+// }
