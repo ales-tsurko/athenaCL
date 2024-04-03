@@ -26,6 +26,7 @@ from athenaCL.libATH import ioTools
 from athenaCL.libATH import language
 from athenaCL.libATH import markov
 from athenaCL.libATH import error
+from athenaCL.libATH import guiOutput
 
 lang = language.LangObj()
 from athenaCL.libATH import osTools
@@ -1540,33 +1541,15 @@ class help(Command):
             msg.append(lang.msgDocBrowser)
             msg = "".join(msg)
 
-            description = {
-                    "type": "Paragraph",
-                    "params": msg
-                    }
-            divider = {
-                    "type": "Divider",
-                    }
-            header = {
-                    "type": "Header",
-                    "params": lang.msgDocHead
-                    }
-            links = {
-                    "type": "List",
-                    "params": []
-                    }
-
+            links = []
             for cmd in cmdsDoc:
-                links["params"].append({
-                        "type": "Link",
-                        "params": {
-                            "text": cmd,
-                            "width": 100,
-                            "cmd": "help {}".format(cmd)
-                        }
-                    })
+                links.append(guiOutput.link(cmd, "help {}".format(cmd)))
 
-            return json.dumps([description, divider, header, links])
+            return json.dumps([
+                guiOutput.paragraph(msg), 
+                guiOutput.divider(),
+                guiOutput.header(lang.msgDocHead),
+                guiOutput.list(links)])
 
 
 class man(help):

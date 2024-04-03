@@ -1,6 +1,6 @@
 //! Application's GUI.
 
-use iced::widget::{column, text, text_input};
+use iced::widget::{column, scrollable, text_input};
 use iced::{Alignment, Element, Font, Length, Sandbox, Settings, Size};
 
 use crate::interpreter::Interpreter;
@@ -57,8 +57,12 @@ impl Sandbox for App {
             }
             Message::SendCommand(value) => {
                 let output = self.interpreter.run_cmd(&value);
-                self.output.update(Some(output));
+                self.output.set_output(Some(output));
                 self.cmd = String::new();
+            }
+            Message::PinOutput(value) => {
+                self.output.set_pinned(value);
+                println!("not implemented");
             }
         }
     }
@@ -70,7 +74,7 @@ impl Sandbox for App {
                 .on_input(|value| Message::PromptInputChanged(value))
                 .on_submit(Message::SendCommand(self.cmd.to_owned()))
                 .width(800),
-            self.output.view()
+            scrollable(self.output.view()),
         ]
         .padding(20)
         .align_items(Alignment::Center)
@@ -84,4 +88,5 @@ impl Sandbox for App {
 pub enum Message {
     PromptInputChanged(String),
     SendCommand(String),
+    PinOutput(bool),
 }

@@ -3,10 +3,13 @@
 use iced::{
     alignment, font,
     widget::{
-        button, column, container, container::Appearance as ContainerAppearance, horizontal_rule,
+        button, checkbox, column, container,
+        container::Appearance as ContainerAppearance,
+        horizontal_rule, horizontal_space, row,
+        rule::{self, Appearance as RuleAppearance},
         scrollable, text, Column, Row,
     },
-    Border, Font, Length,
+    Border, Font,
 };
 
 use super::Message;
@@ -16,6 +19,7 @@ use crate::interpreter::{LinkOutput, ModuleResult as InterpreterResult, Output};
 pub(crate) struct OutputView {
     width: f32,
     output: Option<InterpreterResult<Vec<Output>>>,
+    is_pinned: bool,
 }
 
 impl OutputView {
@@ -24,8 +28,12 @@ impl OutputView {
         self
     }
 
-    pub(crate) fn update(&mut self, output: Option<InterpreterResult<Vec<Output>>>) {
+    pub(crate) fn set_output(&mut self, output: Option<InterpreterResult<Vec<Output>>>) {
         self.output = output;
+    }
+
+    pub(crate) fn set_pinned(&mut self, is_pinned: bool) {
+        self.is_pinned = is_pinned;
     }
 
     pub(crate) fn view(&self) -> iced::Element<'_, Message> {
@@ -40,18 +48,15 @@ impl OutputView {
     }
 
     fn view_output(&self, outputs: &[Output]) -> iced::Element<'_, Message> {
-        let mut elements = vec![];
+        let mut elements = vec![self.view_output_header("this is a command input")];
         for output in outputs {
             elements.push(self.parse_output(output));
         }
-        scrollable(
-            column(elements)
-                .width(self.width)
-                .padding([20.0, 0.0, 20.0, 0.0]),
-        )
-        .width(self.width)
-        .height(Length::Fill)
-        .into()
+
+        container(column(elements))
+            .width(self.width)
+            .padding(20.0)
+            .into()
     }
 
     fn parse_output(&self, output: &Output) -> iced::Element<'_, Message> {
@@ -62,6 +67,24 @@ impl OutputView {
             Output::List(value) => self.view_grid(value, 8),
             Output::Link(value) => self.view_link(value),
         }
+    }
+
+    fn view_output_header(&self, title: &str) -> iced::Element<'_, Message> {
+        container(
+            row(vec![
+                self.view_header(title),
+                horizontal_space().into(),
+                container(checkbox("pin", self.is_pinned).on_toggle(Message::PinOutput))
+                    .padding([0.0, 40.0])
+                    .into(),
+            ])
+            .align_items(iced::Alignment::Center),
+        )
+        .style(ContainerAppearance {
+            background: Some(iced::Color::from_rgba(0.0, 0.0, 0.0, 0.2).into()),
+            ..Default::default()
+        })
+        .into()
     }
 
     fn view_grid(&self, list: &[Output], per_row: usize) -> iced::Element<'_, Message> {
@@ -81,6 +104,7 @@ impl OutputView {
             // top_row = top_row.push(horizontal_space());
             top_row = top_row.push(self.parse_output(output));
         }
+
         column.push(top_row).into()
     }
 
@@ -97,13 +121,17 @@ impl OutputView {
     }
 
     fn view_paragraph(&self, value: &str) -> iced::Element<'_, Message> {
-        text(value).font(Font::MONOSPACE).into()
+        container(text(value).font(Font::MONOSPACE))
+            .padding(20.0)
+            .into()
     }
 
     fn view_header(&self, value: &str) -> iced::Element<'_, Message> {
         let mut style = Font::MONOSPACE;
         style.weight = font::Weight::Bold;
-        text(value).font(style).into()
+        container(text(value).font(style).size(24.0))
+            .padding([20.0, 0.0])
+            .into()
     }
 
     fn view_error(&self, msg: String) -> iced::Element<'_, Message> {

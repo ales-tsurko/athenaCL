@@ -289,7 +289,7 @@ Apple, Macintosh, Mac OS, and QuickTime are trademarks or registered trademarks 
     msgDocCmd = 'to see a hierarchical listing of commands, enter "cmd".\n'
     msgDocPrefix = "to see all commands associated with a prefix, enter that prefix.\n"
     msgDocBrowser = 'to open documentation in a browser, enter "AUdoc".\n'
-    msgDocHead = "athenaCL commands:\n"
+    msgDocHead = "athenaCL commands (click on a command to get more info):\n"
 
     # -----------------------------------------------------------------------||--
     # strings for particular commands

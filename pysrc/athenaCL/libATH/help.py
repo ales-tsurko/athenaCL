@@ -10,12 +10,13 @@
 # -----------------------------------------------------------------||||||||||||--
 
 import unittest, doctest
-
+import json
 
 from athenaCL.libATH import language
 from athenaCL.libATH import typeset
 from athenaCL.libATH import drawer
 from athenaCL.libATH import faq
+from athenaCL.libATH import guiOutput
 
 lang = language.LangObj()
 _MOD = "help.py"
@@ -634,7 +635,7 @@ class HelpDoc:
             "w": {"title": "Warranty", "syn": ["warranty", "merchantability"]},
         }
 
-        self.__msgUsage = "usage:"
+        self.__msgUsage = "Usage"
         # this objects are excluded above
         self.termObj = termObj
         self.faqObj = faq.FaqDictionary()
@@ -734,17 +735,21 @@ class HelpDoc:
     def reprCmd(self, searchStr):
         """main public interface called from Command object to get
         documentation"""
-        entryLines = []
+        output = []
 
         cmdName, docStr = self.searchCmdDoc(searchStr)
         usageName, usageStr = self.searchCmdUsage(searchStr)
 
         if docStr != None:
-            entryLines.append((cmdName, docStr))
+            output.append(guiOutput.header(cmdName))
+            output.append(guiOutput.divider())
+            output.append(guiOutput.paragraph(docStr))
             if usageStr != None:
-                entryLines.append((self.__msgUsage, usageStr))
+                output.append(guiOutput.header(self.__msgUsage))
+                output.append(guiOutput.divider())
+                output.append(guiOutput.paragraph(usageStr))
 
-        if entryLines == []:  # if nothing found
+        if output == []:  # if nothing found
             # this searches all attributes of help, all gloss and synonym entries
             filter = self.searchRef(searchStr)
             for name, doc in filter:
@@ -760,33 +765,22 @@ class HelpDoc:
                         title = name[1:]
                     else:
                         title = name
-                entryLines.append((title, doc))
+                output.append(guiOutput.header(title))
+                output.append(guiOutput.paragraph(doc))
         # last attempt: search faq questions
-        if entryLines == []:
+        if output == []:
             q, a = self.faqObj.searchQuery(searchStr)
             if q != None:
-                entryLines.append(("frequently asked", "%s %s" % (q, a)))
+                output.append(guiOutput.header("frequently asked"))
+                output.append(guiOutput.divider())
+                output.append(guiOutput.header(q))
+                output.append(guiOutput.paragraph(a))
 
-        if entryLines == []:  # still empty
-            return 'no help for: "%s"\n' % searchStr
+        if output == []:  # still empty
+            return json.dumps([
+                guiOutput.paragraph('no help for: "{}"\n'.format(searchStr))])
 
-        msg = []
-        headerKey = ["topic", "documentation"]
-        minWidthList = (lang.LMARGINW, 0)
-        bufList = [1, 1]
-        justList = ["l", "l"]
-        table = typeset.formatVariCol(
-            headerKey,
-            entryLines,
-            minWidthList,
-            bufList,
-            justList,
-            self.termObj,
-            "oneColumn",
-        )
-        msg.append("%s\n" % table)
-
-        return "".join(msg)
+        return json.dumps(output)
 
 
 # -----------------------------------------------------------------||||||||||||--
