@@ -2,6 +2,8 @@
 
 use iced::widget::{column, scrollable, text_input};
 use iced::{Alignment, Element, Font, Length, Sandbox, Settings, Size};
+use indexmap::IndexMap;
+use uuid::Uuid;
 
 use crate::interpreter::Interpreter;
 use output::OutputView;
@@ -14,7 +16,7 @@ pub const APPLICATION_ID: &str = "by.alestsurko.athenacl";
 /// athenaCL GUI.
 pub struct App {
     cmd: String,
-    output: OutputView,
+    outputs: IndexMap<Uuid, OutputView>,
     interpreter: Interpreter,
 }
 
@@ -39,9 +41,11 @@ impl Sandbox for App {
 
     fn new() -> Self {
         let interpreter = Interpreter::new().expect("error initializing interpreter");
+        let init_output = OutputView::new().with_width(800.0);
+        let outputs = [(init_output.id(), init_output)].into();
         Self {
             cmd: String::new(),
-            output: OutputView::default().with_width(800.0),
+            outputs,
             interpreter,
         }
     }
@@ -57,24 +61,42 @@ impl Sandbox for App {
             }
             Message::SendCommand(value) => {
                 let output = self.interpreter.run_cmd(&value);
-                self.output.set_output(Some(output));
+                let output_v = self
+                    .outputs
+                    .last_mut()
+                    .expect("There should always be at least one output view")
+                    .1;
+                output_v.set_output(Some(output));
+                output_v.set_cmd(&self.cmd);
                 self.cmd = String::new();
             }
-            Message::PinOutput(value) => {
-                self.output.set_pinned(value);
-                println!("not implemented");
+            Message::SetPinOutput((id, value)) => {
+                if let Some(output) = self.outputs.get_mut(&id) {
+                    output.set_pinned(value);
+                    let output_v = OutputView::new().with_width(800.0);
+                    self.outputs.insert(output_v.id(), output_v);
+                }
+                if !value && self.outputs.len() != 1 {
+                    self.outputs.shift_remove(&id);
+                }
             }
         }
     }
 
     fn view(&self) -> Element<'_, Message> {
+        let outputs = column(
+            self.outputs
+                .iter()
+                .map(|(_, o)| o.view())
+                .collect::<Vec<_>>(),
+        );
         column![
             text_input(r#"Enter a command or "?" for help"#, &self.cmd)
                 .font(Font::MONOSPACE)
                 .on_input(|value| Message::PromptInputChanged(value))
                 .on_submit(Message::SendCommand(self.cmd.to_owned()))
                 .width(800),
-            scrollable(self.output.view()),
+            scrollable(outputs),
         ]
         .padding(20)
         .align_items(Alignment::Center)
@@ -88,5 +110,5 @@ impl Sandbox for App {
 pub enum Message {
     PromptInputChanged(String),
     SendCommand(String),
-    PinOutput(bool),
+    SetPinOutput((Uuid, bool)),
 }

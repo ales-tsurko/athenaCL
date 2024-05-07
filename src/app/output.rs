@@ -11,18 +11,35 @@ use iced::{
     },
     Border, Font,
 };
+use uuid::Uuid;
 
 use super::Message;
 use crate::interpreter::{LinkOutput, ModuleResult as InterpreterResult, Output};
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub(crate) struct OutputView {
+    id: Uuid,
     width: f32,
     output: Option<InterpreterResult<Vec<Output>>>,
     is_pinned: bool,
+    cmd: String,
 }
 
 impl OutputView {
+    pub(crate) fn new() -> Self {
+        Self {
+            id: Uuid::new_v4(),
+            width: 0.0,
+            output: None,
+            is_pinned: false,
+            cmd: String::new(),
+        }
+    }
+
+    pub(crate) fn id(&self) -> Uuid {
+        self.id
+    }
+
     pub(crate) fn with_width(mut self, width: f32) -> Self {
         self.width = width;
         self
@@ -30,6 +47,10 @@ impl OutputView {
 
     pub(crate) fn set_output(&mut self, output: Option<InterpreterResult<Vec<Output>>>) {
         self.output = output;
+    }
+
+    pub(crate) fn set_cmd(&mut self, cmd: &str) {
+        self.cmd = cmd.to_owned();
     }
 
     pub(crate) fn set_pinned(&mut self, is_pinned: bool) {
@@ -48,7 +69,7 @@ impl OutputView {
     }
 
     fn view_output(&self, outputs: &[Output]) -> iced::Element<'_, Message> {
-        let mut elements = vec![self.view_output_header("this is a command input")];
+        let mut elements = vec![self.view_output_header(&self.cmd)];
         for output in outputs {
             elements.push(self.parse_output(output));
         }
@@ -74,9 +95,12 @@ impl OutputView {
             row(vec![
                 self.view_header(title),
                 horizontal_space().into(),
-                container(checkbox("pin", self.is_pinned).on_toggle(Message::PinOutput))
-                    .padding([0.0, 40.0])
-                    .into(),
+                container(
+                    checkbox("pin", self.is_pinned)
+                        .on_toggle(|v| Message::SetPinOutput((self.id, v))),
+                )
+                .padding([0.0, 40.0])
+                .into(),
             ])
             .align_items(iced::Alignment::Center),
         )
