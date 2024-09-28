@@ -7,24 +7,24 @@ edition = "2021"
 
 [dependencies]
 ahash = "0.8.11"
-iced = { version = "0.12.1", features = ["advanced", "wgpu"] }
-indexmap = "2.2.6"
-quick-xml = "0.31.0"
-rfd = "0.14.0"
-rustpython-pylib = { version = "0.3.0", features = ["freeze-stdlib"] }
-rustpython-stdlib = "0.3.0"
-rustpython-vm = { version = "0.3.0", features = ["freeze-stdlib"] }
-serde = { version = "1.0.197", features = ["derive"] }
-serde_json = "1.0.115"
-thiserror = "1.0.58"
-uuid = { version = "1.8.0", features = ["v4", "fast-rng"] }
+iced = { version = "0.13.1", features = ["advanced", "wgpu"] }
+indexmap = "2.5.0"
+quick-xml = "0.36.2"
+rfd = "0.15.0"
+rustpython-pylib = { version = "0.4.0", features = ["freeze-stdlib"] }
+rustpython-stdlib = "0.4.0"
+rustpython-vm = { version = "0.4.0", features = ["freeze-stdlib"] }
+serde = { version = "1.0.210", features = ["derive"] }
+serde_json = "1.0.128"
+thiserror = "1.0.64"
+uuid = { version = "1.10.0", features = ["v4", "fast-rng"] }
 
 [lints.clippy]
 all = "warn"
 
 [lints.rust]
 missing_docs = "warn"
-rust_2018_idioms = "warn"
+unused_dependencies = "warn"
 
 [profile.release]
 strip = true
@@ -33,4 +33,4 @@ codegen-units = 1
 panic = "abort"
 
 [profile.dev]
-opt-level = 2 # rustpython is too slow in debug mode, so we enable -O2
+opt-level = 2 # rustpython is too slow in the debug mode

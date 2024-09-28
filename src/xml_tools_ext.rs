@@ -18,7 +18,7 @@ pub(super) mod _inner {
     #[pyfunction(name = "xmlToPy")]
     pub(crate) fn xml_to_py(code: String, vm: &VirtualMachine) -> PyResult {
         let mut reader = Reader::from_str(&code);
-        reader.trim_text(true);
+        reader.config_mut().trim_text(true);
         let mut buf = Vec::new();
         let mut stack = Vec::new();
         let root = vm.ctx.new_dict();
@@ -103,7 +103,7 @@ pub(super) mod _inner {
     #[pyfunction(name = "checkFileFormat")]
     pub(crate) fn check_file_format(content: String, vm: &VirtualMachine) -> PyResult {
         let mut reader = Reader::from_str(&content);
-        reader.trim_text(true);
+        reader.config_mut().trim_text(true);
         let mut buf = Vec::new();
 
         let mut res = vec!["xml".to_string(), "ok".to_string()];

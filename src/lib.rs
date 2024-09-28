@@ -2,12 +2,11 @@
 
 use rustpython_vm as vm;
 use vm::Interpreter as PyInterpreter;
-pub use app::App;
 
 mod dialog_ext;
 mod interpreter;
 mod xml_tools_ext;
-mod app;
+pub mod app;
 
 /// Initialize the python interpreter with precompiled stdlib and athenaCL (python modules).
 pub fn init_py_interpreter() -> PyInterpreter {

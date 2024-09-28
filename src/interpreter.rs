@@ -103,9 +103,9 @@ pub(crate) enum Output {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct LinkOutput {
-   pub(crate) text: String,
-   pub(crate) width: f32,
-   pub(crate) cmd: String,
+    pub(crate) text: String,
+    pub(crate) width: f32,
+    pub(crate) cmd: String,
 }
 
 pub(crate) trait TryPy {
