@@ -5,7 +5,6 @@ use serde::{Deserialize, Serialize};
 use thiserror::Error;
 use vm::{
     builtins::{PyBaseExceptionRef, PyInt, PyStr, PyTuple},
-    convert::ToPyObject,
     Interpreter as PyInterpreter, PyObjectRef, PyResult, VirtualMachine,
 };
 
@@ -38,8 +37,8 @@ interp"#
             );
             let _ = vm
                 .run_code_obj(vm.ctx.new_code(module), scope.clone())
-                .try_py(vm)?;
-            scope.globals.get_item("interp", vm).try_py(vm)
+                .try_py()?;
+            scope.globals.get_item("interp", vm).try_py()
         })
     }
 
@@ -48,8 +47,8 @@ interp"#
             .enter(|vm| -> ModuleResult<Vec<Output>> {
                 let result = vm
                     .call_method(&self.ath_interpreter, "cmd", (cmd.to_string(),))
-                    .try_py(vm)?;
-                let (is_ok, msg) = extract_tuple(vm, result).try_py(vm)?;
+                    .try_py()?;
+                let (is_ok, msg) = extract_tuple(vm, result).try_py()?;
 
                 if is_ok {
                     Ok(serde_json::from_str(&msg)?)
@@ -110,14 +109,14 @@ pub(crate) struct LinkOutput {
 pub(crate) trait TryPy {
     type Output;
 
-    fn try_py(self, vm: &VirtualMachine) -> ModuleResult<Self::Output>;
+    fn try_py(self) -> ModuleResult<Self::Output>;
 }
 
 impl<T> TryPy for PyResult<T> {
     type Output = T;
 
-    fn try_py(self, vm: &VirtualMachine) -> ModuleResult<T> {
-        self.map_err(|e| Error::from_py_err(e, vm))
+    fn try_py(self) -> ModuleResult<T> {
+        self.map_err(|e| Error::from_py_err(e))
     }
 }
 
@@ -132,12 +131,14 @@ pub(crate) enum Error {
 }
 
 impl Error {
-    fn from_py_err(err: PyBaseExceptionRef, vm: &VirtualMachine) -> Self {
-        Self::PythonError(
-            err.to_pyobject(vm)
-                .repr(vm)
-                .expect("can't get pyobject representation")
-                .to_string(),
-        )
+    fn from_py_err(err: PyBaseExceptionRef) -> Self {
+        let message = err
+            .get_arg(0)
+            .as_ref()
+            .and_then(|arg| arg.downcast_ref::<PyStr>())
+            .map(|s| s.as_str().to_owned())
+            .unwrap_or_else(|| "Unknown (silent) Python error".to_string());
+
+        Self::PythonError(message)
     }
 }

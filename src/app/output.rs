@@ -6,7 +6,7 @@ use iced::{
         button, checkbox, column, container, container::Style as ContainerStyle, horizontal_rule,
         horizontal_space, row, text, Row,
     },
-    Border, Font,
+    Font,
 };
 use uuid::Uuid;
 
@@ -81,28 +81,22 @@ fn view_output<'a>(
         .width(state.width)
         .padding(70.0)
         .style(|_| ContainerStyle {
-            background: Some(iced::Background::Color(iced::Color {
-                r: 0.0,
-                g: 0.0,
-                b: 0.0,
-                a: 0.7,
-            })),
+            background: Some(iced::Background::Color([0.0, 0.0, 0.0, 0.7].into())),
             ..Default::default()
         })
         .into()
 }
 
 fn view_error<'a>(width: f32, msg: String) -> iced::Element<'a, Message> {
-    let text = text(msg).font(Font::MONOSPACE).width(width);
-    let mut style = ContainerStyle::default();
-    style.border = Border {
-        color: [1.0, 0.0, 0.0].into(),
-        width: 1.0,
-        ..Default::default()
-    };
+    let mut font = Font::MONOSPACE;
+    font.weight = iced::font::Weight::Bold;
+    let text = text(msg).font(font);
     container(text)
         .width(width)
-        .style(move |_| style)
+        .style(|theme: &iced::Theme| ContainerStyle {
+            background: Some(iced::Background::Color(theme.palette().danger)),
+            ..Default::default()
+        })
         .padding(20.0)
         .into()
 }
