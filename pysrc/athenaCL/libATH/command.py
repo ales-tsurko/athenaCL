@@ -1359,7 +1359,10 @@ class w(Command):
         self.cmdStr = "w"
 
     def display(self):
-        return "%s\n" % self.ao.help.w
+        return json.dumps([
+            guiOutput.paragraph("%s\n" % self.ao.help.w)
+            ])
+    
 
 
 class c(Command):
@@ -1378,7 +1381,9 @@ class c(Command):
         self.cmdStr = "c"
 
     def display(self):
-        return "%s\n" % self.ao.help.c
+        return json.dumps([
+            guiOutput.paragraph("%s\n" % self.ao.help.c)
+            ])
 
 
 class r(Command):
@@ -1398,7 +1403,9 @@ class r(Command):
         self.cmdStr = "r"
 
     def display(self):
-        return "%s\n" % lang.msgCredits
+        return json.dumps([
+            guiOutput.paragraph("%s\n" % lang.msgCredits)
+            ])
 
 
 class cmd(Command):

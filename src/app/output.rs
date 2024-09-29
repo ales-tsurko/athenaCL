@@ -3,19 +3,8 @@
 use iced::{
     alignment, font,
     widget::{
-        button,
-        checkbox,
-        column,
-        container,
-        container::Style as ContainerStyle,
-        horizontal_rule,
-        horizontal_space,
-        row,
-        // rule::{self, Appearance as RuleAppearance},
-        scrollable,
-        text,
-        Column,
-        Row,
+        button, checkbox, column, container, container::Style as ContainerStyle, horizontal_rule,
+        horizontal_space, row, text, Row,
     },
     Border, Font,
 };
@@ -90,7 +79,16 @@ fn view_output<'a>(
 
     container(column(elements))
         .width(state.width)
-        .padding(20.0)
+        .padding(70.0)
+        .style(|_| ContainerStyle {
+            background: Some(iced::Background::Color(iced::Color {
+                r: 0.0,
+                g: 0.0,
+                b: 0.0,
+                a: 0.7,
+            })),
+            ..Default::default()
+        })
         .into()
 }
 
@@ -166,9 +164,5 @@ fn view_output_header<'a>(id: Uuid, is_pinned: bool, title: &'a str) -> iced::El
         ])
         .align_y(iced::Alignment::Center),
     )
-    .style(|_| ContainerStyle {
-        background: Some(iced::Color::from_rgba(0.0, 0.0, 0.0, 0.2).into()),
-        ..Default::default()
-    })
     .into()
 }

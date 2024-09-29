@@ -24,7 +24,7 @@ all = "warn"
 
 [lints.rust]
 missing_docs = "warn"
-unused_crate_dependencies = "warn"
+# unused_crate_dependencies = "warn"
 
 [profile.release]
 strip = true
