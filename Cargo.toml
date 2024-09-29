@@ -7,6 +7,7 @@ edition = "2021"
 
 [dependencies]
 ahash = "0.8.11"
+chrono = "0.4.38"
 iced = { version = "0.13.1", features = ["advanced", "wgpu"] }
 indexmap = "2.5.0"
 quick-xml = "0.36.2"

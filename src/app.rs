@@ -1,9 +1,13 @@
 //! Application's GUI.
 
-use iced::widget::{button, column, row, scrollable, text_input};
+use chrono::{DateTime, Local};
+use iced::widget::{
+    button, column, container, container::Style as ContainerStyle, row, scrollable, text,
+    text_input,
+};
 use iced::{Alignment, Element, Font, Length};
 use indexmap::IndexMap;
-use uuid::Uuid;
+use uuid::{timestamp, Uuid};
 
 use crate::interpreter::Interpreter;
 use output::OutputViewState;
@@ -17,7 +21,17 @@ pub const APPLICATION_ID: &str = "by.alestsurko.athenacl";
 pub struct State {
     cmd: String,
     outputs: IndexMap<Uuid, OutputViewState>,
+    errors: IndexMap<Uuid, ErrorState>,
     interpreter: Interpreter,
+}
+
+/// The state used for the errors, which shown in the output container.
+#[allow(missing_docs)]
+#[derive(Clone, Debug, Default)]
+pub struct ErrorState {
+    pub id: Uuid,
+    pub message: String,
+    pub timestamp: DateTime<Local>,
 }
 
 impl Default for State {
@@ -29,6 +43,7 @@ impl Default for State {
             cmd: String::new(),
             outputs,
             interpreter,
+            errors: IndexMap::new(),
         }
     }
 }
@@ -40,13 +55,16 @@ pub fn update(state: &mut State, message: Message) {
             state.cmd = value;
         }
         Message::SendCommand(value) => {
-            let output = state.interpreter.run_cmd(&value);
+            let output = match state.interpreter.run_cmd(&value) {
+                Ok(output) => output,
+                Err(err) => return update(state, Message::PushError(err.to_string())),
+            };
             let output_v = state
                 .outputs
                 .last_mut()
                 .expect("There should always be at least one output view")
                 .1;
-            output_v.set_output(Some(output));
+            output_v.set_output(output);
             output_v.set_cmd(&value);
             state.cmd = String::new();
         }
@@ -60,11 +78,32 @@ pub fn update(state: &mut State, message: Message) {
                 state.outputs.shift_remove(&id);
             }
         }
+        Message::PushError(message) => {
+            let id = Uuid::new_v4();
+            state.errors.insert(
+                id,
+                ErrorState {
+                    id,
+                    message,
+                    timestamp: Local::now(),
+                },
+            );
+        }
+        Message::CloseError(id) => {
+            state.errors.swap_remove(&id);
+        }
     }
 }
 
 /// The top-level iced view function.
 pub fn view(state: &State) -> Element<Message> {
+    let errors = column(
+        state
+            .errors
+            .iter()
+            .map(|(_, state)| view_error(state))
+            .collect::<Vec<_>>(),
+    );
     let outputs = column(
         state
             .outputs
@@ -83,12 +122,37 @@ pub fn view(state: &State) -> Element<Message> {
         ]
         .spacing(10.0)
         .width(800.0),
-        scrollable(outputs),
+        scrollable(column![errors, outputs].width(800.0)),
     ]
     .padding(20)
     .spacing(10.0)
     .width(Length::Fill)
     .align_x(Alignment::Center)
+    .into()
+}
+
+fn view_error<'a>(state: &'a ErrorState) -> iced::Element<'a, Message> {
+    let mut msg_font = Font::MONOSPACE;
+    msg_font.weight = iced::font::Weight::Bold;
+    let timestamp = state.timestamp.format("%T    %a, %e %b %Y").to_string();
+
+    container(row![
+        column![
+            text(&state.message).font(msg_font),
+            text(timestamp).size(11.0)
+        ]
+        .spacing(10.0)
+        .width(iced::Length::Fill),
+        button("close")
+            .style(iced::widget::button::text)
+            .on_press(Message::CloseError(state.id))
+    ])
+    .style(|theme: &iced::Theme| ContainerStyle {
+        background: Some(iced::Background::Color(theme.palette().danger)),
+        ..Default::default()
+    })
+    .width(iced::Length::Fill)
+    .padding(20.0)
     .into()
 }
 
@@ -99,4 +163,6 @@ pub enum Message {
     PromptInputChanged(String),
     SendCommand(String),
     SetPinOutput((Uuid, bool)),
+    PushError(String),
+    CloseError(Uuid),
 }

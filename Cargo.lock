@@ -346,6 +346,7 @@ name = "athenacl"
 version = "0.1.0"
 dependencies = [
  "ahash 0.8.11",
+ "chrono",
  "iced",
  "indexmap",
  "quick-xml",

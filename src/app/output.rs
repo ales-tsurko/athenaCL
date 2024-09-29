@@ -17,7 +17,7 @@ use crate::interpreter::{LinkOutput, ModuleResult as InterpreterResult, Output};
 pub(crate) struct OutputViewState {
     id: Uuid,
     width: f32,
-    output: Option<InterpreterResult<Vec<Output>>>,
+    output: Vec<Output>,
     is_pinned: bool,
     cmd: String,
 }
@@ -27,7 +27,7 @@ impl Default for OutputViewState {
         Self {
             id: Uuid::new_v4(),
             width: 0.0,
-            output: None,
+            output: Vec::new(),
             is_pinned: false,
             cmd: String::new(),
         }
@@ -44,7 +44,7 @@ impl OutputViewState {
         self
     }
 
-    pub(crate) fn set_output(&mut self, output: Option<InterpreterResult<Vec<Output>>>) {
+    pub(crate) fn set_output(&mut self, output: Vec<Output>) {
         self.output = output;
     }
 
@@ -58,22 +58,12 @@ impl OutputViewState {
 }
 
 pub(crate) fn view(state: &OutputViewState) -> iced::Element<Message> {
-    if let Some(output) = &state.output {
-        return match output {
-            Ok(msg) => view_output(state, msg),
-            Err(msg) => view_error(state.width, msg.to_string()),
-        };
+    if state.output.is_empty() {
+        return container("").width(state.width).into();
     }
 
-    container("").width(state.width).into()
-}
-
-fn view_output<'a>(
-    state: &'a OutputViewState,
-    outputs: &'a [Output],
-) -> iced::Element<'a, Message> {
     let mut elements = vec![view_output_header(state.id, state.is_pinned, &state.cmd)];
-    for output in outputs {
+    for output in &state.output {
         elements.push(render_output(output));
     }
 
@@ -84,20 +74,6 @@ fn view_output<'a>(
             background: Some(iced::Background::Color([0.0, 0.0, 0.0, 0.7].into())),
             ..Default::default()
         })
-        .into()
-}
-
-fn view_error<'a>(width: f32, msg: String) -> iced::Element<'a, Message> {
-    let mut font = Font::MONOSPACE;
-    font.weight = iced::font::Weight::Bold;
-    let text = text(msg).font(font);
-    container(text)
-        .width(width)
-        .style(|theme: &iced::Theme| ContainerStyle {
-            background: Some(iced::Background::Color(theme.palette().danger)),
-            ..Default::default()
-        })
-        .padding(20.0)
         .into()
 }
 
