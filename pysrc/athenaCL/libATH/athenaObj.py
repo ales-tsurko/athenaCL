@@ -595,14 +595,12 @@ class AthenaObject(object):
         >>> a = AthenaObject()
         >>> post = a.cmdDisplay()
         """
-        w = self.termObj.w
         output = []
         msg = []
         msg.append("athenaCL Commands:\n")
         for cmdName in self.cmdOrder:
             if cmdName == None:  # none is a divider
                 output.append(guiOutput.divider())
-                # msg.append(lang.DIVIDER * w)
             else:
                 cmds = self.cmdDict[cmdName] 
                 output.append(guiOutput.header(cmds[0]))

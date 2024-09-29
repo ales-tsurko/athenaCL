@@ -8770,50 +8770,40 @@ class _Menu(Command):
     def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
         self.processSwitch = 0
-        self.gatherSwitch = 1
-        self.subCmd = 1  # if 1, executed within method of interptreter
+        self.gatherSwitch = 0
+        self.subCmd = 0  # if 1, executed within method of interptreter
         self.cmdStr = "menu"
         # modify in subclasses
         self.prefix = None
 
-    def gather(self):
-        """optional argument for command of help desired"""
+    def display(self):
         args = self.args
         self.usrStr = None
         self.name = self.ao.prefixName(self.prefix)
 
         args = self.args
+        output = []
         if args != "":
             args = argTools.ArgOps(args)  # no strip
             self.prefix = args.get(0)  # can overide prefix w/ command line arg
             self.usrStr = args.get(1)
         elif self.usrStr == None or self.prefix == None:  # no command line args
-            dialog.msgOut(
-                ("%s (%s) commands:\n" % (self.prefix, self.name)), self.termObj
-            )
+            if self.prefix == None: self.prefix = ""
+            output.append(guiOutput.header("%s (%s) commands:" % (self.prefix, self.name)))
             lowerPrefix = "%sCmd" % self.prefix.lower()
             cmds, cmdNames = self.ao.prefixCmdGroup(lowerPrefix)
-            entryLines = []
+            maxCmdLen = max(map(len, cmds))
             for i in range(0, len(cmdNames)):
-                entryLines.append(["", cmds[i], cmdNames[i]])
-            headerKey = []  # table setup
-            minWidthList = [lang.TABW, lang.NAMEW, 0]
-            bufList = [0, 1, 1]
-            justList = ["c", "l", "l"]
-            table = typeset.formatVariCol(
-                headerKey, entryLines, minWidthList, bufList, justList, self.termObj
-            )
-            dialog.msgOut((table + "\n"), self.termObj)
-            self.usrStr = dialog.askStr("command?", self.termObj)
+                align = (maxCmdLen - len(cmds[i])) * ' '
+                output.append(
+                        guiOutput.link(
+                            "    %s%s        %s" % (cmds[i], align, cmdNames[i]), cmds[i]))
+        return json.dumps(output)
 
-        self.usrCmd = self.ao.prefixMatch(self.prefix, self.usrStr)
 
     def log(self):
         if self.gatherStatus and self.processStatus:  # if complete
             return "%s" % (self.usrCmd)
-
-    def result(self):
-        return {"command": self.usrCmd}  # dict required return
 
 
 class PI_(_Menu):
