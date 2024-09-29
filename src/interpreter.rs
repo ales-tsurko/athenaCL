@@ -97,14 +97,13 @@ pub(crate) enum Output {
     Header(String),
     Divider,
     Paragraph(String),
-    List(Vec<Self>),
+    Row(Vec<Self>),
     Link(LinkOutput),
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct LinkOutput {
     pub(crate) text: String,
-    pub(crate) width: f32,
     pub(crate) cmd: String,
 }
 

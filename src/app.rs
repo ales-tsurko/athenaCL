@@ -1,7 +1,7 @@
 //! Application's GUI.
 
-use iced::widget::{column, scrollable, text_input};
-use iced::{Alignment, Element, Font, Length, Settings};
+use iced::widget::{button, column, row, scrollable, text_input};
+use iced::{Alignment, Element, Font, Length};
 use indexmap::IndexMap;
 use uuid::Uuid;
 
@@ -33,6 +33,7 @@ impl Default for State {
     }
 }
 
+/// The iced update function.
 pub fn update(state: &mut State, message: Message) {
     match message {
         Message::PromptInputChanged(value) => {
@@ -46,7 +47,7 @@ pub fn update(state: &mut State, message: Message) {
                 .expect("There should always be at least one output view")
                 .1;
             output_v.set_output(Some(output));
-            output_v.set_cmd(&state.cmd);
+            output_v.set_cmd(&value);
             state.cmd = String::new();
         }
         Message::SetPinOutput((id, value)) => {
@@ -62,6 +63,7 @@ pub fn update(state: &mut State, message: Message) {
     }
 }
 
+/// The top-level iced view function.
 pub fn view(state: &State) -> Element<Message> {
     let outputs = column(
         state
@@ -71,19 +73,27 @@ pub fn view(state: &State) -> Element<Message> {
             .collect::<Vec<_>>(),
     );
     column![
-        text_input(r#"Enter a command or "?" for help"#, &state.cmd)
-            .font(Font::MONOSPACE)
-            .on_input(|value| Message::PromptInputChanged(value))
-            .on_submit(Message::SendCommand(state.cmd.to_owned()))
-            .width(800),
+        row![
+            text_input(r#"Enter a command or "?" for help"#, &state.cmd)
+                .font(Font::MONOSPACE)
+                .on_input(|value| Message::PromptInputChanged(value))
+                .on_submit(Message::SendCommand(state.cmd.to_owned())),
+            button("cmd").on_press(Message::SendCommand("cmd".to_string())),
+            button("help").on_press(Message::SendCommand("help".to_string())),
+        ]
+        .spacing(10.0)
+        .width(800.0),
         scrollable(outputs),
     ]
     .padding(20)
+    .spacing(10.0)
     .width(Length::Fill)
     .align_x(Alignment::Center)
     .into()
 }
 
+/// The iced message type.
+#[allow(missing_docs)]
 #[derive(Debug, Clone)]
 pub enum Message {
     PromptInputChanged(String),

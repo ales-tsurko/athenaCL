@@ -7,15 +7,14 @@ def paragraph(text):
 def header(text):
     return { "type": "Header", "params": text }
 
-def list(items):
-    return { "type": "List", "params": items }
+def row(items):
+    return { "type": "Row", "params": items }
 
-def link(text, cmd, width=100):
+def link(text, cmd):
     return {
             "type": "Link",
             "params": {
                 "text": text,
-                "width": width,
                 "cmd": cmd
                 }
             }

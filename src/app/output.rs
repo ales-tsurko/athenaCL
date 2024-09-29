@@ -85,7 +85,7 @@ fn view_output<'a>(
 ) -> iced::Element<'a, Message> {
     let mut elements = vec![view_output_header(state.id, state.is_pinned, &state.cmd)];
     for output in outputs {
-        elements.push(render_output(state.width, output));
+        elements.push(render_output(output));
     }
 
     container(column(elements))
@@ -109,12 +109,12 @@ fn view_error<'a>(width: f32, msg: String) -> iced::Element<'a, Message> {
         .into()
 }
 
-fn render_output<'a>(width: f32, output: &'a Output) -> iced::Element<'a, Message> {
+fn render_output<'a>(output: &'a Output) -> iced::Element<'a, Message> {
     match output {
         Output::Paragraph(value) => view_paragraph(value),
         Output::Header(value) => view_header(value),
         Output::Divider => horizontal_rule(20.0).into(),
-        Output::List(value) => view_grid(width, value, 8),
+        Output::Row(value) => view_row(value),
         Output::Link(value) => view_link(value),
     }
 }
@@ -128,30 +128,18 @@ fn view_paragraph(value: &str) -> iced::Element<Message> {
 fn view_header(value: &str) -> iced::Element<Message> {
     let mut style = Font::MONOSPACE;
     style.weight = font::Weight::Bold;
-    container(text(value).font(style).size(24.0))
+    container(text(value).font(style).size(18.0))
         .padding([20.0, 0.0])
         .into()
 }
 
-fn view_grid<'a>(width: f32, list: &'a [Output], per_row: usize) -> iced::Element<'a, Message> {
-    let mut top_row = Row::new().spacing(10.0);
-    let mut column = Column::new()
-        .spacing(10.0)
-        .width(width)
-        .align_x(iced::Alignment::Start);
-
-    for (n, output) in list.iter().enumerate() {
-        if n % per_row == 0 {
-            column = column.push(top_row);
-            top_row = Row::new().spacing(10.0);
-            continue;
-        }
-
-        // top_row = top_row.push(horizontal_space());
-        top_row = top_row.push(render_output(width, output));
+fn view_row<'a>(list: &'a [Output]) -> iced::Element<'a, Message> {
+    let mut row = Row::new().spacing(10.0);
+    for output in list.iter() {
+        row = row.push(render_output(output));
     }
 
-    column.push(top_row).into()
+    row.wrap().into()
 }
 
 fn view_link(link: &LinkOutput) -> iced::Element<Message> {
@@ -160,7 +148,6 @@ fn view_link(link: &LinkOutput) -> iced::Element<Message> {
             .font(Font::MONOSPACE)
             .align_x(alignment::Horizontal::Center),
     )
-    .width(link.width)
     .style(iced::widget::button::text)
     .on_press(Message::SendCommand(link.cmd.to_owned()))
     .into()

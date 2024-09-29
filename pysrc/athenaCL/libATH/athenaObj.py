@@ -12,8 +12,10 @@
 # License:       GPL
 # -----------------------------------------------------------------||||||||||||--
 
-import sys, os, time, random, traceback, http.client, urllib.request, urllib.parse, urllib.error
+import sys, re, json, os, time, random, traceback, http.client, urllib.request, urllib.parse, urllib.error
 import unittest
+
+from athenaCL.libATH import guiOutput
 
 athVersion = "2.0.0"
 athBuild = "2010.07.07"
@@ -499,7 +501,7 @@ class AthenaObject(object):
         }
 
         self.cmdOrder = [
-            None,
+            None,     # None is for graphical divider
             "piCmd",  #'psCmd', 'pvCmd',
             None,
             "tmCmd",
@@ -594,16 +596,23 @@ class AthenaObject(object):
         >>> post = a.cmdDisplay()
         """
         w = self.termObj.w
+        output = []
         msg = []
         msg.append("athenaCL Commands:\n")
         for cmdName in self.cmdOrder:
             if cmdName == None:  # none is a divider
-                msg.append(lang.DIVIDER * w)
+                output.append(guiOutput.divider())
+                # msg.append(lang.DIVIDER * w)
             else:
-                msg.append(
-                    typeset.formatEqCol("", self.cmdDict[cmdName], 20, w, outLine=True)
-                )
-        return "".join(msg)
+                cmds = self.cmdDict[cmdName] 
+                output.append(guiOutput.header(cmds[0]))
+                links = []
+                for cmd in cmds[1:]:
+                    match = re.match(r'(\w+)', cmd)
+                    if match:
+                        links.append(guiOutput.link(cmd, match.group(1)))            
+                output.append(guiOutput.row(links))
+        return json.dumps(output)
 
     def cmdCorrect(self, line):
         """Acts as an athenaCL cmd parser: Capitalizes and corrects first part of user cmd strings called within cmdExecute. Does not deal with special commands like q, quit, cmd, and others.

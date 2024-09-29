@@ -1549,7 +1549,7 @@ class help(Command):
                 guiOutput.paragraph(msg), 
                 guiOutput.divider(),
                 guiOutput.header(lang.msgDocHead),
-                guiOutput.list(links)])
+                guiOutput.row(links)])
 
 
 class man(help):
