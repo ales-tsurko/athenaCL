@@ -10,8 +10,10 @@ use iced::{
 };
 use uuid::Uuid;
 
-use super::Message;
-use crate::interpreter::{LinkOutput, ModuleResult as InterpreterResult, Output};
+use crate::app::Message;
+use crate::interpreter::{LinkOutput, Output};
+
+pub mod form;
 
 #[derive(Debug)]
 pub(crate) struct OutputViewState {
@@ -84,6 +86,7 @@ fn render_output<'a>(output: &'a Output) -> iced::Element<'a, Message> {
         Output::Divider => horizontal_rule(20.0).into(),
         Output::Row(value) => view_row(value),
         Output::Link(value) => view_link(value),
+        Output::Form { command, inputs } => todo!(),
     }
 }
 

@@ -2,12 +2,12 @@
 
 use chrono::{DateTime, Local};
 use iced::widget::{
-    button, column, container, container::Style as ContainerStyle, row, scrollable, text,
-    text_input,
+    button, column, container, container::Style as ContainerStyle, opaque, row, scrollable, stack,
+    text, text::Style as TextStyle, text_input, vertical_space,
 };
-use iced::{Alignment, Element, Font, Length};
+use iced::{Alignment, Element, Font};
 use indexmap::IndexMap;
-use uuid::{timestamp, Uuid};
+use uuid::Uuid;
 
 use crate::interpreter::Interpreter;
 use output::OutputViewState;
@@ -112,26 +112,48 @@ pub fn view(state: &State) -> Element<Message> {
             .collect::<Vec<_>>(),
     );
     column![
-        row![
-            text_input(r#"Enter a command or "?" for help"#, &state.cmd)
-                .font(Font::MONOSPACE)
-                .on_input(|value| Message::PromptInputChanged(value))
-                .on_submit(Message::SendCommand(state.cmd.to_owned())),
-            button("cmd").on_press(Message::SendCommand("cmd".to_string())),
-            button("help").on_press(Message::SendCommand("help".to_string())),
+        view_input_bar(state),
+        stack![
+            container(vertical_space())
+                .width(iced::Length::Fill)
+                .height(iced::Length::Fill),
+            scrollable(outputs).width(iced::Length::Fill),
+            output::form::view(),
+            opaque(errors),
         ]
-        .spacing(10.0)
-        .width(800.0),
-        scrollable(column![errors, outputs].width(800.0)),
     ]
     .padding(20)
     .spacing(10.0)
-    .width(Length::Fill)
+    .width(800.0)
     .align_x(Alignment::Center)
     .into()
 }
 
-fn view_error<'a>(state: &'a ErrorState) -> iced::Element<'a, Message> {
+fn view_input_bar<'a>(state: &'a State) -> Element<'a, Message> {
+    row![
+        // TODO make it interactive and showing real data
+        text("pi{}ti{} ::")
+            .font(Font::MONOSPACE)
+            .style(|theme: &iced::Theme| TextStyle {
+                color: Some(theme.palette().primary),
+                ..Default::default()
+            })
+            .align_y(iced::Alignment::Center),
+        text_input(r#"Enter a command or "?" for help"#, &state.cmd)
+            .font(Font::MONOSPACE)
+            .on_input(|value| Message::PromptInputChanged(value))
+            .on_submit(Message::SendCommand(state.cmd.to_owned())),
+        button("cmd").on_press(Message::SendCommand("cmd".to_string())),
+        button("help").on_press(Message::SendCommand("help".to_string())),
+    ]
+    .height(50.0)
+    .align_y(iced::Alignment::Center)
+    .spacing(10.0)
+    .width(iced::Length::Fill)
+    .into()
+}
+
+fn view_error<'a>(state: &'a ErrorState) -> Element<'a, Message> {
     let mut msg_font = Font::MONOSPACE;
     msg_font.weight = iced::font::Weight::Bold;
     let timestamp = state.timestamp.format("%T    %a, %e %b %Y").to_string();

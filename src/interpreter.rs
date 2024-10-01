@@ -98,12 +98,52 @@ pub(crate) enum Output {
     Paragraph(String),
     Row(Vec<Self>),
     Link(LinkOutput),
+    Form { command: String, inputs: Vec<Input> },
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct LinkOutput {
     pub(crate) text: String,
     pub(crate) cmd: String,
+}
+
+/// Inputs represent positional arguments of a command. This means that the order in which the
+/// inputs are sent should be the same as the order of the command's arguments.
+///
+/// `kind` defines the type of the input, which practically means what kind of widget will be used
+/// and how the data will be validated.
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Input {
+    /// The name is shown as the label of the input.
+    name: String,
+    kind: InputKind,
+}
+
+impl Input {
+    /// Checks the input for validity.
+    pub fn is_valid(&self, value: &str) -> bool {
+        use InputKind::*;
+        match self.kind {
+            Pitch => Self::validate_pitch(value),
+            InstanceName => Self::validate_instance_name(value),
+        }
+    }
+
+    fn validate_pitch(value: &str) -> bool {
+        todo!()
+    }
+
+    fn validate_instance_name(value: &str) -> bool {
+        todo!()
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub enum InputKind {
+    /// Pitch value as per athenaCL (set, sieve, MIDI note number, etc.). Render as text input.
+    Pitch,
+    /// Simple single line text input with validation for PathInstance and TextureInstance names
+    InstanceName,
 }
 
 pub(crate) trait TryPy {
