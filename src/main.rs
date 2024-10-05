@@ -1,20 +1,21 @@
 //! The executable.
 
-use std::process::ExitCode;
-
+use athenacl::app;
 use rustpython_vm as vm;
-use vm::Interpreter;
-use athenacl;
 
-fn main() -> ExitCode {
-    let interpreter = athenacl::init_interpreter();
-    let result = py_main(&interpreter);
-    ExitCode::from(interpreter.run(|_vm| result))
-}
-
-fn py_main(interp: &Interpreter) -> vm::PyResult<()> {
-    interp.enter(|vm| {
-        let _ = vm.import("athenaCL.athenacl", None, 0)?;
-        vm::PyResult::Ok(())
-    })
+fn main() -> iced::Result {
+    iced::application("athenaCL", app::update, app::view)
+        .antialiasing(true)
+        .centered()
+        .settings(iced::settings::Settings {
+            id: Some(app::APPLICATION_ID.to_string()),
+            default_text_size: 14.into(),
+            default_font: iced::Font::MONOSPACE,
+            ..Default::default()
+        })
+        .window(iced::window::Settings {
+            min_size: Some((800.0, 600.0).into()),
+            ..Default::default()
+        })
+        .run()
 }

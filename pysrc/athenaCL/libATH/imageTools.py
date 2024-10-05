@@ -392,6 +392,9 @@ class BarCode(GridGraphic):
             backColor = [
                 backColor,
             ]
+        else:
+            backColor = []
+
         if backColor[0] == None:  # if none, back it transparent
             self.transp = 0  # black
             backColor[0] = "#000000"  # make it black

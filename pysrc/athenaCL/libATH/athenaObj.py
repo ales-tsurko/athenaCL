@@ -15,9 +15,9 @@
 import sys, os, time, random, traceback, http.client, urllib.request, urllib.parse, urllib.error
 import unittest
 
-athVersion = "2.0.0a15"
-athBuild = "2010.07.07"
-athDate = "7 July 2010"  # human readable version
+athVersion = "2.0.0"
+athBuild = "2024.04.10"
+athDate = "4 October 2024"  # human readable version
 __version__ = athVersion
 __license__ = "GPL"
 
@@ -1228,7 +1228,7 @@ class Interpreter(object):
                     raise Exception("command level error: %s" % result.strip())
             except Exception:
                 raise  # raise the same Exception
-            return result
+            return ok, result
 
         # this error mode is for backwards compatibility
         elif errorMode == "return":
