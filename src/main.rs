@@ -5,6 +5,7 @@ use rustpython_vm as vm;
 
 fn main() -> iced::Result {
     iced::application("athenaCL", app::update, app::view)
+        .subscription(app::subscription)
         .antialiasing(true)
         .centered()
         .settings(iced::settings::Settings {

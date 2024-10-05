@@ -3,7 +3,7 @@
 use std::sync::LazyLock;
 use std::thread::{self, JoinHandle};
 
-use crossbeam_channel::{unbounded, Receiver, Sender};
+use async_channel::{unbounded, Receiver, Sender};
 use rustpython_vm as vm;
 use thiserror::Error;
 use vm::{
@@ -35,23 +35,23 @@ impl InterpreterWorker {
 
         let interpreter_handle = thread::spawn(move || {
             let interpreter = Interpreter::new().unwrap_or_else(|err| {
-                s.send(Message::InterpreterError(err))
+                s.send_blocking(Message::PythonError(err.to_string()))
                     .expect("can't send message to channel");
                 panic!("error initializating interpreter");
             });
 
             loop {
-                if let Ok(message) = r.recv() {
-                    if let Message::Send(cmd) = message {
+                if let Ok(message) = r.recv_blocking() {
+                    if let Message::SendCmd(cmd) = message {
                         match interpreter.run_cmd(&cmd) {
                             Ok(msg) => s
-                                .send(Message::Out(msg))
+                                .send_blocking(Message::Post(msg))
                                 .expect("cannot send message via channel"),
                             Err(Error::Command(_, cmd_err)) => s
-                                .send(Message::Error(cmd_err))
+                                .send_blocking(Message::Error(cmd_err))
                                 .expect("cannot send message via channel"),
-                            Err(err) => s
-                                .send(Message::InterpreterError(err))
+                            Err(Error::PythonError(err)) => s
+                                .send_blocking(Message::PythonError(err))
                                 .expect("cannot send message via channel"),
                         }
                     }
@@ -67,18 +67,18 @@ impl InterpreterWorker {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Message {
     /// Output from the interpreter (stdout).
-    Out(String),
+    Post(String),
     /// Requested input (stdin).
     Ask(String),
+    /// Send command to the interpreter.
+    SendCmd(String),
     /// Error from the interpreter (stderr).
     Error(String),
-    /// Other errors, for example on interpreter initialization.
-    InterpreterError(Error),
-    /// Send commands to the interpreter.
-    Send(String),
+    /// Python's interpreter- level errors.
+    PythonError(String),
 }
 
 pub(crate) type InterpreterResult<T> = Result<T, Error>;
@@ -188,8 +188,8 @@ impl<T> TryPy for PyResult<T> {
     }
 }
 
-#[derive(Debug, Error)]
-pub(crate) enum Error {
+#[derive(Debug, Error, Clone)]
+pub enum Error {
     #[error("{0}")]
     PythonError(String),
     #[error("Error running command `{0}`: {1}")]

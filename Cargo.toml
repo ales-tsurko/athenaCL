@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 ahash = "0.8.11"
-crossbeam-channel = "0.5.13"
+async-channel = "2.3.1"
 env_logger = "0.11"
 iced = { version = "0.13.1", features = ["wgpu"] }
 log = "0.4"
