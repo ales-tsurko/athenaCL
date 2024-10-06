@@ -4,8 +4,8 @@ use std::collections::VecDeque;
 
 use iced::futures::sink::SinkExt;
 use iced::widget::{
-    button, column, container, container::Style as ContainerStyle, opaque, row, scrollable, stack,
-    text, text::Style as TextStyle, text_input, vertical_space,
+    column, container, scrollable, text, text::Style as TextStyle, text_input,
+    text_input::Style as TextInputStyle,
 };
 use iced::{padding, stream};
 use iced::{Alignment, Element, Font, Subscription};
@@ -52,11 +52,11 @@ pub fn update(state: &mut State, message: Message) {
             }
             interpreter::Message::Post(output) => {
                 state.answer = "".to_owned();
-                state.output.push_front(Output::Normal(output));
+                state.output.push_back(Output::Normal(output));
             }
             interpreter::Message::Error(output) | interpreter::Message::PythonError(output) => {
                 state.answer = "".to_owned();
-                state.output.push_front(Output::Error(output));
+                state.output.push_back(Output::Error(output));
             }
             interpreter::Message::Ask(prompt) => {
                 state.answer = "".to_owned();
@@ -68,7 +68,7 @@ pub fn update(state: &mut State, message: Message) {
             state.question = None;
             state
                 .output
-                .push_front(Output::Normal(format!("{question}{value}")));
+                .push_back(Output::Normal(format!("{question}{value}")));
             interpreter::INTERPRETER_WORKER
                 .response_sender
                 .send_blocking(value)
@@ -89,10 +89,17 @@ pub fn view(state: &State) -> Element<Message> {
             .collect::<Vec<_>>(),
     );
 
-    container(column![view_prompt(state), scrollable(output).width(iced::Length::Fill)])
-        .padding(40)
-        .width(TERM_WIDTH * FONT_WIDTH)
-        .into()
+    container(column![
+        scrollable(output)
+            .width(iced::Length::Fill)
+            .height(iced::Length::Fill)
+            .anchor_bottom(),
+        view_prompt(state),
+    ])
+    .padding(40)
+    .width(TERM_WIDTH * FONT_WIDTH)
+    .height(iced::Length::Fill)
+    .into()
 }
 
 fn view_output<'a>(output: &'a Output) -> Element<'a, Message> {
@@ -103,26 +110,47 @@ fn view_output<'a>(output: &'a Output) -> Element<'a, Message> {
             font.weight = iced::font::Weight::Bold;
             text(msg).font(font).size(16.0)
         }
-        Output::Error(msg) => text(msg)
-            .style(|theme: &iced::Theme| TextStyle {
-                color: Some(theme.palette().danger),
-            })
+        Output::Error(msg) => text(msg).style(|theme: &iced::Theme| TextStyle {
+            color: Some(theme.palette().danger),
+        }),
     };
 
-    container(text).padding([40, 0]).into()
+    container(text).padding([10, 0]).into()
 }
 
 fn view_prompt<'a>(state: &'a State) -> Element<'a, Message> {
-    match &state.question {
+    use iced::widget::text_input::{Catalog, Status};
+
+    let normal_style = |theme: &iced::Theme, status: Status| {
+        let mut style = theme.style(&<iced::Theme as Catalog>::default(), status);
+
+        style.border = iced::Border {
+            width: 0.0,
+            ..Default::default()
+        };
+        style.background = theme.palette().background.inverse().scale_alpha(0.03).into();
+
+        style
+    };
+
+    let question_style = move |theme: &iced::Theme, status: Status| {
+        let mut style = normal_style(theme, status);
+        style.placeholder = theme.palette().primary;
+        style
+    };
+
+    let text_input = match &state.question {
         Some(question) => text_input(&question, &state.answer)
+            .style(question_style)
             .on_input(Message::InputChanged)
-            .on_submit(Message::Answer(question.to_owned(), state.answer.clone()))
-            .into(),
+            .on_submit(Message::Answer(question.to_owned(), state.answer.clone())),
         None => text_input("type command or 'help'", &state.answer)
+            .style(normal_style)
             .on_input(Message::InputChanged)
-            .on_submit(interpreter::Message::SendCmd(state.answer.clone()).into())
-            .into(),
-    }
+            .on_submit(interpreter::Message::SendCmd(state.answer.clone()).into()),
+    };
+
+    container(text_input).height(40).into()
 }
 
 /// The iced message type.
