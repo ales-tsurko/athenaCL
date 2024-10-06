@@ -1,7 +1,7 @@
 //! athenaCL interpreter.
 
 use std::sync::LazyLock;
-use std::thread::{self, JoinHandle};
+use std::thread;
 
 use async_channel::{unbounded, Receiver, Sender};
 use rustpython_vm as vm;
@@ -21,19 +21,27 @@ pub static INTERPRETER_WORKER: LazyLock<InterpreterWorker> = LazyLock::new(Inter
 /// via channels.
 #[derive(Debug)]
 pub struct InterpreterWorker {
-    interpreter_handle: JoinHandle<()>,
-    pub sender: Sender<Message>,
-    pub receiver: Receiver<Message>,
+    pub interp_sender: Sender<Message>,
+    pub interp_receiver: Receiver<Message>,
+    pub gui_sender: Sender<Message>,
+    pub gui_receiver: Receiver<Message>,
+    /// Response sender/receiver is a special channel dedicated for sending user's answer to
+    /// `Message::Ask`.
+    pub response_sender: Sender<String>,
+    /// Response sender/receiver is a special channel dedicated for sending user's answer to
+    /// `Message::Ask`.
+    pub response_receiver: Receiver<String>,
 }
 
 impl InterpreterWorker {
     /// Run the interpereter loop.
     fn run() -> Self {
-        let (sender, receiver) = unbounded::<Message>();
-        let s = sender.clone();
-        let r = receiver.clone();
+        let (interp_sender, interp_receiver) = unbounded::<Message>();
+        let r = interp_receiver.clone();
+        let (gui_sender, gui_receiver) = unbounded::<Message>();
+        let s = gui_sender.clone();
 
-        let interpreter_handle = thread::spawn(move || {
+        let _ = thread::spawn(move || {
             let interpreter = Interpreter::new().unwrap_or_else(|err| {
                 s.send_blocking(Message::PythonError(err.to_string()))
                     .expect("can't send message to channel");
@@ -43,26 +51,27 @@ impl InterpreterWorker {
             loop {
                 if let Ok(message) = r.recv_blocking() {
                     if let Message::SendCmd(cmd) = message {
-                        match interpreter.run_cmd(&cmd) {
-                            Ok(msg) => s
-                                .send_blocking(Message::Post(msg))
-                                .expect("cannot send message via channel"),
-                            Err(Error::Command(_, cmd_err)) => s
-                                .send_blocking(Message::Error(cmd_err))
-                                .expect("cannot send message via channel"),
-                            Err(Error::PythonError(err)) => s
-                                .send_blocking(Message::PythonError(err))
-                                .expect("cannot send message via channel"),
-                        }
+                        let msg = match interpreter.run_cmd(&cmd) {
+                            Ok(msg) => Message::Post(msg),
+                            Err(Error::Command(_, cmd_err)) => Message::Error(cmd_err),
+                            Err(Error::PythonError(err)) => Message::PythonError(err),
+                        };
+
+                        s.send_blocking(msg).expect("cannot send message to gui");
                     }
                 }
             }
         });
 
+        let (response_sender, response_receiver) = unbounded();
+
         Self {
-            interpreter_handle,
-            sender,
-            receiver,
+            interp_sender,
+            interp_receiver,
+            gui_sender,
+            gui_receiver,
+            response_sender,
+            response_receiver,
         }
     }
 }
@@ -71,7 +80,7 @@ impl InterpreterWorker {
 pub enum Message {
     /// Output from the interpreter (stdout).
     Post(String),
-    /// Requested input (stdin).
+    /// Request input from the user (stdin).
     Ask(String),
     /// Send command to the interpreter.
     SendCmd(String),

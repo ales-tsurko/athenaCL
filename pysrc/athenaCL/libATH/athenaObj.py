@@ -598,7 +598,7 @@ class AthenaObject(object):
         msg.append("athenaCL Commands:\n")
         for cmdName in self.cmdOrder:
             if cmdName == None:  # none is a divider
-                msg.append(lang.DIVIDER * w)
+                msg.append(lang.DIVIDER * (w-1) + "\n")
             else:
                 msg.append(
                     typeset.formatEqCol("", self.cmdDict[cmdName], 20, w, outLine=True)
@@ -904,22 +904,23 @@ class Terminal(object):
         >>> a = Terminal()
         >>> post = a.size()
         """
-        if self.termLive:
-            h, w = self.defaultH, self.defaultW
-            try:
-                import struct, fcntl
+        # if self.termLive:
+        #     h, w = self.defaultH, self.defaultW
+        #     try:
+        #         import struct, fcntl
 
-                h, w = struct.unpack(
-                    "hhhh", fcntl.ioctl(0, termios.TIOCGWINSZ, "\000" * 8)
-                )[0:2]
-            except:  # get size from curses if available; last ditch
-                if not self.cursesTest:
-                    self._sizeCurses()  # run curses method only if not yet run once
-                if self.cursesW != None and self.cursesH != None:
-                    h, w = self.cursesH, self.cursesW
-        else:  # if no term active, get default
-            h, w = self.defaultH, self.defaultW
-        return h, w
+        #         h, w = struct.unpack(
+        #             "hhhh", fcntl.ioctl(0, termios.TIOCGWINSZ, "\000" * 8)
+        #         )[0:2]
+        #     except:  # get size from curses if available; last ditch
+        #         if not self.cursesTest:
+        #             self._sizeCurses()  # run curses method only if not yet run once
+        #         if self.cursesW != None and self.cursesH != None:
+        #             h, w = self.cursesH, self.cursesW
+        # else:  # if no term active, get default
+        #     h, w = self.defaultH, self.defaultW
+        # we fix the width to 80
+        return 100, 80
 
     def __getattr__(self, name):
         """provode interface as attributes"""

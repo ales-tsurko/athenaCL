@@ -1535,19 +1535,19 @@ class help(Command):
             cmdsDoc, cmdsUndoc, helpTopics = self.ao.cmdDocManifest()
             h, w = self.termObj.size()
             msg = []
-            msg.append(lang.DIVIDER * w)
+            msg.append(lang.DIVIDER * (w-1) + "\n")
             msg.append(lang.msgDocAdditionalHelp)
             msg.append(lang.msgDocCmd)
             # msg.append(lang.msgDocPrefix)
             msg.append(lang.msgDocBrowser)
             msg.append(lang.msgDocHead)
-            msg.append(lang.DIVIDER * w)
+            msg.append(lang.DIVIDER * (w - 1) + "\n")
             msg.append(typeset.formatEqCol("", cmdsDoc, 10, w))
             if len(helpTopics) > 0:
-                msg.append(lang.DIVIDER * w)
+                msg.append(lang.DIVIDER * (w - 1) + "\n")
                 msg.append(typeset.formatEqCol("", helpTopics, 10, w))
             if len(cmdsUndoc) > 0:
-                msg.append(lang.DIVIDER * w)
+                msg.append(lang.DIVIDER * (w - 1) + "\n")
                 msg.append(typeset.formatEqCol("", cmdsUndoc, 10, w))
             return "".join(msg)
 

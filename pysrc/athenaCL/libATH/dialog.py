@@ -14,6 +14,7 @@ import unittest
 
 from athenaCL.libATH import typeset
 from athenaCL.libATH import language
+import dialogExt
 
 lang = language.LangObj()
 
@@ -43,7 +44,7 @@ def msgOut(msg, termObj=None):
     if termObj != None:
         if termObj.sessionType == "cgi":  # dont want any output
             return  # do nothing, nothing to stdout, str taken elsewhere
-    sys.stdout.write(msg)
+    dialogExt.postOut(msg)
 
 
 def msgError(msg, termObj=None):
@@ -69,7 +70,7 @@ def rawInput(prompt, termObj=None):
         prompt = typeset.wrapText(prompt, w, 0, "line")
     # line wraping may remove the last space after prompt; make sure it is
     # still there
-    return input(_fixQuery(prompt))
+    return dialogExt.askInput(_fixQuery(prompt))
 
 
 def askStr(query, termObj=None, strip=1):
