@@ -121,7 +121,7 @@ class LangEn:
     msgCommentBreak = ("-" * 65) + ("|" * 12) + ("-" * 2)
     msgAth = "athenaCL"
     msgAthURL = "github.com/ales-tsurko/athenaCL"
-    msgAthDocURL = "alestsurko.by/athenaCL"
+    msgAthDocURL = "athenacl.alestsurko.by"
     msgAthDeveloperURL = "https://github.com/ales-tsurko/athenaCL"
     msgAuthor = "Christopher Ariza"
     msgAuthorEmail = "ariza@flexatone.net"

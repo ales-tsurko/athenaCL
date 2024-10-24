@@ -1,29 +1,39 @@
 //! Application's GUI.
 
-use std::collections::VecDeque;
-
 use iced::futures::sink::SinkExt;
-use iced::widget::{
-    column, container, scrollable, text, text::Style as TextStyle, text_input,
-    text_input::Style as TextInputStyle,
-};
-use iced::{padding, stream};
-use iced::{Alignment, Element, Font, Subscription};
+use iced::stream;
+use iced::widget::{column, container, scrollable, text, text::Style as TextStyle, text_input};
+use iced::{Element, Font, Subscription};
 
-use crate::interpreter::{self, InterpreterResult};
+use super::midi_player::{self, GlobalState as GlobalMidiPlayerState, State as MidiPlayerState};
+use crate::interpreter;
 
 const TERM_WIDTH: u16 = 80;
 const FONT_WIDTH: u16 = 10;
 
 /// System application ID.
 pub const APPLICATION_ID: &str = "by.alestsurko.athenacl";
+// TODO it should be configurable so users could choose they own sf
+const SOUND_FONT: &str = "./resources/SGM-v2.01-YamahaGrand-Guit-Bass-v2.7.sf2";
 
 /// athenaCL GUI.
-#[derive(Debug, Default)]
 pub struct State {
     answer: String,
-    output: VecDeque<Output>,
+    output: Vec<Output>,
     question: Option<String>,
+    midi_player_state: GlobalMidiPlayerState,
+}
+
+impl Default for State {
+    fn default() -> Self {
+        let midi_player_state = GlobalMidiPlayerState::new(SOUND_FONT);
+        Self {
+            midi_player_state,
+            answer: String::new(),
+            output: Vec::new(),
+            question: None,
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -31,6 +41,7 @@ enum Output {
     Normal(String),
     Command(String),
     Error(String),
+    MidiPlayer(MidiPlayerState),
 }
 
 /// The iced update function.
@@ -39,12 +50,45 @@ pub fn update(state: &mut State, message: Message) {
         Message::InputChanged(val) => {
             state.answer = val;
         }
+        Message::PlayMidi(id) => {
+            if let Some(playing_id) = state.midi_player_state.playing_id {
+                if let Some(Output::MidiPlayer(player_state)) = state.output.get_mut(playing_id) {
+                    player_state.is_playing = false;
+                    state.midi_player_state.playing_id = None;
+                }
+            }
+
+            if let Some(Output::MidiPlayer(player)) = state.output.get_mut(id) {
+                player.is_playing = true;
+                if player.path.exists() {
+                    if let Err(e) = state
+                        .midi_player_state
+                        .controller
+                        .set_file(Some(&player.path))
+                    {
+                        state.output.push(Output::Error(e.to_string()));
+                        return;
+                    }
+                    state.midi_player_state.controller.play();
+                    state.midi_player_state.playing_id = Some(id);
+                }
+            }
+        }
+        Message::StopMidi(id) => {
+            if let Some(Output::MidiPlayer(player_state)) = state.output.get_mut(id) {
+                player_state.is_playing = false;
+                state.midi_player_state.controller.stop();
+                if let Some(playing_id) = state.midi_player_state.playing_id {
+                    if playing_id == id {
+                        state.midi_player_state.playing_id = None;
+                    }
+                }
+            }
+        }
         Message::InterpreterMessage(msg) => match msg {
-            interpreter::Message::SendCmd(_) => {
-                // state
-                //     .output
-                //     .push_front(Output::Command(state.input.clone()));
+            interpreter::Message::SendCmd(ref cmd) => {
                 state.answer = "".to_owned();
+                state.output.push(Output::Command(cmd.to_owned()));
                 interpreter::INTERPRETER_WORKER
                     .interp_sender
                     .send_blocking(msg)
@@ -52,23 +96,29 @@ pub fn update(state: &mut State, message: Message) {
             }
             interpreter::Message::Post(output) => {
                 state.answer = "".to_owned();
-                state.output.push_back(Output::Normal(output));
+                state.output.push(Output::Normal(output));
             }
             interpreter::Message::Error(output) | interpreter::Message::PythonError(output) => {
                 state.answer = "".to_owned();
-                state.output.push_back(Output::Error(output));
+                state.output.push(Output::Error(output));
             }
             interpreter::Message::Ask(prompt) => {
                 state.answer = "".to_owned();
                 state.question = Some(prompt);
             }
-            _ => (),
+            interpreter::Message::LoadMidi(path) => {
+                state.output.push(Output::MidiPlayer(MidiPlayerState {
+                    is_playing: false,
+                    path: path.into(),
+                    id: state.output.len(),
+                }));
+            }
         },
         Message::Answer(question, value) => {
             state.question = None;
             state
                 .output
-                .push_back(Output::Normal(format!("{question}{value}")));
+                .push(Output::Normal(format!("{question}{value}")));
             interpreter::INTERPRETER_WORKER
                 .response_sender
                 .send_blocking(value)
@@ -79,6 +129,8 @@ pub fn update(state: &mut State, message: Message) {
 
 /// The top-level iced view function.
 pub fn view(state: &State) -> Element<Message> {
+    use iced::widget::scrollable::{Catalog, Status};
+
     let output = column(
         state
             .output
@@ -90,7 +142,18 @@ pub fn view(state: &State) -> Element<Message> {
     );
 
     container(column![
-        scrollable(output)
+        scrollable(output.padding(20.0))
+            .style(|theme: &iced::Theme, status: Status| {
+                let mut style = theme.style(&<iced::Theme as Catalog>::default(), status);
+                let mut background = theme.palette().background;
+                background.r *= 0.7;
+                background.g *= 0.7;
+                background.b *= 0.7;
+
+                style.container = style.container.background(background);
+
+                style
+            })
             .width(iced::Length::Fill)
             .height(iced::Length::Fill)
             .anchor_bottom(),
@@ -103,19 +166,20 @@ pub fn view(state: &State) -> Element<Message> {
 }
 
 fn view_output<'a>(output: &'a Output) -> Element<'a, Message> {
-    let text = match output {
-        Output::Normal(msg) => text(msg),
+    match output {
+        Output::Normal(msg) => container(text(msg)),
         Output::Command(msg) => {
             let mut font = Font::MONOSPACE;
             font.weight = iced::font::Weight::Bold;
-            text(msg).font(font).size(16.0)
+            container(text(msg).font(font).size(18.0))
         }
-        Output::Error(msg) => text(msg).style(|theme: &iced::Theme| TextStyle {
+        Output::Error(msg) => container(text(msg).style(|theme: &iced::Theme| TextStyle {
             color: Some(theme.palette().danger),
-        }),
-    };
-
-    container(text).padding([10, 0]).into()
+        })),
+        Output::MidiPlayer(state) => container(midi_player::view(state)),
+    }
+    .padding([10, 0])
+    .into()
 }
 
 fn view_prompt<'a>(state: &'a State) -> Element<'a, Message> {
@@ -128,7 +192,12 @@ fn view_prompt<'a>(state: &'a State) -> Element<'a, Message> {
             width: 0.0,
             ..Default::default()
         };
-        style.background = theme.palette().background.inverse().scale_alpha(0.03).into();
+        style.background = theme
+            .palette()
+            .background
+            .inverse()
+            .scale_alpha(0.03)
+            .into();
 
         style
     };
@@ -160,6 +229,8 @@ pub enum Message {
     InputChanged(String),
     InterpreterMessage(interpreter::Message),
     Answer(String, String),
+    PlayMidi(usize),
+    StopMidi(usize),
 }
 
 impl From<interpreter::Message> for Message {

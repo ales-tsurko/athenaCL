@@ -126,11 +126,23 @@ pub(super) mod _inner {
             .send_blocking(interpreter::Message::Ask(prompt))
             .expect("cannot send message via channel");
 
-        if let Ok(msg) = interpreter::INTERPRETER_WORKER.response_receiver.recv_blocking() {
+        if let Ok(msg) = interpreter::INTERPRETER_WORKER
+            .response_receiver
+            .recv_blocking()
+        {
             return Ok(vm.ctx.new_str(msg).into());
         }
 
         Ok(vm.ctx.new_str("").into())
     }
-    
+
+    #[pyfunction(name = "playMidi")]
+    pub(crate) fn play_midi(path: String) -> PyResult<()> {
+        interpreter::INTERPRETER_WORKER
+            .gui_sender
+            .send_blocking(interpreter::Message::LoadMidi(path))
+            .expect("cannot send message via channel");
+
+        Ok(())
+    }
 }

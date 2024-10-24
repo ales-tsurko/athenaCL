@@ -88,6 +88,10 @@ pub enum Message {
     Error(String),
     /// Python's interpreter- level errors.
     PythonError(String),
+    /// Play a MIDI file (in the output area).
+    ///
+    /// The value is the path to the file.
+    LoadMidi(String),
 }
 
 pub(crate) type InterpreterResult<T> = Result<T, Error>;

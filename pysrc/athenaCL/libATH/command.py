@@ -2736,18 +2736,8 @@ class PIh(Command):
         self.pathMidi = self.emObj.outFormatToFilePath("midiFile")
 
     def display(self):
-        msg = []
-        prefDict = self.ao.external.getPrefGroup("external")
-        failFlag = osTools.openMedia(self.pathMidi, prefDict)
-        if failFlag == "failed":
-            msg.append(lang.msgELhearError % self.pathMidi)
-        else:
-            # msg.append(lang.msgELhearInit % hPath)
-            msg.append(
-                "PI %s hear with TM %s complete.\n(%s)\n"
-                % (self.pName, self.ao.activeTextureModule, self.pathMidi)
-            )
-        return "".join(msg)
+        dialogExt.playMidi(self.pathMidi)
+        return "PI %s hear with TM %s\n(%s)\n" % (self.pName, self.ao.activeTextureModule, self.pathMidi)
 
 
 # -----------------------------------------------------------------||||||||||||--

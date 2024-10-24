@@ -1,7 +1,6 @@
 //! The executable.
 
 use athenacl::app;
-use rustpython_vm as vm;
 
 fn main() -> iced::Result {
     iced::application("athenaCL", app::update, app::view)
