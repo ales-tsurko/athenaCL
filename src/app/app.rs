@@ -1,9 +1,9 @@
 //! Application's GUI.
 
-use iced::futures::sink::SinkExt;
+use iced::futures::{join, sink::SinkExt};
 use iced::stream;
 use iced::widget::{column, container, scrollable, text, text::Style as TextStyle, text_input};
-use iced::{Element, Font, Subscription};
+use iced::{time, Element, Font, Subscription};
 
 use super::midi_player::{self, GlobalState as GlobalMidiPlayerState, State as MidiPlayerState};
 use crate::interpreter;
@@ -27,10 +27,23 @@ pub struct State {
 impl Default for State {
     fn default() -> Self {
         let midi_player_state = GlobalMidiPlayerState::new(SOUND_FONT);
+        let output = vec![Output::Normal(
+            r#"
+                       _   _                        ___   __  
+                  __ _| |_| |__   ___ _ __   __ _  / __\ / /  
+                 / _` | __| '_ \ / _ \ '_ \ / _` |/ /   / /   
+                | (_| | |_| | | |  __/ | | | (_| / /___/ /___ 
+                 \__,_|\__|_| |_|\___|_| |_|\__,_\____/\____/ 
+
+                            Welcome to athenaCL!
+                    Type your commands in the input below.
+"#
+            .to_owned(),
+        )];
         Self {
             midi_player_state,
             answer: String::new(),
-            output: Vec::new(),
+            output,
             question: None,
         }
     }
@@ -69,6 +82,7 @@ pub fn update(state: &mut State, message: Message) {
                         state.output.push(Output::Error(e.to_string()));
                         return;
                     }
+                    state.midi_player_state.controller.set_position(player.position);
                     state.midi_player_state.controller.play();
                     state.midi_player_state.playing_id = Some(id);
                 }
@@ -80,6 +94,32 @@ pub fn update(state: &mut State, message: Message) {
                 state.midi_player_state.controller.stop();
                 if let Some(playing_id) = state.midi_player_state.playing_id {
                     if playing_id == id {
+                        state.midi_player_state.playing_id = None;
+                    }
+                }
+            }
+        }
+        Message::ChangePlayingPosition(id, position) => {
+            if let Some(Output::MidiPlayer(player_state)) = state.output.get_mut(id) {
+                player_state.position = position;
+
+                if let Some(playing_id) = state.midi_player_state.playing_id {
+                    if playing_id == id {
+                        state.midi_player_state.controller.set_position(position);
+                    }
+                }
+            }
+        }
+        Message::Tick(_) => {
+            if let Some(playing_id) = state.midi_player_state.playing_id {
+                if let Some(Output::MidiPlayer(player_state)) = state.output.get_mut(playing_id) {
+                    let position = state.midi_player_state.controller.position();
+
+                    player_state.position = position;
+
+                    if position >= 1.0 {
+                        player_state.is_playing = false;
+                        player_state.position = 0.0;
                         state.midi_player_state.playing_id = None;
                     }
                 }
@@ -111,6 +151,7 @@ pub fn update(state: &mut State, message: Message) {
                     is_playing: false,
                     path: path.into(),
                     id: state.output.len(),
+                    position: 0.0,
                 }));
             }
         },
@@ -231,6 +272,9 @@ pub enum Message {
     Answer(String, String),
     PlayMidi(usize),
     StopMidi(usize),
+    // id, position
+    ChangePlayingPosition(usize, f64),
+    Tick(time::Instant),
 }
 
 impl From<interpreter::Message> for Message {
@@ -240,10 +284,12 @@ impl From<interpreter::Message> for Message {
 }
 
 #[allow(missing_docs)]
-pub fn subscription(_: &State) -> Subscription<Message> {
+pub fn subscription(state: &State) -> Subscription<Message> {
     // this worker runs async loop to make the worker, which runs on a System's thread communicate
-    // with our app, whithout blocking the event loop of iced...
-    Subscription::run(|| {
+    // with our app, whithout blocking the event loop of iced
+
+    // let position_observer = state.midi_player_state.controller.new_position_observer();
+    let interpreter_listener = Subscription::run(|| {
         let receiver = interpreter::INTERPRETER_WORKER.gui_receiver.clone();
 
         stream::channel(1000, |mut output| async move {
@@ -259,5 +305,13 @@ pub fn subscription(_: &State) -> Subscription<Message> {
             }
         })
     })
-    .map(Message::InterpreterMessage)
+    .map(Message::InterpreterMessage);
+
+    let position_listener = if state.midi_player_state.controller.is_playing() {
+        time::every(time::Duration::from_millis(20)).map(Message::Tick)
+    } else {
+        Subscription::none()
+    };
+
+    Subscription::batch([interpreter_listener, position_listener])
 }

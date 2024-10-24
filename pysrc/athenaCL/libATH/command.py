@@ -6775,7 +6775,7 @@ class ELh(Command):
             else:  # files was created but does not exists
                 msg.append(lang.msgELaudioMoved % self.audioPath)
 
-        # only midi file prodiuces an output
+        # only midi file produces an output
         self.midPath = self.ao.aoInfo["fpMidi"]
         if "midiFile" in outComplete:
             if os.path.isfile(self.midPath):  # if file found

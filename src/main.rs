@@ -15,6 +15,7 @@ fn main() -> iced::Result {
         })
         .window(iced::window::Settings {
             min_size: Some((800.0, 600.0).into()),
+            max_size: Some((800.0, f32::MAX).into()),
             ..Default::default()
         })
         .run()

@@ -6,7 +6,7 @@ use cpal::{
     Stream as AudioStream, StreamConfig,
 };
 use iced::{
-    widget::{button, svg, text},
+    widget::{button, row, slider, svg},
     Element,
 };
 use midi_player::{Player, PlayerController, Settings as PlayerSettings};
@@ -82,15 +82,27 @@ pub(crate) struct State {
     pub(crate) is_playing: bool,
     pub(crate) path: PathBuf,
     pub(crate) id: usize,
+    pub(crate) position: f64,
 }
 
 pub(crate) fn view<'a>(state: &'a State) -> Element<'a, Message> {
-    let label =
-        svg(if state.is_playing { "resources/img/pause.svg" } else { "resources/img/play.svg" });
+    let label = svg(if state.is_playing {
+        "resources/img/pause.svg"
+    } else {
+        "resources/img/play.svg"
+    });
     let message = if state.is_playing {
         Message::StopMidi(state.id)
     } else {
         Message::PlayMidi(state.id)
     };
-    button(label).on_press(message).width(60.0).into()
+    row![
+        button(label).on_press(message).width(60.0),
+        slider(0.0..=1.0, state.position, |v| {
+            Message::ChangePlayingPosition(state.id, v)
+        }).step(0.001)
+    ]
+    .align_y(iced::Alignment::Center)
+    .spacing(10.0)
+    .into()
 }

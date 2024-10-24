@@ -10,7 +10,7 @@ ahash = "0.8.11"
 async-channel = "2.3.1"
 cpal = "0.15.3"
 env_logger = "0.11"
-iced = { version = "0.13.1", features = ["wgpu", "svg"] }
+iced = { version = "0.13.1", features = ["svg", "tokio", "wgpu"] }
 log = "0.4"
 midi-player = "0.2.1"
 quick-xml = "0.31.0"
