@@ -18,6 +18,7 @@ pub(crate) struct GlobalState {
     pub(crate) controller: PlayerController,
     audio_stream: AudioStream,
     pub(crate) playing_id: Option<usize>,
+    pub(crate) tempo: u16,
 }
 
 impl GlobalState {
@@ -31,6 +32,7 @@ impl GlobalState {
             controller,
             audio_stream,
             playing_id: None,
+            tempo: 120
         }
     }
 
@@ -75,6 +77,19 @@ impl GlobalState {
 
         stream
     }
+
+    pub(crate) fn tempo(&self) -> u16 {
+        self.tempo
+    }
+
+    pub(crate) fn set_tempo(&mut self, tempo: u16) {
+        self.tempo = tempo;
+        self.controller.set_tempo(tempo as f32);
+    }
+
+    pub(crate) fn update_tempo(&mut self) {
+        self.set_tempo(self.tempo);
+    }
 }
 
 #[derive(Debug)]
@@ -85,7 +100,7 @@ pub(crate) struct State {
     pub(crate) position: f64,
 }
 
-pub(crate) fn view<'a>(state: &'a State) -> Element<'a, Message> {
+pub(crate) fn view(state: &State) -> Element<Message> {
     let label = svg(if state.is_playing {
         "resources/img/pause.svg"
     } else {

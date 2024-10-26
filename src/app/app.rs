@@ -1,9 +1,10 @@
 //! Application's GUI.
 
-use iced::futures::{join, sink::SinkExt};
+use iced::futures::sink::SinkExt;
 use iced::stream;
 use iced::widget::{column, container, scrollable, text, text::Style as TextStyle, text_input};
-use iced::{time, Element, Font, Subscription};
+use iced::{time, widget::row, Element, Font, Subscription};
+use iced_aw::widget::number_input;
 
 use super::midi_player::{self, GlobalState as GlobalMidiPlayerState, State as MidiPlayerState};
 use crate::interpreter;
@@ -82,7 +83,11 @@ pub fn update(state: &mut State, message: Message) {
                         state.output.push(Output::Error(e.to_string()));
                         return;
                     }
-                    state.midi_player_state.controller.set_position(player.position);
+                    state
+                        .midi_player_state
+                        .controller
+                        .set_position(player.position);
+                    state.midi_player_state.update_tempo();
                     state.midi_player_state.controller.play();
                     state.midi_player_state.playing_id = Some(id);
                 }
@@ -124,6 +129,9 @@ pub fn update(state: &mut State, message: Message) {
                     }
                 }
             }
+        }
+        Message::SetTempo(tempo) => {
+            state.midi_player_state.set_tempo(tempo);
         }
         Message::InterpreterMessage(msg) => match msg {
             interpreter::Message::SendCmd(ref cmd) => {
@@ -199,6 +207,7 @@ pub fn view(state: &State) -> Element<Message> {
             .height(iced::Length::Fill)
             .anchor_bottom(),
         view_prompt(state),
+        view_bottom_panel(state),
     ])
     .padding(40)
     .width(TERM_WIDTH * FONT_WIDTH)
@@ -206,7 +215,7 @@ pub fn view(state: &State) -> Element<Message> {
     .into()
 }
 
-fn view_output<'a>(output: &'a Output) -> Element<'a, Message> {
+fn view_output(output: &Output) -> Element<Message> {
     match output {
         Output::Normal(msg) => container(text(msg)),
         Output::Command(msg) => {
@@ -223,7 +232,7 @@ fn view_output<'a>(output: &'a Output) -> Element<'a, Message> {
     .into()
 }
 
-fn view_prompt<'a>(state: &'a State) -> Element<'a, Message> {
+fn view_prompt(state: &State) -> Element<Message> {
     use iced::widget::text_input::{Catalog, Status};
 
     let normal_style = |theme: &iced::Theme, status: Status| {
@@ -263,6 +272,18 @@ fn view_prompt<'a>(state: &'a State) -> Element<'a, Message> {
     container(text_input).height(40).into()
 }
 
+fn view_bottom_panel(state: &State) -> Element<Message> {
+    row![
+        text("Tempo:"),
+        number_input(state.midi_player_state.tempo(), 20..=600, Message::SetTempo,).step(1).width(60.0),
+        text("BPM")
+    ]
+    .spacing(10.0)
+    .align_y(iced::Alignment::Center)
+    .height(70.0)
+    .into()
+}
+
 /// The iced message type.
 #[allow(missing_docs)]
 #[derive(Debug, Clone)]
@@ -275,6 +296,7 @@ pub enum Message {
     // id, position
     ChangePlayingPosition(usize, f64),
     Tick(time::Instant),
+    SetTempo(u16),
 }
 
 impl From<interpreter::Message> for Message {

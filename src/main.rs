@@ -1,6 +1,7 @@
 //! The executable.
 
 use athenacl::app;
+use iced_aw::iced_fonts;
 
 fn main() -> iced::Result {
     iced::application("athenaCL", app::update, app::view)
@@ -18,5 +19,6 @@ fn main() -> iced::Result {
             max_size: Some((800.0, f32::MAX).into()),
             ..Default::default()
         })
+        .font(iced_fonts::REQUIRED_FONT_BYTES)
         .run()
 }
