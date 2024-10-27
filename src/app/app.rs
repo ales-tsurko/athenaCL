@@ -242,21 +242,26 @@ pub fn view(state: &State) -> Element<Message> {
 }
 
 fn view_top_panel(state: &State) -> Element<Message> {
-    row![
-        button(text("").font(iced_fonts::NERD_FONT).size(16.0))
-            .style(button::text)
-            .on_press(Message::SetScratchDir),
-        text(&state.scratch_dir),
-        horizontal_space(),
-        text("Tempo:"),
-        number_input(state.midi_player_state.tempo(), 20..=600, Message::SetTempo,)
-            .step(1)
-            .width(60.0),
-        text("BPM"),
+    column![
+        row![
+            horizontal_space(),
+            text("Tempo:"),
+            number_input(state.midi_player_state.tempo(), 20..=600, Message::SetTempo,)
+                .step(1)
+                .width(60.0),
+            text("BPM"),
+        ]
+        .spacing(10.0)
+        .align_y(iced::Alignment::Center),
+        row![
+            button(text("").font(iced_fonts::NERD_FONT).size(16.0))
+                .style(button::text)
+                .on_press(Message::SetScratchDir),
+            text(&state.scratch_dir),
+        ]
+        .spacing(10.0)
+        .align_y(iced::Alignment::Center),
     ]
-    .spacing(10.0)
-    .align_y(iced::Alignment::Center)
-    .height(40.0)
     .into()
 }
 

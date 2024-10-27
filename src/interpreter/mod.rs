@@ -61,8 +61,7 @@ impl InterpreterWorker {
                             .map(|_| Message::ScratchDir(value)),
                         _ => continue,
                     }
-                    .map_err(Into::<Message>::into)
-                    .unwrap();
+                    .into();
 
                     s.send_blocking(msg).expect("cannot send message to gui");
                 }
@@ -111,6 +110,15 @@ impl From<Error> for Message {
         match value {
             Error::Command(_, cmd_err) => Message::Error(cmd_err),
             Error::PythonError(err) => Message::PythonError(err),
+        }
+    }
+}
+
+impl From<InterpreterResult<Message>> for Message {
+    fn from(value: InterpreterResult<Message>) -> Self {
+        match value {
+            Ok(msg) => msg,
+            Err(e) => Self::from(e),
         }
     }
 }
