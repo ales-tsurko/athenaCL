@@ -1,7 +1,6 @@
 //! The executable.
 
 use athenacl::app;
-use iced_aw::iced_fonts;
 
 fn main() -> iced::Result {
     iced::application("athenaCL", app::update, app::view)
@@ -20,5 +19,6 @@ fn main() -> iced::Result {
             ..Default::default()
         })
         .font(iced_fonts::REQUIRED_FONT_BYTES)
+        .font(iced_fonts::NERD_FONT_BYTES)
         .run()
 }

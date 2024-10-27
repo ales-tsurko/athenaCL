@@ -442,6 +442,7 @@ dependencies = [
  "env_logger",
  "iced",
  "iced_aw",
+ "iced_fonts",
  "log",
  "midi-player",
  "quick-xml 0.31.0",

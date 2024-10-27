@@ -16,6 +16,7 @@ mod xml_tools_ext;
 
 /// Global interpreter representation.
 pub static INTERPRETER_WORKER: LazyLock<InterpreterWorker> = LazyLock::new(InterpreterWorker::run);
+pub(crate) type InterpreterResult<T> = Result<T, Error>;
 
 /// A worker which keeps the interpreter on a dedicated thread and provides communication with it
 /// via channels.
@@ -50,15 +51,20 @@ impl InterpreterWorker {
 
             loop {
                 if let Ok(message) = r.recv_blocking() {
-                    if let Message::SendCmd(cmd) = message {
-                        let msg = match interpreter.run_cmd(&cmd) {
-                            Ok(msg) => Message::Post(msg),
-                            Err(Error::Command(_, cmd_err)) => Message::Error(cmd_err),
-                            Err(Error::PythonError(err)) => Message::PythonError(err),
-                        };
-
-                        s.send_blocking(msg).expect("cannot send message to gui");
+                    let msg = match message {
+                        Message::SendCmd(cmd) => interpreter.run_cmd(&cmd).map(Message::Post),
+                        Message::GetScratchDir => {
+                            interpreter.scratch_dir().map(Message::ScratchDir)
+                        }
+                        Message::SetScratchDir(value) => interpreter
+                            .set_scratch_dir(&value)
+                            .map(|_| Message::ScratchDir(value)),
+                        _ => continue,
                     }
+                    .map_err(Into::<Message>::into)
+                    .unwrap();
+
+                    s.send_blocking(msg).expect("cannot send message to gui");
                 }
             }
         });
@@ -92,27 +98,44 @@ pub enum Message {
     ///
     /// The value is the path to the file.
     LoadMidi(String),
+    /// Get scratch dir.
+    GetScratchDir,
+    /// Set scratch dir.
+    SetScratchDir(String),
+    /// The result of `Self::GetScratchDir`.
+    ScratchDir(String),
 }
 
-pub(crate) type InterpreterResult<T> = Result<T, Error>;
+impl From<Error> for Message {
+    fn from(value: Error) -> Self {
+        match value {
+            Error::Command(_, cmd_err) => Message::Error(cmd_err),
+            Error::PythonError(err) => Message::PythonError(err),
+        }
+    }
+}
 
 struct Interpreter {
     py_interpreter: PyInterpreter,
     ath_interpreter: PyObjectRef,
+    ath_object: PyObjectRef,
 }
 
 impl Interpreter {
     fn new() -> InterpreterResult<Self> {
         let py_interpreter = init_py_interpreter();
-        let ath_interpreter = Self::init_ath_interpreter(&py_interpreter)?;
+        let (ath_interpreter, ath_object) = Self::init_ath_interpreter(&py_interpreter)?;
         Ok(Self {
             py_interpreter: init_py_interpreter(),
             ath_interpreter,
+            ath_object,
         })
     }
 
-    fn init_ath_interpreter(interpreter: &PyInterpreter) -> InterpreterResult<PyObjectRef> {
-        interpreter.enter(|vm| -> InterpreterResult<PyObjectRef> {
+    fn init_ath_interpreter(
+        interpreter: &PyInterpreter,
+    ) -> InterpreterResult<(PyObjectRef, PyObjectRef)> {
+        interpreter.enter(|vm| -> InterpreterResult<(PyObjectRef, PyObjectRef)> {
             let scope = vm.new_scope_with_builtins();
             let module = vm::py_compile!(
                 source = r#"from athenaCL.libATH import athenaObj
@@ -122,7 +145,10 @@ interp"#
             let _ = vm
                 .run_code_obj(vm.ctx.new_code(module), scope.clone())
                 .try_py()?;
-            scope.globals.get_item("interp", vm).try_py()
+            let interp = scope.globals.get_item("interp", vm).try_py()?;
+            let ath_object = interp.get_attr("ao", vm).try_py()?;
+
+            Ok((interp, ath_object))
         })
     }
 
@@ -132,13 +158,40 @@ interp"#
                 let result = vm
                     .call_method(&self.ath_interpreter, "cmd", (cmd.to_string(),))
                     .try_py()?;
-                let (is_ok, msg) = extract_tuple(vm, result).try_py()?;
+                let (is_ok, msg) = extract_result_tuple(vm, result).try_py()?;
 
                 if is_ok {
                     Ok(msg)
                 } else {
                     Err(Error::Command(cmd.to_owned(), msg))
                 }
+            })
+    }
+
+    fn set_scratch_dir(&self, path: &str) -> InterpreterResult<()> {
+        self.py_interpreter.enter(|vm| -> InterpreterResult<()> {
+            let external = vm
+                .get_attribute_opt(self.ath_object.clone(), "external")
+                .try_py()?
+                .expect("external attribute is always available on AthenaObject");
+            vm.call_method(&external, "writePref", ("athena", "fpScratchDir", path))
+                .try_py()?;
+            Ok(())
+        })
+    }
+
+    fn scratch_dir(&self) -> InterpreterResult<String> {
+        self.py_interpreter
+            .enter(|vm| -> InterpreterResult<String> {
+                let external = vm
+                    .get_attribute_opt(self.ath_object.clone(), "external")
+                    .try_py()?
+                    .expect("external attribute is always available on AthenaObject");
+                let result = vm
+                    .call_method(&external, "getPref", ("athena", "fpScratchDir"))
+                    .try_py()?;
+
+                extract_string(vm, result).try_py()
             })
     }
 }
@@ -156,7 +209,7 @@ pub fn init_py_interpreter() -> PyInterpreter {
     })
 }
 
-fn extract_tuple(vm: &VirtualMachine, result: PyObjectRef) -> PyResult<(bool, String)> {
+fn extract_result_tuple(vm: &VirtualMachine, result: PyObjectRef) -> PyResult<(bool, String)> {
     // Ensure the result is a tuple
     if let Some(tuple) = result.payload::<PyTuple>() {
         let elements = tuple.as_slice();
@@ -185,6 +238,13 @@ fn extract_tuple(vm: &VirtualMachine, result: PyObjectRef) -> PyResult<(bool, St
     } else {
         Err(vm.new_type_error("Expected a tuple".to_owned()))
     }
+}
+
+fn extract_string(vm: &VirtualMachine, result: PyObjectRef) -> PyResult<String> {
+    result
+        .payload::<PyStr>()
+        .ok_or_else(|| vm.new_type_error("Expected a string".to_owned()))
+        .map(ToString::to_string)
 }
 
 trait TryPy {

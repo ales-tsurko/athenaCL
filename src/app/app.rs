@@ -1,10 +1,16 @@
 //! Application's GUI.
 
+use std::env;
+
 use iced::futures::sink::SinkExt;
 use iced::stream;
-use iced::widget::{column, container, scrollable, text, text::Style as TextStyle, text_input};
-use iced::{time, widget::row, Element, Font, Subscription};
+use iced::widget::{
+    button, column, container, horizontal_space, row, scrollable, text, text::Style as TextStyle,
+    text_input,
+};
+use iced::{time, Element, Font, Subscription};
 use iced_aw::widget::number_input;
+use rfd::FileDialog;
 
 use super::midi_player::{self, GlobalState as GlobalMidiPlayerState, State as MidiPlayerState};
 use crate::interpreter;
@@ -23,6 +29,7 @@ pub struct State {
     output: Vec<Output>,
     question: Option<String>,
     midi_player_state: GlobalMidiPlayerState,
+    scratch_dir: String,
 }
 
 impl Default for State {
@@ -41,11 +48,18 @@ impl Default for State {
 "#
             .to_owned(),
         )];
+
+        interpreter::INTERPRETER_WORKER
+            .interp_sender
+            .send_blocking(interpreter::Message::GetScratchDir)
+            .expect("the channel is unbound");
+
         Self {
             midi_player_state,
             answer: String::new(),
             output,
             question: None,
+            scratch_dir: String::new(),
         }
     }
 }
@@ -63,6 +77,14 @@ pub fn update(state: &mut State, message: Message) {
     match message {
         Message::InputChanged(val) => {
             state.answer = val;
+        }
+        Message::SetScratchDir => {
+            if let Some(value) = pick_directory("Choose scratch folder") {
+                interpreter::INTERPRETER_WORKER
+                    .interp_sender
+                    .send_blocking(interpreter::Message::SetScratchDir(value))
+                    .expect("the channel is unbound");
+            }
         }
         Message::PlayMidi(id) => {
             if let Some(playing_id) = state.midi_player_state.playing_id {
@@ -162,6 +184,10 @@ pub fn update(state: &mut State, message: Message) {
                     position: 0.0,
                 }));
             }
+            interpreter::Message::ScratchDir(value) => {
+                state.scratch_dir = value;
+            }
+            _ => (),
         },
         Message::Answer(question, value) => {
             state.question = None;
@@ -191,6 +217,7 @@ pub fn view(state: &State) -> Element<Message> {
     );
 
     container(column![
+        view_top_panel(state),
         scrollable(output.padding(20.0))
             .style(|theme: &iced::Theme, status: Status| {
                 let mut style = theme.style(&<iced::Theme as Catalog>::default(), status);
@@ -207,11 +234,29 @@ pub fn view(state: &State) -> Element<Message> {
             .height(iced::Length::Fill)
             .anchor_bottom(),
         view_prompt(state),
-        view_bottom_panel(state),
     ])
     .padding(40)
     .width(TERM_WIDTH * FONT_WIDTH)
     .height(iced::Length::Fill)
+    .into()
+}
+
+fn view_top_panel(state: &State) -> Element<Message> {
+    row![
+        button(text("").font(iced_fonts::NERD_FONT).size(16.0))
+            .style(button::text)
+            .on_press(Message::SetScratchDir),
+        text(&state.scratch_dir),
+        horizontal_space(),
+        text("Tempo:"),
+        number_input(state.midi_player_state.tempo(), 20..=600, Message::SetTempo,)
+            .step(1)
+            .width(60.0),
+        text("BPM"),
+    ]
+    .spacing(10.0)
+    .align_y(iced::Alignment::Center)
+    .height(40.0)
     .into()
 }
 
@@ -259,7 +304,7 @@ fn view_prompt(state: &State) -> Element<Message> {
     };
 
     let text_input = match &state.question {
-        Some(question) => text_input(&question, &state.answer)
+        Some(question) => text_input(question, &state.answer)
             .style(question_style)
             .on_input(Message::InputChanged)
             .on_submit(Message::Answer(question.to_owned(), state.answer.clone())),
@@ -269,19 +314,17 @@ fn view_prompt(state: &State) -> Element<Message> {
             .on_submit(interpreter::Message::SendCmd(state.answer.clone()).into()),
     };
 
-    container(text_input).height(40).into()
+    container(text_input.size(16.0)).height(40).into()
 }
 
-fn view_bottom_panel(state: &State) -> Element<Message> {
-    row![
-        text("Tempo:"),
-        number_input(state.midi_player_state.tempo(), 20..=600, Message::SetTempo,).step(1).width(60.0),
-        text("BPM")
-    ]
-    .spacing(10.0)
-    .align_y(iced::Alignment::Center)
-    .height(70.0)
-    .into()
+fn pick_directory(title: &str) -> Option<String> {
+    // let initial_dir = env::current_dir().unwrap_or_default();
+    FileDialog::new()
+        .set_title(title)
+        // .set_directory(initial_dir)
+        .set_can_create_directories(true)
+        .pick_folder()
+        .map(|pb| pb.to_string_lossy().to_string())
 }
 
 /// The iced message type.
@@ -297,6 +340,7 @@ pub enum Message {
     ChangePlayingPosition(usize, f64),
     Tick(time::Instant),
     SetTempo(u16),
+    SetScratchDir,
 }
 
 impl From<interpreter::Message> for Message {
