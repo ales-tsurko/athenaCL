@@ -23,7 +23,6 @@ pub(crate) type InterpreterResult<T> = Result<T, Error>;
 #[derive(Debug)]
 pub struct InterpreterWorker {
     pub interp_sender: Sender<Message>,
-    pub interp_receiver: Receiver<Message>,
     pub gui_sender: Sender<Message>,
     pub gui_receiver: Receiver<Message>,
     /// Response sender/receiver is a special channel dedicated for sending user's answer to
@@ -37,8 +36,7 @@ pub struct InterpreterWorker {
 impl InterpreterWorker {
     /// Run the interpereter loop.
     fn run() -> Self {
-        let (interp_sender, interp_receiver) = unbounded::<Message>();
-        let r = interp_receiver.clone();
+        let (interp_sender, r) = unbounded::<Message>();
         let (gui_sender, gui_receiver) = unbounded::<Message>();
         let s = gui_sender.clone();
 
@@ -72,7 +70,6 @@ impl InterpreterWorker {
 
         Self {
             interp_sender,
-            interp_receiver,
             gui_sender,
             gui_receiver,
             response_sender,

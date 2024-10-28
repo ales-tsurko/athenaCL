@@ -1,14 +1,12 @@
 //! Application's GUI.
 
-use std::env;
-
 use iced::futures::sink::SinkExt;
 use iced::stream;
 use iced::widget::{
-    button, column, container, horizontal_space, row, scrollable, text, text::Style as TextStyle,
-    text_input,
+    button, column, container, container::Style as ContainerStyle, row, scrollable, stack, text,
+    text::Style as TextStyle, text_input,
 };
-use iced::{time, Element, Font, Subscription};
+use iced::{time, Element, Font, Subscription, Task};
 use iced_aw::widget::number_input;
 use rfd::FileDialog;
 
@@ -30,6 +28,7 @@ pub struct State {
     question: Option<String>,
     midi_player_state: GlobalMidiPlayerState,
     scratch_dir: String,
+    input_id: String,
 }
 
 impl Default for State {
@@ -60,6 +59,7 @@ impl Default for State {
             output,
             question: None,
             scratch_dir: String::new(),
+            input_id: "input".to_owned(),
         }
     }
 }
@@ -73,7 +73,7 @@ enum Output {
 }
 
 /// The iced update function.
-pub fn update(state: &mut State, message: Message) {
+pub fn update(state: &mut State, message: Message) -> Task<Message> {
     match message {
         Message::InputChanged(val) => {
             state.answer = val;
@@ -103,7 +103,7 @@ pub fn update(state: &mut State, message: Message) {
                         .set_file(Some(&player.path))
                     {
                         state.output.push(Output::Error(e.to_string()));
-                        return;
+                        return Task::none();
                     }
                     state
                         .midi_player_state
@@ -167,6 +167,8 @@ pub fn update(state: &mut State, message: Message) {
             interpreter::Message::Post(output) => {
                 state.answer = "".to_owned();
                 state.output.push(Output::Normal(output));
+
+                return text_input::focus(state.input_id.clone());
             }
             interpreter::Message::Error(output) | interpreter::Message::PythonError(output) => {
                 state.answer = "".to_owned();
@@ -175,6 +177,8 @@ pub fn update(state: &mut State, message: Message) {
             interpreter::Message::Ask(prompt) => {
                 state.answer = "".to_owned();
                 state.question = Some(prompt);
+
+                return text_input::focus(state.input_id.clone());
             }
             interpreter::Message::LoadMidi(path) => {
                 state.output.push(Output::MidiPlayer(MidiPlayerState {
@@ -200,6 +204,8 @@ pub fn update(state: &mut State, message: Message) {
                 .expect("cannot send message to response receiver");
         }
     }
+
+    Task::none()
 }
 
 /// The top-level iced view function.
@@ -216,7 +222,7 @@ pub fn view(state: &State) -> Element<Message> {
             .collect::<Vec<_>>(),
     );
 
-    container(column![
+    let mut col = column![
         view_top_panel(state),
         scrollable(output.padding(20.0))
             .style(|theme: &iced::Theme, status: Status| {
@@ -233,35 +239,26 @@ pub fn view(state: &State) -> Element<Message> {
             .width(iced::Length::Fill)
             .height(iced::Length::Fill)
             .anchor_bottom(),
-        view_prompt(state),
-    ])
-    .padding(40)
-    .width(TERM_WIDTH * FONT_WIDTH)
-    .height(iced::Length::Fill)
-    .into()
+    ];
+    if let Some(prompt) = view_prompt(state) {
+        col = col.push(prompt);
+    }
+
+    container(col.push(view_input(state)).push(view_bottom_panel(state)))
+        .padding([18, 40])
+        .width(TERM_WIDTH * FONT_WIDTH)
+        .height(iced::Length::Fill)
+        .into()
 }
 
 fn view_top_panel(state: &State) -> Element<Message> {
-    column![
-        row![
-            horizontal_space(),
-            text("Tempo:"),
-            number_input(state.midi_player_state.tempo(), 20..=600, Message::SetTempo,)
-                .step(1)
-                .width(60.0),
-            text("BPM"),
-        ]
-        .spacing(10.0)
-        .align_y(iced::Alignment::Center),
-        row![
-            button(text("").font(iced_fonts::NERD_FONT).size(16.0))
-                .style(button::text)
-                .on_press(Message::SetScratchDir),
-            text(&state.scratch_dir),
-        ]
-        .spacing(10.0)
-        .align_y(iced::Alignment::Center),
+    row![
+        button(text("").font(iced_fonts::NERD_FONT).size(16.0))
+            .style(button::text)
+            .on_press(Message::SetScratchDir),
+        text(&state.scratch_dir),
     ]
+    .align_y(iced::Alignment::Center)
     .into()
 }
 
@@ -282,7 +279,20 @@ fn view_output(output: &Output) -> Element<Message> {
     .into()
 }
 
-fn view_prompt(state: &State) -> Element<Message> {
+fn view_prompt(state: &State) -> Option<Element<Message>> {
+    state.question.as_ref().map(|q| {
+        container(text(q))
+            .style(|theme: &iced::Theme| ContainerStyle {
+                background: Some(theme.palette().primary.into()),
+                ..Default::default()
+            })
+            .padding(10)
+            .width(iced::Length::Fill)
+            .into()
+    })
+}
+
+fn view_input(state: &State) -> Element<Message> {
     use iced::widget::text_input::{Catalog, Status};
 
     let normal_style = |theme: &iced::Theme, status: Status| {
@@ -302,24 +312,42 @@ fn view_prompt(state: &State) -> Element<Message> {
         style
     };
 
-    let question_style = move |theme: &iced::Theme, status: Status| {
-        let mut style = normal_style(theme, status);
-        style.placeholder = theme.palette().primary;
-        style
+    let (placeholder, on_submit_msg) = match &state.question {
+        Some(question) => (
+            "type answer",
+            Message::Answer(question.to_owned(), state.answer.clone()),
+        ),
+        None => (
+            "type command or 'help'",
+            interpreter::Message::SendCmd(state.answer.clone()).into(),
+        ),
     };
 
-    let text_input = match &state.question {
-        Some(question) => text_input(question, &state.answer)
-            .style(question_style)
-            .on_input(Message::InputChanged)
-            .on_submit(Message::Answer(question.to_owned(), state.answer.clone())),
-        None => text_input("type command or 'help'", &state.answer)
+    container(
+        text_input(placeholder, &state.answer)
+            .id(state.input_id.clone())
             .style(normal_style)
             .on_input(Message::InputChanged)
-            .on_submit(interpreter::Message::SendCmd(state.answer.clone()).into()),
-    };
+            .on_submit(on_submit_msg)
+            .size(16.0),
+    )
+    .height(40)
+    .into()
+}
 
-    container(text_input.size(16.0)).height(40).into()
+fn view_bottom_panel(state: &State) -> Element<Message> {
+    row![
+        // horizontal_space(),
+        text("Tempo:"),
+        number_input(state.midi_player_state.tempo(), 20..=600, Message::SetTempo,)
+            .step(1)
+            .width(60.0),
+        text("BPM"),
+    ]
+    .spacing(10.0)
+    .padding([18, 0])
+    .align_y(iced::Alignment::Center)
+    .into()
 }
 
 fn pick_directory(title: &str) -> Option<String> {
