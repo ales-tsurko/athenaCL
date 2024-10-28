@@ -32,7 +32,7 @@ impl GlobalState {
             controller,
             audio_stream,
             playing_id: None,
-            tempo: 120
+            tempo: 120,
         }
     }
 
@@ -115,7 +115,8 @@ pub(crate) fn view(state: &State) -> Element<Message> {
         button(label).on_press(message).width(60.0),
         slider(0.0..=1.0, state.position, |v| {
             Message::ChangePlayingPosition(state.id, v)
-        }).step(0.001)
+        })
+        .step(0.001)
     ]
     .align_y(iced::Alignment::Center)
     .spacing(10.0)
