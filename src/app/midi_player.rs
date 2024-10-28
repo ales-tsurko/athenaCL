@@ -11,12 +11,9 @@ use iced::{
 };
 use midi_player::{Player, PlayerController, Settings as PlayerSettings};
 
-const PLAY_SVG_ICON: &str = include_str!("../../resources/img/play.svg");
-const PAUSE_SVG_ICON: &str = include_str!("../../resources/img/pause.svg");
-
 pub(crate) struct GlobalState {
     pub(crate) controller: PlayerController,
-    audio_stream: AudioStream,
+    _audio_stream: AudioStream,
     pub(crate) playing_id: Option<usize>,
     pub(crate) tempo: u16,
 }
@@ -30,7 +27,7 @@ impl GlobalState {
 
         Self {
             controller,
-            audio_stream,
+            _audio_stream: audio_stream,
             playing_id: None,
             tempo: 120,
         }

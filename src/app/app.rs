@@ -3,7 +3,7 @@
 use iced::futures::sink::SinkExt;
 use iced::stream;
 use iced::widget::{
-    button, column, container, container::Style as ContainerStyle, row, scrollable, stack, text,
+    button, column, container, container::Style as ContainerStyle, row, scrollable, text,
     text::Style as TextStyle, text_input,
 };
 use iced::{time, Element, Font, Subscription, Task};
