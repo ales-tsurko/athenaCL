@@ -82,7 +82,7 @@ pub fn update(state: &mut State, message: Message) -> Task<Message> {
             if let Some(value) = pick_directory("Choose scratch folder") {
                 interpreter::INTERPRETER_WORKER
                     .interp_sender
-                    .send_blocking(interpreter::Message::SetScratchDir(value))
+                    .send_blocking(interpreter::Message::SendCmd(format!("apdir x {value}")))
                     .expect("the channel is unbound");
             }
         }
@@ -173,6 +173,8 @@ pub fn update(state: &mut State, message: Message) -> Task<Message> {
             interpreter::Message::Error(output) | interpreter::Message::PythonError(output) => {
                 state.answer = "".to_owned();
                 state.output.push(Output::Error(output));
+
+                return text_input::focus(state.input_id.clone());
             }
             interpreter::Message::Ask(prompt) => {
                 state.answer = "".to_owned();

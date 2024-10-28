@@ -54,9 +54,6 @@ impl InterpreterWorker {
                         Message::GetScratchDir => {
                             interpreter.scratch_dir().map(Message::ScratchDir)
                         }
-                        Message::SetScratchDir(value) => interpreter
-                            .set_scratch_dir(&value)
-                            .map(|_| Message::ScratchDir(value)),
                         _ => continue,
                     }
                     .into();
@@ -96,8 +93,6 @@ pub enum Message {
     LoadMidi(String),
     /// Get scratch dir.
     GetScratchDir,
-    /// Set scratch dir.
-    SetScratchDir(String),
     /// The result of `Self::GetScratchDir`.
     ScratchDir(String),
 }
@@ -171,18 +166,6 @@ interp"#
                     Err(Error::Command(cmd.to_owned(), msg))
                 }
             })
-    }
-
-    fn set_scratch_dir(&self, path: &str) -> InterpreterResult<()> {
-        self.py_interpreter.enter(|vm| -> InterpreterResult<()> {
-            let external = vm
-                .get_attribute_opt(self.ath_object.clone(), "external")
-                .try_py()?
-                .expect("external attribute is always available on AthenaObject");
-            vm.call_method(&external, "writePref", ("athena", "fpScratchDir", path))
-                .try_py()?;
-            Ok(())
-        })
     }
 
     fn scratch_dir(&self) -> InterpreterResult<String> {
