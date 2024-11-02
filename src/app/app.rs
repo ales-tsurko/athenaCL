@@ -3,8 +3,8 @@
 use iced::futures::sink::SinkExt;
 use iced::stream;
 use iced::widget::{
-    button, column, container, container::Style as ContainerStyle, row, scrollable, text,
-    text::Style as TextStyle, text_input,
+    button, column, container, container::Style as ContainerStyle, horizontal_space, pick_list,
+    row, scrollable, text, text::Style as TextStyle, text_input,
 };
 use iced::{time, Element, Font, Subscription, Task};
 use iced_aw::widget::number_input;
@@ -29,6 +29,10 @@ pub struct State {
     midi_player_state: GlobalMidiPlayerState,
     scratch_dir: String,
     input_id: String,
+    path_lib: Vec<String>,
+    texture_lib: Vec<String>,
+    active_path: String, // not system path, but athenaCL pitch path
+    active_texture: String,
 }
 
 impl Default for State {
@@ -60,6 +64,10 @@ impl Default for State {
             question: None,
             scratch_dir: String::new(),
             input_id: "input".to_owned(),
+            path_lib: Vec::new(),
+            texture_lib: Vec::new(),
+            active_path: String::new(),
+            active_texture: String::new(),
         }
     }
 }
@@ -155,6 +163,18 @@ pub fn update(state: &mut State, message: Message) -> Task<Message> {
         Message::SetTempo(tempo) => {
             state.midi_player_state.set_tempo(tempo);
         }
+        Message::PiSelected(value) => {
+            interpreter::INTERPRETER_WORKER
+                .interp_sender
+                .send_blocking(interpreter::Message::SendCmd(format! {"pio {value}"}))
+                .expect("cannot send message to the interpreter");
+        }
+        Message::TiSelected(value) => {
+            interpreter::INTERPRETER_WORKER
+                .interp_sender
+                .send_blocking(interpreter::Message::SendCmd(format! {"tio {value}"}))
+                .expect("cannot send message to the interpreter");
+        }
         Message::InterpreterMessage(msg) => match msg {
             interpreter::Message::SendCmd(ref cmd) => {
                 state.answer = "".to_owned();
@@ -192,6 +212,18 @@ pub fn update(state: &mut State, message: Message) -> Task<Message> {
             }
             interpreter::Message::ScratchDir(value) => {
                 state.scratch_dir = value;
+            }
+            interpreter::Message::PathLibUpdated(path_lib) => {
+                state.path_lib = path_lib;
+            }
+            interpreter::Message::TextureLibUpdated(texture_lib) => {
+                state.texture_lib = texture_lib;
+            }
+            interpreter::Message::ActivePathSet(path_name) => {
+                state.active_path = path_name;
+            }
+            interpreter::Message::ActiveTextureSet(texture_name) => {
+                state.active_texture = texture_name;
             }
             _ => (),
         },
@@ -255,7 +287,7 @@ pub fn view(state: &State) -> Element<Message> {
 
 fn view_top_panel(state: &State) -> Element<Message> {
     row![
-        button(text("").font(iced_fonts::NERD_FONT).size(16.0))
+        button(text("").font(iced_fonts::NERD_FONT).size(16.0))
             .style(button::text)
             .on_press(Message::SetScratchDir),
         text(&state.scratch_dir),
@@ -320,7 +352,7 @@ fn view_input(state: &State) -> Element<Message> {
             Message::Answer(question.to_owned(), state.answer.clone()),
         ),
         None => (
-            "type command or 'help'",
+            "type a command or 'help'",
             interpreter::Message::SendCmd(state.answer.clone()).into(),
         ),
     };
@@ -331,24 +363,52 @@ fn view_input(state: &State) -> Element<Message> {
             .style(normal_style)
             .on_input(Message::InputChanged)
             .on_submit(on_submit_msg)
-            .size(16.0),
+            .line_height(1.7),
     )
-    .height(40)
     .into()
 }
 
 fn view_bottom_panel(state: &State) -> Element<Message> {
     row![
-        // horizontal_space(),
-        text("Tempo:"),
+        view_pici_chooser(state),
+        horizontal_space(),
+        text("󰟚").font(iced_fonts::NERD_FONT).size(16),
+        text("=").size(16),
         number_input(state.midi_player_state.tempo(), 20..=600, Message::SetTempo,)
             .step(1)
             .width(60.0),
-        text("BPM"),
     ]
     .spacing(10.0)
     .padding([18, 0])
     .align_y(iced::Alignment::Center)
+    .into()
+}
+
+fn view_pici_chooser(state: &State) -> Element<Message> {
+    let pi_selection = if state.active_path.is_empty() {
+        None
+    } else {
+        Some(state.active_path.clone())
+    };
+    let ti_selection = if state.active_texture.is_empty() {
+        None
+    } else {
+        Some(state.active_texture.clone())
+    };
+
+    row![
+        text("Path:"),
+        pick_list(state.path_lib.as_slice(), pi_selection, Message::PiSelected).placeholder("{pi}"),
+        text("Texture:"),
+        pick_list(
+            state.texture_lib.as_slice(),
+            ti_selection,
+            Message::TiSelected
+        )
+        .placeholder("{ti}")
+    ]
+    .align_y(iced::Alignment::Center)
+    .spacing(10)
     .into()
 }
 
@@ -376,6 +436,8 @@ pub enum Message {
     Tick(time::Instant),
     SetTempo(u16),
     SetScratchDir,
+    PiSelected(String),
+    TiSelected(String),
 }
 
 impl From<interpreter::Message> for Message {

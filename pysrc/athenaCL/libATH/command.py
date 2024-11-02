@@ -781,7 +781,7 @@ class Command(object):
         if name not in list(self.ao.pathLib.keys()):
             self.ao.pathLib[name] = pitchPath.PolyPath(name)
             self.ao.pathLib[name].autoFill(psList)
-        self.ao.activePath = name
+        self.ao.setActivePath(name)
         # all updates now done w/ load opperations
 
     def _piAutoCreateMidiPercussion(self, inst):
@@ -1117,11 +1117,11 @@ class Command(object):
                 self.ao.cloneLib.delete(name)  # deletes all clones w/ this text
             if name == self.ao.activeTexture:
                 if len(list(self.ao.textureLib.keys())) == 0:
-                    self.ao.activeTexture = ""
+                    self.ao.setActiveTexture("")
                 else:  # gets a random texture to replace
-                    self.ao.activeTexture = random.choice(
+                    self.ao.setActiveTexture(random.choice(
                         list(self.ao.textureLib.keys())
-                    )
+                    ))
             return "TI %s destroyed.\n" % name
         else:
             return None  # error
@@ -1746,7 +1746,7 @@ class PIn(Command):
     def process(self):
         self.ao.pathLib[self.name] = pitchPath.PolyPath(self.name)
         self.ao.pathLib[self.name].loadMultisetList(self.dataList)  # does updates
-        self.ao.activePath = self.name
+        self.ao.setActivePath(self.name)
 
     def log(self):
         if self.gatherStatus and self.processStatus:  # if complete
@@ -2242,7 +2242,7 @@ class PIcp(Command):
         ) == 1:
             # sets name attribute
             self.ao.pathLib[dstName] = self.ao.pathLib[srcName].copy(dstName)
-            self.ao.activePath = dstName
+            self.ao.setActivePath(dstName)
             return "PI %s added to PathInstances.\n" % dstName
         else:
             return None
@@ -2328,13 +2328,13 @@ class PIrm(Command):
                     % (name, self.ao.pathLib[name].refCount)
                 )
             if name == self.ao.activePath:
-                self.ao.activePath = ""
+                self.ao.setActivePath("")
             del self.ao.pathLib[name]
             if name == self.ao.activePath:
                 if len(list(self.ao.pathLib.keys())) == 0:
-                    self.ao.activePath = ""
+                    self.ao.setActivePath("")
                 else:
-                    self.ao.activePath = random.choice(list(self.ao.pathLib.keys()))
+                    self.ao.setActivePath(random.choice(list(self.ao.pathLib.keys())))
             return "PI %s destroyed.\n" % name
         else:
             return None  # error
@@ -2430,7 +2430,7 @@ class PIo(Command):
                 return lang.msgPIbadName
 
     def process(self):
-        self.ao.activePath = self.name
+        self.ao.setActivePath(self.name)
 
     def log(self):
         if self.gatherStatus and self.processStatus:  # if complete
@@ -2509,7 +2509,7 @@ class PImv(Command):
     def process(self):
         # may change name here
         self.newPathName = self._piMove(self.oldPathName, self.newPathName)
-        self.ao.activePath = self.newPathName
+        self.ao.setActivePath(self.newPathName)
 
     def display(self):
         return "PI %s moved to PI %s.\n" % (self.oldPathName, self.ao.activePath)
@@ -2559,7 +2559,7 @@ class PIret(Command):
     def process(self):
         self.ao.pathLib[self.newName] = self.ao.pathLib[self.oldName].copy(self.newName)
         self.ao.pathLib[self.newName].retro()
-        self.ao.activePath = self.newName
+        self.ao.setActivePath(self.newName)
 
     def display(self):
         return "retrograde PI %s added to PathInstances.\n" % self.ao.activePath
@@ -2624,7 +2624,7 @@ class PIrot(Command):
         cut = self.rotZero - 1  # needs to be corrected
         self.ao.pathLib[self.newName] = self.ao.pathLib[self.oldName].copy(self.newName)
         self.ao.pathLib[self.newName].rotate(cut)
-        self.ao.activePath = self.newName
+        self.ao.setActivePath(self.newName)
 
     def display(self):
         return "rotation PI %s added to PathInstances.\n" % self.newName
@@ -2686,7 +2686,7 @@ class PIslc(Command):
     def process(self):
         self.ao.pathLib[self.newName] = self.ao.pathLib[self.oldName].copy(self.newName)
         self.ao.pathLib[self.newName].slice(self.sl)
-        self.ao.activePath = self.newName
+        self.ao.setActivePath(self.newName)
 
     def display(self):
         return "slice PI %s added to PathInstances.\n" % self.ao.activePath
@@ -3548,7 +3548,7 @@ class TIn(Command):
             self.auxNo,
             refresh,
         )
-        self.ao.activeTexture = self.name
+        self.ao.setActiveTexture(self.name)
 
     def log(self):
         if self.gatherStatus and self.processStatus:  # if complete
@@ -3606,7 +3606,7 @@ class TIo(Command):
                 return lang.msgTIbadName
 
     def process(self):
-        self.ao.activeTexture = self.name
+        self.ao.setActiveTexture(self.name)
 
     def log(self):
         if self.gatherStatus and self.processStatus:  # if complete
@@ -4401,7 +4401,7 @@ class TIcp(Command):
             self.ao.textureLib[copyName] = self.ao.textureLib[srcName].copy(copyName)
             # increment references for this path
             self.ao.textureLib[copyName].path.refIncr()
-            self.ao.activeTexture = copyName
+            self.ao.setActiveTexture(copyName)
             # copy clones
             if srcName in self.ao.cloneLib.tNames():
                 self.ao.cloneLib.tCopy(srcName, copyName)
@@ -4523,7 +4523,7 @@ class TImv(Command):
 
     def process(self):
         self.newTextName = self._tiMove(self.oldTextName, self.newTextName)
-        self.ao.activeTexture = self.newTextName
+        self.ao.setActiveTexture(self.newTextName)
 
     def log(self):
         if self.gatherStatus and self.processStatus:  # if complete
@@ -6983,10 +6983,10 @@ class _CommandAO(Command):
 
     def _aoLoadPathData(self, pathData, replace="replace"):
         """load a path dictionary into current athenaObject"""
-        self.ao.activePath = copy.deepcopy(pathData["activePath"])
+        self.ao.setActivePath(copy.deepcopy(pathData["activePath"]))
         # self.ao.activeSetMeasure = copy.deepcopy(pathData['activeSetMeasure'])
         if replace == "replace":
-            self.ao.pathLib = {}  # reinit path bin
+            self.ao.initPathLib()
         else:  # a name check must make sure that no paths with same name exist
             pass  # do nothing, and add paths
         if len(list(pathData["pathLib"].keys())) > 0:  # paths exist
@@ -7018,8 +7018,8 @@ class _CommandAO(Command):
         self.ao.midiTempo = copy.deepcopy(textureData["midiTempo"])
         self.ao.activeTextureModule = copy.deepcopy(textureData["activeTextureModule"])
         if replace == "replace":
-            self.ao.activeTexture = copy.deepcopy(textureData["activeTexture"])
-            self.ao.textureLib = {}  # reinit path bin
+            self.ao.setActiveTexture(copy.deepcopy(textureData["activeTexture"]))
+            self.ao.initTextureLib()
         if len(list(textureData["textureLib"].keys())) > 0:  # textures exist
             for textureName in list(textureData["textureLib"].keys()):
                 t = textureData["textureLib"][textureName]

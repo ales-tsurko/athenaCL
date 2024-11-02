@@ -3,15 +3,14 @@
 use std::sync::LazyLock;
 use std::thread;
 
+use super::{dialog_ext, xml_tools_ext, athena_obj_ext};
 use async_channel::{unbounded, Receiver, Sender};
 use rustpython_vm as vm;
 use thiserror::Error;
 use vm::{
-    builtins::{PyBaseExceptionRef, PyInt, PyStr, PyTuple},
+    builtins::{PyBaseExceptionRef, PyInt, PyList, PyStr, PyTuple},
     Interpreter as PyInterpreter, PyObjectRef, PyResult, VirtualMachine,
 };
-
-use super::{xml_tools_ext, dialog_ext};
 
 /// Global interpreter representation.
 pub static INTERPRETER_WORKER: LazyLock<InterpreterWorker> = LazyLock::new(InterpreterWorker::run);
@@ -94,6 +93,11 @@ pub enum Message {
     GetScratchDir,
     /// The result of `Self::GetScratchDir`.
     ScratchDir(String),
+    PathLibUpdated(Vec<String>),
+    TextureLibUpdated(Vec<String>),
+    // Not system file path, but athenaCL pitch path
+    ActivePathSet(String),
+    ActiveTextureSet(String)
 }
 
 impl From<Error> for Message {
@@ -152,34 +156,32 @@ interp"#
     }
 
     fn run_cmd(&self, cmd: &str) -> InterpreterResult<String> {
-        self.py_interpreter
-            .enter(|vm| -> InterpreterResult<String> {
-                let result = vm
-                    .call_method(&self.ath_interpreter, "cmd", (cmd.to_string(),))
-                    .try_py()?;
-                let (is_ok, msg) = extract_result_tuple(vm, result).try_py()?;
+        self.py_interpreter.enter(|vm| -> _ {
+            let result = vm
+                .call_method(&self.ath_interpreter, "cmd", (cmd.to_string(),))
+                .try_py()?;
+            let (is_ok, msg) = extract_result_tuple(vm, result).try_py()?;
 
-                if is_ok {
-                    Ok(msg)
-                } else {
-                    Err(Error::Command(cmd.to_owned(), msg))
-                }
-            })
+            if is_ok {
+                Ok(msg)
+            } else {
+                Err(Error::Command(cmd.to_owned(), msg))
+            }
+        })
     }
 
     fn scratch_dir(&self) -> InterpreterResult<String> {
-        self.py_interpreter
-            .enter(|vm| -> InterpreterResult<String> {
-                let external = vm
-                    .get_attribute_opt(self.ath_object.clone(), "external")
-                    .try_py()?
-                    .expect("external attribute is always available on AthenaObject");
-                let result = vm
-                    .call_method(&external, "getPref", ("athena", "fpScratchDir"))
-                    .try_py()?;
+        self.py_interpreter.enter(|vm| -> _ {
+            let external = vm
+                .get_attribute_opt(self.ath_object.clone(), "external")
+                .try_py()?
+                .expect("external attribute is always available on AthenaObject");
+            let result = vm
+                .call_method(&external, "getPref", ("athena", "fpScratchDir"))
+                .try_py()?;
 
-                extract_string(vm, result).try_py()
-            })
+            extract_string(vm, result).try_py()
+        })
     }
 }
 
@@ -193,6 +195,7 @@ pub fn init_py_interpreter() -> PyInterpreter {
         vm.add_frozen(vm::py_freeze!(dir = "pysrc"));
         xml_tools_ext::make_module(vm);
         dialog_ext::make_module(vm);
+        athena_obj_ext::make_module(vm);
     })
 }
 
@@ -225,6 +228,19 @@ fn extract_result_tuple(vm: &VirtualMachine, result: PyObjectRef) -> PyResult<(b
     } else {
         Err(vm.new_type_error("Expected a tuple".to_owned()))
     }
+}
+
+#[allow(dead_code)]
+fn extract_vec_string(vm: &VirtualMachine, result: PyObjectRef) -> PyResult<Vec<String>> {
+    result
+        .payload::<PyList>()
+        .ok_or_else(|| vm.new_type_error("Expected a list".to_owned()))
+        .map(|list| {
+            list.borrow_vec()
+                .iter()
+                .map(|v| extract_string(vm, v.to_owned()))
+                .collect::<PyResult<Vec<String>>>()
+        })?
 }
 
 fn extract_string(vm: &VirtualMachine, result: PyObjectRef) -> PyResult<String> {

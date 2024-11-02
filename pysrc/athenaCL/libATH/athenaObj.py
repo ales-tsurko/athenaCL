@@ -46,6 +46,8 @@ from athenaCL.libATH import help
 from athenaCL.libATH import ioTools  # needed for bkwdCompat object
 from athenaCL.libATH import rhythm  # needed for timing
 from athenaCL.libATH import language
+from collections import UserDict
+import athenaObjExt
 
 lang = language.LangObj()
 # from athenaCL.libATH import SC
@@ -282,6 +284,24 @@ class External(object):
                 self.visualMethod = drawer.imageFormats()
             return self.visualMethod
 
+# triggers callback on the dictionary changes
+# expects a callback in the form of function(Vec<String>)
+# it sends all the keys to the callback
+# used to notify gui for changes in somehting like pathLib.
+class WatchedDict(UserDict):
+    def __init__(self, *args, **kwargs):
+        self.callback = kwargs.pop('callback', None)
+        super().__init__(*args, **kwargs)
+    
+    def __setitem__(self, key, value):
+        super().__setitem__(key, value)
+        if self.callback:
+            self.callback(list(self.keys()))
+    
+    def __delitem__(self, key):
+        super().__delitem__(key)
+        if self.callback:
+            self.callback(list(self.keys()))
 
 class AthenaObject(object):
     """methods for internal processsing of done with command objecst from
@@ -326,12 +346,12 @@ class AthenaObject(object):
         self.tniMode = 0  # true == TnI, false == Tn
         # PATH DATA
         # self.activeSetMeasure = 'ASIM' # default
-        self.pathLib = {}
-        self.activePath = ""
+        self.initPathLib()
+        self.setActivePath("")
         # TEXTURE DATA
         self.activeTextureModule = "LineGroove"  # name of class
-        self.textureLib = {}
-        self.activeTexture = ""  # name of
+        self.initTextureLib()
+        self.setActiveTexture("")
         # CLONE DATA
         self.cloneLib = clone.CloneManager()  # added post 1.3
         self.midiTempo = 120  # default value, changed with TEmidi, added 1.1
@@ -537,6 +557,20 @@ class AthenaObject(object):
         # store a list of all commands
         self.cmdRef = self.cmdManifest()
         self.cmdRef.sort()
+
+    def initPathLib(self):
+        self.pathLib = WatchedDict(callback=athenaObjExt.pathLibUpdated)
+
+    def initTextureLib(self):
+        self.textureLib = WatchedDict(callback=athenaObjExt.textureLibUpdated)
+
+    def setActivePath(self, value):
+        self.activePath = value
+        athenaObjExt.activePathSet(value)
+
+    def setActiveTexture(self, value):
+        self.activeTexture = value
+        athenaObjExt.activeTextureSet(value)
 
     def prefixCmdGroup(self, prefix):
         """for a given prefix will return a list of
