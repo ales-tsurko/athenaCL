@@ -6,7 +6,7 @@ use cpal::{
     Stream as AudioStream, StreamConfig,
 };
 use iced::{
-    widget::{button, row, slider, svg},
+    widget::{button, row, slider, svg, text},
     Element,
 };
 use midi_player::{Player, PlayerController, Settings as PlayerSettings};
@@ -98,6 +98,7 @@ pub(crate) struct State {
 }
 
 pub(crate) fn view(state: &State) -> Element<Message> {
+    let disabled = !state.path.exists() && !state.is_playing;
     let label = svg(if state.is_playing {
         "resources/img/pause.svg"
     } else {
@@ -108,14 +109,30 @@ pub(crate) fn view(state: &State) -> Element<Message> {
     } else {
         Message::PlayMidi(state.id)
     };
-    row![
-        button(label).on_press(message).width(60.0),
+    let button = button(label);
+    let player = row![
+        if disabled {
+            button
+        } else {
+            button.on_press(message)
+        }
+        .width(60.0),
         slider(0.0..=1.0, state.position, |v| {
             Message::ChangePlayingPosition(state.id, v)
         })
         .step(0.001)
     ]
     .align_y(iced::Alignment::Center)
-    .spacing(10.0)
-    .into()
+    .spacing(10.0);
+
+    if disabled {
+        text(format!(
+            "File {} does not exist.",
+            state.path.to_string_lossy()
+        ))
+        .style(text::danger)
+        .into()
+    } else {
+        player.into()
+    }
 }
