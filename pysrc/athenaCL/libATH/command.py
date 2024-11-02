@@ -7433,10 +7433,10 @@ class AOrm(_CommandAO):
 
     def __init__(self, ao, args="", **keywords):
         _CommandAO.__init__(self, ao, args, **keywords)
-        self.processSwitch = 0  # display only
+        self.processSwitch = 1  # display only
         self.gatherSwitch = 1  # display only
         self.cmdStr = "AOrm"
-        self.subCmd = 1  # if 1, executed within method of interptreter
+        # self.subCmd = 1  # if 1, executed within method of interptreter
 
     def gather(self):
         args = self.args
@@ -7453,14 +7453,20 @@ class AOrm(_CommandAO):
             self.confirm = "confirm"
 
     def process(self):
-        pass
+        if self.confirm != "confirm":
+            return
+        self.ao.pathLib.clear()
+        self.ao.textureLib.clear()
+        self.ao.setActiveTexture("")
+        self.ao.setActivePath("")
+        self._piUpdateAllReferences()
 
     def log(self):  # no history stored, as ao is removed
         if self.gatherStatus and self.processStatus:  # if complete
             return "%s %s" % (self.cmdStr, self.confirm)
 
-    def result(self):
-        return {}
+    def display(self):
+        return "AthenaObject has removed"
 
 
 class APgfx(Command):

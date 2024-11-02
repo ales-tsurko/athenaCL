@@ -103,8 +103,8 @@ pub fn update(state: &mut State, message: Message) -> Task<Message> {
             }
 
             if let Some(Output::MidiPlayer(player)) = state.output.get_mut(id) {
-                player.is_playing = true;
                 if player.path.exists() {
+                    player.is_playing = true;
                     if let Err(e) = state
                         .midi_player_state
                         .controller
@@ -120,6 +120,8 @@ pub fn update(state: &mut State, message: Message) -> Task<Message> {
                     state.midi_player_state.update_tempo();
                     state.midi_player_state.controller.play();
                     state.midi_player_state.playing_id = Some(id);
+                } else {
+                    player.is_playing = false;
                 }
             }
         }
@@ -397,9 +399,9 @@ fn view_pici_chooser(state: &State) -> Element<Message> {
     };
 
     row![
-        text("Path:"),
+        text("PI:"),
         pick_list(state.path_lib.as_slice(), pi_selection, Message::PiSelected).placeholder("{pi}"),
-        text("Texture:"),
+        text("TI:"),
         pick_list(
             state.texture_lib.as_slice(),
             ti_selection,

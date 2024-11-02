@@ -3,7 +3,7 @@
 use std::sync::LazyLock;
 use std::thread;
 
-use super::{dialog_ext, xml_tools_ext, athena_obj_ext};
+use super::{athena_obj_ext, dialog_ext, xml_tools_ext};
 use async_channel::{unbounded, Receiver, Sender};
 use rustpython_vm as vm;
 use thiserror::Error;
@@ -97,7 +97,7 @@ pub enum Message {
     TextureLibUpdated(Vec<String>),
     // Not system file path, but athenaCL pitch path
     ActivePathSet(String),
-    ActiveTextureSet(String)
+    ActiveTextureSet(String),
 }
 
 impl From<Error> for Message {
@@ -217,9 +217,8 @@ fn extract_result_tuple(vm: &VirtualMachine, result: PyObjectRef) -> PyResult<(b
             // Extract and convert the second element to String
             let str_part = elements[1]
                 .payload::<PyStr>()
-                .ok_or_else(|| vm.new_type_error("Expected a string".to_owned()))?
-                .as_str()
-                .to_owned();
+                .map(|v| v.as_str().to_owned())
+                .unwrap_or_default();
 
             Ok((bool_part, str_part))
         } else {
