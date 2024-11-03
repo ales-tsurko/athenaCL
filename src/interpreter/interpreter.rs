@@ -89,6 +89,10 @@ pub enum Message {
     ///
     /// The value is the path to the file.
     LoadMidi(String),
+    /// Play an Audio file (in the output area).
+    ///
+    /// The value is the path to the file.
+    LoadAudio(String),
     /// Get scratch dir.
     GetScratchDir,
     /// The result of `Self::GetScratchDir`.

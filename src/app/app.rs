@@ -9,7 +9,7 @@ use iced::widget::{
 use iced::{time, Element, Font, Subscription, Task};
 use rfd::FileDialog;
 
-use super::player::{self, GlobalState as GlobalPlayerState, State as PlayerState};
+use super::player::{self, GlobalState as GlobalPlayerState, Track as PlayerState};
 use crate::interpreter;
 
 const TERM_WIDTH: u16 = 80;
@@ -147,6 +147,14 @@ pub fn update(state: &mut State, message: Message) -> Task<Message> {
                     is_playing: false,
                     path: path.into(),
                     id: player::PlayerId::Midi(state.output.len()),
+                    position: 0.0,
+                }));
+            }
+            interpreter::Message::LoadAudio(path) => {
+                state.output.push(Output::Player(PlayerState {
+                    is_playing: false,
+                    path: path.into(),
+                    id: player::PlayerId::Audio(state.output.len()),
                     position: 0.0,
                 }));
             }

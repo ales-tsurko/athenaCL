@@ -6758,54 +6758,48 @@ class ELh(Command):
         self.processSwitch = 1  # display only
         self.gatherSwitch = 1  # display only
         self.cmdStr = "ELh"
+        self.audioPath = None
+        self.midiPath = None
 
     def gather(self):
         outComplete = self.ao.aoInfo["outComplete"]
         if outComplete == []:
             return lang.msgELcreateFirst
 
-        self.fmtFound = []
         msg = []
 
         # all outputs that produce an audio file
-        self.audioPath = self.ao.aoInfo["fpAudio"]
         if "csoundData" in outComplete or "csoundScore" in outComplete:
-            if os.path.isfile(self.audioPath):  # if file found
-                self.fmtFound.append(self.audioPath)
+            audioPath = self.ao.aoInfo["fpAudio"]
+            if os.path.isfile(audioPath):  # if file found
+                self.audioPath = audioPath
             else:  # files was created but does not exists
-                msg.append(lang.msgELaudioMoved % self.audioPath)
+                msg.append(lang.msgELaudioMoved % audioPath)
 
         # only midi file produces an output
-        self.midPath = self.ao.aoInfo["fpMidi"]
         if "midiFile" in outComplete:
-            if os.path.isfile(self.midPath):  # if file found
-                self.fmtFound.append(self.midPath)
+            midiPath = self.ao.aoInfo["fpMidi"]
+            if os.path.isfile(midiPath):  # if file found
+                self.midiPath = midiPath
             else:
-                msg.append(lang.msgELaudioMoved % self.midPath)
-        if self.fmtFound == []:
+                msg.append(lang.msgELaudioMoved % midiPath)
+
+        if not self.midiPath and not self.audioPath:
             return "".join(msg)
 
     def process(self):
-        # this file render prep should be done after EMr
-        #         if os.name == 'mac': # must check that fp is in found
-        #             if self.audioPath in self.fmtFound:
-        #                 prefDict = self.ao.external.getPrefGroup('external')
-        #                 audioTools.setMacAudioRsrc(prefDict['audioFormat'],
-        #                                                     self.audioPath, prefDict)
-        if os.name == "posix":
-            pass
-        else:  # win or other
-            pass
+        pass
 
     def display(self):
         msg = []
-        prefDict = self.ao.external.getPrefGroup("external")
-        for hPath in self.fmtFound:  # audio path
-            failFlag = osTools.openMedia(hPath, prefDict)
-            if failFlag == "failed":
-                msg.append(lang.msgELhearError % hPath)
-            else:
-                msg.append(lang.msgELhearInit % hPath)
+        if self.audioPath:
+            dialogExt.playAudio(self.audioPath)
+            msg.append("EL hear (Audio) %s\n" % self.audioPath)
+
+        if self.midiPath:
+            dialogExt.playMidi(self.midiPath)
+            msg.append("EL hear (MIDI) %s\n" % self.midiPath)
+
         return "".join(msg)
 
 

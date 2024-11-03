@@ -145,4 +145,14 @@ pub(super) mod _inner {
 
         Ok(())
     }
+
+    #[pyfunction(name = "playAudio")]
+    pub(crate) fn play_audio(path: String) -> PyResult<()> {
+        interpreter::INTERPRETER_WORKER
+            .gui_sender
+            .send_blocking(interpreter::Message::LoadAudio(path))
+            .expect("cannot send message via channel");
+
+        Ok(())
+    }
 }

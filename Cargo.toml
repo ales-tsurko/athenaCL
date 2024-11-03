@@ -17,7 +17,12 @@ log = "0.4"
 midi-player = "0.2.1"
 quick-xml = "0.31.0"
 rfd = "0.14.0"
-rodio = { version = "0.19", features = ["symphonia-all"] }
+# it's git for now, because the version supporting aiff have not released yet
+rodio = { git = "https://github.com/RustAudio/rodio.git", features = [
+    "symphonia-all",
+    "symphonia-aiff",
+    "symphonia-alac",
+] }
 rustpython-pylib = { version = "0.4.0", features = ["freeze-stdlib"] }
 rustpython-stdlib = "0.4.0"
 rustpython-vm = { version = "0.4.0", features = ["freeze-stdlib"] }
