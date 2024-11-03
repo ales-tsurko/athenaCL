@@ -17,6 +17,7 @@ log = "0.4"
 midi-player = "0.2.1"
 quick-xml = "0.31.0"
 rfd = "0.14.0"
+rodio = { version = "0.19", features = ["symphonia-all"] }
 rustpython-pylib = { version = "0.4.0", features = ["freeze-stdlib"] }
 rustpython-stdlib = "0.4.0"
 rustpython-vm = { version = "0.4.0", features = ["freeze-stdlib"] }

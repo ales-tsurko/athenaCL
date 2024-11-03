@@ -7,10 +7,9 @@ use iced::widget::{
     row, scrollable, text, text::Style as TextStyle, text_input,
 };
 use iced::{time, Element, Font, Subscription, Task};
-use iced_aw::widget::number_input;
 use rfd::FileDialog;
 
-use super::midi_player::{self, GlobalState as GlobalMidiPlayerState, State as MidiPlayerState};
+use super::player::{self, GlobalState as GlobalPlayerState, State as PlayerState};
 use crate::interpreter;
 
 const TERM_WIDTH: u16 = 80;
@@ -26,7 +25,7 @@ pub struct State {
     answer: String,
     output: Vec<Output>,
     question: Option<String>,
-    midi_player_state: GlobalMidiPlayerState,
+    player_state: GlobalPlayerState,
     scratch_dir: String,
     input_id: String,
     path_lib: Vec<String>,
@@ -37,7 +36,7 @@ pub struct State {
 
 impl Default for State {
     fn default() -> Self {
-        let midi_player_state = GlobalMidiPlayerState::new(SOUND_FONT);
+        let midi_player_state = GlobalPlayerState::new(SOUND_FONT);
         let output = vec![Output::Normal(
             r#"
                        _   _                        ___   __  
@@ -58,7 +57,7 @@ impl Default for State {
             .expect("the channel is unbound");
 
         Self {
-            midi_player_state,
+            player_state: midi_player_state,
             answer: String::new(),
             output,
             question: None,
@@ -73,11 +72,11 @@ impl Default for State {
 }
 
 #[derive(Debug)]
-enum Output {
+pub(crate) enum Output {
     Normal(String),
     Command(String),
     Error(String),
-    MidiPlayer(MidiPlayerState),
+    Player(PlayerState),
 }
 
 /// The iced update function.
@@ -86,6 +85,16 @@ pub fn update(state: &mut State, message: Message) -> Task<Message> {
         Message::InputChanged(val) => {
             state.answer = val;
         }
+        Message::Answer(question, value) => {
+            state.question = None;
+            state
+                .output
+                .push(Output::Normal(format!("{question}{value}")));
+            interpreter::INTERPRETER_WORKER
+                .response_sender
+                .send_blocking(value)
+                .expect("cannot send message to response receiver");
+        }
         Message::SetScratchDir => {
             if let Some(value) = pick_directory("Choose scratch folder") {
                 interpreter::INTERPRETER_WORKER
@@ -93,77 +102,6 @@ pub fn update(state: &mut State, message: Message) -> Task<Message> {
                     .send_blocking(interpreter::Message::SendCmd(format!("apdir x {value}")))
                     .expect("the channel is unbound");
             }
-        }
-        Message::PlayMidi(id) => {
-            if let Some(playing_id) = state.midi_player_state.playing_id {
-                if let Some(Output::MidiPlayer(player_state)) = state.output.get_mut(playing_id) {
-                    player_state.is_playing = false;
-                    state.midi_player_state.playing_id = None;
-                }
-            }
-
-            if let Some(Output::MidiPlayer(player)) = state.output.get_mut(id) {
-                if player.path.exists() {
-                    player.is_playing = true;
-                    if let Err(e) = state
-                        .midi_player_state
-                        .controller
-                        .set_file(Some(&player.path))
-                    {
-                        state.output.push(Output::Error(e.to_string()));
-                        return Task::none();
-                    }
-                    state
-                        .midi_player_state
-                        .controller
-                        .set_position(player.position);
-                    state.midi_player_state.update_tempo();
-                    state.midi_player_state.controller.play();
-                    state.midi_player_state.playing_id = Some(id);
-                } else {
-                    player.is_playing = false;
-                }
-            }
-        }
-        Message::StopMidi(id) => {
-            if let Some(Output::MidiPlayer(player_state)) = state.output.get_mut(id) {
-                player_state.is_playing = false;
-                state.midi_player_state.controller.stop();
-                if let Some(playing_id) = state.midi_player_state.playing_id {
-                    if playing_id == id {
-                        state.midi_player_state.playing_id = None;
-                    }
-                }
-            }
-        }
-        Message::ChangePlayingPosition(id, position) => {
-            if let Some(Output::MidiPlayer(player_state)) = state.output.get_mut(id) {
-                player_state.position = position;
-
-                if let Some(playing_id) = state.midi_player_state.playing_id {
-                    if playing_id == id {
-                        state.midi_player_state.controller.set_position(position);
-                    }
-                }
-            }
-        }
-        Message::Tick(_) => {
-            if let Some(playing_id) = state.midi_player_state.playing_id {
-                if let Some(Output::MidiPlayer(player_state)) = state.output.get_mut(playing_id) {
-                    let position = state.midi_player_state.controller.position();
-
-                    player_state.position = position;
-
-                    if position >= 1.0 {
-                        player_state.is_playing = false;
-                        player_state.position = 0.0;
-                        state.midi_player_state.playing_id = None;
-                    }
-                }
-            }
-        }
-        Message::SetTempo(tempo) => {
-            state.midi_player_state.set_tempo(tempo);
         }
         Message::PiSelected(value) => {
             interpreter::INTERPRETER_WORKER
@@ -177,7 +115,7 @@ pub fn update(state: &mut State, message: Message) -> Task<Message> {
                 .send_blocking(interpreter::Message::SendCmd(format! {"tio {value}"}))
                 .expect("cannot send message to the interpreter");
         }
-        Message::InterpreterMessage(msg) => match msg {
+        Message::Interpreter(msg) => match msg {
             interpreter::Message::SendCmd(ref cmd) => {
                 state.answer = "".to_owned();
                 state.output.push(Output::Command(cmd.to_owned()));
@@ -205,10 +143,10 @@ pub fn update(state: &mut State, message: Message) -> Task<Message> {
                 return text_input::focus(state.input_id.clone());
             }
             interpreter::Message::LoadMidi(path) => {
-                state.output.push(Output::MidiPlayer(MidiPlayerState {
+                state.output.push(Output::Player(PlayerState {
                     is_playing: false,
                     path: path.into(),
-                    id: state.output.len(),
+                    id: player::PlayerId::Midi(state.output.len()),
                     position: 0.0,
                 }));
             }
@@ -229,15 +167,9 @@ pub fn update(state: &mut State, message: Message) -> Task<Message> {
             }
             _ => (),
         },
-        Message::Answer(question, value) => {
-            state.question = None;
-            state
-                .output
-                .push(Output::Normal(format!("{question}{value}")));
-            interpreter::INTERPRETER_WORKER
-                .response_sender
-                .send_blocking(value)
-                .expect("cannot send message to response receiver");
+        Message::Player(message) => {
+            return player::update(&mut state.output, &mut state.player_state, message)
+                .map(Message::Player)
         }
     }
 
@@ -309,7 +241,7 @@ fn view_output(output: &Output) -> Element<Message> {
         Output::Error(msg) => container(text(msg).style(|theme: &iced::Theme| TextStyle {
             color: Some(theme.palette().danger),
         })),
-        Output::MidiPlayer(state) => container(midi_player::view(state)),
+        Output::Player(state) => container(player::view(state).map(Message::Player)),
     }
     .padding([10, 0])
     .into()
@@ -374,11 +306,7 @@ fn view_bottom_panel(state: &State) -> Element<Message> {
     row![
         view_pici_chooser(state),
         horizontal_space(),
-        text("󰟚").font(iced_fonts::NERD_FONT).size(16),
-        text("=").size(16),
-        number_input(state.midi_player_state.tempo(), 20..=600, Message::SetTempo,)
-            .step(1)
-            .width(60.0),
+        player::view_tempo(&state.player_state).map(Message::Player)
     ]
     .spacing(10.0)
     .padding([18, 0])
@@ -429,22 +357,23 @@ fn pick_directory(title: &str) -> Option<String> {
 #[derive(Debug, Clone)]
 pub enum Message {
     InputChanged(String),
-    InterpreterMessage(interpreter::Message),
     Answer(String, String),
-    PlayMidi(usize),
-    StopMidi(usize),
-    // id, position
-    ChangePlayingPosition(usize, f64),
-    Tick(time::Instant),
-    SetTempo(u16),
     SetScratchDir,
     PiSelected(String),
     TiSelected(String),
+    Interpreter(interpreter::Message),
+    Player(player::Message),
 }
 
 impl From<interpreter::Message> for Message {
     fn from(value: interpreter::Message) -> Self {
-        Self::InterpreterMessage(value)
+        Self::Interpreter(value)
+    }
+}
+
+impl From<player::Message> for Message {
+    fn from(value: player::Message) -> Self {
+        Self::Player(value)
     }
 }
 
@@ -470,10 +399,12 @@ pub fn subscription(state: &State) -> Subscription<Message> {
             }
         })
     })
-    .map(Message::InterpreterMessage);
+    .map(Message::Interpreter);
 
-    let position_listener = if state.midi_player_state.controller.is_playing() {
-        time::every(time::Duration::from_millis(20)).map(Message::Tick)
+    let position_listener = if state.player_state.playing() {
+        time::every(time::Duration::from_millis(20))
+            .map(player::Message::Tick)
+            .map(Message::Player)
     } else {
         Subscription::none()
     };
