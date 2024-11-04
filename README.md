@@ -20,7 +20,14 @@ find the source code inside `doc/` directory. You can read it
 
 ## Usage
 
-You don't need python. To run this program, just:
+The repo includes large files tracked by `git-lfs`. You need it to be installed
+on your system. Then, after you cloned the repo:
+
+```
+git lfs pull
+```
+
+Then you can run the program using:
 
 ```
 $ cargo run --release
