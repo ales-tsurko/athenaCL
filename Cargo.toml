@@ -10,7 +10,7 @@ ahash = "0.8.11"
 async-channel = "2.3.1"
 cpal = "0.15.3"
 env_logger = "0.11"
-iced = { version = "0.13.1", features = ["tokio", "wgpu"] }
+iced = { version = "0.13.1", features = ["fira-sans", "tokio", "wgpu"] }
 iced_aw = "0.11"
 iced_fonts = { version = "0.1.1", features = ["nerd"] }
 log = "0.4"
