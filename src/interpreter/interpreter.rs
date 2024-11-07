@@ -263,7 +263,7 @@ impl<T> TryPy for PyResult<T> {
     type Output = T;
 
     fn try_py(self) -> InterpreterResult<T> {
-        self.map_err(|e| Error::from_py_err(e))
+        self.map_err(Error::from_py_err)
     }
 }
 

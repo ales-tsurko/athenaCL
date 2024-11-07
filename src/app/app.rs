@@ -1,4 +1,5 @@
 //! Application's GUI.
+use std::env;
 
 use iced::futures::sink::SinkExt;
 use iced::stream;
@@ -18,7 +19,7 @@ const FONT_WIDTH: u16 = 10;
 /// System application ID.
 pub const APPLICATION_ID: &str = "by.alestsurko.athenacl";
 // TODO it should be configurable so users could choose they own sf
-const SOUND_FONT: &str = "./resources/SGM-v2.01-YamahaGrand-Guit-Bass-v2.7.sf2";
+const SOUND_FONT: &str = "resources/SGM-v2.01-YamahaGrand-Guit-Bass-v2.7.sf2";
 
 /// athenaCL GUI.
 pub struct State {
@@ -36,7 +37,14 @@ pub struct State {
 
 impl Default for State {
     fn default() -> Self {
-        let midi_player_state = GlobalPlayerState::new(SOUND_FONT);
+        let mut exe_dir = env::current_exe().expect(
+            "executable directory should be available for standard
+            distributions of supported platforms (macOS, Windows, Ubuntu). The executable is also
+            not a symbolic link.",
+        );
+        exe_dir.pop();
+        exe_dir.push(SOUND_FONT);
+        let midi_player_state = GlobalPlayerState::new(&exe_dir.as_os_str().to_string_lossy());
         let output = vec![Output::Normal(
             r#"
                        _   _                        ___   __  

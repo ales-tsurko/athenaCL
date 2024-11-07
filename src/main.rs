@@ -18,9 +18,15 @@ fn main() -> iced::Result {
             max_size: Some((800.0, f32::MAX).into()),
             ..Default::default()
         })
-        .font(include_bytes!("../resources/fonts/Fira_Mono/FiraMono-Bold.ttf"))
-        .font(include_bytes!("../resources/fonts/Fira_Mono/FiraMono-Medium.ttf"))
-        .font(include_bytes!("../resources/fonts/Fira_Mono/FiraMono-Regular.ttf"))
+        .font(include_bytes!(
+            "../resources/fonts/Fira_Mono/FiraMono-Bold.ttf"
+        ))
+        .font(include_bytes!(
+            "../resources/fonts/Fira_Mono/FiraMono-Medium.ttf"
+        ))
+        .font(include_bytes!(
+            "../resources/fonts/Fira_Mono/FiraMono-Regular.ttf"
+        ))
         .font(iced_fonts::REQUIRED_FONT_BYTES)
         .font(iced_fonts::NERD_FONT_BYTES)
         .run()

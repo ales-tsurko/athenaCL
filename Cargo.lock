@@ -434,7 +434,7 @@ dependencies = [
 
 [[package]]
 name = "athenacl"
-version = "0.1.0"
+version = "2.0.0"
 dependencies = [
  "ahash 0.8.11",
  "async-channel",
