@@ -1,5 +1,7 @@
 # athenaCL
 
+![athenaCL screenshot](resources/athenacl-screenshot.jpg)
+
 athenaCL is an algorithmic composition tool created by Christopher Ariza.
 
 Or, as described by the author more specifically, it is a tool for:
@@ -30,10 +32,22 @@ git lfs pull
 Then you can run the program using:
 
 ```
-$ cargo run --release
+cargo run --release
 ```
 
 `cargo test` will run not only rust tests, but python tests as well.
+
+
+### Bundle an app on macOS
+
+Currently, bundling app packages configured on macOS only. To bundle a package:
+
+```
+./bundle-mac.sh
+```
+
+After that the .app package should be located at
+`target/release/bundle/osx/athenaCL.app`.
 
 
 
