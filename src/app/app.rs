@@ -1,5 +1,6 @@
 //! Application's GUI.
 use std::env;
+use std::sync::Arc;
 
 use iced::futures::sink::SinkExt;
 use iced::stream;
@@ -10,11 +11,17 @@ use iced::widget::{
 use iced::{time, Element, Font, Subscription, Task};
 use rfd::FileDialog;
 
+use super::figure;
 use super::player::{self, GlobalState as GlobalPlayerState, Track as PlayerState};
+use crate::figure::Figure;
 use crate::interpreter;
 
 const TERM_WIDTH: u16 = 80;
 const FONT_WIDTH: u16 = 10;
+const WINDOW_PADDING: u16 = 40;
+const OUTPUT_PADDING: u16 = 20;
+/// The width available to each entry in the output.
+const OUTPUT_WIDTH: f32 = (TERM_WIDTH * FONT_WIDTH - 2 * (WINDOW_PADDING + OUTPUT_PADDING)) as f32;
 
 /// System application ID.
 pub const APPLICATION_ID: &str = "by.alestsurko.athenacl";
@@ -85,6 +92,7 @@ pub(crate) enum Output {
     Command(String),
     Error(String),
     Player(PlayerState),
+    Figure(Arc<Figure>),
 }
 
 /// The iced update function.
@@ -122,6 +130,17 @@ pub fn update(state: &mut State, message: Message) -> Task<Message> {
                 .interp_sender
                 .send_blocking(interpreter::Message::SendCmd(format! {"tio {value}"}))
                 .expect("cannot send message to the interpreter");
+        }
+        Message::Figure(figure::Message::SelectTexture(texture)) => {
+            return update(state, Message::TiSelected(texture));
+        }
+        Message::Figure(figure::Message::SelectClone { texture, clone }) => {
+            for cmd in [format!("tio {texture}"), format!("tco {clone}")] {
+                interpreter::INTERPRETER_WORKER
+                    .interp_sender
+                    .send_blocking(interpreter::Message::SendCmd(cmd))
+                    .expect("cannot send message to the interpreter");
+            }
         }
         Message::Interpreter(msg) => match msg {
             interpreter::Message::SendCmd(ref cmd) => {
@@ -166,6 +185,9 @@ pub fn update(state: &mut State, message: Message) -> Task<Message> {
                     position: 0.0,
                 }));
             }
+            interpreter::Message::Figure(figure) => {
+                state.output.push(Output::Figure(figure));
+            }
             interpreter::Message::ScratchDir(value) => {
                 state.scratch_dir = value;
             }
@@ -201,14 +223,14 @@ pub fn view(state: &State) -> Element<Message> {
             .output
             .iter()
             .to_owned()
-            .map(view_output)
+            .map(|output| view_output(output, &state.active_texture))
             .map(Into::into)
             .collect::<Vec<_>>(),
     );
 
     let mut col = column![
         view_top_panel(state),
-        scrollable(output.padding(20.0))
+        scrollable(output.padding(OUTPUT_PADDING))
             .style(|theme: &iced::Theme, status: Status| {
                 let mut style = theme.style(&<iced::Theme as Catalog>::default(), status);
                 let mut background = theme.palette().background;
@@ -229,7 +251,7 @@ pub fn view(state: &State) -> Element<Message> {
     }
 
     container(col.push(view_input(state)).push(view_bottom_panel(state)))
-        .padding([18, 40])
+        .padding([18, WINDOW_PADDING])
         .width(TERM_WIDTH * FONT_WIDTH)
         .height(iced::Length::Fill)
         .into()
@@ -246,7 +268,7 @@ fn view_top_panel(state: &State) -> Element<Message> {
     .into()
 }
 
-fn view_output(output: &Output) -> Element<Message> {
+fn view_output<'a>(output: &'a Output, active_texture: &'a str) -> Element<'a, Message> {
     match output {
         Output::Normal(msg) => container(text(msg)),
         Output::Command(msg) => {
@@ -258,6 +280,9 @@ fn view_output(output: &Output) -> Element<Message> {
             color: Some(theme.palette().danger),
         })),
         Output::Player(state) => container(player::view(state).map(Message::Player)),
+        Output::Figure(figure) => {
+            container(figure::view(figure, OUTPUT_WIDTH, active_texture).map(Message::Figure))
+        }
     }
     .padding([10, 0])
     .into()
@@ -379,6 +404,7 @@ pub enum Message {
     TiSelected(String),
     Interpreter(interpreter::Message),
     Player(player::Message),
+    Figure(figure::Message),
 }
 
 impl From<interpreter::Message> for Message {

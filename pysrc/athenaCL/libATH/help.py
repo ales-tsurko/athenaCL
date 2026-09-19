@@ -31,12 +31,7 @@ class HelpDoc:
     # define common messages shared w/ commands private variables
     _tniToggle = 'The output of this command is configured by the active system Tn/TnI mode; to change the set class Tn/TnI mode enter the command "SCmode".'
 
-    _gfxOption = 'Output in "tk" requires the Python Tkinter GUI installation; output in "png" and "jpg" requires the Python Imaging Library (PIL) library installation; output in "eps" and "text" do not require any additional software or configuration.'
-
-    _gfxCommand = (
-        'This command uses the active graphic output format; this can be selected with the "APgfx" command. %s'
-        % _gfxOption
-    )
+    _gfxCommand = "The graphics are drawn in the output: drag to pan, scroll while holding Command (Control outside macOS) to zoom, and double-click to see all of it again. Hovering shows the values under the pointer."
 
     _scratchDir = (
         "This file is written in the scratch directory specified by APdir command."
@@ -328,7 +323,7 @@ class HelpDoc:
     TEmidi_usage = "temidi parameter"
 
     TEmap = (
-        "TEmap: TextureEnsemble: Map: Provides a text-based display and/or graphical display of the temporal distribution of Textures and Clones. %s"
+        "TEmap: TextureEnsemble: Map: Provides a text-based display and/or graphical display of the temporal distribution of Textures and Clones. Clicking a Texture or Clone in the graphical display selects it. %s"
         % _gfxCommand
     )
     TEmap_usage = "temap"
@@ -448,13 +443,7 @@ class HelpDoc:
     APwid = "APwid: AthenaPreferences: Width: Manually set the number of characters displayed per line during an athenaCL session. Use of this preference is only necessary on platforms that do not provide a full-featured terminal envrionment."
     APwid_usage = "apwid characterWidth"
 
-    APgfx = (
-        "APgfx: AthenaPreferences: Graphics: Toggle between different graphic output formats. All modes may not be available on every platform or Python installation. %s"
-        % _gfxCommand
-    )
-    APgfx_usage = "apgfx dialogMode"
-
-    APdir = 'APdir: AthenaPreferences: Directories: Lets the user select or enter directories necessary for writing and searching files. Directories that can be entered are the "scratch" directory and the "user audio". The scratch directory is used for writing temporary files with automatically-generated file names. Commands such as SCh, PIh, and those that produce graphics (depending on format settings specified with APgfx) use this directory. The user audio directory is used within ParameterObjects that search for files. With such ParameterObjects, the user can specify any file within the specified directory simply by name. To find the the file\'s complete file path, all directories are recursively searched in both the user audio and the athenaCL/audio directories. Directories named "_exclude" will not be searched. If files in different nested directories do not have unique file names, correct file paths may not be found.'
+    APdir = 'APdir: AthenaPreferences: Directories: Lets the user select or enter directories necessary for writing and searching files. Directories that can be entered are the "scratch" directory and the "user audio". The scratch directory is used for writing temporary files with automatically-generated file names. Commands such as SCh and PIh use this directory. The user audio directory is used within ParameterObjects that search for files. With such ParameterObjects, the user can specify any file within the specified directory simply by name. To find the the file\'s complete file path, all directories are recursively searched in both the user audio and the athenaCL/audio directories. Directories named "_exclude" will not be searched. If files in different nested directories do not have unique file names, correct file paths may not be found.'
     APdir_usage = "apdir dirType filePath"
 
     #     APcc = 'APcc: AthenaPreferences: Customize Cursor: Lets the user customize the cursor prompt tool by replacing any of the standard characters with any string. The user may optionally select to restore system defaults.'

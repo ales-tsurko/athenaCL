@@ -267,23 +267,6 @@ class External(object):
         return [userAudioPath]
 
 
-    def getVisualMethod(self, status="normal"):
-        """checks to see if vis methods have been updated
-        if not avail, updates
-        this is a bit of a time suck and should be done once
-        per session
-        status == 'init' allows the attibute self.visualMethod
-        to be initialized to None, updates on next call
-        visual methodis a list containing all avalable methods
-        """
-        if status == "init":
-            self.visualMethod = None  # set to none, but dont update until called
-        else:  # checks guis: a speed clog on startup
-            # done only if set to none, once per sess
-            if self.visualMethod == None:
-                self.visualMethod = drawer.imageFormats()
-            return self.visualMethod
-
 # triggers callback on the dictionary changes
 # expects a callback in the form of function(Vec<String>)
 # it sends all the keys to the callback
@@ -334,7 +317,6 @@ class AthenaObject(object):
         self.external = External(self.termObj)
         self.external.updateAll("on")  # msgs on
         # self.external.reloadTextures()
-        self.external.getVisualMethod("init")  # prep, dont resolve
 
         # utility objects
         self.help = help.HelpDoc(self.termObj)  # pass ref termObj
@@ -511,7 +493,6 @@ class AthenaObject(object):
                 "APdir(directory)",
                 "APea(external)",
                 "APa(audio)",
-                "APgfx(graphics)",
                 "APcurs(cursor)",
                 "APr(refresh)",
                 "APwid(width)",

@@ -435,57 +435,6 @@ def isSudo():
         return 0
 
 
-def imageFormats():
-    """finds available guis and produces a list of options
-    used by imageTools as well as dialog.py
-    same conditional import done w/n imageTools.py
-    this function takes time, as tk window creation may take some time
-    """
-    available = ["text", "eps"]  # always available
-    try:
-        from PIL import Image, ImageDraw, ImageFont
-
-        PIL = 1
-    except ImportError:
-        PIL = 0
-    try:
-        import tkinter
-
-        TK = 1
-    except ImportError:
-        TK = 0
-    if TK:
-        try:  # tkinter already imported; check creation, as may still fail
-            tkTemp = tkinter.Tk()
-            tkTemp.withdraw()
-            tkTemp.destroy()
-            del tkTemp
-            available.append("tk")
-        except:
-            pass
-    if PIL:
-        available.append("png")
-        available.append("jpg")  # uses pil to write the file
-    return available
-
-
-def imageFormatParser(usrStr):
-    """provide backward compat to older names
-
-    >>> imageFormatParser('jpeg')
-    'jpg'
-    """
-    ref = {
-        "jpg": ["pil", "jpeg", "jpg", "j"],
-        "png": ["file", "png", "p"],
-        "tk": ["tk", "tkinter", "k"],  # t reserved for text
-        "eps": ["eps", "ps", "e"],
-        "text": ["text", "t"],
-    }
-    usrStr = selectionParse(usrStr, ref)
-    return usrStr  # may be None
-
-
 # -----------------------------------------------------------------||||||||||||--
 # evaluating and filtering paths to applications
 

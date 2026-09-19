@@ -55,20 +55,12 @@ PI b hear with TM LineGroove complete.
 (/Volumes/xdisc/_scratch/ath2010.07.01.16.12.52.mid)
 ```
 
-Numerous types of graphical aids are provided by athenaCL to assist in the representation of musical materials. Depending on the user's Python installation, numerous formats of graphic files are available. Formats include text (within the Interpreter display), Encapsulated PostScript (convertible to PDF), Tk GUI Windows, JPEG, and PNG. Tk requires the Python TkInter GUI installation; JPEG and PNG require the Python Imaging Library (PIL) installation.
+Numerous types of graphical aids are provided by athenaCL to assist in the
+representation of musical materials. Graphics are drawn directly in the output,
+below the command that produced them. Drag a graphic to pan it, scroll while
+holding Command (Control outside macOS) to zoom, and double-click to see all of
+it again; hovering shows the values under the pointer.
       
-The user can set an active graphic format with the APgfx command. For example:
-      
-
-**Setting the active graphics format with APgfx**
-
-```
-pi{b}ti{} :: apgfx
-active graphics format: png.
-select text, eps, tk, jpg, png. (t, e, k, j, or p): p
-graphics format changed to png.
-```
-
 To test the production of graphic output, the TPmap command, for TextureParameter map, can be used:
       
 

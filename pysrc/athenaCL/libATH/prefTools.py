@@ -48,13 +48,9 @@ def getCategoryDefaultDict(platform, category):
     >>> a = getCategoryDefaultDict('win', 'athena')
     >>> a['dlgVisualMethod']
     'text'
-    >>> a['gfxVisualMethod']
-    'tk'
     >>> a = getCategoryDefaultDict('posix', 'athena')
     >>> a['dlgVisualMethod']
     'text'
-    >>> a['gfxVisualMethod']
-    'png'
     """
     # common to all, some may be chagned in patform specific below
     if category == "external":
@@ -122,14 +118,12 @@ def getCategoryDefaultDict(platform, category):
         # common for all posix
         if category == "athena":
             catDict["dlgVisualMethod"] = "text"
-            catDict["gfxVisualMethod"] = "png"  # return to pil
 
     else:  # win or other
         if category == "external":
             catDict["audioFormat"] = "wav"
         if category == "athena":
             catDict["dlgVisualMethod"] = "text"  # works w/n idle, console on win
-            catDict["gfxVisualMethod"] = "tk"
 
     return catDict
 
@@ -193,11 +187,6 @@ def updatePrefDict(oldPrefDict, platform):
             for key in oldCatKeys:
                 if key not in newCatKeys:  # remove old keys no long used
                     del oldPrefDict[catName][key]
-
-    # do specific name replacements and changes for backwards compat
-    # options user may have selected
-    x = oldPrefDict["athena"]["gfxVisualMethod"]
-    oldPrefDict["athena"]["gfxVisualMethod"] = drawer.imageFormatParser(x)
 
     return oldPrefDict
 

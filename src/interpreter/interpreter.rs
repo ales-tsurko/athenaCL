@@ -1,9 +1,10 @@
 //! athenaCL interpreter.
 
-use std::sync::LazyLock;
+use std::sync::{Arc, LazyLock};
 use std::thread;
 
-use super::{athena_obj_ext, dialog_ext, xml_tools_ext};
+use super::{athena_obj_ext, dialog_ext, figure_ext, xml_tools_ext};
+use crate::figure::Figure;
 use async_channel::{unbounded, Receiver, Sender};
 use rustpython_vm as vm;
 use thiserror::Error;
@@ -93,6 +94,8 @@ pub enum Message {
     ///
     /// The value is the path to the file.
     LoadAudio(String),
+    /// Show a figure (in the output area).
+    Figure(Arc<Figure>),
     /// Get scratch dir.
     GetScratchDir,
     /// The result of `Self::GetScratchDir`.
@@ -200,6 +203,7 @@ pub fn init_py_interpreter() -> PyInterpreter {
         xml_tools_ext::make_module(vm);
         dialog_ext::make_module(vm);
         athena_obj_ext::make_module(vm);
+        figure_ext::make_module(vm);
     })
 }
 

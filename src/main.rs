@@ -5,7 +5,8 @@ use athenacl::app;
 fn main() -> iced::Result {
     iced::application("athenaCL", app::update, app::view)
         .subscription(app::subscription)
-        .antialiasing(true)
+        // figures are pixel art: without multisampling, their pixels stay sharp at any offset
+        .antialiasing(false)
         .centered()
         .settings(iced::settings::Settings {
             id: Some(app::APPLICATION_ID.to_string()),

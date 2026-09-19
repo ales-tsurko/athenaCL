@@ -20,7 +20,6 @@ from athenaCL.libATH import clone
 from athenaCL.libATH import dialog
 from athenaCL.libATH import drawer
 from athenaCL.libATH import eventList
-from athenaCL.libATH import imageTools
 from athenaCL.libATH import ioTools
 from athenaCL.libATH import language
 from athenaCL.libATH import markov
@@ -41,14 +40,7 @@ from athenaCL.libATH.libTM import texture
 from athenaCL.libATH.libOrc import generalMidi
 from athenaCL.libATH.omde import rand
 import dialogExt
-
-# conditional imports that may fail but are not necessary
-try:
-    from athenaCL.libATH.libGfx import graphPmtr
-    from athenaCL.libATH.libGfx import graphEnsemble
-    from athenaCL.libATH.libGfx import graphCellular
-except ImportError:  # pil or tk may not be installed
-    pass
+import figureExt
 
 _MOD = "command.py"
 from athenaCL.libATH import prefTools
@@ -129,10 +121,35 @@ class Command(object):
         """return a string w/ the result ofthe command"""
         pass
 
-    def displayGfx(self, dir=None):
-        """if a gui window is made
-        only drawn if self.gfxSwitch is set"""
+    def displayGfx(self):
+        """shows graphics in the gui output
+        only called if self.gfxSwitch is set"""
         pass
+
+    def _gfxPalette(self):
+        """graphics colors, from the gui preferences"""
+        pref = self.ao.external.getPref
+        return {
+            "background": pref("gui", "COLORbgAbs"),
+            "grid": pref("gui", "COLORbgGrid"),
+            "margin": pref("gui", "COLORbgMargin"),
+            "main": pref("gui", "COLORfgMain"),
+            "mainFrame": pref("gui", "COLORfgMainFrame"),
+            "alt": pref("gui", "COLORfgAlt"),
+            "altFrame": pref("gui", "COLORfgAltFrame"),
+            "title": pref("gui", "COLORtxTitle"),
+            "label": pref("gui", "COLORtxLabel"),
+            "unit": pref("gui", "COLORtxUnit"),
+        }
+
+    def _gfxParameterMap(self, splitSco, xRelation, detailed):
+        """shows each parameter of a loaded split score as a graph
+        xRelation is event or time"""
+        graphs = []
+        for pmtr in splitSco.getKeys():
+            graphs.append((splitSco.getTitle(pmtr), splitSco.getCoord(pmtr, xRelation)))
+        if graphs:
+            figureExt.parameterMap(self._gfxPalette(), xRelation, detailed, graphs)
 
     def do(self):
         """threading only sometimes works
@@ -165,9 +182,7 @@ class Command(object):
         ok = 1
         if not self.subCmd:  # not a sub command, return displays
             if self.gfxSwitch:  # command obj defines gfx method
-                okGfx, fmt, dir = self._validGfxSetup()
-                if okGfx:
-                    self.displayGfx(fmt, dir)  # may be an empty method
+                self.displayGfx()  # may be an empty method
             # return text display always
             return ok, self.display()
         else:  # its is a sub command, call result instead of display
@@ -530,18 +545,6 @@ class Command(object):
         else:  # doesnt exist
             return filePath
 
-    def _validGfxPreference(self):
-        """check if the user preference vis method is a available
-        this is a time-suck only the first time it is called
-        valid gfx methods are tk, pil, file, text"""
-        fmt = self.ao.external.getPref("athena", "gfxVisualMethod")
-        if fmt in self.ao.external.getVisualMethod():
-            if fmt == "text":  # not active in gfx presentations
-                return None
-            return fmt
-        else:  # set as pref but not available
-            return None
-
     #     def _validScratchDir(self):
     #         """use to set valid scratch dir; get from user if necessary
     #
@@ -567,43 +570,6 @@ class Command(object):
     #         path = self._validScratchDir()
     #         if path == None: return None
     #         else: return os.path.join(path, drawer.tempFileName(ext))
-
-    def _validGfxSetup(self):
-        """check if the user preference scratch is a good dir
-        get dir if not set
-        check format compatabilities
-        returns ok, and dir path
-
-        """
-        fmt = self._validGfxPreference()  # checks is pref fmt is available
-        if fmt == None:
-            return 0, fmt, None  # error
-        # check scratch dir for methods that write files
-        if fmt in ["jpg", "png", "eps"]:
-            # scratch dir can be None if not yet set;
-            # temp file will be created in image tools methods
-            fpScratchDir = environment.getScratchDirPath()
-            ok = 1  # fpScratchDir is good
-        else:  # formats taht dont write files
-            ok = 1  # okay for graphics, scratch dir not needed
-            fpScratchDir = None  # not needed for tk
-        # check format and resources available
-        if fmt == "tk" and not imageTools.TK:
-            environment.printWarn([lang.WARN, lang.msgGfxTkError])
-            ok = 0
-        # check if we are in idle and gfx is tk: this will not work
-        if fmt == "tk" and drawer.isIdle():
-            environment.printWarn([lang.WARN, lang.msgGfxIdleError])
-            ok = 0
-        # see if pil module is available
-        if fmt in ["jpg", "png"] and not imageTools.PIL:
-            environment.printWarn([lang.WARN, lang.msgGfxPilError])
-            ok = 0
-
-        if ok:  # get to get fpScratchDir again as set w/ APdir command
-            return ok, fmt, fpScratchDir  # fpScratchDir is a directory
-        else:  # not okay
-            return ok, fmt, None
 
     # -----------------------------------------------------------------------||--
     def _numPmtrDetermineFormat(self, usrStr, srcFmt=None):
@@ -3264,8 +3230,7 @@ class TPmap(_CommandTP):
             if not ok:
                 return "%s\n" % msg
             # make sure this is not a string outputting parameter object
-            dlgVisMet = self.ao.external.getPref("athena", "gfxVisualMethod")
-            if obj.outputFmt == "str" or dlgVisMet == "text":
+            if obj.outputFmt == "str":
                 self._textDisplay = 1  # this will stop gfx processing
 
             self.msg.append(obj.repr("argsOnly"))
@@ -3294,31 +3259,16 @@ class TPmap(_CommandTP):
         self.msg.append("TPmap display complete.\n")
         return "\n".join(self.msg)
 
-    def displayGfx(self, fmt, dir=None):
+    def displayGfx(self):
         if self._textDisplay:
             return None
         if self.events == None:
             return None
-        # print _MOD, 'self.objBundle', self.objBundle
-        obj = graphPmtr.TPmapCanvas(
-            self.ao, self.objBundle, self.eventListSplitFmt, self.events, fmt
+        splitSco = eventList.EventSequenceSplit(
+            self.objBundle, self.eventListSplitFmt, self.events
         )
-        prefDict = self.ao.external.getPrefGroup("external")
-        obj.show(dir, prefDict)  # if writing a file, creates temporary path
-
-    def displayGfxUtil(self, fmt, fp):
-        if self._textDisplay:
-            return None
-        if self.events == None:
-            return None
-
-        # this method is for use in auto-documentation generation
-        # can supply complete path rather than just a directory
-        obj = graphPmtr.TPmapCanvas(
-            self.ao, self.objBundle, self.eventListSplitFmt, self.events, fmt
-        )
-        # second arg sets openMedia to false
-        obj.write(fp, 0)
+        splitSco.load()
+        self._gfxParameterMap(splitSco, "event", 1)
 
 
 class TPe(_CommandTP):
@@ -4706,19 +4656,11 @@ class TImap(Command):
             self.tmRelation,
         )
 
-    def displayGfx(self, fmt, dir=None):
-        prefDict = self.ao.external.getPrefGroup("external")
-        obj = graphPmtr.TImapCanvas(
-            self.ao, self.tName, None, self.tmRelation, self.xRelation, fmt
-        )
-        obj.show(dir, prefDict)
-
-    def displayGfxUtil(self, fmt, fp):
-        obj = graphPmtr.TImapCanvas(
-            self.ao, self.tName, None, self.tmRelation, self.xRelation, fmt
-        )
-        # second arg sets openMedia to false
-        obj.write(fp, 0)
+    def displayGfx(self):
+        splitSco = eventList.EventSequenceSplit(self.ao.textureLib[self.tName], "t")
+        splitSco.load(self.tmRelation)
+        splitSco.clean()  # remove parameters with string values
+        self._gfxParameterMap(splitSco, self.xRelation, 0)
 
 
 # -----------------------------------------------------------------||||||||||||--
@@ -5020,49 +4962,21 @@ class TEmap(Command):
         self.tiMapDict = self._teGetTimeMapDict()
 
     def display(self):
-        tiMapDict = self.tiMapDict
-        termWidth = self.termObj.w
-        graphWidth = termWidth - lang.LMARGINW
-        startTime, endTime, totalDur = self._teGetTotalTimeRange(tiMapDict)
+        # the map itself is drawn in the output by displayGfx
+        return "TEmap display complete.\n"
 
-        durString = "%.2fs" % totalDur
-        ruler = "%s%s\n" % (
-            durString.ljust(lang.LMARGINW),
-            typeset.graphRuler(graphWidth),
-        )
-        msg = []
-        msg.append("TextureEnsemble Map:\n")
-        msg.append(ruler)
-        tiNameList = list(tiMapDict.keys())
-        tiNameList.sort()
-        for tiName in tiNameList:
-            s, e = tiMapDict[tiName]["tRange"]
-            graph = typeset.graphDuration(totalDur, s, e, graphWidth, "_")
-            msg.append("%s%s\n" % (tiName.ljust(lang.LMARGINW), graph))
-            for tcName in list(tiMapDict[tiName]["cloneDict"].keys()):
-                cloneS, cloneE = tiMapDict[tiName]["cloneDict"][tcName]["tRange"]
-                graph = typeset.graphDuration(totalDur, cloneS, cloneE, graphWidth, ".")
-                nameLabel = lang.TAB + tcName.ljust((lang.LMARGINW - lang.TABW))
-                msg.append("%s%s\n" % (nameLabel, graph))
-        return "".join(msg)
-
-    def displayGfx(self, fmt, dir=None):
-        prefDict = self.ao.external.getPrefGroup("external")
-        barHEIGHT = 8  # height of each texture-bar
-        winWIDTH = 700  # should be able to be set w/ cmd-line arg
-        obj = graphEnsemble.TEmapCanvas(
-            self.ao, self.tiMapDict, barHEIGHT, winWIDTH, fmt
-        )
-        obj.show(dir, prefDict)
-
-    def displayGfxUtil(self, fmt, fp):
-        barHEIGHT = 8  # height of each texture-bar
-        winWIDTH = 540  # should be able to be set w/ cmd-line arg
-        obj = graphEnsemble.TEmapCanvas(
-            self.ao, self.tiMapDict, barHEIGHT, winWIDTH, fmt
-        )
-        # second arg sets openMedia to false
-        obj.write(fp, 0)
+    def displayGfx(self):
+        textures = []
+        for tName in sorted(self.tiMapDict.keys()):
+            entry = self.tiMapDict[tName]
+            clones = []
+            for cName in sorted(entry["cloneDict"].keys()):
+                clone = entry["cloneDict"][cName]
+                start, end = clone["tRange"]
+                clones.append((cName, start, end, clone["muteStatus"]))
+            start, end = entry["tRange"]
+            textures.append((tName, start, end, entry["muteStatus"], clones))
+        figureExt.ensembleMap(self._gfxPalette(), textures)
 
 
 class TEmidi(Command):
@@ -5792,12 +5706,12 @@ class TCmap(Command):
             self.tmRelation,
         )
 
-    def displayGfx(self, fmt, dir=None):
-        prefDict = self.ao.external.getPrefGroup("external")
-        obj = graphPmtr.TImapCanvas(
-            self.ao, self.tName, self.cName, self.tmRelation, self.xRelation, fmt
-        )
-        obj.show(dir, prefDict)
+    def displayGfx(self):
+        clone = self.ao.cloneLib.get(self.tName, self.cName)
+        splitSco = eventList.EventSequenceSplit(clone, "c")
+        splitSco.load("post")  # clones only have values after the texture module
+        splitSco.clean()  # remove parameters with string values
+        self._gfxParameterMap(splitSco, self.xRelation, 0)
 
 
 class TCdoc(Command):
@@ -7463,54 +7377,6 @@ class AOrm(_CommandAO):
         return "AthenaObject has removed"
 
 
-class APgfx(Command):
-    """toggles between graphics modes
-    note: this currently allows the selction of a visual mode that is not
-    available: for instance, tk can be selected on a plat that does not have tk
-    all command objs that call graphics check the pref fmt against available fmts
-    """
-
-    def __init__(self, ao, args="", **keywords):
-        Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1  # display only
-        self.gatherSwitch = 1  # display only
-        self.cmdStr = "APgfx"
-
-    def _apGetGfxFmt(self):
-        while 1:
-            dlgVisMet = self.ao.external.getPref("athena", "gfxVisualMethod")
-            usrStr = dialog.askStr(lang.msgAPgfxSelect % dlgVisMet, self.termObj)
-            if usrStr == None:
-                return None
-            usrStr = drawer.imageFormatParser(usrStr)
-            if usrStr == None:
-                continue
-            else:
-                return usrStr
-
-    def gather(self):
-        args = self.args
-        self.formatStr = None
-        if args != "":
-            args = argTools.ArgOps(args)  # no strip
-            self.formatStr = drawer.imageFormatParser(args.get(0, "end"))
-            if self.formatStr == None:
-                return self._getUsage()
-        if self.formatStr == None:
-            self.formatStr = self._apGetGfxFmt()
-            if self.formatStr == None:
-                return lang.msgReturnCancel
-
-    def process(self):
-        self.ao.external.writePref("athena", "gfxVisualMethod", self.formatStr)
-
-    def display(self):
-        msg = lang.msgAPgfxConfirm % self.ao.external.getPref(
-            "athena", "gfxVisualMethod"
-        )
-        return msg
-
-
 class APcurs(Command):
     """toggles between cursor modes"""
 
@@ -8301,8 +8167,6 @@ class AUsys(Command):
         entryLines.append(["", ""])  # draw line
         value = self.ao.external.getPref("athena", "dlgVisualMethod")
         entryLines.append(["dialog method:", value])
-        value = self.ao.external.getPref("athena", "gfxVisualMethod")
-        entryLines.append(["graphics format:", value])
         value = self.ao.external.getPref("athena", "refreshMode", 1)
         entryLines.append(["refresh mode:", typeset.boolAsStr(value)])
 
@@ -8621,50 +8485,21 @@ class AUca(Command):
     def display(self):
         return "%s\ncomplete.\n" % self.ca
 
-    def displayGfx(self, fmt, dir=None):
-        # supply self as first arg to get instance of command
-        prefDict = self.ao.external.getPrefGroup("external")
-        obj = graphCellular.CAmapCanvas(
-            self.ao,
-            self.ca.getCells(
-                "table",
-                0,
-                self.ca.spec.get("s"),
-                None,
-                self.ca.spec.get("c"),
-                self.ca.spec.get("w"),
-            ),
-            self.ca.dstValues,
-            2,
-            2,
-            fmt,
+    def displayGfx(self):
+        cells = self.ca.getCells(
+            "table",
+            0,
+            self.ca.spec.get("s"),
             None,
-            self.ca.repr("line"),
+            self.ca.spec.get("c"),
+            self.ca.spec.get("w"),
         )
-        obj.show(dir, prefDict)
-
-    def displayGfxUtil(self, fmt, fp):
-        # this method is for use in auto-documentation generation
-        # can supply complete path rather than just a directory
-        obj = graphCellular.CAmapCanvas(
-            self.ao,
-            self.ca.getCells(
-                "table",
-                0,
-                self.ca.spec.get("s"),
-                None,
-                self.ca.spec.get("c"),
-                self.ca.spec.get("w"),
-            ),
-            self.ca.dstValues,
-            2,
-            2,
-            fmt,
-            None,
-            self.ca.repr("line"),
-        )
-        # second arg sets openMedia to false
-        obj.write(fp, 0)
+        # discrete values are shaded relative to the largest one
+        if self.ca.dstValues != None:
+            maxValue = self.ca.dstValues[-1]
+        else:
+            maxValue = None
+        figureExt.automatonMap(self._gfxPalette(), self.ca.repr("line"), cells, maxValue)
 
 
 class AUbug(Command):
@@ -8953,6 +8788,21 @@ class Test(unittest.TestCase):
         interpreter.cmd("TPsd 300")
         second = random.random()
         self.assertEqual(first, second)
+
+    def testGraphics(self):
+        from athenaCL.libATH import athenaObj
+
+        interpreter = athenaObj.Interpreter("terminal")
+        for cmd in (
+            "emo m",
+            "tin a 0",
+            "tpmap 120 ru,0,1",
+            "timap",
+            "temap",
+            "auca f{t}x{81}y{40}k{3}r{1} 1086",
+        ):
+            ok, result = interpreter.cmd(cmd)
+            self.assertEqual(ok, True, "%s: %s" % (cmd, result))
 
 
 # -----------------------------------------------------------------||||||||||||--

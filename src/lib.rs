@@ -3,4 +3,5 @@
 pub use interpreter::init_py_interpreter;
 
 pub mod app;
+mod figure;
 mod interpreter;

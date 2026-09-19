@@ -13,8 +13,6 @@ import os, math, copy
 from athenaCL.libATH import pitchTools
 from athenaCL.libATH import drawer
 from athenaCL.libATH import unit
-from athenaCL.libATH import imageTools
-from athenaCL.libATH.libGfx import graphPmtr
 
 
 _MOD = "spectral.py"

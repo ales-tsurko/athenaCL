@@ -247,9 +247,6 @@ Apple, Macintosh, Mac OS, and QuickTime are trademarks or registered trademarks 
     msgFileIoError = "error occurred while trying to write %s."
     msgPlatformError = "this command is not available on %s platforms.\n"
 
-    msgGfxTkError = "install Tk in Python for tk graphic output."
-    msgGfxIdleError = "tk graphics are not available during an IDLE session."
-    msgGfxPilError = "install PIL in Python for jpg or png graphic output."
 
     msgReturnToExit = "press return to exit:"
     msgPleaseWait = "processing."
@@ -511,8 +508,6 @@ Apple, Macintosh, Mac OS, and QuickTime are trademarks or registered trademarks 
     msgAOnotAOdoc = TAB + "this is not an AthenaObject document.\n"
     msgAOselAdirOrSdir = "select directory to set: scratch or audio. (x or a):"
 
-    msgAPgfxSelect = "active graphics format: %s.\nselect text, eps, tk, jpg, png. (t, e, k, j, or p):"
-    msgAPgfxConfirm = "graphics format changed to %s.\n"
     msgAPcursorTool = "cursor tool set to %s.\n"
     msgAPrefreshMode = "refresh mode set to %s.\n"
 

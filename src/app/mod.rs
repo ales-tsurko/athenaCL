@@ -3,4 +3,5 @@
 pub use app::*;
 
 mod app;
+mod figure;
 mod player;
