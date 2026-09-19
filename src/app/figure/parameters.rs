@@ -15,8 +15,8 @@ use iced::{
 };
 
 use super::{
-    action, fill, format_value, repaint, to_index, Anchor, Gesture, Label, Message, Palette,
-    Pointer, Ticks, Window,
+    action, bar_action, fill, format_value, repaint, to_index, Anchor, Bar, Gesture, Label,
+    Message, Palette, Pointer, Ticks, Window, BAR_HEIGHT,
 };
 use crate::figure::{Domain, Graph, Mark, Parameters};
 
@@ -62,7 +62,7 @@ fn block_height(parameters: &Parameters) -> f32 {
 
 fn height(parameters: &Parameters) -> f32 {
     let count = parameters.graphs.len() as f32;
-    (count * block_height(parameters) + (count - 1.0) * GAP).max(0.0)
+    (count * block_height(parameters) + (count - 1.0) * GAP).max(0.0) + GAP + BAR_HEIGHT
 }
 
 struct Plot<'a> {
@@ -73,6 +73,7 @@ struct Plot<'a> {
 #[derive(Debug, Default)]
 struct State {
     pointer: Pointer,
+    bar: Bar,
     window: Window,
     cache: canvas::Cache,
     painted: Cell<Option<Palette>>,
@@ -88,8 +89,18 @@ impl canvas::Program<Message> for Plot<'_> {
         bounds: Rectangle,
         cursor: mouse::Cursor,
     ) -> Option<widget::Action<Message>> {
-        let gesture = state.pointer.gesture(event, bounds, cursor);
         let layout = Layout::new(self.parameters, self.palette, state.window, bounds.width);
+        if let Some(changed) =
+            state
+                .bar
+                .update(event, bounds, layout.bar_area(), cursor, &mut state.window)
+        {
+            if changed {
+                state.cache.clear();
+            }
+            return bar_action(changed);
+        }
+        let gesture = state.pointer.gesture(event, bounds, cursor);
         let plot = layout.plot(0);
         let changed = match gesture {
             Gesture::Zoom { at, factor } => {
@@ -100,7 +111,7 @@ impl canvas::Program<Message> for Plot<'_> {
             }
             Gesture::Pan { delta, .. } => state.window.pan(f64::from(-delta.x / plot.width)),
             Gesture::Reset => state.window.reset(),
-            Gesture::None | Gesture::Press | Gesture::Click(_) => false,
+            Gesture::None | Gesture::Hover | Gesture::Press | Gesture::Click(_) => false,
         };
         if changed {
             state.cache.clear();
@@ -136,11 +147,12 @@ impl canvas::Program<Message> for Plot<'_> {
         bounds: Rectangle,
         cursor: mouse::Cursor,
     ) -> mouse::Interaction {
-        if state.pointer.dragging() {
+        if state.pointer.dragging() || state.bar.dragging() {
             return mouse::Interaction::Grabbing;
         }
         let layout = Layout::new(self.parameters, self.palette, state.window, bounds.width);
         match cursor.position_in(bounds) {
+            Some(at) if layout.bar_area().contains(at) => mouse::Interaction::Pointer,
             Some(at) if layout.over_graphs(at) => mouse::Interaction::Crosshair,
             _ => mouse::Interaction::default(),
         }
@@ -151,6 +163,7 @@ impl canvas::Program<Message> for Plot<'_> {
 struct Layout<'a> {
     parameters: &'a Parameters,
     palette: Palette,
+    window: Window,
     width: f32,
     /// Room for the value labels, left of the graphs.
     left: f32,
@@ -167,11 +180,17 @@ impl<'a> Layout<'a> {
         Self {
             parameters,
             palette,
+            window,
             width,
             left: labels_width(parameters) + GUTTER,
             extent,
             visible: (extent.0 + window.start * span, extent.0 + window.end * span),
         }
+    }
+
+    /// The bar's row, under the graphs.
+    fn bar_area(&self) -> Rectangle {
+        Bar::area(self.plot(0), height(self.parameters) - BAR_HEIGHT)
     }
 
     /// The narrowest visible part, as a fraction of the whole axis.
@@ -319,6 +338,7 @@ impl<'a> Layout<'a> {
                 palette.title,
             );
         }
+        Bar::draw(frame, self.bar_area(), self.window, palette);
     }
 
     /// Value grid lines with their labels, left of the plot.

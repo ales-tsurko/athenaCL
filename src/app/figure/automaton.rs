@@ -14,8 +14,8 @@ use iced::{
 };
 
 use super::{
-    action, fill, format_value, outline, repaint, to_index, Anchor, Gesture, Label, Message,
-    Palette, Pointer, Window, LABEL_SCALE,
+    action, bar_action, fill, format_value, outline, repaint, to_index, Anchor, Bar, Gesture,
+    Label, Message, Palette, Pointer, Window, BAR_HEIGHT, LABEL_SCALE,
 };
 use crate::figure::Automaton;
 
@@ -79,6 +79,7 @@ impl View {
 #[derive(Debug, Default)]
 struct State {
     pointer: Pointer,
+    bar: Bar,
     view: View,
     cache: canvas::Cache,
     painted: Cell<Option<Palette>>,
@@ -94,15 +95,27 @@ impl canvas::Program<Message> for Cells<'_> {
         bounds: Rectangle,
         cursor: mouse::Cursor,
     ) -> Option<widget::Action<Message>> {
-        let gesture = state.pointer.gesture(event, bounds, cursor);
         let layout = Layout::new(self.automaton, self.palette, state.view, bounds.width);
+        if let Some(changed) = state.bar.update(
+            event,
+            bounds,
+            layout.bar_area(),
+            cursor,
+            &mut state.view.cells,
+        ) {
+            if changed {
+                state.cache.clear();
+            }
+            return bar_action(changed);
+        }
+        let gesture = state.pointer.gesture(event, bounds, cursor);
         let changed = match gesture {
             Gesture::Zoom { at, factor } => {
                 state.view.zoom(at, factor, layout.grid, layout.min_span())
             }
             Gesture::Pan { delta, .. } => state.view.pan(delta, layout.grid),
             Gesture::Reset => state.view.reset(),
-            Gesture::None | Gesture::Press | Gesture::Click(_) => false,
+            Gesture::None | Gesture::Hover | Gesture::Press | Gesture::Click(_) => false,
         };
         if changed {
             state.cache.clear();
@@ -138,11 +151,12 @@ impl canvas::Program<Message> for Cells<'_> {
         bounds: Rectangle,
         cursor: mouse::Cursor,
     ) -> mouse::Interaction {
-        if state.pointer.dragging() {
+        if state.pointer.dragging() || state.bar.dragging() {
             return mouse::Interaction::Grabbing;
         }
         let layout = Layout::new(self.automaton, self.palette, state.view, bounds.width);
         match cursor.position_in(bounds) {
+            Some(at) if layout.bar_area().contains(at) => mouse::Interaction::Pointer,
             Some(at) if layout.grid.contains(at) => mouse::Interaction::Crosshair,
             _ => mouse::Interaction::default(),
         }
@@ -191,7 +205,12 @@ impl<'a> Layout<'a> {
     fn height(&self) -> f32 {
         // the title and, under it, the hovered cell's three lines
         let text = (self.automaton.title.len() + 4) as f32 * LINE;
-        TOP + self.grid.height.max(text) + BOTTOM
+        TOP + self.grid.height.max(text) + BOTTOM + BAR_HEIGHT
+    }
+
+    /// The bar's row, under the cells.
+    fn bar_area(&self) -> Rectangle {
+        Bar::area(self.grid, self.height() - BAR_HEIGHT)
     }
 
     /// The narrowest visible part, as a fraction of either direction, which keeps cells square.
@@ -280,6 +299,7 @@ impl<'a> Layout<'a> {
         }
         let whole = Rectangle::new(Point::ORIGIN, Size::new(self.width, self.height()));
         outline(frame, self.grid.expand(1.0), whole, 1.0, palette.grid);
+        Bar::draw(frame, self.bar_area(), self.view.cells, palette);
     }
 
     /// Frame the cell under the pointer, and show where it is and its value.

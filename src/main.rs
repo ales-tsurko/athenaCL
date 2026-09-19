@@ -17,8 +17,7 @@ fn main() -> iced::Result {
             ..Default::default()
         })
         .window(iced::window::Settings {
-            min_size: Some((800.0, 600.0).into()),
-            max_size: Some((800.0, f32::MAX).into()),
+            min_size: Some((app::MIN_WINDOW_SIZE).into()),
             ..Default::default()
         })
         .font(include_bytes!(

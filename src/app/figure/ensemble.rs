@@ -14,8 +14,8 @@ use iced::{
 };
 
 use super::{
-    action, fill, outline, repaint, to_index, Anchor, Gesture, Label, Message, Palette, Pointer,
-    Ticks, Window, LABEL_HEIGHT, LABEL_SCALE,
+    action, bar_action, fill, outline, repaint, to_index, Anchor, Bar, Gesture, Label, Message,
+    Palette, Pointer, Ticks, Window, BAR_HEIGHT, LABEL_HEIGHT, LABEL_SCALE,
 };
 use crate::figure::{Ensemble, Lane};
 
@@ -53,7 +53,7 @@ pub(super) fn view<'a>(
         palette,
     })
     .width(Length::Fill)
-    .height(TOP + lanes * (LANE + LANE_GAP) + LANE_GAP + BOTTOM)
+    .height(TOP + lanes * (LANE + LANE_GAP) + LANE_GAP + BOTTOM + BAR_HEIGHT)
     .into()
 }
 
@@ -93,6 +93,7 @@ struct Timeline<'a> {
 #[derive(Debug, Default)]
 struct State {
     pointer: Pointer,
+    bar: Bar,
     window: Window,
     cache: canvas::Cache,
     painted: Cell<Option<Palette>>,
@@ -108,8 +109,18 @@ impl canvas::Program<Message> for Timeline<'_> {
         bounds: Rectangle,
         cursor: mouse::Cursor,
     ) -> Option<widget::Action<Message>> {
-        let gesture = state.pointer.gesture(event, bounds, cursor);
         let layout = Layout::new(self.ensemble, self.palette, state.window, bounds.width);
+        if let Some(changed) =
+            state
+                .bar
+                .update(event, bounds, layout.bar_area(), cursor, &mut state.window)
+        {
+            if changed {
+                state.cache.clear();
+            }
+            return bar_action(changed);
+        }
+        let gesture = state.pointer.gesture(event, bounds, cursor);
         let map = layout.map;
         let mut message = None;
         let changed = match gesture {
@@ -125,7 +136,7 @@ impl canvas::Program<Message> for Timeline<'_> {
                 message = layout.row_at(at).map(row_message);
                 false
             }
-            Gesture::None | Gesture::Press => false,
+            Gesture::None | Gesture::Hover | Gesture::Press => false,
         };
         if changed {
             state.cache.clear();
@@ -162,11 +173,12 @@ impl canvas::Program<Message> for Timeline<'_> {
         bounds: Rectangle,
         cursor: mouse::Cursor,
     ) -> mouse::Interaction {
-        if state.pointer.dragging() {
+        if state.pointer.dragging() || state.bar.dragging() {
             return mouse::Interaction::Grabbing;
         }
         let layout = Layout::new(self.ensemble, self.palette, state.window, bounds.width);
         match cursor.position_in(bounds) {
+            Some(at) if layout.bar_area().contains(at) => mouse::Interaction::Pointer,
             Some(at) if layout.row_at(at).is_some() => mouse::Interaction::Pointer,
             _ => mouse::Interaction::default(),
         }
@@ -197,6 +209,7 @@ fn lane_colors(row: &Row<'_>, palette: Palette) -> (Color, Color) {
 /// Where everything is, for a width and zoom.
 struct Layout<'a> {
     palette: Palette,
+    window: Window,
     rows: Vec<Row<'a>>,
     width: f32,
     /// Where the bars are drawn.
@@ -226,6 +239,7 @@ impl<'a> Layout<'a> {
         let duration = if end > 0.0 { end } else { 1.0 };
         Self {
             palette,
+            window,
             rows,
             width,
             map,
@@ -236,6 +250,11 @@ impl<'a> Layout<'a> {
 
     fn min_span(&self) -> f64 {
         MIN_SECONDS / self.duration
+    }
+
+    /// The bar's row, under the lanes.
+    fn bar_area(&self) -> Rectangle {
+        Bar::area(self.map, self.map.y + self.map.height + BOTTOM)
     }
 
     fn name_x(row: &Row<'_>) -> f32 {
@@ -299,6 +318,7 @@ impl<'a> Layout<'a> {
 
         self.draw_grid(frame);
         self.draw_lanes(frame);
+        Bar::draw(frame, self.bar_area(), self.window, palette);
     }
 
     /// Time lines in the grid color halfway between labels, and stronger labeled lines.
@@ -386,13 +406,18 @@ impl<'a> Layout<'a> {
         outline(frame, self.bar(index), self.map, 1.0, palette.hover);
         let muted = if lane.muted { " muted" } else { "" };
         let text = format!("{} {:.2}-{:.2}{muted}", lane.name, lane.start, lane.end);
-        Label::new(&text).draw_on(
-            frame,
-            Point::new(self.width - RIGHT, GUTTER),
-            Anchor::NorthEast,
-            palette.label,
+        let label = Label::new(&text);
+        let at = Point::new(self.width - RIGHT, GUTTER);
+        // the readout shares its row with the times, so it hides them to the edge
+        let bounds = label
+            .bounds(at, Anchor::NorthEast)
+            .expand(LABEL_SCALE * 2.0);
+        frame.fill_rectangle(
+            bounds.position(),
+            Size::new(self.width - bounds.x, bounds.height),
             palette.page,
         );
+        label.draw(frame, at, Anchor::NorthEast, palette.label);
     }
 }
 
@@ -424,10 +449,12 @@ mod tests {
                 Texture {
                     lane: lane("a", 0.0, 10.0),
                     clones: vec![lane("x", 2.0, 12.0)],
+                    events: Vec::new(),
                 },
                 Texture {
                     lane: lane("b", 5.0, 20.0),
                     clones: Vec::new(),
+                    events: Vec::new(),
                 },
             ],
         }

@@ -491,6 +491,21 @@ impl Slots {
         Self { domain, onsets }
     }
 
+    /// When the texture starts: beats are counted from there, not from the hour.
+    fn origin(&self) -> f64 {
+        self.onsets.first().copied().unwrap_or(0.0)
+    }
+
+    /// Which beat, counted from the texture's start, is `seconds` into `event`.
+    fn beat(&self, event: &Event, seconds: f64) -> f64 {
+        let tempo = if event.tempo > 0.0 {
+            event.tempo
+        } else {
+            120.0
+        };
+        (event.time - self.origin() + seconds) * tempo / 60.0
+    }
+
     /// The x axis value of `seconds` into `event`.
     fn position(&self, event: &Event, seconds: f64) -> f64 {
         match self.domain {
@@ -698,7 +713,7 @@ fn parts(
                 events: vec![index],
                 staff,
                 position: slots.position(event, seconds),
-                beat: event.time * tempo / 60.0 + elapsed,
+                beat: slots.beat(event, seconds),
                 seconds: value.beats * 60.0 / tempo,
                 value,
                 pitches: pitches.clone(),
@@ -750,7 +765,8 @@ impl Engraver {
                 self.rest(part);
                 continue;
             }
-            // shorter than a beat, in the same beat and tuplet as the note before: beamed to it
+            // beamed to the note before when both are shorter than a beat, they fall in the
+            // same beat of the same staff and tuplet, and nothing comes between them
             let beamed = groups
                 .last()
                 .and_then(|group| group.last())
@@ -760,7 +776,7 @@ impl Engraver {
                         && last.staff == part.staff
                         && last.value.tuplet == part.value.tuplet
                         && beat_of(last.beat) == beat_of(part.beat)
-                        && !last.tied
+                        && (last.beat + last.value.beats - part.beat).abs() < 1e-6
                 });
             match groups.last_mut() {
                 Some(group) if beamed => group.push(part),
@@ -1054,7 +1070,7 @@ impl Engraver {
                     continue;
                 }
                 let mut j = k;
-                while reaches(j + 1) {
+                while reaches(j + 1) && !(level > 0 && subdivides(group, j + 1)) {
                     j += 1;
                 }
                 let (Some(first), Some(last)) = (group.get(k), group.get(j)) else {
@@ -1307,6 +1323,18 @@ struct Placed {
     trim: Trim,
     accidental: Option<Glyph>,
     name: String,
+}
+
+/// Whether a group's secondary beams break before its note at `index`. They break at the halves of
+/// a beat, once a group runs to more than four notes, so that the beat's subdivisions read.
+fn subdivides(group: &[&Written], index: usize) -> bool {
+    if group.len() <= 4 || index == 0 {
+        return false;
+    }
+    group.get(index).is_some_and(|part| {
+        let within = part.beat - part.beat.floor();
+        (within * 2.0).fract().abs() < 1e-6
+    })
 }
 
 /// The count of a tuplet's value.
@@ -1569,6 +1597,68 @@ mod tests {
             })
             .count();
         assert_eq!(flags, 0);
+    }
+
+    /// The beams of a score, longest first.
+    fn beams(score: &Score) -> Vec<i32> {
+        score
+            .items
+            .iter()
+            .filter_map(|item| match item {
+                Item::Bar {
+                    from,
+                    to,
+                    height: BEAM,
+                    ..
+                } => Some((to.position - from.position, from.dx, to.dx)),
+                _ => None,
+            })
+            .map(|(span, from, to)| ((span * 1000.0) as i32).max(to - from))
+            .collect()
+    }
+
+    #[test]
+    fn notes_are_beamed_by_beat_wherever_the_texture_starts() {
+        // four eighths, two beats, starting off the hour's beat grid
+        let events: Vec<Event> = (0..4)
+            .map(|i| event(10.1 + f64::from(i) * 0.25, 0.25, 0.0))
+            .collect();
+        let score = Score::new(&events, Domain::Time);
+        assert_eq!(beams(&score).len(), 2, "a beam for each beat");
+    }
+
+    #[test]
+    fn a_gap_breaks_a_beam() {
+        // two eighths in one beat, with a gap between them
+        let score = Score::new(
+            &[event(0.0, 0.25, 0.0), event(0.375, 0.25, 2.0)],
+            Domain::Time,
+        );
+        assert!(beams(&score).is_empty(), "they are flagged instead");
+        assert_eq!(
+            score
+                .items
+                .iter()
+                .filter(|item| matches!(
+                    item,
+                    Item::Glyph {
+                        glyph: Glyph::Flag8Up,
+                        ..
+                    }
+                ))
+                .count(),
+            2
+        );
+    }
+
+    #[test]
+    fn secondary_beams_break_at_the_beat_halves() {
+        // eight thirty-seconds in one beat: one beam across, the others in halves
+        let events: Vec<Event> = (0..8)
+            .map(|i| event(f64::from(i) * 0.0625, 0.0625, 0.0))
+            .collect();
+        let score = Score::new(&events, Domain::Time);
+        assert_eq!(beams(&score).len(), 5, "one, then two and two");
     }
 
     #[test]

@@ -138,9 +138,23 @@ class Command(object):
 
     def _gfxEvents(self, textureObj):
         """the events of a scored texture, as the gui's score shows them:
-        time, duration, sustain, accent, pitch, amplitude and tempo"""
+        time, duration, sustain, accent, pitch, amplitude and tempo
+
+        a texture that scores without rhythms, like DroneSustain, stores no
+        tempo with its events; the texture's own tempo stands in for it"""
+        bpmDefault = textureObj.pmtrObjDict["beatT"].currentValue
+        if bpmDefault == None:
+            bpmDefault = textureObj.pmtrObjDict["beatT"](0)
         return [
-            (e["time"], e["dur"], e["sus"], e["acc"], e["ps"], e["amp"], e["bpm"])
+            (
+                e["time"],
+                e["dur"],
+                e["sus"],
+                e["acc"],
+                e["ps"],
+                e["amp"],
+                e["bpm"] if e["bpm"] != None else bpmDefault,
+            )
             for e in textureObj.getScore().list()
         ]
 
@@ -4971,7 +4985,10 @@ class TEmap(Command):
                 start, end = clone["tRange"]
                 clones.append((cName, start, end, clone["muteStatus"]))
             start, end = entry["tRange"]
-            textures.append((tName, start, end, entry["muteStatus"], clones))
+            events = self._gfxEvents(self.ao.textureLib[tName])
+            textures.append(
+                (tName, start, end, entry["muteStatus"], clones, events)
+            )
         figureExt.ensembleMap(textures)
 
 

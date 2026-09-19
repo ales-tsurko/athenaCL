@@ -78,18 +78,7 @@ pub(super) mod _inner {
                 marks,
             })
         })?;
-        let events = map(&events, vm, |event| {
-            let [time, duration, sustain, accent, pitch, amplitude, tempo] = items(&event, vm)?;
-            Ok(Event {
-                time: float(time, vm)?,
-                duration: float(duration, vm)?,
-                sustain: float(sustain, vm)?,
-                sounds: float(accent, vm)? > 0.0,
-                pitch: float(pitch, vm)?,
-                amplitude: float(amplitude, vm)?,
-                tempo: float(tempo, vm)?,
-            })
-        })?;
+        let events = events_from(&events, vm)?;
         show(Figure::Parameters(Parameters {
             domain,
             detailed: detailed.into(),
@@ -101,8 +90,9 @@ pub(super) mod _inner {
 
     /// `ensembleMap(textures)`: textures and clones over time, for `TEmap`.
     ///
-    /// `textures` is a list of `(name, start, end, muted, clones)`, where `clones` is a list of
-    /// `(name, start, end, muted)`.
+    /// `textures` is a list of `(name, start, end, muted, clones, events)`, where `clones` is a
+    /// list of `(name, start, end, muted)` and `events` are the texture's, as `parameterMap`
+    /// takes them.
     #[pyfunction(name = "ensembleMap")]
     fn ensemble_map(textures: PyObjectRef, vm: &VirtualMachine) -> PyResult<()> {
         let lane = |fields: [PyObjectRef; 4]| -> PyResult<Lane> {
@@ -115,10 +105,11 @@ pub(super) mod _inner {
             })
         };
         let textures = map(&textures, vm, |texture| {
-            let [name, start, end, muted, clones] = items(&texture, vm)?;
+            let [name, start, end, muted, clones, events] = items(&texture, vm)?;
             Ok(Texture {
                 lane: lane([name, start, end, muted])?,
                 clones: map(&clones, vm, |clone| lane(items(&clone, vm)?))?,
+                events: events_from(&events, vm)?,
             })
         })?;
         show(Figure::Ensemble(Ensemble { textures }));
@@ -148,6 +139,22 @@ pub(super) mod _inner {
             max: max.map(Into::into),
         }));
         Ok(())
+    }
+
+    /// Read events as `(time, duration, sustain, accent, pitch, amplitude, tempo)`.
+    fn events_from(events: &PyObject, vm: &VirtualMachine) -> PyResult<Vec<Event>> {
+        map(events, vm, |event| {
+            let [time, duration, sustain, accent, pitch, amplitude, tempo] = items(&event, vm)?;
+            Ok(Event {
+                time: float(time, vm)?,
+                duration: float(duration, vm)?,
+                sustain: float(sustain, vm)?,
+                sounds: float(accent, vm)? > 0.0,
+                pitch: float(pitch, vm)?,
+                amplitude: float(amplitude, vm)?,
+                tempo: float(tempo, vm)?,
+            })
+        })
     }
 
     fn show(figure: Figure) {

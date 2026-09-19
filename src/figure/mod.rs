@@ -96,6 +96,8 @@ pub struct Texture {
     pub lane: Lane,
     /// Its clones, in display order.
     pub clones: Vec<Lane>,
+    /// Its events, which can also be shown as a score.
+    pub events: Vec<Event>,
 }
 
 /// A texture or clone on the timeline.

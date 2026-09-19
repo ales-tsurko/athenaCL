@@ -24,7 +24,7 @@ use iced::{
     Color, Element, Point, Rectangle, Size, Vector,
 };
 
-pub(crate) use self::score::view as score;
+pub(crate) use self::score::{view as score, Part};
 use crate::figure::{
     font::{Bitmap, Font},
     Figure,
@@ -358,11 +358,116 @@ impl Window {
     }
 }
 
+/// The bar under a figure showing the part of its x axis in view.
+const BAR_TRACK: f32 = 1.0;
+const BAR_THUMB: f32 = 3.0;
+/// How tall the bar's row is: the thumb, and room around it to grab.
+const BAR_HEIGHT: f32 = 11.0;
+/// The shortest the thumb gets, however far the figure is zoomed in.
+const BAR_MIN: f32 = 2.0 * BAR_THUMB;
+
+/// A figure's scrollbar: the bar under it showing the part of its x axis in view. Dragging it, or
+/// clicking the track, moves the view.
+#[derive(Debug, Default)]
+struct Bar {
+    /// Where the thumb was grabbed, as a fraction of its width.
+    grabbed: Option<f32>,
+}
+
+impl Bar {
+    /// The bar's row under a figure, across the `span` its axis is drawn over.
+    fn area(span: Rectangle, top: f32) -> Rectangle {
+        Rectangle::new(Point::new(span.x, top), Size::new(span.width, BAR_HEIGHT))
+    }
+
+    /// Where the thumb is in `area`.
+    fn thumb(area: Rectangle, window: Window) -> Rectangle {
+        let width = (window.span() as f32 * area.width).max(BAR_MIN);
+        let left = (area.x + window.start as f32 * area.width).min(area.x + area.width - width);
+        Rectangle::new(
+            Point::new(left, area.y + (BAR_HEIGHT - BAR_THUMB) / 2.0),
+            Size::new(width, BAR_THUMB),
+        )
+    }
+
+    fn draw(frame: &mut Frame, area: Rectangle, window: Window, palette: Palette) {
+        frame.fill_rectangle(
+            Point::new(area.x, area.y + (BAR_HEIGHT - BAR_TRACK) / 2.0),
+            Size::new(area.width, BAR_TRACK),
+            palette.track,
+        );
+        let thumb = Self::thumb(area, window);
+        frame.fill_rectangle(thumb.position(), thumb.size(), palette.label);
+    }
+
+    /// Handle an event over the bar, moving `window`: `None` when the event isn't the bar's,
+    /// otherwise whether the window moved.
+    fn update(
+        &mut self,
+        event: &canvas::Event,
+        bounds: Rectangle,
+        area: Rectangle,
+        cursor: mouse::Cursor,
+        window: &mut Window,
+    ) -> Option<bool> {
+        match event {
+            canvas::Event::Mouse(mouse::Event::ButtonPressed(mouse::Button::Left)) => {
+                let at = cursor.position_in(bounds)?;
+                if !area.contains(at) {
+                    return None;
+                }
+                let thumb = Self::thumb(area, *window);
+                self.grabbed = Some(if thumb.contains(at) {
+                    (at.x - thumb.x) / thumb.width
+                } else {
+                    0.5
+                });
+                let start = self.move_to(at.x, area, *window);
+                Some(window.place(start, window.span()))
+            }
+            canvas::Event::Mouse(mouse::Event::CursorMoved { .. }) => {
+                self.grabbed?;
+                // the event is in window coordinates, while the bounds are the output's
+                let at = cursor.position()? - (bounds.position() - Point::ORIGIN);
+                let start = self.move_to(at.x, area, *window);
+                Some(window.place(start, window.span()))
+            }
+            canvas::Event::Mouse(mouse::Event::ButtonReleased(mouse::Button::Left)) => {
+                self.grabbed.take().map(|_| false)
+            }
+            _ => None,
+        }
+    }
+
+    /// Where the window starts when the thumb is grabbed at `x`.
+    fn move_to(&self, x: f32, area: Rectangle, window: Window) -> f64 {
+        let grabbed = self.grabbed.unwrap_or(0.5);
+        let width = (window.span() as f32 * area.width).max(BAR_MIN);
+        let left = x - grabbed * width;
+        f64::from((left - area.x) / area.width.max(1.0))
+    }
+
+    fn dragging(&self) -> bool {
+        self.grabbed.is_some()
+    }
+}
+
+/// The action for an event the bar took: it never passes through.
+fn bar_action<Message>(changed: bool) -> Option<widget::Action<Message>> {
+    Some(if changed {
+        widget::Action::request_redraw().and_capture()
+    } else {
+        widget::Action::capture()
+    })
+}
+
 /// What a pointer event asks of a figure.
 #[derive(Debug, Clone, Copy, PartialEq)]
 enum Gesture {
     /// Nothing: let the event through, so that scrolling scrolls the output.
     None,
+    /// The pointer moved over the figure, which shows what it's over.
+    Hover,
     /// A press, which may become a click or a drag.
     Press,
     /// Zoom by `factor` (more than 1 zooms in) around `at`.
@@ -447,7 +552,11 @@ impl Pointer {
             }
             canvas::Event::Mouse(mouse::Event::CursorMoved { .. }) => {
                 let Some(drag) = &mut self.drag else {
-                    return Gesture::None;
+                    return if cursor.is_over(bounds) {
+                        Gesture::Hover
+                    } else {
+                        Gesture::None
+                    };
                 };
                 // the event is in window coordinates, while the cursor, like the bounds, is
                 // translated by the scrolling of the output
@@ -492,7 +601,7 @@ fn action<Message>(
     message: Option<Message>,
 ) -> Option<widget::Action<Message>> {
     let captured = match gesture {
-        Gesture::None => false,
+        Gesture::None | Gesture::Hover => false,
         // sideways scrolling passes through when there's nothing to pan
         Gesture::Pan {
             dragging: false, ..
@@ -501,7 +610,7 @@ fn action<Message>(
     };
     let action = match message {
         Some(message) => Some(widget::Action::publish(message)),
-        None if changed => Some(widget::Action::request_redraw()),
+        None if changed || gesture == Gesture::Hover => Some(widget::Action::request_redraw()),
         None if captured => Some(widget::Action::capture()),
         None => None,
     };
@@ -716,14 +825,25 @@ mod tests {
     }
 
     #[test]
-    fn moving_without_a_drag_ignores() {
+    fn moving_without_a_drag_hovers() {
         let mut pointer = Pointer::default();
         let moved = mouse_event(mouse::Event::CursorMoved {
             position: Point::new(100.0, 150.0),
         });
         let at = mouse::Cursor::Available(Point::new(100.0, 550.0));
 
-        assert_eq!(pointer.gesture(&moved, scrolled(), at), Gesture::None);
+        assert_eq!(pointer.gesture(&moved, scrolled(), at), Gesture::Hover);
+    }
+
+    #[test]
+    fn moving_outside_ignores() {
+        let mut pointer = Pointer::default();
+        let moved = mouse_event(mouse::Event::CursorMoved {
+            position: Point::new(100.0, 150.0),
+        });
+        let outside = mouse::Cursor::Available(Point::new(100.0, 50.0));
+
+        assert_eq!(pointer.gesture(&moved, scrolled(), outside), Gesture::None);
     }
 
     #[test]

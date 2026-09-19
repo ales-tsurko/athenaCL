@@ -22,11 +22,14 @@ use super::{
     theme::{Colors, Mode},
 };
 use crate::{
-    figure::{notation::Score, Figure},
+    figure::{notation::Score, Domain, Event, Figure},
     interpreter,
 };
 
+/// The page's width: the window resizes, the page doesn't.
 const WINDOW_WIDTH: f32 = 800.0;
+/// The smallest the window goes: the page, and room for a few entries.
+pub const MIN_WINDOW_SIZE: (f32, f32) = (WINDOW_WIDTH, 480.0);
 const WINDOW_PADDING: f32 = 40.0;
 /// The scrollbar: a hairline track and a thin thumb, easy to grab.
 const SCROLLBAR: f32 = 1.0;
@@ -138,8 +141,9 @@ pub(crate) struct Prompt {
 #[derive(Debug)]
 pub(crate) struct FigureOutput {
     figure: Arc<Figure>,
-    /// Its events as a score, when it has any.
-    score: Option<Arc<Score>>,
+    /// Its events as a score: a texture's, or one for each of an ensemble's. Empty when the
+    /// figure has no events.
+    scores: Vec<Arc<Score>>,
     view: View,
 }
 
@@ -313,15 +317,9 @@ fn update_interpreter(state: &mut State, message: interpreter::Message) -> Task<
             Task::none()
         }
         interpreter::Message::Figure(figure) => {
-            let score = match figure.as_ref() {
-                Figure::Parameters(parameters) if !parameters.events.is_empty() => {
-                    Some(Arc::new(Score::new(&parameters.events, parameters.domain)))
-                }
-                _ => None,
-            };
             state.output.push(Output::Figure(FigureOutput {
+                scores: engrave(&figure),
                 figure,
-                score,
                 view: state.figure_view,
             }));
 
@@ -358,6 +356,29 @@ fn update_interpreter(state: &mut State, message: interpreter::Message) -> Task<
             Task::none()
         }
         _ => Task::none(),
+    }
+}
+
+/// A figure's events as a score: a texture's, or one for each of an ensemble's.
+fn engrave(figure: &Figure) -> Vec<Arc<Score>> {
+    let score = |events: &[Event], domain| Arc::new(Score::new(events, domain));
+    match figure {
+        Figure::Parameters(parameters) if !parameters.events.is_empty() => {
+            vec![score(&parameters.events, parameters.domain)]
+        }
+        Figure::Ensemble(ensemble)
+            if ensemble
+                .textures
+                .iter()
+                .any(|texture| !texture.events.is_empty()) =>
+        {
+            ensemble
+                .textures
+                .iter()
+                .map(|texture| score(&texture.events, Domain::Time))
+                .collect()
+        }
+        _ => Vec::new(),
     }
 }
 
@@ -400,7 +421,7 @@ pub fn view(state: &State) -> Element<'_, Message> {
     .width(Length::Fill)
     .height(Length::Fill);
 
-    column![
+    let page = column![
         view_header(state, colors),
         rule(colors.ink, 1.0),
         container(log)
@@ -410,9 +431,13 @@ pub fn view(state: &State) -> Element<'_, Message> {
         rule(colors.ink, 1.0),
         view_bottom_bar(state, colors),
     ]
-    .width(Length::Fill)
-    .height(Length::Fill)
-    .into()
+    .width(WINDOW_WIDTH)
+    .height(Length::Fill);
+
+    container(page)
+        .center_x(Length::Fill)
+        .height(Length::Fill)
+        .into()
 }
 
 /// The wordmark, the scratch folder and the look.
@@ -536,11 +561,38 @@ fn view_figure<'a>(
 ) -> Element<'a, Message> {
     let plot = figure::view(&output.figure, OUTPUT_WIDTH, &state.active_texture, palette)
         .map(Message::Figure);
-    let (Some(score), Figure::Parameters(parameters)) = (&output.score, output.figure.as_ref())
-    else {
-        return plot;
+    let (parts, domain) = match output.figure.as_ref() {
+        Figure::Parameters(parameters) => (
+            output
+                .scores
+                .iter()
+                .map(|score| figure::Part {
+                    name: "",
+                    score,
+                    events: &parameters.events,
+                })
+                .collect::<Vec<_>>(),
+            parameters.domain,
+        ),
+        Figure::Ensemble(ensemble) => (
+            ensemble
+                .textures
+                .iter()
+                .zip(&output.scores)
+                .map(|(texture, score)| figure::Part {
+                    name: &texture.lane.name,
+                    score,
+                    events: &texture.events,
+                })
+                .collect(),
+            Domain::Time,
+        ),
+        Figure::Automaton(_) => (Vec::new(), Domain::Time),
     };
-    let score = figure::score(parameters, score, palette).map(Message::Figure);
+    if parts.is_empty() {
+        return plot;
+    }
+    let score = figure::score(parts, domain, palette).map(Message::Figure);
     // both stay in the output so each keeps its zoom: the one not shown has no height
     let shown = |element: Element<'a, Message>, view: View| {
         container(element)
@@ -873,17 +925,19 @@ mod tests {
                 Texture {
                     lane: lane("a", 0.0, 10.0, false),
                     clones: vec![lane("x", 2.0, 12.0, true)],
+                    events: events(),
                 },
                 Texture {
                     lane: lane("b", 5.0, 20.0, false),
                     clones: Vec::new(),
+                    events: events(),
                 },
             ],
         })
     }
 
-    fn parameters() -> Figure {
-        let events = (0..24)
+    fn events() -> Vec<Event> {
+        (0..24)
             .map(|i| Event {
                 time: f64::from(i) * 0.25,
                 duration: 0.25,
@@ -893,7 +947,11 @@ mod tests {
                 amplitude: 0.5 + f64::from(i % 4) * 0.15,
                 tempo: 120.0,
             })
-            .collect();
+            .collect()
+    }
+
+    fn parameters() -> Figure {
+        let events = events();
         Figure::Parameters(Parameters {
             domain: Domain::Time,
             detailed: true,
@@ -1062,9 +1120,10 @@ mod tests {
         let mut state = state();
         figure(&mut state, ensemble());
 
+        // an ensemble's textures each get a score
         assert!(matches!(
             state.output.first(),
-            Some(Output::Figure(FigureOutput { score: None, .. }))
+            Some(Output::Figure(FigureOutput { scores, .. })) if !scores.is_empty()
         ));
     }
 
@@ -1074,11 +1133,7 @@ mod tests {
         figure(&mut state, parameters());
         assert!(matches!(
             state.output.first(),
-            Some(Output::Figure(FigureOutput {
-                score: Some(_),
-                view: View::Plot,
-                ..
-            }))
+            Some(Output::Figure(FigureOutput { scores, view: View::Plot, .. })) if scores.len() == 1
         ));
 
         drop(update(&mut state, Message::FigureView(0, View::Score)));
