@@ -1,16 +1,16 @@
 # athenaCL
 
-![athenaCL screenshot 1](resources/screenshot-1.png)
-![athenaCL screenshot 2](resources/screenshot-2.png)
-![athenaCL screenshot 3](resources/screenshot-3.png)
-![athenaCL screenshot 4](resources/screenshot-4.png)
-
 athenaCL is an algorithmic composition tool created by Christopher Ariza.
 
 Or, as described by the author more specifically, it is a tool for:
 
 > modular poly-paradigm algorithmic music composition in a cross-platform
 > interactive command-line environment.
+
+![athenaCL screenshot 1](resources/screenshot-1.png)
+![athenaCL screenshot 2](resources/screenshot-2.png)
+![athenaCL screenshot 3](resources/screenshot-3.png)
+![athenaCL screenshot 4](resources/screenshot-4.png)
 
 
 
