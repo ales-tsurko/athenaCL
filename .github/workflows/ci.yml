@@ -44,13 +44,8 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y pkg-config libasound2-dev
 
-      - name: Install cargo-binstall
-        uses: cargo-bins/cargo-binstall@main
-
       - name: Install nextest
-        run: |
-          cargo binstall --no-confirm --force cargo-nextest
-          command -v cargo-nextest
+        run: cargo install --locked cargo-nextest
 
       - name: Check
         run: make check
