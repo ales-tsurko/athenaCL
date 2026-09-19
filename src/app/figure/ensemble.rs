@@ -2,6 +2,8 @@
 //!
 //! Hovering a lane shows its time range, and clicking it selects the texture or clone.
 
+use std::cell::Cell;
+
 use iced::{
     mouse,
     widget::{
@@ -12,10 +14,10 @@ use iced::{
 };
 
 use super::{
-    action, color, fill, outline, to_index, Anchor, Gesture, Label, Message, Pointer, Ticks,
-    Window, LABEL_HEIGHT, LABEL_SCALE,
+    action, fill, outline, repaint, to_index, Anchor, Gesture, Label, Message, Palette, Pointer,
+    Ticks, Window, LABEL_HEIGHT, LABEL_SCALE,
 };
-use crate::figure::{Ensemble, Lane, Palette, Rgb};
+use crate::figure::{Ensemble, Lane};
 
 /// Space around the time labels, and at the edges.
 const GUTTER: f32 = 4.0;
@@ -39,12 +41,20 @@ const X_LABEL_SPACING: f32 = 64.0;
 /// The shortest time to zoom in to, in seconds.
 const MIN_SECONDS: f64 = 0.1;
 
-pub(super) fn view<'a>(ensemble: &'a Ensemble, active: &'a str) -> Element<'a, Message> {
+pub(super) fn view<'a>(
+    ensemble: &'a Ensemble,
+    active: &'a str,
+    palette: Palette,
+) -> Element<'a, Message> {
     let lanes = rows(ensemble).len() as f32;
-    Canvas::new(Timeline { ensemble, active })
-        .width(Length::Fill)
-        .height(TOP + lanes * (LANE + LANE_GAP) + LANE_GAP + BOTTOM)
-        .into()
+    Canvas::new(Timeline {
+        ensemble,
+        active,
+        palette,
+    })
+    .width(Length::Fill)
+    .height(TOP + lanes * (LANE + LANE_GAP) + LANE_GAP + BOTTOM)
+    .into()
 }
 
 /// A lane on the timeline, with the texture it belongs to.
@@ -77,6 +87,7 @@ fn rows(ensemble: &Ensemble) -> Vec<Row<'_>> {
 struct Timeline<'a> {
     ensemble: &'a Ensemble,
     active: &'a str,
+    palette: Palette,
 }
 
 #[derive(Debug, Default)]
@@ -84,6 +95,7 @@ struct State {
     pointer: Pointer,
     window: Window,
     cache: canvas::Cache,
+    painted: Cell<Option<Palette>>,
 }
 
 impl canvas::Program<Message> for Timeline<'_> {
@@ -97,7 +109,7 @@ impl canvas::Program<Message> for Timeline<'_> {
         cursor: mouse::Cursor,
     ) -> Option<widget::Action<Message>> {
         let gesture = state.pointer.gesture(event, bounds, cursor);
-        let layout = Layout::new(self.ensemble, state.window, bounds.width);
+        let layout = Layout::new(self.ensemble, self.palette, state.window, bounds.width);
         let map = layout.map;
         let mut message = None;
         let changed = match gesture {
@@ -129,7 +141,8 @@ impl canvas::Program<Message> for Timeline<'_> {
         bounds: Rectangle,
         cursor: mouse::Cursor,
     ) -> Vec<canvas::Geometry> {
-        let layout = Layout::new(self.ensemble, state.window, bounds.width);
+        let layout = Layout::new(self.ensemble, self.palette, state.window, bounds.width);
+        repaint(&state.cache, &state.painted, self.palette);
         let content = state
             .cache
             .draw(renderer, bounds.size(), |frame| layout.draw(frame));
@@ -152,7 +165,7 @@ impl canvas::Program<Message> for Timeline<'_> {
         if state.pointer.dragging() {
             return mouse::Interaction::Grabbing;
         }
-        let layout = Layout::new(self.ensemble, state.window, bounds.width);
+        let layout = Layout::new(self.ensemble, self.palette, state.window, bounds.width);
         match cursor.position_in(bounds) {
             Some(at) if layout.row_at(at).is_some() => mouse::Interaction::Pointer,
             _ => mouse::Interaction::default(),
@@ -172,18 +185,18 @@ fn row_message(row: &Row<'_>) -> Message {
     }
 }
 
-/// A lane's colors: its body and head, and its name.
-fn lane_colors(row: &Row<'_>, palette: Palette) -> (Rgb, Rgb, Rgb) {
+/// A lane's colors: its bar, and its name.
+fn lane_colors(row: &Row<'_>, palette: Palette) -> (Color, Color) {
     if row.is_clone {
-        (palette.alt, palette.alt_frame, palette.label)
+        (palette.alt, palette.title)
     } else {
-        (palette.main, palette.main_frame, palette.title)
+        (palette.mark, palette.label)
     }
 }
 
 /// Where everything is, for a width and zoom.
 struct Layout<'a> {
-    ensemble: &'a Ensemble,
+    palette: Palette,
     rows: Vec<Row<'a>>,
     width: f32,
     /// Where the bars are drawn.
@@ -195,7 +208,7 @@ struct Layout<'a> {
 }
 
 impl<'a> Layout<'a> {
-    fn new(ensemble: &'a Ensemble, window: Window, width: f32) -> Self {
+    fn new(ensemble: &'a Ensemble, palette: Palette, window: Window, width: f32) -> Self {
         let rows = rows(ensemble);
         let names = rows
             .iter()
@@ -212,7 +225,7 @@ impl<'a> Layout<'a> {
         let end = rows.iter().map(|row| row.lane.end).fold(0.0, f64::max);
         let duration = if end > 0.0 { end } else { 1.0 };
         Self {
-            ensemble,
+            palette,
             rows,
             width,
             map,
@@ -270,32 +283,27 @@ impl<'a> Layout<'a> {
     }
 
     fn draw(&self, frame: &mut Frame) {
-        let palette = self.ensemble.palette;
+        let palette = self.palette;
         frame.fill_rectangle(
             Point::ORIGIN,
             Size::new(self.width, self.map.y + self.map.height + BOTTOM),
-            color(palette.margin),
+            palette.page,
         );
-        frame.fill_rectangle(
-            self.map.position(),
-            self.map.size(),
-            color(palette.background),
-        );
+        frame.fill_rectangle(self.map.position(), self.map.size(), palette.plate);
         Label::new(&format!("{:.2}", self.duration)).draw(
             frame,
             Point::new(NAME_X, GUTTER),
             Anchor::NorthWest,
-            color(palette.unit),
+            palette.label,
         );
 
         self.draw_grid(frame);
         self.draw_lanes(frame);
     }
 
-    /// Time lines in the grid color halfway between labels, and labeled lines in the margin
-    /// color.
+    /// Time lines in the grid color halfway between labels, and stronger labeled lines.
     fn draw_grid(&self, frame: &mut Frame) {
-        let palette = self.ensemble.palette;
+        let palette = self.palette;
         let count = to_index(f64::from(self.map.width / X_LABEL_SPACING));
         let ticks = Ticks::new(self.visible.0, self.visible.1, count.max(2), 0.001);
         let line = |frame: &mut Frame, time: f64, color: Color| {
@@ -306,14 +314,10 @@ impl<'a> Layout<'a> {
         let first = (self.visible.0 / ticks.step).floor() * ticks.step;
         let steps = to_index(((self.visible.1 - first) / ticks.step).ceil());
         for i in 0..=steps {
-            line(
-                frame,
-                first + (i as f64 + 0.5) * ticks.step,
-                color(palette.grid),
-            );
+            line(frame, first + (i as f64 + 0.5) * ticks.step, palette.grid);
         }
         for &time in &ticks.values {
-            line(frame, time, color(palette.margin));
+            line(frame, time, palette.major);
             self.draw_time_label(frame, time, &ticks);
         }
     }
@@ -324,36 +328,31 @@ impl<'a> Layout<'a> {
         let at = Point::new(self.x(time).round(), GUTTER);
         let bounds = label.bounds(at, Anchor::NorthCenter);
         if bounds.x >= self.map.x - GUTTER && bounds.x + bounds.width <= self.width {
-            label.draw(
-                frame,
-                at,
-                Anchor::NorthCenter,
-                color(self.ensemble.palette.unit),
-            );
+            label.draw(frame, at, Anchor::NorthCenter, self.palette.label);
         }
     }
 
     /// The lanes: bars with heads, and their names.
     fn draw_lanes(&self, frame: &mut Frame) {
         for (index, row) in self.rows.iter().enumerate() {
-            let (body_color, head_color, name_color) = lane_colors(row, self.ensemble.palette);
+            let (bar_color, name_color) = lane_colors(row, self.palette);
             let bar = self.bar(index);
             let head = Rectangle::new(bar.position(), Size::new(bar.width, HEAD));
-            fill(frame, head, self.map, color(head_color));
+            fill(frame, head, self.map, bar_color);
             let body = Rectangle::new(
                 Point::new(bar.x, bar.y + HEAD),
                 Size::new(bar.width, LANE - HEAD),
             );
             if row.lane.muted {
-                outline(frame, body, self.map, 2.0, color(body_color));
+                outline(frame, body, self.map, 2.0, bar_color);
             } else {
-                fill(frame, body, self.map, color(body_color));
+                fill(frame, body, self.map, bar_color);
             }
             Label::new(&row.lane.name).draw(
                 frame,
                 Point::new(Self::name_x(row), bar.y + LANE / 2.0),
                 Anchor::CenterWest,
-                color(name_color),
+                name_color,
             );
         }
     }
@@ -368,7 +367,7 @@ impl<'a> Layout<'a> {
             frame.fill_rectangle(
                 Point::new(0.0, self.lane_y(index)),
                 Size::new(MARKER, LANE),
-                color(self.ensemble.palette.unit),
+                self.palette.label,
             );
         }
     }
@@ -378,21 +377,21 @@ impl<'a> Layout<'a> {
         let Some(index) = self.index_at(at) else {
             return;
         };
-        let palette = self.ensemble.palette;
+        let palette = self.palette;
         let lane = self
             .rows
             .get(index)
             .expect("the index is one of the rows")
             .lane;
-        outline(frame, self.bar(index), self.map, 1.0, color(palette.title));
+        outline(frame, self.bar(index), self.map, 1.0, palette.hover);
         let muted = if lane.muted { " muted" } else { "" };
         let text = format!("{} {:.2}-{:.2}{muted}", lane.name, lane.start, lane.end);
         Label::new(&text).draw_on(
             frame,
             Point::new(self.width - RIGHT, GUTTER),
             Anchor::NorthEast,
-            color(palette.title),
-            color(palette.margin),
+            palette.label,
+            palette.page,
         );
     }
 }
@@ -404,7 +403,7 @@ mod tests {
     use iced::keyboard;
 
     use super::*;
-    use crate::figure::{Palette, Rgb, Texture};
+    use crate::{app::theme::Mode, figure::Texture};
 
     fn lane(name: &str, start: f64, end: f64) -> Lane {
         Lane {
@@ -415,21 +414,12 @@ mod tests {
         }
     }
 
+    fn palette() -> Palette {
+        Mode::Light.colors().figure()
+    }
+
     fn ensemble() -> Ensemble {
-        let black = Rgb(0, 0, 0);
         Ensemble {
-            palette: Palette {
-                background: black,
-                grid: black,
-                margin: black,
-                main: black,
-                main_frame: black,
-                alt: black,
-                alt_frame: black,
-                title: black,
-                label: black,
-                unit: black,
-            },
             textures: vec![
                 Texture {
                     lane: lane("a", 0.0, 10.0),
@@ -460,7 +450,7 @@ mod tests {
     #[test]
     fn time_runs_from_zero_to_the_last_end() {
         let ensemble = ensemble();
-        let layout = Layout::new(&ensemble, Window::default(), 680.0);
+        let layout = Layout::new(&ensemble, palette(), Window::default(), 680.0);
         assert_eq!(layout.duration, 20.0);
         assert_eq!(layout.x(0.0), layout.map.x);
         assert_eq!(layout.x(20.0), layout.map.x + layout.map.width);
@@ -469,7 +459,7 @@ mod tests {
     #[test]
     fn lanes_are_found_by_height() {
         let ensemble = ensemble();
-        let layout = Layout::new(&ensemble, Window::default(), 680.0);
+        let layout = Layout::new(&ensemble, palette(), Window::default(), 680.0);
         let middle = |index| Point::new(1.0, layout.lane_y(index) + LANE / 2.0);
         assert_eq!(layout.row_at(middle(1)).unwrap().lane.name, "x");
         assert_eq!(layout.row_at(middle(2)).unwrap().lane.name, "b");
@@ -483,8 +473,9 @@ mod tests {
         let program = Timeline {
             ensemble: &ensemble,
             active: "a",
+            palette: palette(),
         };
-        let layout = Layout::new(&ensemble, Window::default(), 680.0);
+        let layout = Layout::new(&ensemble, palette(), Window::default(), 680.0);
         let bounds = Rectangle::new(Point::ORIGIN, Size::new(680.0, 300.0));
         let at = mouse::Cursor::Available(Point::new(
             layout.map.x + 10.0,
@@ -513,6 +504,7 @@ mod tests {
         let program = Timeline {
             ensemble: &ensemble,
             active: "a",
+            palette: palette(),
         };
         let bounds = Rectangle::new(Point::ORIGIN, Size::new(680.0, 300.0));
         let at = mouse::Cursor::Available(Point::new(300.0, 100.0));

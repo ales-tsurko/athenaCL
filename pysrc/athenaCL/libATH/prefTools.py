@@ -85,17 +85,8 @@ def getCategoryDefaultDict(platform, category):
         }
     if category == "gui":
         catDict = {
-            "COLORfgAbs": "#808080",  # 128,128,128
-            "COLORfgMain": "#505050",  # 80,80,80
-            "COLORfgMainFrame": "#6E6E6E",  # 110,110,110
-            "COLORfgAlt": "#3C3C3C",  # 60,60,60
-            "COLORfgAltFrame": "#5A5A5A",  # 90,90,90
-            "COLORbgMargin": "#2A2A2A",  # 42,42,42
-            "COLORbgGrid": "#202020",  # 32,32,32
-            "COLORbgAbs": "#000000",  # backmost
-            "COLORtxTitle": "#9F9F9F",  #'#9A9A9A', #154,154,154
-            "COLORtxLabel": "#7C7C7C",  # 124,124,124
-            "COLORtxUnit": "#8A7A6A",  # 138,122,106
+            # the gui's look, light or dark; figures follow it
+            "appearance": "light",
         }
 
     if platform == "posix":

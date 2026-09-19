@@ -14,7 +14,6 @@ ahash = "0.8.12"
 async-channel = "2.5.0"
 cpal = "0.17.3"
 iced = { version = "0.14.0", features = ["canvas", "tokio", "wgpu"] }
-iced_aw = "0.14.1"
 iced_fonts = { version = "0.3.0", features = ["nerd"] }
 midi-player = "0.2.3"
 quick-xml = "0.42.0"

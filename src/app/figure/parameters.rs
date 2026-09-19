@@ -3,6 +3,8 @@
 //! Graphs are stacked and share the x axis. Hovering shows the value under the pointer in every
 //! graph.
 
+use std::cell::Cell;
+
 use iced::{
     mouse,
     widget::{
@@ -13,8 +15,8 @@ use iced::{
 };
 
 use super::{
-    action, color, fill, format_value, to_index, Anchor, Gesture, Label, Message, Pointer, Ticks,
-    Window,
+    action, fill, format_value, repaint, to_index, Anchor, Gesture, Label, Message, Palette,
+    Pointer, Ticks, Window,
 };
 use crate::figure::{Domain, Graph, Mark, Parameters};
 
@@ -38,11 +40,14 @@ const X_LABEL_SPACING: f32 = 64.0;
 const MIN_EVENTS: f64 = 4.0;
 const MIN_SECONDS: f64 = 0.1;
 
-pub(super) fn view(parameters: &Parameters) -> Element<'_, Message> {
-    Canvas::new(Plot(parameters))
-        .width(Length::Fill)
-        .height(height(parameters))
-        .into()
+pub(super) fn view(parameters: &Parameters, palette: Palette) -> Element<'_, Message> {
+    Canvas::new(Plot {
+        parameters,
+        palette,
+    })
+    .width(Length::Fill)
+    .height(height(parameters))
+    .into()
 }
 
 fn graph_height(parameters: &Parameters) -> f32 {
@@ -62,13 +67,17 @@ fn height(parameters: &Parameters) -> f32 {
     (count * block_height(parameters) + (count - 1.0) * GAP).max(0.0)
 }
 
-struct Plot<'a>(&'a Parameters);
+struct Plot<'a> {
+    parameters: &'a Parameters,
+    palette: Palette,
+}
 
 #[derive(Debug, Default)]
 struct State {
     pointer: Pointer,
     window: Window,
     cache: canvas::Cache,
+    painted: Cell<Option<Palette>>,
 }
 
 impl canvas::Program<Message> for Plot<'_> {
@@ -82,7 +91,7 @@ impl canvas::Program<Message> for Plot<'_> {
         cursor: mouse::Cursor,
     ) -> Option<widget::Action<Message>> {
         let gesture = state.pointer.gesture(event, bounds, cursor);
-        let layout = Layout::new(self.0, state.window, bounds.width);
+        let layout = Layout::new(self.parameters, self.palette, state.window, bounds.width);
         let plot = layout.plot(0);
         let changed = match gesture {
             Gesture::Zoom { at, factor } => {
@@ -109,7 +118,8 @@ impl canvas::Program<Message> for Plot<'_> {
         bounds: Rectangle,
         cursor: mouse::Cursor,
     ) -> Vec<canvas::Geometry> {
-        let layout = Layout::new(self.0, state.window, bounds.width);
+        let layout = Layout::new(self.parameters, self.palette, state.window, bounds.width);
+        repaint(&state.cache, &state.painted, self.palette);
         let content = state
             .cache
             .draw(renderer, bounds.size(), |frame| layout.draw(frame));
@@ -131,7 +141,7 @@ impl canvas::Program<Message> for Plot<'_> {
         if state.pointer.dragging() {
             return mouse::Interaction::Grabbing;
         }
-        let layout = Layout::new(self.0, state.window, bounds.width);
+        let layout = Layout::new(self.parameters, self.palette, state.window, bounds.width);
         match cursor.position_in(bounds) {
             Some(at) if layout.over_graphs(at) => mouse::Interaction::Crosshair,
             _ => mouse::Interaction::default(),
@@ -142,6 +152,7 @@ impl canvas::Program<Message> for Plot<'_> {
 /// Where everything is, for a width and zoom.
 struct Layout<'a> {
     parameters: &'a Parameters,
+    palette: Palette,
     width: f32,
     /// The whole x axis.
     extent: (f64, f64),
@@ -150,11 +161,12 @@ struct Layout<'a> {
 }
 
 impl<'a> Layout<'a> {
-    fn new(parameters: &'a Parameters, window: Window, width: f32) -> Self {
+    fn new(parameters: &'a Parameters, palette: Palette, window: Window, width: f32) -> Self {
         let extent = extent(parameters);
         let span = extent.1 - extent.0;
         Self {
             parameters,
+            palette,
             width,
             extent,
             visible: (extent.0 + window.start * span, extent.0 + window.end * span),
@@ -287,12 +299,12 @@ impl<'a> Layout<'a> {
     }
 
     fn draw(&self, frame: &mut Frame) {
-        let palette = self.parameters.palette;
+        let palette = self.palette;
         for (index, graph) in self.parameters.graphs.iter().enumerate() {
             let block = self.block(index);
-            frame.fill_rectangle(block.position(), block.size(), color(palette.margin));
+            frame.fill_rectangle(block.position(), block.size(), palette.page);
             let plot = self.plot(index);
-            frame.fill_rectangle(plot.position(), plot.size(), color(palette.background));
+            frame.fill_rectangle(plot.position(), plot.size(), palette.plate);
 
             let range = self.value_range(graph);
             self.draw_values(frame, plot, range);
@@ -303,14 +315,14 @@ impl<'a> Layout<'a> {
                 frame,
                 Point::new(block.width - RIGHT, Self::caption_y(plot)),
                 Anchor::NorthEast,
-                color(palette.title),
+                palette.title,
             );
         }
     }
 
     /// Value grid lines with their labels, left of the plot.
     fn draw_values(&self, frame: &mut Frame, plot: Rectangle, range: (f64, f64)) {
-        let palette = self.parameters.palette;
+        let palette = self.palette;
         let count = to_index(f64::from(
             (plot.height - 2.0 * MARK) / (Label::height() + 8.0),
         ));
@@ -318,12 +330,12 @@ impl<'a> Layout<'a> {
         for &value in &ticks.values {
             let y = Self::y(value, range, plot);
             let line = Rectangle::new(Point::new(plot.x, y), Size::new(plot.width, 1.0));
-            fill(frame, line, plot, color(palette.grid));
+            fill(frame, line, plot, palette.grid);
             Label::new(&ticks.format(value)).draw(
                 frame,
                 Point::new(plot.x - GUTTER, y),
                 Anchor::CenterEast,
-                color(palette.unit),
+                palette.label,
             );
         }
     }
@@ -339,7 +351,7 @@ impl<'a> Layout<'a> {
         for &value in &ticks.values {
             let x = self.x(value, plot).round();
             let line = Rectangle::new(Point::new(x, plot.y), Size::new(1.0, plot.height));
-            fill(frame, line, plot, color(self.parameters.palette.grid));
+            fill(frame, line, plot, self.palette.grid);
             self.draw_time_label(frame, value, &ticks, plot);
         }
     }
@@ -350,12 +362,7 @@ impl<'a> Layout<'a> {
         let at = Point::new(self.x(value, plot).round(), Self::units_y(plot));
         let bounds = label.bounds(at, Anchor::NorthCenter);
         if bounds.x >= 0.0 && bounds.x + bounds.width <= self.width {
-            label.draw(
-                frame,
-                at,
-                Anchor::NorthCenter,
-                color(self.parameters.palette.unit),
-            );
+            label.draw(frame, at, Anchor::NorthCenter, self.palette.label);
         }
     }
 
@@ -363,7 +370,7 @@ impl<'a> Layout<'a> {
     fn draw_marks(&self, graph: &Graph, frame: &mut Frame, plot: Rectangle, range: (f64, f64)) {
         for mark in self.visible_marks(graph) {
             let area = self.mark_area(mark, range, plot);
-            fill(frame, area, plot, color(self.parameters.palette.title));
+            fill(frame, area, plot, self.palette.mark);
         }
     }
 
@@ -372,7 +379,7 @@ impl<'a> Layout<'a> {
         if !self.over_graphs(at) {
             return;
         }
-        let palette = self.parameters.palette;
+        let palette = self.palette;
         let x = self.x_value(at.x, self.plot(0));
         for (index, graph) in self.parameters.graphs.iter().enumerate() {
             let Some(mark) = self.mark_at(graph, x) else {
@@ -385,9 +392,9 @@ impl<'a> Layout<'a> {
                 Domain::Time => at.x.round(),
             };
             let line = Rectangle::new(Point::new(line_x, plot.y), Size::new(1.0, plot.height));
-            fill(frame, line, plot, color(palette.label));
+            fill(frame, line, plot, palette.hover);
             let area = self.mark_area(mark, range, plot).expand(1.0);
-            fill(frame, area, plot, color(palette.unit));
+            fill(frame, area, plot, palette.mark);
 
             let text = match self.parameters.domain {
                 Domain::Events => format!("{}: {}", mark.start, format_value(mark.value)),
@@ -402,8 +409,8 @@ impl<'a> Layout<'a> {
                 frame,
                 Point::new(plot.x, Self::caption_y(plot)),
                 Anchor::NorthWest,
-                color(palette.title),
-                color(palette.margin),
+                palette.label,
+                palette.page,
             );
         }
     }
@@ -440,29 +447,21 @@ mod tests {
     use iced::keyboard;
 
     use super::*;
-    use crate::figure::{Palette, Rgb};
+    use crate::app::theme::Mode;
+
+    fn palette() -> Palette {
+        Mode::Light.colors().figure()
+    }
 
     fn parameters(domain: Domain, marks: Vec<Mark>) -> Parameters {
-        let black = Rgb(0, 0, 0);
         Parameters {
-            palette: Palette {
-                background: black,
-                grid: black,
-                margin: black,
-                main: black,
-                main_frame: black,
-                alt: black,
-                alt_frame: black,
-                title: black,
-                label: black,
-                unit: black,
-            },
             domain,
             detailed: true,
             graphs: vec![Graph {
                 title: "amplitude: randomUniform".to_owned(),
                 marks,
             }],
+            events: Vec::new(),
         }
     }
 
@@ -481,7 +480,10 @@ mod tests {
     #[test]
     fn zooming_and_resetting_reach_the_window() {
         let parameters = parameters(Domain::Time, events(&[0.0, 1.0, 5.0, 2.0, 3.0]));
-        let program = Plot(&parameters);
+        let program = Plot {
+            parameters: &parameters,
+            palette: palette(),
+        };
         let bounds = Rectangle::new(Point::ORIGIN, Size::new(680.0, 300.0));
         let at = mouse::Cursor::Available(Point::new(300.0, 150.0));
         let command = canvas::Event::Keyboard(keyboard::Event::ModifiersChanged(
@@ -512,27 +514,27 @@ mod tests {
     #[test]
     fn values_fit_what_is_visible() {
         let parameters = parameters(Domain::Events, events(&[0.0, 1.0, 5.0, 2.0, 3.0]));
-        let whole = Layout::new(&parameters, Window::default(), 680.0);
+        let whole = Layout::new(&parameters, palette(), Window::default(), 680.0);
         assert_eq!(whole.value_range(&parameters.graphs[0]), (0.0, 5.0));
 
         // the first two events
         let mut window = Window::default();
         window.zoom(0.0, 2.5, 0.0);
-        let zoomed = Layout::new(&parameters, window, 680.0);
+        let zoomed = Layout::new(&parameters, palette(), window, 680.0);
         assert_eq!(zoomed.value_range(&parameters.graphs[0]), (0.0, 1.0));
     }
 
     #[test]
     fn constant_values_get_a_range() {
         let parameters = parameters(Domain::Events, events(&[120.0, 120.0]));
-        let layout = Layout::new(&parameters, Window::default(), 680.0);
+        let layout = Layout::new(&parameters, palette(), Window::default(), 680.0);
         assert_eq!(layout.value_range(&parameters.graphs[0]), (119.0, 121.0));
     }
 
     #[test]
     fn hovering_finds_the_nearest_event() {
         let parameters = parameters(Domain::Events, events(&[0.0, 1.0, 2.0]));
-        let layout = Layout::new(&parameters, Window::default(), 680.0);
+        let layout = Layout::new(&parameters, palette(), Window::default(), 680.0);
         let graph = &parameters.graphs[0];
         assert_eq!(layout.mark_at(graph, 1.4).unwrap().start, 1.0);
         assert_eq!(layout.mark_at(graph, 7.0).unwrap().start, 2.0);
@@ -553,7 +555,7 @@ mod tests {
             },
         ];
         let parameters = parameters(Domain::Time, marks);
-        let layout = Layout::new(&parameters, Window::default(), 680.0);
+        let layout = Layout::new(&parameters, palette(), Window::default(), 680.0);
         let graph = &parameters.graphs[0];
         assert_eq!(layout.mark_at(graph, 1.5).unwrap().value, 2.0);
         assert_eq!(layout.mark_at(graph, 0.6).unwrap().value, 1.0);
@@ -562,7 +564,7 @@ mod tests {
     #[test]
     fn marks_stay_inside_the_plot() {
         let parameters = parameters(Domain::Events, events(&[0.0, 1.0]));
-        let layout = Layout::new(&parameters, Window::default(), 680.0);
+        let layout = Layout::new(&parameters, palette(), Window::default(), 680.0);
         let plot = layout.plot(0);
         let range = layout.value_range(&parameters.graphs[0]);
         for mark in &parameters.graphs[0].marks {

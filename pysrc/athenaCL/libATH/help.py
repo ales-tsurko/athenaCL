@@ -306,7 +306,7 @@ class HelpDoc:
     TIals_usage = "tials"
 
     TImap = (
-        "TImap: TextureInstance: Map: Displays a graphical map of the parameter values of the active Texture. With the use of two optional arguments, the TImap display can be presented in four orientations. A TImap diagram can position values on the x-axis in an equal-spaced orientation for each event (event-base), or in a time-proportional orientation, where width is relative to the time of each event (time-base). A TImap diagram can display, for each parameter, direct ParameterObject values as provided to the TextureModule (pre-TM), or the values of each parameter of each event after TextureModule processing (post-TM). %s"
+        "TImap: TextureInstance: Map: Displays a graphical map of the parameter values of the active Texture. With the use of two optional arguments, the TImap display can be presented in four orientations. A TImap diagram can position values on the x-axis in an equal-spaced orientation for each event (event-base), or in a time-proportional orientation, where width is relative to the time of each event (time-base). A TImap diagram can display, for each parameter, direct ParameterObject values as provided to the TextureModule (pre-TM), or the values of each parameter of each event after TextureModule processing (post-TM). The PLOT and SCORE switch under the map shows the Texture's events as a score instead, along the same axis. %s"
         % _gfxCommand
     )
     TImap_usage = "timap [timeEvent prePost]"

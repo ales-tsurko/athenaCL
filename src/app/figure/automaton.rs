@@ -2,6 +2,8 @@
 //!
 //! Zooming keeps the cells square, and hovering shows a cell's generation and value.
 
+use std::cell::Cell;
+
 use iced::{
     mouse,
     widget::{
@@ -12,10 +14,10 @@ use iced::{
 };
 
 use super::{
-    action, color, fill, format_value, outline, to_index, Anchor, Gesture, Label, Message, Pointer,
-    Window, LABEL_SCALE,
+    action, fill, format_value, outline, repaint, to_index, Anchor, Gesture, Label, Message,
+    Palette, Pointer, Window, LABEL_SCALE,
 };
-use crate::figure::{Automaton, Rgb};
+use crate::figure::Automaton;
 
 const TOP: f32 = 8.0;
 const RIGHT: f32 = 8.0;
@@ -30,15 +32,18 @@ const MAX_HEIGHT: f32 = 640.0;
 /// The fewest cells to zoom in to.
 const MIN_CELLS: f64 = 4.0;
 
-pub(super) fn view(automaton: &Automaton, width: f32) -> Element<'_, Message> {
-    let layout = Layout::new(automaton, View::default(), width);
-    Canvas::new(Cells(automaton))
+pub(super) fn view(automaton: &Automaton, width: f32, palette: Palette) -> Element<'_, Message> {
+    let layout = Layout::new(automaton, palette, View::default(), width);
+    Canvas::new(Cells { automaton, palette })
         .width(Length::Fill)
         .height(layout.height())
         .into()
 }
 
-struct Cells<'a>(&'a Automaton);
+struct Cells<'a> {
+    automaton: &'a Automaton,
+    palette: Palette,
+}
 
 /// The visible part of the generations, zoomed alike in both directions.
 #[derive(Debug, Clone, Copy, Default, PartialEq)]
@@ -76,6 +81,7 @@ struct State {
     pointer: Pointer,
     view: View,
     cache: canvas::Cache,
+    painted: Cell<Option<Palette>>,
 }
 
 impl canvas::Program<Message> for Cells<'_> {
@@ -89,7 +95,7 @@ impl canvas::Program<Message> for Cells<'_> {
         cursor: mouse::Cursor,
     ) -> Option<widget::Action<Message>> {
         let gesture = state.pointer.gesture(event, bounds, cursor);
-        let layout = Layout::new(self.0, state.view, bounds.width);
+        let layout = Layout::new(self.automaton, self.palette, state.view, bounds.width);
         let changed = match gesture {
             Gesture::Zoom { at, factor } => {
                 state.view.zoom(at, factor, layout.grid, layout.min_span())
@@ -112,7 +118,8 @@ impl canvas::Program<Message> for Cells<'_> {
         bounds: Rectangle,
         cursor: mouse::Cursor,
     ) -> Vec<canvas::Geometry> {
-        let layout = Layout::new(self.0, state.view, bounds.width);
+        let layout = Layout::new(self.automaton, self.palette, state.view, bounds.width);
+        repaint(&state.cache, &state.painted, self.palette);
         let content = state
             .cache
             .draw(renderer, bounds.size(), |frame| layout.draw(frame));
@@ -134,7 +141,7 @@ impl canvas::Program<Message> for Cells<'_> {
         if state.pointer.dragging() {
             return mouse::Interaction::Grabbing;
         }
-        let layout = Layout::new(self.0, state.view, bounds.width);
+        let layout = Layout::new(self.automaton, self.palette, state.view, bounds.width);
         match cursor.position_in(bounds) {
             Some(at) if layout.grid.contains(at) => mouse::Interaction::Crosshair,
             _ => mouse::Interaction::default(),
@@ -145,6 +152,7 @@ impl canvas::Program<Message> for Cells<'_> {
 /// Where everything is, for a width and zoom.
 struct Layout<'a> {
     automaton: &'a Automaton,
+    palette: Palette,
     view: View,
     width: f32,
     /// Cells per generation.
@@ -154,7 +162,7 @@ struct Layout<'a> {
 }
 
 impl<'a> Layout<'a> {
-    fn new(automaton: &'a Automaton, view: View, width: f32) -> Self {
+    fn new(automaton: &'a Automaton, palette: Palette, view: View, width: f32) -> Self {
         let columns = automaton.cells.iter().map(Vec::len).max().unwrap_or(0);
         let rows = automaton.cells.len();
         let title = automaton
@@ -169,6 +177,7 @@ impl<'a> Layout<'a> {
             .clamp(1.0, MAX_CELL);
         Self {
             automaton,
+            palette,
             view,
             width,
             columns,
@@ -224,18 +233,18 @@ impl<'a> Layout<'a> {
 
     fn draw(&self, frame: &mut Frame) {
         let automaton = self.automaton;
-        let palette = automaton.palette;
+        let palette = self.palette;
         frame.fill_rectangle(
             Point::ORIGIN,
             Size::new(self.width, self.height()),
-            color(palette.margin),
+            palette.page,
         );
         for (index, line) in automaton.title.iter().enumerate() {
             Label::new(line).draw(
                 frame,
                 Point::new(TITLE_X, TOP + index as f32 * LINE),
                 Anchor::NorthWest,
-                color(palette.title),
+                palette.label,
             );
         }
 
@@ -252,19 +261,20 @@ impl<'a> Layout<'a> {
                 continue;
             };
             let (top, bottom) = (self.y(row as f64), self.y(row as f64 + 1.0));
-            // a rectangle for each run of cells of the same shade
+            // a rectangle for each run of cells of the same shade, from the page to ink
+            let level = |value: f64| to_index((automaton.shade(value) * 255.0).round());
             let mut start = columns.start;
             while let Some(rest) = cells.get(start..columns.end.min(cells.len())) {
-                let gray = Rgb::gray(automaton.shade(rest.first().copied().unwrap_or_default()));
+                let shade = level(rest.first().copied().unwrap_or_default());
                 let run = rest
                     .iter()
-                    .take_while(|&&value| Rgb::gray(automaton.shade(value)) == gray)
+                    .take_while(|&&value| level(value) == shade)
                     .count()
                     .max(1);
                 let (left, right) = (self.x(start as f64), self.x((start + run) as f64));
                 let area =
                     Rectangle::new(Point::new(left, top), Size::new(right - left, bottom - top));
-                fill(frame, area, self.grid, color(gray));
+                fill(frame, area, self.grid, palette.shade(shade as f64 / 255.0));
                 start += run;
             }
         }
@@ -275,7 +285,7 @@ impl<'a> Layout<'a> {
         let Some((row, column)) = self.cell_at(at) else {
             return;
         };
-        let palette = self.automaton.palette;
+        let palette = self.palette;
         let area = Rectangle::new(
             Point::new(self.x(column as f64), self.y(row as f64)),
             Size::new(
@@ -283,7 +293,7 @@ impl<'a> Layout<'a> {
                 self.y(row as f64 + 1.0) - self.y(row as f64),
             ),
         );
-        outline(frame, area.expand(1.0), self.grid, 1.0, color(palette.unit));
+        outline(frame, area.expand(1.0), self.grid, 1.0, palette.hover);
 
         let value = self
             .automaton
@@ -303,7 +313,7 @@ impl<'a> Layout<'a> {
                 frame,
                 Point::new(TITLE_X, TOP + (first + index) as f32 * LINE),
                 Anchor::NorthWest,
-                color(palette.unit),
+                palette.label,
             );
         }
     }
@@ -316,23 +326,14 @@ mod tests {
     use iced::keyboard;
 
     use super::*;
-    use crate::figure::Palette;
+    use crate::app::theme::Mode;
+
+    fn palette() -> Palette {
+        Mode::Light.colors().figure()
+    }
 
     fn automaton(columns: usize, rows: usize) -> Automaton {
-        let black = Rgb(0, 0, 0);
         Automaton {
-            palette: Palette {
-                background: black,
-                grid: black,
-                margin: black,
-                main: black,
-                main_frame: black,
-                alt: black,
-                alt_frame: black,
-                title: black,
-                label: black,
-                unit: black,
-            },
             title: vec!["f{t}k{3}r{1}".to_owned()],
             cells: vec![vec![0.0; columns]; rows],
             max: Some(2.0),
@@ -342,7 +343,7 @@ mod tests {
     #[test]
     fn cells_fit_the_width_in_whole_pixels() {
         let automaton = automaton(81, 40);
-        let layout = Layout::new(&automaton, View::default(), 680.0);
+        let layout = Layout::new(&automaton, palette(), View::default(), 680.0);
         let cell = layout.cell();
         assert_eq!(cell, cell.round());
         assert!(layout.grid.x + layout.grid.width <= 680.0 - RIGHT);
@@ -352,14 +353,17 @@ mod tests {
     #[test]
     fn tall_automata_get_smaller_cells() {
         let automaton = automaton(20, 400);
-        let layout = Layout::new(&automaton, View::default(), 680.0);
+        let layout = Layout::new(&automaton, palette(), View::default(), 680.0);
         assert!(layout.grid.height <= MAX_HEIGHT);
     }
 
     #[test]
     fn zooming_and_resetting_reach_the_view() {
         let automaton = automaton(10, 10);
-        let program = Cells(&automaton);
+        let program = Cells {
+            automaton: &automaton,
+            palette: palette(),
+        };
         let bounds = Rectangle::new(Point::ORIGIN, Size::new(680.0, 300.0));
         let at = mouse::Cursor::Available(Point::new(300.0, 100.0));
         let command = canvas::Event::Keyboard(keyboard::Event::ModifiersChanged(
@@ -386,7 +390,7 @@ mod tests {
     #[test]
     fn hovering_finds_cells() {
         let automaton = automaton(10, 10);
-        let layout = Layout::new(&automaton, View::default(), 680.0);
+        let layout = Layout::new(&automaton, palette(), View::default(), 680.0);
         let cell = layout.cell();
         let at = Point::new(layout.grid.x + 3.5 * cell, layout.grid.y + 6.5 * cell);
         assert_eq!(layout.cell_at(at), Some((6, 3)));
@@ -397,7 +401,7 @@ mod tests {
     fn zooming_keeps_cells_square() {
         let automaton = automaton(80, 20);
         let mut view = View::default();
-        let min = Layout::new(&automaton, view, 680.0).min_span();
+        let min = Layout::new(&automaton, palette(), view, 680.0).min_span();
         view.cells.zoom(0.5, 1000.0, min);
         view.generations.zoom(0.5, 1000.0, min);
         assert_eq!(view.cells.span(), view.generations.span());

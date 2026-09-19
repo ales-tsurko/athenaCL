@@ -57,8 +57,18 @@ impl InterpreterWorker {
                 if let Ok(message) = r.recv_blocking() {
                     let msg = match message {
                         Message::SendCmd(cmd) => interpreter.run_cmd(&cmd).map(Message::Post),
-                        Message::GetScratchDir => {
-                            interpreter.scratch_dir().map(Message::ScratchDir)
+                        Message::GetScratchDir => interpreter
+                            .pref("athena", "fpScratchDir")
+                            .map(Message::ScratchDir),
+                        Message::GetAppearance => interpreter
+                            .pref("gui", "appearance")
+                            .map(Message::Appearance),
+                        // saving needs no reply, unless it fails
+                        Message::SetAppearance(appearance) => {
+                            match interpreter.write_pref("gui", "appearance", &appearance) {
+                                Ok(()) => continue,
+                                Err(err) => Err(err),
+                            }
                         }
                         _ => continue,
                     }
@@ -107,6 +117,12 @@ pub enum Message {
     GetScratchDir,
     /// The result of `Self::GetScratchDir`.
     ScratchDir(String),
+    /// Get the GUI's saved look: `light` or `dark`.
+    GetAppearance,
+    /// The result of `Self::GetAppearance`.
+    Appearance(String),
+    /// Save the GUI's look.
+    SetAppearance(String),
     PathLibUpdated(Vec<String>),
     TextureLibUpdated(Vec<String>),
     // Not system file path, but athenaCL pitch path
@@ -184,18 +200,42 @@ interp"#
         })
     }
 
-    fn scratch_dir(&self) -> InterpreterResult<String> {
+    /// A preference, from athenaCL's preferences file.
+    fn pref(&self, category: &str, key: &str) -> InterpreterResult<String> {
         self.py_interpreter.enter(|vm| -> _ {
-            let external = vm
-                .get_attribute_opt(self.ath_object.clone(), "external")
-                .try_py()?
-                .expect("external attribute is always available on AthenaObject");
+            let external = self.external(vm)?;
             let result = vm
-                .call_method(&external, "getPref", ("athena", "fpScratchDir"))
+                .call_method(&external, "getPref", (category.to_owned(), key.to_owned()))
                 .try_py()?;
 
             extract_string(vm, result).try_py()
         })
+    }
+
+    /// Save a preference to athenaCL's preferences file.
+    fn write_pref(&self, category: &str, key: &str, value: &str) -> InterpreterResult<()> {
+        self.py_interpreter.enter(|vm| -> _ {
+            let external = self.external(vm)?;
+            let _ = vm
+                .call_method(
+                    &external,
+                    "writePref",
+                    (category.to_owned(), key.to_owned(), value.to_owned()),
+                )
+                .try_py()?;
+
+            Ok(())
+        })
+    }
+
+    /// The athenaCL object's `external`, which keeps the preferences.
+    fn external(&self, vm: &VirtualMachine) -> InterpreterResult<PyObjectRef> {
+        let external = vm
+            .get_attribute_opt(self.ath_object.clone(), "external")
+            .try_py()?
+            .expect("external attribute is always available on AthenaObject");
+
+        Ok(external)
     }
 }
 

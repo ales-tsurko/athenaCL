@@ -6,6 +6,7 @@ fn main() -> iced::Result {
     iced::application(app::State::default, app::update, app::view)
         .title("athenaCL")
         .subscription(app::subscription)
+        .theme(app::theme)
         // figures are pixel art: without multisampling, their pixels stay sharp at any offset
         .antialiasing(false)
         .centered()

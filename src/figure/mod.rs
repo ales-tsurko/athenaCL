@@ -1,9 +1,11 @@
 //! Figures: what athenaCL's graphics commands show.
 //!
-//! The commands describe their data (parameter values, texture time ranges, cellular automaton
-//! cells) and the GUI lays it out and draws it in athenaCL's style.
+//! The commands describe their data (parameter values, texture events and time ranges, cellular
+//! automaton cells) and the GUI lays it out and draws it in athenaCL's style, in the colors of the
+//! app's theme.
 
 pub mod font;
+pub mod notation;
 
 /// A figure from a graphics command.
 #[derive(Debug, Clone, PartialEq)]
@@ -19,8 +21,6 @@ pub enum Figure {
 /// Graphs of parameter values, sharing the x axis.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Parameters {
-    /// Colors.
-    pub palette: Palette,
     /// What the x axis measures.
     pub domain: Domain,
     /// Whether to draw taller graphs: `TPmap` shows one or two parameters in detail, while
@@ -28,6 +28,9 @@ pub struct Parameters {
     pub detailed: bool,
     /// The graphs, top to bottom.
     pub graphs: Vec<Graph>,
+    /// The events the graphs describe, which can also be shown as a score: a texture's, for
+    /// `TImap`. Figures of parameters alone have none.
+    pub events: Vec<Event>,
 }
 
 /// What the x axis of parameter graphs measures.
@@ -60,11 +63,28 @@ pub struct Mark {
     pub value: f64,
 }
 
+/// An event of a texture: a note, or a rest.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Event {
+    /// When it starts, in seconds.
+    pub time: f64,
+    /// Its rhythmic duration in seconds: the time until the next event of its rhythm.
+    pub duration: f64,
+    /// How long it sounds, in seconds.
+    pub sustain: f64,
+    /// Whether it sounds: an event with no accent is a rest.
+    pub sounds: bool,
+    /// Its pitch in semitones from middle C, athenaCL's pitch space. Microtones are fractions.
+    pub pitch: f64,
+    /// Its amplitude, from 0 to 1.
+    pub amplitude: f64,
+    /// The tempo when it starts, in beats per minute.
+    pub tempo: f64,
+}
+
 /// Textures and their clones over time.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Ensemble {
-    /// Colors.
-    pub palette: Palette,
     /// Textures, in display order.
     pub textures: Vec<Texture>,
 }
@@ -94,8 +114,6 @@ pub struct Lane {
 /// Generations of a one-dimensional cellular automaton.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Automaton {
-    /// Colors.
-    pub palette: Palette,
     /// The automaton's specification, one part per line.
     pub title: Vec<String>,
     /// Cell values, a row per generation.
@@ -106,7 +124,7 @@ pub struct Automaton {
 }
 
 impl Automaton {
-    /// How dark a value is drawn, from 0 (white) to 1 (black).
+    /// How strongly a value is drawn, from 0 (the page) to 1 (ink).
     pub fn shade(&self, value: f64) -> f64 {
         let shade = match self.max {
             Some(max) if max > 0.0 => value / max,
@@ -117,68 +135,6 @@ impl Automaton {
     }
 }
 
-/// Colors, from athenaCL's `gui` preferences.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct Palette {
-    /// Behind the data (`COLORbgAbs`).
-    pub background: Rgb,
-    /// Grid lines (`COLORbgGrid`).
-    pub grid: Rgb,
-    /// Margins around the data (`COLORbgMargin`).
-    pub margin: Rgb,
-    /// Textures (`COLORfgMain`).
-    pub main: Rgb,
-    /// The top edge of textures (`COLORfgMainFrame`).
-    pub main_frame: Rgb,
-    /// Clones (`COLORfgAlt`).
-    pub alt: Rgb,
-    /// The top edge of clones (`COLORfgAltFrame`).
-    pub alt_frame: Rgb,
-    /// Titles and data points (`COLORtxTitle`).
-    pub title: Rgb,
-    /// Secondary labels (`COLORtxLabel`).
-    pub label: Rgb,
-    /// Axis units (`COLORtxUnit`).
-    pub unit: Rgb,
-}
-
-/// An opaque color.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct Rgb(pub u8, pub u8, pub u8);
-
-impl Rgb {
-    /// Parse an HTML-style `#rrggbb` or `#rgb` color, as used throughout athenaCL.
-    pub fn parse(value: &str) -> Option<Self> {
-        let hex = value.strip_prefix('#')?;
-        if !hex.is_ascii() {
-            return None;
-        }
-        let channel = |digits: &str| u8::from_str_radix(digits, 16).ok();
-        match hex.len() {
-            6 => Some(Self(
-                channel(hex.get(0..2)?)?,
-                channel(hex.get(2..4)?)?,
-                channel(hex.get(4..6)?)?,
-            )),
-            3 => {
-                let short = |i: usize| channel(hex.get(i..=i)?).map(|v| v * 17);
-                Some(Self(short(0)?, short(1)?, short(2)?))
-            }
-            _ => None,
-        }
-    }
-
-    /// A gray from white (0) to black (1), as athenaCL shades cellular automata.
-    pub fn gray(shade: f64) -> Self {
-        #[expect(
-            clippy::cast_sign_loss,
-            reason = "the value is clamped to `0.0..=255.0` before the cast"
-        )]
-        let level = ((1.0 - shade) * 255.0).clamp(0.0, 255.0) as u8;
-        Self(level, level, level)
-    }
-}
-
 #[cfg(test)]
 mod tests {
     #![expect(clippy::float_cmp, reason = "the tests assert exact float values")]
@@ -186,39 +142,8 @@ mod tests {
     use super::*;
 
     #[test]
-    fn parses_html_colors() {
-        assert_eq!(Rgb::parse("#FF8000"), Some(Rgb(255, 128, 0)));
-        assert_eq!(Rgb::parse("#9f9f9f"), Some(Rgb(159, 159, 159)));
-        assert_eq!(Rgb::parse("#f80"), Some(Rgb(255, 136, 0)));
-        assert_eq!(Rgb::parse("FF8000"), None);
-        assert_eq!(Rgb::parse("#FF80"), None);
-        assert_eq!(Rgb::parse("#GG8000"), None);
-        assert_eq!(Rgb::parse("red"), None);
-    }
-
-    #[test]
-    fn grays_run_from_white_to_black() {
-        assert_eq!(Rgb::gray(0.0), Rgb(255, 255, 255));
-        assert_eq!(Rgb::gray(1.0), Rgb(0, 0, 0));
-        // truncated like athenaCL's `FloatToRGB`
-        assert_eq!(Rgb::gray(0.5), Rgb(127, 127, 127));
-    }
-
-    #[test]
     fn automata_shade_values() {
         let automaton = |max| Automaton {
-            palette: Palette {
-                background: Rgb(0, 0, 0),
-                grid: Rgb(0, 0, 0),
-                margin: Rgb(0, 0, 0),
-                main: Rgb(0, 0, 0),
-                main_frame: Rgb(0, 0, 0),
-                alt: Rgb(0, 0, 0),
-                alt_frame: Rgb(0, 0, 0),
-                title: Rgb(0, 0, 0),
-                label: Rgb(0, 0, 0),
-                unit: Rgb(0, 0, 0),
-            },
             title: Vec::new(),
             cells: Vec::new(),
             max,

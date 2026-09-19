@@ -1,14 +1,19 @@
-//! Interactive figures in the output, drawn in athenaCL's style.
+//! Interactive figures in the output, drawn in athenaCL's style and the app's colors.
 //!
 //! Figures span the output's width. ⌘-scroll zooms around the pointer, dragging (or scrolling
 //! sideways) pans, and a double click shows the whole figure again. Labels are drawn in athenaCL's
-//! bitmap font at the same size whatever the zoom, and axes relabel as it changes.
+//! bitmap font at the same size whatever the zoom, and axes relabel as it changes. A texture's
+//! events can also be shown as a score.
 
 mod automaton;
 mod ensemble;
 mod parameters;
+mod score;
 
-use std::time::{Duration, Instant};
+use std::{
+    cell::Cell,
+    time::{Duration, Instant},
+};
 
 use iced::{
     keyboard, mouse,
@@ -19,9 +24,10 @@ use iced::{
     Color, Element, Point, Rectangle, Size, Vector,
 };
 
+pub(crate) use self::score::view as score;
 use crate::figure::{
     font::{Bitmap, Font},
-    Figure, Rgb,
+    Figure,
 };
 
 /// Messages from figures.
@@ -38,16 +44,64 @@ pub enum Message {
     },
 }
 
-/// Show a figure `width` wide, marking `active_texture` on ensemble timelines.
+/// Show a figure `width` wide in `palette`, marking `active_texture` on ensemble timelines.
 pub(crate) fn view<'a>(
     figure: &'a Figure,
     width: f32,
     active_texture: &'a str,
+    palette: Palette,
 ) -> Element<'a, Message> {
     match figure {
-        Figure::Parameters(parameters) => parameters::view(parameters),
-        Figure::Ensemble(ensemble) => ensemble::view(ensemble, active_texture),
-        Figure::Automaton(automaton) => automaton::view(automaton, width),
+        Figure::Parameters(parameters) => parameters::view(parameters, palette),
+        Figure::Ensemble(ensemble) => ensemble::view(ensemble, active_texture, palette),
+        Figure::Automaton(automaton) => automaton::view(automaton, width, palette),
+    }
+}
+
+/// The colors figures are drawn in: the theme's.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub(crate) struct Palette {
+    /// Around the plates: the page.
+    pub(crate) page: Color,
+    /// Behind the data.
+    pub(crate) plate: Color,
+    /// Grid lines on the plate.
+    pub(crate) grid: Color,
+    /// Labeled grid lines on the plate.
+    pub(crate) major: Color,
+    /// Data on the plate: values, textures, notes.
+    pub(crate) mark: Color,
+    /// Secondary data on the plate: clones.
+    pub(crate) alt: Color,
+    /// What the pointer is over.
+    pub(crate) hover: Color,
+    /// Labels on the page: values, times, names.
+    pub(crate) label: Color,
+    /// Titles on the page.
+    pub(crate) title: Color,
+    /// Staff lines.
+    pub(crate) staff: Color,
+    /// The track of the bar showing the part in view.
+    pub(crate) track: Color,
+}
+
+impl Palette {
+    /// A shade from the page (0) to the labels' ink (1).
+    fn shade(self, amount: f64) -> Color {
+        let amount = amount.clamp(0.0, 1.0) as f32;
+        let blend = |from: f32, to: f32| from + (to - from) * amount;
+        Color::from_rgb(
+            blend(self.page.r, self.label.r),
+            blend(self.page.g, self.label.g),
+            blend(self.page.b, self.label.b),
+        )
+    }
+}
+
+/// Forget what `cache` drew when the colors changed since: the theme was switched.
+fn repaint(cache: &canvas::Cache, painted: &Cell<Option<Palette>>, palette: Palette) {
+    if painted.replace(Some(palette)) != Some(palette) {
+        cache.clear();
     }
 }
 
@@ -66,10 +120,6 @@ const ZOOM_SPEED: f32 = 0.005;
 const CLICK_DISTANCE: f32 = 3.0;
 /// How soon a second press makes a double click.
 const DOUBLE_CLICK: Duration = Duration::from_millis(300);
-
-fn color(Rgb(r, g, b): Rgb) -> Color {
-    Color::from_rgb8(r, g, b)
-}
 
 /// A float as an index: drawn things are placed by non-negative fractions of their whole extent,
 /// so any negative value a rounding error could produce counts as zero rather than wrapping.

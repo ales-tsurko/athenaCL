@@ -7,18 +7,26 @@ use cpal::{
     Stream as AudioStream, StreamConfig,
 };
 use iced::{
-    time,
-    widget::{button, row, slider, text},
-    Element, Task,
+    alignment::Vertical,
+    mouse, time,
+    widget::{
+        self, button,
+        canvas::{self, Canvas},
+        container, row, text,
+    },
+    Color, Element, Length, Point, Rectangle, Renderer, Size, Task, Theme,
 };
-use iced_aw::number_input;
 use midi_player::{Player, PlayerController, Settings as PlayerSettings};
 use rodio::{
     mixer::Mixer, source::Source, Decoder, DeviceSinkBuilder, MixerDeviceSink,
     Player as AudioPlayer,
 };
 
-use super::app;
+use super::{app, pixel, theme::Colors};
+
+/// Segments of the progress bar, and the gap between them.
+const SEGMENTS: usize = 40;
+const SEGMENT_GAP: f32 = 2.0;
 
 pub(crate) struct GlobalState {
     midi_player_controller: PlayerController,
@@ -415,56 +423,141 @@ pub enum Message {
     Tick(time::Instant),
 }
 
-pub(crate) fn view(state: &Track) -> Element<'_, Message> {
-    let disabled = !state.path.exists() && !state.is_playing;
-    let label = text(if state.is_playing { "" } else { "" })
-        .font(iced_fonts::NERD_FONT)
-        .align_x(iced::Alignment::Center)
-        .size(24);
-    let message = if state.is_playing {
-        Message::Pause(state.id)
-    } else {
-        Message::Play(state.id)
-    };
-    let button = button(label);
-    let player = row![
-        if disabled {
-            button
-        } else {
-            button.on_press(message)
-        }
-        .width(50),
-        slider(0.0..=1.0, state.position, |v| {
-            Message::ChangePosition(state.id, v)
-        })
-        .step(0.001)
-    ]
-    .align_y(iced::Alignment::Center)
-    .spacing(10.0);
-
-    if disabled {
-        text(format!(
+/// A track: its play button, its progress in segments, and its kind.
+pub(crate) fn view(track: &Track, colors: Colors) -> Element<'_, Message> {
+    if !track.path.exists() && !track.is_playing {
+        return text(format!(
             "File {} does not exist.",
-            state.path.to_string_lossy()
+            track.path.to_string_lossy()
         ))
-        .style(text::danger)
-        .into()
+        .color(colors.dim)
+        .into();
+    }
+    let (glyph, message) = if track.is_playing {
+        ('\u{f04c}', Message::Pause(track.id))
     } else {
-        player.into()
+        ('\u{f04b}', Message::Play(track.id))
+    };
+    let play =
+        button(container(text(glyph).font(iced_fonts::NERD_FONT).size(14)).center(Length::Fill))
+            .width(36)
+            .height(36)
+            .padding(0)
+            .style(colors.block_button())
+            .on_press(message);
+    let progress = Canvas::new(Progress {
+        id: track.id,
+        position: track.position,
+        lit: colors.lit,
+        unlit: colors.unlit,
+    })
+    .width(Length::Fill)
+    .height(10);
+    let kind = match track.id {
+        PlayerId::Midi(_) => "MIDI",
+        PlayerId::Audio(_) => "AUDIO",
+    };
+
+    row![play, progress, pixel::label(kind, colors.dim)]
+        .spacing(12)
+        .align_y(Vertical::Center)
+        .into()
+}
+
+/// A track's progress as a row of segments: those played are lit. Clicking or dragging along it
+/// seeks.
+struct Progress {
+    id: PlayerId,
+    position: f64,
+    lit: Color,
+    unlit: Color,
+}
+
+impl Progress {
+    /// Where along the bar `x` is, from 0 to 1.
+    fn position_at(x: f32, width: f32) -> f64 {
+        f64::from((x / width.max(1.0)).clamp(0.0, 1.0))
     }
 }
 
-pub(crate) fn view_tempo(global_state: &GlobalState) -> Element<'_, Message> {
-    row![
-        text("󰟚").font(iced_fonts::NERD_FONT).size(16),
-        text("=").size(16),
-        number_input(&global_state.tempo(), 20..=600, Message::SetTempo)
-            .step(1)
-            .width(60.0),
-    ]
-    .spacing(10.0)
-    .align_y(iced::Alignment::Center)
-    .into()
+impl canvas::Program<Message> for Progress {
+    /// Whether the bar is being dragged.
+    type State = bool;
+
+    fn update(
+        &self,
+        dragging: &mut bool,
+        event: &canvas::Event,
+        bounds: Rectangle,
+        cursor: mouse::Cursor,
+    ) -> Option<widget::Action<Message>> {
+        let seek = |x: f32| {
+            widget::Action::publish(Message::ChangePosition(
+                self.id,
+                Self::position_at(x, bounds.width),
+            ))
+            .and_capture()
+        };
+        match event {
+            canvas::Event::Mouse(mouse::Event::ButtonPressed(mouse::Button::Left)) => {
+                let at = cursor.position_in(bounds)?;
+                *dragging = true;
+                Some(seek(at.x))
+            }
+            canvas::Event::Mouse(mouse::Event::CursorMoved { .. }) if *dragging => {
+                let at = cursor.position()?;
+                Some(seek(at.x - bounds.x))
+            }
+            canvas::Event::Mouse(mouse::Event::ButtonReleased(mouse::Button::Left)) => {
+                *dragging = false;
+                None
+            }
+            _ => None,
+        }
+    }
+
+    fn draw(
+        &self,
+        _dragging: &bool,
+        renderer: &Renderer,
+        _theme: &Theme,
+        bounds: Rectangle,
+        _cursor: mouse::Cursor,
+    ) -> Vec<canvas::Geometry> {
+        let mut frame = canvas::Frame::new(renderer, bounds.size());
+        let count = SEGMENTS as f32;
+        let width = (bounds.width - SEGMENT_GAP * (count - 1.0)) / count;
+        let played = self.position.clamp(0.0, 1.0) as f32 * count;
+        for index in 0..SEGMENTS {
+            let segment = index as f32;
+            let x = (segment * (width + SEGMENT_GAP)).round();
+            let right = ((segment + 1.0) * (width + SEGMENT_GAP) - SEGMENT_GAP).round();
+            let color = if segment < played.round() {
+                self.lit
+            } else {
+                self.unlit
+            };
+            frame.fill_rectangle(
+                Point::new(x, 0.0),
+                Size::new(right - x, bounds.height),
+                color,
+            );
+        }
+        vec![frame.into_geometry()]
+    }
+
+    fn mouse_interaction(
+        &self,
+        dragging: &bool,
+        bounds: Rectangle,
+        cursor: mouse::Cursor,
+    ) -> mouse::Interaction {
+        if *dragging || cursor.is_over(bounds) {
+            mouse::Interaction::Pointer
+        } else {
+            mouse::Interaction::default()
+        }
+    }
 }
 
 #[cfg(test)]
@@ -647,6 +740,29 @@ mod tests {
         let mut state = GlobalState::headless();
         drop(update(&mut Vec::new(), &mut state, Message::SetTempo(144)));
         assert_eq!(state.tempo(), 144);
+    }
+
+    #[test]
+    fn the_progress_bar_seeks_where_it_is_clicked() {
+        let bar = Progress {
+            id: PlayerId::Midi(0),
+            position: 0.0,
+            lit: Color::BLACK,
+            unlit: Color::WHITE,
+        };
+        let bounds = Rectangle::new(Point::new(100.0, 20.0), Size::new(400.0, 10.0));
+        let at = mouse::Cursor::Available(Point::new(200.0, 25.0));
+        let press = canvas::Event::Mouse(mouse::Event::ButtonPressed(mouse::Button::Left));
+        let mut dragging = false;
+        let action = canvas::Program::update(&bar, &mut dragging, &press, bounds, at)
+            .expect("clicking seeks");
+        assert!(matches!(
+            action.into_inner().0,
+            Some(Message::ChangePosition(PlayerId::Midi(0), position)) if (position - 0.25).abs() < 1e-9
+        ));
+        assert!(dragging);
+        assert_eq!(Progress::position_at(-5.0, 400.0), 0.0);
+        assert_eq!(Progress::position_at(900.0, 400.0), 1.0);
     }
 
     #[test]

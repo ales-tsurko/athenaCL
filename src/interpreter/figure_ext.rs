@@ -1,7 +1,8 @@
 //! Python bindings for figures.
 //!
-//! Graphics commands pass what they show (parameter values, texture time ranges, cellular automaton
-//! cells) to these functions, which send it to the GUI as a [`Figure`](crate::figure::Figure).
+//! Graphics commands pass what they show (parameter values, texture events and time ranges,
+//! cellular automaton cells) to these functions, which send it to the GUI as a
+//! [`Figure`](crate::figure::Figure). The GUI draws them in its theme's colors.
 
 use rustpython_vm::{pymodule, VirtualMachine};
 
@@ -18,27 +19,32 @@ pub(super) mod _inner {
     use std::sync::Arc;
 
     use rustpython_vm::{
-        builtins::{PyDictRef, PyStrRef},
+        builtins::PyStrRef,
         function::{ArgIntoBool, ArgIntoFloat},
         PyObject, PyObjectRef, PyResult,
     };
 
     use super::*;
     use crate::figure::{
-        Automaton, Domain, Ensemble, Figure, Graph, Lane, Mark, Palette, Parameters, Rgb, Texture,
+        Automaton, Domain, Ensemble, Event, Figure, Graph, Lane, Mark, Parameters, Texture,
     };
 
-    /// `parameterMap(palette, domain, detailed, graphs)`: parameter values, for `TPmap`,
+    /// `parameterMap(domain, detailed, graphs, events)`: parameter values, for `TPmap`,
     /// `TImap` and `TCmap`.
     ///
     /// `domain` is `"event"` or `"time"`, and `graphs` a list of `(title, coordinates)`. For
     /// events, coordinates are `(event, value)`; for time, `(start, value, end, value)`.
+    ///
+    /// `events` are the events the graphs describe, which the GUI can also show as a score:
+    /// `(time, duration, sustain, accent, pitch, amplitude, tempo)`, with times in seconds, pitch
+    /// in athenaCL's pitch space and tempo in beats per minute. It is empty for parameters
+    /// alone.
     #[pyfunction(name = "parameterMap")]
     fn parameter_map(
-        palette: PyDictRef,
         domain: PyStrRef,
         detailed: ArgIntoBool,
         graphs: PyObjectRef,
+        events: PyObjectRef,
         vm: &VirtualMachine,
     ) -> PyResult<()> {
         let domain = match domain.to_str().unwrap_or_default() {
@@ -72,25 +78,33 @@ pub(super) mod _inner {
                 marks,
             })
         })?;
+        let events = map(&events, vm, |event| {
+            let [time, duration, sustain, accent, pitch, amplitude, tempo] = items(&event, vm)?;
+            Ok(Event {
+                time: float(time, vm)?,
+                duration: float(duration, vm)?,
+                sustain: float(sustain, vm)?,
+                sounds: float(accent, vm)? > 0.0,
+                pitch: float(pitch, vm)?,
+                amplitude: float(amplitude, vm)?,
+                tempo: float(tempo, vm)?,
+            })
+        })?;
         show(Figure::Parameters(Parameters {
-            palette: palette_from(&palette, vm)?,
             domain,
             detailed: detailed.into(),
             graphs,
+            events,
         }));
         Ok(())
     }
 
-    /// `ensembleMap(palette, textures)`: textures and clones over time, for `TEmap`.
+    /// `ensembleMap(textures)`: textures and clones over time, for `TEmap`.
     ///
     /// `textures` is a list of `(name, start, end, muted, clones)`, where `clones` is a list of
     /// `(name, start, end, muted)`.
     #[pyfunction(name = "ensembleMap")]
-    fn ensemble_map(
-        palette: PyDictRef,
-        textures: PyObjectRef,
-        vm: &VirtualMachine,
-    ) -> PyResult<()> {
+    fn ensemble_map(textures: PyObjectRef, vm: &VirtualMachine) -> PyResult<()> {
         let lane = |fields: [PyObjectRef; 4]| -> PyResult<Lane> {
             let [name, start, end, muted] = fields;
             Ok(Lane {
@@ -107,21 +121,16 @@ pub(super) mod _inner {
                 clones: map(&clones, vm, |clone| lane(items(&clone, vm)?))?,
             })
         })?;
-        show(Figure::Ensemble(Ensemble {
-            palette: palette_from(&palette, vm)?,
-            textures,
-        }));
+        show(Figure::Ensemble(Ensemble { textures }));
         Ok(())
     }
 
-    /// `automatonMap(palette, title, cells, max)`: generations of a cellular automaton, for
-    /// `AUca`.
+    /// `automatonMap(title, cells, max)`: generations of a cellular automaton, for `AUca`.
     ///
     /// `cells` is a list of generations, each a list of values. `max` is the largest value of a
     /// discrete automaton, or `None` for a continuous one.
     #[pyfunction(name = "automatonMap")]
     fn automaton_map(
-        palette: PyDictRef,
         title: PyStrRef,
         cells: PyObjectRef,
         max: Option<ArgIntoFloat>,
@@ -129,7 +138,6 @@ pub(super) mod _inner {
     ) -> PyResult<()> {
         let cells = map(&cells, vm, |row| map(&row, vm, |value| float(value, vm)))?;
         show(Figure::Automaton(Automaton {
-            palette: palette_from(&palette, vm)?,
             title: title
                 .to_str()
                 .unwrap_or_default()
@@ -147,27 +155,6 @@ pub(super) mod _inner {
             .gui_sender
             .send_blocking(interpreter::Message::Figure(Arc::new(figure)))
             .expect("cannot send message via channel");
-    }
-
-    /// Read the colors from a dict of `#rrggbb` strings.
-    fn palette_from(palette: &PyDictRef, vm: &VirtualMachine) -> PyResult<Palette> {
-        let color = |key: &str| -> PyResult<Rgb> {
-            let value = string(palette.get_item(key, vm)?, vm)?;
-            Rgb::parse(&value)
-                .ok_or_else(|| vm.new_value_error(format!("invalid {key} color: {value}")))
-        };
-        Ok(Palette {
-            background: color("background")?,
-            grid: color("grid")?,
-            margin: color("margin")?,
-            main: color("main")?,
-            main_frame: color("mainFrame")?,
-            alt: color("alt")?,
-            alt_frame: color("altFrame")?,
-            title: color("title")?,
-            label: color("label")?,
-            unit: color("unit")?,
-        })
     }
 
     /// Convert each element of a Python sequence.

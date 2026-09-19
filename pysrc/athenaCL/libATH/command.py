@@ -126,30 +126,23 @@ class Command(object):
         only called if self.gfxSwitch is set"""
         pass
 
-    def _gfxPalette(self):
-        """graphics colors, from the gui preferences"""
-        pref = self.ao.external.getPref
-        return {
-            "background": pref("gui", "COLORbgAbs"),
-            "grid": pref("gui", "COLORbgGrid"),
-            "margin": pref("gui", "COLORbgMargin"),
-            "main": pref("gui", "COLORfgMain"),
-            "mainFrame": pref("gui", "COLORfgMainFrame"),
-            "alt": pref("gui", "COLORfgAlt"),
-            "altFrame": pref("gui", "COLORfgAltFrame"),
-            "title": pref("gui", "COLORtxTitle"),
-            "label": pref("gui", "COLORtxLabel"),
-            "unit": pref("gui", "COLORtxUnit"),
-        }
-
-    def _gfxParameterMap(self, splitSco, xRelation, detailed):
+    def _gfxParameterMap(self, splitSco, xRelation, detailed, events=()):
         """shows each parameter of a loaded split score as a graph
-        xRelation is event or time"""
+        xRelation is event or time; events, when given, are the events the
+        graphs describe, which the gui can also show as a score"""
         graphs = []
         for pmtr in splitSco.getKeys():
             graphs.append((splitSco.getTitle(pmtr), splitSco.getCoord(pmtr, xRelation)))
         if graphs:
-            figureExt.parameterMap(self._gfxPalette(), xRelation, detailed, graphs)
+            figureExt.parameterMap(xRelation, detailed, graphs, list(events))
+
+    def _gfxEvents(self, textureObj):
+        """the events of a scored texture, as the gui's score shows them:
+        time, duration, sustain, accent, pitch, amplitude and tempo"""
+        return [
+            (e["time"], e["dur"], e["sus"], e["acc"], e["ps"], e["amp"], e["bpm"])
+            for e in textureObj.getScore().list()
+        ]
 
     def do(self):
         """threading only sometimes works
@@ -4657,10 +4650,13 @@ class TImap(Command):
         )
 
     def displayGfx(self):
-        splitSco = eventList.EventSequenceSplit(self.ao.textureLib[self.tName], "t")
-        splitSco.load(self.tmRelation)
+        textureObj = self.ao.textureLib[self.tName]
+        splitSco = eventList.EventSequenceSplit(textureObj, "t")
+        splitSco.load(self.tmRelation)  # scores the texture if needed
         splitSco.clean()  # remove parameters with string values
-        self._gfxParameterMap(splitSco, self.xRelation, 0)
+        self._gfxParameterMap(
+            splitSco, self.xRelation, 0, self._gfxEvents(textureObj)
+        )
 
 
 # -----------------------------------------------------------------||||||||||||--
@@ -4976,7 +4972,7 @@ class TEmap(Command):
                 clones.append((cName, start, end, clone["muteStatus"]))
             start, end = entry["tRange"]
             textures.append((tName, start, end, entry["muteStatus"], clones))
-        figureExt.ensembleMap(self._gfxPalette(), textures)
+        figureExt.ensembleMap(textures)
 
 
 class TEmidi(Command):
@@ -8499,7 +8495,7 @@ class AUca(Command):
             maxValue = self.ca.dstValues[-1]
         else:
             maxValue = None
-        figureExt.automatonMap(self._gfxPalette(), self.ca.repr("line"), cells, maxValue)
+        figureExt.automatonMap(self.ca.repr("line"), cells, maxValue)
 
 
 class AUbug(Command):
