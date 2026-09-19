@@ -2,9 +2,11 @@
 //!
 //! Hovering a lane shows its time range, and clicking it selects the texture or clone.
 
-use iced::mouse;
-use iced::widget::canvas::{self, Canvas, Frame};
-use iced::{Color, Element, Length, Point, Rectangle, Renderer, Size, Theme};
+use iced::{
+    mouse,
+    widget::canvas::{self, Canvas, Frame},
+    Color, Element, Length, Point, Rectangle, Renderer, Size, Theme,
+};
 
 use super::{
     color, fill, outline, status, Anchor, Gesture, Label, Message, Pointer, Ticks, Window,
@@ -272,10 +274,7 @@ impl<'a> Layout<'a> {
         let ticks = Ticks::new(self.visible.0, self.visible.1, count.max(2), 0.001);
         let line = |frame: &mut Frame, time: f64, color: Color| {
             let x = self.x(time).round();
-            let line = Rectangle::new(
-                Point::new(x, self.map.y),
-                Size::new(1.0, self.map.height),
-            );
+            let line = Rectangle::new(Point::new(x, self.map.y), Size::new(1.0, self.map.height));
             fill(frame, line, self.map, color);
         };
         let first = (self.visible.0 / ticks.step).floor() * ticks.step;
@@ -409,7 +408,10 @@ mod tests {
             .iter()
             .map(|row| (row.lane.name.as_str(), row.texture, row.is_clone))
             .collect();
-        assert_eq!(names, [("a", "a", false), ("x", "a", true), ("b", "b", false)]);
+        assert_eq!(
+            names,
+            [("a", "a", false), ("x", "a", true), ("b", "b", false)]
+        );
     }
 
     #[test]

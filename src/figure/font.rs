@@ -162,7 +162,9 @@ mod tests {
             for (c, glyph) in glyphs {
                 assert_eq!(glyph.len(), height, "{font:?} {c:?}");
                 assert!(glyph.iter().all(|row| row.len() == glyph[0].len()));
-                assert!(glyph.iter().all(|row| row.bytes().all(|b| b == b'#' || b == b'.')));
+                assert!(glyph
+                    .iter()
+                    .all(|row| row.bytes().all(|b| b == b'#' || b == b'.')));
             }
         }
     }

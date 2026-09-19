@@ -1,20 +1,22 @@
 //! Application's GUI.
-use std::env;
-use std::sync::Arc;
+use std::{env, sync::Arc};
 
-use iced::futures::sink::SinkExt;
-use iced::stream;
-use iced::widget::{
-    button, column, container, container::Style as ContainerStyle, horizontal_space, pick_list,
-    row, scrollable, text, text::Style as TextStyle, text_input,
+use iced::{
+    futures::sink::SinkExt,
+    stream, time,
+    widget::{
+        button, column, container, container::Style as ContainerStyle, horizontal_space, pick_list,
+        row, scrollable, text, text::Style as TextStyle, text_input,
+    },
+    Element, Font, Subscription, Task,
 };
-use iced::{time, Element, Font, Subscription, Task};
 use rfd::FileDialog;
 
-use super::figure;
-use super::player::{self, GlobalState as GlobalPlayerState, Track as PlayerState};
-use crate::figure::Figure;
-use crate::interpreter;
+use super::{
+    figure,
+    player::{self, GlobalState as GlobalPlayerState, Track as PlayerState},
+};
+use crate::{figure::Figure, interpreter};
 
 const TERM_WIDTH: u16 = 80;
 const FONT_WIDTH: u16 = 10;
@@ -215,7 +217,7 @@ pub fn update(state: &mut State, message: Message) -> Task<Message> {
 }
 
 /// The top-level iced view function.
-pub fn view(state: &State) -> Element<Message> {
+pub fn view(state: &State) -> Element<'_, Message> {
     use iced::widget::scrollable::{Catalog, Status};
 
     let output = column(
@@ -257,7 +259,7 @@ pub fn view(state: &State) -> Element<Message> {
         .into()
 }
 
-fn view_top_panel(state: &State) -> Element<Message> {
+fn view_top_panel(state: &State) -> Element<'_, Message> {
     row![
         button(text("").font(iced_fonts::NERD_FONT).size(16.0))
             .style(button::text)
@@ -288,7 +290,7 @@ fn view_output<'a>(output: &'a Output, active_texture: &'a str) -> Element<'a, M
     .into()
 }
 
-fn view_prompt(state: &State) -> Option<Element<Message>> {
+fn view_prompt(state: &State) -> Option<Element<'_, Message>> {
     state.question.as_ref().map(|q| {
         container(text(q))
             .style(|theme: &iced::Theme| ContainerStyle {
@@ -301,7 +303,7 @@ fn view_prompt(state: &State) -> Option<Element<Message>> {
     })
 }
 
-fn view_input(state: &State) -> Element<Message> {
+fn view_input(state: &State) -> Element<'_, Message> {
     use iced::widget::text_input::{Catalog, Status};
 
     let normal_style = |theme: &iced::Theme, status: Status| {
@@ -343,7 +345,7 @@ fn view_input(state: &State) -> Element<Message> {
     .into()
 }
 
-fn view_bottom_panel(state: &State) -> Element<Message> {
+fn view_bottom_panel(state: &State) -> Element<'_, Message> {
     row![
         view_pici_chooser(state),
         horizontal_space(),
@@ -355,7 +357,7 @@ fn view_bottom_panel(state: &State) -> Element<Message> {
     .into()
 }
 
-fn view_pici_chooser(state: &State) -> Element<Message> {
+fn view_pici_chooser(state: &State) -> Element<'_, Message> {
     let pi_selection = if state.active_path.is_empty() {
         None
     } else {

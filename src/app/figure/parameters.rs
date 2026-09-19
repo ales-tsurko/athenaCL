@@ -3,9 +3,11 @@
 //! Graphs are stacked and share the x axis. Hovering shows the value under the pointer in every
 //! graph.
 
-use iced::mouse;
-use iced::widget::canvas::{self, Canvas, Frame};
-use iced::{Element, Length, Point, Rectangle, Renderer, Size, Theme};
+use iced::{
+    mouse,
+    widget::canvas::{self, Canvas, Frame},
+    Element, Length, Point, Rectangle, Renderer, Size, Theme,
+};
 
 use super::{
     color, fill, format_value, status, Anchor, Gesture, Label, Message, Pointer, Ticks, Window,
@@ -151,10 +153,7 @@ impl<'a> Layout<'a> {
             parameters,
             width,
             extent,
-            visible: (
-                extent.0 + window.start * span,
-                extent.0 + window.end * span,
-            ),
+            visible: (extent.0 + window.start * span, extent.0 + window.end * span),
         }
     }
 

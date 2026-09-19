@@ -16,8 +16,9 @@ pub(crate) fn make_module(vm: &mut VirtualMachine) {
 pub(super) mod _inner {
     use std::str;
 
-    use super::*;
     use rustpython_vm::PyResult;
+
+    use super::*;
 
     #[pyfunction(name = "pathLibUpdated")]
     pub(crate) fn path_lib_updated(path_lib: Vec<String>) -> PyResult<()> {

@@ -2,9 +2,11 @@
 //!
 //! Zooming keeps the cells square, and hovering shows a cell's generation and value.
 
-use iced::mouse;
-use iced::widget::canvas::{self, Canvas, Frame};
-use iced::{Element, Length, Point, Rectangle, Renderer, Size, Theme};
+use iced::{
+    mouse,
+    widget::canvas::{self, Canvas, Frame},
+    Element, Length, Point, Rectangle, Renderer, Size, Theme,
+};
 
 use super::{
     color, fill, format_value, outline, status, Anchor, Gesture, Label, Message, Pointer, Window,
@@ -199,8 +201,8 @@ impl<'a> Layout<'a> {
             return None;
         }
         let cell = self.cell();
-        let column = self.view.cells.start * self.columns as f64
-            + f64::from((at.x - self.grid.x) / cell);
+        let column =
+            self.view.cells.start * self.columns as f64 + f64::from((at.x - self.grid.x) / cell);
         let row = self.view.generations.start * self.automaton.cells.len() as f64
             + f64::from((at.y - self.grid.y) / cell);
         let row = row as usize;
@@ -244,10 +246,8 @@ impl<'a> Layout<'a> {
                     .take_while(|&&value| Rgb::gray(automaton.shade(value)) == gray)
                     .count();
                 let (left, right) = (self.x(start as f64), self.x((start + run) as f64));
-                let area = Rectangle::new(
-                    Point::new(left, top),
-                    Size::new(right - left, bottom - top),
-                );
+                let area =
+                    Rectangle::new(Point::new(left, top), Size::new(right - left, bottom - top));
                 fill(frame, area, self.grid, color(gray));
                 start += run;
             }
@@ -335,10 +335,7 @@ mod tests {
         let automaton = automaton(10, 10);
         let layout = Layout::new(&automaton, View::default(), 680.0);
         let cell = layout.cell();
-        let at = Point::new(
-            layout.grid.x + 3.5 * cell,
-            layout.grid.y + 6.5 * cell,
-        );
+        let at = Point::new(layout.grid.x + 3.5 * cell, layout.grid.y + 6.5 * cell);
         assert_eq!(layout.cell_at(at), Some((6, 3)));
         assert_eq!(layout.cell_at(Point::new(1.0, 1.0)), None);
     }

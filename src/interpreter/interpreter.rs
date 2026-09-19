@@ -1,10 +1,10 @@
 //! athenaCL interpreter.
 
-use std::sync::{Arc, LazyLock};
-use std::thread;
+use std::{
+    sync::{Arc, LazyLock},
+    thread,
+};
 
-use super::{athena_obj_ext, dialog_ext, figure_ext, xml_tools_ext};
-use crate::figure::Figure;
 use async_channel::{unbounded, Receiver, Sender};
 use rustpython_vm as vm;
 use thiserror::Error;
@@ -12,6 +12,9 @@ use vm::{
     builtins::{PyBaseExceptionRef, PyInt, PyList, PyStr, PyTuple},
     Interpreter as PyInterpreter, PyObjectRef, PyResult, VirtualMachine,
 };
+
+use super::{athena_obj_ext, dialog_ext, figure_ext, xml_tools_ext};
+use crate::figure::Figure;
 
 /// Global interpreter representation.
 pub static INTERPRETER_WORKER: LazyLock<InterpreterWorker> = LazyLock::new(InterpreterWorker::run);

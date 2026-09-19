@@ -11,9 +11,10 @@ pub(crate) fn make_module(vm: &mut VirtualMachine) {
 pub(super) mod _inner {
     use std::str;
 
-    use super::*;
     use ahash::AHashMap;
     use rustpython_vm::{convert::ToPyObject, PyResult};
+
+    use super::*;
 
     #[pyfunction(name = "xmlToPy")]
     pub(crate) fn xml_to_py(code: String, vm: &VirtualMachine) -> PyResult {

@@ -1,9 +1,6 @@
-use std::collections::HashMap;
-use std::error::Error;
-use std::fs::File;
-use std::io::BufReader;
-use std::path::PathBuf;
-use std::time::Duration;
+use std::{
+    collections::HashMap, error::Error, fs::File, io::BufReader, path::PathBuf, time::Duration,
+};
 
 use cpal::{
     traits::{DeviceTrait, HostTrait, StreamTrait},
@@ -349,7 +346,7 @@ pub enum Message {
     Tick(time::Instant),
 }
 
-pub(crate) fn view(state: &Track) -> Element<Message> {
+pub(crate) fn view(state: &Track) -> Element<'_, Message> {
     let disabled = !state.path.exists() && !state.is_playing;
     let label = text(if state.is_playing { "" } else { "" })
         .font(iced_fonts::NERD_FONT)
@@ -388,7 +385,7 @@ pub(crate) fn view(state: &Track) -> Element<Message> {
     }
 }
 
-pub(crate) fn view_tempo(global_state: &GlobalState) -> Element<Message> {
+pub(crate) fn view_tempo(global_state: &GlobalState) -> Element<'_, Message> {
     row![
         text("󰟚").font(iced_fonts::NERD_FONT).size(16),
         text("=").size(16),

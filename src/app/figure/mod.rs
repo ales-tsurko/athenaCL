@@ -10,13 +10,16 @@ mod parameters;
 
 use std::time::{Duration, Instant};
 
-use iced::keyboard;
-use iced::mouse;
-use iced::widget::canvas::{self, Frame};
-use iced::{Color, Element, Point, Rectangle, Size, Vector};
+use iced::{
+    keyboard, mouse,
+    widget::canvas::{self, Frame},
+    Color, Element, Point, Rectangle, Size, Vector,
+};
 
-use crate::figure::font::{Bitmap, Font};
-use crate::figure::{Figure, Rgb};
+use crate::figure::{
+    font::{Bitmap, Font},
+    Figure, Rgb,
+};
 
 /// Messages from figures.
 #[derive(Debug, Clone)]
@@ -482,7 +485,13 @@ mod tests {
     fn zooming_keeps_the_anchor_in_place() {
         let mut window = Window::default();
         assert!(window.zoom(0.25, 2.0, 0.01));
-        assert_eq!(window, Window { start: 0.125, end: 0.625 });
+        assert_eq!(
+            window,
+            Window {
+                start: 0.125,
+                end: 0.625
+            }
+        );
         assert_eq!(window.whole(0.25), 0.25);
     }
 
@@ -502,7 +511,13 @@ mod tests {
             end: 0.75,
         };
         assert!(window.pan(1.0));
-        assert_eq!(window, Window { start: 0.5, end: 1.0 });
+        assert_eq!(
+            window,
+            Window {
+                start: 0.5,
+                end: 1.0
+            }
+        );
         assert!(!window.pan(0.5));
         assert!(window.reset());
         assert_eq!(window, Window::default());
@@ -552,7 +567,10 @@ mod tests {
         assert_eq!(pointer.gesture(&moved, scrolled(), at(110.0)), pan(10.0));
         assert_eq!(pointer.gesture(&moved, scrolled(), at(130.0)), pan(20.0));
         let release = mouse_event(mouse::Event::ButtonReleased(mouse::Button::Left));
-        assert_eq!(pointer.gesture(&release, scrolled(), at(130.0)), Gesture::Press);
+        assert_eq!(
+            pointer.gesture(&release, scrolled(), at(130.0)),
+            Gesture::Press
+        );
     }
 
     #[test]

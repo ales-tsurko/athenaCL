@@ -15,11 +15,11 @@ pub(crate) fn make_module(vm: &mut VirtualMachine) {
 
 #[pymodule]
 pub(super) mod _inner {
-    use std::env;
-    use std::str;
+    use std::{env, str};
+
+    use rustpython_vm::{convert::ToPyObject, PyResult};
 
     use super::*;
-    use rustpython_vm::{convert::ToPyObject, PyResult};
 
     #[pyfunction(name = "promptChooseDir")]
     pub(crate) fn prompt_choose_dir(

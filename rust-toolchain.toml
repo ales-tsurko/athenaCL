@@ -1,0 +1,5 @@
+# Tracks the newest stable Rust rather than pinning one, so every machine and CI
+# see the same clippy lints at the same time instead of drifting apart.
+
+[toolchain]
+channel = "stable"

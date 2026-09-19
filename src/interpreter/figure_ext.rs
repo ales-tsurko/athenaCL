@@ -15,14 +15,15 @@ pub(crate) fn make_module(vm: &mut VirtualMachine) {
 pub(super) mod _inner {
     use std::sync::Arc;
 
-    use super::*;
-    use crate::figure::{
-        Automaton, Domain, Ensemble, Figure, Graph, Lane, Mark, Palette, Parameters, Rgb, Texture,
-    };
     use rustpython_vm::{
         builtins::{PyDictRef, PyStrRef},
         function::{ArgIntoBool, ArgIntoFloat},
         PyObject, PyObjectRef, PyResult,
+    };
+
+    use super::*;
+    use crate::figure::{
+        Automaton, Domain, Ensemble, Figure, Graph, Lane, Mark, Palette, Parameters, Rgb, Texture,
     };
 
     /// `parameterMap(palette, domain, detailed, graphs)`: parameter values, for `TPmap`,
@@ -175,7 +176,10 @@ pub(super) mod _inner {
     }
 
     /// The elements of a sequence of exactly `N` items, such as a tuple of fields.
-    fn items<const N: usize>(sequence: &PyObject, vm: &VirtualMachine) -> PyResult<[PyObjectRef; N]> {
+    fn items<const N: usize>(
+        sequence: &PyObject,
+        vm: &VirtualMachine,
+    ) -> PyResult<[PyObjectRef; N]> {
         let items = vm.extract_elements_with(sequence, Ok)?;
         let count = items.len();
         items

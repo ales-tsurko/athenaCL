@@ -1,9 +1,12 @@
-#![allow(missing_docs)]
-use std::env;
-use std::fs;
-use std::io;
-use std::path::{Path, PathBuf};
-use std::process::Command;
+#![allow(missing_docs, reason = "We don't need module docs in the build script")]
+#![allow(clippy::indexing_slicing, reason = "Panics during build are fine")]
+#![allow(clippy::expect_used, reason = "Panics during build are fine")]
+
+use std::{
+    env, fs, io,
+    path::{Path, PathBuf},
+    process::Command,
+};
 
 fn main() {
     link_resources();
@@ -20,7 +23,9 @@ fn main() {
 
 /// Links `resources` next to the executable, where the app looks for the soundfont.
 fn link_resources() {
-    let resources = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").unwrap()).join("resources");
+    let resources =
+        PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").expect("Expected during build"))
+            .join("resources");
     let Some(link) = exe_dir().map(|dir| dir.join("resources")) else {
         println!("cargo:warning=cannot find the executable directory, resources are not linked");
         return;
@@ -33,9 +38,9 @@ fn link_resources() {
         );
         return;
     }
-    // re-run when the link is removed or broken; the files are watched through the link rather
-    // than the link itself, because cargo also compares the link's own mtime, which is newer
-    // than the start of the build that created it
+    // re-run when the link is removed or broken; the files are watched through the link rather than
+    // the link itself, because cargo also compares the link's own mtime, which is newer than the
+    // start of the build that created it
     for entry in fs::read_dir(&resources).into_iter().flatten().flatten() {
         let name = entry.file_name();
         let is_file = entry.file_type().is_ok_and(|file_type| file_type.is_file());
@@ -66,8 +71,8 @@ fn exe_dir() -> Option<PathBuf> {
     Some(dir.to_owned())
 }
 
-/// Target and build directories from the cargo configuration (they differ when
-/// `build.build-dir` is set).
+/// Target and build directories from the cargo configuration (they differ when `build.build-dir` is
+/// set).
 fn target_and_build_dirs() -> Option<(PathBuf, PathBuf)> {
     let output = Command::new(env::var_os("CARGO")?)
         .args(["metadata", "--format-version=1", "--no-deps", "--offline"])

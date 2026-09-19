@@ -22,28 +22,29 @@ find the source code inside `doc/` directory. You can read it
 
 ## Usage
 
-The repo includes large files tracked by `git-lfs`. You need it to be installed
-on your system. Then, after you cloned the repo:
+Run this once after you cloned this repo:
 
 ```
-git lfs pull
+make init
 ```
 
 Then you can run the program using:
 
 ```
-cargo run --release
+make run
 ```
 
-`cargo test` will run not only rust tests, but python tests as well.
+`make test` will run not only rust tests, but python tests as well.
+`cargo-nextest` is required.
 
 
 ### Bundle an app on macOS
 
-Currently, bundling app packages configured on macOS only. To bundle a package:
+Bundling requires [`cargo-bundle`](https://crates.io/crates/cargo-bundle).
+Only macOS is configured currently. To bundle a package:
 
 ```
-./bundle-mac.sh
+make pack-macos
 ```
 
 After that the .app package should be located at
