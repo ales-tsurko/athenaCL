@@ -43,6 +43,10 @@ impl InterpreterWorker {
         let s = gui_sender.clone();
 
         let _ = thread::spawn(move || {
+            #[expect(
+                clippy::panic,
+                reason = "the app cannot proceed without the interpreter"
+            )]
             let interpreter = Interpreter::new().unwrap_or_else(|err| {
                 s.send_blocking(Message::PythonError(err.to_string()))
                     .expect("can't send message to channel");
@@ -213,12 +217,10 @@ pub fn init_py_interpreter() -> PyInterpreter {
 fn extract_result_tuple(vm: &VirtualMachine, result: PyObjectRef) -> PyResult<(bool, String)> {
     // Ensure the result is a tuple
     if let Some(tuple) = result.payload::<PyTuple>() {
-        let elements = tuple.as_slice();
-
         // Ensure the tuple has exactly 2 elements (Integer, String)
-        if elements.len() == 2 {
+        if let [int_part, str_part] = tuple.as_slice() {
             // Extract and convert the first element to i32
-            let int_part = elements[0]
+            let int_part = int_part
                 .payload::<PyInt>()
                 .ok_or_else(|| vm.new_type_error("Expected an integer".to_owned()))?
                 .as_bigint();
@@ -226,7 +228,7 @@ fn extract_result_tuple(vm: &VirtualMachine, result: PyObjectRef) -> PyResult<(b
             let bool_part = *int_part != 0.into();
 
             // Extract and convert the second element to String
-            let str_part = elements[1]
+            let str_part = str_part
                 .payload::<PyStr>()
                 .map(|v| v.as_str().to_owned())
                 .unwrap_or_default();
@@ -240,7 +242,10 @@ fn extract_result_tuple(vm: &VirtualMachine, result: PyObjectRef) -> PyResult<(b
     }
 }
 
-#[allow(dead_code)]
+#[expect(
+    dead_code,
+    reason = "kept beside `extract_string` for Python list results"
+)]
 fn extract_vec_string(vm: &VirtualMachine, result: PyObjectRef) -> PyResult<Vec<String>> {
     result
         .payload::<PyList>()

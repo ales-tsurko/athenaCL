@@ -13,7 +13,13 @@ type Glyph = (char, &'static [&'static str]);
 /// Figures only use the micro font, as athenaCL's graphs did; the others are athenaCL's too,
 /// ported along with it.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[allow(dead_code)]
+#[cfg_attr(
+    not(test),
+    expect(
+        dead_code,
+        reason = "the other fonts are athenaCL's, ported along for completeness"
+    )
+)]
 pub enum Font {
     /// The small font of graph labels.
     Micro,
@@ -50,8 +56,12 @@ impl Bitmap {
         self.rows.iter().enumerate().flat_map(|(y, row)| {
             let mut x = 0;
             std::iter::from_fn(move || {
-                x += row[x..].iter().position(|&set| set)?;
-                let length = row[x..].iter().take_while(|&&set| set).count();
+                let rest = row.get(x..)?;
+                x += rest.iter().position(|&set| set)?;
+                let length = row
+                    .get(x..)
+                    .map_or(0, |rest| rest.iter().take_while(|&&set| set).count())
+                    .max(1);
                 x += length;
                 Some((y, x - length, length))
             })
@@ -72,14 +82,17 @@ impl Font {
 
     fn glyph(self, c: char) -> Option<&'static [&'static str]> {
         let glyphs = self.glyphs();
-        let index = glyphs.binary_search_by_key(&c, |&(c, _)| c).ok()?;
-        Some(glyphs[index].1)
+        glyphs
+            .binary_search_by_key(&c, |&(c, _)| c)
+            .ok()
+            .and_then(|index| glyphs.get(index))
+            .map(|&(_, glyph)| glyph)
     }
 
     /// The size of a character cell, which athenaCL takes from `a`.
     pub fn cell(self) -> (usize, usize) {
         let a = self.glyph('a').expect("every font has an `a`");
-        (a[0].len(), a.len())
+        (a.first().map_or(0, |row| row.len()), a.len())
     }
 
     /// Render a line of text, leaving `kern` empty columns after each character.

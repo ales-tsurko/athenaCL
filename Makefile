@@ -5,13 +5,16 @@ CRAP_REPORT := target/athenacl-crap.md
 CRAP_EXCLUDES := --exclude '**/build.rs' --exclude '**/benches/**' --exclude '**/examples/**' --exclude '**/tests.rs' --exclude '**/*_tests.rs' --exclude '**/tests/**'
 SIMILARITY_ARGS := src --threshold 0.92 --min-lines 12 --min-tokens 80 --fail-on-duplicates
 
-.PHONY: init check test-all lint fmt code-health pack-macos
+.PHONY: init check run test-all lint fmt code-health pack-macos
 
 init:
 	git lfs pull
 
 check:
 	cargo check --all-features --all-targets
+
+run:
+	cargo run --release
 
 test:
 	cargo nextest run --all-features --all-targets
@@ -40,4 +43,4 @@ code-health:
 pack-macos:
 	cargo bundle --release
 	mv "target/release/bundle/osx/athenaCL.app/Contents/Resources/resources" "target/release/bundle/osx/athenaCL.app/Contents/MacOS/"
-	open "target/release/build/osx"
+	open "target/release/bundle/osx"

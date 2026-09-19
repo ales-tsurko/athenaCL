@@ -9,8 +9,8 @@ use iced::{
 };
 
 use super::{
-    color, fill, format_value, outline, status, Anchor, Gesture, Label, Message, Pointer, Window,
-    LABEL_SCALE,
+    color, fill, format_value, outline, status, to_index, Anchor, Gesture, Label, Message, Pointer,
+    Window, LABEL_SCALE,
 };
 use crate::figure::{Automaton, Rgb};
 
@@ -205,8 +205,8 @@ impl<'a> Layout<'a> {
             self.view.cells.start * self.columns as f64 + f64::from((at.x - self.grid.x) / cell);
         let row = self.view.generations.start * self.automaton.cells.len() as f64
             + f64::from((at.y - self.grid.y) / cell);
-        let row = row as usize;
-        let column = column as usize;
+        let row = to_index(row);
+        let column = to_index(column);
         (column < self.automaton.cells.get(row)?.len()).then_some((row, column))
     }
 
@@ -227,24 +227,28 @@ impl<'a> Layout<'a> {
             );
         }
 
-        let rows = automaton.cells.len() as f64;
-        let visible = |window: Window, count: f64| {
-            let first = (window.start * count).floor() as usize;
-            let last = ((window.end * count).ceil() as usize).min(count as usize);
+        let rows = automaton.cells.len();
+        let visible = |window: Window, count: usize| {
+            let whole = count as f64;
+            let first = to_index((window.start * whole).floor());
+            let last = to_index((window.end * whole).ceil()).min(count);
             first..last
         };
-        let columns = visible(self.view.cells, self.columns as f64);
+        let columns = visible(self.view.cells, self.columns);
         for row in visible(self.view.generations, rows) {
-            let cells = &automaton.cells[row];
+            let Some(cells) = automaton.cells.get(row) else {
+                continue;
+            };
             let (top, bottom) = (self.y(row as f64), self.y(row as f64 + 1.0));
             // a rectangle for each run of cells of the same shade
             let mut start = columns.start;
-            while start < columns.end.min(cells.len()) {
-                let gray = Rgb::gray(automaton.shade(cells[start]));
-                let run = cells[start..columns.end.min(cells.len())]
+            while let Some(rest) = cells.get(start..columns.end.min(cells.len())) {
+                let gray = Rgb::gray(automaton.shade(rest.first().copied().unwrap_or_default()));
+                let run = rest
                     .iter()
                     .take_while(|&&value| Rgb::gray(automaton.shade(value)) == gray)
-                    .count();
+                    .count()
+                    .max(1);
                 let (left, right) = (self.x(start as f64), self.x((start + run) as f64));
                 let area =
                     Rectangle::new(Point::new(left, top), Size::new(right - left, bottom - top));
@@ -269,7 +273,13 @@ impl<'a> Layout<'a> {
         );
         outline(frame, area.expand(1.0), self.grid, 1.0, color(palette.unit));
 
-        let value = self.automaton.cells[row][column];
+        let value = self
+            .automaton
+            .cells
+            .get(row)
+            .and_then(|cells| cells.get(column))
+            .copied()
+            .unwrap_or_default();
         let lines = [
             format!("gen {row}"),
             format!("cell {column}"),
@@ -289,6 +299,8 @@ impl<'a> Layout<'a> {
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::float_cmp, reason = "the tests assert exact float values")]
+
     use super::*;
     use crate::figure::Palette;
 

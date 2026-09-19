@@ -1,4 +1,4 @@
-// runs tests for python code
+//! Runs the tests of the Python sources.
 
 use rustpython_vm as vm;
 
@@ -16,5 +16,5 @@ fn test() {
 
     interpreter.run(|_vm| result.clone());
 
-    assert!(result.is_ok());
+    result.unwrap();
 }

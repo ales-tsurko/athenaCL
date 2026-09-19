@@ -1,7 +1,7 @@
 //! Python bindings for figures.
 //!
 //! Graphics commands pass what they show (parameter values, texture time ranges, cellular automaton
-//! cells) to these functions, which send it to the GUI as a [`Figure`].
+//! cells) to these functions, which send it to the GUI as a [`Figure`](crate::figure::Figure).
 
 use rustpython_vm::{pymodule, VirtualMachine};
 
@@ -184,7 +184,7 @@ pub(super) mod _inner {
         let count = items.len();
         items
             .try_into()
-            .map_err(|_| vm.new_value_error(format!("expected {N} items, got {count}")))
+            .map_err(|_items| vm.new_value_error(format!("expected {N} items, got {count}")))
     }
 
     fn float(value: PyObjectRef, vm: &VirtualMachine) -> PyResult<f64> {

@@ -156,12 +156,12 @@ impl Rgb {
         let channel = |digits: &str| u8::from_str_radix(digits, 16).ok();
         match hex.len() {
             6 => Some(Self(
-                channel(&hex[0..2])?,
-                channel(&hex[2..4])?,
-                channel(&hex[4..6])?,
+                channel(hex.get(0..2)?)?,
+                channel(hex.get(2..4)?)?,
+                channel(hex.get(4..6)?)?,
             )),
             3 => {
-                let short = |i: usize| channel(&hex[i..=i]).map(|v| v * 17);
+                let short = |i: usize| channel(hex.get(i..=i)?).map(|v| v * 17);
                 Some(Self(short(0)?, short(1)?, short(2)?))
             }
             _ => None,
@@ -170,6 +170,10 @@ impl Rgb {
 
     /// A gray from white (0) to black (1), as athenaCL shades cellular automata.
     pub fn gray(shade: f64) -> Self {
+        #[expect(
+            clippy::cast_sign_loss,
+            reason = "the value is clamped to `0.0..=255.0` before the cast"
+        )]
         let level = ((1.0 - shade) * 255.0).clamp(0.0, 255.0) as u8;
         Self(level, level, level)
     }
@@ -177,6 +181,8 @@ impl Rgb {
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::float_cmp, reason = "the tests assert exact float values")]
+
     use super::*;
 
     #[test]

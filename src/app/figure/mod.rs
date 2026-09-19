@@ -68,6 +68,17 @@ fn color(Rgb(r, g, b): Rgb) -> Color {
     Color::from_rgb8(r, g, b)
 }
 
+/// A float as an index: drawn things are placed by non-negative fractions of their whole extent,
+/// so any negative value a rounding error could produce counts as zero rather than wrapping.
+fn to_index(value: f64) -> usize {
+    #[expect(
+        clippy::cast_sign_loss,
+        reason = "negative values are clamped away before the cast"
+    )]
+    let index = value.max(0.0) as usize;
+    index
+}
+
 /// Fill the part of `area` inside `clip`.
 fn fill(frame: &mut Frame, area: Rectangle, clip: Rectangle, color: Color) {
     if let Some(area) = area.intersection(&clip) {
@@ -217,7 +228,7 @@ impl Ticks {
 
     /// A value with as many decimals as the step needs.
     fn format(&self, value: f64) -> String {
-        let decimals = (-self.step.log10().floor()).clamp(0.0, 6.0) as usize;
+        let decimals = to_index((-self.step.log10().floor()).clamp(0.0, 6.0));
         let value = if value.abs() < self.step * 1e-9 {
             0.0
         } else {
@@ -438,6 +449,8 @@ fn status(gesture: Gesture, changed: bool) -> canvas::event::Status {
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::float_cmp, reason = "the tests assert exact tick values")]
+
     use super::*;
 
     #[test]

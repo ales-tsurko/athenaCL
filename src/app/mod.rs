@@ -2,6 +2,10 @@
 
 pub use app::*;
 
+#[expect(
+    clippy::module_inception,
+    reason = "the module is the `app` module's core"
+)]
 mod app;
 mod figure;
 mod player;

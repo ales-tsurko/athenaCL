@@ -21,41 +21,44 @@ pub(super) mod _inner {
     use super::*;
 
     #[pyfunction(name = "pathLibUpdated")]
-    pub(crate) fn path_lib_updated(path_lib: Vec<String>) -> PyResult<()> {
+    pub(crate) fn path_lib_updated(path_lib: Vec<String>, vm: &VirtualMachine) -> PyResult<()> {
         interpreter::INTERPRETER_WORKER
             .gui_sender
             .send_blocking(interpreter::Message::PathLibUpdated(path_lib))
-            .expect("cannot send message via channel");
+            .map_err(|_err| vm.new_runtime_error("cannot send message to the GUI".to_owned()))?;
 
         Ok(())
     }
 
     #[pyfunction(name = "textureLibUpdated")]
-    pub(crate) fn texture_lib_updated(texture_lib: Vec<String>) -> PyResult<()> {
+    pub(crate) fn texture_lib_updated(
+        texture_lib: Vec<String>,
+        vm: &VirtualMachine,
+    ) -> PyResult<()> {
         interpreter::INTERPRETER_WORKER
             .gui_sender
             .send_blocking(interpreter::Message::TextureLibUpdated(texture_lib))
-            .expect("cannot send message via channel");
+            .map_err(|_err| vm.new_runtime_error("cannot send message to the GUI".to_owned()))?;
 
         Ok(())
     }
 
     #[pyfunction(name = "activePathSet")]
-    pub(crate) fn active_path_set(path: String) -> PyResult<()> {
+    pub(crate) fn active_path_set(path: String, vm: &VirtualMachine) -> PyResult<()> {
         interpreter::INTERPRETER_WORKER
             .gui_sender
             .send_blocking(interpreter::Message::ActivePathSet(path))
-            .expect("cannot send message via channel");
+            .map_err(|_err| vm.new_runtime_error("cannot send message to the GUI".to_owned()))?;
 
         Ok(())
     }
 
     #[pyfunction(name = "activeTextureSet")]
-    pub(crate) fn active_texture_set(path: String) -> PyResult<()> {
+    pub(crate) fn active_texture_set(path: String, vm: &VirtualMachine) -> PyResult<()> {
         interpreter::INTERPRETER_WORKER
             .gui_sender
             .send_blocking(interpreter::Message::ActiveTextureSet(path))
-            .expect("cannot send message via channel");
+            .map_err(|_err| vm.new_runtime_error("cannot send message to the GUI".to_owned()))?;
 
         Ok(())
     }

@@ -9,8 +9,8 @@ use iced::{
 };
 
 use super::{
-    color, fill, outline, status, Anchor, Gesture, Label, Message, Pointer, Ticks, Window,
-    LABEL_HEIGHT, LABEL_SCALE,
+    color, fill, outline, status, to_index, Anchor, Gesture, Label, Message, Pointer, Ticks,
+    Window, LABEL_HEIGHT, LABEL_SCALE,
 };
 use crate::figure::{Ensemble, Lane};
 
@@ -210,7 +210,7 @@ impl<'a> Layout<'a> {
         MIN_SECONDS / self.duration
     }
 
-    fn name_x(row: &Row) -> f32 {
+    fn name_x(row: &Row<'_>) -> f32 {
         if row.is_clone {
             NAME_X + CLONE_INDENT
         } else {
@@ -230,7 +230,11 @@ impl<'a> Layout<'a> {
 
     /// A lane's bar, inset a pixel at each end as athenaCL draws them.
     fn bar(&self, index: usize) -> Rectangle {
-        let lane = self.rows[index].lane;
+        let lane = self
+            .rows
+            .get(index)
+            .expect("the index is one of the rows")
+            .lane;
         let left = self.x(lane.start).round() + 1.0;
         let right = (self.x(lane.end).round() - 1.0).max(left + 1.0);
         Rectangle::new(
@@ -242,12 +246,12 @@ impl<'a> Layout<'a> {
     /// The index of the lane at `at`, across the whole width, gaps shared with neighbors.
     fn index_at(&self, at: Point) -> Option<usize> {
         let offset = at.y - self.map.y - LANE_GAP / 2.0;
-        let index = (offset / (LANE + LANE_GAP)) as usize;
+        let index = to_index(f64::from(offset / (LANE + LANE_GAP)));
         (offset >= 0.0 && index < self.rows.len()).then_some(index)
     }
 
     fn row_at(&self, at: Point) -> Option<&Row<'a>> {
-        self.index_at(at).map(|index| &self.rows[index])
+        self.index_at(at).and_then(|index| self.rows.get(index))
     }
 
     fn draw(&self, frame: &mut Frame) {
@@ -270,7 +274,7 @@ impl<'a> Layout<'a> {
         );
 
         // time: labeled lines in the margin color, and grid lines halfway between them
-        let count = (self.map.width / X_LABEL_SPACING) as usize;
+        let count = to_index(f64::from(self.map.width / X_LABEL_SPACING));
         let ticks = Ticks::new(self.visible.0, self.visible.1, count.max(2), 0.001);
         let line = |frame: &mut Frame, time: f64, color: Color| {
             let x = self.x(time).round();
@@ -278,7 +282,7 @@ impl<'a> Layout<'a> {
             fill(frame, line, self.map, color);
         };
         let first = (self.visible.0 / ticks.step).floor() * ticks.step;
-        let steps = ((self.visible.1 - first) / ticks.step).ceil() as usize;
+        let steps = to_index(((self.visible.1 - first) / ticks.step).ceil());
         for i in 0..=steps {
             line(
                 frame,
@@ -344,7 +348,11 @@ impl<'a> Layout<'a> {
             return;
         };
         let palette = self.ensemble.palette;
-        let lane = self.rows[index].lane;
+        let lane = self
+            .rows
+            .get(index)
+            .expect("the index is one of the rows")
+            .lane;
         outline(frame, self.bar(index), self.map, 1.0, color(palette.title));
         let muted = if lane.muted { " muted" } else { "" };
         let text = format!("{} {:.2}-{:.2}{muted}", lane.name, lane.start, lane.end);
@@ -360,6 +368,8 @@ impl<'a> Layout<'a> {
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::float_cmp, reason = "the tests assert exact float values")]
+
     use super::*;
     use crate::figure::{Palette, Rgb, Texture};
 

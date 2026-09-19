@@ -10,7 +10,8 @@ use iced::{
 };
 
 use super::{
-    color, fill, format_value, status, Anchor, Gesture, Label, Message, Pointer, Ticks, Window,
+    color, fill, format_value, status, to_index, Anchor, Gesture, Label, Message, Pointer, Ticks,
+    Window,
 };
 use crate::figure::{Domain, Graph, Mark, Parameters};
 
@@ -291,7 +292,9 @@ impl<'a> Layout<'a> {
             frame.fill_rectangle(plot.position(), plot.size(), color(palette.background));
 
             let range = self.value_range(graph);
-            let count = ((plot.height - 2.0 * MARK) / (Label::height() + 8.0)) as usize;
+            let count = to_index(f64::from(
+                (plot.height - 2.0 * MARK) / (Label::height() + 8.0),
+            ));
             let ticks = Ticks::new(range.0, range.1, count.max(2), 0.0);
             for &value in &ticks.values {
                 let y = Self::y(value, range, plot);
@@ -309,7 +312,7 @@ impl<'a> Layout<'a> {
                 Domain::Events => 1.0,
                 Domain::Time => 0.001,
             };
-            let count = (plot.width / X_LABEL_SPACING) as usize;
+            let count = to_index(f64::from(plot.width / X_LABEL_SPACING));
             let ticks = Ticks::new(self.visible.0, self.visible.1, count.max(2), min_step);
             for &value in &ticks.values {
                 let x = self.x(value, plot).round();
@@ -405,6 +408,8 @@ fn min_max<'m>(marks: impl Iterator<Item = &'m Mark>) -> Option<(f64, f64)> {
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::float_cmp, reason = "the tests assert exact float values")]
+
     use super::*;
     use crate::figure::{Palette, Rgb};
 

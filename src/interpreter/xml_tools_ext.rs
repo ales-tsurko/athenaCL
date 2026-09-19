@@ -37,17 +37,21 @@ pub(super) mod _inner {
                 Ok(Event::Start(e)) => {
                     let name = match e
                         .attributes()
-                        .find(|a| a.as_ref().expect("cannot get attribute").key.as_ref() == b"name")
+                        .find(|a| matches!(a.as_ref(), Ok(attr) if attr.key.as_ref() == b"name"))
                     {
-                        Some(attr) => reader
+                        Some(Ok(attr)) => reader
                             .decoder()
-                            .decode(attr.expect("cannot get attribute").value.as_ref())
-                            .expect("cannot decode xml attribute")
+                            .decode(attr.value.as_ref())
+                            .map_err(|_err| {
+                                vm.new_value_error("cannot decode xml attribute".to_owned())
+                            })?
                             .to_string(),
-                        None => reader
+                        _ => reader
                             .decoder()
                             .decode(e.name().as_ref())
-                            .expect("cannot decode xml element name")
+                            .map_err(|_err| {
+                                vm.new_value_error("cannot decode xml element name".to_owned())
+                            })?
                             .to_string(),
                     };
 
@@ -58,15 +62,20 @@ pub(super) mod _inner {
                 Ok(Event::Empty(e)) => {
                     if let Some((_, dict)) = stack.last() {
                         for a in e.attributes() {
-                            let attr = a.expect("cannot get attribute");
-                            let key = reader
-                                .decoder()
-                                .decode(attr.key.as_ref())
-                                .expect("cannot decode xml attribute");
-                            let value = reader
-                                .decoder()
-                                .decode(attr.value.as_ref())
-                                .expect("cannot decode xml attribute");
+                            let attr = a.map_err(|_err| {
+                                vm.new_value_error("cannot get xml attribute".to_owned())
+                            })?;
+                            let key =
+                                reader.decoder().decode(attr.key.as_ref()).map_err(|_err| {
+                                    vm.new_value_error("cannot decode xml attribute".to_owned())
+                                })?;
+                            let value =
+                                reader
+                                    .decoder()
+                                    .decode(attr.value.as_ref())
+                                    .map_err(|_err| {
+                                        vm.new_value_error("cannot decode xml attribute".to_owned())
+                                    })?;
 
                             attrs_cache.insert(key.to_string(), value.to_string());
                         }
@@ -107,7 +116,7 @@ pub(super) mod _inner {
         reader.trim_text(true);
         let mut buf = Vec::new();
 
-        let mut res = vec!["xml".to_string(), "ok".to_string()];
+        let (mut kind, mut message) = ("xml".to_string(), "ok".to_string());
 
         loop {
             match reader.read_event_into(&mut buf) {
@@ -118,14 +127,14 @@ pub(super) mod _inner {
                 }
 
                 Ok(Event::Eof) => {
-                    res[0] = "unknown".to_string();
-                    res[1] = "error reading the file".to_string();
+                    kind = "unknown".to_string();
+                    message = "error reading the file".to_string();
                     break;
                 }
 
                 Err(e) => {
-                    res[0] = "unknown".to_string();
-                    res[1] = format!("Error parsing XML at {}: {:?}", reader.buffer_position(), e);
+                    kind = "unknown".to_string();
+                    message = format!("Error parsing XML at {}: {:?}", reader.buffer_position(), e);
                 }
 
                 _ => {}
@@ -137,7 +146,8 @@ pub(super) mod _inner {
         Ok(vm
             .ctx
             .new_tuple(
-                res.into_iter()
+                [kind, message]
+                    .into_iter()
                     .map(|v| vm.ctx.new_str(v).to_pyobject(vm))
                     .collect(),
             )

@@ -68,21 +68,22 @@ impl GlobalState {
             .build_output_stream(
                 &config,
                 move |data: &mut [f32], _: &cpal::OutputCallbackInfo| {
-                    let sample_count = data.len() / channels;
-
                     player.render(&mut left, &mut right);
 
-                    if !left.is_empty() {
-                        for i in 0..sample_count {
-                            data[channels * i] = left[i];
-                            data[channels * i + 1] = right[i];
+                    for (frame, (left, right)) in data
+                        .chunks_exact_mut(channels)
+                        .zip(left.iter().zip(right.iter()))
+                    {
+                        if let [dst_left, dst_right, ..] = frame {
+                            *dst_left = *left;
+                            *dst_right = *right;
                         }
                     }
                 },
                 err_fn,
                 None,
             )
-            .unwrap();
+            .expect("cannot build the midi renderer's output audio stream");
 
         stream.play().expect("cannot run audio stream");
 
@@ -201,7 +202,7 @@ struct AudioPlayerController {
 
 impl AudioPlayerController {
     fn new(track: &Track, stream_handle: &OutputStreamHandle) -> Self {
-        let file = File::open(&track.path).unwrap();
+        let file = File::open(&track.path).expect("the track exists: playing checked it");
         let file = BufReader::new(file);
         let source = Decoder::new(file).expect("there should not be unsupported file formats");
         let duration = source
@@ -241,7 +242,7 @@ impl AudioPlayerController {
         if self.sink.len() > 0 {
             return;
         }
-        let file = File::open(&track.path).unwrap();
+        let file = File::open(&track.path).expect("the track exists: playing checked it");
         let file = BufReader::new(file);
         let source = Decoder::new(file).expect("there should not be unsupported file formats");
         let duration = source

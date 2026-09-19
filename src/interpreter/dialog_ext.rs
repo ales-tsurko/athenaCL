@@ -111,11 +111,11 @@ pub(super) mod _inner {
     }
 
     #[pyfunction(name = "postOut")]
-    pub(crate) fn post_out(output: String) -> PyResult<()> {
+    pub(crate) fn post_out(output: String, vm: &VirtualMachine) -> PyResult<()> {
         interpreter::INTERPRETER_WORKER
             .gui_sender
             .send_blocking(interpreter::Message::Post(output))
-            .expect("cannot send message via channel");
+            .map_err(|_err| vm.new_runtime_error("cannot send message to the GUI".to_owned()))?;
         Ok(())
     }
 
@@ -124,7 +124,7 @@ pub(super) mod _inner {
         interpreter::INTERPRETER_WORKER
             .gui_sender
             .send_blocking(interpreter::Message::Ask(prompt))
-            .expect("cannot send message via channel");
+            .map_err(|_err| vm.new_runtime_error("cannot send message to the GUI".to_owned()))?;
 
         if let Ok(msg) = interpreter::INTERPRETER_WORKER
             .response_receiver
@@ -137,21 +137,21 @@ pub(super) mod _inner {
     }
 
     #[pyfunction(name = "playMidi")]
-    pub(crate) fn play_midi(path: String) -> PyResult<()> {
+    pub(crate) fn play_midi(path: String, vm: &VirtualMachine) -> PyResult<()> {
         interpreter::INTERPRETER_WORKER
             .gui_sender
             .send_blocking(interpreter::Message::LoadMidi(path))
-            .expect("cannot send message via channel");
+            .map_err(|_err| vm.new_runtime_error("cannot send message to the GUI".to_owned()))?;
 
         Ok(())
     }
 
     #[pyfunction(name = "playAudio")]
-    pub(crate) fn play_audio(path: String) -> PyResult<()> {
+    pub(crate) fn play_audio(path: String, vm: &VirtualMachine) -> PyResult<()> {
         interpreter::INTERPRETER_WORKER
             .gui_sender
             .send_blocking(interpreter::Message::LoadAudio(path))
-            .expect("cannot send message via channel");
+            .map_err(|_err| vm.new_runtime_error("cannot send message to the GUI".to_owned()))?;
 
         Ok(())
     }

@@ -44,6 +44,12 @@ pub struct State {
     active_texture: String,
 }
 
+impl std::fmt::Debug for State {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("State").finish_non_exhaustive()
+    }
+}
+
 impl Default for State {
     fn default() -> Self {
         let mut exe_dir = env::current_exe().expect(
@@ -226,7 +232,6 @@ pub fn view(state: &State) -> Element<'_, Message> {
             .iter()
             .to_owned()
             .map(|output| view_output(output, &state.active_texture))
-            .map(Into::into)
             .collect::<Vec<_>>(),
     );
 
@@ -396,7 +401,10 @@ fn pick_directory(title: &str) -> Option<String> {
 }
 
 /// The iced message type.
-#[allow(missing_docs)]
+#[expect(
+    missing_docs,
+    reason = "the variants mirror the input fields and modules they carry"
+)]
 #[derive(Debug, Clone)]
 pub enum Message {
     InputChanged(String),
@@ -421,7 +429,7 @@ impl From<player::Message> for Message {
     }
 }
 
-#[allow(missing_docs)]
+/// The iced subscription: forwards interpreter messages and, while playing, player ticks.
 pub fn subscription(state: &State) -> Subscription<Message> {
     // this worker runs async loop to make the worker, which runs on a System's thread communicate
     // with our app, whithout blocking the event loop of iced
@@ -436,7 +444,9 @@ pub fn subscription(state: &State) -> Subscription<Message> {
                     match msg {
                         interpreter::Message::SendCmd(_) => (),
                         _ => {
-                            let _ = output.send(msg).await;
+                            if output.send(msg).await.is_err() {
+                                break;
+                            }
                         }
                     }
                 }
