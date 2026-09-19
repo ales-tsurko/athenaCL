@@ -85,8 +85,6 @@ impl Default for State {
         exe_dir.pop();
         exe_dir.push(SOUND_FONT);
         let midi_player_state = GlobalPlayerState::new(&exe_dir.as_os_str().to_string_lossy());
-        let output = vec![Output::Normal(String::new())];
-
         for message in [
             interpreter::Message::GetScratchDir,
             interpreter::Message::GetAppearance,
@@ -101,7 +99,7 @@ impl Default for State {
         Self {
             player_state: midi_player_state,
             answer: String::new(),
-            output,
+            output: Vec::new(),
             question: None,
             scratch_dir: String::new(),
             input_id: "input".to_owned(),
@@ -402,16 +400,10 @@ pub fn view(state: &State) -> Element<'_, Message> {
     .width(Length::Fill)
     .height(Length::Fill);
 
-    let mut body = column![log].spacing(8);
-    if let Some(question) = &state.question {
-        body = body.push(view_query(question, colors));
-    }
-    body = body.push(view_input(state, colors));
-
     column![
         view_header(state, colors),
         rule(colors.ink, 1.0),
-        container(body)
+        container(log)
             .padding([0.0, WINDOW_PADDING])
             .height(Length::Fill),
         space().height(12),
@@ -480,6 +472,7 @@ fn view_log(state: &State, colors: Colors) -> Element<'_, Message> {
             _ => entries.push(column![element].spacing(8)),
         }
     }
+    entries.push(view_input(state, colors));
     Column::with_children(entries.into_iter().map(Element::from))
         .spacing(18)
         .padding([20, 0])
@@ -607,8 +600,9 @@ fn view_query<'a>(question: &'a str, colors: Colors) -> Element<'a, Message> {
     .into()
 }
 
-/// The input: an answer to the question, or a command at the prompt.
-fn view_input(state: &State, colors: Colors) -> Element<'_, Message> {
+/// The line being typed, at the end of the output: an answer to the question, or a command at the
+/// prompt.
+fn view_input(state: &State, colors: Colors) -> Column<'_, Message> {
     let (label, placeholder) = match &state.question {
         Some(_) => (pixel::label("ANSWER", colors.dim), "type answer"),
         None => (
@@ -616,28 +610,23 @@ fn view_input(state: &State, colors: Colors) -> Element<'_, Message> {
             "type a command or 'help'",
         ),
     };
-
-    column![
-        container(
-            row![
-                label,
-                text_input(placeholder, &state.answer)
-                    .id(state.input_id.clone())
-                    .style(colors.input())
-                    .on_input(Message::InputChanged)
-                    .on_submit(Message::Submit)
-                    .padding(0)
-                    .size(14),
-            ]
-            .spacing(12)
-            .align_y(Vertical::Center),
-        )
-        .padding([0, 14])
-        .height(40)
-        .align_y(Vertical::Center),
-        rule(colors.ink, 2.0),
+    let line = row![
+        label,
+        text_input(placeholder, &state.answer)
+            .id(state.input_id.clone())
+            .style(colors.input())
+            .on_input(Message::InputChanged)
+            .on_submit(Message::Submit)
+            .padding(0)
+            .size(14),
     ]
-    .into()
+    .spacing(10)
+    .align_y(Vertical::Center);
+
+    match &state.question {
+        Some(question) => column![view_query(question, colors), line].spacing(8),
+        None => column![line],
+    }
 }
 
 /// The active path and texture, and the tempo.
@@ -947,7 +936,10 @@ mod tests {
     #[test]
     fn submitting_sends_what_is_typed_now() {
         let mut state = state();
-        drop(update(&mut state, Message::InputChanged("tin a 0".to_owned())));
+        drop(update(
+            &mut state,
+            Message::InputChanged("tin a 0".to_owned()),
+        ));
         drop(update(&mut state, Message::Submit));
         assert!(matches!(
             state.output.first(),

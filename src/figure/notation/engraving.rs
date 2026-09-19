@@ -26,7 +26,7 @@ const DYNAMICS_GAP: i32 = 8;
 /// How far each dynamics letter is from the previous one.
 const LETTER: i32 = 7;
 /// Where clefs are, at the left of the staves.
-const CLEF_X: i32 = 2;
+const CLEF_X: i32 = 8;
 /// Notation pixels given to the shortest note, which is when notes are readable.
 const READABLE: f64 = 10.0;
 /// Notation pixels per event in event mode.
@@ -90,6 +90,15 @@ impl Score {
     /// The clefs, and a grand staff's joining line, at the left.
     pub fn pinned(&self) -> &[Run] {
         &self.pinned
+    }
+
+    /// How far the clefs reach across.
+    pub fn clef_width(&self) -> i32 {
+        self.pinned
+            .iter()
+            .map(|run| run.x + run.length)
+            .max()
+            .unwrap_or(0)
     }
 
     /// The notation between columns `left` and `right` on `axis`, as runs of pixels.
@@ -1153,7 +1162,11 @@ impl Engraver {
         order.sort_by(|a, b| a.time.total_cmp(&b.time));
         let mut beats: Vec<(i64, &Event, f64, u32)> = Vec::new();
         for event in order {
-            let tempo = if event.tempo > 0.0 { event.tempo } else { 120.0 };
+            let tempo = if event.tempo > 0.0 {
+                event.tempo
+            } else {
+                120.0
+            };
             let beat = beat_of(event.time * tempo / 60.0);
             match beats.last_mut() {
                 Some((last, _, sum, count)) if *last == beat => {

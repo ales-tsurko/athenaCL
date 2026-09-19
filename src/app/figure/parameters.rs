@@ -20,8 +20,6 @@ use super::{
 };
 use crate::figure::{Domain, Graph, Mark, Parameters};
 
-/// Room for value labels, left of the graphs.
-const LEFT: f32 = 60.0;
 const RIGHT: f32 = 6.0;
 const TOP: f32 = 4.0;
 /// Space between a graph and its labels, and below them.
@@ -154,6 +152,8 @@ struct Layout<'a> {
     parameters: &'a Parameters,
     palette: Palette,
     width: f32,
+    /// Room for the value labels, left of the graphs.
+    left: f32,
     /// The whole x axis.
     extent: (f64, f64),
     /// Its visible part.
@@ -168,6 +168,7 @@ impl<'a> Layout<'a> {
             parameters,
             palette,
             width,
+            left: labels_width(parameters) + GUTTER,
             extent,
             visible: (extent.0 + window.start * span, extent.0 + window.end * span),
         }
@@ -195,9 +196,9 @@ impl<'a> Layout<'a> {
     fn plot(&self, index: usize) -> Rectangle {
         let block = self.block(index);
         Rectangle::new(
-            Point::new(LEFT, block.y + TOP),
+            Point::new(self.left, block.y + TOP),
             Size::new(
-                (self.width - LEFT - RIGHT).max(1.0),
+                (self.width - self.left - RIGHT).max(1.0),
                 graph_height(self.parameters),
             ),
         )
@@ -331,12 +332,12 @@ impl<'a> Layout<'a> {
             let y = Self::y(value, range, plot);
             let line = Rectangle::new(Point::new(plot.x, y), Size::new(plot.width, 1.0));
             fill(frame, line, plot, palette.grid);
-            Label::new(&ticks.format(value)).draw(
-                frame,
-                Point::new(plot.x - GUTTER, y),
-                Anchor::CenterEast,
-                palette.label,
-            );
+            // a label too long for its column, as zooming can make it, is left out
+            let label = Label::new(&ticks.format(value));
+            let at = Point::new(plot.x - GUTTER, y);
+            if label.bounds(at, Anchor::CenterEast).x >= 0.0 {
+                label.draw(frame, at, Anchor::CenterEast, palette.label);
+            }
         }
     }
 
@@ -414,6 +415,23 @@ impl<'a> Layout<'a> {
             );
         }
     }
+}
+
+/// How wide the value labels are: what the widest of the whole range's needs.
+fn labels_width(parameters: &Parameters) -> f32 {
+    parameters
+        .graphs
+        .iter()
+        .map(|graph| {
+            let (low, high) = min_max(graph.marks.iter()).unwrap_or((0.0, 1.0));
+            let ticks = Ticks::new(low, high, 4, 0.0);
+            ticks
+                .values
+                .iter()
+                .map(|&value| Label::new(&ticks.format(value)).width())
+                .fold(0.0, f32::max)
+        })
+        .fold(0.0, f32::max)
 }
 
 /// The span of the x axis: from the first to the last event, or the whole time.

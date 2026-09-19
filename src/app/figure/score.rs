@@ -25,11 +25,10 @@ use crate::figure::{
     Domain, Parameters,
 };
 
-/// Where the x axis starts: under the plot's.
-const LEFT: f32 = 60.0;
 const RIGHT: f32 = 6.0;
-/// Where the clefs end: notation scrolled further left is hidden.
-const CLEFS: i32 = 16;
+/// Space after the clefs: before the notation starts, and before it's hidden behind them.
+const CLEF_GAP: i32 = 8;
+const CLEF_MARGIN: i32 = 2;
 /// Space between the plate and what's under it.
 const GUTTER: f32 = 4.0;
 /// The bar showing the part in view: its track and its thumb.
@@ -203,12 +202,13 @@ impl<'a> Layout<'a> {
         min / (end - start)
     }
 
-    /// Where the x axis is drawn, in pixels.
+    /// Where the x axis is drawn, in pixels: after the clefs.
     fn area(&self) -> Rectangle {
+        let left = (self.score.clef_width() + CLEF_GAP) as f32 * LABEL_SCALE;
         Rectangle::new(
-            Point::new(LEFT, 0.0),
+            Point::new(left, 0.0),
             Size::new(
-                (self.width - LEFT - RIGHT).max(1.0),
+                (self.width - left - RIGHT).max(1.0),
                 plate_height(self.score),
             ),
         )
@@ -235,9 +235,12 @@ impl<'a> Layout<'a> {
         }
     }
 
-    /// The notation's columns: after the clefs, up to the right edge.
+    /// The notation's columns: just after the clefs, up to the right edge.
     fn columns(&self) -> (i32, i32) {
-        (CLEFS, ((self.width - RIGHT) / LABEL_SCALE).floor() as i32)
+        (
+            self.score.clef_width() + CLEF_MARGIN,
+            ((self.width - RIGHT) / LABEL_SCALE).floor() as i32,
+        )
     }
 
     fn times_y(&self) -> f32 {

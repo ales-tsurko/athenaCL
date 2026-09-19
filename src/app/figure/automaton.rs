@@ -170,7 +170,7 @@ impl<'a> Layout<'a> {
             .iter()
             .map(|line| Label::new(line).width())
             .fold(0.0, f32::max);
-        let left = (TITLE_X + title + 16.0).max(96.0);
+        let left = TITLE_X + title + 16.0;
         let cell = ((width - left - RIGHT) / columns.max(1) as f32)
             .floor()
             .min((MAX_HEIGHT / rows.max(1) as f32).floor())
@@ -278,6 +278,8 @@ impl<'a> Layout<'a> {
                 start += run;
             }
         }
+        let whole = Rectangle::new(Point::ORIGIN, Size::new(self.width, self.height()));
+        outline(frame, self.grid.expand(1.0), whole, 1.0, palette.grid);
     }
 
     /// Frame the cell under the pointer, and show where it is and its value.
