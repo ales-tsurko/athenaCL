@@ -1024,7 +1024,7 @@ pageTracker._trackPageview();
         postBreaks=0,
     ):
         """creates a graphic out of a table
-        very inefficient, and should be replaced by PIL code"""
+        very inefficient"""
         # foreColor can be a list of colors that are chosen from at random
         if not drawer.isList(foreColor):
             foreColor = [
