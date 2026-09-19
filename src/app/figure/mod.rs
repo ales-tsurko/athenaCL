@@ -12,7 +12,10 @@ use std::time::{Duration, Instant};
 
 use iced::{
     keyboard, mouse,
-    widget::canvas::{self, Frame},
+    widget::{
+        self,
+        canvas::{self, Frame},
+    },
     Color, Element, Point, Rectangle, Size, Vector,
 };
 
@@ -22,7 +25,7 @@ use crate::figure::{
 };
 
 /// Messages from figures.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Message {
     /// A texture was clicked on the ensemble timeline.
     SelectTexture(String),
@@ -344,9 +347,9 @@ impl Pointer {
         bounds: Rectangle,
         cursor: mouse::Cursor,
     ) -> Gesture {
-        match *event {
+        match event {
             canvas::Event::Keyboard(keyboard::Event::ModifiersChanged(modifiers)) => {
-                self.modifiers = modifiers;
+                self.modifiers = *modifiers;
                 Gesture::None
             }
             canvas::Event::Mouse(mouse::Event::WheelScrolled { delta }) => {
@@ -354,8 +357,8 @@ impl Pointer {
                     return Gesture::None;
                 };
                 let (x, y) = match delta {
-                    mouse::ScrollDelta::Lines { x, y } => (x * LINE, y * LINE),
-                    mouse::ScrollDelta::Pixels { x, y } => (x, y),
+                    mouse::ScrollDelta::Lines { x, y } => (*x * LINE, *y * LINE),
+                    mouse::ScrollDelta::Pixels { x, y } => (*x, *y),
                 };
                 if self.modifiers.command() {
                     Gesture::Zoom {
@@ -430,8 +433,14 @@ impl Pointer {
     }
 }
 
-/// Whether a gesture that changed the figure by `changed` should stop the event here.
-fn status(gesture: Gesture, changed: bool) -> canvas::event::Status {
+/// The [`widget::Action`] for a gesture that changed the figure by `changed` and produced
+/// `message`: publish the message, redraw the change, and stop the event here when the figure
+/// handled it.
+fn action<Message>(
+    gesture: Gesture,
+    changed: bool,
+    message: Option<Message>,
+) -> Option<widget::Action<Message>> {
     let captured = match gesture {
         Gesture::None => false,
         // sideways scrolling passes through when there's nothing to pan
@@ -440,10 +449,17 @@ fn status(gesture: Gesture, changed: bool) -> canvas::event::Status {
         } => changed,
         _ => true,
     };
+    let action = match message {
+        Some(message) => Some(widget::Action::publish(message)),
+        None if changed => Some(widget::Action::request_redraw()),
+        None if captured => Some(widget::Action::capture()),
+        None => None,
+    };
+
     if captured {
-        canvas::event::Status::Captured
+        action.map(widget::Action::and_capture)
     } else {
-        canvas::event::Status::Ignored
+        action
     }
 }
 
@@ -540,6 +556,135 @@ mod tests {
         canvas::Event::Mouse(event)
     }
 
+    #[test]
+    fn actions_publish_capture_and_redraw() {
+        use iced::{event, window};
+
+        // clicks publish their message and capture the event
+        let (message, _, status) = action(
+            Gesture::Click(Point::ORIGIN),
+            false,
+            Some(Message::SelectTexture("texture".to_owned())),
+        )
+        .expect("clicks act")
+        .into_inner();
+        assert!(matches!(message, Some(Message::SelectTexture(_))));
+        assert_eq!(status, event::Status::Captured);
+
+        // interactive gestures that changed the figure capture it and redraw
+        for gesture in [
+            Gesture::Zoom {
+                at: Point::ORIGIN,
+                factor: 2.0,
+            },
+            Gesture::Pan {
+                delta: Vector::new(1.0, 0.0),
+                dragging: true,
+            },
+            Gesture::Reset,
+        ] {
+            let (_, redraw, status) = action::<Message>(gesture, true, None)
+                .expect("changes act")
+                .into_inner();
+            assert_eq!(status, event::Status::Captured);
+            assert!(matches!(redraw, window::RedrawRequest::NextFrame));
+        }
+
+        // presses capture the event without a message
+        let (_, _, status) = action::<Message>(Gesture::Press, false, None)
+            .expect("presses act")
+            .into_inner();
+        assert_eq!(status, event::Status::Captured);
+
+        // sideways scrolling passes through when there is nothing to pan…
+        let scrolled = Gesture::Pan {
+            delta: Vector::new(1.0, 0.0),
+            dragging: false,
+        };
+        assert!(action::<Message>(scrolled, false, None).is_none());
+        // …but captures once it pans
+        assert!(action::<Message>(scrolled, true, None).is_some());
+
+        // nothing gestures only redraw changes
+        assert!(action::<Message>(Gesture::None, false, None).is_none());
+        assert!(action::<Message>(Gesture::None, true, None).is_some());
+    }
+
+    #[test]
+    fn command_scrolling_zooms() {
+        let mut pointer = Pointer::default();
+        let at = mouse::Cursor::Available(Point::new(100.0, 550.0));
+        let command = canvas::Event::Keyboard(keyboard::Event::ModifiersChanged(
+            keyboard::Modifiers::COMMAND,
+        ));
+        let lines = mouse_event(mouse::Event::WheelScrolled {
+            delta: mouse::ScrollDelta::Lines { x: 0.0, y: -2.0 },
+        });
+        let pixels = mouse_event(mouse::Event::WheelScrolled {
+            delta: mouse::ScrollDelta::Pixels { x: 0.0, y: -80.0 },
+        });
+
+        assert_eq!(pointer.gesture(&command, scrolled(), at), Gesture::None);
+        assert!(matches!(
+            pointer.gesture(&lines, scrolled(), at),
+            Gesture::Zoom { .. }
+        ));
+        assert!(matches!(
+            pointer.gesture(&pixels, scrolled(), at),
+            Gesture::Zoom { .. }
+        ));
+    }
+
+    #[test]
+    fn sideways_scrolling_pans() {
+        let mut pointer = Pointer::default();
+        let scroll = mouse_event(mouse::Event::WheelScrolled {
+            delta: mouse::ScrollDelta::Pixels { x: -40.0, y: 0.0 },
+        });
+        let at = mouse::Cursor::Available(Point::new(100.0, 550.0));
+
+        assert_eq!(
+            pointer.gesture(&scroll, scrolled(), at),
+            Gesture::Pan {
+                delta: Vector::new(-40.0, 0.0),
+                dragging: false,
+            }
+        );
+    }
+
+    #[test]
+    fn plain_vertical_scrolling_ignores() {
+        let mut pointer = Pointer::default();
+        let scroll = mouse_event(mouse::Event::WheelScrolled {
+            delta: mouse::ScrollDelta::Pixels { x: 0.0, y: -40.0 },
+        });
+
+        let outside = mouse::Cursor::Available(Point::new(100.0, 10.0));
+        assert_eq!(pointer.gesture(&scroll, scrolled(), outside), Gesture::None);
+        let inside = mouse::Cursor::Available(Point::new(100.0, 550.0));
+        assert_eq!(pointer.gesture(&scroll, scrolled(), inside), Gesture::None);
+    }
+
+    #[test]
+    fn moving_without_a_drag_ignores() {
+        let mut pointer = Pointer::default();
+        let moved = mouse_event(mouse::Event::CursorMoved {
+            position: Point::new(100.0, 150.0),
+        });
+        let at = mouse::Cursor::Available(Point::new(100.0, 550.0));
+
+        assert_eq!(pointer.gesture(&moved, scrolled(), at), Gesture::None);
+    }
+
+    #[test]
+    fn double_clicks_reset() {
+        let mut pointer = Pointer::default();
+        let at = mouse::Cursor::Available(Point::new(100.0, 550.0));
+        let press = mouse_event(mouse::Event::ButtonPressed(mouse::Button::Left));
+
+        assert_eq!(pointer.gesture(&press, scrolled(), at), Gesture::Press);
+        assert_eq!(pointer.gesture(&press, scrolled(), at), Gesture::Reset);
+    }
     /// A figure lower in the scrolled output: its bounds and the cursor are in the output's content
     /// coordinates, while pointer events are in window coordinates.
     fn scrolled() -> Rectangle {

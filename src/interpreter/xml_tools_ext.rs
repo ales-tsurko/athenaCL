@@ -3,11 +3,13 @@
 use quick_xml::{events::Event, reader::Reader};
 use rustpython_vm::{pymodule, VirtualMachine};
 
-pub(crate) fn make_module(vm: &mut VirtualMachine) {
-    vm.add_native_module("xmlToolsExt", Box::new(_inner::make_module));
+pub(crate) fn module_def(
+    ctx: &rustpython_vm::Context,
+) -> &'static rustpython_vm::builtins::PyModuleDef {
+    _inner::module_def(ctx)
 }
 
-#[pymodule]
+#[pymodule(name = "xmlToolsExt")]
 pub(super) mod _inner {
     use std::str;
 
@@ -19,7 +21,7 @@ pub(super) mod _inner {
     #[pyfunction(name = "xmlToPy")]
     pub(crate) fn xml_to_py(code: String, vm: &VirtualMachine) -> PyResult {
         let mut reader = Reader::from_str(&code);
-        reader.trim_text(true);
+        reader.config_mut().trim_text(true);
         let mut buf = Vec::new();
         let mut stack = Vec::new();
         let root = vm.ctx.new_dict();
@@ -37,22 +39,10 @@ pub(super) mod _inner {
                 Ok(Event::Start(e)) => {
                     let name = match e
                         .attributes()
-                        .find(|a| matches!(a.as_ref(), Ok(attr) if attr.key.as_ref() == b"name"))
+                        .find(|a| matches!(a.as_ref(), Ok(attr) if attr.key.as_ref() == "name"))
                     {
-                        Some(Ok(attr)) => reader
-                            .decoder()
-                            .decode(attr.value.as_ref())
-                            .map_err(|_err| {
-                                vm.new_value_error("cannot decode xml attribute".to_owned())
-                            })?
-                            .to_string(),
-                        _ => reader
-                            .decoder()
-                            .decode(e.name().as_ref())
-                            .map_err(|_err| {
-                                vm.new_value_error("cannot decode xml element name".to_owned())
-                            })?
-                            .to_string(),
+                        Some(Ok(attr)) => attr.value.to_string(),
+                        _ => e.name().as_ref().to_string(),
                     };
 
                     let dict = vm.ctx.new_dict();
@@ -65,19 +55,8 @@ pub(super) mod _inner {
                             let attr = a.map_err(|_err| {
                                 vm.new_value_error("cannot get xml attribute".to_owned())
                             })?;
-                            let key =
-                                reader.decoder().decode(attr.key.as_ref()).map_err(|_err| {
-                                    vm.new_value_error("cannot decode xml attribute".to_owned())
-                                })?;
-                            let value =
-                                reader
-                                    .decoder()
-                                    .decode(attr.value.as_ref())
-                                    .map_err(|_err| {
-                                        vm.new_value_error("cannot decode xml attribute".to_owned())
-                                    })?;
-
-                            attrs_cache.insert(key.to_string(), value.to_string());
+                            attrs_cache
+                                .insert(attr.key.as_ref().to_string(), attr.value.to_string());
                         }
 
                         let value = vm
@@ -113,7 +92,7 @@ pub(super) mod _inner {
     #[pyfunction(name = "checkFileFormat")]
     pub(crate) fn check_file_format(content: String, vm: &VirtualMachine) -> PyResult {
         let mut reader = Reader::from_str(&content);
-        reader.trim_text(true);
+        reader.config_mut().trim_text(true);
         let mut buf = Vec::new();
 
         let (mut kind, mut message) = ("xml".to_string(), "ok".to_string());
@@ -121,7 +100,7 @@ pub(super) mod _inner {
         loop {
             match reader.read_event_into(&mut buf) {
                 Ok(Event::Start(e)) => {
-                    if e.name().as_ref() == b"athenaObject" {
+                    if e.name().as_ref() == "athenaObject" {
                         break;
                     }
                 }

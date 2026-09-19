@@ -25,7 +25,7 @@ def load_test_cases(module_names):
         # Assuming the standard naming convention 'Test' for test cases
         test_case = getattr(module, 'Test', None)
         if test_case and issubclass(test_case, unittest.TestCase):
-            suite.addTest(unittest.makeSuite(test_case))
+            suite.addTest(unittest.TestLoader().loadTestsFromTestCase(test_case))
     return suite
 
 

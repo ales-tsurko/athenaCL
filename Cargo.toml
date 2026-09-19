@@ -10,28 +10,28 @@ icon = ["resources/athenaCL.icns"]
 resources = ["resources/SGM-v2.01-YamahaGrand-Guit-Bass-v2.7.sf2"]
 
 [dependencies]
-ahash = "0.8.11"
-async-channel = "2.3.1"
-cpal = "0.15.3"
-env_logger = "0.11"
-iced = { version = "0.13.1", features = ["canvas", "tokio", "wgpu"] }
-iced_aw = "0.11"
-iced_fonts = { version = "0.1.1", features = ["nerd"] }
-log = "0.4"
-midi-player = "0.2.1"
-quick-xml = "0.31.0"
-rfd = "0.14.0"
-# it's git for now, because the version supporting aiff have not released yet
-rodio = { git = "https://github.com/RustAudio/rodio.git", features = [
+ahash = "0.8.12"
+async-channel = "2.5.0"
+cpal = "0.17.3"
+iced = { version = "0.14.0", features = ["canvas", "tokio", "wgpu"] }
+iced_aw = "0.14.1"
+iced_fonts = { version = "0.3.0", features = ["nerd"] }
+midi-player = "0.2.3"
+quick-xml = "0.42.0"
+rfd = "0.17.2"
+rodio = { version = "0.22.2", features = [
     "symphonia-all",
     "symphonia-aiff",
     "symphonia-alac",
 ] }
-rustpython-pylib = { version = "0.4.0", features = ["freeze-stdlib"] }
-rustpython-stdlib = "0.4.0"
-rustpython-vm = { version = "0.4.0", features = ["freeze-stdlib"] }
-serde = { version = "1", features = ["derive"] }
-thiserror = "1.0.64"
+rustpython-pylib = { version = "0.5.0", features = ["freeze-stdlib"] }
+rustpython-stdlib = "0.5.0"
+rustpython-vm = { version = "0.5.0", features = ["freeze-stdlib"] }
+symphonia = { version = "0.5", default-features = false, features = ["wav", "aiff"] }
+thiserror = "2.0.20"
+
+[dev-dependencies]
+iced_test = "0.14.0"
 
 [build-dependencies]
 serde_json = "1"

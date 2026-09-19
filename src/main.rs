@@ -3,12 +3,13 @@
 use athenacl::app;
 
 fn main() -> iced::Result {
-    iced::application("athenaCL", app::update, app::view)
+    iced::application(app::State::default, app::update, app::view)
+        .title("athenaCL")
         .subscription(app::subscription)
         // figures are pixel art: without multisampling, their pixels stay sharp at any offset
         .antialiasing(false)
         .centered()
-        .settings(iced::settings::Settings {
+        .settings(iced::Settings {
             id: Some(app::APPLICATION_ID.to_string()),
             default_text_size: 14.into(),
             default_font: iced::Font::with_name("Fira Mono"),
@@ -28,7 +29,6 @@ fn main() -> iced::Result {
         .font(include_bytes!(
             "../resources/fonts/Fira_Mono/FiraMono-Regular.ttf"
         ))
-        .font(iced_fonts::REQUIRED_FONT_BYTES)
         .font(iced_fonts::NERD_FONT_BYTES)
         .run()
 }

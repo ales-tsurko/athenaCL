@@ -13,7 +13,7 @@ use vm::{
     Interpreter as PyInterpreter, PyObjectRef, PyResult, VirtualMachine,
 };
 
-use super::{athena_obj_ext, dialog_ext, figure_ext, xml_tools_ext};
+use super::{athena_obj_ext, dialog_ext, figure_ext, sndhdr, xml_tools_ext};
 use crate::figure::Figure;
 
 /// Global interpreter representation.
@@ -203,25 +203,28 @@ interp"#
 pub fn init_py_interpreter() -> PyInterpreter {
     let mut settings = vm::Settings::default();
     settings.optimize = 2;
-    PyInterpreter::with_init(settings, |vm| {
-        vm.add_native_modules(rustpython_stdlib::get_module_inits());
-        vm.add_frozen(rustpython_pylib::FROZEN_STDLIB);
-        vm.add_frozen(vm::py_freeze!(dir = "pysrc"));
-        xml_tools_ext::make_module(vm);
-        dialog_ext::make_module(vm);
-        athena_obj_ext::make_module(vm);
-        figure_ext::make_module(vm);
-    })
+    let builder = PyInterpreter::builder(settings);
+    let ctx = builder.ctx.clone();
+    builder
+        .add_native_modules(&rustpython_stdlib::stdlib_module_defs(&ctx))
+        .add_native_module(xml_tools_ext::module_def(&ctx))
+        .add_native_module(dialog_ext::module_def(&ctx))
+        .add_native_module(athena_obj_ext::module_def(&ctx))
+        .add_native_module(figure_ext::module_def(&ctx))
+        .add_native_module(sndhdr::module_def(&ctx))
+        .add_frozen_modules(rustpython_pylib::FROZEN_STDLIB)
+        .add_frozen_modules(vm::py_freeze!(dir = "../../pysrc"))
+        .build()
 }
 
 fn extract_result_tuple(vm: &VirtualMachine, result: PyObjectRef) -> PyResult<(bool, String)> {
     // Ensure the result is a tuple
-    if let Some(tuple) = result.payload::<PyTuple>() {
+    if let Some(tuple) = result.downcast_ref::<PyTuple>() {
         // Ensure the tuple has exactly 2 elements (Integer, String)
         if let [int_part, str_part] = tuple.as_slice() {
             // Extract and convert the first element to i32
             let int_part = int_part
-                .payload::<PyInt>()
+                .downcast_ref::<PyInt>()
                 .ok_or_else(|| vm.new_type_error("Expected an integer".to_owned()))?
                 .as_bigint();
 
@@ -229,8 +232,8 @@ fn extract_result_tuple(vm: &VirtualMachine, result: PyObjectRef) -> PyResult<(b
 
             // Extract and convert the second element to String
             let str_part = str_part
-                .payload::<PyStr>()
-                .map(|v| v.as_str().to_owned())
+                .downcast_ref::<PyStr>()
+                .map(|v| v.to_str().unwrap_or_default().to_owned())
                 .unwrap_or_default();
 
             Ok((bool_part, str_part))
@@ -248,7 +251,7 @@ fn extract_result_tuple(vm: &VirtualMachine, result: PyObjectRef) -> PyResult<(b
 )]
 fn extract_vec_string(vm: &VirtualMachine, result: PyObjectRef) -> PyResult<Vec<String>> {
     result
-        .payload::<PyList>()
+        .downcast_ref::<PyList>()
         .ok_or_else(|| vm.new_type_error("Expected a list".to_owned()))
         .map(|list| {
             list.borrow_vec()
@@ -260,7 +263,7 @@ fn extract_vec_string(vm: &VirtualMachine, result: PyObjectRef) -> PyResult<Vec<
 
 fn extract_string(vm: &VirtualMachine, result: PyObjectRef) -> PyResult<String> {
     result
-        .payload::<PyStr>()
+        .downcast_ref::<PyStr>()
         .ok_or_else(|| vm.new_type_error("Expected a string".to_owned()))
         .map(ToString::to_string)
 }
@@ -293,7 +296,7 @@ impl Error {
             .get_arg(0)
             .as_ref()
             .and_then(|arg| arg.downcast_ref::<PyStr>())
-            .map(|s| s.as_str().to_owned())
+            .map(|s| s.to_str().unwrap_or_default().to_owned())
             .unwrap_or_else(|| "Unknown (silent) error".to_string());
 
         Self::PythonError(message)

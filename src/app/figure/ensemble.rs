@@ -4,15 +4,18 @@
 
 use iced::{
     mouse,
-    widget::canvas::{self, Canvas, Frame},
+    widget::{
+        self,
+        canvas::{self, Canvas, Frame},
+    },
     Color, Element, Length, Point, Rectangle, Renderer, Size, Theme,
 };
 
 use super::{
-    color, fill, outline, status, to_index, Anchor, Gesture, Label, Message, Pointer, Ticks,
+    action, color, fill, outline, to_index, Anchor, Gesture, Label, Message, Pointer, Ticks,
     Window, LABEL_HEIGHT, LABEL_SCALE,
 };
-use crate::figure::{Ensemble, Lane};
+use crate::figure::{Ensemble, Lane, Palette, Rgb};
 
 /// Space around the time labels, and at the edges.
 const GUTTER: f32 = 4.0;
@@ -89,11 +92,11 @@ impl canvas::Program<Message> for Timeline<'_> {
     fn update(
         &self,
         state: &mut State,
-        event: canvas::Event,
+        event: &canvas::Event,
         bounds: Rectangle,
         cursor: mouse::Cursor,
-    ) -> (canvas::event::Status, Option<Message>) {
-        let gesture = state.pointer.gesture(&event, bounds, cursor);
+    ) -> Option<widget::Action<Message>> {
+        let gesture = state.pointer.gesture(event, bounds, cursor);
         let layout = Layout::new(self.ensemble, state.window, bounds.width);
         let map = layout.map;
         let mut message = None;
@@ -107,16 +110,7 @@ impl canvas::Program<Message> for Timeline<'_> {
             Gesture::Pan { delta, .. } => state.window.pan(f64::from(-delta.x / map.width)),
             Gesture::Reset => state.window.reset(),
             Gesture::Click(at) => {
-                message = layout.row_at(at).map(|row| {
-                    if row.is_clone {
-                        Message::SelectClone {
-                            texture: row.texture.to_owned(),
-                            clone: row.lane.name.clone(),
-                        }
-                    } else {
-                        Message::SelectTexture(row.lane.name.clone())
-                    }
-                });
+                message = layout.row_at(at).map(row_message);
                 false
             }
             Gesture::None | Gesture::Press => false,
@@ -124,7 +118,7 @@ impl canvas::Program<Message> for Timeline<'_> {
         if changed {
             state.cache.clear();
         }
-        (status(gesture, changed), message)
+        action(gesture, changed, message)
     }
 
     fn draw(
@@ -163,6 +157,27 @@ impl canvas::Program<Message> for Timeline<'_> {
             Some(at) if layout.row_at(at).is_some() => mouse::Interaction::Pointer,
             _ => mouse::Interaction::default(),
         }
+    }
+}
+
+/// The message clicking a lane sends: selecting its texture, or its clone.
+fn row_message(row: &Row<'_>) -> Message {
+    if row.is_clone {
+        Message::SelectClone {
+            texture: row.texture.to_owned(),
+            clone: row.lane.name.clone(),
+        }
+    } else {
+        Message::SelectTexture(row.lane.name.clone())
+    }
+}
+
+/// A lane's colors: its body and head, and its name.
+fn lane_colors(row: &Row<'_>, palette: Palette) -> (Rgb, Rgb, Rgb) {
+    if row.is_clone {
+        (palette.alt, palette.alt_frame, palette.label)
+    } else {
+        (palette.main, palette.main_frame, palette.title)
     }
 }
 
@@ -273,7 +288,14 @@ impl<'a> Layout<'a> {
             color(palette.unit),
         );
 
-        // time: labeled lines in the margin color, and grid lines halfway between them
+        self.draw_grid(frame);
+        self.draw_lanes(frame);
+    }
+
+    /// Time lines in the grid color halfway between labels, and labeled lines in the margin
+    /// color.
+    fn draw_grid(&self, frame: &mut Frame) {
+        let palette = self.ensemble.palette;
         let count = to_index(f64::from(self.map.width / X_LABEL_SPACING));
         let ticks = Ticks::new(self.visible.0, self.visible.1, count.max(2), 0.001);
         let line = |frame: &mut Frame, time: f64, color: Color| {
@@ -292,20 +314,29 @@ impl<'a> Layout<'a> {
         }
         for &time in &ticks.values {
             line(frame, time, color(palette.margin));
-            let label = Label::new(&ticks.format(time));
-            let at = Point::new(self.x(time).round(), GUTTER);
-            let bounds = label.bounds(at, Anchor::NorthCenter);
-            if bounds.x >= self.map.x - GUTTER && bounds.x + bounds.width <= self.width {
-                label.draw(frame, at, Anchor::NorthCenter, color(palette.unit));
-            }
+            self.draw_time_label(frame, time, &ticks);
         }
+    }
 
+    /// A time's label, when it fits on screen.
+    fn draw_time_label(&self, frame: &mut Frame, time: f64, ticks: &Ticks) {
+        let label = Label::new(&ticks.format(time));
+        let at = Point::new(self.x(time).round(), GUTTER);
+        let bounds = label.bounds(at, Anchor::NorthCenter);
+        if bounds.x >= self.map.x - GUTTER && bounds.x + bounds.width <= self.width {
+            label.draw(
+                frame,
+                at,
+                Anchor::NorthCenter,
+                color(self.ensemble.palette.unit),
+            );
+        }
+    }
+
+    /// The lanes: bars with heads, and their names.
+    fn draw_lanes(&self, frame: &mut Frame) {
         for (index, row) in self.rows.iter().enumerate() {
-            let (body_color, head_color, name_color) = if row.is_clone {
-                (palette.alt, palette.alt_frame, palette.label)
-            } else {
-                (palette.main, palette.main_frame, palette.title)
-            };
+            let (body_color, head_color, name_color) = lane_colors(row, self.ensemble.palette);
             let bar = self.bar(index);
             let head = Rectangle::new(bar.position(), Size::new(bar.width, HEAD));
             fill(frame, head, self.map, color(head_color));
@@ -369,6 +400,8 @@ impl<'a> Layout<'a> {
 #[cfg(test)]
 mod tests {
     #![expect(clippy::float_cmp, reason = "the tests assert exact float values")]
+
+    use iced::keyboard;
 
     use super::*;
     use crate::figure::{Palette, Rgb, Texture};
@@ -442,5 +475,58 @@ mod tests {
         assert_eq!(layout.row_at(middle(2)).unwrap().lane.name, "b");
         assert!(layout.row_at(Point::new(1.0, 2.0)).is_none());
         assert!(layout.row_at(Point::new(1.0, 1000.0)).is_none());
+    }
+
+    #[test]
+    fn clicking_a_lane_selects_it() {
+        let ensemble = ensemble();
+        let program = Timeline {
+            ensemble: &ensemble,
+            active: "a",
+        };
+        let layout = Layout::new(&ensemble, Window::default(), 680.0);
+        let bounds = Rectangle::new(Point::ORIGIN, Size::new(680.0, 300.0));
+        let at = mouse::Cursor::Available(Point::new(
+            layout.map.x + 10.0,
+            layout.lane_y(1) + LANE / 2.0,
+        ));
+        let press = canvas::Event::Mouse(mouse::Event::ButtonPressed(mouse::Button::Left));
+        let release = canvas::Event::Mouse(mouse::Event::ButtonReleased(mouse::Button::Left));
+
+        let mut state = State::default();
+        canvas::Program::update(&program, &mut state, &press, bounds, at);
+        let action = canvas::Program::update(&program, &mut state, &release, bounds, at);
+        let message = action.and_then(|action| action.into_inner().0);
+
+        assert_eq!(
+            message,
+            Some(Message::SelectClone {
+                texture: "a".to_owned(),
+                clone: "x".to_owned()
+            })
+        );
+    }
+
+    #[test]
+    fn zooming_reaches_the_window() {
+        let ensemble = ensemble();
+        let program = Timeline {
+            ensemble: &ensemble,
+            active: "a",
+        };
+        let bounds = Rectangle::new(Point::ORIGIN, Size::new(680.0, 300.0));
+        let at = mouse::Cursor::Available(Point::new(300.0, 100.0));
+        let command = canvas::Event::Keyboard(keyboard::Event::ModifiersChanged(
+            keyboard::Modifiers::COMMAND,
+        ));
+        let zoom = canvas::Event::Mouse(mouse::Event::WheelScrolled {
+            delta: mouse::ScrollDelta::Pixels { x: 0.0, y: 60.0 },
+        });
+
+        let mut state = State::default();
+        canvas::Program::update(&program, &mut state, &command, bounds, at);
+        canvas::Program::update(&program, &mut state, &zoom, bounds, at);
+
+        assert!(state.window.span() < 1.0);
     }
 }

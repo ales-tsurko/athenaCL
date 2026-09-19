@@ -7,11 +7,13 @@ use rustpython_vm::{pymodule, VirtualMachine};
 
 use crate::interpreter;
 
-pub(crate) fn make_module(vm: &mut VirtualMachine) {
-    vm.add_native_module("figureExt", Box::new(_inner::make_module));
+pub(crate) fn module_def(
+    ctx: &rustpython_vm::Context,
+) -> &'static rustpython_vm::builtins::PyModuleDef {
+    _inner::module_def(ctx)
 }
 
-#[pymodule]
+#[pymodule(name = "figureExt")]
 pub(super) mod _inner {
     use std::sync::Arc;
 
@@ -39,7 +41,7 @@ pub(super) mod _inner {
         graphs: PyObjectRef,
         vm: &VirtualMachine,
     ) -> PyResult<()> {
-        let domain = match domain.as_str() {
+        let domain = match domain.to_str().unwrap_or_default() {
             "event" => Domain::Events,
             "time" => Domain::Time,
             other => return Err(vm.new_value_error(format!("unknown domain: {other}"))),
@@ -128,7 +130,12 @@ pub(super) mod _inner {
         let cells = map(&cells, vm, |row| map(&row, vm, |value| float(value, vm)))?;
         show(Figure::Automaton(Automaton {
             palette: palette_from(&palette, vm)?,
-            title: title.as_str().lines().map(str::to_owned).collect(),
+            title: title
+                .to_str()
+                .unwrap_or_default()
+                .lines()
+                .map(str::to_owned)
+                .collect(),
             cells,
             max: max.map(Into::into),
         }));
@@ -194,6 +201,6 @@ pub(super) mod _inner {
     fn string(value: PyObjectRef, vm: &VirtualMachine) -> PyResult<String> {
         value
             .try_into_value::<PyStrRef>(vm)
-            .map(|value| value.as_str().to_owned())
+            .map(|value| value.to_str().unwrap_or_default().to_owned())
     }
 }

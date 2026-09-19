@@ -8,11 +8,13 @@ use rustpython_vm::{pymodule, VirtualMachine};
 
 use crate::interpreter;
 
-pub(crate) fn make_module(vm: &mut VirtualMachine) {
-    vm.add_native_module("athenaObjExt", Box::new(_inner::make_module));
+pub(crate) fn module_def(
+    ctx: &rustpython_vm::Context,
+) -> &'static rustpython_vm::builtins::PyModuleDef {
+    _inner::module_def(ctx)
 }
 
-#[pymodule]
+#[pymodule(name = "athenaObjExt")]
 pub(super) mod _inner {
     use std::str;
 

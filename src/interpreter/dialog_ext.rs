@@ -9,13 +9,15 @@ use rustpython_vm::{pymodule, VirtualMachine};
 
 use crate::interpreter;
 
-pub(crate) fn make_module(vm: &mut VirtualMachine) {
-    vm.add_native_module("dialogExt", Box::new(_inner::make_module));
+pub(crate) fn module_def(
+    ctx: &rustpython_vm::Context,
+) -> &'static rustpython_vm::builtins::PyModuleDef {
+    _inner::module_def(ctx)
 }
 
-#[pymodule]
+#[pymodule(name = "dialogExt")]
 pub(super) mod _inner {
-    use std::{env, str};
+    use std::{env, path::PathBuf, str};
 
     use rustpython_vm::{convert::ToPyObject, PyResult};
 
@@ -54,53 +56,21 @@ pub(super) mod _inner {
         prompt_type: PromptType,
         vm: &VirtualMachine,
     ) -> PyResult {
-        let initial_dir = if initial_dir.is_empty() {
-            match env::current_dir() {
-                Ok(path) => path.to_string_lossy().to_string(),
-                Err(e) => {
-                    eprint!("{}", e);
-                    let res = vec![
-                        vm.ctx.new_str("").to_pyobject(vm),
-                        vm.ctx.new_int(0).to_pyobject(vm),
-                    ];
-                    return Ok(vm.ctx.new_tuple(res).into());
-                }
-            }
-        } else {
-            initial_dir
+        let Some(initial_dir) = initial_directory(initial_dir) else {
+            return cancelled(vm);
         };
-
         let title = if title.is_empty() {
             "Select directory".to_string()
         } else {
             title
         };
 
-        let fd = FileDialog::new()
+        let dialog = FileDialog::new()
             .set_title(title)
             .set_directory(initial_dir)
             .set_can_create_directories(true);
 
-        let res = match prompt_type {
-            PromptType::ChooseDir => fd.pick_folder(),
-            PromptType::ChooseFile => fd.pick_file(),
-            PromptType::SaveFile => fd.save_file(),
-        };
-
-        let res = match res {
-            Some(path) => vec![
-                vm.ctx
-                    .new_str(path.to_string_lossy().to_string())
-                    .to_pyobject(vm),
-                vm.ctx.new_int(1).to_pyobject(vm),
-            ],
-            None => vec![
-                vm.ctx.new_str("").to_pyobject(vm),
-                vm.ctx.new_int(0).to_pyobject(vm),
-            ],
-        };
-
-        Ok(vm.ctx.new_tuple(res).into())
+        response(prompt_type.pick(dialog), vm)
     }
 
     #[derive(Clone, Copy)]
@@ -108,6 +78,50 @@ pub(super) mod _inner {
         ChooseDir,
         ChooseFile,
         SaveFile,
+    }
+
+    impl PromptType {
+        /// Pick with `dialog` however this prompt asks.
+        fn pick(self, dialog: FileDialog) -> Option<PathBuf> {
+            match self {
+                PromptType::ChooseDir => dialog.pick_folder(),
+                PromptType::ChooseFile => dialog.pick_file(),
+                PromptType::SaveFile => dialog.save_file(),
+            }
+        }
+    }
+
+    /// The directory a dialog opens in: the given one, or the working directory.
+    pub(super) fn initial_directory(initial_dir: String) -> Option<String> {
+        if !initial_dir.is_empty() {
+            return Some(initial_dir);
+        }
+
+        env::current_dir()
+            .map(|path| path.to_string_lossy().to_string())
+            .map_err(|err| eprint!("{err}"))
+            .ok()
+    }
+
+    /// The athenaCL dialog result: the chosen path, or an empty one with a zero.
+    pub(super) fn response(picked: Option<PathBuf>, vm: &VirtualMachine) -> PyResult {
+        let (path, ok) = match picked {
+            Some(path) => (path.to_string_lossy().to_string(), 1),
+            None => (String::new(), 0),
+        };
+
+        Ok(vm
+            .ctx
+            .new_tuple(vec![
+                vm.ctx.new_str(path).to_pyobject(vm),
+                vm.ctx.new_int(ok).to_pyobject(vm),
+            ])
+            .into())
+    }
+
+    /// A dialog result for when it cannot even be shown.
+    fn cancelled(vm: &VirtualMachine) -> PyResult {
+        response(None, vm)
     }
 
     #[pyfunction(name = "postOut")]
@@ -154,5 +168,56 @@ pub(super) mod _inner {
             .map_err(|_err| vm.new_runtime_error("cannot send message to the GUI".to_owned()))?;
 
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use rustpython_vm::builtins::{PyInt, PyStr, PyTuple};
+
+    use super::_inner::{initial_directory, response};
+
+    #[test]
+    fn the_working_directory_is_the_default_start() {
+        assert_eq!(
+            initial_directory("given".to_owned()).as_deref(),
+            Some("given")
+        );
+        let cwd = initial_directory(String::new()).expect("the working directory is available");
+        assert!(!cwd.is_empty());
+    }
+
+    #[test]
+    fn responses_carry_the_path_and_flag() {
+        let interpreter = crate::init_py_interpreter();
+        interpreter.enter(|vm| {
+            let picked = response(Some("/tmp/x".into()), vm).expect("a picked path builds");
+            assert_eq!(tuple_fields(&picked), ("/tmp/x".to_owned(), 1));
+
+            let cancelled = response(None, vm).expect("a cancelled dialog builds");
+            assert_eq!(tuple_fields(&cancelled), (String::new(), 0));
+        });
+    }
+
+    /// The `(path, ok)` fields of a dialog result.
+    fn tuple_fields(result: &rustpython_vm::PyObject) -> (String, i64) {
+        let tuple = result
+            .downcast_ref::<PyTuple>()
+            .expect("the result is a tuple");
+        let path = tuple.as_slice()[0]
+            .downcast_ref::<PyStr>()
+            .expect("the first field is a string")
+            .to_str()
+            .unwrap_or_default()
+            .to_owned();
+        let ok = tuple.as_slice()[1]
+            .downcast_ref::<PyInt>()
+            .expect("the second field is a number")
+            .as_bigint()
+            .to_string()
+            .parse()
+            .expect("the flag is a small number");
+
+        (path, ok)
     }
 }

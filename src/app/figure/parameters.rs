@@ -5,12 +5,15 @@
 
 use iced::{
     mouse,
-    widget::canvas::{self, Canvas, Frame},
+    widget::{
+        self,
+        canvas::{self, Canvas, Frame},
+    },
     Element, Length, Point, Rectangle, Renderer, Size, Theme,
 };
 
 use super::{
-    color, fill, format_value, status, to_index, Anchor, Gesture, Label, Message, Pointer, Ticks,
+    action, color, fill, format_value, to_index, Anchor, Gesture, Label, Message, Pointer, Ticks,
     Window,
 };
 use crate::figure::{Domain, Graph, Mark, Parameters};
@@ -74,11 +77,11 @@ impl canvas::Program<Message> for Plot<'_> {
     fn update(
         &self,
         state: &mut State,
-        event: canvas::Event,
+        event: &canvas::Event,
         bounds: Rectangle,
         cursor: mouse::Cursor,
-    ) -> (canvas::event::Status, Option<Message>) {
-        let gesture = state.pointer.gesture(&event, bounds, cursor);
+    ) -> Option<widget::Action<Message>> {
+        let gesture = state.pointer.gesture(event, bounds, cursor);
         let layout = Layout::new(self.0, state.window, bounds.width);
         let plot = layout.plot(0);
         let changed = match gesture {
@@ -95,7 +98,7 @@ impl canvas::Program<Message> for Plot<'_> {
         if changed {
             state.cache.clear();
         }
-        (status(gesture, changed), None)
+        action(gesture, changed, None)
     }
 
     fn draw(
@@ -292,44 +295,9 @@ impl<'a> Layout<'a> {
             frame.fill_rectangle(plot.position(), plot.size(), color(palette.background));
 
             let range = self.value_range(graph);
-            let count = to_index(f64::from(
-                (plot.height - 2.0 * MARK) / (Label::height() + 8.0),
-            ));
-            let ticks = Ticks::new(range.0, range.1, count.max(2), 0.0);
-            for &value in &ticks.values {
-                let y = Self::y(value, range, plot);
-                let line = Rectangle::new(Point::new(plot.x, y), Size::new(plot.width, 1.0));
-                fill(frame, line, plot, color(palette.grid));
-                Label::new(&ticks.format(value)).draw(
-                    frame,
-                    Point::new(plot.x - GUTTER, y),
-                    Anchor::CenterEast,
-                    color(palette.unit),
-                );
-            }
-
-            let min_step = match self.parameters.domain {
-                Domain::Events => 1.0,
-                Domain::Time => 0.001,
-            };
-            let count = to_index(f64::from(plot.width / X_LABEL_SPACING));
-            let ticks = Ticks::new(self.visible.0, self.visible.1, count.max(2), min_step);
-            for &value in &ticks.values {
-                let x = self.x(value, plot).round();
-                let line = Rectangle::new(Point::new(x, plot.y), Size::new(1.0, plot.height));
-                fill(frame, line, plot, color(palette.grid));
-                let label = Label::new(&ticks.format(value));
-                let at = Point::new(x, Self::units_y(plot));
-                let bounds = label.bounds(at, Anchor::NorthCenter);
-                if bounds.x >= 0.0 && bounds.x + bounds.width <= self.width {
-                    label.draw(frame, at, Anchor::NorthCenter, color(palette.unit));
-                }
-            }
-
-            for mark in self.visible_marks(graph) {
-                let area = self.mark_area(mark, range, plot);
-                fill(frame, area, plot, color(palette.title));
-            }
+            self.draw_values(frame, plot, range);
+            self.draw_times(frame, plot);
+            self.draw_marks(graph, frame, plot, range);
 
             Label::new(&graph.title).draw(
                 frame,
@@ -337,6 +305,65 @@ impl<'a> Layout<'a> {
                 Anchor::NorthEast,
                 color(palette.title),
             );
+        }
+    }
+
+    /// Value grid lines with their labels, left of the plot.
+    fn draw_values(&self, frame: &mut Frame, plot: Rectangle, range: (f64, f64)) {
+        let palette = self.parameters.palette;
+        let count = to_index(f64::from(
+            (plot.height - 2.0 * MARK) / (Label::height() + 8.0),
+        ));
+        let ticks = Ticks::new(range.0, range.1, count.max(2), 0.0);
+        for &value in &ticks.values {
+            let y = Self::y(value, range, plot);
+            let line = Rectangle::new(Point::new(plot.x, y), Size::new(plot.width, 1.0));
+            fill(frame, line, plot, color(palette.grid));
+            Label::new(&ticks.format(value)).draw(
+                frame,
+                Point::new(plot.x - GUTTER, y),
+                Anchor::CenterEast,
+                color(palette.unit),
+            );
+        }
+    }
+
+    /// Time grid lines with their labels, under the plot.
+    fn draw_times(&self, frame: &mut Frame, plot: Rectangle) {
+        let min_step = match self.parameters.domain {
+            Domain::Events => 1.0,
+            Domain::Time => 0.001,
+        };
+        let count = to_index(f64::from(plot.width / X_LABEL_SPACING));
+        let ticks = Ticks::new(self.visible.0, self.visible.1, count.max(2), min_step);
+        for &value in &ticks.values {
+            let x = self.x(value, plot).round();
+            let line = Rectangle::new(Point::new(x, plot.y), Size::new(1.0, plot.height));
+            fill(frame, line, plot, color(self.parameters.palette.grid));
+            self.draw_time_label(frame, value, &ticks, plot);
+        }
+    }
+
+    /// A time's label, when it fits on screen.
+    fn draw_time_label(&self, frame: &mut Frame, value: f64, ticks: &Ticks, plot: Rectangle) {
+        let label = Label::new(&ticks.format(value));
+        let at = Point::new(self.x(value, plot).round(), Self::units_y(plot));
+        let bounds = label.bounds(at, Anchor::NorthCenter);
+        if bounds.x >= 0.0 && bounds.x + bounds.width <= self.width {
+            label.draw(
+                frame,
+                at,
+                Anchor::NorthCenter,
+                color(self.parameters.palette.unit),
+            );
+        }
+    }
+
+    /// The marks of `graph`, as bars across their spans of the x axis.
+    fn draw_marks(&self, graph: &Graph, frame: &mut Frame, plot: Rectangle, range: (f64, f64)) {
+        for mark in self.visible_marks(graph) {
+            let area = self.mark_area(mark, range, plot);
+            fill(frame, area, plot, color(self.parameters.palette.title));
         }
     }
 
@@ -410,6 +437,8 @@ fn min_max<'m>(marks: impl Iterator<Item = &'m Mark>) -> Option<(f64, f64)> {
 mod tests {
     #![expect(clippy::float_cmp, reason = "the tests assert exact float values")]
 
+    use iced::keyboard;
+
     use super::*;
     use crate::figure::{Palette, Rgb};
 
@@ -447,6 +476,31 @@ mod tests {
                 value,
             })
             .collect()
+    }
+
+    #[test]
+    fn zooming_and_resetting_reach_the_window() {
+        let parameters = parameters(Domain::Time, events(&[0.0, 1.0, 5.0, 2.0, 3.0]));
+        let program = Plot(&parameters);
+        let bounds = Rectangle::new(Point::ORIGIN, Size::new(680.0, 300.0));
+        let at = mouse::Cursor::Available(Point::new(300.0, 150.0));
+        let command = canvas::Event::Keyboard(keyboard::Event::ModifiersChanged(
+            keyboard::Modifiers::COMMAND,
+        ));
+        let zoom = canvas::Event::Mouse(mouse::Event::WheelScrolled {
+            delta: mouse::ScrollDelta::Pixels { x: 0.0, y: 60.0 },
+        });
+        let press = canvas::Event::Mouse(mouse::Event::ButtonPressed(mouse::Button::Left));
+
+        let mut state = State::default();
+        canvas::Program::update(&program, &mut state, &command, bounds, at);
+        canvas::Program::update(&program, &mut state, &zoom, bounds, at);
+        assert!(state.window.span() < 1.0);
+
+        // a double click shows everything again
+        canvas::Program::update(&program, &mut state, &press, bounds, at);
+        canvas::Program::update(&program, &mut state, &press, bounds, at);
+        assert_eq!(state.window, Window::default());
     }
 
     #[test]

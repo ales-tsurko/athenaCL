@@ -5,8 +5,8 @@ use iced::{
     futures::sink::SinkExt,
     stream, time,
     widget::{
-        button, column, container, container::Style as ContainerStyle, horizontal_space, pick_list,
-        row, scrollable, text, text::Style as TextStyle, text_input,
+        button, column, container, container::Style as ContainerStyle, operation, pick_list, row,
+        scrollable, space, text, text::Style as TextStyle, text_input,
     },
     Element, Font, Subscription, Task,
 };
@@ -28,7 +28,7 @@ const OUTPUT_WIDTH: f32 = (TERM_WIDTH * FONT_WIDTH - 2 * (WINDOW_PADDING + OUTPU
 /// System application ID.
 pub const APPLICATION_ID: &str = "by.alestsurko.athenacl";
 // TODO it should be configurable so users could choose they own sf
-const SOUND_FONT: &str = "resources/SGM-v2.01-YamahaGrand-Guit-Bass-v2.7.sf2";
+pub(super) const SOUND_FONT: &str = "resources/SGM-v2.01-YamahaGrand-Guit-Bass-v2.7.sf2";
 
 /// athenaCL GUI.
 pub struct State {
@@ -106,113 +106,13 @@ pub(crate) enum Output {
 /// The iced update function.
 pub fn update(state: &mut State, message: Message) -> Task<Message> {
     match message {
-        Message::InputChanged(val) => {
-            state.answer = val;
-        }
-        Message::Answer(question, value) => {
-            state.question = None;
-            state
-                .output
-                .push(Output::Normal(format!("{question}{value}")));
-            interpreter::INTERPRETER_WORKER
-                .response_sender
-                .send_blocking(value)
-                .expect("cannot send message to response receiver");
-        }
-        Message::SetScratchDir => {
-            if let Some(value) = pick_directory("Choose scratch folder") {
-                interpreter::INTERPRETER_WORKER
-                    .interp_sender
-                    .send_blocking(interpreter::Message::SendCmd(format!("apdir x {value}")))
-                    .expect("the channel is unbound");
-            }
-        }
-        Message::PiSelected(value) => {
-            interpreter::INTERPRETER_WORKER
-                .interp_sender
-                .send_blocking(interpreter::Message::SendCmd(format! {"pio {value}"}))
-                .expect("cannot send message to the interpreter");
-        }
-        Message::TiSelected(value) => {
-            interpreter::INTERPRETER_WORKER
-                .interp_sender
-                .send_blocking(interpreter::Message::SendCmd(format! {"tio {value}"}))
-                .expect("cannot send message to the interpreter");
-        }
-        Message::Figure(figure::Message::SelectTexture(texture)) => {
-            return update(state, Message::TiSelected(texture));
-        }
-        Message::Figure(figure::Message::SelectClone { texture, clone }) => {
-            for cmd in [format!("tio {texture}"), format!("tco {clone}")] {
-                interpreter::INTERPRETER_WORKER
-                    .interp_sender
-                    .send_blocking(interpreter::Message::SendCmd(cmd))
-                    .expect("cannot send message to the interpreter");
-            }
-        }
-        Message::Interpreter(msg) => match msg {
-            interpreter::Message::SendCmd(ref cmd) => {
-                state.answer = "".to_owned();
-                state.output.push(Output::Command(cmd.to_owned()));
-                interpreter::INTERPRETER_WORKER
-                    .interp_sender
-                    .send_blocking(msg)
-                    .expect("cannot send message to the interpreter");
-            }
-            interpreter::Message::Post(output) => {
-                state.answer = "".to_owned();
-                state.output.push(Output::Normal(output));
-
-                return text_input::focus(state.input_id.clone());
-            }
-            interpreter::Message::Error(output) | interpreter::Message::PythonError(output) => {
-                state.answer = "".to_owned();
-                state.output.push(Output::Error(output));
-
-                return text_input::focus(state.input_id.clone());
-            }
-            interpreter::Message::Ask(prompt) => {
-                state.answer = "".to_owned();
-                state.question = Some(prompt);
-
-                return text_input::focus(state.input_id.clone());
-            }
-            interpreter::Message::LoadMidi(path) => {
-                state.output.push(Output::Player(PlayerState {
-                    is_playing: false,
-                    path: path.into(),
-                    id: player::PlayerId::Midi(state.output.len()),
-                    position: 0.0,
-                }));
-            }
-            interpreter::Message::LoadAudio(path) => {
-                state.output.push(Output::Player(PlayerState {
-                    is_playing: false,
-                    path: path.into(),
-                    id: player::PlayerId::Audio(state.output.len()),
-                    position: 0.0,
-                }));
-            }
-            interpreter::Message::Figure(figure) => {
-                state.output.push(Output::Figure(figure));
-            }
-            interpreter::Message::ScratchDir(value) => {
-                state.scratch_dir = value;
-            }
-            interpreter::Message::PathLibUpdated(path_lib) => {
-                state.path_lib = path_lib;
-            }
-            interpreter::Message::TextureLibUpdated(texture_lib) => {
-                state.texture_lib = texture_lib;
-            }
-            interpreter::Message::ActivePathSet(path_name) => {
-                state.active_path = path_name;
-            }
-            interpreter::Message::ActiveTextureSet(texture_name) => {
-                state.active_texture = texture_name;
-            }
-            _ => (),
-        },
+        Message::InputChanged(val) => state.answer = val,
+        Message::Answer(question, value) => return answer(state, &question, value),
+        Message::SetScratchDir => set_scratch_dir(),
+        Message::PiSelected(value) => send_command(format!("pio {value}")),
+        Message::TiSelected(value) => send_command(format!("tio {value}")),
+        Message::Figure(message) => return update_figure(state, message),
+        Message::Interpreter(message) => return update_interpreter(state, message),
         Message::Player(message) => {
             return player::update(&mut state.output, &mut state.player_state, message)
                 .map(Message::Player)
@@ -220,6 +120,131 @@ pub fn update(state: &mut State, message: Message) -> Task<Message> {
     }
 
     Task::none()
+}
+
+/// Reply to the interpreter's question.
+fn answer(state: &mut State, question: &str, value: String) -> Task<Message> {
+    state.question = None;
+    state
+        .output
+        .push(Output::Normal(format!("{question}{value}")));
+    interpreter::INTERPRETER_WORKER
+        .response_sender
+        .send_blocking(value)
+        .expect("cannot send message to response receiver");
+
+    Task::none()
+}
+
+/// Let the user choose the scratch directory, and use it.
+fn set_scratch_dir() {
+    if let Some(value) = pick_directory("Choose scratch folder") {
+        send_command(format!("apdir x {value}"));
+    }
+}
+
+/// Send a command to the interpreter.
+fn send_command(cmd: String) {
+    interpreter::INTERPRETER_WORKER
+        .interp_sender
+        .send_blocking(interpreter::Message::SendCmd(cmd))
+        .expect("cannot send message to the interpreter");
+}
+
+/// Select the texture or clone clicked on a figure.
+fn update_figure(state: &mut State, message: figure::Message) -> Task<Message> {
+    match message {
+        figure::Message::SelectTexture(texture) => update(state, Message::TiSelected(texture)),
+        figure::Message::SelectClone { texture, clone } => {
+            for cmd in [format!("tio {texture}"), format!("tco {clone}")] {
+                send_command(cmd);
+            }
+
+            Task::none()
+        }
+    }
+}
+
+/// Apply what the interpreter reports.
+fn update_interpreter(state: &mut State, message: interpreter::Message) -> Task<Message> {
+    match message {
+        interpreter::Message::SendCmd(ref cmd) => {
+            state.answer = "".to_owned();
+            state.output.push(Output::Command(cmd.to_owned()));
+            send_command(cmd.to_owned());
+
+            Task::none()
+        }
+        interpreter::Message::Post(output) => push_output(state, Output::Normal(output)),
+        interpreter::Message::Error(output) | interpreter::Message::PythonError(output) => {
+            push_output(state, Output::Error(output))
+        }
+        interpreter::Message::Ask(prompt) => {
+            state.answer = "".to_owned();
+            state.question = Some(prompt);
+
+            operation::focus(state.input_id.clone())
+        }
+        interpreter::Message::LoadMidi(path) => {
+            state.output.push(Output::Player(PlayerState {
+                is_playing: false,
+                path: path.into(),
+                id: player::PlayerId::Midi(state.output.len()),
+                position: 0.0,
+            }));
+
+            Task::none()
+        }
+        interpreter::Message::LoadAudio(path) => {
+            state.output.push(Output::Player(PlayerState {
+                is_playing: false,
+                path: path.into(),
+                id: player::PlayerId::Audio(state.output.len()),
+                position: 0.0,
+            }));
+
+            Task::none()
+        }
+        interpreter::Message::Figure(figure) => {
+            state.output.push(Output::Figure(figure));
+
+            Task::none()
+        }
+        interpreter::Message::ScratchDir(value) => {
+            state.scratch_dir = value;
+
+            Task::none()
+        }
+        interpreter::Message::PathLibUpdated(path_lib) => {
+            state.path_lib = path_lib;
+
+            Task::none()
+        }
+        interpreter::Message::TextureLibUpdated(texture_lib) => {
+            state.texture_lib = texture_lib;
+
+            Task::none()
+        }
+        interpreter::Message::ActivePathSet(path_name) => {
+            state.active_path = path_name;
+
+            Task::none()
+        }
+        interpreter::Message::ActiveTextureSet(texture_name) => {
+            state.active_texture = texture_name;
+
+            Task::none()
+        }
+        _ => Task::none(),
+    }
+}
+
+/// Show the interpreter's output, returning focus to the input.
+fn push_output(state: &mut State, output: Output) -> Task<Message> {
+    state.answer = "".to_owned();
+    state.output.push(output);
+
+    operation::focus(state.input_id.clone())
 }
 
 /// The top-level iced view function.
@@ -259,7 +284,7 @@ pub fn view(state: &State) -> Element<'_, Message> {
 
     container(col.push(view_input(state)).push(view_bottom_panel(state)))
         .padding([18, WINDOW_PADDING])
-        .width(TERM_WIDTH * FONT_WIDTH)
+        .width(f32::from(TERM_WIDTH * FONT_WIDTH))
         .height(iced::Length::Fill)
         .into()
 }
@@ -353,7 +378,7 @@ fn view_input(state: &State) -> Element<'_, Message> {
 fn view_bottom_panel(state: &State) -> Element<'_, Message> {
     row![
         view_pici_chooser(state),
-        horizontal_space(),
+        space::horizontal(),
         player::view_tempo(&state.player_state).map(Message::Player)
     ]
     .spacing(10.0)
@@ -438,15 +463,13 @@ pub fn subscription(state: &State) -> Subscription<Message> {
     let interpreter_listener = Subscription::run(|| {
         let receiver = interpreter::INTERPRETER_WORKER.gui_receiver.clone();
 
-        stream::channel(1000, |mut output| async move {
-            loop {
-                if let Ok(msg) = receiver.recv().await {
-                    match msg {
-                        interpreter::Message::SendCmd(_) => (),
-                        _ => {
-                            if output.send(msg).await.is_err() {
-                                break;
-                            }
+        stream::channel(1000, async move |mut output| loop {
+            if let Ok(msg) = receiver.recv().await {
+                match msg {
+                    interpreter::Message::SendCmd(_) => (),
+                    _ => {
+                        if output.send(msg).await.is_err() {
+                            break;
                         }
                     }
                 }
@@ -464,4 +487,306 @@ pub fn subscription(state: &State) -> Subscription<Message> {
     };
 
     Subscription::batch([interpreter_listener, position_listener])
+}
+
+#[cfg(test)]
+mod tests {
+    use player::PlayerId;
+    use iced::{Point, Size};
+
+    use super::*;
+    use crate::figure::{
+        Automaton, Domain, Ensemble, Figure, Graph, Lane, Mark, Palette, Parameters, Rgb, Texture,
+    };
+
+    fn state() -> State {
+        State {
+            answer: String::new(),
+            output: Vec::new(),
+            question: None,
+            player_state: GlobalPlayerState::headless(),
+            scratch_dir: String::new(),
+            input_id: "input".to_owned(),
+            path_lib: vec!["path".to_owned()],
+            texture_lib: vec!["texture".to_owned()],
+            active_path: "path".to_owned(),
+            active_texture: "texture".to_owned(),
+        }
+    }
+
+    fn palette() -> Palette {
+        let shade = Rgb(0x40, 0x40, 0x40);
+        Palette {
+            background: Rgb(0xff, 0xff, 0xff),
+            grid: shade,
+            margin: Rgb(0xd0, 0xd0, 0xd0),
+            main: Rgb(0x30, 0x60, 0x30),
+            main_frame: Rgb(0x10, 0x40, 0x10),
+            alt: Rgb(0x30, 0x30, 0x60),
+            alt_frame: Rgb(0x10, 0x10, 0x40),
+            title: Rgb(0, 0, 0),
+            label: shade,
+            unit: Rgb(0, 0, 0),
+        }
+    }
+
+    fn automaton() -> Figure {
+        Figure::Automaton(Automaton {
+            palette: palette(),
+            title: vec!["f{t}k{3}r{1}".to_owned()],
+            cells: vec![vec![0.0, 1.0, 0.5], vec![1.0, 0.0, 1.0]],
+            max: Some(2.0),
+        })
+    }
+
+    fn ensemble() -> Figure {
+        let lane = |name: &str, start: f64, end: f64, muted: bool| Lane {
+            name: name.to_owned(),
+            start,
+            end,
+            muted,
+        };
+        Figure::Ensemble(Ensemble {
+            palette: palette(),
+            textures: vec![
+                Texture {
+                    lane: lane("a", 0.0, 10.0, false),
+                    clones: vec![lane("x", 2.0, 12.0, true)],
+                },
+                Texture {
+                    lane: lane("b", 5.0, 20.0, false),
+                    clones: Vec::new(),
+                },
+            ],
+        })
+    }
+
+    fn parameters() -> Figure {
+        Figure::Parameters(Parameters {
+            palette: palette(),
+            domain: Domain::Time,
+            detailed: true,
+            graphs: vec![Graph {
+                title: "amplitude: randomBeta".to_owned(),
+                marks: vec![
+                    Mark {
+                        start: 0.0,
+                        end: 4.0,
+                        value: 0.25,
+                    },
+                    Mark {
+                        start: 4.0,
+                        end: 12.0,
+                        value: 0.75,
+                    },
+                ],
+            }],
+        })
+    }
+
+    #[test]
+    fn input_changes_the_answer() {
+        let mut state = state();
+        drop(update(
+            &mut state,
+            Message::InputChanged("hello".to_owned()),
+        ));
+        assert_eq!(state.answer, "hello");
+    }
+
+    #[test]
+    fn answers_clear_the_question() {
+        let mut state = state();
+        state.question = Some("name: ".to_owned());
+        drop(update(
+            &mut state,
+            Message::Answer("name: ".to_owned(), "x".to_owned()),
+        ));
+
+        assert!(state.question.is_none());
+        assert!(matches!(state.output.first(), Some(Output::Normal(text)) if text == "name: x"));
+    }
+
+    #[test]
+    fn commands_echo_to_the_output() {
+        let mut state = state();
+        drop(update(
+            &mut state,
+            Message::Interpreter(interpreter::Message::SendCmd("help".to_owned())),
+        ));
+
+        assert!(matches!(state.output.first(), Some(Output::Command(cmd)) if cmd == "help"));
+        assert!(state.answer.is_empty());
+    }
+
+    #[test]
+    fn selections_send_commands() {
+        let mut state = state();
+        drop(update(&mut state, Message::PiSelected("path".to_owned())));
+        drop(update(
+            &mut state,
+            Message::TiSelected("texture".to_owned()),
+        ));
+        drop(update(
+            &mut state,
+            Message::Figure(figure::Message::SelectTexture("texture".to_owned())),
+        ));
+        drop(update(
+            &mut state,
+            Message::Figure(figure::Message::SelectClone {
+                texture: "texture".to_owned(),
+                clone: "clone".to_owned(),
+            }),
+        ));
+    }
+
+    #[test]
+    fn interpreter_outputs_and_errors_show() {
+        let mut state = state();
+        state.answer = "typed".to_owned();
+
+        drop(update(
+            &mut state,
+            Message::Interpreter(interpreter::Message::Post("done".to_owned())),
+        ));
+        assert!(matches!(state.output.first(), Some(Output::Normal(text)) if text == "done"));
+        assert!(state.answer.is_empty());
+
+        drop(update(
+            &mut state,
+            Message::Interpreter(interpreter::Message::Error("err".to_owned())),
+        ));
+        drop(update(
+            &mut state,
+            Message::Interpreter(interpreter::Message::PythonError("py".to_owned())),
+        ));
+        assert!(state.output.len() == 3);
+    }
+
+    #[test]
+    fn interpreter_questions_show() {
+        let mut state = state();
+        drop(update(
+            &mut state,
+            Message::Interpreter(interpreter::Message::Ask("name".to_owned())),
+        ));
+
+        assert_eq!(state.question.as_deref(), Some("name"));
+    }
+
+    #[test]
+    fn loaded_files_become_players() {
+        let mut state = state();
+        drop(update(
+            &mut state,
+            Message::Interpreter(interpreter::Message::LoadMidi("m.mid".to_owned())),
+        ));
+        drop(update(
+            &mut state,
+            Message::Interpreter(interpreter::Message::LoadAudio("a.aiff".to_owned())),
+        ));
+
+        assert!(
+            matches!(state.output.first(), Some(Output::Player(t)) if matches!(t.id, PlayerId::Midi(0)))
+        );
+        assert!(
+            matches!(state.output.last(), Some(Output::Player(t)) if matches!(t.id, PlayerId::Audio(1)))
+        );
+    }
+
+    #[test]
+    fn figures_show_in_the_output() {
+        let mut state = state();
+        drop(update(
+            &mut state,
+            Message::Interpreter(interpreter::Message::Figure(Arc::new(ensemble()))),
+        ));
+
+        assert!(matches!(state.output.first(), Some(Output::Figure(_))));
+    }
+
+    #[test]
+    fn interpreter_updates_the_state() {
+        let mut state = state();
+        let messages = [
+            interpreter::Message::ScratchDir("/tmp".to_owned()),
+            interpreter::Message::PathLibUpdated(vec!["lib".to_owned()]),
+            interpreter::Message::TextureLibUpdated(vec!["lib".to_owned()]),
+            interpreter::Message::ActivePathSet("pi".to_owned()),
+            interpreter::Message::ActiveTextureSet("ti".to_owned()),
+            interpreter::Message::GetScratchDir,
+        ];
+        for message in messages {
+            drop(update(&mut state, Message::Interpreter(message)));
+        }
+
+        assert_eq!(state.scratch_dir, "/tmp");
+        assert_eq!(state.path_lib, ["lib".to_owned()]);
+        assert_eq!(state.texture_lib, ["lib".to_owned()]);
+        assert_eq!(state.active_path, "pi");
+        assert_eq!(state.active_texture, "ti");
+    }
+
+    #[test]
+    fn player_messages_reach_the_player() {
+        let mut state = state();
+        drop(update(
+            &mut state,
+            Message::Player(player::Message::SetTempo(96)),
+        ));
+
+        assert_eq!(state.player_state.tempo(), 96);
+    }
+
+    #[test]
+    fn every_output_kind_renders() {
+        let outputs = [
+            Output::Normal("normal".to_owned()),
+            Output::Command("command".to_owned()),
+            Output::Error("error".to_owned()),
+            Output::Player(PlayerState {
+                is_playing: false,
+                path: "no-such-file.aiff".into(),
+                id: PlayerId::Audio(0),
+                position: 0.5,
+            }),
+            Output::Figure(Arc::new(automaton())),
+        ];
+        for output in &outputs {
+            let _ = view_output(output, "texture");
+        }
+    }
+
+    #[test]
+    fn the_gui_renders_every_output() {
+        let mut state = state();
+        state.output = vec![
+            Output::Normal("normal".to_owned()),
+            Output::Command("command".to_owned()),
+            Output::Error("error".to_owned()),
+            Output::Player(PlayerState {
+                is_playing: false,
+                path: "no-such-file.aiff".into(),
+                id: PlayerId::Audio(0),
+                position: 0.5,
+            }),
+            Output::Figure(Arc::new(automaton())),
+            Output::Figure(Arc::new(ensemble())),
+            Output::Figure(Arc::new(parameters())),
+        ];
+        state.question = Some("question".to_owned());
+
+        let theme = iced::Theme::Light;
+        let mut simulator = iced_test::Simulator::with_size(
+            iced::Settings::default(),
+            Size::new(800.0, 4000.0),
+            view(&state),
+        );
+
+        // sweep the pointer down the output: every figure draws its hover overlay
+        for y in (0..3900).step_by(50) {
+            simulator.point_at(Point::new(400.0, y as f32));
+            let _ = simulator.snapshot(&theme).expect("the gui renders");
+        }
+    }
 }

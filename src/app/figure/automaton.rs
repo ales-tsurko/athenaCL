@@ -4,12 +4,15 @@
 
 use iced::{
     mouse,
-    widget::canvas::{self, Canvas, Frame},
-    Element, Length, Point, Rectangle, Renderer, Size, Theme,
+    widget::{
+        self,
+        canvas::{self, Canvas, Frame},
+    },
+    Element, Length, Point, Rectangle, Renderer, Size, Theme, Vector,
 };
 
 use super::{
-    color, fill, format_value, outline, status, to_index, Anchor, Gesture, Label, Message, Pointer,
+    action, color, fill, format_value, outline, to_index, Anchor, Gesture, Label, Message, Pointer,
     Window, LABEL_SCALE,
 };
 use crate::figure::{Automaton, Rgb};
@@ -38,10 +41,34 @@ pub(super) fn view(automaton: &Automaton, width: f32) -> Element<'_, Message> {
 struct Cells<'a>(&'a Automaton);
 
 /// The visible part of the generations, zoomed alike in both directions.
-#[derive(Debug, Clone, Copy, Default)]
+#[derive(Debug, Clone, Copy, Default, PartialEq)]
 struct View {
     cells: Window,
     generations: Window,
+}
+
+impl View {
+    /// Zoom around `at`, keeping cells square.
+    fn zoom(&mut self, at: Point, factor: f32, grid: Rectangle, min_span: f64) -> bool {
+        let across = f64::from(((at.x - grid.x) / grid.width).clamp(0.0, 1.0));
+        let down = f64::from(((at.y - grid.y) / grid.height).clamp(0.0, 1.0));
+        let (factor, min) = (f64::from(factor), min_span);
+
+        self.cells.zoom(across, factor, min) || self.generations.zoom(down, factor, min)
+    }
+
+    /// Pan by a distance in pixels.
+    fn pan(&mut self, delta: Vector, grid: Rectangle) -> bool {
+        let across = f64::from(-delta.x / grid.width);
+        let down = f64::from(-delta.y / grid.height);
+
+        self.cells.pan(across) || self.generations.pan(down)
+    }
+
+    /// Show everything again.
+    fn reset(&mut self) -> bool {
+        self.cells.reset() || self.generations.reset()
+    }
 }
 
 #[derive(Debug, Default)]
@@ -57,39 +84,24 @@ impl canvas::Program<Message> for Cells<'_> {
     fn update(
         &self,
         state: &mut State,
-        event: canvas::Event,
+        event: &canvas::Event,
         bounds: Rectangle,
         cursor: mouse::Cursor,
-    ) -> (canvas::event::Status, Option<Message>) {
-        let gesture = state.pointer.gesture(&event, bounds, cursor);
+    ) -> Option<widget::Action<Message>> {
+        let gesture = state.pointer.gesture(event, bounds, cursor);
         let layout = Layout::new(self.0, state.view, bounds.width);
-        let grid = layout.grid;
-        let view = &mut state.view;
         let changed = match gesture {
             Gesture::Zoom { at, factor } => {
-                let x = f64::from(((at.x - grid.x) / grid.width).clamp(0.0, 1.0));
-                let y = f64::from(((at.y - grid.y) / grid.height).clamp(0.0, 1.0));
-                let (factor, min) = (f64::from(factor), layout.min_span());
-                let across = view.cells.zoom(x, factor, min);
-                let down = view.generations.zoom(y, factor, min);
-                across || down
+                state.view.zoom(at, factor, layout.grid, layout.min_span())
             }
-            Gesture::Pan { delta, .. } => {
-                let across = view.cells.pan(f64::from(-delta.x / grid.width));
-                let down = view.generations.pan(f64::from(-delta.y / grid.height));
-                across || down
-            }
-            Gesture::Reset => {
-                let across = view.cells.reset();
-                let down = view.generations.reset();
-                across || down
-            }
+            Gesture::Pan { delta, .. } => state.view.pan(delta, layout.grid),
+            Gesture::Reset => state.view.reset(),
             Gesture::None | Gesture::Press | Gesture::Click(_) => false,
         };
         if changed {
             state.cache.clear();
         }
-        (status(gesture, changed), None)
+        action(gesture, changed, None)
     }
 
     fn draw(
@@ -301,6 +313,8 @@ impl<'a> Layout<'a> {
 mod tests {
     #![expect(clippy::float_cmp, reason = "the tests assert exact float values")]
 
+    use iced::keyboard;
+
     use super::*;
     use crate::figure::Palette;
 
@@ -340,6 +354,33 @@ mod tests {
         let automaton = automaton(20, 400);
         let layout = Layout::new(&automaton, View::default(), 680.0);
         assert!(layout.grid.height <= MAX_HEIGHT);
+    }
+
+    #[test]
+    fn zooming_and_resetting_reach_the_view() {
+        let automaton = automaton(10, 10);
+        let program = Cells(&automaton);
+        let bounds = Rectangle::new(Point::ORIGIN, Size::new(680.0, 300.0));
+        let at = mouse::Cursor::Available(Point::new(300.0, 100.0));
+        let command = canvas::Event::Keyboard(keyboard::Event::ModifiersChanged(
+            keyboard::Modifiers::COMMAND,
+        ));
+        let zoom = canvas::Event::Mouse(mouse::Event::WheelScrolled {
+            delta: mouse::ScrollDelta::Pixels { x: 0.0, y: 60.0 },
+        });
+
+        let mut state = State::default();
+        canvas::Program::update(&program, &mut state, &command, bounds, at);
+        let action = canvas::Program::update(&program, &mut state, &zoom, bounds, at);
+        assert!(action.is_some(), "zooming acts");
+        assert!(state.view.cells.span() < 1.0);
+
+        // a double click shows everything again
+        let press = canvas::Event::Mouse(mouse::Event::ButtonPressed(mouse::Button::Left));
+        canvas::Program::update(&program, &mut state, &press, bounds, at);
+        let action = canvas::Program::update(&program, &mut state, &press, bounds, at);
+        assert!(action.is_some(), "resetting acts");
+        assert_eq!(state.view, View::default());
     }
 
     #[test]
