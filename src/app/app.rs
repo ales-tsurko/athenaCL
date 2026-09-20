@@ -15,13 +15,14 @@ use iced::{
 };
 use rfd::FileDialog;
 
-use super::{
-    figure::{self, Palette},
-    pixel,
-    player::{self, GlobalState as GlobalPlayerState, Track as PlayerState},
-    theme::{Colors, Mode},
-};
 use crate::{
+    app::{
+        figure::{self, Palette},
+        icons::Icon,
+        pixel,
+        player::{self, GlobalState as GlobalPlayerState, Track as PlayerState},
+        theme::{Colors, Mode},
+    },
     figure::{notation::Score, Domain, Event, Figure},
     interpreter,
 };
@@ -35,6 +36,8 @@ const WINDOW_PADDING: f32 = 40.0;
 const HEADER_HEIGHT: f32 = 56.0;
 const BOTTOM_BAR_HEIGHT: f32 = 76.0;
 const FRAME_HEIGHT: f32 = 36.0;
+/// Space between items in the header and bottom bar.
+const BAR_SPACING: f32 = 12.0;
 /// The scrollbar: a hairline track and a thin thumb, easy to grab.
 const SCROLLBAR: f32 = 1.0;
 const SCROLLER: f32 = 3.0;
@@ -453,12 +456,13 @@ pub fn view(state: &State) -> Element<'_, Message> {
 
 /// The wordmark, the scratch folder and the look.
 fn view_header(state: &State, colors: Colors) -> Element<'_, Message> {
-    let folder = icon_button('\u{f114}', 16.0, colors.outlined())
+    let folder = Icon::Folder
+        .button(colors.outlined())
         .width(FRAME_HEIGHT)
         .height(FRAME_HEIGHT)
         .on_press(Message::SetScratchDir);
-    let segment = |glyph: char, mode: Mode| {
-        icon_button(glyph, 14.0, colors.segment(state.mode == mode))
+    let segment = |icon: Icon, mode: Mode| {
+        icon.button(colors.segment(state.mode == mode))
             .width(32)
             .height(Length::Fill)
             .on_press(Message::SetMode(mode))
@@ -466,9 +470,9 @@ fn view_header(state: &State, colors: Colors) -> Element<'_, Message> {
     let modes = framed(
         colors,
         row![
-            segment('\u{f10c}', Mode::Light),
+            segment(Icon::CircleOutline, Mode::Light),
             rule_across(colors.ink),
-            segment('\u{f111}', Mode::Dark),
+            segment(Icon::CircleFilled, Mode::Dark),
         ],
     );
 
@@ -685,6 +689,11 @@ fn view_input(state: &State, colors: Colors) -> Column<'_, Message> {
 
 /// The active path and texture, and the tempo.
 fn view_bottom_bar(state: &State, colors: Colors) -> Element<'_, Message> {
+    // The icon's final transparent column completes the same visible gap as label-to-input.
+    let tempo_label = row![Icon::Metronome, pixel::label("TEMPO", colors.dim)]
+        .spacing(BAR_SPACING - 1.0)
+        .align_y(Vertical::Center);
+
     // the tempo is typed, or stepped up and down
     let tempo = framed(
         colors,
@@ -697,9 +706,9 @@ fn view_bottom_bar(state: &State, colors: Colors) -> Element<'_, Message> {
                 .size(14),
             rule_across(colors.ink),
             column![
-                stepper(colors, '\u{f077}', 1),
+                stepper(colors, Icon::ChevronUp, 1),
                 rule(colors.ink, 1.0),
-                stepper(colors, '\u{f078}', -1),
+                stepper(colors, Icon::ChevronDown, -1),
             ]
             .width(STEPPER_WIDTH),
         ],
@@ -723,8 +732,7 @@ fn view_bottom_bar(state: &State, colors: Colors) -> Element<'_, Message> {
                 Message::TiSelected
             ),
             space::horizontal(),
-            icon('\u{f07da}', 16.0),
-            pixel::label("TEMPO", colors.dim),
+            tempo_label,
             tempo,
         ],
     )
@@ -752,36 +760,16 @@ fn picker<'a>(
 }
 
 /// One of the tempo's steppers, stacked half each in the tempo's frame.
-fn stepper<'a>(colors: Colors, glyph: char, step: i32) -> Button<'a, Message> {
-    icon_button(glyph, 8.0, colors.bare())
+fn stepper<'a>(colors: Colors, icon: Icon, step: i32) -> Button<'a, Message> {
+    icon.button(colors.bare())
         .width(STEPPER_WIDTH)
         .height(Length::Fill)
         .on_press(Message::TempoStep(step))
 }
 
-/// An icon from the Nerd Font.
-fn icon<'a>(glyph: char, size: f32) -> Element<'a, Message> {
-    text(glyph).font(iced_fonts::NERD_FONT).size(size).into()
-}
-
-/// Something centered in all the room it's given, as an icon in its button.
-fn centered<'a>(content: Element<'a, Message>) -> Element<'a, Message> {
-    container(content).center(Length::Fill).into()
-}
-
-/// A square button showing one icon: the folder, the look's segments, the tempo's steppers. The
-/// caller gives it its size and what it sends.
-fn icon_button<'a>(
-    glyph: char,
-    size: f32,
-    style: impl Fn(&Theme, button::Status) -> button::Style + 'a,
-) -> Button<'a, Message> {
-    button(centered(icon(glyph, size))).padding(0).style(style)
-}
-
 /// A bar across the page, `height` high: the header, and the bottom bar.
 fn bar<'a>(height: f32, content: Row<'a, Message>) -> Element<'a, Message> {
-    container(content.spacing(12).align_y(Vertical::Center))
+    container(content.spacing(BAR_SPACING).align_y(Vertical::Center))
         .padding([0.0, WINDOW_PADDING])
         .height(height)
         .align_y(Vertical::Center)
@@ -1267,6 +1255,15 @@ mod tests {
         figure(&mut state, parameters());
         figure(&mut state, parameters());
         drop(update(&mut state, Message::FigureView(7, View::Score)));
+        // An existing path reaches the controls; the missing file above tests the error label.
+        for is_playing in [false, true] {
+            state.output.push(Output::Player(PlayerState {
+                is_playing,
+                path: file!().into(),
+                id: PlayerId::Audio(1),
+                position: 0.5,
+            }));
+        }
         state.question = Some("question".to_owned());
         state.mode = mode;
 

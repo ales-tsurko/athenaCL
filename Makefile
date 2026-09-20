@@ -12,7 +12,7 @@ check:
 	cargo check --all-features --all-targets
 
 run:
-	cargo run --release
+	cargo run
 
 test:
 	cargo nextest run --all-features --all-targets

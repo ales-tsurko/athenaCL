@@ -10,9 +10,9 @@ use iced::{
     alignment::Vertical,
     mouse, time,
     widget::{
-        self, button,
+        self,
         canvas::{self, Canvas},
-        container, row, text,
+        row, text,
     },
     Color, Element, Length, Point, Rectangle, Renderer, Size, Task, Theme,
 };
@@ -22,7 +22,7 @@ use rodio::{
     Player as AudioPlayer,
 };
 
-use super::{app, pixel, theme::Colors};
+use crate::app::{app, icons::Icon, pixel, theme::Colors};
 
 /// Segments of the progress bar, and the gap between them.
 const SEGMENTS: usize = 40;
@@ -433,18 +433,16 @@ pub(crate) fn view(track: &Track, colors: Colors) -> Element<'_, Message> {
         .color(colors.dim)
         .into();
     }
-    let (glyph, message) = if track.is_playing {
-        ('\u{f04c}', Message::Pause(track.id))
+    let (icon, message) = if track.is_playing {
+        (Icon::Pause, Message::Pause(track.id))
     } else {
-        ('\u{f04b}', Message::Play(track.id))
+        (Icon::Play, Message::Play(track.id))
     };
-    let play =
-        button(container(text(glyph).font(iced_fonts::NERD_FONT).size(14)).center(Length::Fill))
-            .width(36)
-            .height(36)
-            .padding(0)
-            .style(colors.block_button())
-            .on_press(message);
+    let play = icon
+        .button(colors.block_button())
+        .width(36)
+        .height(36)
+        .on_press(message);
     let progress = Canvas::new(Progress {
         id: track.id,
         position: track.position,

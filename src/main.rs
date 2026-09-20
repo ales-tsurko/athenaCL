@@ -29,6 +29,5 @@ fn main() -> iced::Result {
         .font(include_bytes!(
             "../resources/fonts/Fira_Mono/FiraMono-Regular.ttf"
         ))
-        .font(iced_fonts::NERD_FONT_BYTES)
         .run()
 }

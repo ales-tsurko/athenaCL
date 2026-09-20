@@ -2,9 +2,9 @@
 """Render athenaCL's `:: athcl` icon on an exact bitmap grid.
 
 Python 3 standard library only. No font installation or image library needed.
-Run: python3 render_icon.py
-Optional: python3 render_icon.py --size 1024 --output /path/to/output
-Previous version: python3 render_icon.py --text ':: ath'
+Run from any directory: python3 scripts/generate_app_icon.py
+Optional: python3 scripts/generate_app_icon.py --size 1024 --output /path/to/output
+Previous version: python3 scripts/generate_app_icon.py --text ':: ath'
 
 The a/t/h bitmaps are copied without alteration from WORDMARK in
 athenaCL/src/app/pixel.rs. The colon uses MACRO's square dots from
@@ -170,7 +170,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--size", type=int, default=1024)
     parser.add_argument("--text", default=":: athcl")
-    parser.add_argument("--output", type=Path, default=Path(__file__).resolve().parent)
+    parser.add_argument("--output", type=Path, default=Path(__file__).resolve().parents[1] / "resources")
     args = parser.parse_args()
     if args.size < 64:
         parser.error("--size must be at least 64")

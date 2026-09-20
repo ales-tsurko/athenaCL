@@ -8,6 +8,7 @@ pub use app::*;
 )]
 mod app;
 mod figure;
+mod icons;
 mod pixel;
 mod player;
 pub(crate) mod theme;

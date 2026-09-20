@@ -13,8 +13,13 @@ resources = ["resources/SGM-v2.01-YamahaGrand-Guit-Bass-v2.7.sf2"]
 ahash = "0.8.12"
 async-channel = "2.5.0"
 cpal = "0.17.3"
-iced = { version = "0.14.0", features = ["canvas", "tokio", "wgpu"] }
-iced_fonts = { version = "0.3.0", features = ["nerd"] }
+iced = { version = "0.14.0", features = [
+    "advanced",
+    "canvas",
+    "image-without-codecs",
+    "tokio",
+    "wgpu",
+] }
 midi-player = "0.2.3"
 quick-xml = "0.42.0"
 rfd = "0.17.2"
