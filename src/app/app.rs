@@ -979,7 +979,7 @@ impl From<player::Message> for Message {
     }
 }
 
-/// The iced subscription: forwards interpreter messages and, while playing, player ticks.
+/// Interpreter messages, audio output changes, keyboard input and active playback ticks.
 pub fn subscription(state: &State) -> Subscription<Message> {
     let keys = keyboard::listen().map(|event| match event {
         keyboard::Event::KeyPressed { key, .. } => Message::Key(key),
@@ -1015,7 +1015,12 @@ pub fn subscription(state: &State) -> Subscription<Message> {
         Subscription::none()
     };
 
-    Subscription::batch([interpreter_listener, position_listener, keys])
+    Subscription::batch([
+        interpreter_listener,
+        position_listener,
+        player::subscription(&state.player_state).map(Message::Player),
+        keys,
+    ])
 }
 
 #[cfg(test)]

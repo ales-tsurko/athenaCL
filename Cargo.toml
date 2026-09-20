@@ -12,7 +12,7 @@ resources = ["resources/SGM-v2.01-YamahaGrand-Guit-Bass-v2.7.sf2"]
 [dependencies]
 ahash = "0.8.12"
 async-channel = "2.5.0"
-cpal = "0.17.3"
+cpal = "0.18.2"
 iced = { version = "0.14.0", features = [
     "advanced",
     "canvas",
@@ -23,7 +23,7 @@ iced = { version = "0.14.0", features = [
 midi-player = "0.2.3"
 quick-xml = "0.42.0"
 rfd = "0.17.2"
-rodio = { version = "0.22.2", features = [
+rodio = { version = "0.22.2", default-features = false, features = [
     "symphonia-all",
     "symphonia-aiff",
     "symphonia-alac",
@@ -36,6 +36,10 @@ rustpython-stdlib = "0.5.0"
 rustpython-vm = { version = "0.5.0", features = ["freeze-stdlib"] }
 symphonia = { version = "0.5", default-features = false, features = ["wav", "aiff"] }
 thiserror = "2.0.20"
+
+[target.'cfg(target_os = "linux")'.dependencies]
+# Native sound-server routing and change notifications; ALSA remains the fallback.
+cpal = { version = "0.18.2", features = ["pipewire", "pulseaudio"] }
 
 [dev-dependencies]
 iced_test = "0.14.0"
