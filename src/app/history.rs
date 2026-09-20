@@ -16,12 +16,33 @@ const CAPACITY: usize = 1_000;
 /// moving past the newest entry restores the draft saved on the first move backwards.
 pub(super) struct History {
     entries: FileHistory,
+    /// Only unsaved commands; a failed write keeps these for the next submission.
+    pending: FileHistory,
+    config: Config,
     path: Option<PathBuf>,
     position: Option<usize>,
     draft: String,
 }
 
 impl History {
+    fn with_capacity(capacity: usize) -> Self {
+        let config = Config::builder()
+            .max_history_size(capacity)
+            .expect("the history capacity is valid")
+            .history_ignore_dups(true)
+            .expect("FileHistory supports ignoring consecutive duplicates")
+            .history_ignore_space(false)
+            .build();
+        Self {
+            entries: FileHistory::with_config(&config),
+            pending: FileHistory::with_config(&config),
+            config,
+            path: None,
+            position: None,
+            draft: String::new(),
+        }
+    }
+
     /// Load the history beside athenaCL's preferences, respecting the test directory override.
     pub fn load_default(&mut self) -> rustyline::Result<()> {
         let directory = env::var_os("ATHENACL_PREFS_DIR")
@@ -34,7 +55,7 @@ impl History {
     /// Start with an empty history when the file is missing. A failed load leaves this instance in
     /// memory only, so subsequent commands cannot overwrite a file we could not read.
     fn load(&mut self, path: PathBuf) -> rustyline::Result<()> {
-        let mut loaded = Self::default();
+        let mut loaded = Self::with_capacity(self.config.max_history_size());
         match loaded.entries.load(&path) {
             Ok(()) => (),
             Err(ReadlineError::Io(error)) if error.kind() == io::ErrorKind::NotFound => (),
@@ -52,12 +73,19 @@ impl History {
         if command.trim().is_empty() {
             return Ok(());
         }
-        let _ = self.entries.add(command)?;
+        let added = self.entries.add(command)?;
         if let Some(path) = &self.path {
+            if added {
+                let _ = self.pending.add(command)?;
+            }
             if let Some(parent) = path.parent() {
                 std::fs::create_dir_all(parent)?;
             }
-            self.entries.append(path)?;
+            // A fresh writer avoids rustyline's timestamp-only append shortcut. Windows can
+            // report an unchanged mtime after another session writes, so always merge and trim
+            // under the file lock. Keep pending commands if any file operation fails.
+            self.pending.append(path)?;
+            self.pending = FileHistory::with_config(&self.config);
         }
         Ok(())
     }
@@ -107,19 +135,7 @@ impl History {
 
 impl Default for History {
     fn default() -> Self {
-        let config = Config::builder()
-            .max_history_size(CAPACITY)
-            .expect("the fixed history capacity is valid")
-            .history_ignore_dups(true)
-            .expect("FileHistory supports ignoring consecutive duplicates")
-            .history_ignore_space(false)
-            .build();
-        Self {
-            entries: FileHistory::with_config(&config),
-            path: None,
-            position: None,
-            draft: String::new(),
-        }
+        Self::with_capacity(CAPACITY)
     }
 }
 
@@ -262,25 +278,65 @@ mod tests {
 
     #[test]
     fn persistent_history_merges_sessions_and_trims_the_file() {
-        let directory = tempfile::tempdir().expect("scratch history directory");
-        let path = directory.path().join("nested/history");
-        let mut first = History::default();
-        first
-            .load(path.clone())
-            .expect("a missing file starts empty");
-        first.entries.set_max_len(3).expect("small test limit");
-        first.record("help").expect("create history");
-        let mut second = History::default();
-        second.load(path.clone()).expect("load another session");
-        second.entries.set_max_len(3).expect("small test limit");
+        for unchanged_timestamp in [false, true] {
+            let directory = tempfile::tempdir().expect("scratch history directory");
+            let path = directory.path().join("nested/history");
+            let mut first = History::with_capacity(3);
+            first
+                .load(path.clone())
+                .expect("a missing file starts empty");
+            first.record("help").expect("create history");
+            let mut second = History::with_capacity(3);
+            second.load(path.clone()).expect("load another session");
 
-        first.record("pin 音 0").expect("append first session");
-        second
-            .record(r"apdir x C:\Music\scores")
-            .expect("merge second session");
-        first
-            .record("tin a 0")
-            .expect("merge and trim first session");
+            first.record("pin 音 0").expect("append first session");
+            let modified = std::fs::metadata(&path)
+                .expect("history metadata")
+                .modified()
+                .expect("history timestamp");
+            second
+                .record(r"apdir x C:\Music\scores")
+                .expect("merge second session");
+            if unchanged_timestamp {
+                // Reproduce a filesystem reporting the same timestamp for another session's write.
+                // The first session must still discover that the file has reached its entry limit.
+                std::fs::OpenOptions::new()
+                    .write(true)
+                    .open(&path)
+                    .expect("open history")
+                    .set_modified(modified)
+                    .expect("restore history timestamp");
+            }
+            first
+                .record("tin a 0")
+                .expect("merge and trim first session");
+            let mut reopened = History::default();
+            reopened.load(path).expect("reopen history");
+            assert_eq!(
+                reopened
+                    .entries
+                    .iter()
+                    .map(String::as_str)
+                    .collect::<Vec<_>>(),
+                ["pin 音 0", r"apdir x C:\Music\scores", "tin a 0"],
+                "unchanged timestamp: {unchanged_timestamp}",
+            );
+        }
+    }
+
+    #[test]
+    fn failed_writes_retry_all_pending_commands_including_on_a_duplicate_submission() {
+        let directory = tempfile::tempdir().expect("scratch history directory");
+        let path = directory.path().join("history");
+        let mut history = History::default();
+        history.load(path.clone()).expect("missing file");
+        std::fs::create_dir(&path).expect("block history writes");
+        assert!(history.record("help").is_err());
+        assert!(history.record("pin 音 0").is_err());
+        std::fs::remove_dir(&path).expect("unblock history writes");
+        history.record("pin 音 0").expect("retry pending entries");
+        history.record("tin a 0").expect("append once after retry");
+
         let mut reopened = History::default();
         reopened.load(path).expect("reopen history");
         assert_eq!(
@@ -289,7 +345,7 @@ mod tests {
                 .iter()
                 .map(String::as_str)
                 .collect::<Vec<_>>(),
-            ["pin 音 0", r"apdir x C:\Music\scores", "tin a 0"]
+            ["help", "pin 音 0", "tin a 0"],
         );
     }
 
