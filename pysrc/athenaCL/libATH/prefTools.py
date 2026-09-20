@@ -46,11 +46,11 @@ def getCategoryDefaultDict(platform, category):
     >>> a['audioFormat']
     'wav'
     >>> a = getCategoryDefaultDict('win', 'athena')
-    >>> a['dlgVisualMethod']
-    'text'
+    >>> a['eventMode']
+    'midi'
     >>> a = getCategoryDefaultDict('posix', 'athena')
-    >>> a['dlgVisualMethod']
-    'text'
+    >>> a['eventMode']
+    'midi'
     """
     # common to all, some may be chagned in patform specific below
     if category == "external":
@@ -106,15 +106,9 @@ def getCategoryDefaultDict(platform, category):
                 catDict["textReaderPath"] = "more"  # will use system default
                 catDict["imageViewerPath"] = "imagemagick"
                 catDict["psViewerPath"] = "gs"
-        # common for all posix
-        if category == "athena":
-            catDict["dlgVisualMethod"] = "text"
-
     else:  # win or other
         if category == "external":
             catDict["audioFormat"] = "wav"
-        if category == "athena":
-            catDict["dlgVisualMethod"] = "text"  # works w/n idle, console on win
 
     return catDict
 

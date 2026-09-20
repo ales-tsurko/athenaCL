@@ -7184,7 +7184,6 @@ class AOw(_CommandAO):
             if self.path == None:
                 return self._getUsage()
         if self.path == None:
-            dlgVisMet = self.ao.external.getPref("athena", "dlgVisualMethod")
             prompt = lang.msgAOnameFile
             while 1:  ## to make sure you a get a .xml ending
                 self.path, ok = dialogExt.promptSaveFile(
@@ -8186,8 +8185,6 @@ class AUsys(Command):
         entryLines.append(["midi tempo:", self.ao.midiTempo])
 
         entryLines.append(["", ""])  # draw line
-        value = self.ao.external.getPref("athena", "dlgVisualMethod")
-        entryLines.append(["dialog method:", value])
         value = self.ao.external.getPref("athena", "refreshMode", 1)
         entryLines.append(["refresh mode:", typeset.boolAsStr(value)])
 
