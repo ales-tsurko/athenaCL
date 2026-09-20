@@ -22,6 +22,7 @@ pub(super) mod _inner {
     use rustpython_vm::{convert::ToPyObject, PyResult};
 
     use super::*;
+    use crate::interpreter::Question;
 
     #[pyfunction(name = "promptChooseDir")]
     pub(crate) fn prompt_choose_dir(
@@ -135,19 +136,58 @@ pub(super) mod _inner {
 
     #[pyfunction(name = "askInput")]
     pub(crate) fn ask_input(prompt: String, vm: &VirtualMachine) -> PyResult {
+        let answer = ask(prompt, Question::Text, vm)?;
+        Ok(vm.ctx.new_str(answer).into())
+    }
+
+    /// Ask for a yes or a no, and return 1 or 0.
+    #[pyfunction(name = "askYesNo")]
+    pub(crate) fn ask_yes_no(prompt: String, default: bool, vm: &VirtualMachine) -> PyResult {
+        let answer = ask(prompt, Question::YesNo { default }, vm)?;
+        Ok(vm.ctx.new_int(i32::from(yes(&answer, default))).into())
+    }
+
+    /// Ask for a yes, a no or a cancel, and return 1, 0 or -1.
+    #[pyfunction(name = "askYesNoCancel")]
+    pub(crate) fn ask_yes_no_cancel(
+        prompt: String,
+        default: bool,
+        vm: &VirtualMachine,
+    ) -> PyResult {
+        let answer = ask(prompt, Question::YesNoCancel { default }, vm)?;
+        let status = if is_cancel(&answer) {
+            -1
+        } else {
+            i32::from(yes(&answer, default))
+        };
+        Ok(vm.ctx.new_int(status).into())
+    }
+
+    /// Put `question` to the user and wait for the answer.
+    fn ask(prompt: String, question: Question, vm: &VirtualMachine) -> PyResult<String> {
         interpreter::INTERPRETER_WORKER
             .gui_sender
-            .send_blocking(interpreter::Message::Ask(prompt))
+            .send_blocking(interpreter::Message::Ask { prompt, question })
             .map_err(|_err| vm.new_runtime_error("cannot send message to the GUI".to_owned()))?;
 
-        if let Ok(msg) = interpreter::INTERPRETER_WORKER
+        Ok(interpreter::INTERPRETER_WORKER
             .response_receiver
             .recv_blocking()
-        {
-            return Ok(vm.ctx.new_str(msg).into());
-        }
+            .unwrap_or_default())
+    }
 
-        Ok(vm.ctx.new_str("").into())
+    /// Whether an answer means yes: an empty one is the default, as is anything unrecognized,
+    /// since the gui only ever sends one of the answers the question offered.
+    fn yes(answer: &str, default: bool) -> bool {
+        match answer.trim().to_lowercase().as_str() {
+            "y" | "yes" | "1" | "on" | "true" => true,
+            "n" | "no" | "0" | "off" | "false" => false,
+            _ => default,
+        }
+    }
+
+    fn is_cancel(answer: &str) -> bool {
+        matches!(answer.trim().to_lowercase().as_str(), "cancel" | "c" | "-1")
     }
 
     #[pyfunction(name = "playMidi")]

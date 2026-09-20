@@ -100,7 +100,10 @@ pub enum Message {
     /// Output from the interpreter (stdout).
     Post(String),
     /// Request input from the user (stdin).
-    Ask(String),
+    Ask {
+        prompt: String,
+        question: Question,
+    },
     /// Send command to the interpreter.
     SendCmd(String),
     /// Error from the interpreter (stderr).
@@ -132,6 +135,28 @@ pub enum Message {
     // Not system file path, but athenaCL pitch path
     ActivePathSet(String),
     ActiveTextureSet(String),
+}
+
+/// What kind of answer a question wants, so that the gui can offer it.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Question {
+    /// Anything typed.
+    Text,
+    /// Yes or no, and which of them the user gets by answering nothing.
+    YesNo { default: bool },
+    /// Yes, no or cancel, and which of the first two answering nothing gives.
+    YesNoCancel { default: bool },
+}
+
+impl Question {
+    /// The answers it offers, in the order they are shown; none, when it takes any text.
+    pub fn answers(self) -> &'static [&'static str] {
+        match self {
+            Self::Text => &[],
+            Self::YesNo { .. } => &["YES", "NO"],
+            Self::YesNoCancel { .. } => &["YES", "NO", "CANCEL"],
+        }
+    }
 }
 
 impl From<Error> for Message {

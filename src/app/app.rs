@@ -5,7 +5,7 @@ use iced::{
     alignment::Vertical,
     font,
     futures::sink::SinkExt,
-    never, stream, time,
+    keyboard, never, stream, time,
     widget::{
         button, column, container, operation, pick_list, rich_text, row,
         scrollable::{self, Direction, Scrollbar},
@@ -24,7 +24,7 @@ use crate::{
         theme::{Colors, Mode},
     },
     figure::{notation::Score, Domain, Event, Figure},
-    interpreter,
+    interpreter::{self, Question},
 };
 
 /// The page's width: the window resizes, the page doesn't.
@@ -61,6 +61,8 @@ const PATH_CHARACTERS: usize = 48;
 const TEMPO: std::ops::RangeInclusive<u16> = 20..=600;
 const TEMPO_WIDTH: f32 = 52.0;
 const STEPPER_WIDTH: f32 = 24.0;
+/// Room either side of an answer's word in its button.
+const ANSWER_PADDING: u16 = 10;
 
 /// System application ID.
 pub const APPLICATION_ID: &str = "by.alestsurko.athenacl";
@@ -71,7 +73,7 @@ pub(super) const SOUND_FONT: &str = "resources/SGM-v2.01-YamahaGrand-Guit-Bass-v
 pub struct State {
     answer: String,
     output: Vec<Output>,
-    question: Option<String>,
+    question: Option<Query>,
     player_state: GlobalPlayerState,
     scratch_dir: String,
     input_id: String,
@@ -151,6 +153,49 @@ pub(crate) struct Prompt {
     texture: String,
 }
 
+/// A question from the interpreter, waiting to be answered.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) struct Query {
+    prompt: String,
+    question: Question,
+    /// Which of the answers is picked: the arrows move it, return takes it.
+    picked: usize,
+}
+
+impl Query {
+    /// A question as it arrives, with its default answer picked.
+    fn new(prompt: String, question: Question) -> Self {
+        let picked = match question {
+            Question::Text => 0,
+            Question::YesNo { default } | Question::YesNoCancel { default } => {
+                usize::from(!default)
+            }
+        };
+        Self {
+            prompt,
+            question,
+            picked,
+        }
+    }
+
+    /// Move the pick by `step` answers, stopping at either end.
+    fn move_pick(&mut self, step: i32) {
+        let last = self.question.answers().len().saturating_sub(1);
+        self.picked = if step < 0 {
+            self.picked.saturating_sub(step.unsigned_abs() as usize)
+        } else {
+            self.picked
+                .saturating_add(step.unsigned_abs() as usize)
+                .min(last)
+        };
+    }
+
+    /// The answer that is picked.
+    fn picked(&self) -> Option<&'static str> {
+        self.question.answers().get(self.picked).copied()
+    }
+}
+
 /// A figure in the output, and how it's shown.
 #[derive(Debug)]
 pub(crate) struct FigureOutput {
@@ -176,7 +221,8 @@ pub fn update(state: &mut State, message: Message) -> Task<Message> {
     match message {
         Message::InputChanged(val) => state.answer = val,
         Message::Submit => return submit(state),
-        Message::Answer(question, value) => return answer(state, &question, value),
+        Message::Answer(value) => return answer_current(state, value),
+        Message::Key(key) => return press_key(state, &key),
         Message::SetScratchDir => set_scratch_dir(),
         Message::PiSelected(value) => send_command(format!("pio {value}")),
         Message::TiSelected(value) => send_command(format!("tio {value}")),
@@ -200,9 +246,38 @@ pub fn update(state: &mut State, message: Message) -> Task<Message> {
 fn submit(state: &mut State) -> Task<Message> {
     let typed = state.answer.clone();
     match state.question.clone() {
-        Some(question) => answer(state, &question, typed),
+        Some(query) => answer(state, &query.prompt, typed),
         None => update_interpreter(state, interpreter::Message::SendCmd(typed)),
     }
+}
+
+/// Move or take the picked answer, when a question offers a set of them.
+fn press_key(state: &mut State, key: &keyboard::Key) -> Task<Message> {
+    let Some(query) = state.question.as_mut() else {
+        return Task::none();
+    };
+    if query.question.answers().is_empty() {
+        return Task::none();
+    }
+    match key {
+        keyboard::Key::Named(keyboard::key::Named::ArrowLeft) => query.move_pick(-1),
+        keyboard::Key::Named(keyboard::key::Named::ArrowRight) => query.move_pick(1),
+        keyboard::Key::Named(keyboard::key::Named::Enter) => {
+            if let Some(answer) = query.picked() {
+                return answer_current(state, answer.to_owned());
+            }
+        }
+        _ => (),
+    }
+    Task::none()
+}
+
+/// Reply to the question on screen.
+fn answer_current(state: &mut State, value: String) -> Task<Message> {
+    let Some(query) = state.question.clone() else {
+        return Task::none();
+    };
+    answer(state, &query.prompt, value)
 }
 
 /// Reply to the interpreter's question.
@@ -304,9 +379,9 @@ fn update_interpreter(state: &mut State, message: interpreter::Message) -> Task<
         interpreter::Message::Error(output) | interpreter::Message::PythonError(output) => {
             push_output(state, Output::Error(output))
         }
-        interpreter::Message::Ask(prompt) => {
+        interpreter::Message::Ask { prompt, question } => {
             state.answer = "".to_owned();
-            state.question = Some(prompt);
+            state.question = Some(Query::new(prompt, question));
 
             operation::focus(state.input_id.clone())
         }
@@ -661,6 +736,19 @@ fn view_query<'a>(question: &'a str, colors: Colors) -> Element<'a, Message> {
 /// The line being typed, at the end of the output: an answer to the question, or a command at the
 /// prompt.
 fn view_input(state: &State, colors: Colors) -> Column<'_, Message> {
+    // a question that offers answers is answered from them alone, so there is nothing to type
+    if let Some(query) = &state.question {
+        if !query.question.answers().is_empty() {
+            let line = row![
+                pixel::label("ANSWER", colors.dim),
+                view_answers(query, colors)
+            ]
+            .spacing(10)
+            .align_y(Vertical::Center);
+            return column![view_query(&query.prompt, colors), line].spacing(8);
+        }
+    }
+
     let (label, placeholder) = match &state.question {
         Some(_) => (pixel::label("ANSWER", colors.dim), "type answer"),
         None => (
@@ -682,8 +770,38 @@ fn view_input(state: &State, colors: Colors) -> Column<'_, Message> {
     .align_y(Vertical::Center);
 
     match &state.question {
-        Some(question) => column![view_query(question, colors), line].spacing(8),
+        Some(query) => column![view_query(&query.prompt, colors), line].spacing(8),
         None => column![line],
+    }
+}
+
+/// The answers a question offers, as a switch like the look's: the picked one is filled, the
+/// arrows move it and return takes it.
+fn view_answers<'a>(query: &Query, colors: Colors) -> Element<'a, Message> {
+    let answers = query.question.answers();
+    let mut switch = row![];
+    for (index, &word) in answers.iter().enumerate() {
+        if index > 0 {
+            switch = switch.push(rule_across(colors.ink));
+        }
+        let picked = index == query.picked;
+        switch = switch.push(
+            button(container(pixel::label(word, answer_ink(picked, colors))).center(Length::Fill))
+                .height(Length::Fill)
+                .padding([0, ANSWER_PADDING])
+                .style(colors.segment(picked))
+                .on_press(Message::Answer(word.to_owned())),
+        );
+    }
+    framed(colors, switch)
+}
+
+/// A pixel label draws in one color, so the chosen answer's has to be the filled one's.
+fn answer_ink(chosen: bool, colors: Colors) -> Color {
+    if chosen {
+        colors.paper
+    } else {
+        colors.ink
     }
 }
 
@@ -833,7 +951,9 @@ pub enum Message {
     InputChanged(String),
     /// Send what's typed.
     Submit,
-    Answer(String, String),
+    Answer(String),
+    /// A key no widget took: the answers' switch moves on the arrows and takes return.
+    Key(keyboard::Key),
     SetScratchDir,
     PiSelected(String),
     TiSelected(String),
@@ -861,6 +981,10 @@ impl From<player::Message> for Message {
 
 /// The iced subscription: forwards interpreter messages and, while playing, player ticks.
 pub fn subscription(state: &State) -> Subscription<Message> {
+    let keys = keyboard::listen().map(|event| match event {
+        keyboard::Event::KeyPressed { key, .. } => Message::Key(key),
+        _ => Message::Key(keyboard::Key::Unidentified),
+    });
     // this worker runs async loop to make the worker, which runs on a System's thread communicate
     // with our app, whithout blocking the event loop of iced
 
@@ -891,7 +1015,7 @@ pub fn subscription(state: &State) -> Subscription<Message> {
         Subscription::none()
     };
 
-    Subscription::batch([interpreter_listener, position_listener])
+    Subscription::batch([interpreter_listener, position_listener, keys])
 }
 
 #[cfg(test)]
@@ -920,6 +1044,10 @@ mod tests {
             figure_view: View::Plot,
             tempo: "120".to_owned(),
         }
+    }
+
+    fn text_query(prompt: &str) -> Query {
+        Query::new(prompt.to_owned(), Question::Text)
     }
 
     fn automaton() -> Figure {
@@ -1021,7 +1149,7 @@ mod tests {
             Some(Output::Command { command, .. }) if command == "tin a 0"
         ));
 
-        state.question = Some("name: ".to_owned());
+        state.question = Some(text_query("name: "));
         drop(update(&mut state, Message::InputChanged("x".to_owned())));
         drop(update(&mut state, Message::Submit));
         assert!(state.question.is_none());
@@ -1029,13 +1157,82 @@ mod tests {
     }
 
     #[test]
+    fn a_yes_no_question_starts_on_its_default() {
+        for default in [true, false] {
+            let query = Query::new("save? ".to_owned(), Question::YesNo { default });
+            assert_eq!(query.picked(), Some(if default { "YES" } else { "NO" }));
+        }
+    }
+
+    #[test]
+    fn the_arrows_move_the_pick_and_stop_at_the_ends() {
+        let mut query = Query::new("save? ".to_owned(), Question::YesNoCancel { default: true });
+        assert_eq!(query.picked(), Some("YES"));
+
+        query.move_pick(1);
+        assert_eq!(query.picked(), Some("NO"));
+        query.move_pick(1);
+        assert_eq!(query.picked(), Some("CANCEL"));
+        query.move_pick(1);
+        assert_eq!(query.picked(), Some("CANCEL"), "it stops at the last");
+
+        query.move_pick(-1);
+        assert_eq!(query.picked(), Some("NO"));
+        query.move_pick(-5);
+        assert_eq!(query.picked(), Some("YES"), "and at the first");
+    }
+
+    #[test]
+    fn return_answers_with_the_picked_one() {
+        let mut state = state();
+        state.question = Some(Query::new(
+            "save? ".to_owned(),
+            Question::YesNo { default: true },
+        ));
+        drop(update(&mut state, Message::Key(arrow_right())));
+        drop(update(&mut state, Message::Key(enter())));
+
+        assert!(state.question.is_none());
+        assert!(matches!(state.output.last(), Some(Output::Normal(t)) if t == "save? NO"));
+    }
+
+    #[test]
+    fn keys_do_nothing_without_a_question_that_offers_answers() {
+        let mut state = state();
+        drop(update(&mut state, Message::Key(enter())));
+        assert!(state.output.is_empty());
+
+        state.question = Some(text_query("name: "));
+        drop(update(&mut state, Message::Key(enter())));
+        assert!(
+            state.question.is_some(),
+            "a typed answer is not taken by return"
+        );
+    }
+
+    fn arrow_right() -> keyboard::Key {
+        keyboard::Key::Named(keyboard::key::Named::ArrowRight)
+    }
+
+    fn enter() -> keyboard::Key {
+        keyboard::Key::Named(keyboard::key::Named::Enter)
+    }
+
+    #[test]
+    fn only_questions_with_set_answers_offer_them() {
+        assert!(Question::Text.answers().is_empty());
+        assert_eq!(Question::YesNo { default: true }.answers(), ["YES", "NO"]);
+        assert_eq!(
+            Question::YesNoCancel { default: false }.answers(),
+            ["YES", "NO", "CANCEL"]
+        );
+    }
+
+    #[test]
     fn answers_clear_the_question() {
         let mut state = state();
-        state.question = Some("name: ".to_owned());
-        drop(update(
-            &mut state,
-            Message::Answer("name: ".to_owned(), "x".to_owned()),
-        ));
+        state.question = Some(text_query("name: "));
+        drop(update(&mut state, Message::Answer("x".to_owned())));
 
         assert!(state.question.is_none());
         assert!(matches!(state.output.first(), Some(Output::Normal(text)) if text == "name: x"));
@@ -1106,10 +1303,13 @@ mod tests {
         let mut state = state();
         drop(update(
             &mut state,
-            Message::Interpreter(interpreter::Message::Ask("name".to_owned())),
+            Message::Interpreter(interpreter::Message::Ask {
+                prompt: "name".to_owned(),
+                question: Question::Text,
+            }),
         ));
 
-        assert_eq!(state.question.as_deref(), Some("name"));
+        assert_eq!(state.question, Some(text_query("name")));
     }
 
     #[test]
@@ -1264,7 +1464,7 @@ mod tests {
                 position: 0.5,
             }));
         }
-        state.question = Some("question".to_owned());
+        state.question = Some(text_query("question"));
         state.mode = mode;
 
         let theme = theme(&state);

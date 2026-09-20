@@ -98,56 +98,18 @@ def askStr(query, termObj=None, strip=1):
 def askYesNoCancel(query, defaultSel=1, termObj=None):
     """function for querying user yes, no, or cancel
     returns 1 for yes, 0 for no, -1 for cancel
+
+    the gui offers the three answers and the default, so there is nothing to
+    parse or to ask again here
     """
-    if termObj != None:
-        sessionType = termObj.sessionType
-    else:
-        sessionType = "terminal"
-    # need to fix query before appending
-    query = _fixQuery(query)
-    qString = query + "(y, n, or cancel): "
-    if sessionType in ["terminal", "idle", "gui-tk"]:
-        status = -2  # place holder
-        while 1:
-            try:
-                aString = rawInput(qString, termObj)
-            except (KeyboardInterrupt, EOFError, TypeError):
-                status = -1  # cancel
-                break
-            status = typeset.convertBoolCancel(aString)
-            if status != None:
-                break  # status set to 0, 1, -1
-            else:
-                msgOut(lang.msgConfusedInput)
-                continue
-    return status
+    return dialogExt.askYesNoCancel(_fixQuery(query), bool(defaultSel))
 
 
 def askYesNo(query, defaultSel=1, termObj=None):
     """function for querying user yes, no
     returns 1 for yes, 0 for no
     """
-    if termObj != None:
-        sessionType = termObj.sessionType
-    else:
-        sessionType = "terminal"
-    query = _fixQuery(query)
-    qString = query + "(y or n): "
-    if sessionType in ["terminal", "idle", "gui-tk"]:
-        status = None  # place holder
-        while 1:  # 1 for yes, 0 for no
-            try:
-                aString = rawInput(qString, termObj)
-            except (KeyboardInterrupt, EOFError, TypeError):
-                status = 0  # cancel
-                break
-            status = typeset.convertBool(aString)
-            if status != None:  # an error:
-                break  # status set to 0, 1
-            else:
-                msgOut(lang.msgConfusedInput)
-                continue
-    return status
+    return dialogExt.askYesNo(_fixQuery(query), bool(defaultSel))
 
 
 def getEncouragement():
