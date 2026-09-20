@@ -6,15 +6,20 @@ use rustpython_vm as vm;
 fn test() {
     let interpreter = athenacl::init_py_interpreter();
 
-    let result = interpreter.enter(|vm| {
+    // The vm is entered rather than run, so it is never finalized: finalizing collects every object
+    // the tests made, which takes longer than running them, and the process ends here anyway. The
+    // runner prints its report as it goes, so a failure is readable without it.
+    let failed = interpreter.enter(|vm| {
         let scope = vm.new_scope_with_builtins();
         let code = vm::py_compile!(file = "runner.py");
-        vm.run_code_obj(vm.ctx.new_code(code), scope)?;
-
-        vm::PyResult::Ok(())
+        match vm.run_code_obj(vm.ctx.new_code(code), scope) {
+            Ok(_) => false,
+            Err(exception) => {
+                vm.print_exception(exception);
+                true
+            }
+        }
     });
 
-    interpreter.run(|_vm| result.clone());
-
-    result.unwrap();
+    assert!(!failed, "the Python tests failed: their report is above");
 }

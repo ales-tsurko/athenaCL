@@ -9,7 +9,7 @@ use iced::{
     widget::{
         button, column, container, operation, pick_list, rich_text, row,
         scrollable::{self, Direction, Scrollbar},
-        space, span, text, text_input, Column,
+        space, span, text, text_input, Button, Column, PickList, Row,
     },
     Color, Element, Font, Length, Subscription, Task, Theme,
 };
@@ -31,6 +31,10 @@ const WINDOW_WIDTH: f32 = 800.0;
 /// The smallest the window goes: the page, and room for a few entries.
 pub const MIN_WINDOW_SIZE: (f32, f32) = (WINDOW_WIDTH, 480.0);
 const WINDOW_PADDING: f32 = 40.0;
+/// The bars across the top and bottom of the page, and the frames of controls in them.
+const HEADER_HEIGHT: f32 = 56.0;
+const BOTTOM_BAR_HEIGHT: f32 = 76.0;
+const FRAME_HEIGHT: f32 = 36.0;
 /// The scrollbar: a hairline track and a thin thumb, easy to grab.
 const SCROLLBAR: f32 = 1.0;
 const SCROLLER: f32 = 3.0;
@@ -43,10 +47,17 @@ const OUTPUT_WIDTH: f32 = WINDOW_WIDTH
     - SCROLLBAR.max(SCROLLER)
     - 2.0 * SCROLLBAR_MARGIN
     - SCROLLBAR_SPACING;
+/// A picker's width: room for its longest option, its arrow, and never less than this.
+const PICKER_CHARACTER: f32 = 8.4;
+const PICKER_ARROW: f32 = 44.0;
+const PICKER_WIDTH: f32 = 104.0;
 /// The longest scratch folder path the header shows whole.
 const PATH_CHARACTERS: usize = 48;
-/// The tempo's range, in beats per minute.
+/// The tempo's range, in beats per minute, and the widths of the box it's typed in and of its
+/// steppers.
 const TEMPO: std::ops::RangeInclusive<u16> = 20..=600;
+const TEMPO_WIDTH: f32 = 52.0;
+const STEPPER_WIDTH: f32 = 24.0;
 
 /// System application ID.
 pub const APPLICATION_ID: &str = "by.alestsurko.athenacl";
@@ -442,30 +453,27 @@ pub fn view(state: &State) -> Element<'_, Message> {
 
 /// The wordmark, the scratch folder and the look.
 fn view_header(state: &State, colors: Colors) -> Element<'_, Message> {
-    let folder = button(centered(icon('\u{f114}', 16.0)))
-        .width(36)
-        .height(36)
-        .padding(0)
-        .style(colors.outlined())
+    let folder = icon_button('\u{f114}', 16.0, colors.outlined())
+        .width(FRAME_HEIGHT)
+        .height(FRAME_HEIGHT)
         .on_press(Message::SetScratchDir);
     let segment = |glyph: char, mode: Mode| {
-        button(centered(icon(glyph, 14.0)))
+        icon_button(glyph, 14.0, colors.segment(state.mode == mode))
             .width(32)
             .height(Length::Fill)
-            .padding(0)
-            .style(colors.segment(state.mode == mode))
             .on_press(Message::SetMode(mode))
     };
-    let modes = container(row![
-        segment('\u{f10c}', Mode::Light),
-        rule_across(colors.ink),
-        segment('\u{f111}', Mode::Dark),
-    ])
-    .height(36)
-    .padding(1)
-    .style(colors.frame());
+    let modes = framed(
+        colors,
+        row![
+            segment('\u{f10c}', Mode::Light),
+            rule_across(colors.ink),
+            segment('\u{f111}', Mode::Dark),
+        ],
+    );
 
-    container(
+    bar(
+        HEADER_HEIGHT,
         row![
             pixel::wordmark(colors.ink),
             space::horizontal(),
@@ -473,14 +481,8 @@ fn view_header(state: &State, colors: Colors) -> Element<'_, Message> {
             text(shorten(&state.scratch_dir, PATH_CHARACTERS)).size(12),
             folder,
             modes,
-        ]
-        .spacing(12)
-        .align_y(Vertical::Center),
+        ],
     )
-    .padding([0.0, WINDOW_PADDING])
-    .height(56)
-    .align_y(Vertical::Center)
-    .into()
 }
 
 /// The output: each command with what it printed and showed.
@@ -683,29 +685,39 @@ fn view_input(state: &State, colors: Colors) -> Column<'_, Message> {
 
 /// The active path and texture, and the tempo.
 fn view_bottom_bar(state: &State, colors: Colors) -> Element<'_, Message> {
-    let picker = |options: &'_ [String], active: &str, on_select: fn(String) -> Message| {
-        let selected = (!active.is_empty()).then(|| active.to_owned());
-        let width = options
-            .iter()
-            .map(|option| option.chars().count())
-            .max()
-            .unwrap_or(0) as f32
-            * 8.4
-            + 44.0;
-        pick_list(options.to_vec(), selected, on_select)
-            .placeholder("none")
-            .padding([8, 10])
-            .width(width.max(104.0))
-            .style(colors.picker())
-            .menu_style(colors.menu())
-    };
+    // the tempo is typed, or stepped up and down
+    let tempo = framed(
+        colors,
+        row![
+            text_input("", &state.tempo)
+                .on_input(Message::TempoChanged)
+                .style(colors.input())
+                .padding([0, 10])
+                .width(TEMPO_WIDTH)
+                .size(14),
+            rule_across(colors.ink),
+            column![
+                stepper(colors, '\u{f077}', 1),
+                rule(colors.ink, 1.0),
+                stepper(colors, '\u{f078}', -1),
+            ]
+            .width(STEPPER_WIDTH),
+        ],
+    );
 
-    container(
+    bar(
+        BOTTOM_BAR_HEIGHT,
         row![
             pixel::label("PATH", colors.dim),
-            picker(&state.path_lib, &state.active_path, Message::PiSelected),
+            picker(
+                colors,
+                &state.path_lib,
+                &state.active_path,
+                Message::PiSelected
+            ),
             pixel::label("TEXTURE", colors.dim),
             picker(
+                colors,
                 &state.texture_lib,
                 &state.active_texture,
                 Message::TiSelected
@@ -713,49 +725,38 @@ fn view_bottom_bar(state: &State, colors: Colors) -> Element<'_, Message> {
             space::horizontal(),
             icon('\u{f07da}', 16.0),
             pixel::label("TEMPO", colors.dim),
-            view_tempo(state, colors),
-        ]
-        .spacing(12)
-        .align_y(Vertical::Center),
+            tempo,
+        ],
     )
-    .padding([0.0, WINDOW_PADDING])
-    .height(76)
-    .align_y(Vertical::Center)
-    .into()
 }
 
-/// The tempo: typed, or stepped up and down.
-fn view_tempo(state: &State, colors: Colors) -> Element<'_, Message> {
-    let stepper = |glyph: char, step: i32| {
-        button(centered(icon(glyph, 8.0)))
-            .width(24)
-            .height(Length::Fill)
-            .padding(0)
-            .style(colors.bare())
-            .on_press(Message::TempoStep(step))
-    };
-    container(
-        row![
-            text_input("", &state.tempo)
-                .on_input(Message::TempoChanged)
-                .style(colors.input())
-                .padding([0, 10])
-                .width(52)
-                .size(14),
-            rule_across(colors.ink),
-            column![
-                stepper('\u{f077}', 1),
-                rule(colors.ink, 1.0),
-                stepper('\u{f078}', -1),
-            ]
-            .width(24),
-        ]
-        .align_y(Vertical::Center),
-    )
-    .height(36)
-    .padding(1)
-    .style(colors.frame())
-    .into()
+/// One of the bottom bar's pickers, wide enough for its longest option.
+fn picker<'a>(
+    colors: Colors,
+    options: &[String],
+    active: &str,
+    on_select: fn(String) -> Message,
+) -> PickList<'a, String, Vec<String>, String, Message> {
+    let selected = (!active.is_empty()).then(|| active.to_owned());
+    let longest = options
+        .iter()
+        .map(|option| option.chars().count())
+        .max()
+        .unwrap_or(0) as f32;
+    pick_list(options.to_vec(), selected, on_select)
+        .placeholder("none")
+        .padding([8, 10])
+        .width((longest * PICKER_CHARACTER + PICKER_ARROW).max(PICKER_WIDTH))
+        .style(colors.picker())
+        .menu_style(colors.menu())
+}
+
+/// One of the tempo's steppers, stacked half each in the tempo's frame.
+fn stepper<'a>(colors: Colors, glyph: char, step: i32) -> Button<'a, Message> {
+    icon_button(glyph, 8.0, colors.bare())
+        .width(STEPPER_WIDTH)
+        .height(Length::Fill)
+        .on_press(Message::TempoStep(step))
 }
 
 /// An icon from the Nerd Font.
@@ -766,6 +767,34 @@ fn icon<'a>(glyph: char, size: f32) -> Element<'a, Message> {
 /// Something centered in all the room it's given, as an icon in its button.
 fn centered<'a>(content: Element<'a, Message>) -> Element<'a, Message> {
     container(content).center(Length::Fill).into()
+}
+
+/// A square button showing one icon: the folder, the look's segments, the tempo's steppers. The
+/// caller gives it its size and what it sends.
+fn icon_button<'a>(
+    glyph: char,
+    size: f32,
+    style: impl Fn(&Theme, button::Status) -> button::Style + 'a,
+) -> Button<'a, Message> {
+    button(centered(icon(glyph, size))).padding(0).style(style)
+}
+
+/// A bar across the page, `height` high: the header, and the bottom bar.
+fn bar<'a>(height: f32, content: Row<'a, Message>) -> Element<'a, Message> {
+    container(content.spacing(12).align_y(Vertical::Center))
+        .padding([0.0, WINDOW_PADDING])
+        .height(height)
+        .align_y(Vertical::Center)
+        .into()
+}
+
+/// Controls sharing one ink frame: the look switch, the tempo.
+fn framed<'a>(colors: Colors, content: Row<'a, Message>) -> Element<'a, Message> {
+    container(content.align_y(Vertical::Center))
+        .height(FRAME_HEIGHT)
+        .padding(1)
+        .style(colors.frame())
+        .into()
 }
 
 /// A rule across the window, `thickness` high.
@@ -1204,7 +1233,20 @@ mod tests {
     }
 
     #[test]
-    fn the_gui_renders_every_output_in_both_looks() {
+    fn the_gui_renders_every_output_in_the_light_look() {
+        renders_every_output(Mode::Light);
+    }
+
+    #[test]
+    fn the_gui_renders_every_output_in_the_dark_look() {
+        renders_every_output(Mode::Dark);
+    }
+
+    /// Draw every kind of output in `mode`, hovering down the whole output.
+    ///
+    /// One look per test: each snapshot is a whole page rendered, which takes minutes on a
+    /// machine without a gpu, and as two tests the looks are drawn side by side.
+    fn renders_every_output(mode: Mode) {
         let mut state = state();
         state.output = vec![
             Output::Normal("normal".to_owned()),
@@ -1226,21 +1268,19 @@ mod tests {
         figure(&mut state, parameters());
         drop(update(&mut state, Message::FigureView(7, View::Score)));
         state.question = Some("question".to_owned());
+        state.mode = mode;
 
-        for mode in [Mode::Light, Mode::Dark] {
-            state.mode = mode;
-            let theme = theme(&state);
-            let mut simulator = iced_test::Simulator::with_size(
-                iced::Settings::default(),
-                Size::new(800.0, 4000.0),
-                view(&state),
-            );
+        let theme = theme(&state);
+        let mut simulator = iced_test::Simulator::with_size(
+            iced::Settings::default(),
+            Size::new(800.0, 4000.0),
+            view(&state),
+        );
 
-            // sweep the pointer down the output: every figure draws its hover overlay
-            for y in (0..3900).step_by(50) {
-                simulator.point_at(Point::new(400.0, y as f32));
-                let _ = simulator.snapshot(&theme).expect("the gui renders");
-            }
+        // sweep the pointer down the output: every figure draws its hover overlay
+        for y in (0..3900).step_by(50) {
+            simulator.point_at(Point::new(400.0, y as f32));
+            let _ = simulator.snapshot(&theme).expect("the gui renders");
         }
     }
 }

@@ -183,7 +183,11 @@ def updatePrefDict(oldPrefDict, platform):
 
 
 def writePrefDict(prefFilePath, prefDict):
-    """given patha and pref, writes as xml file"""
+    """given patha and pref, writes as xml file
+
+    every athenaCL shares the one preference file, so the new file is written
+    beside it under a name of this process' own and then moved onto it: that
+    move is atomic, and a reader never finds the file half written"""
     msg = []
     parent = "preferences"
     msg.append(xmlTools.XMLHEAD)
@@ -197,9 +201,11 @@ def writePrefDict(prefFilePath, prefDict):
             "prefGroup",
         ],
     )
-    f = open(prefFilePath, "w")
+    tempFilePath = "%s.%s.tmp" % (prefFilePath, os.getpid())
+    f = open(tempFilePath, "w")
     f.writelines(msg)
     f.close()
+    os.replace(tempFilePath, prefFilePath)
 
 
 def getXmlPrefDict(prefFilePath=None):
@@ -242,10 +248,10 @@ class Environment(object):
         fp = drawer.getPrefsPath()
         if not os.path.exists(fp):
             return 0
-        prefDict = getXmlPrefDict(fp)
-        # if fp is not found, this should return a default
+        # reading is in the catch all too: the file may be another athenaCL's
+        # half-written one, and this cannot crash
         try:
-            return int(prefDict["athena"]["debug"])
+            return int(getXmlPrefDict(fp)["athena"]["debug"])
         except:  # catch all: this cannot crash
             return 0
 

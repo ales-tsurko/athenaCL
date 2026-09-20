@@ -397,6 +397,17 @@ class Command(object):
 
     # -----------------------------------------------------------------------||--
     # file path utilities
+    def _hasPathSep(self, usrStr):
+        """whether a string is written as a path rather than as a bare file name
+
+        windows takes both separators, so either one counts there: os.altsep is
+        the other one it takes, and None where there is only one"""
+        if usrStr.find(os.sep) >= 0:
+            return 1
+        if os.altsep != None and usrStr.find(os.altsep) >= 0:
+            return 1
+        return 0
+
     def _findFilePath(self, usrStr):
         """if a complete path, checks existence and returns
         if a file name, searches directories for file and
@@ -404,7 +415,7 @@ class Command(object):
         """
         if usrStr == None:
             return None
-        if usrStr.find(os.sep) >= 0:  # a complete path
+        if self._hasPathSep(usrStr):  # a complete path
             filePath = drawer.pathScrub(usrStr)
             if (
                 os.path.exists(filePath) == 1 and os.path.isdir(filePath) != 1
@@ -502,10 +513,7 @@ class Command(object):
             if usrStr[-len(forceExtension) :] != forceExtension:
                 return None  # if no extensions, return none
         # determine if an absolute or relative path was given _initially_
-        if usrStr.find(os.sep) >= 0:
-            abs = 1
-        else:
-            abs = 0
+        abs = self._hasPathSep(usrStr)
         # try to get a complete path; will not append cwd if just a name
         filePath = drawer.pathScrub(usrStr)
         # never try to replace a directory

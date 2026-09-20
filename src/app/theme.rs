@@ -141,64 +141,42 @@ impl Colors {
 
     /// An outlined button: the folder, the pickers' look.
     pub(crate) fn outlined(self) -> impl Fn(&Theme, button::Status) -> button::Style {
-        move |_, status| button::Style {
-            background: Some(Background::Color(match status {
+        button_style(self.ink, self.border(1.0), move |status| {
+            Some(match status {
                 button::Status::Hovered | button::Status::Pressed => self.rule,
                 button::Status::Active | button::Status::Disabled => self.paper,
-            })),
-            text_color: self.ink,
-            border: self.border(1.0),
-            shadow: Shadow::default(),
-            snap: true,
-        }
+            })
+        })
     }
 
     /// A block button: the play button.
     pub(crate) fn block_button(self) -> impl Fn(&Theme, button::Status) -> button::Style {
-        move |_, status| button::Style {
-            background: Some(Background::Color(match status {
+        button_style(self.on_block, self.border(1.0), move |status| {
+            Some(match status {
                 button::Status::Disabled => self.rule,
                 _ => self.block,
-            })),
-            text_color: self.on_block,
-            border: self.border(1.0),
-            shadow: Shadow::default(),
-            snap: true,
-        }
+            })
+        })
     }
 
     /// A segment of a switch: filled with ink when it's the one chosen.
     pub(crate) fn segment(self, chosen: bool) -> impl Fn(&Theme, button::Status) -> button::Style {
-        move |_, status| {
-            let background = match (chosen, status) {
+        let text = if chosen { self.paper } else { self.ink };
+        button_style(text, Border::default(), move |status| {
+            Some(match (chosen, status) {
                 (true, _) => self.ink,
                 (false, button::Status::Hovered | button::Status::Pressed) => self.rule,
                 (false, _) => self.paper,
-            };
-            button::Style {
-                background: Some(Background::Color(background)),
-                text_color: if chosen { self.paper } else { self.ink },
-                border: Border::default(),
-                shadow: Shadow::default(),
-                snap: true,
-            }
-        }
+            })
+        })
     }
 
-    /// A bare button: the tempo's steppers.
+    /// A bare button: the tempo's steppers, which show only where the pointer is.
     pub(crate) fn bare(self) -> impl Fn(&Theme, button::Status) -> button::Style {
-        move |_, status| button::Style {
-            background: match status {
-                button::Status::Hovered | button::Status::Pressed => {
-                    Some(Background::Color(self.rule))
-                }
-                _ => None,
-            },
-            text_color: self.ink,
-            border: Border::default(),
-            shadow: Shadow::default(),
-            snap: true,
-        }
+        button_style(self.ink, Border::default(), move |status| match status {
+            button::Status::Hovered | button::Status::Pressed => Some(self.rule),
+            _ => None,
+        })
     }
 
     /// A 1 pixel ink frame, as around buttons and switches.
@@ -296,6 +274,22 @@ impl Colors {
             width,
             radius: border::Radius::default(),
         }
+    }
+}
+
+/// A button's look: its text color, its border, and what fills it in each state. The app's
+/// buttons are flat and square, and differ only in those three.
+fn button_style(
+    text: Color,
+    border: Border,
+    fill: impl Fn(button::Status) -> Option<Color>,
+) -> impl Fn(&Theme, button::Status) -> button::Style {
+    move |_, status| button::Style {
+        background: fill(status).map(Background::Color),
+        text_color: text,
+        border,
+        shadow: Shadow::default(),
+        snap: true,
     }
 }
 
