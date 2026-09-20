@@ -12,4 +12,5 @@ mod history;
 mod icons;
 mod pixel;
 mod player;
+mod terminal_input;
 pub(crate) mod theme;

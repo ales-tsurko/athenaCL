@@ -23,6 +23,7 @@ use crate::{
         icons::Icon,
         pixel,
         player::{self, GlobalState as GlobalPlayerState, Track as PlayerState},
+        terminal_input::Input,
         theme::{Colors, Mode},
     },
     figure::{notation::Score, Domain, Event, Figure},
@@ -812,13 +813,10 @@ fn view_input(state: &State, colors: Colors) -> Column<'_, Message> {
     };
     let line = row![
         label,
-        text_input(placeholder, &state.answer)
+        Input::new(placeholder, &state.answer, colors)
             .id(state.input_id.clone())
-            .style(colors.input())
             .on_input(Message::InputChanged)
-            .on_submit(Message::Submit)
-            .padding(0)
-            .size(14),
+            .on_submit(Message::Submit),
     ]
     .spacing(10)
     .align_y(Vertical::Center);
