@@ -115,4 +115,13 @@ codegen-units = 1
 panic = "abort"
 
 [profile.dev]
-opt-level = 2 # rustpython is too slow in debug mode, so we enable -O2
+# Our own code is not optimized, so that a rebuild after an edit stays quick.
+opt-level = 0
+
+[profile.dev.package."*"]
+# The dependencies are, once: rustpython is too slow to run unoptimized, and it and the rest are
+# built rarely enough that -O2 on them costs nothing day to day.
+opt-level = 2
+# Their debug info is only line numbers, which is all a backtrace through them needs. In full it
+# is most of what the build writes: rustpython-vm alone goes from 61 to 222 MB.
+debug = "line-tables-only"
