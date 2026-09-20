@@ -73,43 +73,48 @@ pub(crate) enum Glyph {
     Forte,
 }
 
+/// Every glyph with its bitmap, in the order the glyphs are declared: a glyph finds its own by its
+/// place in the enum, which `the_table_holds_every_glyph_in_order` checks.
+type Bitmap = (i32, &'static [&'static str]);
+const BITMAPS: [(Glyph, Bitmap); 32] = [
+    (Glyph::GClef, G_CLEF),
+    (Glyph::FClef, F_CLEF),
+    (Glyph::NoteheadBlack, NOTEHEAD_BLACK),
+    (Glyph::NoteheadHalf, NOTEHEAD_HALF),
+    (Glyph::NoteheadWhole, NOTEHEAD_WHOLE),
+    (Glyph::Flag8Up, FLAG_8_UP),
+    (Glyph::Flag16Up, FLAG_16_UP),
+    (Glyph::Flag32Up, FLAG_32_UP),
+    (Glyph::Flag8Down, FLAG_8_DOWN),
+    (Glyph::Flag16Down, FLAG_16_DOWN),
+    (Glyph::Flag32Down, FLAG_32_DOWN),
+    (Glyph::RestWhole, REST_WHOLE),
+    (Glyph::RestHalf, REST_HALF),
+    (Glyph::RestQuarter, REST_QUARTER),
+    (Glyph::Rest8, REST_8),
+    (Glyph::Rest16, REST_16),
+    (Glyph::Rest32, REST_32),
+    (Glyph::Sharp, SHARP),
+    (Glyph::QuarterSharp, QUARTER_SHARP),
+    (Glyph::ThreeQuarterSharp, THREE_QUARTER_SHARP),
+    (Glyph::Dot, DOT),
+    (Glyph::TieStartBelow, TIE_START_BELOW),
+    (Glyph::TieEndBelow, TIE_END_BELOW),
+    (Glyph::TieStartAbove, TIE_START_ABOVE),
+    (Glyph::TieEndAbove, TIE_END_ABOVE),
+    (Glyph::Tuplet3, TUPLET_3),
+    (Glyph::Tuplet5, TUPLET_5),
+    (Glyph::Tuplet6, TUPLET_6),
+    (Glyph::Tuplet7, TUPLET_7),
+    (Glyph::Piano, PIANO),
+    (Glyph::Mezzo, MEZZO),
+    (Glyph::Forte, FORTE),
+];
+
 impl Glyph {
     /// The glyph's anchor row and its rows of pixels.
-    pub(crate) fn bitmap(self) -> (i32, &'static [&'static str]) {
-        match self {
-            Self::GClef => G_CLEF,
-            Self::FClef => F_CLEF,
-            Self::NoteheadBlack => NOTEHEAD_BLACK,
-            Self::NoteheadHalf => NOTEHEAD_HALF,
-            Self::NoteheadWhole => NOTEHEAD_WHOLE,
-            Self::Flag8Up => FLAG_8_UP,
-            Self::Flag16Up => FLAG_16_UP,
-            Self::Flag32Up => FLAG_32_UP,
-            Self::Flag8Down => FLAG_8_DOWN,
-            Self::Flag16Down => FLAG_16_DOWN,
-            Self::Flag32Down => FLAG_32_DOWN,
-            Self::RestWhole => REST_WHOLE,
-            Self::RestHalf => REST_HALF,
-            Self::RestQuarter => REST_QUARTER,
-            Self::Rest8 => REST_8,
-            Self::Rest16 => REST_16,
-            Self::Rest32 => REST_32,
-            Self::Sharp => SHARP,
-            Self::QuarterSharp => QUARTER_SHARP,
-            Self::ThreeQuarterSharp => THREE_QUARTER_SHARP,
-            Self::Dot => DOT,
-            Self::TieStartBelow => TIE_START_BELOW,
-            Self::TieEndBelow => TIE_END_BELOW,
-            Self::TieStartAbove => TIE_START_ABOVE,
-            Self::TieEndAbove => TIE_END_ABOVE,
-            Self::Tuplet3 => TUPLET_3,
-            Self::Tuplet5 => TUPLET_5,
-            Self::Tuplet6 => TUPLET_6,
-            Self::Tuplet7 => TUPLET_7,
-            Self::Piano => PIANO,
-            Self::Mezzo => MEZZO,
-            Self::Forte => FORTE,
-        }
+    pub(crate) fn bitmap(self) -> Bitmap {
+        BITMAPS.get(self as usize).map_or((0, &[]), |&(_, it)| it)
     }
 
     /// The glyph's width in pixels.
@@ -325,3 +330,29 @@ const FORTE: (i32, &[&str]) = (
         "....##", "...#..", "..#...", ".####.", "..#...", "..#...", ".#....", ".#....", "#.....",
     ],
 );
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn the_table_holds_every_glyph_in_order() {
+        for (index, &(glyph, (_, rows))) in BITMAPS.iter().enumerate() {
+            assert_eq!(glyph as usize, index, "{glyph:?} is not at its own place");
+            assert!(!rows.is_empty(), "{glyph:?} has no rows");
+            assert_eq!(glyph.bitmap().1, rows, "{glyph:?} finds another's bitmap");
+        }
+    }
+
+    #[test]
+    fn glyphs_are_rectangles_as_wide_as_they_measure() {
+        for &(glyph, (_, rows)) in &BITMAPS {
+            let width = rows.first().map_or(0, |row| row.len());
+            assert!(
+                rows.iter().all(|row| row.len() == width),
+                "{glyph:?} is ragged"
+            );
+            assert_eq!(glyph.width(), width as i32);
+        }
+    }
+}

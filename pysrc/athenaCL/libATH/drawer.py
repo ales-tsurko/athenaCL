@@ -1511,6 +1511,13 @@ def getPrefsName():
 
 
 def getPrefsDir():
+    """the directory holding the preference file and the log
+
+    ATHENACL_PREFS_DIR moves both out of the home directory: the tests give each
+    run one of its own, so that running them leaves the user's preferences alone
+    """
+    if "ATHENACL_PREFS_DIR" in os.environ:
+        return os.environ["ATHENACL_PREFS_DIR"]
     if os.name == "posix":
         dir = os.environ["HOME"]
     else:  # win or other

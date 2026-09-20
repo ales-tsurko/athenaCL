@@ -183,11 +183,7 @@ def updatePrefDict(oldPrefDict, platform):
 
 
 def writePrefDict(prefFilePath, prefDict):
-    """given patha and pref, writes as xml file
-
-    every athenaCL shares the one preference file, so the new file is written
-    beside it under a name of this process' own and then moved onto it: that
-    move is atomic, and a reader never finds the file half written"""
+    """given patha and pref, writes as xml file"""
     msg = []
     parent = "preferences"
     msg.append(xmlTools.XMLHEAD)
@@ -201,11 +197,9 @@ def writePrefDict(prefFilePath, prefDict):
             "prefGroup",
         ],
     )
-    tempFilePath = "%s.%s.tmp" % (prefFilePath, os.getpid())
-    f = open(tempFilePath, "w")
+    f = open(prefFilePath, "w")
     f.writelines(msg)
     f.close()
-    os.replace(tempFilePath, prefFilePath)
 
 
 def getXmlPrefDict(prefFilePath=None):

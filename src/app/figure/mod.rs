@@ -264,7 +264,9 @@ impl Ticks {
             };
         }
         let raw = span / count.max(1) as f64;
-        let magnitude = 10f64.powf(raw.log10().floor());
+        // by whole powers: `powf` is only as exact as the platform's libm, and it can make a round
+        // step come out as 0.20000000000000007
+        let magnitude = power_of_ten(raw.log10().floor());
         let step = [1.0, 2.0, 5.0, 10.0]
             .into_iter()
             .map(|multiple| multiple * magnitude)
@@ -288,6 +290,20 @@ impl Ticks {
             value
         };
         format!("{value:.decimals$}")
+    }
+}
+
+/// Ten to a whole `exponent`, as exactly as f64 holds it.
+///
+/// Powers of ten come out of a multiplication, not the platform's `powf`: a tick step is a round
+/// number, and the smallest error in the last bit shows up as `0.20000000000000007` in a label.
+fn power_of_ten(exponent: f64) -> f64 {
+    let steps = to_index(exponent.abs().min(308.0));
+    let magnitude = (0..steps).fold(1.0, |power: f64, _| power * 10.0);
+    if exponent < 0.0 {
+        1.0 / magnitude
+    } else {
+        magnitude
     }
 }
 

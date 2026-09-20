@@ -1,6 +1,6 @@
 //! athenaCL is an algorithmic music composition tool.
 
-pub use interpreter::init_py_interpreter;
+pub use interpreter::{init_py_interpreter, init_scratch_prefs};
 
 pub mod app;
 mod figure;

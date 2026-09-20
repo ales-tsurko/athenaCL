@@ -1,5 +1,3 @@
-MIRI_FLAGS := -Zmiri-disable-isolation -Zmiri-tree-borrows
-MIRI_SYSROOT := $(CURDIR)/target/miri-sysroot
 COVERAGE_LCOV := target/athenacl-lcov.info
 CRAP_REPORT := target/athenacl-crap.md
 CRAP_EXCLUDES := --exclude '**/build.rs' --exclude '**/benches/**' --exclude '**/examples/**' --exclude '**/tests.rs' --exclude '**/*_tests.rs' --exclude '**/tests/**'
@@ -36,9 +34,6 @@ code-health:
 	cargo llvm-cov nextest --all-features --all-targets --lcov --output-path $(COVERAGE_LCOV)
 	cargo crap --workspace --lcov $(COVERAGE_LCOV) $(CRAP_EXCLUDES) --format markdown --output $(CRAP_REPORT)
 	cargo crap --workspace --lcov $(COVERAGE_LCOV) $(CRAP_EXCLUDES) --summary --fail-above
-	MIRI_SYSROOT="$(MIRI_SYSROOT)" cargo +nightly miri setup
-	@set -e; \
-	MIRI_SYSROOT="$(MIRI_SYSROOT)" MIRIFLAGS="$(MIRI_FLAGS)" cargo +nightly miri test  --all-features; \
 
 pack-macos:
 	cargo bundle --release

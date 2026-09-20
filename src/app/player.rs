@@ -581,8 +581,12 @@ mod soundfont {
     pub(super) fn path() -> &'static str {
         static PATH: OnceLock<String> = OnceLock::new();
         PATH.get_or_init(|| {
-            let path: PathBuf =
-                std::env::temp_dir().join(format!("athenacl-test-{}.sf2", std::process::id()));
+            // beside this process' other test files, all under the one directory to sweep away
+            let dir: PathBuf = std::env::temp_dir()
+                .join("athenacl-tests")
+                .join(std::process::id().to_string());
+            std::fs::create_dir_all(&dir).expect("the test directory should be created");
+            let path = dir.join("soundfont.sf2");
             std::fs::write(&path, bytes()).expect("the test soundfont should be written");
             path.to_string_lossy().into_owned()
         })

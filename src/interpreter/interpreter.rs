@@ -38,6 +38,10 @@ pub struct InterpreterWorker {
 impl InterpreterWorker {
     /// Run the interpereter loop.
     fn run() -> Self {
+        // the tests keep out of the user's preferences; set before the thread reads the environment
+        #[cfg(test)]
+        init_scratch_prefs();
+
         let (interp_sender, r) = unbounded::<Message>();
         let (gui_sender, gui_receiver) = unbounded::<Message>();
         let s = gui_sender.clone();
@@ -237,6 +241,21 @@ interp"#
 
         Ok(external)
     }
+}
+
+/// Point athenaCL's preferences and log at a directory of this process' own.
+///
+/// athenaCL keeps one preference file for every instance, in the home directory, and rewrites it as
+/// it runs. The tests call this before starting an interpreter, so that running them leaves the
+/// preferences of whoever ran them alone, and so that test processes running at once never write
+/// over each other's.
+pub fn init_scratch_prefs() {
+    // every test process gets its own, all under the one directory to sweep away
+    let prefs = std::env::temp_dir()
+        .join("athenacl-tests")
+        .join(std::process::id().to_string());
+    std::fs::create_dir_all(&prefs).expect("the scratch preferences directory should be created");
+    std::env::set_var("ATHENACL_PREFS_DIR", prefs);
 }
 
 /// Initialize the python interpreter with precompiled stdlib and athenaCL (python modules).

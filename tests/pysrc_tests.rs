@@ -4,6 +4,8 @@ use rustpython_vm as vm;
 
 #[test]
 fn test() {
+    // before the interpreter starts, so that its first read of the preferences already sees it
+    athenacl::init_scratch_prefs();
     let interpreter = athenacl::init_py_interpreter();
 
     // The vm is entered rather than run, so it is never finalized: finalizing collects every object

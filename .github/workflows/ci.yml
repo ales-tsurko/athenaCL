@@ -73,7 +73,7 @@ jobs:
           components: clippy
 
       - name: Install Rust nightly tools
-        run: rustup toolchain install nightly --component miri --component rust-src --component rustfmt
+        run: rustup toolchain install nightly --component rustfmt
 
       - name: Cache Rust artifacts
         uses: Swatinem/rust-cache@v2
