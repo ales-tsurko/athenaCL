@@ -14,10 +14,12 @@ use iced::{
     Color, Element, Font, Length, Subscription, Task, Theme,
 };
 use rfd::FileDialog;
+use rustyline::history::SearchDirection;
 
 use crate::{
     app::{
         figure::{self, Palette},
+        history::{self, History},
         icons::Icon,
         pixel,
         player::{self, GlobalState as GlobalPlayerState, Track as PlayerState},
@@ -72,6 +74,7 @@ pub(super) const SOUND_FONT: &str = "resources/SGM-v2.01-YamahaGrand-Guit-Bass-v
 /// athenaCL GUI.
 pub struct State {
     answer: String,
+    history: History,
     output: Vec<Output>,
     question: Option<Query>,
     player_state: GlobalPlayerState,
@@ -115,10 +118,18 @@ impl Default for State {
         }
 
         let tempo = midi_player_state.tempo().to_string();
+        let mut history = History::default();
+        let mut output = Vec::new();
+        if let Err(error) = history.load_default() {
+            output.push(Output::Error(format!(
+                "Could not load command history: {error}"
+            )));
+        }
         Self {
             player_state: midi_player_state,
             answer: String::new(),
-            output: Vec::new(),
+            history,
+            output,
             question: None,
             scratch_dir: String::new(),
             input_id: "input".to_owned(),
@@ -222,7 +233,10 @@ pub fn update(state: &mut State, message: Message) -> Task<Message> {
         Message::InputChanged(val) => state.answer = val,
         Message::Submit => return submit(state),
         Message::Answer(value) => return answer_current(state, value),
-        Message::Key(key) => return press_key(state, &key),
+        Message::Key(key, modifiers) => return press_key(state, &key, modifiers),
+        Message::RecallHistory { direction, focused } => {
+            return recall_history(state, direction, focused)
+        }
         Message::SetScratchDir => set_scratch_dir(),
         Message::PiSelected(value) => send_command(format!("pio {value}")),
         Message::TiSelected(value) => send_command(format!("tio {value}")),
@@ -247,13 +261,34 @@ fn submit(state: &mut State) -> Task<Message> {
     let typed = state.answer.clone();
     match state.question.clone() {
         Some(query) => answer(state, &query.prompt, typed),
-        None => update_interpreter(state, interpreter::Message::SendCmd(typed)),
+        None => {
+            let recorded = state.history.record(&typed);
+            if typed.trim().is_empty() {
+                state.answer.clear();
+                return Task::none();
+            }
+            let task = update_interpreter(state, interpreter::Message::SendCmd(typed));
+            if let Err(error) = recorded {
+                state.output.push(Output::Error(format!(
+                    "Could not save command history: {error}"
+                )));
+            }
+            task
+        }
     }
 }
 
-/// Move or take the picked answer, when a question offers a set of them.
-fn press_key(state: &mut State, key: &keyboard::Key) -> Task<Message> {
+/// Browse commands when the input is focused, or move and take a question's picked answer.
+fn press_key(
+    state: &mut State,
+    key: &keyboard::Key,
+    modifiers: keyboard::Modifiers,
+) -> Task<Message> {
     let Some(query) = state.question.as_mut() else {
+        if let Some(direction) = history::direction(key, modifiers) {
+            return operation::is_focused(state.input_id.clone())
+                .map(move |focused| Message::RecallHistory { direction, focused });
+        }
         return Task::none();
     };
     if query.question.answers().is_empty() {
@@ -272,6 +307,23 @@ fn press_key(state: &mut State, key: &keyboard::Key) -> Task<Message> {
     Task::none()
 }
 
+/// Apply a history key after checking focus. A question may have arrived in the meantime.
+fn recall_history(state: &mut State, direction: SearchDirection, focused: bool) -> Task<Message> {
+    if focused && state.question.is_none() {
+        match state.history.recall(direction, &state.answer) {
+            Ok(Some(command)) => {
+                state.answer = command;
+                return operation::move_cursor_to_end(state.input_id.clone());
+            }
+            Ok(None) => (),
+            Err(error) => state
+                .output
+                .push(Output::Error(format!("Could not recall command: {error}"))),
+        }
+    }
+    Task::none()
+}
+
 /// Reply to the question on screen.
 fn answer_current(state: &mut State, value: String) -> Task<Message> {
     let Some(query) = state.question.clone() else {
@@ -283,6 +335,7 @@ fn answer_current(state: &mut State, value: String) -> Task<Message> {
 /// Reply to the interpreter's question.
 fn answer(state: &mut State, question: &str, value: String) -> Task<Message> {
     state.question = None;
+    state.answer.clear();
     state
         .output
         .push(Output::Normal(format!("{question}{value}")));
@@ -366,6 +419,7 @@ fn update_figure(state: &mut State, message: figure::Message) -> Task<Message> {
 fn update_interpreter(state: &mut State, message: interpreter::Message) -> Task<Message> {
     match message {
         interpreter::Message::SendCmd(ref cmd) => {
+            state.history.reset();
             state.answer = "".to_owned();
             state.output.push(Output::Command {
                 prompt: prompt(state),
@@ -380,6 +434,7 @@ fn update_interpreter(state: &mut State, message: interpreter::Message) -> Task<
             push_output(state, Output::Error(output))
         }
         interpreter::Message::Ask { prompt, question } => {
+            state.history.reset();
             state.answer = "".to_owned();
             state.question = Some(Query::new(prompt, question));
 
@@ -481,7 +536,6 @@ fn prompt(state: &State) -> Prompt {
 
 /// Show the interpreter's output, returning focus to the input.
 fn push_output(state: &mut State, output: Output) -> Task<Message> {
-    state.answer = "".to_owned();
     state.output.push(output);
 
     operation::focus(state.input_id.clone())
@@ -952,8 +1006,13 @@ pub enum Message {
     /// Send what's typed.
     Submit,
     Answer(String),
-    /// A key no widget took: the answers' switch moves on the arrows and takes return.
-    Key(keyboard::Key),
+    /// A key no widget took: command recall or the answers' switch.
+    Key(keyboard::Key, keyboard::Modifiers),
+    /// A history key, with the result of checking the command input's focus.
+    RecallHistory {
+        direction: SearchDirection,
+        focused: bool,
+    },
     SetScratchDir,
     PiSelected(String),
     TiSelected(String),
@@ -982,8 +1041,8 @@ impl From<player::Message> for Message {
 /// Interpreter messages, audio output changes, keyboard input and active playback ticks.
 pub fn subscription(state: &State) -> Subscription<Message> {
     let keys = keyboard::listen().map(|event| match event {
-        keyboard::Event::KeyPressed { key, .. } => Message::Key(key),
-        _ => Message::Key(keyboard::Key::Unidentified),
+        keyboard::Event::KeyPressed { key, modifiers, .. } => Message::Key(key, modifiers),
+        _ => Message::Key(keyboard::Key::Unidentified, keyboard::Modifiers::empty()),
     });
     // this worker runs async loop to make the worker, which runs on a System's thread communicate
     // with our app, whithout blocking the event loop of iced
@@ -1036,6 +1095,7 @@ mod tests {
     fn state() -> State {
         State {
             answer: String::new(),
+            history: History::default(),
             output: Vec::new(),
             question: None,
             player_state: GlobalPlayerState::headless(),
@@ -1159,6 +1219,138 @@ mod tests {
         drop(update(&mut state, Message::Submit));
         assert!(state.question.is_none());
         assert!(matches!(state.output.last(), Some(Output::Normal(text)) if text == "name: x"));
+        assert_eq!(
+            state
+                .history
+                .recall(SearchDirection::Reverse, "")
+                .expect("recall")
+                .as_deref(),
+            Some("tin a 0"),
+            "answers are not commands"
+        );
+    }
+
+    #[test]
+    fn history_recall_requires_command_input_focus_and_no_question() {
+        let mut state = state();
+        state.history.record("help").expect("record");
+        state.answer = "draft".to_owned();
+        drop(update(
+            &mut state,
+            Message::RecallHistory {
+                direction: SearchDirection::Reverse,
+                focused: false,
+            },
+        ));
+        assert_eq!(state.answer, "draft", "another control has focus");
+
+        for question in [Question::Text, Question::YesNo { default: true }] {
+            state.question = Some(Query::new("question".to_owned(), question));
+            drop(update(
+                &mut state,
+                Message::RecallHistory {
+                    direction: SearchDirection::Reverse,
+                    focused: true,
+                },
+            ));
+            assert_eq!(
+                state.answer, "draft",
+                "questions also reject pending recall tasks"
+            );
+        }
+        state.question = None;
+        drop(update(
+            &mut state,
+            Message::RecallHistory {
+                direction: SearchDirection::Reverse,
+                focused: true,
+            },
+        ));
+        assert_eq!(state.answer, "help");
+    }
+
+    #[test]
+    fn history_drafts_and_edits_survive_late_interpreter_output() {
+        let mut state = state();
+        state.history.record("help").expect("record");
+        state.answer = "draft".to_owned();
+        drop(update(
+            &mut state,
+            Message::RecallHistory {
+                direction: SearchDirection::Reverse,
+                focused: true,
+            },
+        ));
+        drop(update(
+            &mut state,
+            Message::InputChanged("help tin".to_owned()),
+        ));
+        drop(update(
+            &mut state,
+            Message::Interpreter(interpreter::Message::Post("done".to_owned())),
+        ));
+        assert_eq!(state.answer, "help tin");
+        drop(update(
+            &mut state,
+            Message::RecallHistory {
+                direction: SearchDirection::Forward,
+                focused: true,
+            },
+        ));
+        assert_eq!(state.answer, "draft");
+        drop(update(
+            &mut state,
+            Message::RecallHistory {
+                direction: SearchDirection::Reverse,
+                focused: true,
+            },
+        ));
+        assert_eq!(
+            state.answer, "help",
+            "editing the recalled input preserves its stored entry"
+        );
+    }
+
+    #[test]
+    fn the_input_leaves_history_keys_for_the_keyboard_subscription() {
+        use iced::{
+            event::Status,
+            keyboard::{key::Named, Modifiers},
+            Event,
+        };
+
+        let state = state();
+        let mut simulator: iced_test::Simulator<'_, Message> =
+            iced_test::Simulator::new(view_input(&state, state.mode.colors()));
+        let _ = simulator
+            .click(iced_test::selector::id("input"))
+            .expect("focus the command input");
+        for key in [Named::ArrowUp, Named::ArrowDown] {
+            assert_eq!(simulator.tap_key(key), Status::Ignored);
+        }
+        for (key, text) in [("p", "\u{10}"), ("n", "\u{e}")] {
+            let key = keyboard::Key::Character(key.into());
+            let statuses = simulator.simulate([
+                Event::Keyboard(keyboard::Event::ModifiersChanged(Modifiers::CTRL)),
+                Event::Keyboard(keyboard::Event::KeyPressed {
+                    key: key.clone(),
+                    modified_key: key,
+                    physical_key: keyboard::key::Physical::Unidentified(
+                        keyboard::key::NativeCode::Unidentified,
+                    ),
+                    location: keyboard::Location::Standard,
+                    modifiers: Modifiers::CTRL,
+                    text: Some(text.into()),
+                    repeat: false,
+                }),
+            ]);
+            assert_eq!(statuses.last(), Some(&Status::Ignored));
+        }
+        assert_eq!(
+            simulator.into_messages().count(),
+            0,
+            "history shortcuts insert no text"
+        );
     }
 
     #[test]
@@ -1194,8 +1386,14 @@ mod tests {
             "save? ".to_owned(),
             Question::YesNo { default: true },
         ));
-        drop(update(&mut state, Message::Key(arrow_right())));
-        drop(update(&mut state, Message::Key(enter())));
+        drop(update(
+            &mut state,
+            Message::Key(arrow_right(), keyboard::Modifiers::empty()),
+        ));
+        drop(update(
+            &mut state,
+            Message::Key(enter(), keyboard::Modifiers::empty()),
+        ));
 
         assert!(state.question.is_none());
         assert!(matches!(state.output.last(), Some(Output::Normal(t)) if t == "save? NO"));
@@ -1204,11 +1402,17 @@ mod tests {
     #[test]
     fn keys_do_nothing_without_a_question_that_offers_answers() {
         let mut state = state();
-        drop(update(&mut state, Message::Key(enter())));
+        drop(update(
+            &mut state,
+            Message::Key(enter(), keyboard::Modifiers::empty()),
+        ));
         assert!(state.output.is_empty());
 
         state.question = Some(text_query("name: "));
-        drop(update(&mut state, Message::Key(enter())));
+        drop(update(
+            &mut state,
+            Message::Key(enter(), keyboard::Modifiers::empty()),
+        ));
         assert!(
             state.question.is_some(),
             "a typed answer is not taken by return"
@@ -1290,7 +1494,10 @@ mod tests {
             Message::Interpreter(interpreter::Message::Post("done".to_owned())),
         ));
         assert!(matches!(state.output.first(), Some(Output::Normal(text)) if text == "done"));
-        assert!(state.answer.is_empty());
+        assert_eq!(
+            state.answer, "typed",
+            "output preserves the next command's draft"
+        );
 
         drop(update(
             &mut state,

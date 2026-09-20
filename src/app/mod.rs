@@ -8,6 +8,7 @@ pub use app::*;
 )]
 mod app;
 mod figure;
+mod history;
 mod icons;
 mod pixel;
 mod player;

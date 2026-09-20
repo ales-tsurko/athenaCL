@@ -25,4 +25,16 @@ PI b added to PathInstances.
 ```
 
 Notice that in the above example the Path name and pitch collection arguments are entered at the same time as the command: "pin b d,f#,a". As an interactive command-line program, athenaCL can obtain arguments from the user, and can, alternatively, accept space-separated arguments following a command. Command-line arguments allow advanced users ease and speed and, when called from an external environment (such as a UNIX shell or Python script), permit advanced scripting automation. All athenaCL commands can function both with arguments and with interactive prompts. Command-line arguments, however, are never required: if arguments are absent, the user is prompted for the necessary details.
-      
+
+
+### Command History
+
+In the GUI, focus the command input and use **Up/Down** or **Ctrl+P/Ctrl+N** to
+recall commands. Recalled commands can be edited. Moving past the newest entry
+restores the unfinished command you were typing before browsing.
+
+The latest 1,000 commands are saved after submission in `.athenacl-history`
+beside the preferences file (`~/.athenacl-history` on macOS and Linux). Blank
+entries and consecutive duplicates are skipped; failed commands can be recalled
+for correction. Answers to interpreter questions are not recorded. The
+`ATHENACL_PREFS_DIR` environment variable also relocates the history file.
