@@ -7,6 +7,7 @@ pub use app::*;
     reason = "the module is the `app` module's core"
 )]
 mod app;
+mod completion;
 mod figure;
 mod history;
 mod icons;

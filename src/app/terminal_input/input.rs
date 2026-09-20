@@ -2,6 +2,7 @@
 
 use iced::{
     advanced::{
+        input_method,
         layout::{self, Layout},
         mouse, renderer,
         text::{self, paragraph, Renderer as TextRenderer},
@@ -9,6 +10,7 @@ use iced::{
         Clipboard, Shell,
     },
     alignment::Vertical,
+    keyboard::{self, key::Named, Modifiers},
     widget::{text_input, TextInput},
     Element, Event, Length, Padding, Rectangle, Size, Theme,
 };
@@ -17,10 +19,15 @@ use crate::app::{terminal_input::renderer::BlockRenderer, theme::Colors};
 
 /// A borderless command or answer field with a blinking, reverse-video block caret.
 pub(crate) struct Input<'a, Message> {
-    inner: TextInput<'a, Message>,
+    inner: TextInput<'a, Edit>,
     value: text_input::Value,
     colors: Colors,
     enabled: bool,
+    on_input: Option<EditHandler<'a, Message>>,
+    on_submit: Option<Message>,
+    on_complete: Option<CompletionHandler<'a, Message>>,
+    on_dismiss: Option<Message>,
+    observe_cursor: bool,
 }
 
 impl<'a, Message: Clone> Input<'a, Message> {
@@ -30,6 +37,11 @@ impl<'a, Message: Clone> Input<'a, Message> {
             value: text_input::Value::new(value),
             colors,
             enabled: false,
+            on_input: None,
+            on_submit: None,
+            on_complete: None,
+            on_dismiss: None,
+            observe_cursor: false,
         }
     }
 
@@ -39,14 +51,66 @@ impl<'a, Message: Clone> Input<'a, Message> {
     }
 
     pub(crate) fn on_input(mut self, on_input: impl Fn(String) -> Message + 'a) -> Self {
-        self.inner = self.inner.on_input(on_input);
+        self.inner = self.inner.on_input(Edit::Changed);
+        self.on_input = Some(Box::new(move |value, _| on_input(value)));
         self.enabled = true;
         self
     }
 
     pub(crate) fn on_submit(mut self, message: Message) -> Self {
-        self.inner = self.inner.on_submit(message);
+        self.inner = self.inner.on_submit(Edit::Submitted);
+        self.on_submit = Some(message);
         self
+    }
+
+    /// Report edits and caret moves using UTF-8 byte offsets, suppressing selected or IME text.
+    pub(crate) fn on_edit(
+        mut self,
+        on_edit: impl Fn(String, Option<usize>) -> Message + 'a,
+    ) -> Self {
+        self.inner = self.inner.on_input(Edit::Changed);
+        self.on_input = Some(Box::new(on_edit));
+        self.enabled = true;
+        self.observe_cursor = true;
+        self
+    }
+
+    pub(crate) fn on_complete(
+        mut self,
+        on_complete: impl Fn(bool, String, usize) -> Message + 'a,
+    ) -> Self {
+        self.on_complete = Some(Box::new(on_complete));
+        self
+    }
+
+    pub(crate) fn on_dismiss(mut self, message: Option<Message>) -> Self {
+        self.on_dismiss = message;
+        self
+    }
+
+    fn completion_key(&self, event: &Event, state: &State) -> Option<Message> {
+        let caret = state.caret(&self.value)?;
+        match event {
+            Event::Keyboard(keyboard::Event::KeyPressed {
+                key: keyboard::Key::Named(Named::Tab),
+                modifiers,
+                ..
+            }) if modifiers.is_empty() || *modifiers == Modifiers::SHIFT => {
+                self.on_complete.as_ref().map(|complete| {
+                    complete(
+                        modifiers.shift(),
+                        self.value.to_string(),
+                        self.value.until(caret).to_string().len(),
+                    )
+                })
+            }
+            Event::Keyboard(keyboard::Event::KeyPressed {
+                key: keyboard::Key::Named(Named::Escape),
+                modifiers,
+                ..
+            }) if modifiers.is_empty() => self.on_dismiss.clone(),
+            _ => None,
+        }
     }
 }
 
@@ -57,8 +121,10 @@ impl<Message: Clone> Widget<Message, Theme, iced::Renderer> for Input<'_, Messag
 
     fn state(&self) -> tree::State {
         tree::State::new(State {
-            input: Tree::new(&self.inner as &dyn Widget<Message, Theme, iced::Renderer>),
+            input: Tree::new(&self.inner as &dyn Widget<Edit, Theme, iced::Renderer>),
             space: paragraph::Plain::default(),
+            caret: None,
+            preediting: false,
         })
     }
 
@@ -112,16 +178,60 @@ impl<Message: Clone> Widget<Message, Theme, iced::Renderer> for Input<'_, Messag
         shell: &mut Shell<'_, Message>,
         viewport: &Rectangle,
     ) {
+        let state = tree.state.downcast_mut::<State>();
+        if let Some(message) = self.completion_key(event, state) {
+            state.caret = state.caret(&self.value);
+            shell.publish(message);
+            shell.capture_event();
+            return;
+        }
+        state.update_preedit(event);
+        let mut edits = Vec::new();
+        let mut local = Shell::new(&mut edits);
         self.inner.update(
-            &mut tree.state.downcast_mut::<State>().input,
+            &mut state.input,
             event,
             layout,
             cursor,
             renderer,
             clipboard,
-            shell,
+            &mut local,
             viewport,
         );
+        // Forward native redraw/IME requests even when the event produced no application message.
+        forward_requests(&local, shell);
+        let mut changed = false;
+        for edit in edits {
+            let message = match edit {
+                Edit::Changed(value) => {
+                    self.value = text_input::Value::new(&value);
+                    changed = true;
+                    self.on_input
+                        .as_ref()
+                        .expect("enabled input has a callback")(
+                        value,
+                        state
+                            .caret(&self.value)
+                            .map(|index| self.value.until(index).to_string().len()),
+                    )
+                }
+                Edit::Submitted => self
+                    .on_submit
+                    .clone()
+                    .expect("submit callback was configured"),
+            };
+            shell.publish(message);
+        }
+        let caret = state.caret(&self.value);
+        if self.observe_cursor && !changed && caret != state.caret && state.native().is_focused() {
+            if let Some(on_input) = &self.on_input {
+                shell.publish(on_input(
+                    self.value.to_string(),
+                    caret.map(|index| self.value.until(index).to_string().len()),
+                ));
+            }
+        }
+        state.caret = caret;
     }
 
     fn mouse_interaction(
@@ -206,14 +316,44 @@ impl<'a, Message: Clone + 'a> From<Input<'a, Message>> for Element<'a, Message> 
     }
 }
 
+type EditHandler<'a, Message> = Box<dyn Fn(String, Option<usize>) -> Message + 'a>;
+type CompletionHandler<'a, Message> = Box<dyn Fn(bool, String, usize) -> Message + 'a>;
+
 /// Retain the native input state and the space measurement across view rebuilds.
 #[derive(Debug)]
 pub(super) struct State {
     pub(super) input: Tree,
     pub(super) space: paragraph::Plain<<iced::Renderer as TextRenderer>::Paragraph>,
+    caret: Option<usize>,
+    preediting: bool,
 }
 
 impl State {
+    fn native(&self) -> &text_input::State<<iced::Renderer as TextRenderer>::Paragraph> {
+        self.input.state.downcast_ref()
+    }
+
+    fn caret(&self, value: &text_input::Value) -> Option<usize> {
+        if !self.native().is_focused() || self.preediting {
+            return None;
+        }
+        match self.native().cursor().state(value) {
+            text_input::cursor::State::Index(index) => Some(index),
+            text_input::cursor::State::Selection { .. } => None,
+        }
+    }
+
+    fn update_preedit(&mut self, event: &Event) {
+        match event {
+            Event::InputMethod(input_method::Event::Preedit(text, _)) => {
+                self.preediting = !text.is_empty();
+            }
+            Event::InputMethod(input_method::Event::Commit(_) | input_method::Event::Closed)
+            | Event::Window(iced::window::Event::Unfocused) => self.preediting = false,
+            _ => (),
+        }
+    }
+
     fn measure_space(&mut self, renderer: &iced::Renderer) -> f32 {
         let size = renderer.default_size();
         let line_height = text::LineHeight::default();
@@ -231,6 +371,27 @@ impl State {
             wrapping: text::Wrapping::default(),
         });
         self.space.min_width()
+    }
+}
+
+/// Native edits are mapped after Iced has updated its caret, including paste and IME commits.
+#[derive(Clone)]
+enum Edit {
+    Changed(String),
+    Submitted,
+}
+
+fn forward_requests<Message>(native: &Shell<'_, Edit>, shell: &mut Shell<'_, Message>) {
+    shell.request_redraw_at(native.redraw_request());
+    shell.request_input_method(native.input_method());
+    if native.is_event_captured() {
+        shell.capture_event();
+    }
+    if native.is_layout_invalid() {
+        shell.invalidate_layout();
+    }
+    if native.are_widgets_invalid() {
+        shell.invalidate_widgets();
     }
 }
 

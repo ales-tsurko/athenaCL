@@ -333,6 +333,102 @@ fn font_and_size_changes_update_the_empty_caret_and_scroll_padding() {
     }
 }
 
+#[test]
+fn completion_keys_are_focused_and_do_not_interfere_with_selection_or_ime() {
+    use iced::{advanced::input_method, keyboard::Modifiers};
+
+    let Some(mut input) = InputHarness::new("", "ti tail", Mode::Dark.colors(), "tiny-skia") else {
+        return;
+    };
+    input.input = Input::new("", "ti tail", input.colors)
+        .id("command")
+        .on_edit(|value, cursor| format!("edit:{cursor:?}:{value}"))
+        .on_complete(|backwards, value, cursor| format!("complete:{backwards}:{cursor}:{value}"))
+        .on_dismiss(Some("dismiss".to_owned()))
+        .on_submit("submit".to_owned())
+        .into();
+    input.tree.diff(input.input.as_widget());
+    input.layout();
+    assert!(input
+        .event(
+            iced_test::simulator::tap_key(Named::Tab, None)
+                .next()
+                .expect("key")
+        )
+        .is_empty());
+    input.focus(2);
+    let tab: Vec<_> = iced_test::simulator::tap_key(Named::Tab, None)
+        .flat_map(|event| input.event(event))
+        .collect();
+    assert_eq!(tab, ["complete:false:2:ti tail"]);
+    let backwards: Vec<_> = iced_test::simulator::tap_key(Named::Tab, None)
+        .map(|mut event| {
+            if let Event::Keyboard(iced::keyboard::Event::KeyPressed { modifiers, .. }) = &mut event
+            {
+                *modifiers = Modifiers::SHIFT;
+            }
+            event
+        })
+        .flat_map(|event| input.event(event))
+        .collect();
+    assert_eq!(backwards, ["complete:true:2:ti tail"]);
+    let escape: Vec<_> = iced_test::simulator::tap_key(Named::Escape, None)
+        .flat_map(|event| input.event(event))
+        .collect();
+    assert_eq!(escape, ["dismiss"]);
+    assert!(input
+        .tree
+        .state
+        .downcast_ref::<State>()
+        .input
+        .state
+        .downcast_ref::<InputState>()
+        .is_focused());
+
+    input
+        .tree
+        .state
+        .downcast_mut::<State>()
+        .input
+        .state
+        .downcast_mut::<InputState>()
+        .select_range(0, 2);
+    let selected: Vec<_> = iced_test::simulator::tap_key(Named::Tab, None)
+        .flat_map(|event| input.event(event))
+        .collect();
+    assert_eq!(selected, ["edit:None:ti tail"]);
+    input.focus(2);
+    let preedit = input.event(Event::InputMethod(input_method::Event::Preedit(
+        "音".into(),
+        None,
+    )));
+    assert!(preedit
+        .iter()
+        .all(|message| !message.starts_with("complete")));
+    let composing: Vec<_> = iced_test::simulator::tap_key(Named::Tab, None)
+        .flat_map(|event| input.event(event))
+        .collect();
+    assert!(composing.is_empty());
+    assert_eq!(
+        input.event(Event::InputMethod(input_method::Event::Commit("音".into()))),
+        ["edit:Some(5):ti音 tail"]
+    );
+    let moved: Vec<_> = iced_test::simulator::tap_key(Named::ArrowLeft, None)
+        .flat_map(|event| input.event(event))
+        .collect();
+    assert_eq!(moved, ["edit:Some(2):ti音 tail"]);
+    for _ in 0..10 {
+        assert!(
+            input
+                .event(Event::Window(window::Event::RedrawRequested(
+                    iced::time::Instant::now()
+                )))
+                .is_empty(),
+            "redraws do not trigger new suggestion searches"
+        );
+    }
+}
+
 fn row(pixels: &[[u8; 4]], y: usize, scale: usize) -> &[[u8; 4]] {
     pixels
         .chunks_exact(WIDTH as usize * scale)

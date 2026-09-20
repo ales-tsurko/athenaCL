@@ -9,7 +9,7 @@ use async_channel::{unbounded, Receiver, Sender};
 use rustpython_vm as vm;
 use thiserror::Error;
 use vm::{
-    builtins::{PyBaseExceptionRef, PyInt, PyList, PyStr, PyTuple},
+    builtins::{PyBaseExceptionRef, PyInt, PyStr, PyTuple},
     Interpreter as PyInterpreter, PyObjectRef, PyResult, VirtualMachine,
 };
 
@@ -67,6 +67,9 @@ impl InterpreterWorker {
                         Message::GetAppearance => interpreter
                             .pref("gui", "appearance")
                             .map(Message::Appearance),
+                        Message::GetCompletions => {
+                            interpreter.command_completions().map(Message::Completions)
+                        }
                         // saving needs no reply, unless it fails
                         Message::SetAppearance(appearance) => {
                             match interpreter.write_pref("gui", "appearance", &appearance) {
@@ -130,11 +133,24 @@ pub enum Message {
     Appearance(String),
     /// Save the GUI's look.
     SetAppearance(String),
+    /// Request the command catalog once, without running a user command.
+    GetCompletions,
+    /// Names and descriptions from athenaCL's command registry.
+    Completions(Vec<CommandCompletion>),
     PathLibUpdated(Vec<String>),
     TextureLibUpdated(Vec<String>),
     // Not system file path, but athenaCL pitch path
     ActivePathSet(String),
     ActiveTextureSet(String),
+}
+
+/// A command offered by the interpreter's own registry.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CommandCompletion {
+    /// Canonical command spelling, accepted regardless of ASCII case.
+    pub name: String,
+    /// A short description from the existing command documentation.
+    pub description: String,
 }
 
 /// What kind of answer a question wants, so that the gui can offer it.
@@ -242,6 +258,27 @@ interp"#
         })
     }
 
+    fn command_completions(&self) -> InterpreterResult<Vec<CommandCompletion>> {
+        self.py_interpreter.enter(|vm| {
+            let result = vm
+                .call_method(&self.ath_object, "commandCompletions", ())
+                .try_py()?;
+            vm.extract_elements_with(&result, |entry| {
+                let tuple = entry
+                    .downcast_ref::<PyTuple>()
+                    .ok_or_else(|| vm.new_type_error("Expected a command tuple".to_owned()))?;
+                let [name, description] = tuple.as_slice() else {
+                    return Err(vm.new_value_error("Expected name and description".to_owned()));
+                };
+                Ok(CommandCompletion {
+                    name: extract_string(vm, name.clone())?,
+                    description: extract_string(vm, description.clone())?,
+                })
+            })
+            .try_py()
+        })
+    }
+
     /// A preference, from athenaCL's preferences file.
     fn pref(&self, category: &str, key: &str) -> InterpreterResult<String> {
         self.py_interpreter.enter(|vm| -> _ {
@@ -342,13 +379,10 @@ fn extract_result_tuple(vm: &VirtualMachine, result: PyObjectRef) -> PyResult<(b
     }
 }
 
-#[expect(
-    dead_code,
-    reason = "kept beside `extract_string` for Python list results"
-)]
+#[cfg(test)]
 fn extract_vec_string(vm: &VirtualMachine, result: PyObjectRef) -> PyResult<Vec<String>> {
     result
-        .downcast_ref::<PyList>()
+        .downcast_ref::<vm::builtins::PyList>()
         .ok_or_else(|| vm.new_type_error("Expected a list".to_owned()))
         .map(|list| {
             list.borrow_vec()
@@ -403,6 +437,37 @@ impl Error {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn completions_come_from_the_live_command_registry_with_descriptions() {
+        init_scratch_prefs();
+        let interpreter = Interpreter::new().expect("interpreter");
+        let commands = interpreter.command_completions().expect("command catalog");
+        let names = interpreter.py_interpreter.enter(|vm| {
+            let names = interpreter
+                .ath_object
+                .get_attr("cmdRef", vm)
+                .expect("registry");
+            extract_vec_string(vm, names).expect("command names")
+        });
+        assert_eq!(
+            commands
+                .iter()
+                .map(|command| &command.name)
+                .collect::<Vec<_>>(),
+            names.iter().collect::<Vec<_>>()
+        );
+        assert!(commands
+            .iter()
+            .any(|command| command.name == "TIn" && command.description == "TextureInstance: new"));
+        assert!(commands
+            .iter()
+            .any(|command| command.name == "help" && !command.description.is_empty()));
+        assert!(
+            commands.iter().any(|command| command.name == "PIals"),
+            "documented hidden commands are available too"
+        );
+    }
 
     #[test]
     fn athenacl_reports_the_package_version() {

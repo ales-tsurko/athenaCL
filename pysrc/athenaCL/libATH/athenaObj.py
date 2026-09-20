@@ -719,6 +719,20 @@ class AthenaObject(object):
         helpTopics = allHelpTopics  # all that remain
         return cmdsDoc, cmdsUndoc, helpTopics
 
+    def commandCompletions(self):
+        """Command names and short descriptions for the GUI, from the live catalog."""
+        descriptions = {}
+        for group in self.cmdDict.values():
+            for entry in group[1:]:
+                name, _, action = entry.partition("(")
+                descriptions[name] = "%s: %s" % (group[0], action.rstrip(")"))
+        result = []
+        for name in self.cmdRef:
+            doc = getattr(self.help, name, "")
+            summary = doc.split(": ", 1)[-1].split(". ", 1)[0].rstrip(".")
+            result.append((name, descriptions.get(name, " ".join(summary.split()))))
+        return result
+
     def prefixMatch(self, prefix, usrStr):
         """will attempt to match a user string to a command, knowing the prefix
         that command will be found in. if an PI command, user can enter both v or

@@ -18,6 +18,7 @@ use rustyline::history::SearchDirection;
 
 use crate::{
     app::{
+        completion::{Action as CompletionAction, Sources, Suggestions},
         figure::{self, Palette},
         history::{self, History},
         icons::Icon,
@@ -76,6 +77,7 @@ pub(super) const SOUND_FONT: &str = "resources/SGM-v2.01-YamahaGrand-Guit-Bass-v
 pub struct State {
     answer: String,
     history: History,
+    suggestions: Suggestions,
     output: Vec<Output>,
     question: Option<Query>,
     player_state: GlobalPlayerState,
@@ -90,6 +92,67 @@ pub struct State {
     figure_view: View,
     /// The tempo as typed.
     tempo: String,
+}
+
+impl State {
+    fn update_completion(&mut self, action: CompletionAction) -> Task<Message> {
+        match action {
+            CompletionAction::Edit(value, cursor) => self.edit_command(value, cursor),
+            CompletionAction::Cycle(backwards, value, cursor) => {
+                return self.complete_command(backwards, value, cursor);
+            }
+            CompletionAction::Select(index) => return self.accept_suggestion(index),
+            CompletionAction::Dismiss => self.suggestions.dismiss(),
+        }
+        Task::none()
+    }
+
+    fn completion(&mut self) -> (&mut Suggestions, Sources<'_>) {
+        (
+            &mut self.suggestions,
+            Sources {
+                history: &self.history,
+                paths: &self.path_lib,
+                textures: &self.texture_lib,
+            },
+        )
+    }
+
+    fn edit_command(&mut self, value: String, cursor: Option<usize>) {
+        if self.question.is_none() {
+            let (suggestions, sources) = self.completion();
+            suggestions.edit(&value, cursor, sources);
+            self.answer = value;
+        }
+    }
+
+    fn complete_command(&mut self, backwards: bool, value: String, cursor: usize) -> Task<Message> {
+        if self.question.is_some() {
+            return Task::none();
+        }
+        self.edit_command(value, Some(cursor));
+        let (suggestions, sources) = self.completion();
+        let completion = suggestions.cycle(backwards, sources);
+        self.apply_completion(completion)
+    }
+
+    fn accept_suggestion(&mut self, index: usize) -> Task<Message> {
+        if self.question.is_some() {
+            return Task::none();
+        }
+        let completion = self.suggestions.accept(index);
+        self.apply_completion(completion)
+    }
+
+    /// Fill the input without submitting; Enter executes the command.
+    fn apply_completion(&mut self, completion: Option<(String, usize)>) -> Task<Message> {
+        let Some((value, cursor)) = completion else {
+            return Task::none();
+        };
+        self.answer = value;
+        operation::focus(self.input_id.clone())
+            .chain(operation::move_cursor_to(self.input_id.clone(), cursor))
+    }
 }
 
 impl std::fmt::Debug for State {
@@ -111,6 +174,7 @@ impl Default for State {
         for message in [
             interpreter::Message::GetScratchDir,
             interpreter::Message::GetAppearance,
+            interpreter::Message::GetCompletions,
         ] {
             interpreter::INTERPRETER_WORKER
                 .interp_sender
@@ -130,6 +194,7 @@ impl Default for State {
             player_state: midi_player_state,
             answer: String::new(),
             history,
+            suggestions: Suggestions::default(),
             output,
             question: None,
             scratch_dir: String::new(),
@@ -232,6 +297,7 @@ pub enum View {
 pub fn update(state: &mut State, message: Message) -> Task<Message> {
     match message {
         Message::InputChanged(val) => state.answer = val,
+        Message::Completion(action) => return state.update_completion(action),
         Message::Submit => return submit(state),
         Message::Answer(value) => return answer_current(state, value),
         Message::Key(key, modifiers) => return press_key(state, &key, modifiers),
@@ -259,6 +325,7 @@ pub fn update(state: &mut State, message: Message) -> Task<Message> {
 /// Send what's typed: the answer to the question, or a command. It's read now rather than when
 /// the input was drawn, so nothing typed since is lost.
 fn submit(state: &mut State) -> Task<Message> {
+    state.suggestions.clear();
     let typed = state.answer.clone();
     match state.question.clone() {
         Some(query) => answer(state, &query.prompt, typed),
@@ -314,6 +381,7 @@ fn recall_history(state: &mut State, direction: SearchDirection, focused: bool) 
         match state.history.recall(direction, &state.answer) {
             Ok(Some(command)) => {
                 state.answer = command;
+                state.suggestions.clear();
                 return operation::move_cursor_to_end(state.input_id.clone());
             }
             Ok(None) => (),
@@ -420,6 +488,7 @@ fn update_figure(state: &mut State, message: figure::Message) -> Task<Message> {
 fn update_interpreter(state: &mut State, message: interpreter::Message) -> Task<Message> {
     match message {
         interpreter::Message::SendCmd(ref cmd) => {
+            state.suggestions.clear();
             state.history.reset();
             state.answer = "".to_owned();
             state.output.push(Output::Command {
@@ -435,6 +504,7 @@ fn update_interpreter(state: &mut State, message: interpreter::Message) -> Task<
             push_output(state, Output::Error(output))
         }
         interpreter::Message::Ask { prompt, question } => {
+            state.suggestions.clear();
             state.history.reset();
             state.answer = "".to_owned();
             state.question = Some(Query::new(prompt, question));
@@ -480,14 +550,19 @@ fn update_interpreter(state: &mut State, message: interpreter::Message) -> Task<
 
             Task::none()
         }
+        interpreter::Message::Completions(commands) => {
+            let (suggestions, sources) = state.completion();
+            suggestions.set_commands(commands, sources);
+            Task::none()
+        }
         interpreter::Message::PathLibUpdated(path_lib) => {
             state.path_lib = path_lib;
-
+            refresh_suggestions(state);
             Task::none()
         }
         interpreter::Message::TextureLibUpdated(texture_lib) => {
             state.texture_lib = texture_lib;
-
+            refresh_suggestions(state);
             Task::none()
         }
         interpreter::Message::ActivePathSet(path_name) => {
@@ -502,6 +577,11 @@ fn update_interpreter(state: &mut State, message: interpreter::Message) -> Task<
         }
         _ => Task::none(),
     }
+}
+
+fn refresh_suggestions(state: &mut State) {
+    let (suggestions, sources) = state.completion();
+    suggestions.refresh(sources);
 }
 
 /// A figure's events as a score: a texture's, or one for each of an ensemble's.
@@ -811,19 +891,35 @@ fn view_input(state: &State, colors: Colors) -> Column<'_, Message> {
             "type a command or 'help'",
         ),
     };
-    let line = row![
-        label,
-        Input::new(placeholder, &state.answer, colors)
-            .id(state.input_id.clone())
-            .on_input(Message::InputChanged)
-            .on_submit(Message::Submit),
-    ]
-    .spacing(10)
-    .align_y(Vertical::Center);
+    let input = Input::new(placeholder, &state.answer, colors)
+        .id(state.input_id.clone())
+        .on_submit(Message::Submit);
+    let input = if state.question.is_none() {
+        input
+            .on_edit(|value, cursor| CompletionAction::Edit(value, cursor).into())
+            .on_complete(|backwards, value, cursor| {
+                CompletionAction::Cycle(backwards, value, cursor).into()
+            })
+            .on_dismiss(
+                state
+                    .suggestions
+                    .is_open()
+                    .then_some(CompletionAction::Dismiss.into()),
+            )
+    } else {
+        input.on_input(Message::InputChanged)
+    };
+    let line = row![label, input].spacing(10).align_y(Vertical::Center);
 
     match &state.question {
         Some(query) => column![view_query(&query.prompt, colors), line].spacing(8),
-        None => column![line],
+        None => column![line]
+            .extend(
+                state
+                    .suggestions
+                    .view(colors, |index| CompletionAction::Select(index).into()),
+            )
+            .spacing(10),
     }
 }
 
@@ -1001,6 +1097,7 @@ fn pick_directory(title: &str) -> Option<String> {
 #[derive(Debug, Clone)]
 pub enum Message {
     InputChanged(String),
+    Completion(CompletionAction),
     /// Send what's typed.
     Submit,
     Answer(String),
@@ -1033,6 +1130,12 @@ impl From<interpreter::Message> for Message {
 impl From<player::Message> for Message {
     fn from(value: player::Message) -> Self {
         Self::Player(value)
+    }
+}
+
+impl From<CompletionAction> for Message {
+    fn from(action: CompletionAction) -> Self {
+        Self::Completion(action)
     }
 }
 
@@ -1094,6 +1197,7 @@ mod tests {
         State {
             answer: String::new(),
             history: History::default(),
+            suggestions: Suggestions::default(),
             output: Vec::new(),
             question: None,
             player_state: GlobalPlayerState::headless(),
@@ -1197,6 +1301,106 @@ mod tests {
             Message::InputChanged("hello".to_owned()),
         ));
         assert_eq!(state.answer, "hello");
+    }
+
+    fn completion_catalog(state: &mut State) {
+        let commands = ["TIls", "TIn", "TIo"]
+            .into_iter()
+            .map(|name| interpreter::CommandCompletion {
+                name: name.to_owned(),
+                description: "TextureInstance".to_owned(),
+            })
+            .collect();
+        drop(update(
+            state,
+            Message::Interpreter(interpreter::Message::Completions(commands)),
+        ));
+    }
+
+    #[test]
+    fn suggestions_fill_the_input_without_submitting_and_ignore_questions() {
+        let mut state = state();
+        completion_catalog(&mut state);
+        drop(update(
+            &mut state,
+            CompletionAction::Edit("ti".to_owned(), Some(2)).into(),
+        ));
+        drop(update(
+            &mut state,
+            CompletionAction::Cycle(false, "ti".to_owned(), 2).into(),
+        ));
+        assert_eq!(state.answer, "TIls ");
+        assert!(state.output.is_empty());
+        assert!(state.history.recent().next().is_none());
+        drop(update(
+            &mut state,
+            CompletionAction::Cycle(false, "TIls ".to_owned(), 5).into(),
+        ));
+        assert_eq!(state.answer, "TIn ");
+        drop(update(&mut state, CompletionAction::Dismiss.into()));
+        assert!(!state.suggestions.is_open());
+        drop(update(
+            &mut state,
+            Message::Interpreter(interpreter::Message::Ask {
+                prompt: "name".to_owned(),
+                question: Question::Text,
+            }),
+        ));
+        drop(update(
+            &mut state,
+            Message::InputChanged("answer".to_owned()),
+        ));
+        drop(update(
+            &mut state,
+            CompletionAction::Cycle(false, "ti".to_owned(), 2).into(),
+        ));
+        drop(update(&mut state, CompletionAction::Select(0).into()));
+        drop(update(
+            &mut state,
+            CompletionAction::Edit("stale".to_owned(), Some(5)).into(),
+        ));
+        assert_eq!(state.answer, "answer");
+        assert!(!state.suggestions.is_open());
+    }
+
+    #[test]
+    fn suggestions_render_in_both_themes_and_can_be_clicked() {
+        for mode in [Mode::Light, Mode::Dark] {
+            let mut state = state();
+            state.mode = mode;
+            completion_catalog(&mut state);
+            drop(update(
+                &mut state,
+                CompletionAction::Edit("ti".to_owned(), Some(2)).into(),
+            ));
+            let mut simulator: iced_test::Simulator<'_, Message> = iced_test::Simulator::with_size(
+                iced::Settings {
+                    default_font: Font::with_name("Fira Mono"),
+                    default_text_size: 14.into(),
+                    fonts: vec![include_bytes!(
+                        "../../resources/fonts/Fira_Mono/FiraMono-Regular.ttf"
+                    )
+                    .as_slice()
+                    .into()],
+                    ..iced::Settings::default()
+                },
+                Size::new(700.0, 220.0),
+                view_input(&state, mode.colors()),
+            );
+            let _ = simulator
+                .snapshot(&mode.theme())
+                .expect("suggestions render");
+            let _ = simulator
+                .click(iced_test::selector::id("input"))
+                .expect("focus");
+            let _ = simulator.click("TIo").expect("suggestion");
+            let messages: Vec<_> = simulator.into_messages().collect();
+            for message in messages {
+                drop(update(&mut state, message));
+            }
+            assert_eq!(state.answer, "TIo ");
+            assert!(state.output.is_empty());
+        }
     }
 
     #[test]
@@ -1344,9 +1548,10 @@ mod tests {
             ]);
             assert_eq!(statuses.last(), Some(&Status::Ignored));
         }
-        assert_eq!(
-            simulator.into_messages().count(),
-            0,
+        assert!(
+            simulator.into_messages().all(|message| matches!(
+                message, Message::Completion(CompletionAction::Edit(value, _)) if value.is_empty()
+            )),
             "history shortcuts insert no text"
         );
     }

@@ -47,6 +47,24 @@ if arguments are absent, the user is prompted for the necessary details.
 
 
 
+## Command Suggestions
+
+The GUI suggests command names as you type, with short descriptions. Press
+**Tab** to insert a suggestion and cycle through the matches; **Shift+Tab**
+cycles backwards. You can also click a suggestion. **Escape** dismisses the
+list, and **Enter** runs the command. Pressing Tab on an empty line offers all
+commands. **Up/Down** remain available for command history.
+
+Suggestions also include matching commands from your saved history and existing
+PathInstance or TextureInstance names where an argument refers to one, such as
+`pio`, `tio`, `piv`, or `tiv`. Command names also complete after `help` and `?`.
+Completion replaces the word at the cursor while preserving later arguments. It
+is disabled while selecting text, composing text with an input method, or
+answering an interpreter question.
+
+
+
+
 ## Command History
 
 In the GUI, focus the command input and use **Up/Down** or **Ctrl+P/Ctrl+N** to

@@ -131,6 +131,11 @@ impl History {
         self.position = None;
         self.draft.clear();
     }
+
+    /// Saved commands, newest first, without changing recall or its draft.
+    pub fn recent(&self) -> impl Iterator<Item = &str> {
+        self.entries.iter().rev().map(String::as_str)
+    }
 }
 
 impl Default for History {
