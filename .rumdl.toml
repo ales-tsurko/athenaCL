@@ -1,0 +1,27 @@
+[global]
+enable = ["MD009", "MD012", "MD013", "MD022", "MD025", "MD041", "MD047"]
+exclude = ["target/**", "doc/book/**", "doc/old/**"]
+
+[MD013]
+line-length = 80
+length-mode = "chars"
+reflow = true
+reflow-mode = "normalize"
+strict = true
+# Command transcripts and program output keep their original line layout.
+code-block-line-length = 0
+
+[MD022]
+# H1, H2, H3, H4, H5, H6; the title at the start needs no preceding blank line.
+lines-above = [1, 4, 2, 1, 1, 1]
+lines-below = 1
+
+[MD012]
+maximum = 1
+
+[MD041]
+fix = true
+
+[per-file-ignores]
+# mdBook uses additional H1 headings and indivisible chapter links in its contents.
+"doc/src/SUMMARY.md" = ["MD013", "MD025"]

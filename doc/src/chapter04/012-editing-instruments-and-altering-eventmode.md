@@ -1,9 +1,14 @@
-## Editing Instruments and Altering EventMode
+# Editing Instruments and Altering EventMode
 
-A Texture's instrument can be edited like other Texture attributes. The instruments available for editing, just as when creating a Texture, are dependent on the active EventMode. To use instruments from another EventMode, the active EventMode must first be changed, and then the Texture may be assigned an instrument.
-      
-In the following example, the user changes the EventMode to csoundNative with EMo, examines the available instruments with EMi, and then assigns each Texture instrument 80:
-      
+A Texture's instrument can be edited like other Texture attributes. The
+instruments available for editing, just as when creating a Texture, are
+dependent on the active EventMode. To use instruments from another EventMode,
+the active EventMode must first be changed, and then the Texture may be assigned
+an instrument.
+
+In the following example, the user changes the EventMode to csoundNative with
+EMo, examines the available instruments with EMi, and then assigns each Texture
+instrument 80:
 
 **Changing EventMode and editing Texture instrument**
 
@@ -121,8 +126,13 @@ texture (s)tatic
 texture (d)ynamic   none
 ```
 
-Notice that, after editing the Texture, a warning is issued. This warning tells the user that additional auxiliary ParameterObjects have been added. As a Csound-based instrument, each event of instrument 80 can accept two additional synthesis parameters. When viewing a Texture with this instrument, as shown above, the auxiliary display shows two additional ParameterObjects, x0 and x1. To learn what these auxiliary ParameterObjects control, the command TIdoc ma be used:
-      
+Notice that, after editing the Texture, a warning is issued. This warning tells
+the user that additional auxiliary ParameterObjects have been added. As a
+Csound-based instrument, each event of instrument 80 can accept two additional
+synthesis parameters. When viewing a Texture with this instrument, as shown
+above, the auxiliary display shows two additional ParameterObjects, x0 and x1.
+To learn what these auxiliary ParameterObjects control, the command TIdoc ma be
+used:
 
 **Examining Texture documentation with TIdoc**
 
@@ -160,8 +170,11 @@ texture (s)tatic
 texture (d)ynamic   none
 ```
 
-Assuming that Csound is properly configured, a new set of EventLists can be created. As the user is now in EventMode csoundNative and has csoundNative textures, both a Csound score and a MIDI file are created. (See  for more information on working with Csound in athenaCL.) The user may render the Csound score with ELr, and then audition the results with the ELh command.
-      
+Assuming that Csound is properly configured, a new set of EventLists can be
+created. As the user is now in EventMode csoundNative and has csoundNative
+textures, both a Csound score and a MIDI file are created. (See for more
+information on working with Csound in athenaCL.) The user may render the Csound
+score with ELr, and then audition the results with the ELh command.
 
 **Creating a new EventList with ELn**
 
@@ -176,4 +189,3 @@ audio rendering initiated: /Volumes/xdisc/_scratch/ath2010.07.03.18.40.11.bat
 EventList hear initiated: /Volumes/xdisc/_scratch/ath2010.07.03.18.40.11.aif
 EventList hear initiated: /Volumes/xdisc/_scratch/ath2010.07.03.18.40.11.mid
 ```
-

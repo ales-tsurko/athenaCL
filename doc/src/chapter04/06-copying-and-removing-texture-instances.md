@@ -1,6 +1,8 @@
-## Copying and Removing Texture Instances
+# Copying and Removing Texture Instances
 
-TextureInstances can be duplicated with the command TIcp. The user is prompted to enter the name of the Texture to be copied, and then the name of the copy. The copy can be confirmed by listing all Textures with the command TIls.
+TextureInstances can be duplicated with the command TIcp. The user is prompted
+to enter the name of the Texture to be copied, and then the name of the copy.
+The copy can be confirmed by listing all Textures with the command TIls.
 
 **Copying a TextureInstance**
 
@@ -18,8 +20,9 @@ TextureInstances available:
  + b2               + LineGroove  auto-muteHiConga 62  00.0--20.0   0
 ```
 
-Textures can be deleted with the command TIrm, for TextureInstance Remove. The user is prompted to enter the name of the Texture to be deleted. The removal can be confirmed by listing all Textures with the command TIls.
-      
+Textures can be deleted with the command TIrm, for TextureInstance Remove. The
+user is prompted to enter the name of the Texture to be deleted. The removal can
+be confirmed by listing all Textures with the command TIls.
 
 **Removing a TextureInstance**
 
@@ -38,5 +41,6 @@ TextureInstances available:
 pi{auto-muteHiConga}ti{b1} :: 
 ```
 
-When the active Texture is deleted, as it is above, athenaCL chooses a new Texture to activate, here choosing "b1." To select a different Texture, use the command TIo.
-      
+When the active Texture is deleted, as it is above, athenaCL chooses a new
+Texture to activate, here choosing "b1." To select a different Texture, use the
+command TIo.

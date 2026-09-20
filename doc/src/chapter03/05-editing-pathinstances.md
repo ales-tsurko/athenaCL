@@ -1,9 +1,13 @@
-## Editing PathInstances
+# Editing PathInstances
 
-A Path can be edited as a serial succession of Multisets with the standard assortment of serial operations: retrograde, rotation, and slice. Additionally, each Multiset in a Path can be changed, either by transposition or replacement.
-      
-Whenever a serial edit is performed on a Path, the edited Path becomes a new, distinct Path and the original Path is left unchanged. For example, to create the retrograde of the active Path, enter PIret. The user must provide the name of the new Path:
-      
+A Path can be edited as a serial succession of Multisets with the standard
+assortment of serial operations: retrograde, rotation, and slice. Additionally,
+each Multiset in a Path can be changed, either by transposition or replacement.
+
+Whenever a serial edit is performed on a Path, the edited Path becomes a new,
+distinct Path and the original Path is left unchanged. For example, to create
+the retrograde of the active Path, enter PIret. The user must provide the name
+of the new Path:
 
 **Creating a retrograde of a Path with PIret**
 
@@ -20,8 +24,9 @@ PathInstances available:
  + pathCret         0  4-14A,7-34,6-4,5-3A 
 ```
 
-To create a rotation, the user, after entering PIrot, must enter the number of the Multiset to occupy the new first position. If the new first position is to be the second Multiset, the user would enter 2:
-      
+To create a rotation, the user, after entering PIrot, must enter the number of
+the Multiset to occupy the new first position. If the new first position is to
+be the second Multiset, the user would enter 2:
 
 **Creating a rotation of a Path with PIrot**
 
@@ -40,7 +45,10 @@ PathInstances available:
  + pathCretRot      0  7-34,6-4,5-3A,4-14A 
 ```
 
-A slice will extract a segment from a Path. To create a slice, enter PIslc. The user is prompted for the name of the new Path, and the start and end Multiset positions. If the slice is to only contain the last two chords of a four chord Path, for example, the start and end positions would be 3,4:
+A slice will extract a segment from a Path. To create a slice, enter PIslc. The
+user is prompted for the name of the new Path, and the start and end Multiset
+positions. If the slice is to only contain the last two chords of a four chord
+Path, for example, the start and end positions would be 3,4:
 
 **Creating a slice of a Path with PIslc**
 
@@ -60,10 +68,11 @@ PathInstances available:
  + pathD            0  5-3A,4-14A      
 ```
 
-There are three ways to edit a single Multiset within a Path using the PIe command: by replacement, by transposition, or by inversion. In all cases, the number of elements in the Multiset must be maintained.
-      
+There are three ways to edit a single Multiset within a Path using the PIe
+command: by replacement, by transposition, or by inversion. In all cases, the
+number of elements in the Multiset must be maintained.
+
 To edit a single Multiset in a Path enter PIe:
-      
 
 **Transposing a set within a Path**
 
@@ -86,9 +95,19 @@ durFraction         1(50%)           1(50%)
 TI References: none.
 ```
 
-Here the user has selected the Multiset in position "2" of PI "pathD" to edit. The user next selects to edit the set by transposition, entering "t". There are two methods of transposition available: a "literal" transposition is done in pitch space, creating a new set in the range of all positive and negative integers; a "modulus" transposition is done in pitch-class space, creating a new set in the range of pitch-classes 0 through 11. In the example above the user has selected a literal ("l") transposition and enters "8" as the transposition value.  This shifts each pitch in the Multiset up 8 half-steps. Since this is a literal and not a modulus transposition, pitch 5 becomes pitch 15, or D#5.
-      
-Any Multiset in a Path can be replaced with a Multiset of equal size. For example, the same Multiset edited above can be replaced with any four-element Multiset:
+Here the user has selected the Multiset in position "2" of PI "pathD" to edit.
+The user next selects to edit the set by transposition, entering "t". There are
+two methods of transposition available: a "literal" transposition is done in
+pitch space, creating a new set in the range of all positive and negative
+integers; a "modulus" transposition is done in pitch-class space, creating a new
+set in the range of pitch-classes 0 through 11. In the example above the user
+has selected a literal ("l") transposition and enters "8" as the transposition
+value. This shifts each pitch in the Multiset up 8 half-steps. Since this is a
+literal and not a modulus transposition, pitch 5 becomes pitch 15, or D#5.
+
+Any Multiset in a Path can be replaced with a Multiset of equal size. For
+example, the same Multiset edited above can be replaced with any four-element
+Multiset:
 
 **Replacing a Multiset with a new Multiset**
 
@@ -110,4 +129,3 @@ scPath              5-3A             2-2
 durFraction         1(50%)           1(50%)       
 TI References: none.
 ```
-

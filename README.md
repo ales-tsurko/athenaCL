@@ -18,7 +18,7 @@ Or, as described by the author more specifically, it is a tool for:
 ## Documentation
 
 The manual is built using [mdBook](https://rust-lang.github.io/mdBook) you will
-find the source code inside `doc/` directory. You can read it 
+find the source code inside `doc/` directory. You can read it
 [here](https://alestsurko.by/athenaCL/).
 
 
@@ -50,8 +50,8 @@ make run
 
 ### Bundle an app on macOS
 
-Bundling requires [`cargo-bundle`](https://crates.io/crates/cargo-bundle).
-Only macOS is configured currently. To bundle a package:
+Bundling requires [`cargo-bundle`](https://crates.io/crates/cargo-bundle). Only
+macOS is configured currently. To bundle a package:
 
 ```
 make pack-macos

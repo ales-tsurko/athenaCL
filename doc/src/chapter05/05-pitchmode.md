@@ -1,11 +1,26 @@
-## PitchMode
+# PitchMode
 
-PitchMode is a Texture attribute that controls the interpretation of the Path from inside a TextureInstance.
-      
-PitchMode determines if a Path is represented to the Texture as a pitch space set, a pitch class set, or set class. As a pitch space set, a Texture performs register information included in a Path. The set (1,11,24), performed as a pitch space set, would consist of a C-sharp, a B-natural a minor seventh above the lowest pitch, and C-natural an octave and major-seventh above the lowest pitch. The set (1,11,24) performed as a pitch-class set, would be interpreted as the set (1,11,0): register information is removed, while pitch class is retained. The set (1,11,24), performed as a set-class, would be interpreted as the set (0,1,2): register and pitch-class are removed, while the normal-form of the set-class is retained.
-      
-In the following example, a new Texture is created from TextureModule LineGroove. First, the TM must be selected with the TMo command. Next, a new Texture named b1 is created with the TIn command. The TImode command can be used to edit many Texture options. In this example, pitchMode is selected and "pcs," for pitch class space, is selected. Finally, the Texture is given a more interesting rhythm, by use of the Rhythm ParameterObject markovPulse, and is panned to the right with a constant value:
-      
+PitchMode is a Texture attribute that controls the interpretation of the Path
+from inside a TextureInstance.
+
+PitchMode determines if a Path is represented to the Texture as a pitch space
+set, a pitch class set, or set class. As a pitch space set, a Texture performs
+register information included in a Path. The set (1,11,24), performed as a pitch
+space set, would consist of a C-sharp, a B-natural a minor seventh above the
+lowest pitch, and C-natural an octave and major-seventh above the lowest pitch.
+The set (1,11,24) performed as a pitch-class set, would be interpreted as the
+set (1,11,0): register information is removed, while pitch class is retained.
+The set (1,11,24), performed as a set-class, would be interpreted as the set
+(0,1,2): register and pitch-class are removed, while the normal-form of the
+set-class is retained.
+
+In the following example, a new Texture is created from TextureModule
+LineGroove. First, the TM must be selected with the TMo command. Next, a new
+Texture named b1 is created with the TIn command. The TImode command can be used
+to edit many Texture options. In this example, pitchMode is selected and "pcs,"
+for pitch class space, is selected. Finally, the Texture is given a more
+interesting rhythm, by use of the Rhythm ParameterObject markovPulse, and is
+panned to the right with a constant value:
 
 **Editing PitchMode of a TextureInstance**
 
@@ -58,5 +73,12 @@ texture (s)tatic
 texture (d)ynamic   none
 ```
 
-Because Path q1 is still active, this new Texture is assigned the same Path as Texture a1. After setting the Texture's pitchMode to pitchClassSpace, however, Texture b1 will receive only pitch class values from Path q1: all register information, as performed in Texture a1, is stripped. By creating a new EventList with ELn and auditioning the results, it should be clear that both Textures share the same pitch information and duration weighting. Notice that the faster-moving single-note line Texture b1, however, stays within a single register. When a Texture is in pitchClassSpace Pitch mode, all pitches from a Path are interpreted within the octave from C4 to C5. 
-      
+Because Path q1 is still active, this new Texture is assigned the same Path as
+Texture a1. After setting the Texture's pitchMode to pitchClassSpace, however,
+Texture b1 will receive only pitch class values from Path q1: all register
+information, as performed in Texture a1, is stripped. By creating a new
+EventList with ELn and auditioning the results, it should be clear that both
+Textures share the same pitch information and duration weighting. Notice that
+the faster-moving single-note line Texture b1, however, stays within a single
+register. When a Texture is in pitchClassSpace Pitch mode, all pitches from a
+Path are interpreted within the octave from C4 to C5.

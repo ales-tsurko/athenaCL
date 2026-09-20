@@ -1,11 +1,19 @@
-## Creating athenaCL Generator ParameterObjects within Python
+# Creating athenaCL Generator ParameterObjects within Python
 
-Components of the athenaCL system can be used in isolation as resources within Python. Generator ParameterObjects offer particularly useful resources for a range of generative activities.
-      
-To create a Generator ParameterObject, a Python list of ParameterObject arguments must be passed to the factory() function of the parameter module. This list of arguments must provide proper data objects for each argument.
-      
-The returned ParameterObject instance has many useful attributes and methods. The doc attribute provides the ParameterObject documentation string. The __str__ method, accessed with the built-in str() function, returns the complete formatted argument string. The __call__ method, accessed by calling the instance name, takes a single argument and returns the next value, or the value at the specified argument time value.
-      
+Components of the athenaCL system can be used in isolation as resources within
+Python. Generator ParameterObjects offer particularly useful resources for a
+range of generative activities.
+
+To create a Generator ParameterObject, a Python list of ParameterObject
+arguments must be passed to the factory() function of the parameter module. This
+list of arguments must provide proper data objects for each argument.
+
+The returned ParameterObject instance has many useful attributes and methods.
+The doc attribute provides the ParameterObject documentation string. The __str__
+method, accessed with the built-in str() function, returns the complete
+formatted argument string. The __call__ method, accessed by calling the instance
+name, takes a single argument and returns the next value, or the value at the
+specified argument time value.
 
 **Creating a Generator ParameterObject**
 
@@ -20,4 +28,3 @@ The returned ParameterObject instance has many useful attributes and methods. Th
 >>> po(5)
 -0.86602540378443904
 ```
-

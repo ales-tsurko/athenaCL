@@ -1,9 +1,17 @@
-## Creating an athenaCL Interpreter within Python
+# Creating an athenaCL Interpreter within Python
 
-Within a Python interpreter or a Python script on any platform, one or more instances of the athenaCL Interpreter can be created and programmatically controlled. Programming a sequence of athenaCL commands via a Python script provides maximal control and flexibility in using athenaCL. Loops, external procedures, and a variety of programming designs can be combined with the high-level syntax of the athenaCL command line. Furthermore, command sequences can be stored, edited, and developed. 
-      
-The cmd() method of the athenaCL Interpreter can be used to be pass  strings or Python data structures. The cmd() method will raise an exception on error. The following example creates an athenaCL Interpter instance named ath and sends it a number of commands to generate a drum beat. 
-      
+Within a Python interpreter or a Python script on any platform, one or more
+instances of the athenaCL Interpreter can be created and programmatically
+controlled. Programming a sequence of athenaCL commands via a Python script
+provides maximal control and flexibility in using athenaCL. Loops, external
+procedures, and a variety of programming designs can be combined with the
+high-level syntax of the athenaCL command line. Furthermore, command sequences
+can be stored, edited, and developed.
+
+The cmd() method of the athenaCL Interpreter can be used to be pass strings or
+Python data structures. The cmd() method will raise an exception on error. The
+following example creates an athenaCL Interpter instance named ath and sends it
+a number of commands to generate a drum beat.
 
 **An athenaCL Interpreter in Python**
 
@@ -28,5 +36,7 @@ ath.cmd('tee b ws,t,4,0,122,118')
 ath.cmd('eln; elh')
 ```
 
-For advanced and/or extended work with athenaCL, automating command string execution is highly recommended. Included with the athenaCL distribution is over 30 Python files demonstrating fundamental concepts of working with the system. These files can be found in the demo directory and also in .
-      
+For advanced and/or extended work with athenaCL, automating command string
+execution is highly recommended. Included with the athenaCL distribution is over
+30 Python files demonstrating fundamental concepts of working with the system.
+These files can be found in the demo directory and also in .

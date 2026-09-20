@@ -21,12 +21,14 @@ lint:
 	@status=0; \
 	cargo clippy --all-targets --all-features -- -D warnings || status=$$?; \
 	cargo +nightly fmt --check --all || status=$$?; \
+	rumdl fmt --check . || status=$$?; \
 	RUSTDOCFLAGS="-D warnings" cargo doc --all-features \
 		--no-deps --document-private-items || status=$$?; \
 	exit $$status
 
 fmt:
 	cargo +nightly fmt --all
+	rumdl fmt .
 
 code-health:
 	similarity-rs $(SIMILARITY_ARGS)

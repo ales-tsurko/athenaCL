@@ -1,7 +1,8 @@
-## Getting Help for Commands
+# Getting Help for Commands
 
-athenaCL provides two ways of helping the user access and learn commands. If the user only remembers the prefix of a command, this prefix can be entered at the prompt to produce a list of all commands associated with that prefix:
-      
+athenaCL provides two ways of helping the user access and learn commands. If the
+user only remembers the prefix of a command, this prefix can be entered at the
+prompt to produce a list of all commands associated with that prefix:
 
 **Displaying a command listing**
 
@@ -22,8 +23,11 @@ PI (PathInstance) commands:
    PIslc            slice 
 ```
 
-Help information is available for each command and can be accessed from the athenaCL prompt by typing either "?" or "help" followed by the name of the command. The following example provides the documentation for the PIn command. Notice that the main documentation is followed by "usage" documentation, or the format required for providing command-line arguments:
-      
+Help information is available for each command and can be accessed from the
+athenaCL prompt by typing either "?" or "help" followed by the name of the
+command. The following example provides the documentation for the PIn command.
+Notice that the main documentation is followed by "usage" documentation, or the
+format required for providing command-line arguments:
 
 **Using the help command**
 
@@ -72,8 +76,10 @@ PIn                 PIn: PathInstance: New: Create a new Path from user-
 usage:              pin name set1 ... setN
 ```
 
-The same help command can be used to access information concerning additional topics, notations, and representations used within athenaCL. For example, information about Markov transition strings can be accessed with the same help command:
-      
+The same help command can be used to access information concerning additional
+topics, notations, and representations used within athenaCL. For example,
+information about Markov transition strings can be accessed with the same help
+command:
 
 **Accessing additional help topics**
 
@@ -114,5 +120,6 @@ Markov Notation     Markov transition strings are entered using symbolic
                     match "a" followed by either "b" or "c".
 ```
 
-Throughout this document additional information for the reader may be recommended by suggesting the use of the help command. For example: (enter "help markov" for more information).
-      
+Throughout this document additional information for the reader may be
+recommended by suggesting the use of the help command. For example: (enter "help
+markov" for more information).

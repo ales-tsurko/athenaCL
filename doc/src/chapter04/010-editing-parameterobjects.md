@@ -1,7 +1,11 @@
-## Editing ParameterObjects
+# Editing ParameterObjects
 
-To edit an attribute of Texture, a user enters a new ParameterObject argument list. The command TIe, as before, first prompts the user to select which attribute to edit. Next, the current value of the attribute is displayed, followed by a prompt for the new value. TIv can be used to confirm the changed value. In the following example, the panning of Texture "a1" is assigned a fractional noise (1/f) ParameterObject:
-      
+To edit an attribute of Texture, a user enters a new ParameterObject argument
+list. The command TIe, as before, first prompts the user to select which
+attribute to edit. Next, the current value of the attribute is displayed,
+followed by a prompt for the new value. TIv can be used to confirm the changed
+value. In the following example, the panning of Texture "a1" is assigned a
+fractional noise (1/f) ParameterObject:
 
 **Editing the panning of a TextureInstance**
 
@@ -40,10 +44,20 @@ texture (s)tatic
 texture (d)ynamic   none
 ```
 
-The noise ParameterObject has been given an embedded ParameterObject to control the gamma argument. Notice that instead of entering "noise", "cyclicGen" or "upDown" the user can enter the acronyms "n", "cg", and "ud". All ParameterObjects support automatic acronym expansion of argument strings. This is an important and time-saving shortcut.
-      
-The previous example edited the panning of Texture "a1" such that it produces values within the range of .5 to 1. This limits the spatial location of the sound to the upper half of the range (the middle to right stereo position). To limit the spatial location of "b1" in a complementary fashion, the Texture is edited to produce values within the range 0 to .5, corresponding to the lower half of the range (the middle to left stereo position). In the example below, TIo is used to select "b1" before entering the TIe command. TEv is then used to compare panning values for all Textures.
-      
+The noise ParameterObject has been given an embedded ParameterObject to control
+the gamma argument. Notice that instead of entering "noise", "cyclicGen" or
+"upDown" the user can enter the acronyms "n", "cg", and "ud". All
+ParameterObjects support automatic acronym expansion of argument strings. This
+is an important and time-saving shortcut.
+
+The previous example edited the panning of Texture "a1" such that it produces
+values within the range of .5 to 1. This limits the spatial location of the
+sound to the upper half of the range (the middle to right stereo position). To
+limit the spatial location of "b1" in a complementary fashion, the Texture is
+edited to produce values within the range 0 to .5, corresponding to the lower
+half of the range (the middle to left stereo position). In the example below,
+TIo is used to select "b1" before entering the TIe command. TEv is then used to
+compare panning values for all Textures.
 
 **Editing the panning of a TextureInstance**
 
@@ -88,5 +102,10 @@ b1                  wavePowerDown, event, (constant, 15), 0.25, 2.5, (constant,
                     0), (constant, 0.5)
 ```
 
-Notice that, in the above example, the user provided complete command-line arguments for the TIe command. When entering a ParameterObject from the command-line, no spaces, and only commas, can be used between ParameterObject arguments. As command-line arguments are space delimited (and ParameterObject arguments are comma delimited), a ParameterObject on the command line must be given without spaces between arguments. When providing a ParameterObject to a TIe prompt, however, spaces may be provided.
-      
+Notice that, in the above example, the user provided complete command-line
+arguments for the TIe command. When entering a ParameterObject from the
+command-line, no spaces, and only commas, can be used between ParameterObject
+arguments. As command-line arguments are space delimited (and ParameterObject
+arguments are comma delimited), a ParameterObject on the command line must be
+given without spaces between arguments. When providing a ParameterObject to a
+TIe prompt, however, spaces may be provided.

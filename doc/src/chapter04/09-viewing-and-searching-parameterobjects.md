@@ -1,11 +1,24 @@
-## Viewing and Searching ParameterObjects
+# Viewing and Searching ParameterObjects
 
-For each dynamic attribute of a TextureInstance, a ParameterObject can be assigned to produce values over the duration of the Texture. Complete documentation for all ParameterObjects can be found in . Texture attributes for bpm, local field, local octave, amplitude, panning, and all auxiliary parameters (if required by the instrument) can have independent ParameterObjects.
-      
-ParameterObjects are applied to a Texture attribute with an argument list. athenaCL accepts lists in the same comma-separated format of Python list data structures. A list can consist of elements like strings, numbers, and other lists, each separated by a comma. Within athenaCL, text strings need not be in quotes, and sub-lists can be given with either parenthesis or brackets. Each entry in the ParameterObject argument list corresponds, by ordered-position, to an internal setting within the ParameterObject. The first entry in the argument list is always the name of the ParameterObject. ParameterObject names, as well as all ParameterObject configuration strings, can always be accessed with acronyms.
-      
-To display a list if all available ParameterObjects, enter the command TPls, for TextureParameter list:
-      
+For each dynamic attribute of a TextureInstance, a ParameterObject can be
+assigned to produce values over the duration of the Texture. Complete
+documentation for all ParameterObjects can be found in . Texture attributes for
+bpm, local field, local octave, amplitude, panning, and all auxiliary parameters
+(if required by the instrument) can have independent ParameterObjects.
+
+ParameterObjects are applied to a Texture attribute with an argument list.
+athenaCL accepts lists in the same comma-separated format of Python list data
+structures. A list can consist of elements like strings, numbers, and other
+lists, each separated by a comma. Within athenaCL, text strings need not be in
+quotes, and sub-lists can be given with either parenthesis or brackets. Each
+entry in the ParameterObject argument list corresponds, by ordered-position, to
+an internal setting within the ParameterObject. The first entry in the argument
+list is always the name of the ParameterObject. ParameterObject names, as well
+as all ParameterObject configuration strings, can always be accessed with
+acronyms.
+
+To display a list if all available ParameterObjects, enter the command TPls, for
+TextureParameter list:
 
 **Displaying all ParameterObjects with TPls**
 
@@ -133,8 +146,10 @@ Filter ParameterObject
    replace              
 ```
 
-To display detailed documentation for a ParameterObject, enter the command TPv, for Texture Parameter view. In the following example the user views the ParameterObjects "wavePowerDown" and "noise" by providing command-line arguments for the desired ParameterObject name:
-      
+To display detailed documentation for a ParameterObject, enter the command TPv,
+for Texture Parameter view. In the following example the user views the
+ParameterObjects "wavePowerDown" and "noise" by providing command-line arguments
+for the desired ParameterObject name:
 
 **Viewing ParameterObject reference information**
 
@@ -177,8 +192,10 @@ Noise               noise, resolution, parameterObject, min, max
                     (5) max
 ```
 
-The command TPmap provides graphical displays of ParameterObject-generated values. (To configure athenaCL graphics output, see .) The user must supply the name of the ParamaterObject library (Generator, Rhythm, or Filter), the number of events to generate, and the ParameterObject argument list.
-      
+The command TPmap provides graphical displays of ParameterObject-generated
+values. (To configure athenaCL graphics output, see .) The user must supply the
+name of the ParamaterObject library (Generator, Rhythm, or Filter), the number
+of events to generate, and the ParameterObject argument list.
 
 **ParameterObject Map display with TPmap**
 
@@ -192,8 +209,9 @@ wavePowerDown, event, (constant, 30), 0, 2, (constant, 0), (constant, 1)
 TPmap display complete.
 ```
 
-The TPmap, like other athenaCL commands, can be used with command-line arguments. In the following example, the user produces a TPmap display of the noise ParameterObject, generating "brown" fractional noise:
-      
+The TPmap, like other athenaCL commands, can be used with command-line
+arguments. In the following example, the user produces a TPmap display of the
+noise ParameterObject, generating "brown" fractional noise:
 
 **ParameterObject Map display with TPmap**
 
@@ -203,4 +221,3 @@ pi{auto-muteHiConga}ti{b1} :: tpmap 120 n,50,(c,2),0,1
 noise, 50, (constant, 2), (constant, 0), (constant, 1)
 TPmap display complete.
 ```
-

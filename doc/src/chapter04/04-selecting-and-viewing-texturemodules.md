@@ -1,7 +1,8 @@
-## Selecting and Viewing TextureModules
+# Selecting and Viewing TextureModules
 
-A Texture is an instance of a TextureModule. Every time a Texture is created, athenaCL creates an independent instance of the active TextureModule. To display a complete list of all available TextureModules, enter the command TMls:
-      
+A Texture is an instance of a TextureModule. Every time a Texture is created,
+athenaCL creates an independent instance of the active TextureModule. To display
+a complete list of all available TextureModules, enter the command TMls:
 
 **Listing TextureModules with TMls**
 
@@ -25,10 +26,15 @@ TextureModules available:
    TimeSegment        0
 ```
 
-As in other athenaCL displays, the first line of the display is a key, telling the user that the list consists of a name followed by the number of TI references. This number displays the count of TextureInstances referenced from a parent TextureModule. The "+" designates the active TextureModule. When creating a new TextureInstance, athenaCL uses the active TextureModule.
-      
-To select a different TextureModule, the user enters TMo. The user is prompted to enter the name or number (as represented in the list order) of the desired TextureModule. The TMls command can be used to confirm the change.
-      
+As in other athenaCL displays, the first line of the display is a key, telling
+the user that the list consists of a name followed by the number of TI
+references. This number displays the count of TextureInstances referenced from a
+parent TextureModule. The "+" designates the active TextureModule. When creating
+a new TextureInstance, athenaCL uses the active TextureModule.
+
+To select a different TextureModule, the user enters TMo. The user is prompted
+to enter the name or number (as represented in the list order) of the desired
+TextureModule. The TMls command can be used to confirm the change.
 
 **Selecting the active TextureModule with TMo**
 
@@ -56,10 +62,16 @@ TextureModules available:
    TimeSegment        0
 ```
 
-Here the user has entered "da", to select the TextureModule DroneArticulate. Whenever selecting objects in athenaCL the user may enter the acronym (formed from the leading character and all following capitals), the literal name ("dronearticulate"), or the ordinal number as displayed in the corresponding list display.
-      
-To learn what a particular TextureModule does, as well what types of Texture options are available, enter the command TMv, for TextureModule View. In this example, the user, with TIo, selects the TextureModule "LineGroove" (with a command-line argument) before entering the TMv command.
-      
+Here the user has entered "da", to select the TextureModule DroneArticulate.
+Whenever selecting objects in athenaCL the user may enter the acronym (formed
+from the leading character and all following capitals), the literal name
+("dronearticulate"), or the ordinal number as displayed in the corresponding
+list display.
+
+To learn what a particular TextureModule does, as well what types of Texture
+options are available, enter the command TMv, for TextureModule View. In this
+example, the user, with TIo, selects the TextureModule "LineGroove" (with a
+command-line argument) before entering the TMv command.
 
 **Viewing details of the active TextureModule**
 
@@ -92,5 +104,8 @@ levelOctaveMonophonic Description: Toggle between selection of local octave
 texture (d)ynamic
 ```
 
-The TMv command displays the name of the TextureModule along with the author of its code. Following the author designation is a description of how the module performs. Following this is documentation for all TextureStatic parameter objects, or Texture-specific options and user-configurable settings pertinent to the particular TextureModule's algorithmic design.
-      
+The TMv command displays the name of the TextureModule along with the author of
+its code. Following the author designation is a description of how the module
+performs. Following this is documentation for all TextureStatic parameter
+objects, or Texture-specific options and user-configurable settings pertinent to
+the particular TextureModule's algorithmic design.

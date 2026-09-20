@@ -1,9 +1,8 @@
 # Style guide
 
-Follow the
-[Rust Style Guide](https://doc.rust-lang.org/style-guide/) and the
-[rustc coding conventions][rustc-style].
-Nightly `rustfmt` is the Rust formatting authority.
+Follow the [Rust Style Guide](https://doc.rust-lang.org/style-guide/) and the
+[rustc coding conventions][rustc-style]. Nightly `rustfmt` is the Rust
+formatting authority.
 
 
 
@@ -26,8 +25,8 @@ Write modules from the public concept down to its details:
 3. Re-exports, module declarations, then constants.
 4. The module's primary type, immediately followed by all of its inherent and
    trait impls.
-5. Supporting types in the order the primary abstraction introduces them,
-   each immediately followed by its impls.
+5. Supporting types in the order the primary abstraction introduces them, each
+   immediately followed by its impls.
 6. Private utilities, error types, and tests, in that order.
 
 Keep an item earlier only when Rust's lexical rules require it, such as a macro
@@ -39,8 +38,8 @@ used by the primary implementation.
 ## Functions and types
 
 - Prefer methods on the type that owns the operation's state or context. Avoid
-  standalone functions unless the operation has no natural owner. `main`,
-  tests, and trait-required functions are normal exceptions.
+  standalone functions unless the operation has no natural owner. `main`, tests,
+  and trait-required functions are normal exceptions.
 - Use traits and conversion types such as `From` when they make an extension
   point explicit and keep variant-specific logic localized.
 - Derive errors with `thiserror`. Do not write manual `std::error::Error`
@@ -62,7 +61,17 @@ used by the primary implementation.
 
 ### Markdown
 
+Use rumdl 0.2.75, configured in `.rumdl.toml`. Install it with
+`cargo install --locked rumdl --version 0.2.75`.
+
+`make fmt` formats Rust and Markdown. `make lint` checks both formats without
+rewriting files, alongside Clippy and rustdoc. To format or check one document,
+use `rumdl fmt PATH` or `rumdl fmt --check PATH`.
+
+Rumdl enforces heading gaps as minimums; remove excess blank lines manually.
+
 - Limit Markdown lines to 80 characters.
+- Preserve line layout in code examples and mdBook's table-of-contents links.
 - Use exactly one H1 heading as the document title.
 - Put four blank lines before each H2 heading.
 - Put two blank lines before each H3 heading.

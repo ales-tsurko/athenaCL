@@ -1,8 +1,7 @@
-##  Software Dependencies
+# Software Dependencies
 
-athenaCL produces both Csound and MIDI scores. Csound is free and runs on 
-every platform. Download Csound here:
-https://csound.com/.
+athenaCL produces both Csound and MIDI scores. Csound is free and runs on every
+platform. Download Csound here: https://csound.com/.
 
 
 

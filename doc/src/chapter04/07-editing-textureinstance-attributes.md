@@ -1,9 +1,17 @@
-## Editing TextureInstance Attributes
+# Editing TextureInstance Attributes
 
-Each attribute of a Texture can be edited to specialize its performance. Some attributes such as instrument, time-range, and Path are static: they do not change over the duration of a Texture. Other attributes are dynamic, such as bpm, rhythm, local field, local octave, amplitude and panning, and can be configured with a wide range of ParameterObjects.
-      
-Texture attributes are edited with the TIe command. The command first prompts the user to select which attribute to edit. Attributes are named by a single-letter abbreviation, as notated in the TIv display with parenthesis. Next, the current value of the attribute is displayed, followed by a prompt for the new value. In the following example the time range of Texture "a1" is edited:
-      
+Each attribute of a Texture can be edited to specialize its performance. Some
+attributes such as instrument, time-range, and Path are static: they do not
+change over the duration of a Texture. Other attributes are dynamic, such as
+bpm, rhythm, local field, local octave, amplitude and panning, and can be
+configured with a wide range of ParameterObjects.
+
+Texture attributes are edited with the TIe command. The command first prompts
+the user to select which attribute to edit. Attributes are named by a
+single-letter abbreviation, as notated in the TIv display with parenthesis.
+Next, the current value of the attribute is displayed, followed by a prompt for
+the new value. In the following example the time range of Texture "a1" is
+edited:
 
 **Editing a TextureInstance**
 
@@ -41,10 +49,20 @@ texture (s)tatic
 texture (d)ynamic   none
 ```
 
-In the example above the user select "t" to edit the active Texture's time-range attribute. In general, new values for attributes must be entered with the same syntax with which they are displayed. In this example, time-range values are given as two numbers separated by a comma. Deviation from this syntax will return an error. The user enters 5, 20 to set the time-range attribute to the duration from 5 to 20 seconds.
-      
-The command TEe, for TextureEnsemble Edit can be used to edit the entire collection of Textures with one command. In the following example the user selects the amplitude attribute with "a" and then enters a new ParameterObject: randomUniform. The randomUniform parameterObject produces random values with a uniform distribution between the required arguments for minimum and maximum. After this edit, TEv, with the command-line argument "a", can be used to view the amplitude for all Textures and confirm the edit.
-      
+In the example above the user select "t" to edit the active Texture's time-range
+attribute. In general, new values for attributes must be entered with the same
+syntax with which they are displayed. In this example, time-range values are
+given as two numbers separated by a comma. Deviation from this syntax will
+return an error. The user enters 5, 20 to set the time-range attribute to the
+duration from 5 to 20 seconds.
+
+The command TEe, for TextureEnsemble Edit can be used to edit the entire
+collection of Textures with one command. In the following example the user
+selects the amplitude attribute with "a" and then enters a new ParameterObject:
+randomUniform. The randomUniform parameterObject produces random values with a
+uniform distribution between the required arguments for minimum and maximum.
+After this edit, TEv, with the command-line argument "a", can be used to view
+the amplitude for all Textures and confirm the edit.
 
 **Editing a single parameter of all Textures with TEe**
 
@@ -65,10 +83,15 @@ a1                  randomUniform, (constant, 0.6), (constant, 1)
 b1                  randomUniform, (constant, 0.6), (constant, 1)
 ```
 
-Using ELn, the current collection of Textures can be used to create an EventList, and ELh may be used to audition the results. (For more information on using ELn, see .) The random fluctuation of amplitude values should provide a variety of accent patterns to the fixed rhythmic loop.
-      
-The collection of Textures can be displayed in a graphical and textual diagram produced by the TEmap command. This command lists each Texture and Clone within the current AthenaObject and provides a proportional representation of their respective start and end times.
-      
+Using ELn, the current collection of Textures can be used to create an
+EventList, and ELh may be used to audition the results. (For more information on
+using ELn, see .) The random fluctuation of amplitude values should provide a
+variety of accent patterns to the fixed rhythmic loop.
+
+The collection of Textures can be displayed in a graphical and textual diagram
+produced by the TEmap command. This command lists each Texture and Clone within
+the current AthenaObject and provides a proportional representation of their
+respective start and end times.
 
 **Generating a graphical display of Texture position with TEmap**
 
@@ -79,4 +102,3 @@ TextureEnsemble Map:
 a1                  ____________________________________________________________
 b1                                 _____________________________________________
 ```
-

@@ -86,7 +86,8 @@ jobs:
       - name: Install quality tools
         run: |
           cargo binstall --no-confirm --force cargo-nextest cargo-llvm-cov cargo-crap similarity-rs cargo-machete
-          command -v cargo-nextest cargo-llvm-cov cargo-crap similarity-rs cargo-machete
+          cargo binstall --no-confirm --force rumdl@0.2.75
+          command -v cargo-nextest cargo-llvm-cov cargo-crap similarity-rs cargo-machete rumdl
 
       - name: Lint
         run: make lint

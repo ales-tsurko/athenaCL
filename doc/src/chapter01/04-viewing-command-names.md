@@ -1,6 +1,7 @@
-## Viewing Command Names
+# Viewing Command Names
 
-When starting athenaCL, the user is presented with a prompt (::). To display a listing of all commands enter "cmd", for command:
+When starting athenaCL, the user is presented with a prompt (::). To display a
+listing of all commands enter "cmd", for command:
 
 **Listing all commands**
 
@@ -43,5 +44,5 @@ AthenaObject        AOw(save)           AOl(load)           AOmg(merge)
                     AOrm(remove)  
 ```
 
-This display, organized by prefix heading, shows each command followed by a longer description of the commands name.
-      
+This display, organized by prefix heading, shows each command followed by a
+longer description of the commands name.

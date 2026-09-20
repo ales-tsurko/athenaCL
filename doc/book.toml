@@ -1,7 +1,6 @@
 [book]
 authors = ["Christopher Ariza"]
 language = "en"
-multilingual = false
 src = "src"
 title = "athenaCL Manual"
 

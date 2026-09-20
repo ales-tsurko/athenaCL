@@ -1,9 +1,14 @@
-## Editing Rhythm ParameterObjects
+# Editing Rhythm ParameterObjects
 
-Rhythm ParameterObjects are ParameterObjects specialized for generating time and rhythm information. Many Rhythm ParameterObjects use Pulse object notations to define proportional rhythms and reference a Texture's dynamic bpm attribute. Other ParameterObjects are independent of bpm and can use raw timing information provided by one or more Generator ParameterObjects.
-      
-When using proportional rhythms, athenaCL uses Pulse objects. Pulses represent a ratio of duration in relation to the duration of beat (specified in BPM and obtained from the Texture). For details on Pulse notation, enter "help pulse":
-      
+Rhythm ParameterObjects are ParameterObjects specialized for generating time and
+rhythm information. Many Rhythm ParameterObjects use Pulse object notations to
+define proportional rhythms and reference a Texture's dynamic bpm attribute.
+Other ParameterObjects are independent of bpm and can use raw timing information
+provided by one or more Generator ParameterObjects.
+
+When using proportional rhythms, athenaCL uses Pulse objects. Pulses represent a
+ratio of duration in relation to the duration of beat (specified in BPM and
+obtained from the Texture). For details on Pulse notation, enter "help pulse":
 
 **View Pulse and Rhythm help**
 
@@ -29,8 +34,12 @@ Pulse and Rhythm    Pulses represent a duration value derived from ratio and a
                     (4,2,1), (4,3,1)).
 ```
 
-To edit the rhythms used by Texture b1, enter TIe followed by an "r" to access the rhythm attribute. As before, the user is presented with the current value, then prompted for a new value. In the following example, the ParameterObject "loop" is examined first with the TPv, then the active Texture is edited by providing an random walk over an expanded rhythm. Finally, the rhythm attribute of all Textures is viewed with TEv.
-      
+To edit the rhythms used by Texture b1, enter TIe followed by an "r" to access
+the rhythm attribute. As before, the user is presented with the current value,
+then prompted for a new value. In the following example, the ParameterObject
+"loop" is examined first with the TPv, then the active Texture is edited by
+providing an random walk over an expanded rhythm. Finally, the rhythm attribute
+of all Textures is viewed with TEv.
 
 **Editing Rhythm ParameterObjects with TIe**
 
@@ -65,10 +74,16 @@ b1                  loop, ((4,1,+),(4,1,+),(4,2,+),(4,3,+),(4,5,+),(4,3,+)),
                     randomWalk
 ```
 
-Notice that, as with all ParameterObjects, abbreviations can be used for argument strings. The user need only enter the string "l" to select the "loop" RhythmObject, and "rw" to select the randomWalk selection method.
-      
-To edit Texture a1, the user must first make a1 the active texture with TIo. In the following example, the user applies a zero-order Markov chain to generate pulses. The user fist consults the documentation for ParameterObject markovPulse. For more information about Markov transition strings (Ariza 2006 [AN#1343]), enter "help markov". After selecting and editing the Texture, the Rhythms are compared with TEv:
-      
+Notice that, as with all ParameterObjects, abbreviations can be used for
+argument strings. The user need only enter the string "l" to select the "loop"
+RhythmObject, and "rw" to select the randomWalk selection method.
+
+To edit Texture a1, the user must first make a1 the active texture with TIo. In
+the following example, the user applies a zero-order Markov chain to generate
+pulses. The user fist consults the documentation for ParameterObject
+markovPulse. For more information about Markov transition strings (Ariza 2006
+[AN#1343]), enter "help markov". After selecting and editing the Texture, the
+Rhythms are compared with TEv:
 
 **Editing Rhythm ParameterObjects with TIe**
 
@@ -113,12 +128,22 @@ b1                  loop, ((4,1,+),(4,1,+),(4,2,+),(4,3,+),(4,5,+),(4,3,+)),
                     
 ```
 
-In the previous example, the user supplies four Pulses; each pulses is weighted such that the shortest, (8,1,1), is the least frequent (weight of 1), and the longest, (4,5,1), is the most frequent (weight of 7).
-      
-Using ELn, the current collection of Textures can be used to create an EventList, and ELh may be used to audition the results. (For more information on using ELn, see .) Each time an EventList is created, different sequences of rhythms will be generated: for Texture a1, these rhythms will be the result of a zero-order Markov chain; for Texture b1, these rhythms will be the result of a random walk on an ordered list of Pulses.
-      
-A final alternation can be made to the metric performance of these Textures. Using the TEe command, both Texture's bpm attribute can be altered to cause a gradual accelerando from 120 BPM to 300 BPM. In the following example, the user applies a wavePowerUp ParameterObject to the bpm attribute of both Textures by using the TEe command with complete command-line arguments:
-      
+In the previous example, the user supplies four Pulses; each pulses is weighted
+such that the shortest, (8,1,1), is the least frequent (weight of 1), and the
+longest, (4,5,1), is the most frequent (weight of 7).
+
+Using ELn, the current collection of Textures can be used to create an
+EventList, and ELh may be used to audition the results. (For more information on
+using ELn, see .) Each time an EventList is created, different sequences of
+rhythms will be generated: for Texture a1, these rhythms will be the result of a
+zero-order Markov chain; for Texture b1, these rhythms will be the result of a
+random walk on an ordered list of Pulses.
+
+A final alternation can be made to the metric performance of these Textures.
+Using the TEe command, both Texture's bpm attribute can be altered to cause a
+gradual accelerando from 120 BPM to 300 BPM. In the following example, the user
+applies a wavePowerUp ParameterObject to the bpm attribute of both Textures by
+using the TEe command with complete command-line arguments:
 
 **Editing BPM with TEe**
 
@@ -127,4 +152,3 @@ pi{auto-muteHiConga}ti{a1} :: tee b wpu,t,20,0,2,120,300
 TI a1: parameter bpm updated.
 TI b1: parameter bpm updated.
 ```
-

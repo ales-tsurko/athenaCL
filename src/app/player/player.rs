@@ -115,16 +115,18 @@ impl GlobalState {
     }
 
     fn play_audio(&mut self, track: &Track) -> Result<(), Box<dyn Error>> {
-        if let Some(output) = &self.output {
-            // Seek the decoder before connecting it: rodio's Player::try_seek waits for the audio
-            // callback, which may have stopped after a device disconnect.
-            let controller = AudioPlayerController::new(track, &output.mixer)?;
-            self.audio_player_cache
-                .insert(track.path.clone(), controller);
-            if let Some(controller) = self.audio_player_cache.get(&track.path) {
-                controller.player.play();
-            }
-        }
+        let Some(output) = &self.output else {
+            return Ok(());
+        };
+        // Seek the decoder before connecting it: rodio's Player::try_seek waits for the audio
+        // callback, which may have stopped after a device disconnect.
+        let controller = AudioPlayerController::new(track, &output.mixer)?;
+        self.audio_player_cache
+            .entry(track.path.clone())
+            .insert_entry(controller)
+            .get()
+            .player
+            .play();
         Ok(())
     }
 
@@ -1174,6 +1176,7 @@ mod tests {
         state.play(&mut midi).expect("play MIDI");
         let mut output = vec![app::Output::Player(midi)];
         state.suspend_output(&mut output);
+        state.opening = Some(state.generation);
         drop(update(
             &mut output,
             &mut state,
@@ -1184,6 +1187,9 @@ mod tests {
             &mut state,
             Message::Pause(PlayerId::Midi(0)),
         ));
+        assert_eq!(state.generation, 2);
+        assert_eq!(state.opening, Some(0));
+        assert!(state.events.is_current(2));
         drop(connect(&mut state, &mut output, 48000));
         assert!(!state.playing());
         assert!(!first_track(&output).is_playing);
@@ -1288,21 +1294,59 @@ mod tests {
     #[test]
     fn midi_reconstruction_advances_to_the_playhead_and_can_be_cancelled() {
         let (mut device, mut renderer) = AudioOutput::headless(soundfont::path(), 48000);
-        let resume = MidiResume {
+        let mut resume = MidiResume {
             path: midi_file(),
             position: 0.5,
             tempo: 144,
             playing: true,
         };
-        renderer
-            .prepare_midi(&mut device.midi, &resume, || false)
+        device
+            .restore_midi(&mut renderer, Some(resume.clone()), || false)
             .expect("reconstruct MIDI");
+        assert_eq!(device.prepared_midi.as_ref(), Some(&resume));
         assert!((device.midi.position() - 0.5).abs() < 1.0 / 96.0);
         assert_eq!(device.midi.tempo(), Some(144.0));
         let (mut device, mut renderer) = AudioOutput::headless(soundfont::path(), 48000);
+        resume.playing = false;
         assert!(matches!(
-            renderer.prepare_midi(&mut device.midi, &resume, || true),
+            device.restore_midi(&mut renderer, Some(resume), || true),
             Err(OutputError::Changed)
+        ));
+        assert!(device.prepared_midi.is_none());
+    }
+
+    #[test]
+    fn missing_idle_midi_files_do_not_block_audio_reconnection() {
+        let directory = tempfile::tempdir().expect("temporary directory");
+        let (mut device, mut renderer) = AudioOutput::headless(soundfont::path(), 44100);
+        let mut resume = MidiResume {
+            path: directory.path().join("removed.mid"),
+            position: 0.5,
+            tempo: 120,
+            playing: false,
+        };
+        device
+            .restore_midi(&mut renderer, None, || false)
+            .expect("no MIDI snapshot to restore");
+        device
+            .restore_midi(&mut renderer, Some(resume.clone()), || false)
+            .expect("an idle file must not block audio");
+        assert!(device.prepared_midi.is_none());
+        assert!(!device.midi.is_playing());
+
+        device.mixer.add(rodio::buffer::SamplesBuffer::new(
+            std::num::NonZero::new(2).expect("stereo"),
+            std::num::NonZero::new(44100).expect("rate"),
+            vec![0.25f32; 4],
+        ));
+        let mut samples = [0.0f32; 4];
+        renderer.render(&mut samples, 2);
+        assert_eq!(samples, [0.25; 4]);
+
+        resume.playing = true;
+        assert!(matches!(
+            device.restore_midi(&mut renderer, Some(resume), || false),
+            Err(OutputError::MidiFile(_))
         ));
     }
 

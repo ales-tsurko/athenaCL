@@ -37,55 +37,63 @@ impl AudioOutput {
         sf: &str,
         events: Events,
         generation: u64,
-        mut resume: Option<MidiResume>,
+        resume: Option<MidiResume>,
     ) -> Result<Self, OutputError> {
-        let host = cpal::default_host();
-        let device = host.default_output_device().ok_or(OutputError::NoDevice)?;
-        let config = device.default_output_config()?;
-        let key = DeviceKey::new(&device, &config)?;
-        let settings = Settings::builder()
-            .sample_rate(config.sample_rate())
-            .build();
-        let (player, mut controller) = Player::new(sf, settings)
-            .map_err(|error| OutputError::Synthesizer(error.to_string()))?;
-
+        let device = OutputDevice::current()?;
+        let (mut output, mut renderer) = Self::new(sf, device.key.clone())?;
         // Loading a large SoundFont can outlast another device change. Do not pin a stream to a
         // device that stopped being the default while the font was loading.
-        if !events.is_current(generation) || DeviceKey::current()? != key {
-            return Err(OutputError::Changed);
-        }
-        let channels = NonZero::new(config.channels()).ok_or(OutputError::InvalidFormat)?;
-        let rate = NonZero::new(config.sample_rate()).ok_or(OutputError::InvalidFormat)?;
+        device.ensure_current(&events, generation)?;
+        output.restore_midi(&mut renderer, resume, || !events.is_current(generation))?;
+        device.connect(output, renderer, events, generation)
+    }
+
+    /// Build the shared render state independently of the physical stream.
+    fn new(sf: &str, device: DeviceKey) -> Result<(Self, Renderer), OutputError> {
+        let channels = NonZero::new(device.channels).ok_or(OutputError::InvalidFormat)?;
+        let rate = NonZero::new(device.rate).ok_or(OutputError::InvalidFormat)?;
+        let settings = Settings::builder().sample_rate(rate.get()).build();
+        let (player, midi) = Player::new(sf, settings)
+            .map_err(|error| OutputError::Synthesizer(error.to_string()))?;
         let (mixer, source) = mixer::mixer(channels, rate);
         let midi_audible = Arc::new(AtomicBool::new(false));
-        let mut renderer = Renderer::new(player, source, midi_audible.clone());
-        if let Some(snapshot) = &resume {
-            if let Err(error) =
-                renderer.prepare_midi(&mut controller, snapshot, || !events.is_current(generation))
-            {
-                if snapshot.playing || matches!(error, OutputError::Changed) {
-                    return Err(error);
-                }
+        let renderer = Renderer::new(player, source, midi_audible.clone());
+        Ok((
+            Self {
+                stream: None,
+                midi,
+                mixer,
+                device,
+                needs_poll: false,
+                prepared_midi: None,
+                midi_audible,
+            },
+            renderer,
+        ))
+    }
+
+    /// Restore the transport snapshot, tolerating stale files only for idle MIDI tracks.
+    pub(crate) fn restore_midi(
+        &mut self,
+        renderer: &mut Renderer,
+        resume: Option<MidiResume>,
+        cancelled: impl Fn() -> bool,
+    ) -> Result<(), OutputError> {
+        let Some(snapshot) = resume else {
+            return Ok(());
+        };
+        match renderer.prepare_midi(&mut self.midi, &snapshot, cancelled) {
+            Ok(()) => self.prepared_midi = Some(snapshot),
+            Err(error) if snapshot.playing || matches!(error, OutputError::Changed) => {
+                return Err(error);
+            }
+            Err(_) => {
                 // An idle MIDI file may have been deleted or edited. It must not prevent
                 // reconnecting audio files; playing it later reports its own file error.
-                controller.stop();
-                resume = None;
+                self.midi.stop();
             }
         }
-        let stream = renderer.open(&device, &config, events, generation)?;
-        if DeviceKey::current()? != key {
-            return Err(OutputError::Changed);
-        }
-
-        Ok(Self {
-            stream: Some(stream),
-            midi: controller,
-            mixer,
-            device: key,
-            needs_poll: needs_poll(host.id()),
-            prepared_midi: resume,
-            midi_audible,
-        })
+        Ok(())
     }
 
     pub(crate) fn play_midi(&mut self) {
@@ -117,30 +125,60 @@ impl AudioOutput {
 
     #[cfg(test)]
     pub(crate) fn headless(sf: &str, sample_rate: u32) -> (Self, Renderer) {
-        let settings = Settings::builder().sample_rate(sample_rate).build();
-        let (player, controller) = Player::new(sf, settings).expect("valid test soundfont");
-        let (mixer, source) = mixer::mixer(
-            NonZero::new(2).expect("stereo"),
-            NonZero::new(sample_rate).expect("nonzero sample rate"),
-        );
-        let midi_audible = Arc::new(AtomicBool::new(false));
-        (
-            Self {
-                stream: None,
-                midi: controller,
-                mixer,
-                device: DeviceKey {
-                    id: "test".into(),
-                    rate: sample_rate,
-                    channels: 2,
-                    format: cpal::SampleFormat::F32,
-                },
-                needs_poll: false,
-                prepared_midi: None,
-                midi_audible: midi_audible.clone(),
+        Self::new(
+            sf,
+            DeviceKey {
+                id: "test".into(),
+                rate: sample_rate,
+                channels: 2,
+                format: cpal::SampleFormat::F32,
             },
-            Renderer::new(player, source, midi_audible),
         )
+        .expect("valid test soundfont and format")
+    }
+}
+
+/// The selected physical output and its format, validated around slow preparation work.
+struct OutputDevice {
+    device: cpal::Device,
+    config: SupportedStreamConfig,
+    key: DeviceKey,
+    needs_poll: bool,
+}
+
+impl OutputDevice {
+    fn current() -> Result<Self, OutputError> {
+        let host = cpal::default_host();
+        let device = host.default_output_device().ok_or(OutputError::NoDevice)?;
+        let config = device.default_output_config()?;
+        let key = DeviceKey::new(&device, &config)?;
+        Ok(Self {
+            device,
+            config,
+            key,
+            needs_poll: needs_poll(host.id()),
+        })
+    }
+
+    fn ensure_current(&self, events: &Events, generation: u64) -> Result<(), OutputError> {
+        if !events.is_current(generation) || DeviceKey::current()? != self.key {
+            return Err(OutputError::Changed);
+        }
+        Ok(())
+    }
+
+    fn connect(
+        self,
+        mut output: AudioOutput,
+        renderer: Renderer,
+        events: Events,
+        generation: u64,
+    ) -> Result<AudioOutput, OutputError> {
+        output.stream =
+            Some(renderer.open(&self.device, &self.config, events.clone(), generation)?);
+        self.ensure_current(&events, generation)?;
+        output.needs_poll = self.needs_poll;
+        Ok(output)
     }
 }
 
