@@ -174,9 +174,22 @@ impl Interpreter {
     ) -> InterpreterResult<(PyObjectRef, PyObjectRef)> {
         interpreter.enter(|vm| -> InterpreterResult<(PyObjectRef, PyObjectRef)> {
             let scope = vm.new_scope_with_builtins();
+            let import = vm::py_compile!(source = "from athenaCL.libATH import athenaObj");
+            let _ = vm
+                .run_code_obj(vm.ctx.new_code(import), scope.clone())
+                .try_py()?;
+
+            // the version athenaCL reports is the package's, so that it is written down once;
+            // the one in athenaObj.py only stands in when the python runs on its own
+            scope
+                .globals
+                .get_item("athenaObj", vm)
+                .try_py()?
+                .set_attr("athVersion", vm.ctx.new_str(env!("CARGO_PKG_VERSION")), vm)
+                .try_py()?;
+
             let module = vm::py_compile!(
-                source = r#"from athenaCL.libATH import athenaObj
-interp = athenaObj.Interpreter()
+                source = r#"interp = athenaObj.Interpreter()
 interp"#
             );
             let _ = vm
@@ -359,5 +372,27 @@ impl Error {
             .unwrap_or_else(|| "Unknown (silent) error".to_string());
 
         Self::PythonError(message)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn athenacl_reports_the_package_version() {
+        init_scratch_prefs();
+        let interpreter = init_py_interpreter();
+        let (_, ath_object) =
+            Interpreter::init_ath_interpreter(&interpreter).expect("the interpreter starts");
+
+        let version = interpreter.enter(|vm| {
+            let version = ath_object
+                .get_attr("athVersion", vm)
+                .expect("the athena object carries a version");
+            extract_string(vm, version).expect("the version is a string")
+        });
+
+        assert_eq!(version, env!("CARGO_PKG_VERSION"));
     }
 }

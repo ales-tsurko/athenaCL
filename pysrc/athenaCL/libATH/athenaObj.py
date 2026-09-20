@@ -15,6 +15,8 @@
 import sys, os, time, random, traceback, http.client, urllib.request, urllib.parse, urllib.error
 import unittest
 
+# the rust host overwrites this with the package version at startup; it stands
+# in only when the python runs on its own, as the tests do
 athVersion = "2.0.0"
 athBuild = "2024.04.10"
 athDate = "4 October 2024"  # human readable version
