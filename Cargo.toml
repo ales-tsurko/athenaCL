@@ -23,6 +23,9 @@ rodio = { version = "0.22.2", features = [
     "symphonia-aiff",
     "symphonia-alac",
 ] }
+# rustpython 0.5.0 hands libc::POSIX_SPAWN_SETSID to nix's PosixSpawnFlags, which libc 0.2.187
+# retyped from c_int to c_short: it no longer builds on Linux. Cargo.lock holds libc at 0.2.186
+# until rustpython releases a fix, so don't let `cargo update` carry it past that on its own.
 rustpython-pylib = { version = "0.5.0", features = ["freeze-stdlib"] }
 rustpython-stdlib = "0.5.0"
 rustpython-vm = { version = "0.5.0", features = ["freeze-stdlib"] }

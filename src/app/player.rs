@@ -83,7 +83,7 @@ impl GlobalState {
     #[cfg(test)]
     pub(crate) fn headless() -> Self {
         let settings = PlayerSettings::builder().build();
-        let (player, controller) = Player::new(app::SOUND_FONT, settings)
+        let (player, controller) = Player::new(soundfont::path(), settings)
             .expect("midi player should be initialized with default settings and soundfont");
         drop(player);
 
@@ -557,6 +557,134 @@ impl canvas::Program<Message> for Progress {
         } else {
             mouse::Interaction::default()
         }
+    }
+}
+
+/// The soundfont tests play through.
+///
+/// The app's own soundfont is half a gigabyte kept in Git LFS, which CI doesn't fetch. Tests need
+/// a player, not a sound, so they get the smallest soundfont rustysynth accepts, built here: one
+/// preset of one instrument of one silent sample.
+#[cfg(test)]
+mod soundfont {
+    use std::{path::PathBuf, sync::OnceLock};
+
+    /// A zone's generator naming the instrument it plays, and a zone's naming the sample.
+    const INSTRUMENT: u16 = 41;
+    const SAMPLE_ID: u16 = 53;
+    /// Silent sample data, as 16-bit samples. The sample ends inside it, as rustysynth checks.
+    const WAVE: [u8; 16] = [0; 16];
+    const SAMPLE_END: u32 = 4;
+    const SAMPLE_LOOP_END: u32 = 3;
+
+    /// Where this process wrote its soundfont: each writes its own, as tests run in parallel.
+    pub(super) fn path() -> &'static str {
+        static PATH: OnceLock<String> = OnceLock::new();
+        PATH.get_or_init(|| {
+            let path: PathBuf =
+                std::env::temp_dir().join(format!("athenacl-test-{}.sf2", std::process::id()));
+            std::fs::write(&path, bytes()).expect("the test soundfont should be written");
+            path.to_string_lossy().into_owned()
+        })
+    }
+
+    /// The soundfont itself: a RIFF file of an info, a sample data and a parameter list.
+    fn bytes() -> Vec<u8> {
+        let info = list(b"INFO", &chunk(b"ifil", &[2, 0, 1, 0]));
+        let sample_data = list(b"sdta", &chunk(b"smpl", &WAVE));
+
+        // every list names one thing and ends with a terminal record, which is never played
+        let mut parameters = chunk(b"phdr", &[preset("silence", 0), preset("EOP", 1)].concat());
+        parameters.extend(chunk(b"pbag", &[zone(0), zone(1)].concat()));
+        parameters.extend(chunk(
+            b"pgen",
+            &[generator(INSTRUMENT, 0), generator(0, 0)].concat(),
+        ));
+        parameters.extend(chunk(
+            b"inst",
+            &[instrument("silence", 0), instrument("EOI", 1)].concat(),
+        ));
+        parameters.extend(chunk(b"ibag", &[zone(0), zone(1)].concat()));
+        parameters.extend(chunk(
+            b"igen",
+            &[generator(SAMPLE_ID, 0), generator(0, 0)].concat(),
+        ));
+        parameters.extend(chunk(b"shdr", &[sample("silence"), sample("EOS")].concat()));
+
+        let mut form = b"sfbk".to_vec();
+        form.extend(info);
+        form.extend(sample_data);
+        form.extend(list(b"pdta", &parameters));
+        chunk(b"RIFF", &form)
+    }
+
+    /// A RIFF chunk: its name, its length, and its content.
+    fn chunk(id: &[u8; 4], body: &[u8]) -> Vec<u8> {
+        let mut out = id.to_vec();
+        out.extend(u32::try_from(body.len()).unwrap_or(u32::MAX).to_le_bytes());
+        out.extend(body);
+        out
+    }
+
+    /// A list chunk, whose content starts with the kind of list it is.
+    fn list(kind: &[u8; 4], body: &[u8]) -> Vec<u8> {
+        let mut inner = kind.to_vec();
+        inner.extend(body);
+        chunk(b"LIST", &inner)
+    }
+
+    /// A name, in the twenty bytes records start with.
+    fn name(text: &str) -> [u8; 20] {
+        let mut out = [0; 20];
+        for (slot, byte) in out.iter_mut().zip(text.bytes()) {
+            *slot = byte;
+        }
+        out
+    }
+
+    /// A preset: its name, its patch and bank, the zone it starts at, and unused catalog numbers.
+    fn preset(text: &str, zone: u16) -> Vec<u8> {
+        let mut out = name(text).to_vec();
+        out.extend(0u16.to_le_bytes());
+        out.extend(0u16.to_le_bytes());
+        out.extend(zone.to_le_bytes());
+        out.extend([0; 12]);
+        out
+    }
+
+    /// An instrument: its name, and the zone it starts at.
+    fn instrument(text: &str, zone: u16) -> Vec<u8> {
+        let mut out = name(text).to_vec();
+        out.extend(zone.to_le_bytes());
+        out
+    }
+
+    /// A zone: where its generators start, and where its modulators would.
+    fn zone(generator: u16) -> Vec<u8> {
+        let mut out = generator.to_le_bytes().to_vec();
+        out.extend(0u16.to_le_bytes());
+        out
+    }
+
+    /// A generator: what it sets, and what to.
+    fn generator(operator: u16, amount: u16) -> Vec<u8> {
+        let mut out = operator.to_le_bytes().to_vec();
+        out.extend(amount.to_le_bytes());
+        out
+    }
+
+    /// A sample: its name, its span of the wave data, its loop, its rate and its pitch.
+    fn sample(text: &str) -> Vec<u8> {
+        let mut out = name(text).to_vec();
+        out.extend(0u32.to_le_bytes());
+        out.extend(SAMPLE_END.to_le_bytes());
+        out.extend(0u32.to_le_bytes());
+        out.extend(SAMPLE_LOOP_END.to_le_bytes());
+        out.extend(44100u32.to_le_bytes());
+        out.extend([60, 0]);
+        out.extend(0u16.to_le_bytes());
+        out.extend(1u16.to_le_bytes());
+        out
     }
 }
 
