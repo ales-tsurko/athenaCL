@@ -13,3 +13,6 @@ athenaCL/demo/csound/*.mp3
 # Added by cargo
 
 /target
+
+# the built-in sound font: `make init` downloads it
+/resources/FluidR3_GM.sf2

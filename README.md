@@ -37,7 +37,7 @@ Linux builds require ALSA and PipeWire development libraries. On Debian/Ubuntu:
 sudo apt-get install pkg-config libasound2-dev libpipewire-0.3-dev libclang-dev
 ```
 
-Run this once after you cloned this repo:
+Run this once after you cloned this repo, to download the built-in sound font:
 
 ```
 make init
