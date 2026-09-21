@@ -36,7 +36,7 @@
             const path_to_root = "";
             const default_light_theme = "coal";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-fa470db0.js";
+            window.path_to_searchindex_js = "searchindex-fd17ca9b.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-ba80255b.js"></script>
@@ -302,11 +302,13 @@ Use <strong>Change folder</strong> inside the browser to choose a scratch folder
 icons show whether each folder is expanded or collapsed. Drag the browser’s
 right edge to resize it, between 220 and 480 pixels. The tree refreshes
 automatically as files change; <strong>Refresh</strong> also reloads it. Folders and readable
-AthenaObjects, audio, MIDI, and text files are shown. Symbolic links and
-unsupported binary files are hidden.</p>
+AthenaObjects, audio, MIDI, sound fonts (<code>.sf2</code>), and text files are shown.
+Symbolic links and unsupported binary files are hidden.</p>
 <p>Double-click a file to open it. AthenaObject XML files replace the current
 object, just like <code>AOl</code>. Audio and MIDI files add a player to the log. Text
-files show their contents in the log, with previews limited to 1 MiB.</p>
+files show their contents in the log, with previews limited to 1 MiB. Sound
+fonts carry an <strong>SF</strong> tag. Double-click one, press Enter with it selected, or
+choose <strong>Use as sound</strong> from its context menu to use it for MIDI playback.</p>
 <p>Right-click a file or folder to copy, paste, rename, delete, or create a folder.
 Shift-click selects a range; Command-click on macOS or Ctrl-click on Windows and
 Linux adds or removes individual items. Copy and Delete apply to the selection;
@@ -323,6 +325,22 @@ folder into itself or its descendants.</p>
 deleting their source files does not change what was already loaded. Affected
 media players stop and keep their original paths, so the old log entry reports a
 missing file. Open the moved or renamed file to add a new player.</p>
+<h2 id="playback-volume-and-sound"><a class="header" href="#playback-volume-and-sound">Playback volume and sound</a></h2>
+<p>The bottom bar’s <strong>VOLUME</strong> meter controls all audio and MIDI playback. Click or
+drag its twelve segments to set the level, scroll for one step, or double-click
+for full volume. Hover to see the percentage. The speaker button mutes playback
+without changing the saved level; click again to restore it. Adjusting the meter
+also unmutes. Volume and mute are remembered between sessions.</p>
+<p>The header’s <strong>SOUND</strong> button chooses the MIDI sound font. Its menu lists the
+built-in FluidR3 GM, recent fonts with their folders, and <strong>Load sound font…</strong>
+for choosing an <code>.sf2</code> file. The active choice is filled. A new font loads in
+the background while players keep their old sound, then takes over at the
+current playhead. All MIDI players use the selected font, which is remembered
+for the next session. An unreadable font adds an <strong>ERR</strong> line and leaves the
+previous sound in place. If a remembered font is missing at startup, the
+built-in font is restored and the log explains why.</p>
+<p>These controls affect playback only. Exported files and Csound renders keep
+their original sound and level.</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="tutorial-1-the-interactive-command-line-interface"><a class="header" href="#tutorial-1-the-interactive-command-line-interface">Tutorial 1: The Interactive Command Line Interface</a></h1>
 <p>This tutorial provides essential information and examples for using athenaCL’s
@@ -346,9 +364,10 @@ The active PathInstance is named within “pi{}”, and the active TextureInstan
 within “ti{}”; both are empty until one is created. This will be explained in
 greater detail below.</p>
 <p>Around the log, the window carries the things that would otherwise need a
-command: above it, the scratch directory athenaCL writes its files to, with a
-button to change it, and a switch between the light and the dark look; below it,
-the active Path and Texture, and the tempo the built-in player plays at.</p>
+command. Above it are the sound font the built-in player plays with, the scratch
+folder athenaCL writes its files to, with a button that opens its files beside
+the log, and a switch between the light and the dark look. Below it are the
+active Path and Texture, and the tempo and volume the built-in player plays at.</p>
 <p><label class="checkbox-label"><input class="checkbox-img" type="checkbox"><img src="images/window.png" alt="The athenaCL window, as it opens"><span class="img-wrapper"><img src="images/window.png" alt="The athenaCL window, as it opens"></span></label></p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="introduction-to-commands"><a class="header" href="#introduction-to-commands">Introduction to Commands</a></h1>
