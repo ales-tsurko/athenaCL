@@ -36,7 +36,7 @@
             const path_to_root = "";
             const default_light_theme = "coal";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-61305100.js";
+            window.path_to_searchindex_js = "searchindex-fa470db0.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-ba80255b.js"></script>
@@ -292,6 +292,37 @@ platform. Download Csound here: https://csound.com/.</p>
 <p>Then:</p>
 <pre><code>$ athenacl
 </code></pre>
+<h2 id="command-log"><a class="header" href="#command-log">Command log</a></h2>
+<p>Command output wraps to the log’s width. Opened text files preserve their line
+breaks and have their own horizontal scrollbar; scrolling a file sideways leaves
+the rest of the log in place.</p>
+<h2 id="scratch-file-browser"><a class="header" href="#scratch-file-browser">Scratch file browser</a></h2>
+<p>Click the folder icon in the header to show or hide the scratch folder’s tree.
+Use <strong>Change folder</strong> inside the browser to choose a scratch folder. Folder
+icons show whether each folder is expanded or collapsed. Drag the browser’s
+right edge to resize it, between 220 and 480 pixels. The tree refreshes
+automatically as files change; <strong>Refresh</strong> also reloads it. Folders and readable
+AthenaObjects, audio, MIDI, and text files are shown. Symbolic links and
+unsupported binary files are hidden.</p>
+<p>Double-click a file to open it. AthenaObject XML files replace the current
+object, just like <code>AOl</code>. Audio and MIDI files add a player to the log. Text
+files show their contents in the log, with previews limited to 1 MiB.</p>
+<p>Right-click a file or folder to copy, paste, rename, delete, or create a folder.
+Shift-click selects a range; Command-click on macOS or Ctrl-click on Windows and
+Linux adds or removes individual items. Copy and Delete apply to the selection;
+Rename is available for one item at a time. Copy and paste work within the
+browser’s current scratch folder. Pasting beside an existing name creates a
+numbered copy; renaming refuses an existing name. Deletion requires confirmation
+and is permanent.</p>
+<p>Drag files or folders onto a folder to move them, or onto <strong>Scratch folder</strong> to
+move them back to the root. Dragging a selected item moves the whole selection.
+Holding over a closed folder expands it; holding near the tree’s top or bottom
+scrolls it. Escape cancels a drag. Moves refuse existing names and cannot move a
+folder into itself or its descendants.</p>
+<p>Text previews and loaded AthenaObjects are snapshots. Moving, renaming, or
+deleting their source files does not change what was already loaded. Affected
+media players stop and keep their original paths, so the old log entry reports a
+missing file. Open the moved or renamed file to add a new player.</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="tutorial-1-the-interactive-command-line-interface"><a class="header" href="#tutorial-1-the-interactive-command-line-interface">Tutorial 1: The Interactive Command Line Interface</a></h1>
 <p>This tutorial provides essential information and examples for using athenaCL’s
@@ -352,40 +383,41 @@ listing of all commands enter “cmd”, for command:</p>
 <h2 id="listing-all-commands"><a class="header" href="#listing-all-commands">Listing all commands</a></h2>
 <pre><code>pi{y0}ti{a2} :: cmd
 athenaCL Commands:
-................................................................................
+...............................................................................
 PathInstance        PIn(new)            PIcp(copy)          PIrm(remove)
-                    PIo(select)         PIv(view)           PIe(edit)           
-                    PIdf(duration)      PIls(list)          PIh(hear)           
-                    PIret(retro)        PIrot(rot)          PIslc(slice)        
-................................................................................
+                    PIo(select)         PIv(view)           PIe(edit)
+                    PIdf(duration)      PIls(list)          PIh(hear)
+                    PIret(retro)        PIrot(rot)          PIslc(slice)
+...............................................................................
 TextureModule       TMo(select)         TMv(view)           TMls(list)
-TextureParameter    TPls(list)          TPv(select)         TPmap(map)          
-                    TPe(export)         
-TextureInstance     TIn(new)            TIcp(copy)          TIrm(remove)        
-                    TIo(select)         TIv(view)           TIe(edit)           
-                    TIls(list)          TImode(mode)        TImute(mute)        
-                    TIdoc(doc)          TImap(map)          TImidi(midi)        
-TextureClone        TCn(new)            TCcp(copy)          TCrm(remove)        
-                    TCo(select)         TCv(view)           TCe(edit)           
-                    TCls(list)          TCmute(mute)        TCmap(map)          
-TextureTemperament  TTls(list)          TTo(select)         
-TextureEnsemble     TEv(view)           TEe(edit)           TEmap(map)          
-                    TEmidi(midi)        
-................................................................................
+                    TMsd(seed)
+TextureParameter    TPls(list)          TPv(select)         TPmap(map)
+                    TPsd(seed)          TPe(export)
+TextureInstance     TIn(new)            TIcp(copy)          TIrm(remove)
+                    TIo(select)         TIv(view)           TIe(edit)
+                    TIls(list)          TImode(mode)        TImute(mute)
+                    TIdoc(doc)          TImap(map)          TImidi(midi)
+TextureClone        TCn(new)            TCcp(copy)          TCrm(remove)
+                    TCo(select)         TCv(view)           TCe(edit)
+                    TCls(list)          TCmute(mute)        TCmap(map)
+TextureTemperament  TTls(list)          TTo(select)
+TextureEnsemble     TEv(view)           TEe(edit)           TEmap(map)
+                    TEmidi(midi)
+...............................................................................
 EventOutput         EOls(list)          EOo(select)         EOrm(remove)
-EventMode           EMls(list)          EMo(select)         EMv(view)           
-                    EMi(inst)           
-EventList           ELn(new)            ELw(save)           ELv(view)           
-                    ELh(hear)           ELr(render)         ELauto(auto)        
-................................................................................
+EventMode           EMls(list)          EMo(select)         EMv(view)
+                    EMi(inst)
+EventList           ELn(new)            ELw(save)           ELv(view)
+                    ELh(hear)           ELr(render)         ELauto(auto)
+...............................................................................
 AthenaPreferences   APdir(directory)    APea(external)      APa(audio)
-                    APcurs(cursor)      APr(refresh)        APwid(width)
-AthenaHistory       AHls(list)          AHexe(execute)      
-AthenaUtility       AUsys(system)       AUdoc(docs)         AUup(update)        
-                    AUbeat(beat)        AUpc(pitch)         AUmg(markov)        
-                    AUma(markov)        AUca(automata)      
-AthenaObject        AOw(save)           AOl(load)           AOmg(merge)         
-                    AOrm(remove)  
+                    APr(refresh)
+AthenaHistory       AHls(list)          AHexe(execute)
+AthenaUtility       AUsys(system)       AUdoc(docs)         AUup(update)
+                    AUbeat(beat)        AUpc(pitch)         AUmg(markov)
+                    AUma(markov)        AUca(automata)
+AthenaObject        AOw(save)           AOl(load)           AOmg(merge)
+                    AOrm(remove)
 </code></pre>
 <p>This display, organized by prefix heading, shows each command followed by a
 longer description of the commands name.</p>
@@ -565,25 +597,12 @@ markov” for more information).</p>
 <p>athenaCL has many configurable settings that are saved in a preference file and
 loaded for each athenaCL session. Some of these settings have default values;
 others will need to be configured the first time a command is used.</p>
-<p>For example, following the athenaCL prompt (“::”) is the the athenaCL “cursor
-tool.” This tool, providing information on the active Texture and Path, can be
-turned on or off with the command <code>APcurs</code>, for AthenaPreferences cursor:</p>
-<h2 id="toggling-the-athenacl-cursor-tool-with-apcurs"><a class="header" href="#toggling-the-athenacl-cursor-tool-with-apcurs">Toggling the athenaCL cursor tool with <code>APcurs</code></a></h2>
-<pre><code>pi{b}ti{} :: apcurs
-cursor tool set to off.
-
-:: apcurs
-cursor tool set to on.
-
-pi{b}ti{} :: 
-</code></pre>
-<p>athenaCL writes files. Some of these files are audio file formats, some are
-event list formats (scores, MIDI files), and some are image files. In most
-cases, athenaCL will write a file in a user specified “scratch” directory with
-an automatically-generated file name. This is convenient and fast. To set the
-scratch directory, enter the <code>APdir</code> command, for AthenaPreferences directory.
-(Replace “/Volumes/xdisc/_scratch” with a complete file path to a suitable
-directory.)</p>
+<p>athenaCL writes files. Some of these files are audio file formats, and some are
+event list formats (scores, MIDI files). In most cases, athenaCL will write a
+file in a user specified “scratch” directory with an automatically-generated
+file name. This is convenient and fast. To set the scratch directory, enter the
+<code>APdir</code> command, for AthenaPreferences directory. (Replace
+“/Volumes/xdisc/_scratch” with a complete file path to a suitable directory.)</p>
 <h2 id="setting-the-scratch-directory-with-apdir"><a class="header" href="#setting-the-scratch-directory-with-apdir">Setting the scratch directory with <code>APdir</code></a></h2>
 <pre><code>pi{b}ti{} :: apdir
 select directory to set: scratch or audio. (x or a): x

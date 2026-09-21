@@ -35,7 +35,7 @@
             const path_to_root = "../";
             const default_light_theme = "coal";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-61305100.js";
+            window.path_to_searchindex_js = "../searchindex-fa470db0.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-ba80255b.js"></script>
@@ -181,25 +181,12 @@
 <p>athenaCL has many configurable settings that are saved in a preference file and
 loaded for each athenaCL session. Some of these settings have default values;
 others will need to be configured the first time a command is used.</p>
-<p>For example, following the athenaCL prompt (“::”) is the the athenaCL “cursor
-tool.” This tool, providing information on the active Texture and Path, can be
-turned on or off with the command <code>APcurs</code>, for AthenaPreferences cursor:</p>
-<h2 id="toggling-the-athenacl-cursor-tool-with-apcurs"><a class="header" href="#toggling-the-athenacl-cursor-tool-with-apcurs">Toggling the athenaCL cursor tool with <code>APcurs</code></a></h2>
-<pre><code>pi{b}ti{} :: apcurs
-cursor tool set to off.
-
-:: apcurs
-cursor tool set to on.
-
-pi{b}ti{} :: 
-</code></pre>
-<p>athenaCL writes files. Some of these files are audio file formats, some are
-event list formats (scores, MIDI files), and some are image files. In most
-cases, athenaCL will write a file in a user specified “scratch” directory with
-an automatically-generated file name. This is convenient and fast. To set the
-scratch directory, enter the <code>APdir</code> command, for AthenaPreferences directory.
-(Replace “/Volumes/xdisc/_scratch” with a complete file path to a suitable
-directory.)</p>
+<p>athenaCL writes files. Some of these files are audio file formats, and some are
+event list formats (scores, MIDI files). In most cases, athenaCL will write a
+file in a user specified “scratch” directory with an automatically-generated
+file name. This is convenient and fast. To set the scratch directory, enter the
+<code>APdir</code> command, for AthenaPreferences directory. (Replace
+“/Volumes/xdisc/_scratch” with a complete file path to a suitable directory.)</p>
 <h2 id="setting-the-scratch-directory-with-apdir"><a class="header" href="#setting-the-scratch-directory-with-apdir">Setting the scratch directory with <code>APdir</code></a></h2>
 <pre><code>pi{b}ti{} :: apdir
 select directory to set: scratch or audio. (x or a): x
