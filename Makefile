@@ -17,7 +17,8 @@ run:
 test:
 	cargo nextest run --all-features --all-targets
 
-# the manual's screenshots, into doc/src/images
+# the manual's screenshots, into doc/src/images, and the README's, into resources; SHOTS=name
+# makes only those whose names hold it
 screenshots:
 	cargo test --lib app::app::screenshots -- --ignored
 

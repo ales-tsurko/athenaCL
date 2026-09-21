@@ -24,8 +24,9 @@ within "ti{}"; both are empty until one is created. This will be explained in
 greater detail below.
 
 Around the log, the window carries the things that would otherwise need a
-command: above it, the scratch directory athenaCL writes its files to, with a
-button to change it, and a switch between the light and the dark look; below it,
-the active Path and Texture, and the tempo the built-in player plays at.
+command. Above it are the sound font the built-in player plays with, the scratch
+folder athenaCL writes its files to, with a button that opens its files beside
+the log, and a switch between the light and the dark look. Below it are the
+active Path and Texture, and the tempo and volume the built-in player plays at.
 
 ![The athenaCL window, as it opens](../images/window.png)

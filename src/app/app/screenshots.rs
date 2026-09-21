@@ -168,7 +168,7 @@ const PATIENCE: Duration = Duration::from_secs(60);
 fn manual_screenshots() {
     let images = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("doc/src/images");
     std::fs::create_dir_all(&images).expect("the images directory should be made");
-    for shot in SHOTS {
+    for shot in SHOTS.iter().filter(|shot| wanted(shot.name)) {
         let mut state = session(shot.setup.iter().chain(shot.commands));
         for mode in [Mode::Light, Mode::Dark] {
             let name = match mode {
@@ -199,6 +199,11 @@ fn a_shot_is_as_wide_as_a_picture_in_the_log_and_cut_to_what_it_shows() {
         "{width}"
     );
     assert!(0.0 < height && height < f64::from(TALL) * 2.0, "{height}");
+}
+
+/// Whether the screenshot `name` is to be made: all of them, or those whose names hold `SHOTS`.
+fn wanted(name: &str) -> bool {
+    std::env::var("SHOTS").map_or(true, |only| name.contains(&only))
 }
 
 /// The app after running `commands` on a fresh AthenaObject.
@@ -281,6 +286,10 @@ fn render(state: &mut State, frame: Frame, path: &Path) {
         drop(update(state, Message::FigureView(index, View::Score)));
     }
 
+    if window {
+        // a scratch folder as a user would have one: the commands' own is a test's
+        state.scratch_dir = PROJECT_SHOWN_IN.to_owned();
+    }
     let size = if window {
         Size::from(MIN_WINDOW_SIZE)
     } else {
@@ -345,4 +354,324 @@ fn crop_to_content(image: &image::RgbaImage, paper: iced::Color) -> image::RgbaI
     let bottom = (0..image.height()).rev().find(shows).unwrap_or(top);
     let bottom = (bottom + 1 + margin).min(image.height());
     image::imageops::crop_imm(image, 0, top, image.width(), bottom - top).to_image()
+}
+
+/// The README's screenshots: the window at work on a small project, two in each look, each on a
+/// different part of the app. They are written into `resources`; `make screenshots` makes them
+/// again.
+struct Scene {
+    /// The image's name under `resources`, without its extension.
+    name: &'static str,
+    mode: Mode,
+    /// What the scene ends on, after the project's making.
+    commands: &'static [&'static str],
+    /// The file browser, if it is open: the folders expanded in it, and the file selected, under
+    /// the project.
+    browser: Option<(&'static [&'static str], Option<&'static str>)>,
+    /// Whether the last figure is switched to its score.
+    score: bool,
+    /// What is typed at the prompt, its suggestions open.
+    typed: Option<&'static str>,
+}
+
+const SCENES: &[Scene] = &[
+    // the parameters of a Texture as graphs, beside the project's files
+    Scene {
+        name: "screenshot-1",
+        mode: Mode::Light,
+        commands: &["tio lead", "timap"],
+        browser: Some((&["sketches"], None)),
+        score: false,
+        typed: None,
+    },
+    // the whole piece as a score, and a player for it
+    Scene {
+        name: "screenshot-2",
+        mode: Mode::Dark,
+        commands: &["elh", "temap"],
+        browser: None,
+        score: true,
+        typed: None,
+    },
+    // a ParameterObject looked up and mapped, and the next command being completed
+    Scene {
+        name: "screenshot-3",
+        mode: Mode::Light,
+        commands: &["tpv wpd", "tpmap 120 wpd,e,30,0,2"],
+        browser: None,
+        score: false,
+        typed: Some("tim"),
+    },
+    // a cellular automaton of nested triangles, with a sketch picked out in the project
+    Scene {
+        name: "screenshot-4",
+        mode: Mode::Dark,
+        commands: &["auca f{t}y{56}x{81}r{2}k{6}i{c} 1806 0"],
+        browser: Some((&["sketches"], Some("sketches/canon.xml"))),
+        score: false,
+        typed: None,
+    },
+];
+
+/// The project the README's window works on, and where it seems to be.
+const PROJECT: &str = "etudes";
+const PROJECT_SHOWN_IN: &str = "~/Music/athenaCL";
+
+/// The project's making: a Path, a lead falling in waves over a bass loop and the loop's echo a
+/// fifth above, a sketch of them saved, and an EventList. `{project}` is where the project is.
+const MAKING: &[&str] = &[
+    "emo m",
+    "pin arc c4,e4,g4,a4,d5",
+    "tmo linegroove",
+    "tin lead 0",
+    "tie t 0,24",
+    "tie r cs,(wpd,e,16,2,0,.3,.06)",
+    "tie f ws,e,12,0,-5,5",
+    "tie a ru,.5,.9",
+    "tin bass 32",
+    "tie t 0,24",
+    "tie r l,((4,2,1),(4,1,1),(4,1,1),(4,3,1)),oc",
+    "tie f c,-12",
+    "tcn echo",
+    "tce t fa,(c,.5)",
+    "tce f fa,(c,7)",
+    "aow {project}/sketches/canon.xml",
+    "eln",
+];
+
+/// The README's window, larger than the smallest the app allows.
+const README_WINDOW: Size = Size::new(1280.0, 800.0);
+
+#[test]
+#[ignore = "writes the README's screenshots into resources: run `make screenshots`"]
+fn readme_screenshots() {
+    let resources = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("resources");
+    for scene in SCENES.iter().filter(|scene| wanted(scene.name)) {
+        let folder = tempfile::tempdir().expect("the project's folder is made");
+        let project = folder.path().join(PROJECT);
+        let state = project_session(&project, scene);
+        let mut simulator =
+            iced_test::Simulator::with_size(settings(), README_WINDOW, view(&state));
+        let snapshot = simulator
+            .snapshot(&theme(&state))
+            .expect("the scene renders");
+        crate::app::snapshot::pixels(&snapshot)
+            .save(resources.join(format!("{}.png", scene.name)))
+            .expect("the scene is saved");
+    }
+}
+
+#[test]
+fn a_project_scene_shows_its_files_score_player_and_suggestions_where_it_seems_to_be() {
+    let folder = tempfile::tempdir().expect("the project's folder is made");
+    let project = folder.path().join(PROJECT);
+    let state = project_session(
+        &project,
+        &Scene {
+            name: "every part",
+            mode: Mode::Dark,
+            commands: &["elh", "temap"],
+            browser: Some((&["sketches"], Some("sketches/canon.xml"))),
+            score: true,
+            typed: Some("tim"),
+        },
+    );
+
+    let listed = |name: &str| {
+        state
+            .browser
+            .listing
+            .entries
+            .iter()
+            .any(|entry| entry.path == project.join(name))
+    };
+    assert!(state.browser.visible);
+    assert!(listed("notes.txt") && listed("sketches/canon.xml") && listed("sketches/drone.wav"));
+    assert!(state
+        .browser
+        .selected
+        .contains(&project.join("sketches/canon.xml")));
+    assert!(matches!(
+        state.output.iter().rev().find(|output| matches!(output, Output::Figure(_))),
+        Some(Output::Figure(figure)) if figure.view == View::Score
+    ));
+    assert!(state.output.iter().any(|output| matches!(
+        output,
+        Output::Player(track) if track.is_playing && track.position > 0.0
+    )));
+    assert_eq!(state.answer, "tim");
+    assert!(state.suggestions.is_open());
+    // the temporary folder shows only as where the project seems to be
+    let shown = format!("{PROJECT_SHOWN_IN}/{PROJECT}");
+    assert_eq!(state.scratch_dir, shown);
+    let project_text = project.to_string_lossy();
+    assert!(state.output.iter().all(|output| match output {
+        Output::Normal(text) | Output::Error(text) => {
+            !text.contains(project_text.as_ref()) && !text.contains("/private/")
+        }
+        _ => true,
+    }));
+}
+
+/// The app after making the project in `project` and playing `scene` in it.
+fn project_session(project: &Path, scene: &Scene) -> State {
+    std::fs::create_dir_all(project.join("sketches")).expect("the project's folders are made");
+    std::fs::write(
+        project.join("notes.txt"),
+        "etude 1: the lead falls in waves over the bass loop; its echo a fifth above.\n",
+    )
+    .expect("the notes are written");
+    std::fs::write(project.join("sketches/drone.wav"), silence()).expect("a render is written");
+
+    let mut state = fresh_state();
+    state.mode = scene.mode;
+    run(&mut state, "aorm confirm");
+    state.output.clear();
+    // the project is the scratch folder, as the folder button makes it
+    ask(
+        &mut state,
+        interpreter::Message::SetScratchDir(project.to_string_lossy().into_owned()),
+        |reply| matches!(reply, interpreter::Message::Post(_)),
+    );
+    ask(&mut state, interpreter::Message::GetCompletions, |reply| {
+        matches!(reply, interpreter::Message::Completions(_))
+    });
+    let project_text = project.to_string_lossy();
+    for command in MAKING.iter().chain(scene.commands) {
+        run(&mut state, &command.replace("{project}", &project_text));
+    }
+
+    if let Some((expanded, selected)) = scene.browser {
+        let task = update(
+            &mut state,
+            Message::Browser(crate::app::browser::Message::Toggle),
+        );
+        settle(&mut state, task);
+        for folder in expanded {
+            let task = update(
+                &mut state,
+                Message::Browser(crate::app::browser::Message::Expand(project.join(folder))),
+            );
+            settle(&mut state, task);
+        }
+        if let Some(file) = selected {
+            let task = update(
+                &mut state,
+                Message::Browser(crate::app::browser::Message::Click(
+                    project.join(file),
+                    keyboard::Modifiers::empty(),
+                    false,
+                )),
+            );
+            settle(&mut state, task);
+        }
+    }
+    // a player partway through what it plays
+    if let Some(Output::Player(track)) = state
+        .output
+        .iter_mut()
+        .rev()
+        .find(|output| matches!(output, Output::Player(_)))
+    {
+        track.is_playing = true;
+        track.position = 0.38;
+    }
+    if scene.score {
+        let index = last(&state, |output| matches!(output, Output::Figure(_)));
+        drop(update(&mut state, Message::FigureView(index, View::Score)));
+    }
+    if let Some(typed) = scene.typed {
+        drop(state.update_completion(CompletionAction::Edit(
+            typed.to_owned(),
+            Some(typed.chars().count()),
+        )));
+    }
+    // where the project seems to be, rather than the temporary folder it is in, however that
+    // folder is spelled: macOS also names it through the link it is under
+    let shown = format!("{PROJECT_SHOWN_IN}/{PROJECT}");
+    let canonical = project
+        .canonicalize()
+        .expect("the project is there")
+        .to_string_lossy()
+        .into_owned();
+    let tidy = |text: &mut String| {
+        *text = text
+            .replace(&canonical, &shown)
+            .replace(project_text.as_ref(), &shown);
+    };
+    tidy(&mut state.scratch_dir);
+    for output in &mut state.output {
+        match output {
+            Output::Normal(text) | Output::Error(text) => tidy(text),
+            Output::Command { command, .. } => tidy(command),
+            _ => (),
+        }
+    }
+    state
+}
+
+/// Ask the interpreter `question`, as the app does, and give the app all it says until `answered`.
+fn ask(
+    state: &mut State,
+    question: interpreter::Message,
+    answered: impl Fn(&interpreter::Message) -> bool,
+) {
+    let asked = format!("{question:?}");
+    interpreter::INTERPRETER_WORKER
+        .interp_sender
+        .send_blocking(question)
+        .expect("the interpreter listens");
+    let receiver = &interpreter::INTERPRETER_WORKER.gui_receiver;
+    let deadline = Instant::now() + PATIENCE;
+    loop {
+        let Ok(message) = receiver.try_recv() else {
+            assert!(Instant::now() < deadline, "{asked} was not answered");
+            std::thread::sleep(Duration::from_millis(20));
+            continue;
+        };
+        let done = answered(&message);
+        drop(update(state, Message::Interpreter(message)));
+        if done {
+            break;
+        }
+    }
+}
+
+/// Run `task` to its end, giving the app every message it brings, and the tasks those bring.
+fn settle(state: &mut State, task: Task<Message>) {
+    use iced::futures::{executor::block_on, StreamExt};
+    use iced_test::runtime::{task::into_stream, Action};
+    let mut pending = vec![task];
+    while let Some(task) = pending.pop() {
+        let Some(stream) = into_stream(task) else {
+            continue;
+        };
+        for action in block_on(stream.collect::<Vec<_>>()) {
+            if let Action::Output(message) = action {
+                pending.push(update(state, message));
+            }
+        }
+    }
+}
+
+/// A tenth of a second of silence, as a WAV file: a render, for the project's folder.
+fn silence() -> Vec<u8> {
+    const RATE: u32 = 44_100;
+    let samples = RATE / 10;
+    let data = samples * 2;
+    let mut wav = Vec::new();
+    wav.extend_from_slice(b"RIFF");
+    wav.extend_from_slice(&(36 + data).to_le_bytes());
+    wav.extend_from_slice(b"WAVEfmt ");
+    wav.extend_from_slice(&16u32.to_le_bytes());
+    wav.extend_from_slice(&1u16.to_le_bytes());
+    wav.extend_from_slice(&1u16.to_le_bytes());
+    wav.extend_from_slice(&RATE.to_le_bytes());
+    wav.extend_from_slice(&(RATE * 2).to_le_bytes());
+    wav.extend_from_slice(&2u16.to_le_bytes());
+    wav.extend_from_slice(&16u16.to_le_bytes());
+    wav.extend_from_slice(b"data");
+    wav.extend_from_slice(&data.to_le_bytes());
+    wav.resize(wav.len() + data as usize, 0);
+    wav
 }

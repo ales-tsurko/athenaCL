@@ -1572,6 +1572,17 @@ class Test(unittest.TestCase):
             if not ok:
                 raise Exception("failed cmd (%s): %s" % (cmd, result))
 
+    def testInterpreterRemoveClearsClones(self):
+        # a texture made again after the AthenaObject is removed has none of its old clones
+        athInt = Interpreter("terminal")
+        for cmd in ["emo m", "tin a 0", "tcn w", "aorm confirm", "tin a 0"]:
+            ok, result = athInt.cmd(cmd, errorMode="return")
+            if not ok:
+                raise Exception("failed cmd (%s): %s" % (cmd, result))
+        self.assertEqual(athInt.ao.cloneLib.number("a"), 0)
+        ok, result = athInt.cmd("tcn w", errorMode="return")
+        self.assertTrue(ok, result)
+
     def testInterpreterEmbeddedParameterObject(self):
 
         ai = Interpreter("terminal")

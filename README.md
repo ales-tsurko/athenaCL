@@ -7,10 +7,15 @@ Or, as described by the author more specifically, it is a tool for:
 > modular poly-paradigm algorithmic music composition in a cross-platform
 > interactive command-line environment.
 
-![athenaCL screenshot 1](resources/screenshot-1.png)
-![athenaCL screenshot 2](resources/screenshot-2.png)
-![athenaCL screenshot 3](resources/screenshot-3.png)
-![athenaCL screenshot 4](resources/screenshot-4.png)
+![A Texture's parameters as graphs, beside the project's files][shot-1]
+![Two Textures as a score, with a player for the piece][shot-2]
+![A ParameterObject mapped, and the next command being completed][shot-3]
+![A cellular automaton of nested triangles, beside the files][shot-4]
+
+[shot-1]: resources/screenshot-1.png
+[shot-2]: resources/screenshot-2.png
+[shot-3]: resources/screenshot-3.png
+[shot-4]: resources/screenshot-4.png
 
 
 

@@ -7386,6 +7386,8 @@ class AOrm(_CommandAO):
             return
         self.ao.pathLib.clear()
         self.ao.textureLib.clear()
+        # clones are kept by the name of their texture: one made again must not find them
+        self.ao.cloneLib = clone.CloneManager()
         self.ao.setActiveTexture("")
         self.ao.setActivePath("")
         self._piUpdateAllReferences()
