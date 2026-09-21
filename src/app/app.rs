@@ -8,23 +8,25 @@ use iced::{
     futures::sink::SinkExt,
     keyboard, never, stream, time,
     widget::{
-        button, column, container, operation, pick_list, rich_text, row,
-        scrollable::{self, Direction, Scrollbar},
-        space, span, text, text_input, Button, Column, PickList, Row,
+        button, column, container, operation, pick_list, responsive, rich_text, row,
+        scrollable::{self, Direction},
+        space, span, text, text_input, tooltip, Button, Column, PickList, Row,
     },
-    Color, Element, Font, Length, Rectangle, Subscription, Task, Theme, Vector,
+    Color, Element, Font, Length, Padding, Rectangle, Subscription, Task, Theme, Vector,
 };
 use rfd::FileDialog;
 use rustyline::history::SearchDirection;
 
 use crate::{
     app::{
+        browser::{Browser, Message as BrowserMessage},
         completion::{Action as CompletionAction, Sources, Suggestions},
         figure::{self, Palette},
         history::{self, History},
         icons::Icon,
         manual, pixel,
         player::{self, GlobalState as GlobalPlayerState, Track as PlayerState},
+        scrollbar,
         terminal_input::Input,
         theme::{Colors, Mode},
     },
@@ -34,10 +36,12 @@ use crate::{
     manual::Page as ManualPage,
 };
 
-/// The page's width: the window resizes, the page doesn't.
-const WINDOW_WIDTH: f32 = 800.0;
-/// The smallest the window goes: the page, and room for a few entries.
-pub const MIN_WINDOW_SIZE: (f32, f32) = (WINDOW_WIDTH, 480.0);
+mod browser;
+
+/// The log's original page width, including its side padding.
+const LOG_MAX_WIDTH: f32 = 800.0;
+/// Room for the browser, its file-action panel, and a usable log.
+pub const MIN_WINDOW_SIZE: (f32, f32) = (1040.0, 640.0);
 const WINDOW_PADDING: f32 = 40.0;
 /// The bars across the top and bottom of the page, and the frames of controls in them.
 const HEADER_HEIGHT: f32 = 56.0;
@@ -45,24 +49,15 @@ const BOTTOM_BAR_HEIGHT: f32 = 76.0;
 const FRAME_HEIGHT: f32 = 36.0;
 /// Space between items in the header and bottom bar.
 const BAR_SPACING: f32 = 12.0;
-/// The scrollbar: a hairline track and a thin thumb, easy to grab.
-const SCROLLBAR: f32 = 1.0;
-const SCROLLER: f32 = 3.0;
-const SCROLLBAR_MARGIN: f32 = 4.0;
-/// Space between the output and its scrollbar.
-const SCROLLBAR_SPACING: f32 = 13.0;
 /// The width available to each entry in the output.
-const OUTPUT_WIDTH: f32 = WINDOW_WIDTH
-    - 2.0 * WINDOW_PADDING
-    - SCROLLBAR.max(SCROLLER)
-    - 2.0 * SCROLLBAR_MARGIN
-    - SCROLLBAR_SPACING;
+#[cfg(test)]
+const OUTPUT_WIDTH: f32 = LOG_MAX_WIDTH - 2.0 * WINDOW_PADDING - scrollbar::RESERVED_WIDTH;
 /// A picker's width: room for its longest option, its arrow, and never less than this.
 const PICKER_CHARACTER: f32 = 8.4;
 const PICKER_ARROW: f32 = 44.0;
 const PICKER_WIDTH: f32 = 104.0;
 /// The longest scratch folder path the header shows whole.
-const PATH_CHARACTERS: usize = 48;
+const PATH_CHARACTERS: usize = 36;
 /// The manual on the web, for `AUdoc www`.
 const MANUAL_URL: &str = "https://athenacl.alestsurko.by";
 /// The tempo's range, in beats per minute, and the widths of the box it's typed in and of its
@@ -87,6 +82,7 @@ pub struct State {
     question: Option<Query>,
     player_state: GlobalPlayerState,
     scratch_dir: String,
+    browser: Browser,
     input_id: String,
     path_lib: Vec<String>,
     texture_lib: Vec<String>,
@@ -238,6 +234,7 @@ impl Default for State {
             output,
             question: None,
             scratch_dir: String::new(),
+            browser: Browser::default(),
             input_id: "input".to_owned(),
             path_lib: Vec::new(),
             texture_lib: Vec::new(),
@@ -264,6 +261,11 @@ pub(crate) enum Output {
     Figure(FigureOutput),
     /// A page of the manual, from `AUdoc`.
     Manual(Box<ManualPage>),
+    /// Text captured when a file was opened; later edits to the file do not rewrite the log.
+    File {
+        path: std::path::PathBuf,
+        content: String,
+    },
 }
 
 /// The active path and texture, as athenaCL's prompt shows them.
@@ -343,13 +345,14 @@ pub fn update(state: &mut State, message: Message) -> Task<Message> {
         Message::Completion(action) => return state.update_completion(action),
         Message::Submit => return submit(state),
         Message::Answer(value) => return answer_current(state, value),
-        Message::Key(key, modifiers) => return press_key(state, &key, modifiers),
-        Message::Typed(typed) => return type_at_prompt(state, &typed),
+        Message::Key(..) | Message::TreeKey(..) | Message::Typed(_) => {
+            return use_keyboard(state, message)
+        }
         Message::ManualLink(index, target) => return follow_manual_link(state, index, &target),
         Message::RecallHistory { direction, focused } => {
             return recall_history(state, direction, focused)
         }
-        Message::SetScratchDir => set_scratch_dir(),
+        Message::Browser(message) => return state.update_browser(message),
         Message::PiSelected(value) => send_command(format!("pio {value}")),
         Message::TiSelected(value) => send_command(format!("tio {value}")),
         Message::SetMode(mode) => set_mode(state, mode),
@@ -396,6 +399,10 @@ fn submit(state: &mut State) -> Task<Message> {
 /// Add `typed` to the end of the line being typed, and give it focus back: whatever was clicked
 /// last, as output selected to copy, typing is for the prompt.
 fn type_at_prompt(state: &mut State, typed: &str) -> Task<Message> {
+    if state.browser.edit.is_some() {
+        return Task::none();
+    }
+    state.browser.focused = false;
     let value = format!("{}{typed}", state.answer);
     match &state.question {
         // the answers' switch takes no typing
@@ -409,8 +416,56 @@ fn type_at_prompt(state: &mut State, typed: &str) -> Task<Message> {
     operation::focus(state.input_id.clone())
 }
 
-/// Browse commands when the input is focused, or move and take a question's picked answer.
+/// Keys and text no widget took.
+fn use_keyboard(state: &mut State, message: Message) -> Task<Message> {
+    match message {
+        Message::Key(key, modifiers) => press_key(state, &key, modifiers),
+        Message::TreeKey(key, modifiers, prompt) => press_tree_key(state, key, modifiers, prompt),
+        Message::Typed(typed) => type_at_prompt(state, &typed),
+        _ => Task::none(),
+    }
+}
+
+/// What a key no widget took is for: an open file form, the file tree, or the prompt.
 fn press_key(
+    state: &mut State,
+    key: &keyboard::Key,
+    modifiers: keyboard::Modifiers,
+) -> Task<Message> {
+    if state.browser.edit.is_some() {
+        return match key {
+            keyboard::Key::Named(keyboard::key::Named::Escape) if !state.browser.busy => {
+                state.update_browser(BrowserMessage::Cancel)
+            }
+            _ => Task::none(),
+        };
+    }
+    // after a click in the file tree, keys are its own, unless the prompt has taken them back
+    if state.browser.focused && state.browser.visible && state.question.is_none() {
+        let key = key.clone();
+        return operation::is_focused(state.input_id.clone())
+            .map(move |prompt| Message::TreeKey(key.clone(), modifiers, prompt));
+    }
+    press_key_at_prompt(state, key, modifiers)
+}
+
+/// A key for the file tree, unless the prompt has taken the keyboard back since the tree was
+/// clicked: then it is the prompt's again.
+fn press_tree_key(
+    state: &mut State,
+    key: keyboard::Key,
+    modifiers: keyboard::Modifiers,
+    prompt_focused: bool,
+) -> Task<Message> {
+    if prompt_focused {
+        state.browser.focused = false;
+        return press_key_at_prompt(state, &key, modifiers);
+    }
+    state.update_browser(BrowserMessage::Key(key, modifiers))
+}
+
+/// Browse commands when the input is focused, or move and take a question's picked answer.
+fn press_key_at_prompt(
     state: &mut State,
     key: &keyboard::Key,
     modifiers: keyboard::Modifiers,
@@ -592,7 +647,10 @@ fn answer(state: &mut State, question: &str, value: String) -> Task<Message> {
 /// Let the user choose the scratch directory, and use it.
 fn set_scratch_dir() {
     if let Some(value) = pick_directory("Choose scratch folder") {
-        send_command(format!("apdir x {value}"));
+        interpreter::INTERPRETER_WORKER
+            .interp_sender
+            .send_blocking(interpreter::Message::SetScratchDir(value))
+            .expect("the interpreter channel is unbounded");
     }
 }
 
@@ -715,9 +773,9 @@ fn update_interpreter(state: &mut State, message: interpreter::Message) -> Task<
             Task::none()
         }
         interpreter::Message::ScratchDir(value) => {
+            let task = state.browser.set_root(value.clone().into());
             state.scratch_dir = value;
-
-            Task::none()
+            task.map(Message::Browser)
         }
         interpreter::Message::Appearance(name) => {
             state.mode = Mode::from_name(&name).unwrap_or_default();
@@ -792,8 +850,11 @@ fn prompt(state: &State) -> Prompt {
 /// Show the interpreter's output, returning focus to the input.
 fn push_output(state: &mut State, output: Output) -> Task<Message> {
     state.output.push(output);
-
-    operation::focus(state.input_id.clone())
+    if state.browser.edit.is_some() {
+        Task::none()
+    } else {
+        operation::focus(state.input_id.clone())
+    }
 }
 
 /// Show what a command printed as it finished, and then the start of the page of the manual it
@@ -814,62 +875,95 @@ pub fn theme(state: &State) -> Theme {
 /// The top-level iced view function.
 pub fn view(state: &State) -> Element<'_, Message> {
     let colors = state.mode.colors();
-    let log = scrollable::Scrollable::with_direction(
-        view_log(state, colors),
-        Direction::Vertical(
-            Scrollbar::new()
-                .width(SCROLLBAR)
-                .scroller_width(SCROLLER)
-                .margin(SCROLLBAR_MARGIN)
-                .spacing(SCROLLBAR_SPACING),
-        ),
-    )
-    .anchor_bottom()
-    .id(LOG)
-    .style(colors.scrollbar())
-    .width(Length::Fill)
-    .height(Length::Fill);
+    let log = responsive(move |size| {
+        scrollable::Scrollable::with_direction(
+            view_log(state, colors, size.width - scrollbar::RESERVED_WIDTH),
+            Direction::Vertical(scrollbar::vertical()),
+        )
+        .anchor_bottom()
+        .id(LOG)
+        .style(colors.scrollbar())
+        .width(Length::Fill)
+        .height(Length::Fill)
+        .into()
+    });
+    let log = container(log)
+        // The shared body now supplies the outer gutters; retain the log's original content width
+        // so widening the window does not stretch terminal output.
+        .max_width(LOG_MAX_WIDTH - 2.0 * WINDOW_PADDING)
+        .height(Length::Fill)
+        .width(Length::Fill);
+    let log = container(log)
+        .center_x(Length::Fill)
+        .height(Length::Fill)
+        .padding(Padding::ZERO.bottom(12));
+    let sidebar: Element<'_, Message> = if state.browser.visible {
+        row![
+            container(state.browser.view(colors).map(Message::Browser)).id("file-browser"),
+            state.browser.divider(colors).map(Message::Browser),
+        ]
+        .height(Length::Fill)
+        .into()
+    } else {
+        space().width(0).into()
+    };
+    // Keep the log at the same child index: toggling the browser must retain its scroll, input
+    // focus and figure zoom state.
+    let body = row![sidebar, log]
+        .spacing(if state.browser.visible {
+            WINDOW_PADDING
+        } else {
+            0.0
+        })
+        .padding([0.0, WINDOW_PADDING])
+        .width(Length::Fill)
+        .height(Length::Fill);
 
     let page = column![
         view_header(state, colors),
-        rule(colors.ink, 1.0),
-        container(log)
-            .padding([0.0, WINDOW_PADDING])
-            .height(Length::Fill),
-        space().height(12),
-        rule(colors.ink, 1.0),
+        container(rule(colors.ink, 1.0)).padding([0.0, WINDOW_PADDING]),
+        body,
+        container(rule(colors.ink, 1.0)).padding([0.0, WINDOW_PADDING]),
         view_bottom_bar(state, colors),
     ]
-    .width(WINDOW_WIDTH)
+    .width(Length::Fill)
     .height(Length::Fill);
 
     container(page)
-        .center_x(Length::Fill)
+        .width(Length::Fill)
         .height(Length::Fill)
         .into()
 }
 
 /// The wordmark, the scratch folder and the look.
 fn view_header(state: &State, colors: Colors) -> Element<'_, Message> {
-    let folder = Icon::Folder
-        .button(colors.outlined())
+    let folder = Icon::folder(state.browser.visible)
+        .button(move |theme, status| {
+            let mut style = colors.outlined()(theme, status);
+            if state.browser.visible {
+                style.background = Some(colors.ink.into());
+                style.text_color = colors.paper;
+            }
+            style
+        })
         .width(FRAME_HEIGHT)
         .height(FRAME_HEIGHT)
-        .on_press(Message::SetScratchDir);
-    let segment = |icon: Icon, mode: Mode| {
-        icon.button(colors.segment(state.mode == mode))
-            .width(32)
-            .height(Length::Fill)
-            .on_press(Message::SetMode(mode))
+        .on_press(Message::Browser(BrowserMessage::Toggle));
+    let (icon, next_mode) = match state.mode {
+        Mode::Light => (Icon::CircleFilled, Mode::Dark),
+        Mode::Dark => (Icon::CircleOutline, Mode::Light),
     };
-    let modes = framed(
-        colors,
-        row![
-            segment(Icon::CircleOutline, Mode::Light),
-            rule_across(colors.ink),
-            segment(Icon::CircleFilled, Mode::Dark),
-        ],
-    );
+    let appearance = tooltip(
+        icon.button(colors.outlined())
+            .width(FRAME_HEIGHT)
+            .height(FRAME_HEIGHT)
+            .on_press(Message::SetMode(next_mode)),
+        container(text(format!("Switch to {} mode", next_mode.name())).size(12))
+            .padding(6)
+            .style(colors.block(true)),
+        tooltip::Position::Bottom,
+    )
+    .delay(std::time::Duration::from_millis(500));
 
     bar(
         HEADER_HEIGHT,
@@ -878,18 +972,18 @@ fn view_header(state: &State, colors: Colors) -> Element<'_, Message> {
             space::horizontal(),
             pixel::label("SCRATCH", colors.dim),
             text(shorten(&state.scratch_dir, PATH_CHARACTERS)).size(12),
-            folder,
-            modes,
+            container(folder).id("toggle-file-browser"),
+            container(appearance).id("appearance-control"),
         ],
     )
 }
 
 /// The output: each command with what it printed and showed.
-fn view_log(state: &State, colors: Colors) -> Element<'_, Message> {
+fn view_log(state: &State, colors: Colors, width: f32) -> Element<'_, Message> {
     let palette = colors.figure();
     let mut entries: Vec<Column<'_, Message>> = Vec::new();
     for (index, output) in state.output.iter().enumerate() {
-        let element = view_output(index, output, state, colors, palette);
+        let element = view_output(index, output, state, colors, palette, width);
         match entries.last_mut() {
             Some(entry) if !matches!(output, Output::Command { .. }) => {
                 let taken = std::mem::replace(entry, Column::new());
@@ -898,7 +992,7 @@ fn view_log(state: &State, colors: Colors) -> Element<'_, Message> {
             _ => entries.push(column![element].spacing(8)),
         }
     }
-    entries.push(view_input(state, colors));
+    entries.push(view_input(state, colors, width));
     Column::with_children(entries.into_iter().map(Element::from))
         .spacing(18)
         .padding([20, 0])
@@ -912,6 +1006,7 @@ fn view_output<'a>(
     state: &'a State,
     colors: Colors,
     palette: Palette,
+    width: f32,
 ) -> Element<'a, Message> {
     // what the log prints can be selected to copy
     let selectable =
@@ -932,11 +1027,28 @@ fn view_output<'a>(
         Output::Error(msg) => row![view_error_tag(colors), selectable(msg)]
             .spacing(10)
             .into(),
-        Output::Player(track) => player::view(track, colors).map(Message::Player),
-        Output::Figure(figure) => view_figure(index, figure, state, colors, palette),
+        Output::Player(track) => player::view(track, colors, width).map(Message::Player),
+        Output::Figure(figure) => {
+            container(view_figure(index, figure, state, colors, palette, width))
+                .width(width)
+                .into()
+        }
         Output::Manual(page) => container(
-            manual::view(page, OUTPUT_WIDTH, state.mode)
+            manual::view(page, width, state.mode)
                 .map(move |target| Message::ManualLink(index, target)),
+        )
+        .id(page_id(index))
+        .into(),
+        Output::File { path, content } => container(
+            column![
+                text(path.display().to_string()).size(12).color(colors.dim),
+                scrollable::Scrollable::new(selectable(content).wrapping(text::Wrapping::None))
+                    .id(format!("file-scroll-{index}"))
+                    .direction(Direction::Horizontal(scrollbar::horizontal().spacing(8)))
+                    .style(colors.scrollbar())
+                    .width(width),
+            ]
+            .spacing(8),
         )
         .id(page_id(index))
         .into(),
@@ -952,6 +1064,7 @@ fn view_prompt<'a>(prompt: &Prompt, colors: Colors) -> Element<'a, Message> {
         span(prompt.texture.clone()).color(colors.ink),
         span("} ::").color(colors.dim),
     ]
+    .wrapping(text::Wrapping::None)
     .on_link_click(never)
     .into()
 }
@@ -970,9 +1083,10 @@ fn view_figure<'a>(
     state: &'a State,
     colors: Colors,
     palette: Palette,
+    width: f32,
 ) -> Element<'a, Message> {
-    let plot = figure::view(&output.figure, OUTPUT_WIDTH, &state.active_texture, palette)
-        .map(Message::Figure);
+    let plot =
+        figure::view(&output.figure, width, &state.active_texture, palette).map(Message::Figure);
     let (parts, domain) = match output.figure.as_ref() {
         Figure::Parameters(parameters) => (
             output
@@ -1055,7 +1169,7 @@ fn view_query<'a>(question: &'a str, colors: Colors) -> Element<'a, Message> {
 
 /// The line being typed, at the end of the output: an answer to the question, or a command at the
 /// prompt.
-fn view_input(state: &State, colors: Colors) -> Column<'_, Message> {
+fn view_input(state: &State, colors: Colors, width: f32) -> Column<'_, Message> {
     // a question that offers answers is answered from them alone, so there is nothing to type
     if let Some(query) = &state.question {
         if !query.question.answers().is_empty() {
@@ -1094,16 +1208,17 @@ fn view_input(state: &State, colors: Colors) -> Column<'_, Message> {
     } else {
         input.on_input(Message::InputChanged)
     };
-    let line = row![label, input].spacing(10).align_y(Vertical::Center);
+    let line = row![label, input]
+        .spacing(10)
+        .align_y(Vertical::Center)
+        .width(width);
 
     match &state.question {
         Some(query) => column![view_query(&query.prompt, colors), line].spacing(8),
         None => column![line]
-            .extend(
-                state
-                    .suggestions
-                    .view(colors, |index| CompletionAction::Select(index).into()),
-            )
+            .extend(state.suggestions.view(colors, width, |index| {
+                CompletionAction::Select(index).into()
+            }))
             .spacing(10),
     }
 }
@@ -1184,7 +1299,7 @@ fn view_bottom_bar(state: &State, colors: Colors) -> Element<'_, Message> {
             ),
             space::horizontal(),
             tempo_label,
-            tempo,
+            container(tempo).id("tempo-control"),
         ],
     )
 }
@@ -1220,11 +1335,17 @@ fn stepper<'a>(colors: Colors, icon: Icon, step: i32) -> Button<'a, Message> {
 
 /// A bar across the page, `height` high: the header, and the bottom bar.
 fn bar<'a>(height: f32, content: Row<'a, Message>) -> Element<'a, Message> {
-    container(content.spacing(BAR_SPACING).align_y(Vertical::Center))
-        .padding([0.0, WINDOW_PADDING])
-        .height(height)
-        .align_y(Vertical::Center)
-        .into()
+    container(
+        content
+            .width(Length::Fill)
+            .spacing(BAR_SPACING)
+            .align_y(Vertical::Center),
+    )
+    .padding([0.0, WINDOW_PADDING])
+    .width(Length::Fill)
+    .height(height)
+    .align_y(Vertical::Center)
+    .into()
 }
 
 /// Controls sharing one ink frame: the look switch, the tempo.
@@ -1256,14 +1377,20 @@ pub(super) fn switch<'a, M: 'a>(
         .into()
 }
 
-/// A segment of a switch, labelled `label` and filled when `chosen`, that sends `message`.
+/// A segment of a switch, labelled `label` and filled when `chosen`, that sends `message`; without
+/// one, it is dimmed and does nothing.
 pub(super) fn segment<'a, M: Clone + 'a>(
     label: &str,
     colors: Colors,
     chosen: bool,
-    message: M,
+    message: impl Into<Option<M>>,
 ) -> Element<'a, M> {
-    let ink = if chosen { colors.paper } else { colors.ink };
+    let message = message.into();
+    let ink = match (chosen, message.is_some()) {
+        (true, _) => colors.paper,
+        (false, true) => colors.ink,
+        (false, false) => colors.dim,
+    };
     button(
         container(pixel::label(label, ink))
             .height(Length::Fill)
@@ -1272,7 +1399,7 @@ pub(super) fn segment<'a, M: Clone + 'a>(
     .height(Length::Fill)
     .padding([0, 8])
     .style(colors.segment(chosen))
-    .on_press(message)
+    .on_press_maybe(message)
     .into()
 }
 
@@ -1331,6 +1458,8 @@ pub enum Message {
     ManualLink(usize, manual::Link),
     /// A key no widget took: command recall or the answers' switch.
     Key(keyboard::Key, keyboard::Modifiers),
+    /// A key for the file tree, and whether the prompt has since taken the keyboard back.
+    TreeKey(keyboard::Key, keyboard::Modifiers, bool),
     /// Text typed while nothing that takes it had focus: it is for the prompt.
     Typed(String),
     /// A history key, with the result of checking the command input's focus.
@@ -1338,7 +1467,7 @@ pub enum Message {
         direction: SearchDirection,
         focused: bool,
     },
-    SetScratchDir,
+    Browser(BrowserMessage),
     PiSelected(String),
     TiSelected(String),
     SetMode(Mode),
@@ -1429,6 +1558,7 @@ pub fn subscription(state: &State) -> Subscription<Message> {
         interpreter_listener,
         position_listener,
         player::subscription(&state.player_state).map(Message::Player),
+        state.browser.subscription().map(Message::Browser),
         keys,
     ])
 }
@@ -1452,6 +1582,7 @@ mod tests {
             question: None,
             player_state: GlobalPlayerState::headless(),
             scratch_dir: String::new(),
+            browser: Browser::default(),
             input_id: "input".to_owned(),
             path_lib: vec!["path".to_owned()],
             texture_lib: vec!["texture".to_owned()],
@@ -1461,6 +1592,372 @@ mod tests {
             figure_view: View::Plot,
             tempo: "120".to_owned(),
             reveal: None,
+        }
+    }
+
+    #[test]
+    fn browser_files_become_snapshots_and_players_in_the_log() {
+        use crate::app::browser::Opened;
+        let mut state = state();
+        let dir = tempfile::tempdir().expect("scratch folder");
+        let path = dir.path().join("notes.txt");
+        std::fs::write(&path, "original notes").expect("text file");
+        drop(update(
+            &mut state,
+            Message::Browser(BrowserMessage::Opened(
+                0,
+                path.clone(),
+                Ok(Opened::Text("original notes".into())),
+            )),
+        ));
+        std::fs::remove_file(&path).expect("remove source");
+        for (name, kind) in [("song.mid", Opened::Midi), ("song.wav", Opened::Audio)] {
+            drop(update(
+                &mut state,
+                Message::Browser(BrowserMessage::Opened(0, dir.path().join(name), Ok(kind))),
+            ));
+        }
+        drop(update(
+            &mut state,
+            Message::Browser(BrowserMessage::Changed(std::path::PathBuf::new())),
+        ));
+        assert!(
+            matches!(state.output.first(), Some(Output::File { content, .. }) if content == "original notes")
+        );
+        assert!(
+            matches!(state.output.get(2), Some(Output::Player(track)) if track.id == PlayerId::Midi(2))
+        );
+        assert!(
+            matches!(state.output.get(4), Some(Output::Player(track)) if track.id == PlayerId::Audio(4))
+        );
+        state.question = Some(text_query("name: "));
+        drop(update(
+            &mut state,
+            Message::Browser(BrowserMessage::Opened(0, path, Ok(Opened::Athena))),
+        ));
+        assert!(
+            matches!(state.output.last(), Some(Output::Error(message)) if message.contains("current question"))
+        );
+    }
+
+    #[test]
+    fn keys_are_the_trees_until_the_prompt_takes_them_back() {
+        use iced::futures::{executor::block_on, StreamExt};
+        use iced_test::runtime::{task::into_stream, Action};
+        let dir = tempfile::tempdir().expect("scratch folder");
+        for name in ["a.txt", "b.txt"] {
+            std::fs::write(dir.path().join(name), "notes").expect("file");
+        }
+        let mut state = state();
+        drop(update_interpreter(
+            &mut state,
+            interpreter::Message::ScratchDir(dir.path().to_string_lossy().into_owned()),
+        ));
+        let task = update(&mut state, Message::Browser(BrowserMessage::Toggle));
+        for action in block_on(into_stream(task).expect("initial scan").collect::<Vec<_>>()) {
+            if let Action::Output(message) = action {
+                drop(update(&mut state, message));
+            }
+        }
+        let (a, b) = (dir.path().join("a.txt"), dir.path().join("b.txt"));
+        drop(update(
+            &mut state,
+            Message::Browser(BrowserMessage::Click(
+                a.clone(),
+                keyboard::Modifiers::empty(),
+                false,
+            )),
+        ));
+        assert!(
+            state.browser.focused,
+            "a click in the tree gives it the keys"
+        );
+
+        let down = |prompt| {
+            Message::TreeKey(
+                keyboard::Key::Named(keyboard::key::Named::ArrowDown),
+                keyboard::Modifiers::empty(),
+                prompt,
+            )
+        };
+        drop(update(&mut state, down(false)));
+        assert!(
+            state.browser.selected.contains(&b),
+            "the tree takes the key"
+        );
+        drop(update(&mut state, down(true)));
+        assert!(
+            state.browser.selected.contains(&b) && !state.browser.focused,
+            "once the prompt has the keyboard, keys are its own"
+        );
+
+        state.browser.focused = true;
+        drop(update(&mut state, Message::Typed("x".to_owned())));
+        assert!(!state.browser.focused, "typing is for the prompt");
+        assert_eq!(state.answer, "x");
+    }
+
+    #[test]
+    fn browser_name_edits_do_not_type_into_the_command_or_answer_a_question() {
+        let mut state = state();
+        state.answer = "draft".into();
+        state.question = Some(Query::new(
+            "Save? ".into(),
+            Question::YesNo { default: true },
+        ));
+        state.browser.edit = Some(crate::app::browser::Edit::CreateFolder("scratch".into()));
+        drop(update(&mut state, Message::Typed("x".into())));
+        drop(update(
+            &mut state,
+            Message::Key(enter(), keyboard::Modifiers::empty()),
+        ));
+        assert_eq!(state.answer, "draft");
+        assert!(state.question.is_some());
+        assert!(state.output.is_empty());
+        drop(update(
+            &mut state,
+            Message::Key(
+                keyboard::Key::Named(keyboard::key::Named::Escape),
+                keyboard::Modifiers::empty(),
+            ),
+        ));
+        assert!(state.browser.edit.is_none());
+    }
+
+    #[test]
+    fn browser_and_log_render_at_minimum_and_wide_window_sizes() {
+        use iced::futures::{executor::block_on, StreamExt};
+        use iced_test::runtime::{task::into_stream, Action};
+        let dir = tempfile::tempdir().expect("scratch folder");
+        std::fs::create_dir(dir.path().join("scores")).expect("folder");
+        std::fs::write(dir.path().join("notes.txt"), "notes").expect("file");
+        std::fs::write(dir.path().join("render.wav"), b"RIFF").expect("audio");
+        let mut state = state();
+        drop(update_interpreter(
+            &mut state,
+            interpreter::Message::ScratchDir(dir.path().to_string_lossy().into_owned()),
+        ));
+        let task = update(&mut state, Message::Browser(BrowserMessage::Toggle));
+        let stream = into_stream(task).expect("initial scan");
+        for action in block_on(stream.collect::<Vec<_>>()) {
+            if let Action::Output(message) = action {
+                drop(update(&mut state, message));
+            }
+        }
+        state.output.push(Output::Normal(
+            "The scratch folder's readable files appear here.".into(),
+        ));
+        for mode in [Mode::Light, Mode::Dark] {
+            state.mode = mode;
+            for width in [MIN_WINDOW_SIZE.0, 1600.0] {
+                let mut simulator = iced_test::Simulator::with_size(
+                    settings(),
+                    Size::new(width, MIN_WINDOW_SIZE.1),
+                    view(&state),
+                );
+                let file = simulator.find("notes.txt").expect("browser file");
+                let browser = simulator
+                    .find(iced_test::selector::id("file-browser"))
+                    .expect("browser panel")
+                    .bounds();
+                assert!(
+                    (browser.x - WINDOW_PADDING).abs() < 1.0,
+                    "browser shares the header and footer gutter"
+                );
+                let log = simulator
+                    .find(iced_test::selector::id(LOG))
+                    .expect("log")
+                    .bounds();
+                assert!(log.width <= LOG_MAX_WIDTH - 2.0 * WINDOW_PADDING);
+                assert!(log.x + log.width <= width - WINDOW_PADDING + 1.0);
+                let input = simulator
+                    .find(iced_test::selector::id("input"))
+                    .expect("command input");
+                assert!(file.visible_bounds().expect("visible file").x < state.browser.width.get());
+                assert!(
+                    input.visible_bounds().expect("visible prompt").x >= state.browser.width.get()
+                );
+                let tempo = simulator
+                    .find(iced_test::selector::id("tempo-control"))
+                    .expect("tempo control")
+                    .visible_bounds()
+                    .expect("visible tempo");
+                assert!((tempo.x + tempo.width - (width - WINDOW_PADDING)).abs() < 1.0);
+                let modes = simulator
+                    .find(iced_test::selector::id("appearance-control"))
+                    .expect("appearance control")
+                    .visible_bounds()
+                    .expect("visible appearance control");
+                assert!((modes.x + modes.width - (width - WINDOW_PADDING)).abs() < 1.0);
+                let _ = simulator
+                    .click(iced_test::selector::id("toggle-file-browser"))
+                    .expect("browser toggle button");
+                let _ = simulator
+                    .click(iced_test::selector::id("browser-change-folder"))
+                    .expect("scratch folder chooser");
+                let snapshot = simulator
+                    .snapshot(&theme(&state))
+                    .expect("browser and log render");
+                if let Ok(directory) = std::env::var("ATHENACL_BROWSER_PREVIEW") {
+                    crate::app::snapshot::pixels(&snapshot)
+                        .save(
+                            std::path::Path::new(&directory)
+                                .join(format!("browser-{}-{width}.png", mode.name())),
+                        )
+                        .expect("preview");
+                }
+                let messages: Vec<_> = simulator.into_messages().collect();
+                assert!(messages
+                    .iter()
+                    .any(|message| matches!(message, Message::Browser(BrowserMessage::Toggle))));
+                assert!(messages.iter().any(|message| matches!(
+                    message,
+                    Message::Browser(BrowserMessage::ChooseRoot)
+                )));
+            }
+        }
+    }
+
+    #[test]
+    fn only_opened_text_files_scroll_sideways_while_the_rest_of_the_log_wraps() {
+        use iced::{mouse, Event};
+        use iced_test::{selector, Simulator};
+
+        let mut state = state();
+        let line = "wrapping command output 音  ".repeat(6);
+        let normal = format!("Output: {line}");
+        let command = format!("Command: {line}");
+        let error = format!("Error: {line}");
+        let file = format!("File: {}\nSecond line", line.repeat(3));
+        let second_file = format!("Independent file: {}", line.repeat(3));
+        let prose = format!("Manual: {line}");
+        let code = format!("Code: {line}\nAnother explicit line");
+        let question = format!("Question: {line}");
+        state.question = Some(text_query(&question));
+        state.output = vec![
+            Output::Normal(normal.clone()),
+            Output::Command {
+                prompt: prompt(&state),
+                command: command.clone(),
+            },
+            Output::Error(error.clone()),
+            Output::File {
+                path: "scratch/notes.txt".into(),
+                content: file.clone(),
+            },
+            Output::File {
+                path: "scratch/other.txt".into(),
+                content: second_file.clone(),
+            },
+            Output::Manual(Box::new(ManualPage {
+                title: "Manual".into(),
+                blocks: vec![
+                    manual_source::Block::Paragraph(vec![manual_source::Span::plain(&prose)]),
+                    manual_source::Block::Code(code.clone()),
+                ],
+                nav: manual_source::Nav::default(),
+            })),
+            Output::Player(PlayerState {
+                is_playing: false,
+                path: file!().into(),
+                id: PlayerId::Audio(6),
+                position: 0.0,
+            }),
+        ];
+        for mode in [Mode::Light, Mode::Dark] {
+            state.mode = mode;
+            for sidebar in [false, true] {
+                state.browser.visible = sidebar;
+                state.browser.width.set(480.0);
+                let mut simulator = Simulator::with_size(
+                    settings(),
+                    Size::new(MIN_WINDOW_SIZE.0, 1600.0),
+                    view(&state),
+                );
+                for text in [&normal, &command, &error, &question, &code] {
+                    let bounds = simulator
+                        .find(text.as_str())
+                        .expect("wrapped log text")
+                        .bounds();
+                    assert!(
+                        bounds.width <= OUTPUT_WIDTH + 1.0,
+                        "text fits the log: {bounds:?}"
+                    );
+                    assert!(bounds.height > 36.0, "long lines wrap: {bounds:?}");
+                }
+                let manual = simulator
+                    .find(selector::id(page_id(5)))
+                    .expect("manual page")
+                    .bounds();
+                assert!(
+                    manual.width <= LOG_MAX_WIDTH - 2.0 * WINDOW_PADDING && manual.height > 80.0,
+                    "manual wraps within the log: {manual:?}"
+                );
+                let preview = simulator.find(file.as_str()).expect("file preview");
+                let bounds = preview.bounds();
+                assert!(
+                    bounds.width > MIN_WINDOW_SIZE.0,
+                    "file keeps its natural width"
+                );
+                assert!(
+                    bounds.height > 30.0 && bounds.height < 40.0,
+                    "only explicit newlines add height"
+                );
+                let input = simulator
+                    .find(selector::id("input"))
+                    .expect("input")
+                    .visible_bounds()
+                    .expect("visible input");
+                assert!(input.width > 100.0 && input.width < OUTPUT_WIDTH);
+                let fixed = [&normal, &second_file, &question];
+                let positions: Vec<_> = fixed
+                    .iter()
+                    .map(|text| {
+                        simulator
+                            .find(text.as_str())
+                            .expect("neighbor")
+                            .visible_bounds()
+                    })
+                    .collect();
+                simulator.point_at(preview.visible_bounds().expect("visible file").center());
+                let _ = simulator.simulate([Event::Mouse(mouse::Event::WheelScrolled {
+                    delta: mouse::ScrollDelta::Pixels { x: -400.0, y: 0.0 },
+                })]);
+                for (id, offset) in [
+                    ("file-scroll-3", 400.0),
+                    ("file-scroll-4", 0.0),
+                    ("log", 0.0),
+                ] {
+                    let selector::Target::Scrollable { translation, .. } =
+                        simulator.find(selector::id(id)).expect("scrollable")
+                    else {
+                        panic!("scrollable target")
+                    };
+                    assert!(
+                        (translation.x - offset).abs() < 1.0,
+                        "independent offset for {id}: {translation:?}"
+                    );
+                }
+                for (text, position) in fixed.into_iter().zip(positions) {
+                    assert_eq!(
+                        simulator
+                            .find(text.as_str())
+                            .expect("fixed neighbor")
+                            .visible_bounds(),
+                        position
+                    );
+                }
+                assert_eq!(
+                    simulator
+                        .find(selector::id("input"))
+                        .expect("fixed input")
+                        .visible_bounds(),
+                    Some(input)
+                );
+                let _ = simulator
+                    .snapshot(&theme(&state))
+                    .expect("independently scrolled file renders");
+            }
         }
     }
 
@@ -1615,42 +2112,79 @@ mod tests {
     }
 
     #[test]
+    fn batched_pointer_events_still_resize_the_browser_beside_the_log() {
+        use iced::{mouse, Event, Point};
+        let mut state = state();
+        state.browser.visible = true;
+        completion_catalog(&mut state);
+        drop(update(
+            &mut state,
+            CompletionAction::Edit("ti".into(), Some(2)).into(),
+        ));
+        let mut simulator =
+            iced_test::Simulator::with_size(settings(), Size::new(1120.0, 760.0), view(&state));
+        // The native event loop supplies the final cursor position for this whole batch.
+        simulator.point_at(Point::new(600.0, 200.0));
+        let _ = simulator.simulate([
+            Event::Mouse(mouse::Event::CursorMoved {
+                position: Point::new(WINDOW_PADDING + state.browser.width.get() + 3.0, 200.0),
+            }),
+            Event::Mouse(mouse::Event::ButtonPressed(mouse::Button::Left)),
+            Event::Mouse(mouse::Event::CursorMoved {
+                position: Point::new(600.0, 200.0),
+            }),
+            Event::Mouse(mouse::Event::ButtonReleased(mouse::Button::Left)),
+        ]);
+        for message in simulator.into_messages() {
+            drop(update(&mut state, message));
+        }
+        assert!((state.browser.width.get() - 480.0).abs() < 1.0);
+    }
+
+    #[test]
     fn suggestions_render_in_both_themes_and_can_be_clicked() {
         for mode in [Mode::Light, Mode::Dark] {
-            let mut state = state();
-            state.mode = mode;
-            completion_catalog(&mut state);
-            drop(update(
-                &mut state,
-                CompletionAction::Edit("ti".to_owned(), Some(2)).into(),
-            ));
-            let mut simulator: iced_test::Simulator<'_, Message> = iced_test::Simulator::with_size(
-                iced::Settings {
-                    default_font: Font::with_name("Fira Mono"),
-                    default_text_size: 14.into(),
-                    fonts: vec![include_bytes!(
-                        "../../resources/fonts/Fira_Mono/FiraMono-Regular.ttf"
-                    )
-                    .as_slice()
-                    .into()],
-                    ..iced::Settings::default()
-                },
-                Size::new(700.0, 220.0),
-                view_input(&state, mode.colors()),
-            );
-            let _ = simulator
-                .snapshot(&mode.theme())
-                .expect("suggestions render");
-            let _ = simulator
-                .click(iced_test::selector::id("input"))
-                .expect("focus");
-            let _ = simulator.click("TIo").expect("suggestion");
-            let messages: Vec<_> = simulator.into_messages().collect();
-            for message in messages {
-                drop(update(&mut state, message));
+            for width in [MIN_WINDOW_SIZE.0, 1600.0] {
+                let mut state = state();
+                state.mode = mode;
+                state.browser.visible = true;
+                state.browser.width.set(480.0);
+                state
+                    .output
+                    .push(Output::Normal("Existing log output".into()));
+                completion_catalog(&mut state);
+                drop(update(
+                    &mut state,
+                    CompletionAction::Edit("ti".to_owned(), Some(2)).into(),
+                ));
+                let mut simulator: iced_test::Simulator<'_, Message> =
+                    iced_test::Simulator::with_size(
+                        settings(),
+                        Size::new(width, MIN_WINDOW_SIZE.1),
+                        view(&state),
+                    );
+                let output = simulator.find("Existing log output").expect("log output");
+                let bounds = output
+                    .visible_bounds()
+                    .expect("log remains visible with suggestions");
+                assert!(
+                    bounds.x.is_finite() && bounds.y.is_finite(),
+                    "finite log position: {bounds:?}"
+                );
+                let _ = simulator
+                    .snapshot(&mode.theme())
+                    .expect("suggestions render");
+                let _ = simulator
+                    .click(iced_test::selector::id("input"))
+                    .expect("focus");
+                let _ = simulator.click("TIo").expect("suggestion");
+                let messages: Vec<_> = simulator.into_messages().collect();
+                for message in messages {
+                    drop(update(&mut state, message));
+                }
+                assert_eq!(state.answer, "TIo ");
+                assert_eq!(state.output.len(), 1);
             }
-            assert_eq!(state.answer, "TIo ");
-            assert!(state.output.is_empty());
         }
     }
 
@@ -1774,7 +2308,7 @@ mod tests {
 
         let state = state();
         let mut simulator: iced_test::Simulator<'_, Message> =
-            iced_test::Simulator::new(view_input(&state, state.mode.colors()));
+            iced_test::Simulator::new(view_input(&state, state.mode.colors(), OUTPUT_WIDTH));
         let _ = simulator
             .click(iced_test::selector::id("input"))
             .expect("focus the command input");

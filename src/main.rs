@@ -12,6 +12,7 @@ fn main() -> iced::Result {
         // replaces whatever was set before
         .settings(app::settings())
         .window(iced::window::Settings {
+            size: (1120.0, 760.0).into(),
             min_size: Some((app::MIN_WINDOW_SIZE).into()),
             ..Default::default()
         })

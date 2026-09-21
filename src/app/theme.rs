@@ -259,7 +259,7 @@ impl Colors {
         }
     }
 
-    /// The output's scrollbar: a hairline track with a thin ink thumb.
+    /// The app's scrollbars: a hairline track with a thin ink thumb.
     pub(crate) fn scrollbar(self) -> impl Fn(&Theme, scrollable::Status) -> scrollable::Style {
         move |theme, status| {
             let rail = scrollable::Rail {

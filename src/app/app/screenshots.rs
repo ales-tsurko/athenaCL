@@ -222,6 +222,7 @@ fn fresh_state() -> State {
         question: None,
         player_state: GlobalPlayerState::headless(),
         scratch_dir: String::new(),
+        browser: Browser::default(),
         input_id: "input".to_owned(),
         path_lib: Vec::new(),
         texture_lib: Vec::new(),
@@ -292,11 +293,18 @@ fn render(state: &mut State, frame: Frame, path: &Path) {
             _ => matches!(output, Output::Figure(_)),
         });
         let output = state.output.get(index).expect("the index is the output's");
-        container(view_output(index, output, state, colors, colors.figure()))
-            .padding(MARGIN)
-            .width(Length::Fill)
-            .style(Colors::fill(colors.paper))
-            .into()
+        container(view_output(
+            index,
+            output,
+            state,
+            colors,
+            colors.figure(),
+            OUTPUT_WIDTH,
+        ))
+        .padding(MARGIN)
+        .width(Length::Fill)
+        .style(Colors::fill(colors.paper))
+        .into()
     };
 
     let mut simulator = iced_test::Simulator::with_size(settings(), size, element);

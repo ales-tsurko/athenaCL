@@ -59,8 +59,20 @@ impl InterpreterWorker {
 
             loop {
                 if let Ok(message) = r.recv_blocking() {
+                    let refresh_scratch = matches!(
+                        message,
+                        Message::SendCmd(_)
+                            | Message::LoadAthenaObject(_)
+                            | Message::SetScratchDir(_)
+                    );
                     let msg = match message {
                         Message::SendCmd(cmd) => interpreter.run_cmd(&cmd).map(Message::Post),
+                        Message::LoadAthenaObject(path) => interpreter
+                            .call_command("loadAthenaObject", &path)
+                            .map(Message::Post),
+                        Message::SetScratchDir(path) => interpreter
+                            .call_command("setScratchDirectory", &path)
+                            .map(Message::Post),
                         Message::GetScratchDir => interpreter
                             .pref("athena", "fpScratchDir")
                             .map(Message::ScratchDir),
@@ -80,6 +92,13 @@ impl InterpreterWorker {
                         _ => continue,
                     }
                     .into();
+
+                    if refresh_scratch {
+                        if let Ok(path) = interpreter.pref("athena", "fpScratchDir") {
+                            s.send_blocking(Message::ScratchDir(path))
+                                .expect("GUI channel is unbounded");
+                        }
+                    }
 
                     s.send_blocking(msg).expect("cannot send message to gui");
                 }
@@ -109,6 +128,8 @@ pub enum Message {
     },
     /// Send command to the interpreter.
     SendCmd(String),
+    /// Load a literal filesystem path, without command-line tokenization.
+    LoadAthenaObject(String),
     /// Error from the interpreter (stderr).
     Error(String),
     /// Python's interpreter- level errors.
@@ -127,6 +148,8 @@ pub enum Message {
     Manual(crate::manual::Request),
     /// Get scratch dir.
     GetScratchDir,
+    /// Set the scratch folder to a directory picker's literal path.
+    SetScratchDir(String),
     /// The result of `Self::GetScratchDir`.
     ScratchDir(String),
     /// Get the GUI's saved look: `light` or `dark`.
@@ -246,16 +269,20 @@ interp"#
     }
 
     fn run_cmd(&self, cmd: &str) -> InterpreterResult<String> {
+        self.call_command("cmd", cmd)
+    }
+
+    fn call_command(&self, method: &str, argument: &str) -> InterpreterResult<String> {
         self.py_interpreter.enter(|vm| -> _ {
             let result = vm
-                .call_method(&self.ath_interpreter, "cmd", (cmd.to_string(),))
+                .call_method(&self.ath_interpreter, method, (argument.to_string(),))
                 .try_py()?;
             let (is_ok, msg) = extract_result_tuple(vm, result).try_py()?;
 
             if is_ok {
                 Ok(msg)
             } else {
-                Err(Error::Command(cmd.to_owned(), msg))
+                Err(Error::Command(argument.to_owned(), msg))
             }
         })
     }
@@ -440,6 +467,48 @@ impl Error {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn browser_paths_are_literal_when_loading_objects_and_changing_scratch_folders() {
+        init_scratch_prefs();
+        let interpreter = Interpreter::new().expect("interpreter");
+        let directory = tempfile::tempdir().expect("scratch directory");
+        let folder = directory.path().join("scratch & $HOME '音'");
+        std::fs::create_dir(&folder).expect("folder");
+        let folder_text = folder.to_str().expect("Unicode path");
+        interpreter
+            .call_command("setScratchDirectory", folder_text)
+            .expect("choose literal directory");
+        assert_eq!(
+            interpreter
+                .pref("athena", "fpScratchDir")
+                .expect("scratch preference"),
+            folder_text
+        );
+        let reloaded = Interpreter::new().expect("reload preferences");
+        assert_eq!(
+            reloaded
+                .pref("athena", "fpScratchDir")
+                .expect("literal saved path"),
+            folder_text
+        );
+        let path = folder.join("session $HOME '音'.xml");
+        let object =
+            std::fs::read_to_string("tests/xml/empty01.xml").expect("AthenaObject fixture");
+        std::fs::write(&path, object.replace("ariza", "音")).expect("Unicode object contents");
+        let path_text = path.to_str().expect("Unicode path");
+        let result = interpreter
+            .call_command("loadAthenaObject", path_text)
+            .expect("load literal object path");
+        assert!(result.contains("AthenaObject loaded"));
+        assert!(result.contains(path_text));
+        interpreter
+            .call_command("loadAthenaObject", "missing-file.xml")
+            .expect_err("missing object");
+        interpreter
+            .call_command("setScratchDirectory", path_text)
+            .expect_err("a file is not a scratch folder");
+    }
 
     #[test]
     fn completions_come_from_the_live_command_registry_with_descriptions() {

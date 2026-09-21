@@ -434,14 +434,10 @@ class HelpDoc:
 
     # -----------------------------------------------------------------------||--
 
-    APcurs = "APcurs: AthenaPreferences: Cursor: Toggle between showing or hiding the cursor prompt tool."
-    APcurs_usage = "apcurs"
 
     APr = "APr: AthenaPreferences: Refresh: When refresh mode is active, every time a Texture or Clone is edited, a new event list is calculated in order to test ParameterObject compatibility and to find absolute time range. When refresh mode is inactive, editing Textures and Clones does not test event list production, and is thus significantly faster."
     APr_usage = "apr"
 
-    APwid = "APwid: AthenaPreferences: Width: Manually set the number of characters displayed per line during an athenaCL session. Use of this preference is only necessary on platforms that do not provide a full-featured terminal envrionment."
-    APwid_usage = "apwid characterWidth"
 
     APdir = 'APdir: AthenaPreferences: Directories: Lets the user select or enter directories necessary for writing and searching files. Directories that can be entered are the "scratch" directory and the "user audio". The scratch directory is used for writing temporary files with automatically-generated file names. Commands such as SCh and PIh use this directory. The user audio directory is used within ParameterObjects that search for files. With such ParameterObjects, the user can specify any file within the specified directory simply by name. To find the the file\'s complete file path, all directories are recursively searched in both the user audio and the athenaCL/audio directories. Directories named "_exclude" will not be searched. If files in different nested directories do not have unique file names, correct file paths may not be found.'
     APdir_usage = "apdir dirType filePath"

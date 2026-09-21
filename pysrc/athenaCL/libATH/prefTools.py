@@ -30,8 +30,6 @@ AIF = "AIF"
 WAV = "WAV"
 AUTOOFF = "autoOff"
 AUTOON = "autoOn"
-CURSTOOLON = "cursorToolOn"
-CURSTOOLOFF = "cursorToolOff"
 
 
 def getCategoryDefaultDict(platform, category):
@@ -75,13 +73,6 @@ def getCategoryDefaultDict(platform, category):
             "eventMode": "midi",  # startup value
             "refreshMode": "1",  # esObj refreshing
             "debug": "0",
-            "cursorToolLb": "",
-            "cursorToolRb": "",
-            "cursorToolLp": "{",
-            "cursorToolRp": "}",
-            "cursorToolP": "pi",
-            "cursorToolT": "ti",
-            "cursorToolOption": "cursorToolOn",
         }
     if category == "gui":
         catDict = {
@@ -191,7 +182,7 @@ def writePrefDict(prefFilePath, prefDict):
             "prefGroup",
         ],
     )
-    f = open(prefFilePath, "w")
+    f = open(prefFilePath, "w", encoding="utf-8")
     f.writelines(msg)
     f.close()
 
@@ -206,7 +197,7 @@ def getXmlPrefDict(prefFilePath=None):
     """
     doc = None
     if prefFilePath != None:
-        with open(prefFilePath, "r") as f:
+        with open(prefFilePath, "r", encoding="utf-8") as f:
             doc = f.read()
     if doc != None:
         procData = xmlToPy(doc)

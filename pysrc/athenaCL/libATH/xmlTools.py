@@ -27,6 +27,9 @@ def xmlScrub(usrStr):
     usrStr = usrStr.replace("&", "&amp;")
     usrStr = usrStr.replace(">", "&gt;")
     usrStr = usrStr.replace("<", "&lt;")
+    usrStr = usrStr.replace('"', "&quot;")
+    # Attribute whitespace would otherwise be normalized when preferences are read back.
+    usrStr = usrStr.replace("\n", "&#10;").replace("\r", "&#13;").replace("\t", "&#9;")
     return usrStr
 
 

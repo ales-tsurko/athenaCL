@@ -1,6 +1,12 @@
 //! Playback state, transport messages and track controls.
 
-use std::{collections::HashMap, error::Error, fs::File, path::PathBuf, time::Duration};
+use std::{
+    collections::HashMap,
+    error::Error,
+    fs::File,
+    path::{Path, PathBuf},
+    time::Duration,
+};
 
 use iced::{
     alignment::Vertical,
@@ -191,6 +197,43 @@ impl GlobalState {
 
     pub(crate) fn playing(&self) -> bool {
         self.playing_track.is_some() && self.output.is_some()
+    }
+
+    /// Release media before it moves or disappears. Log entries deliberately retain their old
+    /// paths.
+    pub(crate) fn release_files(
+        &mut self,
+        entries: &mut [app::Output],
+        affected: impl Fn(&Path) -> bool,
+    ) {
+        let mut released_midi = false;
+        let mut released = false;
+        for entry in entries {
+            if let app::Output::Player(track) = entry {
+                if affected(&track.path) {
+                    released |=
+                        self.playing_track == Some(track.id) || self.midi_track == Some(track.id);
+                    self.pause(track);
+                    self.audio_player_cache.remove(&track.path);
+                    if self.midi_track == Some(track.id) {
+                        self.midi_track = None;
+                        released_midi = true;
+                    }
+                }
+            }
+        }
+        if released_midi {
+            if let Some(output) = &mut self.output {
+                output.prepared_midi = None;
+                // MIDI is already in memory, with no open file handle. Do not enqueue an unload:
+                // midi-player's one-slot queue can be full while an output is disconnected.
+            }
+        }
+        // A device reconnect may still be preparing a MIDI file which has just been removed.
+        if released && self.opening.is_some() {
+            self.generation += 1;
+            self.events.set_generation(self.generation);
+        }
     }
 
     fn on_tick(&mut self, track: &mut Track) {
@@ -569,7 +612,7 @@ impl Message {
 }
 
 /// A track: its play button, its progress in segments, and its kind.
-pub(crate) fn view(track: &Track, colors: Colors) -> Element<'_, Message> {
+pub(crate) fn view(track: &Track, colors: Colors, width: f32) -> Element<'_, Message> {
     if !track.path.exists() && !track.is_playing {
         return text(format!(
             "File {} does not exist.",
@@ -602,6 +645,7 @@ pub(crate) fn view(track: &Track, colors: Colors) -> Element<'_, Message> {
     };
 
     row![play, progress, pixel::label(kind, colors.dim)]
+        .width(width)
         .spacing(12)
         .align_y(Vertical::Center)
         .into()
@@ -901,6 +945,65 @@ mod tests {
         };
         assert!(track.is_playing);
         assert!(state.playing());
+    }
+
+    #[test]
+    fn releasing_a_folder_stops_its_players_and_leaves_old_log_paths() {
+        let directory = tempfile::tempdir().expect("scratch folder");
+        let midi_path = directory.path().join("song.mid");
+        let audio_path = directory.path().join("render.wav");
+        std::fs::copy(midi_file(), &midi_path).expect("MIDI fixture");
+        std::fs::copy(audio_file(), &audio_path).expect("audio fixture");
+        let mut state = GlobalState::headless();
+        let mut output = vec![
+            app::Output::Player(Track {
+                path: midi_path.clone(),
+                ..track(PlayerId::Midi(0))
+            }),
+            app::Output::Player(Track {
+                path: audio_path.clone(),
+                ..track(PlayerId::Audio(1))
+            }),
+        ];
+        play(&mut output, &mut state, PlayerId::Midi(0));
+        play(&mut output, &mut state, PlayerId::Audio(1));
+        assert!(state.playing());
+        assert!(state.audio_player_cache.contains_key(&audio_path));
+        state.release_files(&mut output, |path| path.starts_with(directory.path()));
+        assert!(!state.playing());
+        assert!(state.audio_player_cache.is_empty());
+        assert!(state.midi_track.is_none());
+        assert!(output
+            .iter()
+            .all(|entry| matches!(entry, app::Output::Player(track) if !track.is_playing)));
+        let renamed = directory.path().join("new.mid");
+        std::fs::rename(&midi_path, renamed).expect("released MIDI can move");
+        std::fs::remove_file(&audio_path)
+            .expect("released audio can be deleted, including on Windows");
+        assert_eq!(first_track(&output).path, midi_path);
+        assert!(!first_track(&output).path.exists());
+        play(&mut output, &mut state, PlayerId::Midi(0));
+        assert!(!state.playing());
+    }
+
+    #[test]
+    fn releasing_unrelated_files_does_not_interrupt_playback_or_reconnection() {
+        let mut state = GlobalState::headless();
+        let mut midi = track(PlayerId::Midi(0));
+        midi.path = midi_file();
+        state.play(&mut midi).expect("play");
+        let mut output = vec![app::Output::Player(midi)];
+        state.opening = Some(state.generation);
+        let generation = state.generation;
+        state.release_files(&mut output, |_| false);
+        assert!(state.playing());
+        assert_eq!(state.generation, generation);
+        state.release_files(&mut output, |_| true);
+        assert!(!state.playing());
+        assert!(
+            state.generation > generation,
+            "a late reconnect cannot resurrect deleted media"
+        );
     }
 
     #[test]

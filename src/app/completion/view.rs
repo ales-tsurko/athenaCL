@@ -13,6 +13,7 @@ impl Suggestions {
     pub(crate) fn view<'a, Message: Clone + 'a>(
         &'a self,
         colors: Colors,
+        width: f32,
         on_select: impl Fn(usize) -> Message,
     ) -> Option<Element<'a, Message>> {
         if !self.is_open() {
@@ -60,6 +61,7 @@ impl Suggestions {
                 text(hint).size(12).color(colors.dim),
             ]
             .spacing(6)
+            .width(width)
             .into(),
         )
     }

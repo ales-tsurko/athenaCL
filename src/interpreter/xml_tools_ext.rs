@@ -1,6 +1,6 @@
 //! Rust extensions to the athenaCL.libATH.xmlTools
 
-use quick_xml::{events::Event, reader::Reader};
+use quick_xml::{events::Event, reader::Reader, XmlVersion};
 use rustpython_vm::{pymodule, VirtualMachine};
 
 pub(crate) fn module_def(
@@ -41,7 +41,10 @@ pub(super) mod _inner {
                         .attributes()
                         .find(|a| matches!(a.as_ref(), Ok(attr) if attr.key.as_ref() == "name"))
                     {
-                        Some(Ok(attr)) => attr.value.to_string(),
+                        Some(Ok(attr)) => attr
+                            .normalized_value(XmlVersion::Implicit1_0)
+                            .map_err(|error| vm.new_value_error(error.to_string()))?
+                            .into_owned(),
                         _ => e.name().as_ref().to_string(),
                     };
 
@@ -55,8 +58,10 @@ pub(super) mod _inner {
                             let attr = a.map_err(|_err| {
                                 vm.new_value_error("cannot get xml attribute".to_owned())
                             })?;
-                            attrs_cache
-                                .insert(attr.key.as_ref().to_string(), attr.value.to_string());
+                            let value = attr
+                                .normalized_value(XmlVersion::Implicit1_0)
+                                .map_err(|error| vm.new_value_error(error.to_string()))?;
+                            attrs_cache.insert(attr.key.as_ref().to_string(), value.into_owned());
                         }
 
                         let value = vm

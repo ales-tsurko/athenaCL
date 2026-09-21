@@ -6,8 +6,10 @@
 pub(crate) enum Icon {
     /// Metronome.
     Metronome,
-    /// Folder.
+    /// Closed folder.
     Folder,
+    /// Open folder, with its front folded forward.
+    FolderOpen,
     /// Outlined circle.
     CircleOutline,
     /// Filled circle.
@@ -23,6 +25,15 @@ pub(crate) enum Icon {
 }
 
 impl Icon {
+    /// A folder's expansion state, on the same pixel grid.
+    pub(crate) fn folder(open: bool) -> Self {
+        if open {
+            Self::FolderOpen
+        } else {
+            Self::Folder
+        }
+    }
+
     /// Square pixel masks, read left to right and top to bottom.
     pub(super) fn rows(self) -> &'static [&'static [u8]] {
         match self {
@@ -59,6 +70,24 @@ impl Icon {
                 b".#............#.",
                 b".#............#.",
                 b".##############.",
+                b"................",
+                b"................",
+            ],
+            Self::FolderOpen => &[
+                b"................",
+                b"................",
+                b".######.........",
+                b".#....##........",
+                b".#.....######...",
+                b".#..........#...",
+                b".#..###########.",
+                b".#..#.........#.",
+                b".#.#.........#..",
+                b".#.#.........#..",
+                b".##.........#...",
+                b".##.........#...",
+                b".#.........#....",
+                b".###########....",
                 b"................",
                 b"................",
             ],

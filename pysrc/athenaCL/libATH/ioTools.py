@@ -39,7 +39,7 @@ def extractXML(path):
     missing attributes are not added (backwards compat done in athenaObj
     """
     # added universal new line support; should provide cross-plat access
-    with open(path, 'r') as f:
+    with open(path, "r", encoding="utf-8-sig") as f:
         doc = f.read()
                                       
     procData = xmlToPy(doc)
@@ -100,7 +100,7 @@ def writeXML(filePath, aData, pData, tData):
         [None, None, ("textureLib", "ti", "cloneLib", "tc")],
     )
     msg.append("\n</%s>" % parent)  # close prefs
-    f = open(filePath, "w")
+    f = open(filePath, "w", encoding="utf-8")
     f.writelines(msg)
     f.close()
 

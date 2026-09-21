@@ -4,32 +4,12 @@ athenaCL has many configurable settings that are saved in a preference file and
 loaded for each athenaCL session. Some of these settings have default values;
 others will need to be configured the first time a command is used.
 
-For example, following the athenaCL prompt ("::") is the the athenaCL "cursor
-tool." This tool, providing information on the active Texture and Path, can be
-turned on or off with the command `APcurs`, for AthenaPreferences cursor:
-
-
-
-
-## Toggling the athenaCL cursor tool with `APcurs`
-
-```
-pi{b}ti{} :: apcurs
-cursor tool set to off.
-
-:: apcurs
-cursor tool set to on.
-
-pi{b}ti{} :: 
-```
-
-athenaCL writes files. Some of these files are audio file formats, some are
-event list formats (scores, MIDI files), and some are image files. In most
-cases, athenaCL will write a file in a user specified "scratch" directory with
-an automatically-generated file name. This is convenient and fast. To set the
-scratch directory, enter the `APdir` command, for AthenaPreferences directory.
-(Replace "/Volumes/xdisc/_scratch" with a complete file path to a suitable
-directory.)
+athenaCL writes files. Some of these files are audio file formats, and some are
+event list formats (scores, MIDI files). In most cases, athenaCL will write a
+file in a user specified "scratch" directory with an automatically-generated
+file name. This is convenient and fast. To set the scratch directory, enter the
+`APdir` command, for AthenaPreferences directory. (Replace
+"/Volumes/xdisc/_scratch" with a complete file path to a suitable directory.)
 
 
 

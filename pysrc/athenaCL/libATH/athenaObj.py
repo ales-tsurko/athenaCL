@@ -370,9 +370,6 @@ class AthenaObject(object):
         # self.fpLastDirEventList = self.external.getPref('athena', 'fpLastDirEventList')
 
         self.aoInfo["refreshMode"] = self.external.getPref("athena", "refreshMode", 1)
-        self.aoInfo["cursorToolOption"] = self.external.getPref(
-            "athena", "cursorToolOption"
-        )
         self.aoInfo["version"] = self.athVersion
         self.aoInfo["outComplete"] = []  # will be filled after creating files
         self.aoInfo["history"] = {}  # store command history # mod in Interpreter
@@ -495,9 +492,7 @@ class AthenaObject(object):
                 "APdir(directory)",
                 "APea(external)",
                 "APa(audio)",
-                "APcurs(cursor)",
                 "APr(refresh)",
-                "APwid(width)",
             ),
         }
 
@@ -866,8 +861,6 @@ class Terminal(object):
     """terminal management.
     represents basic screen presentation issues, even w/o a tty
     size - return height, width of the terminal
-    self.termLive determines if the term is in a unix that can get size
-    if not, returs default width
     """
 
     def __init__(self, sessionType="terminal"):
@@ -897,13 +890,6 @@ class Terminal(object):
                 self.termLive = 0
         elif sessionType in ["cgi", "idle"]:
             self.termLive = 0
-        # defaults spacings
-        self.defaultW = 72  # for plats that dont have termio
-        self.defaultH = 24
-        self.cursesTest = 0  # bool if curses test has been completed
-        # do session type adjustments on default sizes
-        if sessionType == "cgi":
-            self.defaultW = 58
 
     def clear(self):
         """Clear screen."""
@@ -911,46 +897,13 @@ class Terminal(object):
             # replace this with backspace in dialog.py
             os.system("clear")
 
-    def _sizeCurses(self):
-        """get size from curses: note, using this tweaks the terminal environment
-        and reduces the performance of /b animations. only use when abs necessary
-        """
-        self.cursesTest = 1  # only run this method once
-        if self.termLive:
-            try:  # as list ditch test, load curses to get size
-                import curses
-
-                curses.initscr()
-                self.cursesH, self.cursesW = curses.LINES, curses.COLS
-                curses.endwin()
-                del curses
-            except ImportError:
-                self.cursesW = None  # try to get size at init
-                self.cursesH = None  # from curses if around
-
     def size(self):
-        """Return terminal size as tuple (height, width).
-        this is called once with each command, updated size
+        """Return terminal size as tuple (height, width): the log's, which fits 80 characters a
+        line.
 
         >>> a = Terminal()
         >>> post = a.size()
         """
-        # if self.termLive:
-        #     h, w = self.defaultH, self.defaultW
-        #     try:
-        #         import struct, fcntl
-
-        #         h, w = struct.unpack(
-        #             "hhhh", fcntl.ioctl(0, termios.TIOCGWINSZ, "\000" * 8)
-        #         )[0:2]
-        #     except:  # get size from curses if available; last ditch
-        #         if not self.cursesTest:
-        #             self._sizeCurses()  # run curses method only if not yet run once
-        #         if self.cursesW != None and self.cursesH != None:
-        #             h, w = self.cursesH, self.cursesW
-        # else:  # if no term active, get default
-        #     h, w = self.defaultH, self.defaultW
-        # we fix the width to 80
         return 100, 80
 
     def __getattr__(self, name):
@@ -962,13 +915,6 @@ class Terminal(object):
             return w
         else:
             raise AttributeError
-
-    def setWidth(self, width):
-        self.defaultW = width
-        self.termLive = 0  # disables using termios
-
-    def setHight(self, height):
-        self.defaultH = height
 
 
 # -----------------------------------------------------------------||||||||||||--
@@ -1011,7 +957,6 @@ class Interpreter(object):
         self._emptyCount = 0  # count empty lines returned
         self._blankCount = 0  # count blank lines returned
 
-        self.cursorToolConvert = self._getCursorToolConvert()
         self._updatePrompt()  # creates self.prompt
         athTitle = "\n" + "athenaCL %s (on %s via %s)\n" % (
             self.athVersion,
@@ -1202,6 +1147,23 @@ class Interpreter(object):
         # environment.printDebug(['_prepareCommandArguments()', 'cmd:', cmd, 'arg:', arg])
         return cmd, arg
 
+    def loadAthenaObject(self, path):
+        """Load a literal browser path, preserving spaces and other filename characters."""
+        loader = command.AOl(self.ao, verbose=self.verbose)
+        loader.path = path
+        loader.gatherSwitch = 0  # do not tokenize, expand variables, or show a file dialog
+        return loader.do()
+
+    def setScratchDirectory(self, path):
+        """Use the directory picker's literal path, without command-line parsing."""
+        if not os.path.isdir(path):
+            return 0, "Scratch folder does not exist: %s" % path
+        setter = command.APdir(self.ao, verbose=self.verbose)
+        setter.name = "fpScratchDir"
+        setter.dir = path
+        setter.gatherSwitch = 0
+        return setter.do()
+
     def cmd(self, line, *arguments, **keywords):
         """Public interface for executing a single command line. This duplicates the functionality of _cmd(), above, yet provides features for a public interface.
 
@@ -1365,46 +1327,14 @@ class Interpreter(object):
 
     # -----------------------------------------------------------------------||--
 
-    def _getCursorToolConvert(self):
-        """read prefs and return a conversion dictionary
-        called on init of Interpreter"""
-        # get a blank command object; myst be a AthenaPreferences
-        convert = {}
-        convert["["] = self.ao.external.getPref("athena", "cursorToolLb")
-        convert["]"] = self.ao.external.getPref("athena", "cursorToolRb")
-        convert["("] = self.ao.external.getPref("athena", "cursorToolLp")
-        convert[")"] = self.ao.external.getPref("athena", "cursorToolRp")
-        convert["PI"] = self.ao.external.getPref("athena", "cursorToolP")
-        convert["TI"] = self.ao.external.getPref("athena", "cursorToolT")
-
-        convert["empty"] = self._cursorTool(convert)  # adds fake
-        return convert
-
-    def _cursorTool(self, convert=None):
-        "need optional arg to build a default curos in _getCursor"
-        if convert == None:
-            convert = self.cursorToolConvert
-        post = []
-        post.append("%s%s%s" % (convert["["], convert["PI"], convert["("]))
-        post.append("%s")
-        post.append("%s%s%s" % (convert[")"], convert["TI"], convert["("]))
-        post.append("%s")
-        post.append("%s%s" % (convert[")"], convert["]"]))
-        return "".join(post)
-
     def _updatePrompt(self):
-        """update prompt graphics; done each time command is called"""
-        promptRoot = self.ao.promptSym
-        # this used to get pref from file; get now from aoInfo
-        cursTemplate = self._cursorTool()
-        #         if msg: # intial startup msg
-        #             cursTool = dialog.getSalutation(self.cursorToolConvert)
-        #         else: # update appearance
-        cursTool = cursTemplate % (self.ao.activePath, self.ao.activeTexture)
-        if self.ao.aoInfo["cursorToolOption"] != "cursorToolOff":
-            self.prompt = "%s %s " % (cursTool, promptRoot)
-        else:
-            self.prompt = "%s " % (promptRoot)
+        """update the prompt, which names the active Path and Texture; done each time a
+        command is called"""
+        self.prompt = "pi{%s}ti{%s} %s " % (
+            self.ao.activePath,
+            self.ao.activeTexture,
+            self.ao.promptSym,
+        )
 
     def toggleEcho(self):
         """flips echo status on and off"""
@@ -1594,9 +1524,6 @@ class Test(unittest.TestCase):
             #'AOl demo05.xml',
             "AOmg pysrc/athenaCL/demo/legacy/demo01.xml",
             # AOdlg
-            "APwid 80",
-            "APcurs",
-            "APcurs",  # twice to toggle back
             "cmd",
             "help",
             "AUsys",

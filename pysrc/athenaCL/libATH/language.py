@@ -498,7 +498,6 @@ Apple, Macintosh, Mac OS, and QuickTime are trademarks or registered trademarks 
 
     msgELauto = "csound auto score render control set to %s.\n"
 
-    msgAObadWidth = "the character width should be between 30 and 300. try again.\n"
     msgAObadName = 'AthenaObject files must end with a ".xml" extension. try again.\n'
     msgAOnameFile = 'name this AthenaObject. use a ".xml" extension:'
     msgAOselectFile = "select an AthenaObject file:"
@@ -508,7 +507,6 @@ Apple, Macintosh, Mac OS, and QuickTime are trademarks or registered trademarks 
     msgAOnotAOdoc = TAB + "this is not an AthenaObject document.\n"
     msgAOselAdirOrSdir = "select directory to set: scratch or audio. (x or a):"
 
-    msgAPcursorTool = "cursor tool set to %s.\n"
     msgAPrefreshMode = "refresh mode set to %s.\n"
 
     # -----------------------------------------------------------------------||--

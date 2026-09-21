@@ -22,7 +22,9 @@ iced = { version = "0.14.0", features = [
 ] }
 image = { version = "0.25.10", default-features = false, features = ["png"] }
 iced_selection = "0.5.0"
+iced_aw = { version = "0.14.1", default-features = false, features = ["context_menu"] }
 midi-player = "0.2.3"
+notify = "8.2.0"
 open = "5.4.4"
 pulldown-cmark = { version = "0.13.4", default-features = false }
 quick-xml = "0.42.0"
@@ -41,6 +43,7 @@ rustpython-vm = { version = "0.5.0", features = ["freeze-stdlib"] }
 rustyline = { version = "18", default-features = false, features = ["with-file-history"] }
 symphonia = { version = "0.5", default-features = false, features = ["wav", "aiff"] }
 thiserror = "2.0.20"
+tokio = { version = "1", features = ["time"] }
 
 [target.'cfg(target_os = "linux")'.dependencies]
 # Native sound-server routing and change notifications; ALSA remains the fallback.

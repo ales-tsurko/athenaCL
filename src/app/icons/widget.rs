@@ -177,6 +177,7 @@ mod tests {
                 for icon in [
                     Icon::Metronome,
                     Icon::Folder,
+                    Icon::FolderOpen,
                     Icon::CircleOutline,
                     Icon::CircleFilled,
                     Icon::Play,

@@ -7038,7 +7038,7 @@ class _CommandAO(Command):
 
     def _aoDetermineFileFormat(self, path):
         "check xml type of a file, or determine if it is an old pickled file"
-        with open(path, "r") as f:
+        with open(path, "r", encoding="utf-8-sig") as f:
             content = f.read()
 
         return checkFileFormat(content)
@@ -7398,30 +7398,6 @@ class AOrm(_CommandAO):
         return "AthenaObject has removed"
 
 
-class APcurs(Command):
-    """toggles between cursor modes"""
-
-    def __init__(self, ao, args="", **keywords):
-        Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1  # display only
-        self.gatherSwitch = 0  # display only
-        self.cmdStr = "APcurs"
-
-    def process(self):
-        curVal = self.ao.external.getPref("athena", "cursorToolOption")
-        if curVal in ["", "cursorToolOn"]:
-            self.ao.external.writePref("athena", "cursorToolOption", "cursorToolOff")
-            self.ao.aoInfo["cursorToolOption"] = "cursorToolOff"
-            self.value = lang.OFF
-        else:
-            self.ao.external.writePref("athena", "cursorToolOption", "cursorToolOn")
-            self.ao.aoInfo["cursorToolOption"] = "cursorToolOn"
-            self.value = lang.ON
-
-    def display(self):
-        return lang.msgAPcursorTool % self.value
-
-
 class APr(Command):
     """toggles refresh modes"""
 
@@ -7458,55 +7434,6 @@ class APr(Command):
     def display(self):
         curVal = typeset.convertBool(self.ao.aoInfo["refreshMode"])
         return lang.msgAPrefreshMode % typeset.boolAsStr(curVal)
-
-
-class APwid(Command):
-    """manually sets screen width"""
-
-    def __init__(self, ao, args="", **keywords):
-        Command.__init__(self, ao, args, **keywords)
-        self.processSwitch = 1  # display only
-        self.gatherSwitch = 1  # display only
-        self.cmdStr = "APwid"
-
-    def _apConvertWidth(self, usrStr):
-        """range checks width value"""
-        usrStr = drawer.strToNum(usrStr, "int", 30, 300)
-        return usrStr  # may be None
-
-    def _apGetWidth(self):
-        """quaries user for a screen width, returns None on error"""
-        while 1:
-            usrString = dialog.askStr("enter a screen width:", self.termObj)
-            if usrString == None:
-                return None
-            number = self._apConvertWidth(usrString)
-            if number == None:
-                dialog.msgOut(lang.msgAObadWidth, self.termObj)
-                continue
-            else:
-                return number
-
-    def gather(self):
-        args = self.args
-
-        width = None
-        if args != "":
-            args = argTools.ArgOps(args)  # no strip
-            width = self._apConvertWidth(args.get(0, "end"))
-            if width == None:
-                return self._getUsage()
-        if width == None:
-            width = self._apGetWidth()
-            if width == None:
-                return lang.msgReturnCancel
-        self.width = width
-
-    def process(self):
-        self.termObj.setWidth(self.width)
-
-    def display(self):
-        return "screen width set to %s.\n" % self.width
 
 
 class APdir(Command):

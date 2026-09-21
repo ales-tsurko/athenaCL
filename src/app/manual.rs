@@ -54,11 +54,11 @@ pub(crate) fn view(page: &Page, width: f32, mode: Mode) -> Element<'_, Link> {
         }
         blocks = blocks.push(view_block(block, width, mode, colors));
     }
-    blocks.push(view_nav(&page.nav, colors)).into()
+    blocks.push(view_nav(&page.nav, colors, width)).into()
 }
 
 /// Where the page leads from its end, set as the figures' switch is under them.
-fn view_nav<'a>(nav: &Nav, colors: Colors) -> Element<'a, Link> {
+fn view_nav<'a>(nav: &Nav, colors: Colors, width: f32) -> Element<'a, Link> {
     let turns = [
         ("CONTENTS", &nav.contents),
         ("PREVIOUS", &nav.previous),
@@ -66,7 +66,9 @@ fn view_nav<'a>(nav: &Nav, colors: Colors) -> Element<'a, Link> {
     ]
     .into_iter()
     .filter_map(|(label, path)| Some(segment(label, colors, false, path.clone()?)));
-    row![space::horizontal(), switch(colors, turns)].into()
+    row![space::horizontal(), switch(colors, turns)]
+        .width(width)
+        .into()
 }
 
 fn view_block(block: &Block, width: f32, mode: Mode, colors: Colors) -> Element<'_, Link> {
