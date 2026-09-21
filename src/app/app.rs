@@ -743,24 +743,27 @@ fn update_interpreter(state: &mut State, message: interpreter::Message) -> Task<
             operation::focus(state.input_id.clone())
         }
         interpreter::Message::LoadMidi(path) => {
+            let id = player::PlayerId::Midi(state.output.len());
             state.output.push(Output::Player(PlayerState {
                 is_playing: false,
                 path: path.into(),
-                id: player::PlayerId::Midi(state.output.len()),
+                id,
                 position: 0.0,
             }));
 
-            Task::none()
+            // a playback command's result is heard at once, not left paused for the play button
+            update_player(state, player::Message::Play(id))
         }
         interpreter::Message::LoadAudio(path) => {
+            let id = player::PlayerId::Audio(state.output.len());
             state.output.push(Output::Player(PlayerState {
                 is_playing: false,
                 path: path.into(),
-                id: player::PlayerId::Audio(state.output.len()),
+                id,
                 position: 0.0,
             }));
 
-            Task::none()
+            update_player(state, player::Message::Play(id))
         }
         interpreter::Message::Manual(request) => show_manual(state, &request),
         interpreter::Message::Figure(figure) => {
@@ -1593,6 +1596,46 @@ mod tests {
             tempo: "120".to_owned(),
             reveal: None,
         }
+    }
+
+    /// A minimal valid MIDI file: one format-0 track holding a note and its end.
+    fn midi_file(dir: &std::path::Path) -> std::path::PathBuf {
+        let path = dir.join("song.mid");
+        std::fs::write(
+            &path,
+            [
+                // header: `MThd`, 6 bytes, format 0, one track, 96 ticks per beat
+                0x4D, 0x54, 0x68, 0x64, 0x00, 0x00, 0x00, 0x06, 0x00, 0x00, 0x00, 0x01, 0x00, 0x60,
+                // track: `MTrk`, 12 bytes, a note on, a note off 96 ticks later, the end
+                0x4D, 0x54, 0x72, 0x6B, 0x00, 0x00, 0x00, 0x0C, 0x00, 0x90, 0x3C, 0x50, 0x60, 0x80,
+                0x3C, 0x00, 0x00, 0xFF, 0x2F, 0x00,
+            ],
+        )
+        .expect("writing a test midi file works");
+        path
+    }
+
+    /// One second of quiet mono PCM audio.
+    fn audio_file(dir: &std::path::Path) -> std::path::PathBuf {
+        let path = dir.join("render.wav");
+        let data_size = 44100u32 * 2;
+        let mut wav = b"RIFF".to_vec();
+        wav.extend((36 + data_size).to_le_bytes());
+        wav.extend(b"WAVEfmt ");
+        wav.extend(16u32.to_le_bytes());
+        wav.extend(1u16.to_le_bytes()); // PCM
+        wav.extend(1u16.to_le_bytes()); // mono
+        wav.extend(44100u32.to_le_bytes());
+        wav.extend((44100u32 * 2).to_le_bytes());
+        wav.extend(2u16.to_le_bytes());
+        wav.extend(16u16.to_le_bytes());
+        wav.extend(b"data");
+        wav.extend(data_size.to_le_bytes());
+        for _ in 0..44100 {
+            wav.extend(1000i16.to_le_bytes());
+        }
+        std::fs::write(&path, wav).expect("write test audio");
+        path
     }
 
     #[test]
@@ -2662,6 +2705,35 @@ mod tests {
         assert!(
             matches!(state.output.last(), Some(Output::Player(t)) if matches!(t.id, PlayerId::Audio(1)))
         );
+    }
+
+    #[test]
+    fn playback_commands_start_playing() {
+        let dir = tempfile::tempdir().expect("scratch folder");
+        let mut state = state();
+        drop(update(
+            &mut state,
+            Message::Interpreter(interpreter::Message::LoadMidi(
+                midi_file(dir.path()).to_string_lossy().into_owned(),
+            )),
+        ));
+        assert!(state.player_state.playing());
+        assert!(matches!(state.output.first(), Some(Output::Player(track)) if track.is_playing));
+
+        drop(update(
+            &mut state,
+            Message::Interpreter(interpreter::Message::LoadAudio(
+                audio_file(dir.path()).to_string_lossy().into_owned(),
+            )),
+        ));
+        // one player sounds at a time: the audio command stops the MIDI
+        let (Some(Output::Player(midi)), Some(Output::Player(audio))) =
+            (state.output.first(), state.output.get(1))
+        else {
+            panic!("both players stay in the log");
+        };
+        assert!(!midi.is_playing);
+        assert!(audio.is_playing);
     }
 
     #[test]
