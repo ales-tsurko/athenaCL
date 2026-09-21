@@ -35,7 +35,7 @@
             const path_to_root = "../";
             const default_light_theme = "coal";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-1b375f45.js";
+            window.path_to_searchindex_js = "../searchindex-61305100.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-ba80255b.js"></script>
@@ -180,9 +180,10 @@
                         <h1 id="viewing-and-searching-parameterobjects"><a class="header" href="#viewing-and-searching-parameterobjects">Viewing and Searching ParameterObjects</a></h1>
 <p>For each dynamic attribute of a TextureInstance, a ParameterObject can be
 assigned to produce values over the duration of the Texture. Complete
-documentation for all ParameterObjects can be found in . Texture attributes for
-bpm, local field, local octave, amplitude, panning, and all auxiliary parameters
-(if required by the instrument) can have independent ParameterObjects.</p>
+documentation for every ParameterObject is available from within athenaCL, with
+the <code>TPls</code> and <code>TPv</code> commands described below. Texture attributes for bpm, local
+field, local octave, amplitude, panning, and all auxiliary parameters (if
+required by the instrument) can have independent ParameterObjects.</p>
 <p>ParameterObjects are applied to a Texture attribute with an argument list.
 athenaCL accepts lists in the same comma-separated format of Python list data
 structures. A list can consist of elements like strings, numbers, and other
@@ -193,9 +194,9 @@ an internal setting within the ParameterObject. The first entry in the argument
 list is always the name of the ParameterObject. ParameterObject names, as well
 as all ParameterObject configuration strings, can always be accessed with
 acronyms.</p>
-<p>To display a list if all available ParameterObjects, enter the command TPls, for
-TextureParameter list:</p>
-<p><strong>Displaying all ParameterObjects with TPls</strong></p>
+<p>To display a list if all available ParameterObjects, enter the command <code>TPls</code>,
+for TextureParameter list:</p>
+<h2 id="displaying-all-parameterobjects-with-tpls"><a class="header" href="#displaying-all-parameterobjects-with-tpls">Displaying all ParameterObjects with <code>TPls</code></a></h2>
 <pre><code>pi{auto-muteHiConga}ti{b1} :: tpls
 Generator ParameterObject
 {name}
@@ -318,11 +319,11 @@ Filter ParameterObject
    pipeLine             
    replace              
 </code></pre>
-<p>To display detailed documentation for a ParameterObject, enter the command TPv,
-for Texture Parameter view. In the following example the user views the
+<p>To display detailed documentation for a ParameterObject, enter the command
+<code>TPv</code>, for Texture Parameter view. In the following example the user views the
 ParameterObjects “wavePowerDown” and “noise” by providing command-line arguments
 for the desired ParameterObject name:</p>
-<p><strong>Viewing ParameterObject reference information</strong></p>
+<h2 id="viewing-parameterobject-reference-information"><a class="header" href="#viewing-parameterobject-reference-information">Viewing ParameterObject reference information</a></h2>
 <pre><code>pi{auto-muteHiConga}ti{b1} :: tpv wpd
 Generator ParameterObject
 {name,documentation}
@@ -360,11 +361,11 @@ Noise               noise, resolution, parameterObject, min, max
                     parameterObject {gamma value as string or number}, (4) min,
                     (5) max
 </code></pre>
-<p>The command TPmap provides graphical displays of ParameterObject-generated
-values. (To configure athenaCL graphics output, see .) The user must supply the
-name of the ParamaterObject library (Generator, Rhythm, or Filter), the number
-of events to generate, and the ParameterObject argument list.</p>
-<p><strong>ParameterObject Map display with TPmap</strong></p>
+<p>The command <code>TPmap</code> provides graphical displays of ParameterObject-generated
+values, drawn in the log below the command. The user must supply the name of the
+ParameterObject library (Generator, Rhythm, or Filter), the number of events to
+generate, and the ParameterObject argument list.</p>
+<h2 id="parameterobject-map-display-with-tpmap"><a class="header" href="#parameterobject-map-display-with-tpmap">ParameterObject Map display with <code>TPmap</code></a></h2>
 <pre><code>pi{auto-muteHiConga}ti{b1} :: tpmap
 select a library: Generator, Rhythm, or Filter. (g, r, f): g
 number of events: 120
@@ -373,15 +374,17 @@ enter a Generator ParameterObject argument: wpd, e, 30, 0, 2
 wavePowerDown, event, (constant, 30), 0, 2, (constant, 0), (constant, 1)
 TPmap display complete.
 </code></pre>
-<p>The TPmap, like other athenaCL commands, can be used with command-line
-arguments. In the following example, the user produces a TPmap display of the
+<p><label class="checkbox-label"><input class="checkbox-img" type="checkbox"><img src="../images/tpmap-wave.png" alt="TPmap of wavePowerDown over 120 events"><span class="img-wrapper"><img src="../images/tpmap-wave.png" alt="TPmap of wavePowerDown over 120 events"></span></label></p>
+<p>The <code>TPmap</code>, like other athenaCL commands, can be used with command-line
+arguments. In the following example, the user produces a <code>TPmap</code> display of the
 noise ParameterObject, generating “brown” fractional noise:</p>
-<p><strong>ParameterObject Map display with TPmap</strong></p>
+<h2 id="parameterobject-map-display-with-command-line-arguments"><a class="header" href="#parameterobject-map-display-with-command-line-arguments">ParameterObject Map display with command-line arguments</a></h2>
 <pre><code>pi{auto-muteHiConga}ti{b1} :: tpmap 120 n,50,(c,2),0,1
 
 noise, 50, (constant, 2), (constant, 0), (constant, 1)
 TPmap display complete.
 </code></pre>
+<p><label class="checkbox-label"><input class="checkbox-img" type="checkbox"><img src="../images/tpmap-noise.png" alt="TPmap of brown noise over 120 events"><span class="img-wrapper"><img src="../images/tpmap-noise.png" alt="TPmap of brown noise over 120 events"></span></label></p>
 
                     </main>
 

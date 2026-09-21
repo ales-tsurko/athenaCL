@@ -35,7 +35,7 @@
             const path_to_root = "../";
             const default_light_theme = "coal";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-1b375f45.js";
+            window.path_to_searchindex_js = "../searchindex-61305100.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-ba80255b.js"></script>
@@ -179,9 +179,9 @@
                     <main>
                         <h1 id="executing-commands"><a class="header" href="#executing-commands">Executing Commands</a></h1>
 <p>To use a command, simply enter its name. The user will be prompted for all
-additional information. For example, type “PIn” (or “pin”) at the athenaCL
+additional information. For example, type “<code>PIn</code>” (or “pin”) at the athenaCL
 prompt:</p>
-<p><strong>Entering a command</strong></p>
+<h2 id="entering-a-command"><a class="header" href="#entering-a-command">Entering a command</a></h2>
 <pre><code>pi{}ti{} :: pin
 name this PathInstance: a
 enter a pitch set, sieve, spectrum, or set-class: b,c#,g
@@ -198,9 +198,9 @@ sharps as “#” and flats as “$”) or pitch-classes (integers that represen
 notes of the chromatic scale) (Straus 1990 [AN#34]). For instance, the chord
 D-major can be represented with the following pitch-name string: (D, F#, A). Or,
 the same chord can be represented as a pitch class set: (2,6,9), where 0 is
-always C, 1=C#, 2=D, …, 10=A#, and 11=B. Calling the PIn command to create a new
-path named “b” with this pitch class set gives us the following results:</p>
-<p><strong>Entering a command with arguments</strong></p>
+always C, 1=C#, 2=D, …, 10=A#, and 11=B. Calling the <code>PIn</code> command to create a
+new path named “b” with this pitch class set gives us the following results:</p>
+<h2 id="entering-a-command-with-arguments"><a class="header" href="#entering-a-command-with-arguments">Entering a command with arguments</a></h2>
 <pre><code>pi{a}ti{} :: pin b d,f#,a
 PI b added to PathInstances.
 </code></pre>
@@ -213,6 +213,18 @@ an external environment (such as a UNIX shell or Python script), permit advanced
 scripting automation. All athenaCL commands can function both with arguments and
 with interactive prompts. Command-line arguments, however, are never required:
 if arguments are absent, the user is prompted for the necessary details.</p>
+<h2 id="command-suggestions"><a class="header" href="#command-suggestions">Command Suggestions</a></h2>
+<p>The GUI suggests command names as you type, with short descriptions. Press
+<strong>Tab</strong> to insert a suggestion and cycle through the matches; <strong>Shift+Tab</strong>
+cycles backwards. You can also click a suggestion. <strong>Escape</strong> dismisses the
+list, and <strong>Enter</strong> runs the command. Pressing Tab on an empty line offers all
+commands. <strong>Up/Down</strong> remain available for command history.</p>
+<p>Suggestions also include matching commands from your saved history and existing
+PathInstance or TextureInstance names where an argument refers to one, such as
+<code>pio</code>, <code>tio</code>, <code>piv</code>, or <code>tiv</code>. Command names also complete after <code>help</code> and <code>?</code>.
+Completion replaces the word at the cursor while preserving later arguments. It
+is disabled while selecting text, composing text with an input method, or
+answering an interpreter question.</p>
 <h2 id="command-history"><a class="header" href="#command-history">Command History</a></h2>
 <p>In the GUI, focus the command input and use <strong>Up/Down</strong> or <strong>Ctrl+P/Ctrl+N</strong> to
 recall commands. Recalled commands can be edited. Moving past the newest entry

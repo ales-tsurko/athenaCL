@@ -35,7 +35,7 @@
             const path_to_root = "../";
             const default_light_theme = "coal";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-1b375f45.js";
+            window.path_to_searchindex_js = "../searchindex-61305100.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-ba80255b.js"></script>
@@ -179,19 +179,23 @@
                     <main>
                         <h1 id="displaying-texture-parameter-values"><a class="header" href="#displaying-texture-parameter-values">Displaying Texture Parameter Values</a></h1>
 <p>It is often useful to view the values produced by a Texture with a graphical
-diagram. The command TImap provides a multi-parameter display of all raw values
-input from ParameterObjects into the Texture. The values displayed by TImap are
-pre-TextureModule, meaning that they are the raw values produced by the
-ParameterObjects; the final parametric event values may be altered or completely
-changed by the Texture’s internal processing (its TextureModule) to produce
-different arrangements of events. The TImap command thus only provides a partial
-representation of what a Texture produces.</p>
-<p>To view a TImap display, the user’s graphic preferences must be properly set
-(see for more information). The command TImap displays the active Texture:</p>
-<p><strong>Viewing a Texture with TImap</strong></p>
+diagram. The command <code>TImap</code> provides a multi-parameter display of all raw
+values input from ParameterObjects into the Texture. The values displayed by
+<code>TImap</code> are pre-TextureModule, meaning that they are the raw values produced by
+the ParameterObjects; the final parametric event values may be altered or
+completely changed by the Texture’s internal processing (its TextureModule) to
+produce different arrangements of events. The <code>TImap</code> command thus only provides
+a partial representation of what a Texture produces.</p>
+<p>The command <code>TImap</code> displays the active Texture, drawn in the log below the
+command:</p>
+<h2 id="viewing-a-texture-with-timap"><a class="header" href="#viewing-a-texture-with-timap">Viewing a Texture with <code>TImap</code></a></h2>
 <pre><code>pi{auto-muteHiConga}ti{b1} :: timap
 TImap (event-base, pre-TM) display complete.
 </code></pre>
+<p><label class="checkbox-label"><input class="checkbox-img" type="checkbox"><img src="../images/timap.png" alt="TImap of Texture b1"><span class="img-wrapper"><img src="../images/timap.png" alt="TImap of Texture b1"></span></label></p>
+<p>The switch under the map shows the same Texture as a score instead: its events
+as notes, along the same time as the graphs.</p>
+<p><label class="checkbox-label"><input class="checkbox-img" type="checkbox"><img src="../images/timap-score.png" alt="TImap of Texture b1, as a score"><span class="img-wrapper"><img src="../images/timap-score.png" alt="TImap of Texture b1, as a score"></span></label></p>
 
                     </main>
 

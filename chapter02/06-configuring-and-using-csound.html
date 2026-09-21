@@ -35,7 +35,7 @@
             const path_to_root = "../";
             const default_light_theme = "coal";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-1b375f45.js";
+            window.path_to_searchindex_js = "../searchindex-61305100.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-ba80255b.js"></script>
@@ -194,29 +194,30 @@ open source, free, cross platform program available for all major operating
 systems.</p>
 <p>Once configured properly, athenaCL provides commands to control Csound
 rendering. The user may be required to provide the location of (file path to)
-the Csound program; the location of the Csound program is set with the APea
+the Csound program; the location of the Csound program is set with the <code>APea</code>
 command, or Athena Preferences external applications command. Each platform has
 a different default Csound application specified. Unix: default position is
 /usr/local/bin/csound; MacOS X: default Csound is the same as Unix; Windows:
-users must select the Csound executable, “winsound.exe,” with the APea command.
-The user can select a different Csound with the APea command; this selection is
-stored in the user preferences and is maintained between athenaCL sessions.</p>
-<p>Assuming that the necessary Csound files were created with ELn as demonstrated
-above, the user may view the Csound score file created with the command ELv, or
-EventList view. Depending on operating system configuration, this command will
-open the score file with a platform-specific text reader. Alternatively, the
-.sco file can be manually selected and opened by the user. Whenever athenaCL
+users must select the Csound executable, “winsound.exe,” with the <code>APea</code>
+command. The user can select a different Csound with the <code>APea</code> command; this
+selection is stored in the user preferences and is maintained between athenaCL
+sessions.</p>
+<p>Assuming that the necessary Csound files were created with <code>ELn</code> as demonstrated
+above, the user may view the Csound score file created with the command <code>ELv</code>,
+or EventList view. Depending on operating system configuration, this command
+will open the score file with a platform-specific text reader. Alternatively,
+the .sco file can be manually selected and opened by the user. Whenever athenaCL
 creates Csound files under EventMode csoundNative, a script file (.bat) is
 created to automate rendering of the audio file from the Csound score and
 orchestra (or .csd file). The script instructs Csound to create an audio file
 with the same name as the score in the same directory as the score, orchestra,
 and batch file.</p>
-<p>Prior to writing files with the ELn command, the desired audio file format can
+<p>Prior to writing files with the <code>ELn</code> command, the desired audio file format can
 be specified from within athenaCL using the command APa. The user will be
 prompted to select a file format from the options given. Note: the user must set
-Csound options before executing ELn; otherwise, they will have no effect until a
-new EventList is created.</p>
-<p><strong>Changing the Csound audio file format with CPff</strong></p>
+Csound options before executing <code>ELn</code>; otherwise, they will have no effect until
+a new EventList is created.</p>
+<h2 id="changing-the-csound-audio-file-format-with-cpff"><a class="header" href="#changing-the-csound-audio-file-format-with-cpff">Changing the Csound audio file format with CPff</a></h2>
 <pre><code>pi{y0}ti{a2} :: apa
 select format, channels, or rate. (f,c,r): f
 current audio file format: aif.
@@ -224,12 +225,12 @@ select aif, wav, or sd2. (a, w, or s): a
 audio format set to 'aif'.
 </code></pre>
 <p>Assuming correct Csound installation and configuration within athenaCL, the user
-can enter ELr to automatically initiate Csound rendering of the last Csound
-score created with ELn. ELr, using the operating system, calls the
-athenaCL-created script. For ELr to function, and thus the ELn-created script to
-function, the Csound score and orchestra files (or .csd file) must remain in
+can enter <code>ELr</code> to automatically initiate Csound rendering of the last Csound
+score created with ELn. <code>ELr</code>, using the operating system, calls the
+athenaCL-created script. For <code>ELr</code> to function, and thus the ELn-created script
+to function, the Csound score and orchestra files (or .csd file) must remain in
 their original locations.</p>
-<p><strong>Rendering a Csound score</strong></p>
+<h2 id="rendering-a-csound-score"><a class="header" href="#rendering-a-csound-score">Rendering a Csound score</a></h2>
 <pre><code>pi{y0}ti{a2} :: elr
 audio rendering initiated: /Volumes/xdisc/_scratch/test02.bat
 </code></pre>
@@ -238,19 +239,19 @@ Csound application, just as they would for any other Csound score and orchestra,
 manually setting file Paths, file formats, and Csound option flags. See Csound
 documentation for more information on using Csound.</p>
 <p>As demonstrated above with MIDI files, the user can open the Csound-rendered
-audio file with the ELh command. This command opens the audio file with a
+audio file with the <code>ELh</code> command. This command opens the audio file with a
 platform-specific media player.</p>
-<p><strong>Opening Csound-generated audio files with ELh</strong></p>
+<h2 id="opening-csound-generated-audio-files-with-elh"><a class="header" href="#opening-csound-generated-audio-files-with-elh">Opening Csound-generated audio files with <code>ELh</code></a></h2>
 <pre><code>pi{y0}ti{a2} :: elh
 EventList hear initiated: /Volumes/xdisc/_scratch/test02.aif
 EventList hear initiated: /Volumes/xdisc/_scratch/test02.mid
 </code></pre>
 <p>To summarize, there are three athenaCL commands needed to create, render, and
-hear a Csound score, and they must be executed in order: ELn, ELr, ELh. To link
-these three commands, the user can set a automation preference with the ELauto
-command. When this option is toggled, the single command ELn will create an
-EventList, render it in Csound, and open the Csound-created audio file with a
-platform-specific media player.</p>
+hear a Csound score, and they must be executed in order: <code>ELn</code>, <code>ELr</code>, ELh. To
+link these three commands, the user can set a automation preference with the
+<code>ELauto</code> command. When this option is toggled, the single command <code>ELn</code> will
+create an EventList, render it in Csound, and open the Csound-created audio file
+with a platform-specific media player.</p>
 
                     </main>
 

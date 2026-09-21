@@ -35,7 +35,7 @@
             const path_to_root = "../";
             const default_light_theme = "coal";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-1b375f45.js";
+            window.path_to_searchindex_js = "../searchindex-61305100.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-ba80255b.js"></script>
@@ -178,28 +178,25 @@
                 <div id="mdbook-content" class="content">
                     <main>
                         <h1 id="starting-the-athenacl-interpreter"><a class="header" href="#starting-the-athenacl-interpreter">Starting the athenaCL Interpreter</a></h1>
-<p>Depending on your platform, there are a number of different ways to launch the
-athenaCL program and start the athenaCL Interpreter. For all platforms, using
-athenaCL requires installing (or finding) Python 2.6 (or better) on your system.
-Many advanced operating systems (UNIX-based operating systems including
-GNU/Linux and MacOS X) ship with Python installed.</p>
-<p>For complete instructions on installing and launching athenaCL in each platform,
-please see the file “README.txt” included in the athenaCL distribution and in .</p>
-<p>After launching athenaCL, the user is presented with a text-based display in a
-terminal or Python-interactive window. The user is presented with the following
-initialization information:</p>
-<p><strong>Initialization information</strong></p>
-<pre><code>athenaCL 2.0.0 (on darwin via terminal)
-Enter "cmd" to see all commands. For help enter "?".
-Enter "c" for copyright, "w" for warranty, "r" for credits.
-
-pi{}ti{} :: 
+<p>athenaCL is a single application: open it as you would any other program on your
+platform. Everything it needs, including its Python interpreter, is built into
+the application, so there is nothing to install alongside it.</p>
+<p>The window opens on the athenaCL prompt, with the caret already in it: a command
+can be typed straight away. Commands are entered at the prompt, and what they
+print appears above it, in the log. Enter <code>cmd</code> to see all commands, <code>help</code> for
+help with one of them, and <code>AUdoc</code> to read this manual inside the application.</p>
+<h2 id="the-athenacl-prompt"><a class="header" href="#the-athenacl-prompt">The athenaCL prompt</a></h2>
+<pre><code>pi{}ti{} :: type a command or 'help'
 </code></pre>
-<p>When starting up the Interpreter, athenaCL looks in the athenaCL directory for
-the “libATH” folder, and then various directories within the “libATH” folder.
-These directories contain essential files and must be present for the program to
-run. The athenaCL prompt “::” is preceded by information concerning the
-AthenaObject. This will be explained in greater detail below.</p>
+<p>The athenaCL prompt “::” is preceded by information concerning the AthenaObject.
+The active PathInstance is named within “pi{}”, and the active TextureInstance
+within “ti{}”; both are empty until one is created. This will be explained in
+greater detail below.</p>
+<p>Around the log, the window carries the things that would otherwise need a
+command: above it, the scratch directory athenaCL writes its files to, with a
+button to change it, and a switch between the light and the dark look; below it,
+the active Path and Texture, and the tempo the built-in player plays at.</p>
+<p><label class="checkbox-label"><input class="checkbox-img" type="checkbox"><img src="../images/window.png" alt="The athenaCL window, as it opens"><span class="img-wrapper"><img src="../images/window.png" alt="The athenaCL window, as it opens"></span></label></p>
 
                     </main>
 

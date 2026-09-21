@@ -35,7 +35,7 @@
             const path_to_root = "../";
             const default_light_theme = "coal";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-1b375f45.js";
+            window.path_to_searchindex_js = "../searchindex-61305100.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-ba80255b.js"></script>
@@ -178,11 +178,12 @@
                 <div id="mdbook-content" class="content">
                     <main>
                         <h1 id="setting-eventmode-and-creating-a-texture"><a class="header" href="#setting-eventmode-and-creating-a-texture">Setting EventMode and Creating a Texture</a></h1>
-<p>As explained in , the athenaCL EventMode determines what instruments are
-available for Texture creation. In the following example, the EventMode is set
-to midi, the TextureModule LiteralVertical is selected, a new Texture is created
-with instrument 0, and the Texture is displayed with TIv.</p>
-<p><strong>Creating a Texture with TM LiteralVertical</strong></p>
+<p>As explained in <a href="../chapter04/01-tutorial-4-creating-and-editing-textures.html">Tutorial 4: Creating and Editing Textures</a>, the
+athenaCL EventMode determines what instruments are available for Texture
+creation. In the following example, the EventMode is set to midi, the
+TextureModule LiteralVertical is selected, a new Texture is created with
+instrument 0, and the Texture is displayed with TIv.</p>
+<h2 id="creating-a-texture-with-tm-literalvertical"><a class="header" href="#creating-a-texture-with-tm-literalvertical">Creating a Texture with TM LiteralVertical</a></h2>
 <pre><code>pi{q1}ti{} :: emo midi
 EventMode mode set to: midi.
 
@@ -238,26 +239,27 @@ texture (d)ynamic   none
 </code></pre>
 <p>Notice that the Texture’s Path attribute is set to q1. In all cases, a Texture,
 when created, links to the active Path. The Path a Texture links to can be
-edited later if necessary. Notice also that the Path listing in the TIv display
-shows the pitches of the Path, as well as timings for each set: 10, 6.25, and
-3.74 seconds respectively. These times are the result of the duration fraction
-applied to the Texture’s duration.</p>
-<p>To hear this Texture, create an EventList as explained in . After using the ELn
-command, the ELh command can be used to open the MIDI file. Notice that each
-chord lasts the appropriate duration fraction of the total twenty-second
-duration of the Texture.</p>
+edited later if necessary. Notice also that the Path listing in the <code>TIv</code>
+display shows the pitches of the Path, as well as timings for each set: 10,
+6.25, and 3.74 seconds respectively. These times are the result of the duration
+fraction applied to the Texture’s duration.</p>
+<p>To hear this Texture, create an EventList as explained in
+<a href="../chapter02/05-creating-an-eventlist.html">Creating an EventList</a>. After using
+the <code>ELn</code> command, the <code>ELh</code> command can be used to open the MIDI file. Notice
+that each chord lasts the appropriate duration fraction of the total
+twenty-second duration of the Texture.</p>
 <p>A few small edits to this Texture will make it more interesting. In the
 following example, both the rhythm and amplitude are edited: the rhythm is given
 more Pulses and made to oscillate back and forth along the specified series; the
 amplitude randomly selects from a list of four amplitudes.</p>
-<p><strong>Editing a Texture</strong></p>
+<h2 id="editing-a-texture"><a class="header" href="#editing-a-texture">Editing a Texture</a></h2>
 <pre><code>pi{q1}ti{a1} :: tie r l, ((4,1,1), (4,1,1), (4,3,0), (2,3,1), (3,2,1), (3,2,1)), oo
 TI a1: parameter rhythm updated.
 
 pi{q1}ti{a1} :: tie a bg, rc, (.5,.6,.8,1) 
 TI a1: parameter amplitude updated.
 </code></pre>
-<p>Again, ELn and ELh can be used to create and audition the resulting musical
+<p>Again, <code>ELn</code> and <code>ELh</code> can be used to create and audition the resulting musical
 structure.</p>
 
                     </main>

@@ -35,7 +35,7 @@
             const path_to_root = "../";
             const default_light_theme = "coal";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-1b375f45.js";
+            window.path_to_searchindex_js = "../searchindex-61305100.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-ba80255b.js"></script>
@@ -191,13 +191,13 @@ The set (1,11,24), performed as a set-class, would be interpreted as the set
 (0,1,2): register and pitch-class are removed, while the normal-form of the
 set-class is retained.</p>
 <p>In the following example, a new Texture is created from TextureModule
-LineGroove. First, the TM must be selected with the TMo command. Next, a new
-Texture named b1 is created with the TIn command. The TImode command can be used
-to edit many Texture options. In this example, pitchMode is selected and “pcs,”
-for pitch class space, is selected. Finally, the Texture is given a more
+LineGroove. First, the TM must be selected with the <code>TMo</code> command. Next, a new
+Texture named b1 is created with the <code>TIn</code> command. The <code>TImode</code> command can be
+used to edit many Texture options. In this example, pitchMode is selected and
+“pcs,” for pitch class space, is selected. Finally, the Texture is given a more
 interesting rhythm, by use of the Rhythm ParameterObject markovPulse, and is
 panned to the right with a constant value:</p>
-<p><strong>Editing PitchMode of a TextureInstance</strong></p>
+<h2 id="editing-pitchmode-of-a-textureinstance"><a class="header" href="#editing-pitchmode-of-a-textureinstance">Editing PitchMode of a TextureInstance</a></h2>
 <pre><code>pi{q1}ti{a1} :: tmo lg
 TextureModule LineGroove now active.
 
@@ -249,7 +249,7 @@ texture (d)ynamic   none
 Texture a1. After setting the Texture’s pitchMode to pitchClassSpace, however,
 Texture b1 will receive only pitch class values from Path q1: all register
 information, as performed in Texture a1, is stripped. By creating a new
-EventList with ELn and auditioning the results, it should be clear that both
+EventList with <code>ELn</code> and auditioning the results, it should be clear that both
 Textures share the same pitch information and duration weighting. Notice that
 the faster-moving single-note line Texture b1, however, stays within a single
 register. When a Texture is in pitchClassSpace Pitch mode, all pitches from a

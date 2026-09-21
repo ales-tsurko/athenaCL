@@ -35,7 +35,7 @@
             const path_to_root = "../";
             const default_light_theme = "coal";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-1b375f45.js";
+            window.path_to_searchindex_js = "../searchindex-61305100.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-ba80255b.js"></script>
@@ -187,7 +187,7 @@ options levelField and levelOctave.</p>
 such that octaves are chosen in order from a list of possibilities, creating a
 sequence of octave transpositions. An octave value of 0 means no transposition;
 an octave of -2 means a transposition two octaves down.</p>
-<p><strong>Editing Local Octave</strong></p>
+<h2 id="editing-local-octave-with-tie"><a class="header" href="#editing-local-octave-with-tie">Editing Local Octave with <code>TIe</code></a></h2>
 <pre><code>pi{q1}ti{b1} :: tie
 command.py: raw args  
 edit TI b1
@@ -221,8 +221,8 @@ texture (s)tatic
       s3            levelOctaveMonophonic, event
 texture (d)ynamic   none
 </code></pre>
-<p>Listening to the results of the previous edit (with ELn and ELh), it should be
-clear that a new octave is applied to each event of Texture b1, creating an
+<p>Listening to the results of the previous edit (with <code>ELn</code> and <code>ELh</code>), it should
+be clear that a new octave is applied to each event of Texture b1, creating an
 regular oscillation of register independent of Path Multiset.</p>
 <p>Alternatively, the user may desire local octave and field controls to only be
 applied once per Multiset. This option can be set for TextureModule LineGroove
@@ -231,7 +231,7 @@ example, the user examines the documentation of ParameterObject
 levelOctaveMonophonic, and a copy of Texture b1 is created named b2. Next, this
 Texture’s panning is edited, and then the TextureStatic option
 levelOctaveMonophonic is changed from “event” to “set”:</p>
-<p><strong>Editing TextureStatic</strong></p>
+<h2 id="editing-texturestatic"><a class="header" href="#editing-texturestatic">Editing TextureStatic</a></h2>
 <pre><code>pi{q1}ti{b1} :: tpv leveloctave
 Texture Static ParameterObject
 {name,documentation}
@@ -259,13 +259,13 @@ TI b2: parameter texture static updated.
 pi{q1}ti{b2} :: tie n c,.1
 TI b2: parameter panning updated.
 </code></pre>
-<p>Listening to a new EventList created with these three Textures (with ELn and
-ELh), it should be clear that all pitch information is synchronized by use of a
-common Path. In the case of Texture a1, the pitches are taken directly from the
-Path with register. In the case of Texture b1 (right channel), the Path pitches,
-without register, are transposed into various registers for each event. In the
-case of Texture b2 (left channel), the Path pitches, also without register, are
-transposed into various registers only once per Multiset.</p>
+<p>Listening to a new EventList created with these three Textures (with <code>ELn</code> and
+<code>ELh</code>), it should be clear that all pitch information is synchronized by use of
+a common Path. In the case of Texture a1, the pitches are taken directly from
+the Path with register. In the case of Texture b1 (right channel), the Path
+pitches, without register, are transposed into various registers for each event.
+In the case of Texture b2 (left channel), the Path pitches, also without
+register, are transposed into various registers only once per Multiset.</p>
 
                     </main>
 

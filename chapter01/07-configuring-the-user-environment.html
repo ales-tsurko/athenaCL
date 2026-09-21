@@ -35,7 +35,7 @@
             const path_to_root = "../";
             const default_light_theme = "coal";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-1b375f45.js";
+            window.path_to_searchindex_js = "../searchindex-61305100.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-ba80255b.js"></script>
@@ -183,8 +183,8 @@ loaded for each athenaCL session. Some of these settings have default values;
 others will need to be configured the first time a command is used.</p>
 <p>For example, following the athenaCL prompt (“::”) is the the athenaCL “cursor
 tool.” This tool, providing information on the active Texture and Path, can be
-turned on or off with the command APcurs, for AthenaPreferences cursor:</p>
-<p><strong>Toggling the athenaCL cursor tool with APcurs</strong></p>
+turned on or off with the command <code>APcurs</code>, for AthenaPreferences cursor:</p>
+<h2 id="toggling-the-athenacl-cursor-tool-with-apcurs"><a class="header" href="#toggling-the-athenacl-cursor-tool-with-apcurs">Toggling the athenaCL cursor tool with <code>APcurs</code></a></h2>
 <pre><code>pi{b}ti{} :: apcurs
 cursor tool set to off.
 
@@ -197,10 +197,10 @@ pi{b}ti{} ::
 event list formats (scores, MIDI files), and some are image files. In most
 cases, athenaCL will write a file in a user specified “scratch” directory with
 an automatically-generated file name. This is convenient and fast. To set the
-scratch directory, enter the APdir command, for AthenaPreferences directory.
+scratch directory, enter the <code>APdir</code> command, for AthenaPreferences directory.
 (Replace “/Volumes/xdisc/_scratch” with a complete file path to a suitable
 directory.)</p>
-<p><strong>Setting the scratch directory with APdir</strong></p>
+<h2 id="setting-the-scratch-directory-with-apdir"><a class="header" href="#setting-the-scratch-directory-with-apdir">Setting the scratch directory with <code>APdir</code></a></h2>
 <pre><code>pi{b}ti{} :: apdir
 select directory to set: scratch or audio. (x or a): x
 /Users/ariza/_x/src/athenaCL
@@ -220,14 +220,14 @@ to change directory enter name, path, or ".."
 cancel or select? (c or s): s
 user scratch directory set to /Volumes/xdisc/_scratch.
 </code></pre>
-<p>The command PIh, for PathInstance hear, allows the creation of a MIDI file from
-a single Path specification. In this case, athenaCL writes the MIDI file in the
-user-specified scratch directory. After the file is written, athenaCL opens the
-file with the operating system. Depending on how the operating system is
+<p>The command <code>PIh</code>, for PathInstance hear, allows the creation of a MIDI file
+from a single Path specification. In this case, athenaCL writes the MIDI file in
+the user-specified scratch directory. After the file is written, athenaCL opens
+the file with the operating system. Depending on how the operating system is
 configured, the MIDI file should open in an appropriate player. The athenaCL
 system frequently works in this manner with the operating system and external
 programs and resources.</p>
-<p><strong>Creating a MIDI file with PIh</strong></p>
+<h2 id="creating-a-midi-file-with-pih"><a class="header" href="#creating-a-midi-file-with-pih">Creating a MIDI file with <code>PIh</code></a></h2>
 <pre><code>pi{b}ti{} :: pih
 command.py: temporary file: /Volumes/xdisc/_scratch/ath2010.07.01.16.12.52.xml 
 PI b hear with TM LineGroove complete.
@@ -238,13 +238,14 @@ representation of musical materials. Graphics are drawn directly in the output,
 below the command that produced them. Drag a graphic to pan it, scroll while
 holding Command (Control outside macOS) to zoom, and double-click to see all of
 it again; hovering shows the values under the pointer.</p>
-<p>To test the production of graphic output, the TPmap command, for
+<p>To test the production of graphic output, the <code>TPmap</code> command, for
 TextureParameter map, can be used:</p>
-<p><strong>Producing a graphical diagram with TPmap</strong></p>
+<h2 id="producing-a-graphical-diagram-with-tpmap"><a class="header" href="#producing-a-graphical-diagram-with-tpmap">Producing a graphical diagram with <code>TPmap</code></a></h2>
 <pre><code>pi{b}ti{} :: tpmap 100 ru
 randomUniform, (constant, 0), (constant, 1)
 TPmap display complete.
 </code></pre>
+<p><label class="checkbox-label"><input class="checkbox-img" type="checkbox"><img src="../images/tpmap-uniform.png" alt="TPmap of randomUniform over 100 events"><span class="img-wrapper"><img src="../images/tpmap-uniform.png" alt="TPmap of randomUniform over 100 events"></span></label></p>
 
                     </main>
 

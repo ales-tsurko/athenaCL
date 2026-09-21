@@ -35,7 +35,7 @@
             const path_to_root = "../";
             const default_light_theme = "coal";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-1b375f45.js";
+            window.path_to_searchindex_js = "../searchindex-61305100.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-ba80255b.js"></script>
@@ -178,12 +178,13 @@
                 <div id="mdbook-content" class="content">
                     <main>
                         <h1 id="creating-a-path-with-a-duration-fraction"><a class="header" href="#creating-a-path-with-a-duration-fraction">Creating a Path with a Duration Fraction</a></h1>
-<p>First, the user creates a path consisting of three Multisets. As demonstrated
-in , there are many ways to create and edit a Path. In the following example,
-the user creates a new path named q1 by simply providing pitch space values
-using conventional note names. The path is the then viewed with the PIv command,
-and auditioned with the PIh command.</p>
-<p><strong>Creating a Path with PIn</strong></p>
+<p>First, the user creates a path consisting of three Multisets. As demonstrated in
+<a href="../chapter03/01-tutorial-3-creating-and-editing-paths.html">Tutorial 3: Creating and Editing Paths</a>, there are many ways to
+create and edit a Path. In the following example, the user creates a new path
+named q1 by simply providing pitch space values using conventional note names.
+The path is the then viewed with the <code>PIv</code> command, and auditioned with the
+<code>PIh</code> command.</p>
+<h2 id="creating-a-path-with-pin"><a class="header" href="#creating-a-path-with-pin">Creating a Path with <code>PIn</code></a></h2>
 <pre><code>pi{}ti{} :: pin
 name this PathInstance: q1
 enter a pitch set, sieve, spectrum, or set-class: D2,G#3,A3,D3,E2,B2,A2
@@ -217,11 +218,11 @@ specifies that each Multiset in the Path has an equal duration weighting (1, or
 weighting to each Multiset in the Path. When a Texture interprets a Path, it
 partitions its duration into as many segments as there are Path Multisets, and
 each segment is given a duration proportional to the Path durFraction. The
-command PIdf can be used to alter a Path’s duration weighting. The user must
+command <code>PIdf</code> can be used to alter a Path’s duration weighting. The user must
 supply a list of values, either as percentages (floating point or integer) or
-simply as numeric weightings. In the following example, after calling PIdf, the
-command PIh is used to audition the results of an altered durFraction:</p>
-<p><strong>Altering a Path’s durFraction with PIdf</strong></p>
+simply as numeric weightings. In the following example, after calling <code>PIdf</code>,
+the command <code>PIh</code> is used to audition the results of an altered durFraction:</p>
+<h2 id="altering-a-paths-durfraction-with-pidf"><a class="header" href="#altering-a-paths-durfraction-with-pidf">Altering a Path’s durFraction with <code>PIdf</code></a></h2>
 <pre><code>pi{q1}ti{} :: pidf
 edit PI q1
 enter a list of duration fractions: 8,5,3
@@ -240,8 +241,8 @@ pi{q1}ti{} :: pih
 PI q1 hear with TM LineGroove complete.
 (/Volumes/xdisc/_scratch/ath2010.07.03.19.08.09.mid)
 </code></pre>
-<p>The PIv display shows that the Multisets are weighted such that the first is
-given 50%, the second 31%, and the last 19%. The MIDI file created with PIh
+<p>The <code>PIv</code> display shows that the Multisets are weighted such that the first is
+given 50%, the second 31%, and the last 19%. The MIDI file created with <code>PIh</code>
 should confirm this distribution.</p>
 
                     </main>

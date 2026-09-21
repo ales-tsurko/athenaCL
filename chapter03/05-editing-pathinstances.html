@@ -35,7 +35,7 @@
             const path_to_root = "../";
             const default_light_theme = "coal";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-1b375f45.js";
+            window.path_to_searchindex_js = "../searchindex-61305100.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-ba80255b.js"></script>
@@ -185,7 +185,7 @@ each Multiset in a Path can be changed, either by transposition or replacement.<
 distinct Path and the original Path is left unchanged. For example, to create
 the retrograde of the active Path, enter PIret. The user must provide the name
 of the new Path:</p>
-<p><strong>Creating a retrograde of a Path with PIret</strong></p>
+<h2 id="creating-a-retrograde-of-a-path-with-piret"><a class="header" href="#creating-a-retrograde-of-a-path-with-piret">Creating a retrograde of a Path with <code>PIret</code></a></h2>
 <pre><code>pi{pathC}ti{} :: piret
 name this PathInstance: pathCret
 retrograde PI pathCret added to PathInstances.
@@ -197,10 +197,10 @@ PathInstances available:
    pathC            0  5-3A,6-4,7-34,4-14A 
  + pathCret         0  4-14A,7-34,6-4,5-3A 
 </code></pre>
-<p>To create a rotation, the user, after entering PIrot, must enter the number of
+<p>To create a rotation, the user, after entering <code>PIrot</code>, must enter the number of
 the Multiset to occupy the new first position. If the new first position is to
 be the second Multiset, the user would enter 2:</p>
-<p><strong>Creating a rotation of a Path with PIrot</strong></p>
+<h2 id="creating-a-rotation-of-a-path-with-pirot"><a class="header" href="#creating-a-rotation-of-a-path-with-pirot">Creating a rotation of a Path with <code>PIrot</code></a></h2>
 <pre><code>pi{pathCret}ti{} :: pirot
 name this PathInstance: pathCretRot
 which chord should start the rotation? (positions 2-4): 2
@@ -218,7 +218,7 @@ PathInstances available:
 user is prompted for the name of the new Path, and the start and end Multiset
 positions. If the slice is to only contain the last two chords of a four chord
 Path, for example, the start and end positions would be 3,4:</p>
-<p><strong>Creating a slice of a Path with PIslc</strong></p>
+<h2 id="creating-a-slice-of-a-path-with-pislc"><a class="header" href="#creating-a-slice-of-a-path-with-pislc">Creating a slice of a Path with <code>PIslc</code></a></h2>
 <pre><code>pi{pathCretRot}ti{} :: pislc
 name this slice of path pathCretRot: pathD
 which chords should bound the slice? (positions 1 - 4): 3,4
@@ -233,11 +233,11 @@ PathInstances available:
    pathCretRot      0  7-34,6-4,5-3A,4-14A 
  + pathD            0  5-3A,4-14A      
 </code></pre>
-<p>There are three ways to edit a single Multiset within a Path using the PIe
+<p>There are three ways to edit a single Multiset within a Path using the <code>PIe</code>
 command: by replacement, by transposition, or by inversion. In all cases, the
 number of elements in the Multiset must be maintained.</p>
-<p>To edit a single Multiset in a Path enter PIe:</p>
-<p><strong>Transposing a set within a Path</strong></p>
+<p>To edit a single Multiset in a Path enter <code>PIe</code>:</p>
+<h2 id="transposing-a-set-within-a-path"><a class="header" href="#transposing-a-set-within-a-path">Transposing a set within a Path</a></h2>
 <pre><code>pi{pathD}ti{} :: pie
 edit PI pathD
 enter position to edit (positions 1-2): 2
@@ -267,7 +267,7 @@ literal and not a modulus transposition, pitch 5 becomes pitch 15, or D#5.</p>
 <p>Any Multiset in a Path can be replaced with a Multiset of equal size. For
 example, the same Multiset edited above can be replaced with any four-element
 Multiset:</p>
-<p><strong>Replacing a Multiset with a new Multiset</strong></p>
+<h2 id="replacing-a-multiset-with-a-new-multiset"><a class="header" href="#replacing-a-multiset-with-a-new-multiset">Replacing a Multiset with a new Multiset</a></h2>
 <pre><code>pi{pathD}ti{} :: pie
 edit PI pathD
 enter position to edit (positions 1-2): 2

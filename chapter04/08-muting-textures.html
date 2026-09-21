@@ -35,7 +35,7 @@
             const path_to_root = "../";
             const default_light_theme = "coal";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-1b375f45.js";
+            window.path_to_searchindex_js = "../searchindex-61305100.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-ba80255b.js"></script>
@@ -179,15 +179,15 @@
                     <main>
                         <h1 id="muting-textures"><a class="header" href="#muting-textures">Muting Textures</a></h1>
 <p>Textures can be muted to disable the inclusion of their events in all
-EventOutputs. Textures and their Clones (see ) can be muted independently. The
-command TImute, if no arguments are given, toggles the current Texture’s mute
-status. The following example demonstrates muting Texture a1, listing all
-Textures with with TIls, and then displaying the collection of Textures with the
-TEmap command. Notice that in the TIls display, the “status” of Texture a1 is
-set to “o”, meaning that it is muted.</p>
-<p><strong>Muting a Texture with TImute</strong></p>
-<pre><code>
-pi{auto-muteHiConga}ti{b1} :: timute
+EventOutputs. Textures and their Clones (see
+<a href="../chapter06/01-tutorial-6-textures-and-clones.html">Tutorial 6: Textures and Clones</a>) can be muted independently. The
+command <code>TImute</code>, if no arguments are given, toggles the current Texture’s mute
+status. The following example demonstrates muting the active Texture, b1,
+listing all Textures with <code>TIls</code>, and then displaying the collection of Textures
+with the <code>TEmap</code> command. Notice that in the <code>TIls</code> display, the “status” of
+Texture b1 is set to “o”, meaning that it is muted.</p>
+<h2 id="muting-a-texture-with-timute"><a class="header" href="#muting-a-texture-with-timute">Muting a Texture with <code>TImute</code></a></h2>
+<pre><code>pi{auto-muteHiConga}ti{b1} :: timute
 TI b1 is now muted.
 
 pi{auto-muteHiConga}ti{b1} :: tils
@@ -197,16 +197,15 @@ TextureInstances available:
  + b1               o LineGroove  auto-muteHiConga 62  05.0--20.0   0
 
 pi{auto-muteHiConga}ti{b1} :: temap
-TextureEnsemble Map:
-19.97s              |      .       |      .       |      .      |       .      |
-a1                  ____________________________________________________________
-b1                                 _____________________________________________
+TEmap display complete.
 </code></pre>
+<p><label class="checkbox-label"><input class="checkbox-img" type="checkbox"><img src="../images/temap-muted.png" alt="TEmap with Texture b1 muted"><span class="img-wrapper"><img src="../images/temap-muted.png" alt="TEmap with Texture b1 muted"></span></label></p>
 <p>By providing the name of one or more Textures as command-line arguments,
 numerous Texture’s mute status can be toggled. In the following example, Texture
-a1 is given as an argument to the TImute command. The TIls command shows that
-the Texture is no longer muted.</p>
-<p><strong>Removing mute status with TImute</strong></p>
+a1 is given as an argument to the <code>TImute</code> command, and the <code>TIls</code> command shows
+that both Textures are now muted. Given again, a Texture’s name removes its mute
+status.</p>
+<h2 id="removing-mute-status-with-timute"><a class="header" href="#removing-mute-status-with-timute">Removing mute status with <code>TImute</code></a></h2>
 <pre><code>pi{auto-muteHiConga}ti{b1} :: timute a1
 TI a1 is now muted.
 

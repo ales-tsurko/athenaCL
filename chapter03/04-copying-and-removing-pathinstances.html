@@ -35,7 +35,7 @@
             const path_to_root = "../";
             const default_light_theme = "coal";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-1b375f45.js";
+            window.path_to_searchindex_js = "../searchindex-61305100.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-ba80255b.js"></script>
@@ -183,8 +183,8 @@ copy and remove Paths. In all cases of copying and removing user-defined objects
 in athenaCL, the active object is never assumed to be the object that the
 command should be performed upon. Said another way, the user must always specify
 which object(s) to copy or remove.</p>
-<p>To copy a Path instance, enter PIcp and select a Path to copy:</p>
-<p><strong>Copying a Path with PIcp</strong></p>
+<p>To copy a Path instance, enter <code>PIcp</code> and select a Path to copy:</p>
+<h2 id="copying-a-path-with-picp"><a class="header" href="#copying-a-path-with-picp">Copying a Path with <code>PIcp</code></a></h2>
 <pre><code>pi{pathB}ti{} :: picp
 select a path to copy: (name or number 1-2): pathB
 name the copy of path pathB: pathC
@@ -197,9 +197,9 @@ PathInstances available:
    pathB            0  5-3A,6-4,7-34,4-14A 
  + pathC            0  5-3A,6-4,7-34,4-14A 
 </code></pre>
-<p>To delete a Path, enter PIrm and select a Path to delete as above. In the
+<p>To delete a Path, enter <code>PIrm</code> and select a Path to delete as above. In the
 example below, the Path to delete is given with a command line argument:</p>
-<p><strong>Removing a Path with PIrm</strong></p>
+<h2 id="removing-a-path-with-pirm"><a class="header" href="#removing-a-path-with-pirm">Removing a Path with <code>PIrm</code></a></h2>
 <pre><code>pi{pathC}ti{} :: pirm pathB
 PI pathB destroyed.
 </code></pre>

@@ -35,7 +35,7 @@
             const path_to_root = "../";
             const default_light_theme = "coal";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-1b375f45.js";
+            window.path_to_searchindex_js = "../searchindex-61305100.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-ba80255b.js"></script>
@@ -186,9 +186,9 @@ transposed and tuned with any ParameterObject by using the Texture local field
 attribute. Each integer represents a half-step transposition, and floating point
 values can provide any detail of microtonal specification. Second, each Texture
 can have a different Temperament, or tuning system based on either pitch class,
-pitch space, or algorithmic specification. The command TTls allows the user to
+pitch space, or algorithmic specification. The command <code>TTls</code> allows the user to
 list the available TextureTemperaments.</p>
-<p><strong>Listing all TextureTemperaments</strong></p>
+<h2 id="listing-all-texturetemperaments"><a class="header" href="#listing-all-texturetemperaments">Listing all TextureTemperaments</a></h2>
 <pre><code>pi{q1}ti{b2} :: ttls
 TextureTemperaments available for TI b2:
 {name,tunning}
@@ -211,7 +211,7 @@ the user selects the temperament NoiseLight for Textures b2 and Texture b1, and
 then selects the temperament NoiseMedium for Texture a1. In the last case, two
 command are given on the some command line. As is the UNIX convention, the
 commands and arguments are separated by a semicolon:</p>
-<p><strong>Selecting Texture Temperament with TTo</strong></p>
+<h2 id="selecting-texture-temperament-with-tto"><a class="header" href="#selecting-texture-temperament-with-tto">Selecting Texture Temperament with <code>TTo</code></a></h2>
 <pre><code>pi{q1}ti{b2} :: tto
 select a TextureTemperament for TI b2: (name or number 1-11): nl
 TT NoiseLight now active for TI b2.

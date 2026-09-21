@@ -35,7 +35,7 @@
             const path_to_root = "../";
             const default_light_theme = "coal";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-1b375f45.js";
+            window.path_to_searchindex_js = "../searchindex-61305100.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-ba80255b.js"></script>
@@ -183,13 +183,13 @@ attributes such as instrument, time-range, and Path are static: they do not
 change over the duration of a Texture. Other attributes are dynamic, such as
 bpm, rhythm, local field, local octave, amplitude and panning, and can be
 configured with a wide range of ParameterObjects.</p>
-<p>Texture attributes are edited with the TIe command. The command first prompts
+<p>Texture attributes are edited with the <code>TIe</code> command. The command first prompts
 the user to select which attribute to edit. Attributes are named by a
-single-letter abbreviation, as notated in the TIv display with parenthesis.
+single-letter abbreviation, as notated in the <code>TIv</code> display with parenthesis.
 Next, the current value of the attribute is displayed, followed by a prompt for
 the new value. In the following example the time range of Texture “a1” is
 edited:</p>
-<p><strong>Editing a TextureInstance</strong></p>
+<h2 id="editing-a-textureinstance"><a class="header" href="#editing-a-textureinstance">Editing a TextureInstance</a></h2>
 <pre><code>pi{auto-muteHiConga}ti{b1} :: tie
 edit TI b1
 which parameter? (i,t,b,r,p,f,o,a,n,x,s,d): t
@@ -228,16 +228,15 @@ syntax with which they are displayed. In this example, time-range values are
 given as two numbers separated by a comma. Deviation from this syntax will
 return an error. The user enters 5, 20 to set the time-range attribute to the
 duration from 5 to 20 seconds.</p>
-<p>The command TEe, for TextureEnsemble Edit can be used to edit the entire
+<p>The command <code>TEe</code>, for TextureEnsemble Edit can be used to edit the entire
 collection of Textures with one command. In the following example the user
 selects the amplitude attribute with “a” and then enters a new ParameterObject:
 randomUniform. The randomUniform parameterObject produces random values with a
 uniform distribution between the required arguments for minimum and maximum.
-After this edit, TEv, with the command-line argument “a”, can be used to view
+After this edit, <code>TEv</code>, with the command-line argument “a”, can be used to view
 the amplitude for all Textures and confirm the edit.</p>
-<p><strong>Editing a single parameter of all Textures with TEe</strong></p>
-<pre><code>
-pi{auto-muteHiConga}ti{b1} :: tee
+<h2 id="editing-a-single-parameter-of-all-textures-with-tee"><a class="header" href="#editing-a-single-parameter-of-all-textures-with-tee">Editing a single parameter of all Textures with <code>TEe</code></a></h2>
+<pre><code>pi{auto-muteHiConga}ti{b1} :: tee
 edit all TextureInstances
 which parameter? (i,t,b,r,p,f,o,a,n,x): a
 sample amplitude: randomBeta, 0.4, 0.4, (constant, 0.7), (constant, 0.9)
@@ -251,21 +250,21 @@ compare parameters: amplitude
 a1                  randomUniform, (constant, 0.6), (constant, 1)  
 b1                  randomUniform, (constant, 0.6), (constant, 1)
 </code></pre>
-<p>Using ELn, the current collection of Textures can be used to create an
-EventList, and ELh may be used to audition the results. (For more information on
-using ELn, see .) The random fluctuation of amplitude values should provide a
-variety of accent patterns to the fixed rhythmic loop.</p>
-<p>The collection of Textures can be displayed in a graphical and textual diagram
-produced by the TEmap command. This command lists each Texture and Clone within
-the current AthenaObject and provides a proportional representation of their
+<p>Using <code>ELn</code>, the current collection of Textures can be used to create an
+EventList, and <code>ELh</code> may be used to audition the results. (For more information
+on using <code>ELn</code>, see
+<a href="../chapter02/05-creating-an-eventlist.html">Creating an EventList</a>.) The random
+fluctuation of amplitude values should provide a variety of accent patterns to
+the fixed rhythmic loop.</p>
+<p>The collection of Textures can be displayed in a graphical diagram produced by
+the <code>TEmap</code> command. This command lists each Texture and Clone within the
+current AthenaObject and provides a proportional representation of their
 respective start and end times.</p>
-<p><strong>Generating a graphical display of Texture position with TEmap</strong></p>
+<h2 id="generating-a-graphical-display-of-texture-position-with-temap"><a class="header" href="#generating-a-graphical-display-of-texture-position-with-temap">Generating a graphical display of Texture position with <code>TEmap</code></a></h2>
 <pre><code>pi{auto-muteHiConga}ti{b1} :: temap
-TextureEnsemble Map:
-19.97s              |      .       |      .       |      .      |       .      |
-a1                  ____________________________________________________________
-b1                                 _____________________________________________
+TEmap display complete.
 </code></pre>
+<p><label class="checkbox-label"><input class="checkbox-img" type="checkbox"><img src="../images/temap-position.png" alt="TEmap of Textures a1 and b1"><span class="img-wrapper"><img src="../images/temap-position.png" alt="TEmap of Textures a1 and b1"></span></label></p>
 
                     </main>
 

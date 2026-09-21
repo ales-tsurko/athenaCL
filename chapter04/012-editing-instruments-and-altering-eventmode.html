@@ -35,7 +35,7 @@
             const path_to_root = "../";
             const default_light_theme = "coal";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-1b375f45.js";
+            window.path_to_searchindex_js = "../searchindex-61305100.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-ba80255b.js"></script>
@@ -184,9 +184,9 @@ dependent on the active EventMode. To use instruments from another EventMode,
 the active EventMode must first be changed, and then the Texture may be assigned
 an instrument.</p>
 <p>In the following example, the user changes the EventMode to csoundNative with
-EMo, examines the available instruments with EMi, and then assigns each Texture
-instrument 80:</p>
-<p><strong>Changing EventMode and editing Texture instrument</strong></p>
+<code>EMo</code>, examines the available instruments with <code>EMi</code>, and then assigns each
+Texture instrument 80:</p>
+<h2 id="changing-eventmode-and-editing-texture-instrument"><a class="header" href="#changing-eventmode-and-editing-texture-instrument">Changing EventMode and editing Texture instrument</a></h2>
 <pre><code>pi{auto-muteHiConga}ti{a1} :: emo cn
 EventMode mode set to: csoundNative.
 
@@ -304,9 +304,9 @@ the user that additional auxiliary ParameterObjects have been added. As a
 Csound-based instrument, each event of instrument 80 can accept two additional
 synthesis parameters. When viewing a Texture with this instrument, as shown
 above, the auxiliary display shows two additional ParameterObjects, x0 and x1.
-To learn what these auxiliary ParameterObjects control, the command TIdoc ma be
-used:</p>
-<p><strong>Examining Texture documentation with TIdoc</strong></p>
+To learn what these auxiliary ParameterObjects control, the command <code>TIdoc</code> ma
+be used:</p>
+<h2 id="examining-texture-documentation-with-tidoc"><a class="header" href="#examining-texture-documentation-with-tidoc">Examining Texture documentation with <code>TIdoc</code></a></h2>
 <pre><code>pi{auto-muteHiConga}ti{b1} :: tidoc
 TI: b1, TM: LineGroove
 (i)nstrument        80 (csoundNative: pluckTamHats)
@@ -341,10 +341,12 @@ texture (d)ynamic   none
 </code></pre>
 <p>Assuming that Csound is properly configured, a new set of EventLists can be
 created. As the user is now in EventMode csoundNative and has csoundNative
-textures, both a Csound score and a MIDI file are created. (See for more
-information on working with Csound in athenaCL.) The user may render the Csound
-score with ELr, and then audition the results with the ELh command.</p>
-<p><strong>Creating a new EventList with ELn</strong></p>
+textures, both a Csound score and a MIDI file are created. (See
+<a href="../chapter02/06-configuring-and-using-csound.html">Configuring and Using Csound</a>
+for more information on working with Csound in athenaCL.) The user may render
+the Csound score with <code>ELr</code>, and then audition the results with the <code>ELh</code>
+command.</p>
+<h2 id="creating-a-new-eventlist-with-eln"><a class="header" href="#creating-a-new-eventlist-with-eln">Creating a new EventList with <code>ELn</code></a></h2>
 <pre><code>pi{auto-muteHiConga}ti{b1} :: eln
       EventList ath2010.07.03.18.40.11 complete:
 /Volumes/xdisc/_scratch/ath2010.07.03.18.40.11.bat

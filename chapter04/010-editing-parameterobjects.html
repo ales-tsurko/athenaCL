@@ -35,7 +35,7 @@
             const path_to_root = "../";
             const default_light_theme = "coal";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-1b375f45.js";
+            window.path_to_searchindex_js = "../searchindex-61305100.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-ba80255b.js"></script>
@@ -179,12 +179,12 @@
                     <main>
                         <h1 id="editing-parameterobjects"><a class="header" href="#editing-parameterobjects">Editing ParameterObjects</a></h1>
 <p>To edit an attribute of Texture, a user enters a new ParameterObject argument
-list. The command TIe, as before, first prompts the user to select which
+list. The command <code>TIe</code>, as before, first prompts the user to select which
 attribute to edit. Next, the current value of the attribute is displayed,
-followed by a prompt for the new value. TIv can be used to confirm the changed
+followed by a prompt for the new value. <code>TIv</code> can be used to confirm the changed
 value. In the following example, the panning of Texture “a1” is assigned a
 fractional noise (1/f) ParameterObject:</p>
-<p><strong>Editing the panning of a TextureInstance</strong></p>
+<h2 id="editing-the-panning-of-a-textureinstance"><a class="header" href="#editing-the-panning-of-a-textureinstance">Editing the panning of a TextureInstance</a></h2>
 <pre><code>pi{auto-muteHiConga}ti{b1} :: tie
 edit TI b1
 which parameter? (i,t,b,r,p,f,o,a,n,x,s,d): n
@@ -229,9 +229,9 @@ sound to the upper half of the range (the middle to right stereo position). To
 limit the spatial location of “b1” in a complementary fashion, the Texture is
 edited to produce values within the range 0 to .5, corresponding to the lower
 half of the range (the middle to left stereo position). In the example below,
-TIo is used to select “b1” before entering the TIe command. TEv is then used to
-compare panning values for all Textures.</p>
-<p><strong>Editing the panning of a TextureInstance</strong></p>
+<code>TIo</code> is used to select “b1” before entering the <code>TIe</code> command. <code>TEv</code> is then
+used to compare panning values for all Textures.</p>
+<h2 id="editing-and-comparing-panning-with-tie-and-tev"><a class="header" href="#editing-and-comparing-panning-with-tie-and-tev">Editing and comparing panning with <code>TIe</code> and <code>TEv</code></a></h2>
 <pre><code>pi{auto-muteHiConga}ti{b1} :: tio b1
 TI b1 now active.
 
@@ -272,12 +272,12 @@ b1                  wavePowerDown, event, (constant, 15), 0.25, 2.5, (constant,
                     0), (constant, 0.5)
 </code></pre>
 <p>Notice that, in the above example, the user provided complete command-line
-arguments for the TIe command. When entering a ParameterObject from the
+arguments for the <code>TIe</code> command. When entering a ParameterObject from the
 command-line, no spaces, and only commas, can be used between ParameterObject
 arguments. As command-line arguments are space delimited (and ParameterObject
 arguments are comma delimited), a ParameterObject on the command line must be
 given without spaces between arguments. When providing a ParameterObject to a
-TIe prompt, however, spaces may be provided.</p>
+<code>TIe</code> prompt, however, spaces may be provided.</p>
 
                     </main>
 

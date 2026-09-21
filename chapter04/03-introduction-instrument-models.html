@@ -35,7 +35,7 @@
             const path_to_root = "../";
             const default_light_theme = "coal";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-1b375f45.js";
+            window.path_to_searchindex_js = "../searchindex-61305100.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-ba80255b.js"></script>
@@ -186,15 +186,17 @@ creation, and are able to control a wide variety of instrument-specific
 parameters.</p>
 <p>athenaCL features an integrated library of Csound instruments, providing
 automated control of both Csound score and orchestra generation and control. For
-details on installing and using Csound within athenaCL, see . Csound instruments
-are signal processing and synthesis instructions. These instructions designates
-a certain number of parameters to expose to the user of the instrument. These
-parameters allow events in the score to communicate information and settings to
-the instrument. athenaCL’s integrated library of Csound instruments permits
-dynamically constructed orchestra files to be used with athenaCL-generated
-Csound scores. Alternatively, users can use external, custom orchestras with
-athenaCL-written score files. EventModes csoundNative, csoundExternal, and
-csoundSilence support diverse ways of working with Csound within athenaCL.</p>
+details on installing and using Csound within athenaCL, see
+<a href="../chapter02/06-configuring-and-using-csound.html">Configuring and Using Csound</a>.
+Csound instruments are signal processing and synthesis instructions. These
+instructions designates a certain number of parameters to expose to the user of
+the instrument. These parameters allow events in the score to communicate
+information and settings to the instrument. athenaCL’s integrated library of
+Csound instruments permits dynamically constructed orchestra files to be used
+with athenaCL-generated Csound scores. Alternatively, users can use external,
+custom orchestras with athenaCL-written score files. EventModes csoundNative,
+csoundExternal, and csoundSilence support diverse ways of working with Csound
+within athenaCL.</p>
 <p>athenaCL provides instrument collections (Orchestras) for working with other
 EventOutput formats. For working with MIDI systems, General MIDI (GM) instrument
 definitions are provided with the generalMidi and generalMidiPercussion
@@ -208,8 +210,8 @@ provided when available.</p>
 EventMode: that is, for any active EventMode, one Orchestra is available from
 which a Texture’s instrument must be selected. In the following example, the
 user lists available EventModes to check that csoundNative is active, and then
-views the available instruments with the EMi command.</p>
-<p><strong>Listing available Instruments with EMi</strong></p>
+views the available instruments with the <code>EMi</code> command.</p>
+<h2 id="listing-available-instruments-with-emi"><a class="header" href="#listing-available-instruments-with-emi">Listing available Instruments with <code>EMi</code></a></h2>
 <pre><code>pi{}ti{} :: emls
 EventMode modes available:
 {name}
@@ -290,9 +292,9 @@ csoundNative instruments:
    241    vocodeVcoOctScaleRemap    
 </code></pre>
 <p>Other EventModes provide other Orchestras for use in Textures. In the example
-below, the user selects the EventMode midiPercussion with the EMo command and
-examines the available instruments with the EMi command:</p>
-<p><strong>Examining additional Instruments with EMi</strong></p>
+below, the user selects the EventMode midiPercussion with the <code>EMo</code> command and
+examines the available instruments with the <code>EMi</code> command:</p>
+<h2 id="examining-additional-instruments-with-emi"><a class="header" href="#examining-additional-instruments-with-emi">Examining additional Instruments with <code>EMi</code></a></h2>
 <pre><code>pi{}ti{} :: emo mp
 EventMode mode set to: midiPercussion.
 

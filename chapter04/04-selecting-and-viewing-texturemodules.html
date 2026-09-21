@@ -35,7 +35,7 @@
             const path_to_root = "../";
             const default_light_theme = "coal";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-1b375f45.js";
+            window.path_to_searchindex_js = "../searchindex-61305100.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-ba80255b.js"></script>
@@ -180,8 +180,8 @@
                         <h1 id="selecting-and-viewing-texturemodules"><a class="header" href="#selecting-and-viewing-texturemodules">Selecting and Viewing TextureModules</a></h1>
 <p>A Texture is an instance of a TextureModule. Every time a Texture is created,
 athenaCL creates an independent instance of the active TextureModule. To display
-a complete list of all available TextureModules, enter the command TMls:</p>
-<p><strong>Listing TextureModules with TMls</strong></p>
+a complete list of all available TextureModules, enter the command <code>TMls</code>:</p>
+<h2 id="listing-texturemodules-with-tmls"><a class="header" href="#listing-texturemodules-with-tmls">Listing TextureModules with <code>TMls</code></a></h2>
 <pre><code>pi{}ti{} :: tmls
 TextureModules available:
 {name,TIreferences}
@@ -207,8 +207,8 @@ parent TextureModule. The “+” designates the active TextureModule. When crea
 a new TextureInstance, athenaCL uses the active TextureModule.</p>
 <p>To select a different TextureModule, the user enters TMo. The user is prompted
 to enter the name or number (as represented in the list order) of the desired
-TextureModule. The TMls command can be used to confirm the change.</p>
-<p><strong>Selecting the active TextureModule with TMo</strong></p>
+TextureModule. The <code>TMls</code> command can be used to confirm the change.</p>
+<h2 id="selecting-the-active-texturemodule-with-tmo"><a class="header" href="#selecting-the-active-texturemodule-with-tmo">Selecting the active TextureModule with <code>TMo</code></a></h2>
 <pre><code>pi{}ti{} :: tmo 
 which TextureModule to activate? (name or number 1-14): da
 TextureModule DroneArticulate now active.
@@ -237,10 +237,10 @@ from the leading character and all following capitals), the literal name
 (“dronearticulate”), or the ordinal number as displayed in the corresponding
 list display.</p>
 <p>To learn what a particular TextureModule does, as well what types of Texture
-options are available, enter the command TMv, for TextureModule View. In this
-example, the user, with TIo, selects the TextureModule “LineGroove” (with a
-command-line argument) before entering the TMv command.</p>
-<p><strong>Viewing details of the active TextureModule</strong></p>
+options are available, enter the command <code>TMv</code>, for TextureModule View. In this
+example, the user, with <code>TIo</code>, selects the TextureModule “LineGroove” (with a
+command-line argument) before entering the <code>TMv</code> command.</p>
+<h2 id="viewing-details-of-the-active-texturemodule"><a class="header" href="#viewing-details-of-the-active-texturemodule">Viewing details of the active TextureModule</a></h2>
 <pre><code>pi{}ti{} :: tmo linegroove
 TextureModule LineGroove now active.
 
@@ -268,8 +268,8 @@ levelOctaveMonophonic Description: Toggle between selection of local octave
                       event. Arguments: (1) name, (2) level {'set', 'event'}
 texture (d)ynamic
 </code></pre>
-<p>The TMv command displays the name of the TextureModule along with the author of
-its code. Following the author designation is a description of how the module
+<p>The <code>TMv</code> command displays the name of the TextureModule along with the author
+of its code. Following the author designation is a description of how the module
 performs. Following this is documentation for all TextureStatic parameter
 objects, or Texture-specific options and user-configurable settings pertinent to
 the particular TextureModule’s algorithmic design.</p>
