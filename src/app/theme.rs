@@ -149,6 +149,22 @@ impl Colors {
         })
     }
 
+    /// An outlined button that is filled while what it opens is open: the file browser, the sound
+    /// font menu.
+    pub(crate) fn toggle(self, open: bool) -> impl Fn(&Theme, button::Status) -> button::Style {
+        button_style(
+            if open { self.paper } else { self.ink },
+            self.border(1.0),
+            move |status| {
+                Some(match (open, status) {
+                    (true, _) => self.ink,
+                    (false, button::Status::Hovered | button::Status::Pressed) => self.rule,
+                    (false, _) => self.paper,
+                })
+            },
+        )
+    }
+
     /// A block button: the play button.
     pub(crate) fn block_button(self) -> impl Fn(&Theme, button::Status) -> button::Style {
         button_style(self.on_block, self.border(1.0), move |status| {

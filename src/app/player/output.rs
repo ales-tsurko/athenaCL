@@ -15,10 +15,10 @@ use cpal::{
     traits::{DeviceTrait, HostTrait, StreamTrait},
     ErrorKind, SupportedStreamConfig,
 };
-use midi_player::{Player, PlayerController, Settings};
+use midi_player::{Player, PlayerController, PositionObserver, Settings};
 use rodio::mixer::{self, Mixer, MixerSource};
 
-use crate::app::player::events::Events;
+use crate::app::player::{events::Events, gain::Gain};
 
 /// Device resources are replaced as a unit, so MIDI and audio cannot use different outputs.
 pub(crate) struct AudioOutput {
@@ -30,6 +30,7 @@ pub(crate) struct AudioOutput {
     pub(crate) needs_poll: bool,
     pub(crate) prepared_midi: Option<MidiResume>,
     midi_audible: Arc<AtomicBool>,
+    gain: Gain,
 }
 
 impl AudioOutput {
@@ -38,12 +39,16 @@ impl AudioOutput {
         events: Events,
         generation: u64,
         resume: Option<MidiResume>,
+        follow: Option<PositionObserver>,
     ) -> Result<Self, OutputError> {
+        // A missing remembered font must fall back even when no output device is connected.
+        std::fs::File::open(sf).map_err(|error| OutputError::Synthesizer(error.to_string()))?;
         let device = OutputDevice::current()?;
         let (mut output, mut renderer) = Self::new(sf, device.key.clone())?;
         // Loading a large SoundFont can outlast another device change. Do not pin a stream to a
         // device that stopped being the default while the font was loading.
         device.ensure_current(&events, generation)?;
+        renderer.follow = follow;
         output.restore_midi(&mut renderer, resume, || !events.is_current(generation))?;
         device.connect(output, renderer, events, generation)
     }
@@ -57,7 +62,8 @@ impl AudioOutput {
             .map_err(|error| OutputError::Synthesizer(error.to_string()))?;
         let (mixer, source) = mixer::mixer(channels, rate);
         let midi_audible = Arc::new(AtomicBool::new(false));
-        let renderer = Renderer::new(player, source, midi_audible.clone());
+        let gain = Gain::default();
+        let renderer = Renderer::new(player, source, midi_audible.clone(), gain.clone());
         Ok((
             Self {
                 stream: None,
@@ -67,6 +73,7 @@ impl AudioOutput {
                 needs_poll: false,
                 prepared_midi: None,
                 midi_audible,
+                gain,
             },
             renderer,
         ))
@@ -99,6 +106,10 @@ impl AudioOutput {
     pub(crate) fn play_midi(&mut self) {
         self.midi.play();
         self.midi_audible.store(true, Ordering::Relaxed);
+    }
+
+    pub(crate) fn set_volume(&self, volume: f32) {
+        self.gain.set(volume);
     }
 
     pub(crate) fn pause_midi(&mut self) {
@@ -248,16 +259,20 @@ pub(crate) struct Renderer {
     left: [f32; 256],
     right: [f32; 256],
     midi_audible: Arc<AtomicBool>,
+    gain: Gain,
+    follow: Option<PositionObserver>,
 }
 
 impl Renderer {
-    fn new(player: Player, audio: MixerSource, midi_audible: Arc<AtomicBool>) -> Self {
+    fn new(player: Player, audio: MixerSource, midi_audible: Arc<AtomicBool>, gain: Gain) -> Self {
         Self {
             player,
             audio,
             left: [0.0; 256],
             right: [0.0; 256],
             midi_audible,
+            gain,
+            follow: None,
         }
     }
 
@@ -288,8 +303,11 @@ impl Renderer {
             + u128::from(controller.total_ticks())
             + rate;
         let mut rendered = 0;
-        let target =
+        let mut target =
             (controller.total_ticks() as f64 * resume.position.clamp(0.0, 1.0)).round() as u64;
+        if let Some(follow) = &self.follow {
+            target = follow.ticks().min(controller.total_ticks());
+        }
         controller.play();
         while controller.position_ticks() < target && controller.is_playing() {
             if cancelled() {
@@ -302,11 +320,15 @@ impl Renderer {
             }
             self.player.render(&mut self.left, &mut self.right);
             rendered += self.left.len() as u128;
+            if let Some(follow) = &self.follow {
+                target = follow.ticks().min(controller.total_ticks());
+            }
         }
         controller.set_position_ticks(target);
         if !resume.playing {
             controller.stop();
         }
+        self.follow = None;
         Ok(())
     }
 
@@ -370,6 +392,7 @@ impl Renderer {
             // Reconstructed held notes and release tails stay silent while the transport is paused,
             // including the gap between stream acceptance and transport resume.
             let audible = self.midi_audible.load(Ordering::Relaxed);
+            let gain = self.gain.get();
             for (frame, (left, right)) in block
                 .chunks_exact_mut(channels.max(1))
                 .zip(left.iter().zip(right.iter()))
@@ -381,8 +404,9 @@ impl Renderer {
                         (true, _, 1) => *right,
                         _ => 0.0,
                     };
-                    *sample =
-                        T::from_sample((midi + self.audio.next().unwrap_or(0.0)).clamp(-1.0, 1.0));
+                    *sample = T::from_sample(
+                        ((midi + self.audio.next().unwrap_or(0.0)) * gain).clamp(-1.0, 1.0),
+                    );
                 }
             }
         }

@@ -10,13 +10,9 @@ use std::{
 
 use iced::{
     alignment::Vertical,
-    mouse, time,
-    widget::{
-        self,
-        canvas::{self, Canvas},
-        row, text,
-    },
-    Color, Element, Length, Point, Rectangle, Renderer, Size, Subscription, Task, Theme,
+    time,
+    widget::{canvas::Canvas, row, text},
+    Element, Length, Subscription, Task,
 };
 use rodio::{mixer::Mixer, source::Source, Decoder, Player as AudioPlayer};
 
@@ -26,18 +22,20 @@ use crate::app::{
     pixel,
     player::{
         events::Events,
+        gain::Gain,
         output::{AudioOutput, DeviceKey, MidiResume, Opened, OutputError},
     },
+    segments,
     theme::Colors,
 };
-
-/// Segments of the progress bar, and the gap between them.
-const SEGMENTS: usize = 40;
-const SEGMENT_GAP: f32 = 2.0;
 
 pub(crate) struct GlobalState {
     output: Option<AudioOutput>,
     soundfont: String,
+    builtin_soundfont: String,
+    requested_soundfont: Option<String>,
+    output_generation: u64,
+    gain: Gain,
     events: Events,
     /// Identifies the current output attempt; late callbacks from retired streams are ignored.
     generation: u64,
@@ -61,6 +59,10 @@ impl GlobalState {
         Self {
             output: None,
             soundfont: sf.into(),
+            builtin_soundfont: sf.into(),
+            requested_soundfont: None,
+            output_generation: 0,
+            gain: Gain::default(),
             events,
             generation: 0,
             opening: None,
@@ -109,10 +111,14 @@ impl GlobalState {
                 tempo: self.tempo,
                 playing: true,
             };
-            if output.prepared_midi.take().as_ref() != Some(&resume) {
+            if !output
+                .prepared_midi
+                .take()
+                .is_some_and(|prepared| prepared.path == resume.path)
+            {
                 output.midi.set_file(Some(&track.path))?;
-                output.midi.set_position(track.position);
             }
+            output.midi.set_position(track.position);
             output.midi.set_tempo(f32::from(self.tempo));
             output.play_midi();
             self.midi_track = Some(track.id);
@@ -192,6 +198,59 @@ impl GlobalState {
         self.tempo = tempo;
         if let Some(output) = &mut self.output {
             output.midi.set_tempo(f32::from(tempo));
+        }
+    }
+
+    pub(crate) fn set_volume(&self, volume: f32) {
+        self.gain.set(volume);
+        if let Some(output) = &self.output {
+            output.set_volume(volume);
+        }
+    }
+
+    pub(crate) fn soundfont(&self) -> &Path {
+        Path::new(&self.soundfont)
+    }
+
+    pub(crate) fn builtin_soundfont(&self) -> &Path {
+        Path::new(&self.builtin_soundfont)
+    }
+
+    pub(crate) fn loading_soundfont(&self) -> bool {
+        self.requested_soundfont.is_some()
+    }
+
+    /// The startup request is consumed by the first output open.
+    pub(crate) fn restore_soundfont(&mut self, path: &Path) {
+        self.requested_soundfont = Some(path.to_string_lossy().into_owned());
+    }
+
+    fn select_soundfont(&mut self, path: PathBuf, tracks: &mut Vec<app::Output>) -> Task<Message> {
+        let Some(path) = path.to_str() else {
+            tracks.push(app::Output::Error(
+                "Sound font paths must be valid Unicode.".into(),
+            ));
+            return Task::none();
+        };
+        if self.requested_soundfont.as_deref() == Some(path)
+            || (self.requested_soundfont.is_none() && self.soundfont == path)
+        {
+            return Task::none();
+        }
+        if self.soundfont == path && self.output.is_some() {
+            self.requested_soundfont = None;
+            self.generation += 1;
+            self.events.set_generation(self.generation);
+            return Task::none();
+        }
+        self.requested_soundfont = Some(path.to_owned());
+        self.generation += 1;
+        self.events.set_generation(self.generation);
+        // Keep the accepted stream running while its replacement loads.
+        if self.opening.is_some() {
+            Task::none()
+        } else {
+            self.open(tracks)
         }
     }
 
@@ -288,7 +347,11 @@ impl GlobalState {
         let generation = self.generation;
         self.events.set_generation(generation);
         self.opening = Some(generation);
-        let sf = self.soundfont.clone();
+        let sf = self
+            .requested_soundfont
+            .as_ref()
+            .unwrap_or(&self.soundfont)
+            .clone();
         let events = self.events.clone();
         let resume = self
             .playing_track
@@ -306,8 +369,14 @@ impl GlobalState {
                 }
                 _ => None,
             });
+        let follow = self.output.as_ref().and_then(|output| {
+            resume
+                .as_ref()
+                .filter(|resume| resume.playing)
+                .map(|_| output.midi.new_position_observer())
+        });
         Message::background(move || {
-            let result = Opened::new(AudioOutput::open(&sf, events, generation, resume));
+            let result = Opened::new(AudioOutput::open(&sf, events, generation, resume, follow));
             Message::OutputOpened(generation, result)
         })
     }
@@ -327,14 +396,24 @@ impl GlobalState {
         self.opening = None;
         if generation != self.generation {
             drop(result);
-            return self.open(tracks);
+            return if self.requested_soundfont.is_none() && self.output.is_some() {
+                Task::none()
+            } else {
+                self.open(tracks)
+            };
         }
         match result.and_then(|output| {
+            output.set_volume(self.gain.get());
             output.start()?;
             Ok(output)
         }) {
             Ok(output) => {
+                self.suspend_output(tracks);
+                if let Some(path) = self.requested_soundfont.take() {
+                    self.soundfont = path;
+                }
                 self.output = Some(output);
+                self.output_generation = generation;
                 self.retry = false;
                 self.last_error = None;
                 if let Some(app::Output::Player(track)) =
@@ -348,6 +427,18 @@ impl GlobalState {
                 }
             }
             Err(error) => {
+                if self.requested_soundfont.is_some() && !error.retryable() {
+                    let path = self.requested_soundfont.take().unwrap_or_default();
+                    tracks.push(app::Output::Error(format!(
+                        "Could not load sound font {path}: {error}"
+                    )));
+                    // A failed first choice still leaves the built-in sound available.
+                    return if self.output.is_none() {
+                        self.open(tracks)
+                    } else {
+                        Task::none()
+                    };
+                }
                 self.retry = error.retryable();
                 if !self.retry {
                     if let Some(app::Output::Player(track)) =
@@ -477,7 +568,11 @@ pub(crate) fn update(
         Message::ChangePosition(id, position) => change_position(output, state, id, position),
         Message::SetTempo(tempo) => state.set_tempo(tempo),
         Message::Tick(_) => tick(output, state),
-        Message::OutputChanged(generation) if generation == state.generation => {
+        Message::SelectSoundFont(path) => return state.select_soundfont(path, output),
+        Message::OutputChanged(generation)
+            if generation == state.generation
+                || (state.output.is_some() && generation == state.output_generation) =>
+        {
             return state.reopen(output);
         }
         Message::OutputOpened(generation, result) => {
@@ -591,6 +686,7 @@ pub enum Message {
     Pause(PlayerId),
     ChangePosition(PlayerId, f64),
     SetTempo(u16),
+    SelectSoundFont(PathBuf),
     Tick(time::Instant),
     OutputChanged(u64),
     OutputOpened(u64, Opened),
@@ -631,11 +727,12 @@ pub(crate) fn view(track: &Track, colors: Colors, width: f32) -> Element<'_, Mes
         .width(36)
         .height(36)
         .on_press(message);
-    let progress = Canvas::new(Progress {
-        id: track.id,
+    let progress = Canvas::new(segments::Slider {
         position: track.position,
-        lit: colors.lit,
-        unlit: colors.unlit,
+        count: 40,
+        colors,
+        steps: None,
+        on_change: |position| Message::ChangePosition(track.id, position),
     })
     .width(Length::Fill)
     .height(10);
@@ -651,102 +748,6 @@ pub(crate) fn view(track: &Track, colors: Colors, width: f32) -> Element<'_, Mes
         .into()
 }
 
-/// A track's progress as a row of segments: those played are lit. Clicking or dragging along it
-/// seeks.
-struct Progress {
-    id: PlayerId,
-    position: f64,
-    lit: Color,
-    unlit: Color,
-}
-
-impl Progress {
-    /// Where along the bar `x` is, from 0 to 1.
-    fn position_at(x: f32, width: f32) -> f64 {
-        f64::from((x / width.max(1.0)).clamp(0.0, 1.0))
-    }
-}
-
-impl canvas::Program<Message> for Progress {
-    /// Whether the bar is being dragged.
-    type State = bool;
-
-    fn update(
-        &self,
-        dragging: &mut bool,
-        event: &canvas::Event,
-        bounds: Rectangle,
-        cursor: mouse::Cursor,
-    ) -> Option<widget::Action<Message>> {
-        let seek = |x: f32| {
-            widget::Action::publish(Message::ChangePosition(
-                self.id,
-                Self::position_at(x, bounds.width),
-            ))
-            .and_capture()
-        };
-        match event {
-            canvas::Event::Mouse(mouse::Event::ButtonPressed(mouse::Button::Left)) => {
-                let at = cursor.position_in(bounds)?;
-                *dragging = true;
-                Some(seek(at.x))
-            }
-            canvas::Event::Mouse(mouse::Event::CursorMoved { .. }) if *dragging => {
-                let at = cursor.position()?;
-                Some(seek(at.x - bounds.x))
-            }
-            canvas::Event::Mouse(mouse::Event::ButtonReleased(mouse::Button::Left)) => {
-                *dragging = false;
-                None
-            }
-            _ => None,
-        }
-    }
-
-    fn draw(
-        &self,
-        _dragging: &bool,
-        renderer: &Renderer,
-        _theme: &Theme,
-        bounds: Rectangle,
-        _cursor: mouse::Cursor,
-    ) -> Vec<canvas::Geometry> {
-        let mut frame = canvas::Frame::new(renderer, bounds.size());
-        let count = SEGMENTS as f32;
-        let width = (bounds.width - SEGMENT_GAP * (count - 1.0)) / count;
-        let played = self.position.clamp(0.0, 1.0) as f32 * count;
-        for index in 0..SEGMENTS {
-            let segment = index as f32;
-            let x = (segment * (width + SEGMENT_GAP)).round();
-            let right = ((segment + 1.0) * (width + SEGMENT_GAP) - SEGMENT_GAP).round();
-            let color = if segment < played.round() {
-                self.lit
-            } else {
-                self.unlit
-            };
-            frame.fill_rectangle(
-                Point::new(x, 0.0),
-                Size::new(right - x, bounds.height),
-                color,
-            );
-        }
-        vec![frame.into_geometry()]
-    }
-
-    fn mouse_interaction(
-        &self,
-        dragging: &bool,
-        bounds: Rectangle,
-        cursor: mouse::Cursor,
-    ) -> mouse::Interaction {
-        if *dragging || cursor.is_over(bounds) {
-            mouse::Interaction::Pointer
-        } else {
-            mouse::Interaction::default()
-        }
-    }
-}
-
 /// The soundfont tests play through.
 ///
 /// The app's own soundfont is half a gigabyte kept in Git LFS, which CI doesn't fetch. Tests need a
@@ -760,9 +761,9 @@ mod soundfont {
     const INSTRUMENT: u16 = 41;
     const SAMPLE_ID: u16 = 53;
     /// Silent sample data, as 16-bit samples. The sample ends inside it, as rustysynth checks.
-    const WAVE: [u8; 16] = [0; 16];
-    const SAMPLE_END: u32 = 4;
-    const SAMPLE_LOOP_END: u32 = 3;
+    const WAVE: [u8; 512] = [0; 512];
+    const SAMPLE_END: u32 = 128;
+    const SAMPLE_LOOP_END: u32 = 127;
 
     /// Where this process wrote its soundfont: each writes its own, as tests run in parallel.
     pub(super) fn path() -> &'static str {
@@ -781,8 +782,28 @@ mod soundfont {
 
     /// The soundfont itself: a RIFF file of an info, a sample data and a parameter list.
     fn bytes() -> Vec<u8> {
+        with_wave(&WAVE)
+    }
+
+    pub(super) fn tone(path: &std::path::Path) {
+        let wave: Vec<u8> = (0..256)
+            .flat_map(|index| {
+                let sample: i16 = if index >= 128 {
+                    0
+                } else if index % 32 < 16 {
+                    10000
+                } else {
+                    -10000
+                };
+                sample.to_le_bytes()
+            })
+            .collect();
+        std::fs::write(path, with_wave(&wave)).expect("audible test font");
+    }
+
+    fn with_wave(wave: &[u8]) -> Vec<u8> {
         let info = list(b"INFO", &chunk(b"ifil", &[2, 0, 1, 0]));
-        let sample_data = list(b"sdta", &chunk(b"smpl", &WAVE));
+        let sample_data = list(b"sdta", &chunk(b"smpl", wave));
 
         // every list names one thing and ends with a terminal record, which is never played
         let mut parameters = chunk(b"phdr", &[preset("silence", 0), preset("EOP", 1)].concat());
@@ -795,10 +816,10 @@ mod soundfont {
             b"inst",
             &[instrument("silence", 0), instrument("EOI", 1)].concat(),
         ));
-        parameters.extend(chunk(b"ibag", &[zone(0), zone(1)].concat()));
+        parameters.extend(chunk(b"ibag", &[zone(0), zone(2)].concat()));
         parameters.extend(chunk(
             b"igen",
-            &[generator(SAMPLE_ID, 0), generator(0, 0)].concat(),
+            &[generator(54, 1), generator(SAMPLE_ID, 0), generator(0, 0)].concat(),
         ));
         parameters.extend(chunk(b"shdr", &[sample("silence"), sample("EOS")].concat()));
 
@@ -1122,25 +1143,24 @@ mod tests {
 
     #[test]
     fn the_progress_bar_seeks_where_it_is_clicked() {
-        let bar = Progress {
-            id: PlayerId::Midi(0),
+        use iced::{mouse, widget::canvas, Point, Rectangle, Size};
+        let bar = segments::Slider {
             position: 0.0,
-            lit: Color::BLACK,
-            unlit: Color::WHITE,
+            count: 40,
+            colors: crate::app::theme::Mode::Light.colors(),
+            steps: None,
+            on_change: |value| Message::ChangePosition(PlayerId::Midi(0), value),
         };
         let bounds = Rectangle::new(Point::new(100.0, 20.0), Size::new(400.0, 10.0));
         let at = mouse::Cursor::Available(Point::new(200.0, 25.0));
         let press = canvas::Event::Mouse(mouse::Event::ButtonPressed(mouse::Button::Left));
-        let mut dragging = false;
+        let mut dragging = segments::State::default();
         let action = canvas::Program::update(&bar, &mut dragging, &press, bounds, at)
             .expect("clicking seeks");
         assert!(matches!(
             action.into_inner().0,
             Some(Message::ChangePosition(PlayerId::Midi(0), position)) if (position - 0.25).abs() < 1e-9
         ));
-        assert!(dragging);
-        assert_eq!(Progress::position_at(-5.0, 400.0), 0.0);
-        assert_eq!(Progress::position_at(900.0, 400.0), 1.0);
     }
 
     #[test]
@@ -1395,6 +1415,142 @@ mod tests {
     }
 
     #[test]
+    fn master_gain_changes_audio_and_midi_that_are_already_rendering() {
+        let directory = tempfile::tempdir().expect("sound font directory");
+        let font = directory.path().join("tone.sf2");
+        soundfont::tone(&font);
+        for midi in [false, true] {
+            let (mut device, mut renderer) =
+                AudioOutput::headless(font.to_str().expect("path"), 44100);
+            if midi {
+                device.midi.set_file(Some(midi_file())).expect("MIDI file");
+                device.play_midi();
+            } else {
+                device.mixer.add(rodio::buffer::SamplesBuffer::new(
+                    std::num::NonZero::new(2).expect("stereo"),
+                    std::num::NonZero::new(44100).expect("rate"),
+                    vec![0.25f32; 44100],
+                ));
+            }
+            let mut samples = [0.0f32; 4096];
+            renderer.render(&mut samples, 2);
+            assert!(
+                samples.iter().any(|value| value.abs() > 1e-5),
+                "audible source: MIDI={midi}"
+            );
+            device.set_volume(0.0);
+            renderer.render(&mut samples, 2);
+            assert!(
+                samples.iter().all(|value| value.abs() < f32::EPSILON),
+                "muted: MIDI={midi}"
+            );
+            device.set_volume(0.5);
+            renderer.render(&mut samples, 2);
+            assert!(
+                samples.iter().any(|value| value.abs() > 1e-5),
+                "unmuted without restarting: MIDI={midi}"
+            );
+            if !midi {
+                assert!(samples.iter().all(|value| (*value - 0.125).abs() < 1e-6));
+            }
+        }
+    }
+
+    #[test]
+    fn soundfont_replacement_preserves_live_playhead_tempo_and_gain() {
+        let directory = tempfile::tempdir().expect("sound font directory");
+        let font = directory.path().join("new font.sf2");
+        soundfont::tone(&font);
+        let mut state = GlobalState::headless();
+        let (device, mut old_renderer) = AudioOutput::headless(soundfont::path(), 44100);
+        state.output = Some(device);
+        state.set_tempo(144);
+        state.set_volume(0.5);
+        let mut midi = track(PlayerId::Midi(0));
+        midi.path = midi_file();
+        state.play(&mut midi).expect("play");
+        let mut tracks = vec![app::Output::Player(midi)];
+        // A pending worker leaves the original stream alive while the font is read.
+        state.opening = Some(state.generation);
+        drop(state.select_soundfont(font.clone(), &mut tracks));
+        let mut samples = [0.0f32; 4096];
+        old_renderer.render(&mut samples, 2);
+        assert!(state.playing());
+        let position = state
+            .output
+            .as_ref()
+            .expect("original output")
+            .midi
+            .position();
+        assert!(position > 0.0);
+        let (mut device, mut renderer) = AudioOutput::headless(font.to_str().expect("path"), 44100);
+        device
+            .restore_midi(
+                &mut renderer,
+                Some(MidiResume {
+                    path: first_track(&tracks).path.clone(),
+                    position,
+                    tempo: 144,
+                    playing: true,
+                }),
+                || false,
+            )
+            .expect("prepare replacement");
+        old_renderer.render(&mut samples, 2);
+        let latest = state.output.as_ref().expect("old output").midi.position();
+        state.opening = Some(state.generation);
+        drop(state.opened(&mut tracks, state.generation, Opened::new(Ok(device))));
+        assert_eq!(state.soundfont(), font);
+        assert!(!state.loading_soundfont());
+        assert!((first_track(&tracks).position - latest).abs() < 1e-6);
+        assert_eq!(
+            state.output.as_ref().expect("new output").midi.tempo(),
+            Some(144.0)
+        );
+        renderer.render(&mut samples, 2);
+        assert!(
+            samples.iter().any(|value| value.abs() > 1e-5),
+            "new font replaces the silent font mid-note"
+        );
+        state.set_volume(0.0);
+        renderer.render(&mut samples, 2);
+        assert!(samples.iter().all(|value| value.abs() < f32::EPSILON));
+    }
+
+    #[test]
+    fn failed_and_cancelled_soundfont_choices_keep_the_previous_output() {
+        let mut state = GlobalState::headless();
+        let mut tracks = Vec::new();
+        let original = state.soundfont.clone();
+        state.opening = Some(state.generation);
+        drop(state.select_soundfont("missing.sf2".into(), &mut tracks));
+        assert!(state.loading_soundfont());
+        state.opening = Some(state.generation);
+        drop(state.opened(
+            &mut tracks,
+            state.generation,
+            Opened::new(Err(OutputError::Synthesizer("unreadable font".into()))),
+        ));
+        assert!(state.output.is_some());
+        assert!(!state.loading_soundfont());
+        assert_eq!(state.soundfont, original);
+        assert!(
+            matches!(tracks.as_slice(), [app::Output::Error(message)] if message.contains("unreadable font"))
+        );
+
+        state.opening = Some(state.generation);
+        drop(state.select_soundfont("another.sf2".into(), &mut tracks));
+        let pending = state.opening.expect("pending load");
+        drop(state.select_soundfont(original.clone().into(), &mut tracks));
+        drop(state.opened(&mut tracks, pending, Opened::new(Err(OutputError::Changed))));
+        assert!(!state.loading_soundfont());
+        assert!(state.opening.is_none());
+        assert!(state.output.is_some());
+        assert_eq!(state.soundfont, original);
+        assert_eq!(tracks.len(), 1);
+    }
+
+    #[test]
     fn midi_reconstruction_advances_to_the_playhead_and_can_be_cancelled() {
         let (mut device, mut renderer) = AudioOutput::headless(soundfont::path(), 48000);
         let mut resume = MidiResume {
@@ -1459,8 +1615,9 @@ mod tests {
         let events = Events::new();
         for generation in 0..2 {
             events.set_generation(generation);
-            let output = AudioOutput::open(soundfont::path(), events.clone(), generation, None)
-                .expect("open the system default output");
+            let output =
+                AudioOutput::open(soundfont::path(), events.clone(), generation, None, None)
+                    .expect("open the system default output");
             output.start().expect("start the output");
             std::thread::sleep(Duration::from_millis(50));
             drop(output);

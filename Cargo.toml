@@ -22,7 +22,7 @@ iced = { version = "0.14.0", features = [
 ] }
 image = { version = "0.25.10", default-features = false, features = ["png"] }
 iced_selection = "0.5.0"
-iced_aw = { version = "0.14.1", default-features = false, features = ["context_menu"] }
+iced_aw = { version = "0.14.1", default-features = false, features = ["context_menu", "drop_down"] }
 midi-player = "0.2.3"
 notify = "8.2.0"
 open = "5.4.4"
@@ -34,6 +34,9 @@ rodio = { version = "0.22.2", default-features = false, features = [
     "symphonia-aiff",
     "symphonia-alac",
 ] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tempfile = "3"
 # rustpython 0.5.0 hands libc::POSIX_SPAWN_SETSID to nix's PosixSpawnFlags, which libc 0.2.187
 # retyped from c_int to c_short: it no longer builds on Linux. Cargo.lock holds libc at 0.2.186
 # until rustpython releases a fix, so don't let `cargo update` carry it past that on its own.
@@ -51,7 +54,6 @@ cpal = { version = "0.18.2", features = ["pipewire", "pulseaudio"] }
 
 [dev-dependencies]
 iced_test = "0.14.0"
-tempfile = "3"
 
 [build-dependencies]
 serde_json = "1"

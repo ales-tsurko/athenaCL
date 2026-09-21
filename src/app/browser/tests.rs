@@ -24,15 +24,17 @@ fn tree_filters_binary_files_and_only_reads_expanded_folders() {
     fs::write(root.join("other.xml"), b"<settings/>").expect("xml");
     fs::write(root.join("events.mid"), b"MThd\0\0\0\x06").expect("midi");
     fs::write(root.join("render.WAV"), b"RIFF\0\0\0\0WAVE").expect("audio");
+    fs::write(root.join("piano.SF2"), b"RIFF\0\0\0\0sfbk").expect("sound font");
     fs::write(root.join("binary.dat"), [0, 255, 7]).expect("binary");
     let listing = Listing::read(root, &BTreeSet::new()).expect("listing");
-    assert_eq!(listing.entries.len(), 6);
+    assert_eq!(listing.entries.len(), 7);
     assert_eq!(listing.entries.first().expect("folder").kind, Kind::Folder);
     for (name, kind) in [
         ("object.xml", Kind::Athena),
         ("other.xml", Kind::Text),
         ("events.mid", Kind::Midi),
         ("render.WAV", Kind::Audio),
+        ("piano.SF2", Kind::SoundFont),
         ("notes", Kind::Text),
     ] {
         assert!(listing
@@ -47,6 +49,10 @@ fn tree_filters_binary_files_and_only_reads_expanded_folders() {
         .iter()
         .any(|entry| entry.name() == "notes.txt" && entry.depth == 1));
     assert!(listing.errors.is_empty());
+    assert_eq!(
+        Opened::read(root, &root.join("piano.SF2")).expect("open sound font"),
+        Opened::SoundFont
+    );
     Listing::read(&root.join("missing"), &expanded).expect_err("missing folder");
 }
 

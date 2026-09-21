@@ -45,9 +45,7 @@ impl History {
 
     /// Load the history beside athenaCL's preferences, respecting the test directory override.
     pub fn load_default(&mut self) -> rustyline::Result<()> {
-        let directory = env::var_os("ATHENACL_PREFS_DIR")
-            .map(PathBuf::from)
-            .or_else(preferences_dir)
+        let directory = preferences_dir()
             .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "no preferences directory"))?;
         self.load(directory.join(".athenacl-history"))
     }
@@ -166,7 +164,10 @@ pub(super) fn direction(key: &Key, modifiers: Modifiers) -> Option<SearchDirecti
 }
 
 /// Follow the same platform locations as Python's `drawer.getPrefsDir`.
-fn preferences_dir() -> Option<PathBuf> {
+pub(crate) fn preferences_dir() -> Option<PathBuf> {
+    if let Some(directory) = env::var_os("ATHENACL_PREFS_DIR") {
+        return Some(directory.into());
+    }
     #[cfg(windows)]
     {
         if let Some(directory) = env::var_os("APPDATA") {

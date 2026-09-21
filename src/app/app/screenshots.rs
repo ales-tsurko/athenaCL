@@ -221,6 +221,7 @@ fn fresh_state() -> State {
         output: Vec::new(),
         question: None,
         player_state: GlobalPlayerState::headless(),
+        playback: crate::app::playback::Preferences::default(),
         scratch_dir: String::new(),
         browser: Browser::default(),
         input_id: "input".to_owned(),

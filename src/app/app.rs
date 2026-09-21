@@ -1,5 +1,5 @@
 //! Application's GUI.
-use std::{env, sync::Arc};
+use std::sync::Arc;
 
 use iced::{
     advanced::widget::{self, operation::scrollable::AbsoluteOffset},
@@ -10,7 +10,7 @@ use iced::{
     widget::{
         button, column, container, operation, pick_list, responsive, rich_text, row,
         scrollable::{self, Direction},
-        space, span, text, text_input, tooltip, Button, Column, PickList, Row,
+        space, span, text, Button, Column, PickList, Row,
     },
     Color, Element, Font, Length, Padding, Rectangle, Subscription, Task, Theme, Vector,
 };
@@ -36,7 +36,9 @@ use crate::{
     manual::Page as ManualPage,
 };
 
+mod bars;
 mod browser;
+mod playback;
 
 /// The log's original page width, including its side padding.
 const LOG_MAX_WIDTH: f32 = 800.0;
@@ -46,9 +48,12 @@ const WINDOW_PADDING: f32 = 40.0;
 /// The bars across the top and bottom of the page, and the frames of controls in them.
 const HEADER_HEIGHT: f32 = 56.0;
 const BOTTOM_BAR_HEIGHT: f32 = 76.0;
-const FRAME_HEIGHT: f32 = 36.0;
-/// Space between items in the header and bottom bar.
-const BAR_SPACING: f32 = 12.0;
+pub(super) const FRAME_HEIGHT: f32 = 36.0;
+/// Space between the items of a group in the header and bottom bar: a label, its control, and
+/// the button that goes with it.
+pub(super) const BAR_SPACING: f32 = 12.0;
+/// Space between those groups, twice that inside them, so each reads as one.
+pub(super) const GROUP_SPACING: f32 = 2.0 * BAR_SPACING;
 /// The width available to each entry in the output.
 #[cfg(test)]
 const OUTPUT_WIDTH: f32 = LOG_MAX_WIDTH - 2.0 * WINDOW_PADDING - scrollbar::RESERVED_WIDTH;
@@ -56,8 +61,9 @@ const OUTPUT_WIDTH: f32 = LOG_MAX_WIDTH - 2.0 * WINDOW_PADDING - scrollbar::RESE
 const PICKER_CHARACTER: f32 = 8.4;
 const PICKER_ARROW: f32 = 44.0;
 const PICKER_WIDTH: f32 = 104.0;
+const PICKER_PADDING: f32 = 8.0;
 /// The longest scratch folder path the header shows whole.
-const PATH_CHARACTERS: usize = 36;
+const PATH_CHARACTERS: usize = 24;
 /// The manual on the web, for `AUdoc www`.
 const MANUAL_URL: &str = "https://athenacl.alestsurko.by";
 /// The tempo's range, in beats per minute, and the widths of the box it's typed in and of its
@@ -70,7 +76,6 @@ const ANSWER_PADDING: u16 = 10;
 
 /// System application ID.
 pub const APPLICATION_ID: &str = "by.alestsurko.athenacl";
-// TODO it should be configurable so users could choose they own sf
 pub(super) const SOUND_FONT: &str = "resources/SGM-v2.01-YamahaGrand-Guit-Bass-v2.7.sf2";
 
 /// athenaCL GUI.
@@ -81,6 +86,7 @@ pub struct State {
     output: Vec<Output>,
     question: Option<Query>,
     player_state: GlobalPlayerState,
+    playback: crate::app::playback::Preferences,
     scratch_dir: String,
     browser: Browser,
     input_id: String,
@@ -199,14 +205,13 @@ impl std::fmt::Debug for State {
 
 impl Default for State {
     fn default() -> Self {
-        let mut exe_dir = env::current_exe().expect(
-            "executable directory should be available for standard
-            distributions of supported platforms (macOS, Windows, Ubuntu). The executable is also
-            not a symbolic link.",
-        );
-        exe_dir.pop();
-        exe_dir.push(SOUND_FONT);
-        let midi_player_state = GlobalPlayerState::new(&exe_dir.as_os_str().to_string_lossy());
+        let mut midi_player_state =
+            GlobalPlayerState::new(&playback::builtin_soundfont().to_string_lossy());
+        let (playback, playback_error) = crate::app::playback::Preferences::load();
+        midi_player_state.set_volume(playback.settings.gain());
+        if let Some(path) = &playback.settings.soundfont {
+            midi_player_state.restore_soundfont(path);
+        }
         for message in [
             interpreter::Message::GetScratchDir,
             interpreter::Message::GetAppearance,
@@ -221,6 +226,9 @@ impl Default for State {
         let tempo = midi_player_state.tempo().to_string();
         let mut history = History::default();
         let mut output = Vec::new();
+        if let Some(error) = playback_error {
+            output.push(Output::Error(error));
+        }
         if let Err(error) = history.load_default() {
             output.push(Output::Error(format!(
                 "Could not load command history: {error}"
@@ -228,6 +236,7 @@ impl Default for State {
         }
         Self {
             player_state: midi_player_state,
+            playback,
             answer: String::new(),
             history,
             suggestions: Suggestions::default(),
@@ -353,6 +362,7 @@ pub fn update(state: &mut State, message: Message) -> Task<Message> {
             return recall_history(state, direction, focused)
         }
         Message::Browser(message) => return state.update_browser(message),
+        Message::Playback(message) => return state.update_playback(message),
         Message::PiSelected(value) => send_command(format!("pio {value}")),
         Message::TiSelected(value) => send_command(format!("tio {value}")),
         Message::SetMode(mode) => set_mode(state, mode),
@@ -361,15 +371,10 @@ pub fn update(state: &mut State, message: Message) -> Task<Message> {
         Message::TempoStep(step) => return step_tempo(state, step),
         Message::Figure(message) => return update_figure(state, message),
         Message::Interpreter(message) => return update_interpreter(state, message),
-        Message::Player(message) => return update_player(state, message),
+        Message::Player(message) => return state.update_player(message),
     }
 
     Task::none()
-}
-
-/// The players in the log and the audio output they play through.
-fn update_player(state: &mut State, message: player::Message) -> Task<Message> {
-    player::update(&mut state.output, &mut state.player_state, message).map(Message::Player)
 }
 
 /// Send what's typed: the answer to the question, or a command. It's read now rather than when
@@ -752,7 +757,7 @@ fn update_interpreter(state: &mut State, message: interpreter::Message) -> Task<
             }));
 
             // a playback command's result is heard at once, not left paused for the play button
-            update_player(state, player::Message::Play(id))
+            state.update_player(player::Message::Play(id))
         }
         interpreter::Message::LoadAudio(path) => {
             let id = player::PlayerId::Audio(state.output.len());
@@ -763,7 +768,7 @@ fn update_interpreter(state: &mut State, message: interpreter::Message) -> Task<
                 position: 0.0,
             }));
 
-            update_player(state, player::Message::Play(id))
+            state.update_player(player::Message::Play(id))
         }
         interpreter::Message::Manual(request) => show_manual(state, &request),
         interpreter::Message::Figure(figure) => {
@@ -923,11 +928,11 @@ pub fn view(state: &State) -> Element<'_, Message> {
         .height(Length::Fill);
 
     let page = column![
-        view_header(state, colors),
+        bars::Bar::Header.view(state, colors),
         container(rule(colors.ink, 1.0)).padding([0.0, WINDOW_PADDING]),
         body,
         container(rule(colors.ink, 1.0)).padding([0.0, WINDOW_PADDING]),
-        view_bottom_bar(state, colors),
+        bars::Bar::Footer.view(state, colors),
     ]
     .width(Length::Fill)
     .height(Length::Fill);
@@ -936,49 +941,6 @@ pub fn view(state: &State) -> Element<'_, Message> {
         .width(Length::Fill)
         .height(Length::Fill)
         .into()
-}
-
-/// The wordmark, the scratch folder and the look.
-fn view_header(state: &State, colors: Colors) -> Element<'_, Message> {
-    let folder = Icon::folder(state.browser.visible)
-        .button(move |theme, status| {
-            let mut style = colors.outlined()(theme, status);
-            if state.browser.visible {
-                style.background = Some(colors.ink.into());
-                style.text_color = colors.paper;
-            }
-            style
-        })
-        .width(FRAME_HEIGHT)
-        .height(FRAME_HEIGHT)
-        .on_press(Message::Browser(BrowserMessage::Toggle));
-    let (icon, next_mode) = match state.mode {
-        Mode::Light => (Icon::CircleFilled, Mode::Dark),
-        Mode::Dark => (Icon::CircleOutline, Mode::Light),
-    };
-    let appearance = tooltip(
-        icon.button(colors.outlined())
-            .width(FRAME_HEIGHT)
-            .height(FRAME_HEIGHT)
-            .on_press(Message::SetMode(next_mode)),
-        container(text(format!("Switch to {} mode", next_mode.name())).size(12))
-            .padding(6)
-            .style(colors.block(true)),
-        tooltip::Position::Bottom,
-    )
-    .delay(std::time::Duration::from_millis(500));
-
-    bar(
-        HEADER_HEIGHT,
-        row![
-            pixel::wordmark(colors.ink),
-            space::horizontal(),
-            pixel::label("SCRATCH", colors.dim),
-            text(shorten(&state.scratch_dir, PATH_CHARACTERS)).size(12),
-            container(folder).id("toggle-file-browser"),
-            container(appearance).id("appearance-control"),
-        ],
-    )
 }
 
 /// The output: each command with what it printed and showed.
@@ -1256,57 +1218,6 @@ fn answer_ink(chosen: bool, colors: Colors) -> Color {
     }
 }
 
-/// The active path and texture, and the tempo.
-fn view_bottom_bar(state: &State, colors: Colors) -> Element<'_, Message> {
-    // The icon's final transparent column completes the same visible gap as label-to-input.
-    let tempo_label = row![Icon::Metronome, pixel::label("TEMPO", colors.dim)]
-        .spacing(BAR_SPACING - 1.0)
-        .align_y(Vertical::Center);
-
-    // the tempo is typed, or stepped up and down
-    let tempo = framed(
-        colors,
-        row![
-            text_input("", &state.tempo)
-                .on_input(Message::TempoChanged)
-                .style(colors.input())
-                .padding([0, 10])
-                .width(TEMPO_WIDTH)
-                .size(14),
-            rule_across(colors.ink),
-            column![
-                stepper(colors, Icon::ChevronUp, 1),
-                rule(colors.ink, 1.0),
-                stepper(colors, Icon::ChevronDown, -1),
-            ]
-            .width(STEPPER_WIDTH),
-        ],
-    );
-
-    bar(
-        BOTTOM_BAR_HEIGHT,
-        row![
-            pixel::label("PATH", colors.dim),
-            picker(
-                colors,
-                &state.path_lib,
-                &state.active_path,
-                Message::PiSelected
-            ),
-            pixel::label("TEXTURE", colors.dim),
-            picker(
-                colors,
-                &state.texture_lib,
-                &state.active_texture,
-                Message::TiSelected
-            ),
-            space::horizontal(),
-            tempo_label,
-            container(tempo).id("tempo-control"),
-        ],
-    )
-}
-
 /// One of the bottom bar's pickers, wide enough for its longest option.
 fn picker<'a>(
     colors: Colors,
@@ -1320,10 +1231,14 @@ fn picker<'a>(
         .map(|option| option.chars().count())
         .max()
         .unwrap_or(0) as f32;
+    // as high as every other control in the bars: the text's line fills what the padding leaves
     pick_list(options.to_vec(), selected, on_select)
         .placeholder("none")
-        .padding([8, 10])
-        .width((longest * PICKER_CHARACTER + PICKER_ARROW).max(PICKER_WIDTH))
+        .padding([PICKER_PADDING, 10.0])
+        .text_line_height(iced::widget::text::LineHeight::Absolute(
+            (FRAME_HEIGHT - 2.0 * PICKER_PADDING).into(),
+        ))
+        .width((longest * PICKER_CHARACTER + PICKER_ARROW).clamp(PICKER_WIDTH, 160.0))
         .style(colors.picker())
         .menu_style(colors.menu())
 }
@@ -1336,23 +1251,8 @@ fn stepper<'a>(colors: Colors, icon: Icon, step: i32) -> Button<'a, Message> {
         .on_press(Message::TempoStep(step))
 }
 
-/// A bar across the page, `height` high: the header, and the bottom bar.
-fn bar<'a>(height: f32, content: Row<'a, Message>) -> Element<'a, Message> {
-    container(
-        content
-            .width(Length::Fill)
-            .spacing(BAR_SPACING)
-            .align_y(Vertical::Center),
-    )
-    .padding([0.0, WINDOW_PADDING])
-    .width(Length::Fill)
-    .height(height)
-    .align_y(Vertical::Center)
-    .into()
-}
-
-/// Controls sharing one ink frame: the look switch, the tempo.
-fn framed<'a>(colors: Colors, content: Row<'a, Message>) -> Element<'a, Message> {
+/// Controls sharing one ink frame: the tempo and its steppers, the volume and its mute.
+pub(super) fn framed<'a, M: 'a>(colors: Colors, content: Row<'a, M>) -> Element<'a, M> {
     container(content.align_y(Vertical::Center))
         .height(FRAME_HEIGHT)
         .padding(1)
@@ -1416,7 +1316,7 @@ fn rule<'a>(color: Color, thickness: f32) -> Element<'a, Message> {
 }
 
 /// A 1 pixel rule down its row.
-fn rule_across<'a, M: 'a>(color: Color) -> Element<'a, M> {
+pub(super) fn rule_across<'a, M: 'a>(color: Color) -> Element<'a, M> {
     container(space())
         .width(1)
         .height(Length::Fill)
@@ -1425,7 +1325,7 @@ fn rule_across<'a, M: 'a>(color: Color) -> Element<'a, M> {
 }
 
 /// A path, shortened from the front to `characters`.
-fn shorten(path: &str, characters: usize) -> String {
+pub(super) fn shorten(path: &str, characters: usize) -> String {
     let count = path.chars().count();
     if count <= characters {
         return path.to_owned();
@@ -1471,6 +1371,7 @@ pub enum Message {
         focused: bool,
     },
     Browser(BrowserMessage),
+    Playback(crate::app::playback::Message),
     PiSelected(String),
     TiSelected(String),
     SetMode(Mode),
@@ -1584,6 +1485,7 @@ mod tests {
             output: Vec::new(),
             question: None,
             player_state: GlobalPlayerState::headless(),
+            playback: crate::app::playback::Preferences::default(),
             scratch_dir: String::new(),
             browser: Browser::default(),
             input_id: "input".to_owned(),
@@ -1596,6 +1498,86 @@ mod tests {
             tempo: "120".to_owned(),
             reveal: None,
         }
+    }
+
+    /// Complete only application messages; layout operations are exercised by the GUI tests.
+    fn finish_playback(state: &mut State, task: Task<Message>) {
+        use iced::futures::{executor::block_on, StreamExt};
+        use iced_test::runtime::{task::into_stream, Action};
+        let Some(mut stream) = into_stream(task) else {
+            return;
+        };
+        while let Some(action) = block_on(stream.next()) {
+            if let Action::Output(message) = action {
+                let next = update(state, message);
+                finish_playback(state, next);
+            }
+        }
+    }
+
+    #[test]
+    fn playback_settings_apply_mute_restore_and_dialog_cancellation() {
+        use crate::app::playback::Message as Control;
+        let mut state = state();
+        for message in [Control::Volume(2.0 / 3.0), Control::Mute, Control::Mute] {
+            drop(update(&mut state, Message::Playback(message)));
+        }
+        assert_eq!(state.playback.settings.volume, 8);
+        assert!(!state.playback.settings.muted);
+        drop(update(&mut state, Message::Playback(Control::Mute)));
+        drop(update(&mut state, Message::Playback(Control::Volume(0.5))));
+        assert_eq!(state.playback.settings.volume, 6);
+        assert!(
+            !state.playback.settings.muted,
+            "adjusting the meter unmutes"
+        );
+        drop(update(&mut state, Message::Playback(Control::Menu(true))));
+        assert!(state.playback.menu_open);
+        // The native chooser's future remains unpolled in a headless test.
+        drop(update(&mut state, Message::Playback(Control::Choose)));
+        assert!(!state.playback.menu_open);
+        drop(update(&mut state, Message::Playback(Control::Chosen(None))));
+        assert!(state.active_soundfont().is_none());
+        assert!(state.output.is_empty());
+        drop(update(
+            &mut state,
+            Message::Playback(Control::Saved(Ok(()))),
+        ));
+        drop(update(
+            &mut state,
+            Message::Playback(Control::Saved(Err("read-only preferences".into()))),
+        ));
+        assert!(
+            matches!(state.output.as_slice(), [Output::Error(message)] if message.contains("read-only preferences"))
+        );
+    }
+
+    #[test]
+    fn missing_soundfonts_report_once_and_keep_the_previous_sound() {
+        use crate::app::playback::Message as Control;
+        let directory = tempfile::tempdir().expect("scratch folder");
+        let missing = directory.path().join("removed.sf2");
+        let mut state = state();
+        let task = update(
+            &mut state,
+            Message::Playback(Control::Chosen(Some(missing))),
+        );
+        assert!(state.player_state.loading_soundfont());
+        finish_playback(&mut state, task);
+        assert!(!state.player_state.loading_soundfont());
+        assert!(state.active_soundfont().is_none());
+        assert!(state.playback.settings.soundfont.is_none());
+        assert!(state.playback.settings.recent.is_empty());
+        assert!(
+            matches!(state.output.as_slice(), [Output::Error(message)] if message.contains("Could not load sound font"))
+        );
+        let task = update(&mut state, Message::Playback(Control::Select(None)));
+        finish_playback(&mut state, task);
+        assert_eq!(
+            state.output.len(),
+            1,
+            "selecting the active built-in adds no errors"
+        );
     }
 
     /// A minimal valid MIDI file: one format-0 track holding a note and its end.
@@ -1825,7 +1807,13 @@ mod tests {
                     .expect("tempo control")
                     .visible_bounds()
                     .expect("visible tempo");
-                assert!((tempo.x + tempo.width - (width - WINDOW_PADDING)).abs() < 1.0);
+                let volume = simulator
+                    .find(iced_test::selector::id("master-volume"))
+                    .expect("master volume")
+                    .visible_bounds()
+                    .expect("visible volume");
+                assert!(tempo.x + tempo.width < volume.x);
+                assert!((volume.x + volume.width - (width - WINDOW_PADDING)).abs() < 1.0);
                 let modes = simulator
                     .find(iced_test::selector::id("appearance-control"))
                     .expect("appearance control")

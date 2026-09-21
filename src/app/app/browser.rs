@@ -50,6 +50,7 @@ impl State {
 
     fn open_browser_file(&mut self, path: PathBuf, opened: Opened) -> Task<Message> {
         match opened {
+            Opened::SoundFont => self.select_soundfont(Some(&path)),
             Opened::Text(content) => {
                 let index = self.output.len();
                 push_output(self, Output::File { path, content }).chain(reveal(index))

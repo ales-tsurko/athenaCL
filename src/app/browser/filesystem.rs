@@ -85,6 +85,7 @@ pub(crate) enum Kind {
     Athena,
     Audio,
     Midi,
+    SoundFont,
     Text,
 }
 
@@ -112,6 +113,9 @@ impl Kind {
             .and_then(|s| s.to_str())
             .unwrap_or("")
             .to_ascii_lowercase();
+        if extension == "sf2" {
+            return Ok(Self::SoundFont);
+        }
         // Formats enabled by rodio's Symphonia features. Decoding errors are reported by the
         // player.
         if matches!(
@@ -162,6 +166,7 @@ pub enum Opened {
     Athena,
     Audio,
     Midi,
+    SoundFont,
     Text(String),
 }
 
@@ -172,6 +177,7 @@ impl Opened {
             Kind::Athena => Ok(Self::Athena),
             Kind::Audio => Ok(Self::Audio),
             Kind::Midi => Ok(Self::Midi),
+            Kind::SoundFont => Ok(Self::SoundFont),
             Kind::Text => Self::read_text(path),
             Kind::Folder => Err(Error::Invalid("Open a file, or expand the folder.".into())),
         }

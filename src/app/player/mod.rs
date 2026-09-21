@@ -4,6 +4,7 @@ pub use player::{Message, PlayerId};
 pub(crate) use player::{subscription, update, view, GlobalState, Track};
 
 mod events;
+mod gain;
 mod output;
 #[expect(
     clippy::module_inception,

@@ -165,7 +165,7 @@ impl Browser {
             ..container::Style::default()
         });
         Input::new(ContextMenu::new(line, move || {
-            self.menu(&self.root, true, colors)
+            self.menu(&self.root, Kind::Folder, colors)
         }))
         .context(self.root.clone())
         .into()
@@ -212,7 +212,7 @@ impl Browser {
                 false,
             ))
             .on_double_click(Message::Click(entry.path.clone(), Modifiers::empty(), true));
-        let menu = ContextMenu::new(content, move || self.menu(&entry.path, folder, colors));
+        let menu = ContextMenu::new(content, move || self.menu(&entry.path, entry.kind, colors));
         tooltip(
             Input::new(menu)
                 .context(entry.path.clone())
@@ -226,7 +226,7 @@ impl Browser {
         .into()
     }
 
-    fn menu<'a>(&'a self, path: &'a Path, folder: bool, colors: Colors) -> Element<'a, Message> {
+    fn menu<'a>(&'a self, path: &'a Path, kind: Kind, colors: Colors) -> Element<'a, Message> {
         let directory = self.directory_for(Some(path));
         let action = |label: &'static str, keys: &'static str, message, enabled: bool| {
             let enabled = enabled && !self.busy;
@@ -258,7 +258,11 @@ impl Browser {
         if path != self.root {
             menu = menu
                 .push(action(
-                    if folder { "Expand / collapse" } else { "Open" },
+                    match kind {
+                        Kind::Folder => "Expand / collapse",
+                        Kind::SoundFont => "Use as sound",
+                        _ => "Open",
+                    },
                     "Enter",
                     Message::Open(path.into()),
                     true,
@@ -387,6 +391,7 @@ fn tag(kind: Kind) -> &'static str {
         Kind::Athena => "AO",
         Kind::Midi => "MI",
         Kind::Audio => "AU",
+        Kind::SoundFont => "SF",
         Kind::Text | Kind::Folder => "TX",
     }
 }

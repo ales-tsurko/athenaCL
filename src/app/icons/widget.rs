@@ -182,6 +182,9 @@ mod tests {
                     Icon::CircleFilled,
                     Icon::Play,
                     Icon::Pause,
+                    Icon::Speaker,
+                    Icon::Muted,
+                    Icon::SoundFont,
                     Icon::ChevronUp,
                     Icon::ChevronDown,
                 ] {

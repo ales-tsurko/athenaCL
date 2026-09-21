@@ -329,6 +329,7 @@ dependencies = [
  "rustpython-stdlib",
  "rustpython-vm",
  "rustyline 18.0.1",
+ "serde",
  "serde_json",
  "symphonia",
  "tempfile",

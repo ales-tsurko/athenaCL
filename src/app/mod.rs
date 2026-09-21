@@ -14,8 +14,10 @@ mod history;
 mod icons;
 mod manual;
 mod pixel;
+mod playback;
 mod player;
 mod scrollbar;
+mod segments;
 #[cfg(test)]
 mod snapshot;
 mod terminal_input;
