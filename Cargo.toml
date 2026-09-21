@@ -7,7 +7,11 @@ edition = "2021"
 name = "athenaCL"
 identifier = "by.alestsurko.athenacl"
 icon = ["resources/athenaCL.icns"]
-resources = ["resources/SGM-v2.01-YamahaGrand-Guit-Bass-v2.7.sf2", "doc/src"]
+resources = [
+    "resources/FluidR3_GM.sf2",
+    "resources/FluidR3_GM.license.txt",
+    "doc/src",
+]
 
 [dependencies]
 ahash = "0.8.12"

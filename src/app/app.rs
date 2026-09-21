@@ -76,7 +76,9 @@ const ANSWER_PADDING: u16 = 10;
 
 /// System application ID.
 pub const APPLICATION_ID: &str = "by.alestsurko.athenacl";
-pub(super) const SOUND_FONT: &str = "resources/SGM-v2.01-YamahaGrand-Guit-Bass-v2.7.sf2";
+/// The built-in sound font, shipped beside the executable with its license rather than built into
+/// it.
+pub(super) const SOUND_FONT: &str = "resources/FluidR3_GM.sf2";
 
 /// athenaCL GUI.
 pub struct State {

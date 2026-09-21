@@ -174,7 +174,7 @@ fn sound_menu_shows_builtin_recent_folders_and_load_last() {
             preferences.sound(Some(&path), false, mode.colors()),
         );
         for label in [
-            "Yamaha Grand",
+            "FluidR3 GM",
             "built in",
             "Grand 音",
             "Sounds",
@@ -183,7 +183,7 @@ fn sound_menu_shows_builtin_recent_folders_and_load_last() {
         ] {
             assert!(simulator.find(label).is_ok(), "{label}");
         }
-        let builtin = simulator.find("Yamaha Grand").expect("builtin").bounds();
+        let builtin = simulator.find("FluidR3 GM").expect("builtin").bounds();
         let recent = simulator.find("Sounds").expect("recent folder").bounds();
         let load = simulator.find("Load sound font…").expect("load").bounds();
         assert!(builtin.y < recent.y && recent.y < load.y);

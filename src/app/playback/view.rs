@@ -187,7 +187,7 @@ impl Preferences {
 
 fn font_name(path: Option<&Path>) -> String {
     path.map_or_else(
-        || "Yamaha Grand".into(),
+        || "FluidR3 GM".into(),
         |path| {
             path.file_stem()
                 .unwrap_or_default()

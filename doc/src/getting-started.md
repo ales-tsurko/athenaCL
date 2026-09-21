@@ -86,7 +86,7 @@ without changing the saved level; click again to restore it. Adjusting the meter
 also unmutes. Volume and mute are remembered between sessions.
 
 The header's **SOUND** button chooses the MIDI sound font. Its menu lists the
-built-in Yamaha Grand, recent fonts with their folders, and **Load sound font…**
+built-in FluidR3 GM, recent fonts with their folders, and **Load sound font…**
 for choosing an `.sf2` file. The active choice is filled. A new font loads in
 the background while players keep their old sound, then takes over at the
 current playhead. All MIDI players use the selected font, which is remembered
