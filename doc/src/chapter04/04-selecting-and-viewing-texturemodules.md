@@ -2,9 +2,12 @@
 
 A Texture is an instance of a TextureModule. Every time a Texture is created,
 athenaCL creates an independent instance of the active TextureModule. To display
-a complete list of all available TextureModules, enter the command TMls:
+a complete list of all available TextureModules, enter the command `TMls`:
 
-**Listing TextureModules with TMls**
+
+
+
+## Listing TextureModules with `TMls`
 
 ```
 pi{}ti{} :: tmls
@@ -34,9 +37,12 @@ a new TextureInstance, athenaCL uses the active TextureModule.
 
 To select a different TextureModule, the user enters TMo. The user is prompted
 to enter the name or number (as represented in the list order) of the desired
-TextureModule. The TMls command can be used to confirm the change.
+TextureModule. The `TMls` command can be used to confirm the change.
 
-**Selecting the active TextureModule with TMo**
+
+
+
+## Selecting the active TextureModule with `TMo`
 
 ```
 pi{}ti{} :: tmo 
@@ -69,11 +75,14 @@ from the leading character and all following capitals), the literal name
 list display.
 
 To learn what a particular TextureModule does, as well what types of Texture
-options are available, enter the command TMv, for TextureModule View. In this
-example, the user, with TIo, selects the TextureModule "LineGroove" (with a
-command-line argument) before entering the TMv command.
+options are available, enter the command `TMv`, for TextureModule View. In this
+example, the user, with `TIo`, selects the TextureModule "LineGroove" (with a
+command-line argument) before entering the `TMv` command.
 
-**Viewing details of the active TextureModule**
+
+
+
+## Viewing details of the active TextureModule
 
 ```
 pi{}ti{} :: tmo linegroove
@@ -104,8 +113,8 @@ levelOctaveMonophonic Description: Toggle between selection of local octave
 texture (d)ynamic
 ```
 
-The TMv command displays the name of the TextureModule along with the author of
-its code. Following the author designation is a description of how the module
+The `TMv` command displays the name of the TextureModule along with the author
+of its code. Following the author designation is a description of how the module
 performs. Following this is documentation for all TextureStatic parameter
 objects, or Texture-specific options and user-configurable settings pertinent to
 the particular TextureModule's algorithmic design.

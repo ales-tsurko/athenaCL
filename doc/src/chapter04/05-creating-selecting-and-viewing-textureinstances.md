@@ -5,21 +5,24 @@ Texture is created, a default Path is automatically created consisting of a
 single Multiset with a single pitch (middle C, or C4). If Paths exists when the
 Texture is created, the active PathInstance is assigned to the Texture. A
 TextureInstance's Path can be later edited. For a complete introduction to Paths
-see .
+see [Tutorial 3: Creating and Editing Paths][tutorial-3].
 
 A new TextureInstance is always created from the active TextureModule; the user
 must then always select the desired TextureModule before creating a Texture of
 the desired type. A TextureInstance's type, or TextureModule, cannot be changed
 after the Texture is created.
 
-A new Texture is created with the TIn command, for TextureInstance New. The user
-is prompted to name the new Texture and select an instrument by number. If the
-number of the desired instrument is not known, a "?" can be entered to display a
-list of instruments. In the example below the user selects TextureMode
+A new Texture is created with the `TIn` command, for TextureInstance New. The
+user is prompted to name the new Texture and select an instrument by number. If
+the number of the desired instrument is not known, a "?" can be entered to
+display a list of instruments. In the example below the user selects TextureMode
 LineGroove, EventMode midiPercussion, and then creates a texture named "a1" with
 instrument 64 ("lowConga").
 
-**Creating a new TextureInstance with TIn**
+
+
+
+## Creating a new TextureInstance with `TIn`
 
 ```
 pi{}ti{} :: tmo linegroove
@@ -38,10 +41,14 @@ TI a1 created.
 ```
 
 To hear the resulting musical structure, enter the command ELn. (For more
-information on using ELn, see . The resulting MIDI file may be opened with the
-ELh command.
+information on using `ELn`, see
+[Creating an EventList](../chapter02/05-creating-an-eventlist.md). The resulting
+MIDI file may be opened with the `ELh` command.
 
-**Creating a new EventList with ELn**
+
+
+
+## Creating a new EventList with `ELn`
 
 ```
 pi{auto-lowConga}ti{a1} :: eln
@@ -51,10 +58,13 @@ command.py: temporary file: /Volumes/xdisc/_scratch/ath2010.07.02.17.51.42.xml
 /Volumes/xdisc/_scratch/ath2010.07.02.17.51.42.xml
 ```
 
-After creating a Texture, the TIv command can be used to view the active
+After creating a Texture, the `TIv` command can be used to view the active
 Texture:
 
-**Viewing a TextureInstance**
+
+
+
+## Viewing a TextureInstance
 
 ```
 pi{auto-lowConga}ti{a1} :: tiv
@@ -83,12 +93,12 @@ texture (s)tatic
 texture (d)ynamic   none
 ```
 
-The TIv command displays all essential attributes of a Texture. Each label in
-the display corresponds to an attribute in the TextureInstance. The TIv display
-is in two-blocks. The first block gives parameters that are constant. The first
-line displays the name of the TextureInstance (a1), the name of the parent
-TextureModule (LineGroove), the number of TextureClones (0), and the active
-TextureTemperament (TwelveEqual). The second line displays the PitchMode
+The `TIv` command displays all essential attributes of a Texture. Each label in
+the display corresponds to an attribute in the TextureInstance. The `TIv`
+display is in two-blocks. The first block gives parameters that are constant.
+The first line displays the name of the TextureInstance (a1), the name of the
+parent TextureModule (LineGroove), the number of TextureClones (0), and the
+active TextureTemperament (TwelveEqual). The second line displays the PitchMode
 (pitchSpace), the silenceMode (off), and the postMapMode (on). The third line
 provides the GM MIDI program name (piano1). The fourth, indented line displays
 the TextureInstance's mute status (where a "o" is muted and a "+" is non-muted)
@@ -124,7 +134,7 @@ and a duration equal to a quarter-note tied to a sixteenth note (4,5,1).
 The Path attribute gives the name of the PathInstance used by this Texture,
 followed on the next line by the Multiset pitches that will be used.
 PathInstances are linked to the Texture. Thus, if a change is made to a Path
-(with PIe, for example), all Textures that use that Path will reflect the
+(with `PIe`, for example), all Textures that use that Path will reflect the
 change. Each TextureInstance, however, can control the interpretation of a Path
 in numerous ways. The Texture PitchMode setting, for example, determines if
 pitches are derived from a Path in pitchSpace, pitchClassSpace, or as a
@@ -156,10 +166,13 @@ The last attributes, "texture static" and "texture dynamic," designate controls
 specific to particular TextureModules. The values here can be edited like other
 attributes.
 
-A second Texture will be created with TIn named "b1" and using instrument 62.
-The Texture, after creation, is displayed with the TIv command.
+A second Texture will be created with `TIn` named "b1" and using instrument 62.
+The Texture, after creation, is displayed with the `TIv` command.
 
-**Creating and viewing a TextureInstance**
+
+
+
+## Creating and viewing a TextureInstance
 
 ```
 pi{auto-lowConga}ti{a1} :: tin
@@ -201,10 +214,14 @@ autonomous object. No changes to "a1" will have any effect on "b1".
 
 During an athenaCL session a user can create any number of TextureInstances and
 save this collection in an AthenaObject file for latter use. For more
-information on saving, loading, and merging AthenaObjects see . To view a list
-of all current Textures, enter the command TIls, for TextureInstance List.
+information on saving, loading, and merging AthenaObjects see
+[Tutorial 2: AthenaObjects and EventModes][tutorial-2]. To view a list of all
+current Textures, enter the command `TIls`, for TextureInstance List.
 
-**Listing all TextureInstances**
+
+
+
+## Listing all TextureInstances
 
 ```
 pi{auto-muteHiConga}ti{b1} :: tils
@@ -219,9 +236,12 @@ information given, in order from left to right, is the name, the mute-status,
 the parent TM, the PathInstance, the instrument number, the time-range, and the
 number of TextureClones. Notice the "+" in front of Texture "b1": this
 designates that this Texture is active. To change the active Texture, enter the
-command TIo either with a command-line argument or alone:
+command `TIo` either with a command-line argument or alone:
 
-**Selecting the active TextureInstance**
+
+
+
+## Selecting the active TextureInstance
 
 ```
 pi{auto-muteHiConga}ti{b1} :: tio a1
@@ -231,15 +251,18 @@ pi{auto-muteHiConga}ti{a1} ::
 ```
 
 In order to compare a single attribute of all Textures, the user can enter the
-command TEv, for TextureEnsemble View. TextureEnsemble refers to the collection
-of all Textures, and all TE commands process all Textures simultaneously. The
-user will be prompted to enter an abbreviation for the desired attribute.
-Attribute abbreviations are notated in the TIv display labels. Thus the
-attribute abbreviation for "(a)mplitude" is "a"; the attribute abbreviation for
-"pan(n)ing" is "n." As with other commands, use of command-line arguments
-provides flexible control:
+command `TEv`, for TextureEnsemble View. TextureEnsemble refers to the
+collection of all Textures, and all TE commands process all Textures
+simultaneously. The user will be prompted to enter an abbreviation for the
+desired attribute. Attribute abbreviations are notated in the `TIv` display
+labels. Thus the attribute abbreviation for "(a)mplitude" is "a"; the attribute
+abbreviation for "pan(n)ing" is "n." As with other commands, use of command-line
+arguments provides flexible control:
 
-**Viewing parameter values for all Textures**
+
+
+
+## Viewing parameter values for all Textures
 
 ```
 pi{auto-muteHiConga}ti{a1} :: tev
@@ -255,3 +278,6 @@ compare parameters: instrument
 a1                  64 (generalMidiPercussion: lowConga)     
 b1                  62 (generalMidiPercussion: muteHiConga)  
 ```
+
+[tutorial-2]: ../chapter02/01-tutorial-2-athenaobjects-and-eventmodes.md
+[tutorial-3]: ../chapter03/01-tutorial-3-creating-and-editing-paths.md

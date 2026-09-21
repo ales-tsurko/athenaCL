@@ -10,7 +10,10 @@ When using proportional rhythms, athenaCL uses Pulse objects. Pulses represent a
 ratio of duration in relation to the duration of beat (specified in BPM and
 obtained from the Texture). For details on Pulse notation, enter "help pulse":
 
-**View Pulse and Rhythm help**
+
+
+
+## View Pulse and Rhythm help
 
 ```
 pi{auto-muteHiConga}ti{b1} :: help pulse
@@ -34,14 +37,17 @@ Pulse and Rhythm    Pulses represent a duration value derived from ratio and a
                     (4,2,1), (4,3,1)).
 ```
 
-To edit the rhythms used by Texture b1, enter TIe followed by an "r" to access
+To edit the rhythms used by Texture b1, enter `TIe` followed by an "r" to access
 the rhythm attribute. As before, the user is presented with the current value,
 then prompted for a new value. In the following example, the ParameterObject
-"loop" is examined first with the TPv, then the active Texture is edited by
+"loop" is examined first with the `TPv`, then the active Texture is edited by
 providing an random walk over an expanded rhythm. Finally, the rhythm attribute
 of all Textures is viewed with TEv.
 
-**Editing Rhythm ParameterObjects with TIe**
+
+
+
+## Editing a loop Rhythm with `TIe`
 
 ```
 pi{auto-muteHiConga}ti{b1} :: tpv loop
@@ -83,9 +89,12 @@ the following example, the user applies a zero-order Markov chain to generate
 pulses. The user fist consults the documentation for ParameterObject
 markovPulse. For more information about Markov transition strings (Ariza 2006
 [AN#1343]), enter "help markov". After selecting and editing the Texture, the
-Rhythms are compared with TEv:
+Rhythms are compared with `TEv`:
 
-**Editing Rhythm ParameterObjects with TIe**
+
+
+
+## Editing a markovPulse Rhythm with `TIe`
 
 ```
 pi{auto-muteHiConga}ti{b1} :: tpv markovp
@@ -125,27 +134,31 @@ a1                  markovPulse,
                     (constant, 0)
 b1                  loop, ((4,1,+),(4,1,+),(4,2,+),(4,3,+),(4,5,+),(4,3,+)),
                     randomWalk
-                    
 ```
 
 In the previous example, the user supplies four Pulses; each pulses is weighted
 such that the shortest, (8,1,1), is the least frequent (weight of 1), and the
 longest, (4,5,1), is the most frequent (weight of 7).
 
-Using ELn, the current collection of Textures can be used to create an
-EventList, and ELh may be used to audition the results. (For more information on
-using ELn, see .) Each time an EventList is created, different sequences of
-rhythms will be generated: for Texture a1, these rhythms will be the result of a
-zero-order Markov chain; for Texture b1, these rhythms will be the result of a
-random walk on an ordered list of Pulses.
+Using `ELn`, the current collection of Textures can be used to create an
+EventList, and `ELh` may be used to audition the results. (For more information
+on using `ELn`, see
+[Creating an EventList](../chapter02/05-creating-an-eventlist.md).) Each time an
+EventList is created, different sequences of rhythms will be generated: for
+Texture a1, these rhythms will be the result of a zero-order Markov chain; for
+Texture b1, these rhythms will be the result of a random walk on an ordered list
+of Pulses.
 
 A final alternation can be made to the metric performance of these Textures.
-Using the TEe command, both Texture's bpm attribute can be altered to cause a
+Using the `TEe` command, both Texture's bpm attribute can be altered to cause a
 gradual accelerando from 120 BPM to 300 BPM. In the following example, the user
 applies a wavePowerUp ParameterObject to the bpm attribute of both Textures by
-using the TEe command with complete command-line arguments:
+using the `TEe` command with complete command-line arguments:
 
-**Editing BPM with TEe**
+
+
+
+## Editing BPM with `TEe`
 
 ```
 pi{auto-muteHiConga}ti{a1} :: tee b wpu,t,20,0,2,120,300

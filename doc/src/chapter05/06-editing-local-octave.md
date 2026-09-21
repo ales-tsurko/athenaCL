@@ -11,7 +11,10 @@ such that octaves are chosen in order from a list of possibilities, creating a
 sequence of octave transpositions. An octave value of 0 means no transposition;
 an octave of -2 means a transposition two octaves down.
 
-**Editing Local Octave**
+
+
+
+## Editing Local Octave with `TIe`
 
 ```
 pi{q1}ti{b1} :: tie
@@ -48,8 +51,8 @@ texture (s)tatic
 texture (d)ynamic   none
 ```
 
-Listening to the results of the previous edit (with ELn and ELh), it should be
-clear that a new octave is applied to each event of Texture b1, creating an
+Listening to the results of the previous edit (with `ELn` and `ELh`), it should
+be clear that a new octave is applied to each event of Texture b1, creating an
 regular oscillation of register independent of Path Multiset.
 
 Alternatively, the user may desire local octave and field controls to only be
@@ -60,7 +63,10 @@ levelOctaveMonophonic, and a copy of Texture b1 is created named b2. Next, this
 Texture's panning is edited, and then the TextureStatic option
 levelOctaveMonophonic is changed from "event" to "set":
 
-**Editing TextureStatic**
+
+
+
+## Editing TextureStatic
 
 ```
 pi{q1}ti{b1} :: tpv leveloctave
@@ -91,10 +97,10 @@ pi{q1}ti{b2} :: tie n c,.1
 TI b2: parameter panning updated.
 ```
 
-Listening to a new EventList created with these three Textures (with ELn and
-ELh), it should be clear that all pitch information is synchronized by use of a
-common Path. In the case of Texture a1, the pitches are taken directly from the
-Path with register. In the case of Texture b1 (right channel), the Path pitches,
-without register, are transposed into various registers for each event. In the
-case of Texture b2 (left channel), the Path pitches, also without register, are
-transposed into various registers only once per Multiset.
+Listening to a new EventList created with these three Textures (with `ELn` and
+`ELh`), it should be clear that all pitch information is synchronized by use of
+a common Path. In the case of Texture a1, the pitches are taken directly from
+the Path with register. In the case of Texture b1 (right channel), the Path
+pitches, without register, are transposed into various registers for each event.
+In the case of Texture b2 (left channel), the Path pitches, also without
+register, are transposed into various registers only once per Multiset.

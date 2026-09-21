@@ -15,14 +15,17 @@ The set (1,11,24), performed as a set-class, would be interpreted as the set
 set-class is retained.
 
 In the following example, a new Texture is created from TextureModule
-LineGroove. First, the TM must be selected with the TMo command. Next, a new
-Texture named b1 is created with the TIn command. The TImode command can be used
-to edit many Texture options. In this example, pitchMode is selected and "pcs,"
-for pitch class space, is selected. Finally, the Texture is given a more
+LineGroove. First, the TM must be selected with the `TMo` command. Next, a new
+Texture named b1 is created with the `TIn` command. The `TImode` command can be
+used to edit many Texture options. In this example, pitchMode is selected and
+"pcs," for pitch class space, is selected. Finally, the Texture is given a more
 interesting rhythm, by use of the Rhythm ParameterObject markovPulse, and is
 panned to the right with a constant value:
 
-**Editing PitchMode of a TextureInstance**
+
+
+
+## Editing PitchMode of a TextureInstance
 
 ```
 pi{q1}ti{a1} :: tmo lg
@@ -77,7 +80,7 @@ Because Path q1 is still active, this new Texture is assigned the same Path as
 Texture a1. After setting the Texture's pitchMode to pitchClassSpace, however,
 Texture b1 will receive only pitch class values from Path q1: all register
 information, as performed in Texture a1, is stripped. By creating a new
-EventList with ELn and auditioning the results, it should be clear that both
+EventList with `ELn` and auditioning the results, it should be clear that both
 Textures share the same pitch information and duration weighting. Notice that
 the faster-moving single-note line Texture b1, however, stays within a single
 register. When a Texture is in pitchClassSpace Pitch mode, all pitches from a

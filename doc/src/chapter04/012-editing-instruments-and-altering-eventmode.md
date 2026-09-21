@@ -7,10 +7,13 @@ the active EventMode must first be changed, and then the Texture may be assigned
 an instrument.
 
 In the following example, the user changes the EventMode to csoundNative with
-EMo, examines the available instruments with EMi, and then assigns each Texture
-instrument 80:
+`EMo`, examines the available instruments with `EMi`, and then assigns each
+Texture instrument 80:
 
-**Changing EventMode and editing Texture instrument**
+
+
+
+## Changing EventMode and editing Texture instrument
 
 ```
 pi{auto-muteHiConga}ti{a1} :: emo cn
@@ -131,10 +134,13 @@ the user that additional auxiliary ParameterObjects have been added. As a
 Csound-based instrument, each event of instrument 80 can accept two additional
 synthesis parameters. When viewing a Texture with this instrument, as shown
 above, the auxiliary display shows two additional ParameterObjects, x0 and x1.
-To learn what these auxiliary ParameterObjects control, the command TIdoc ma be
-used:
+To learn what these auxiliary ParameterObjects control, the command `TIdoc` ma
+be used:
 
-**Examining Texture documentation with TIdoc**
+
+
+
+## Examining Texture documentation with `TIdoc`
 
 ```
 pi{auto-muteHiConga}ti{b1} :: tidoc
@@ -172,11 +178,16 @@ texture (d)ynamic   none
 
 Assuming that Csound is properly configured, a new set of EventLists can be
 created. As the user is now in EventMode csoundNative and has csoundNative
-textures, both a Csound score and a MIDI file are created. (See for more
-information on working with Csound in athenaCL.) The user may render the Csound
-score with ELr, and then audition the results with the ELh command.
+textures, both a Csound score and a MIDI file are created. (See
+[Configuring and Using Csound](../chapter02/06-configuring-and-using-csound.md)
+for more information on working with Csound in athenaCL.) The user may render
+the Csound score with `ELr`, and then audition the results with the `ELh`
+command.
 
-**Creating a new EventList with ELn**
+
+
+
+## Creating a new EventList with `ELn`
 
 ```
 pi{auto-muteHiConga}ti{b1} :: eln

@@ -2,6 +2,7 @@
 use std::{env, sync::Arc};
 
 use iced::{
+    advanced::widget::{self, operation::scrollable::AbsoluteOffset},
     alignment::Vertical,
     font,
     futures::sink::SinkExt,
@@ -11,7 +12,7 @@ use iced::{
         scrollable::{self, Direction, Scrollbar},
         space, span, text, text_input, Button, Column, PickList, Row,
     },
-    Color, Element, Font, Length, Subscription, Task, Theme,
+    Color, Element, Font, Length, Rectangle, Subscription, Task, Theme, Vector,
 };
 use rfd::FileDialog;
 use rustyline::history::SearchDirection;
@@ -22,13 +23,15 @@ use crate::{
         figure::{self, Palette},
         history::{self, History},
         icons::Icon,
-        pixel,
+        manual, pixel,
         player::{self, GlobalState as GlobalPlayerState, Track as PlayerState},
         terminal_input::Input,
         theme::{Colors, Mode},
     },
     figure::{notation::Score, Domain, Event, Figure},
     interpreter::{self, Question},
+    manual as manual_source,
+    manual::Page as ManualPage,
 };
 
 /// The page's width: the window resizes, the page doesn't.
@@ -60,6 +63,8 @@ const PICKER_ARROW: f32 = 44.0;
 const PICKER_WIDTH: f32 = 104.0;
 /// The longest scratch folder path the header shows whole.
 const PATH_CHARACTERS: usize = 48;
+/// The manual on the web, for `AUdoc www`.
+const MANUAL_URL: &str = "https://athenacl.alestsurko.by";
 /// The tempo's range, in beats per minute, and the widths of the box it's typed in and of its
 /// steppers.
 const TEMPO: std::ops::RangeInclusive<u16> = 20..=600;
@@ -92,6 +97,9 @@ pub struct State {
     figure_view: View,
     /// The tempo as typed.
     tempo: String,
+    /// A page of the manual the running command showed, to scroll to once the command is done:
+    /// what the command prints after it would push the page's start out of view.
+    reveal: Option<usize>,
 }
 
 impl State {
@@ -155,6 +163,38 @@ impl State {
     }
 }
 
+/// How the app draws: its own monospaced font at the log's size, and no antialiasing.
+///
+/// Headless renders use the same, so that what they draw is what the app draws.
+pub fn settings() -> iced::Settings {
+    iced::Settings {
+        id: Some(APPLICATION_ID.to_string()),
+        default_text_size: 14.into(),
+        default_font: Font::with_name("Fira Mono"),
+        fonts: vec![
+            include_bytes!("../../resources/fonts/Fira_Mono/FiraMono-Bold.ttf")
+                .as_slice()
+                .into(),
+            include_bytes!("../../resources/fonts/Fira_Mono/FiraMono-Medium.ttf")
+                .as_slice()
+                .into(),
+            include_bytes!("../../resources/fonts/Fira_Mono/FiraMono-Regular.ttf")
+                .as_slice()
+                .into(),
+        ],
+        // figures are pixel art: without multisampling, their pixels stay sharp at any offset
+        antialiasing: false,
+        ..Default::default()
+    }
+}
+
+/// The app as it opens: the prompt already has the caret, so the first command can just be typed.
+pub fn boot() -> (State, Task<Message>) {
+    let state = State::default();
+    let focus = operation::focus(state.input_id.clone());
+    (state, focus)
+}
+
 impl std::fmt::Debug for State {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("State").finish_non_exhaustive()
@@ -205,6 +245,7 @@ impl Default for State {
             active_texture: String::new(),
             mode: Mode::default(),
             figure_view: View::default(),
+            reveal: None,
             tempo,
         }
     }
@@ -221,6 +262,8 @@ pub(crate) enum Output {
     Error(String),
     Player(PlayerState),
     Figure(FigureOutput),
+    /// A page of the manual, from `AUdoc`.
+    Manual(Box<ManualPage>),
 }
 
 /// The active path and texture, as athenaCL's prompt shows them.
@@ -301,6 +344,8 @@ pub fn update(state: &mut State, message: Message) -> Task<Message> {
         Message::Submit => return submit(state),
         Message::Answer(value) => return answer_current(state, value),
         Message::Key(key, modifiers) => return press_key(state, &key, modifiers),
+        Message::Typed(typed) => return type_at_prompt(state, &typed),
+        Message::ManualLink(index, target) => return follow_manual_link(state, index, &target),
         Message::RecallHistory { direction, focused } => {
             return recall_history(state, direction, focused)
         }
@@ -313,13 +358,15 @@ pub fn update(state: &mut State, message: Message) -> Task<Message> {
         Message::TempoStep(step) => return step_tempo(state, step),
         Message::Figure(message) => return update_figure(state, message),
         Message::Interpreter(message) => return update_interpreter(state, message),
-        Message::Player(message) => {
-            return player::update(&mut state.output, &mut state.player_state, message)
-                .map(Message::Player)
-        }
+        Message::Player(message) => return update_player(state, message),
     }
 
     Task::none()
+}
+
+/// The players in the log and the audio output they play through.
+fn update_player(state: &mut State, message: player::Message) -> Task<Message> {
+    player::update(&mut state.output, &mut state.player_state, message).map(Message::Player)
 }
 
 /// Send what's typed: the answer to the question, or a command. It's read now rather than when
@@ -344,6 +391,22 @@ fn submit(state: &mut State) -> Task<Message> {
             task
         }
     }
+}
+
+/// Add `typed` to the end of the line being typed, and give it focus back: whatever was clicked
+/// last, as output selected to copy, typing is for the prompt.
+fn type_at_prompt(state: &mut State, typed: &str) -> Task<Message> {
+    let value = format!("{}{typed}", state.answer);
+    match &state.question {
+        // the answers' switch takes no typing
+        Some(query) if !query.question.answers().is_empty() => return Task::none(),
+        Some(_) => state.answer = value,
+        None => {
+            let cursor = value.chars().count();
+            state.edit_command(value, Some(cursor));
+        }
+    }
+    operation::focus(state.input_id.clone())
 }
 
 /// Browse commands when the input is focused, or move and take a question's picked answer.
@@ -391,6 +454,116 @@ fn recall_history(state: &mut State, direction: SearchDirection, focused: bool) 
         }
     }
     Task::none()
+}
+
+/// Open `url` in whatever the system uses for the web.
+fn open_in_browser(url: &str) {
+    if let Err(err) = open::that_detached(url) {
+        eprintln!("cannot open {url}: {err}");
+    }
+}
+
+/// Follow a link in the page of the manual at `index`: turn that page to the one it leads to, where
+/// it is, or open the web in a browser.
+fn follow_manual_link(state: &mut State, index: usize, target: &str) -> Task<Message> {
+    if target.contains("://") || target.starts_with("mailto:") {
+        open_in_browser(target);
+        return Task::none();
+    }
+    let page = manual_source::request_of(target)
+        .ok_or_else(|| format!("the manual has no page at {target}"))
+        .and_then(|request| manual_source::read(&request));
+    match (page, state.output.get_mut(index)) {
+        (Ok(page), Some(Output::Manual(shown))) => {
+            **shown = page;
+            operation::focus(state.input_id.clone()).chain(reveal(index))
+        }
+        (Ok(page), _) => push_output(state, Output::Manual(Box::new(page))),
+        (Err(message), _) => push_output(state, Output::Error(message)),
+    }
+}
+
+/// Put what `request` asks for into the log, to read from its start once the command is done.
+fn show_manual(state: &mut State, request: &manual_source::Request) -> Task<Message> {
+    if *request == manual_source::Request::Web {
+        open_in_browser(MANUAL_URL);
+    }
+    match manual_source::read(request) {
+        Ok(page) => {
+            state.reveal = Some(state.output.len());
+            push_output(state, Output::Manual(Box::new(page)))
+        }
+        Err(message) => push_output(state, Output::Error(message)),
+    }
+}
+
+/// The id of the log, which is scrolled to a page of the manual.
+const LOG: &str = "log";
+
+/// The id of the page of the manual at `index` in the log.
+fn page_id(index: usize) -> String {
+    format!("manual-{index}")
+}
+
+/// Scroll the log to the start of the page of the manual at `index`.
+fn reveal(index: usize) -> Task<Message> {
+    iced::advanced::widget::operate(StartOf {
+        log: LOG.into(),
+        target: page_id(index).into(),
+        log_bounds: None,
+        top: None,
+    })
+    .then(|offset| operation::scroll_to(LOG, offset))
+}
+
+/// Finds how far the log is to be scrolled for the widget with the `target` id to start at the top
+/// of its view.
+struct StartOf {
+    log: widget::Id,
+    target: widget::Id,
+    /// The log's view and all it holds.
+    log_bounds: Option<(Rectangle, Rectangle)>,
+    top: Option<f32>,
+}
+
+impl widget::Operation<AbsoluteOffset<Option<f32>>> for StartOf {
+    fn traverse(
+        &mut self,
+        operate: &mut dyn FnMut(&mut dyn widget::Operation<AbsoluteOffset<Option<f32>>>),
+    ) {
+        operate(self);
+    }
+
+    fn container(&mut self, id: Option<&widget::Id>, bounds: Rectangle) {
+        if id == Some(&self.target) {
+            self.top = Some(bounds.y);
+        }
+    }
+
+    fn scrollable(
+        &mut self,
+        id: Option<&widget::Id>,
+        bounds: Rectangle,
+        content_bounds: Rectangle,
+        _translation: Vector,
+        _state: &mut dyn widget::operation::Scrollable,
+    ) {
+        if id == Some(&self.log) {
+            self.log_bounds = Some((bounds, content_bounds));
+        }
+    }
+
+    fn finish(&self) -> widget::operation::Outcome<AbsoluteOffset<Option<f32>>> {
+        let (Some((view, content)), Some(top)) = (self.log_bounds, self.top) else {
+            return widget::operation::Outcome::None;
+        };
+        // the log keeps to its end, so it is scrolled by how far its view is from there
+        let from_end = (content.height - view.height).max(0.0) - (top - content.y);
+        widget::operation::Outcome::Some(AbsoluteOffset {
+            x: None,
+            y: Some(from_end.max(0.0)),
+        })
+    }
 }
 
 /// Reply to the question on screen.
@@ -499,9 +672,9 @@ fn update_interpreter(state: &mut State, message: interpreter::Message) -> Task<
 
             Task::none()
         }
-        interpreter::Message::Post(output) => push_output(state, Output::Normal(output)),
+        interpreter::Message::Post(output) => push_result(state, Output::Normal(output)),
         interpreter::Message::Error(output) | interpreter::Message::PythonError(output) => {
-            push_output(state, Output::Error(output))
+            push_result(state, Output::Error(output))
         }
         interpreter::Message::Ask { prompt, question } => {
             state.suggestions.clear();
@@ -531,6 +704,7 @@ fn update_interpreter(state: &mut State, message: interpreter::Message) -> Task<
 
             Task::none()
         }
+        interpreter::Message::Manual(request) => show_manual(state, &request),
         interpreter::Message::Figure(figure) => {
             state.output.push(Output::Figure(FigureOutput {
                 scores: engrave(&figure),
@@ -622,6 +796,16 @@ fn push_output(state: &mut State, output: Output) -> Task<Message> {
     operation::focus(state.input_id.clone())
 }
 
+/// Show what a command printed as it finished, and then the start of the page of the manual it
+/// showed, if it showed one.
+fn push_result(state: &mut State, output: Output) -> Task<Message> {
+    let focus = push_output(state, output);
+    match state.reveal.take() {
+        Some(index) => focus.chain(reveal(index)),
+        None => focus,
+    }
+}
+
 /// The iced theme: the look's.
 pub fn theme(state: &State) -> Theme {
     state.mode.theme()
@@ -641,6 +825,7 @@ pub fn view(state: &State) -> Element<'_, Message> {
         ),
     )
     .anchor_bottom()
+    .id(LOG)
     .style(colors.scrollbar())
     .width(Length::Fill)
     .height(Length::Fill);
@@ -728,22 +913,33 @@ fn view_output<'a>(
     colors: Colors,
     palette: Palette,
 ) -> Element<'a, Message> {
+    // what the log prints can be selected to copy
+    let selectable =
+        |text| iced_selection::text(text).style(Colors::selectable(colors.ink, colors.rule));
     match output {
-        Output::Normal(msg) => text(msg).into(),
+        Output::Normal(msg) => selectable(msg).into(),
         Output::Command { prompt, command } => {
             let mut bold = Font::with_name("Fira Mono");
             bold.weight = font::Weight::Bold;
             row![
                 view_prompt(prompt, colors),
-                text(command).font(bold).size(15),
+                selectable(command).font(bold).size(15),
             ]
             .spacing(10)
             .align_y(Vertical::Center)
             .into()
         }
-        Output::Error(msg) => row![view_error_tag(colors), text(msg)].spacing(10).into(),
+        Output::Error(msg) => row![view_error_tag(colors), selectable(msg)]
+            .spacing(10)
+            .into(),
         Output::Player(track) => player::view(track, colors).map(Message::Player),
         Output::Figure(figure) => view_figure(index, figure, state, colors, palette),
+        Output::Manual(page) => container(
+            manual::view(page, OUTPUT_WIDTH, state.mode)
+                .map(move |target| Message::ManualLink(index, target)),
+        )
+        .id(page_id(index))
+        .into(),
     }
 }
 
@@ -819,29 +1015,18 @@ fn view_figure<'a>(
             })
             .clip(true)
     };
-    let segment = |label: &str, view: View| {
-        let chosen = output.view == view;
-        button(
-            container(pixel::label(
-                label,
-                if chosen { colors.paper } else { colors.ink },
-            ))
-            .height(Length::Fill)
-            .align_y(Vertical::Center),
+    let view_as = |label: &str, view: View| {
+        segment(
+            label,
+            colors,
+            output.view == view,
+            Message::FigureView(index, view),
         )
-        .height(Length::Fill)
-        .padding([0, 8])
-        .style(colors.segment(chosen))
-        .on_press(Message::FigureView(index, view))
     };
-    let switch = container(row![
-        segment("PLOT", View::Plot),
-        rule_across(colors.ink),
-        segment("SCORE", View::Score),
-    ])
-    .height(24)
-    .padding(1)
-    .style(colors.frame());
+    let switch = switch(
+        colors,
+        [view_as("PLOT", View::Plot), view_as("SCORE", View::Score)],
+    );
 
     column![
         shown(plot, View::Plot),
@@ -1051,6 +1236,46 @@ fn framed<'a>(colors: Colors, content: Row<'a, Message>) -> Element<'a, Message>
         .into()
 }
 
+/// A framed row of segments, a rule between each: a figure's switch between its plot and score,
+/// the turns at the end of a page of the manual.
+pub(super) fn switch<'a, M: 'a>(
+    colors: Colors,
+    segments: impl IntoIterator<Item = Element<'a, M>>,
+) -> Element<'a, M> {
+    let mut row = Row::new();
+    for (index, segment) in segments.into_iter().enumerate() {
+        if index > 0 {
+            row = row.push(rule_across(colors.ink));
+        }
+        row = row.push(segment);
+    }
+    container(row)
+        .height(24)
+        .padding(1)
+        .style(colors.frame())
+        .into()
+}
+
+/// A segment of a switch, labelled `label` and filled when `chosen`, that sends `message`.
+pub(super) fn segment<'a, M: Clone + 'a>(
+    label: &str,
+    colors: Colors,
+    chosen: bool,
+    message: M,
+) -> Element<'a, M> {
+    let ink = if chosen { colors.paper } else { colors.ink };
+    button(
+        container(pixel::label(label, ink))
+            .height(Length::Fill)
+            .align_y(Vertical::Center),
+    )
+    .height(Length::Fill)
+    .padding([0, 8])
+    .style(colors.segment(chosen))
+    .on_press(message)
+    .into()
+}
+
 /// A rule across the window, `thickness` high.
 fn rule<'a>(color: Color, thickness: f32) -> Element<'a, Message> {
     container(space())
@@ -1061,7 +1286,7 @@ fn rule<'a>(color: Color, thickness: f32) -> Element<'a, Message> {
 }
 
 /// A 1 pixel rule down its row.
-fn rule_across<'a>(color: Color) -> Element<'a, Message> {
+fn rule_across<'a, M: 'a>(color: Color) -> Element<'a, M> {
     container(space())
         .width(1)
         .height(Length::Fill)
@@ -1101,8 +1326,13 @@ pub enum Message {
     /// Send what's typed.
     Submit,
     Answer(String),
+    /// A link or a turn in the page of the manual at an output index: another of its pages, or a
+    /// url to open in a browser.
+    ManualLink(usize, manual::Link),
     /// A key no widget took: command recall or the answers' switch.
     Key(keyboard::Key, keyboard::Modifiers),
+    /// Text typed while nothing that takes it had focus: it is for the prompt.
+    Typed(String),
     /// A history key, with the result of checking the command input's focus.
     RecallHistory {
         direction: SearchDirection,
@@ -1139,12 +1369,32 @@ impl From<CompletionAction> for Message {
     }
 }
 
+/// What a key no widget took is for: text typed is for the prompt, and other keys recall commands
+/// or move the answers' switch.
+fn key_message(event: keyboard::Event) -> Message {
+    match event {
+        keyboard::Event::KeyPressed {
+            key,
+            modifiers,
+            text,
+            ..
+        } => match text {
+            Some(text)
+                if !modifiers.command()
+                    && !modifiers.control()
+                    && !text.chars().any(char::is_control) =>
+            {
+                Message::Typed(text.to_string())
+            }
+            _ => Message::Key(key, modifiers),
+        },
+        _ => Message::Key(keyboard::Key::Unidentified, keyboard::Modifiers::empty()),
+    }
+}
+
 /// Interpreter messages, audio output changes, keyboard input and active playback ticks.
 pub fn subscription(state: &State) -> Subscription<Message> {
-    let keys = keyboard::listen().map(|event| match event {
-        keyboard::Event::KeyPressed { key, modifiers, .. } => Message::Key(key, modifiers),
-        _ => Message::Key(keyboard::Key::Unidentified, keyboard::Modifiers::empty()),
-    });
+    let keys = keyboard::listen().map(key_message);
     // this worker runs async loop to make the worker, which runs on a System's thread communicate
     // with our app, whithout blocking the event loop of iced
 
@@ -1210,6 +1460,7 @@ mod tests {
             mode: Mode::Light,
             figure_view: View::Plot,
             tempo: "120".to_owned(),
+            reveal: None,
         }
     }
 
@@ -1622,6 +1873,138 @@ mod tests {
         );
     }
 
+    #[test]
+    fn a_link_turns_its_page_where_it_is() {
+        let mut state = state();
+        state.output = vec![
+            Output::Command {
+                prompt: Prompt::default(),
+                command: "audoc".to_owned(),
+            },
+            Output::Manual(Box::new(
+                manual_source::read(&manual_source::Request::Contents).expect("contents"),
+            )),
+            Output::Normal("done".to_owned()),
+        ];
+        let second = manual_source::contents()[1].clone();
+        drop(update(
+            &mut state,
+            Message::ManualLink(1, second.path.clone()),
+        ));
+        assert_eq!(state.output.len(), 3, "no page is added");
+        assert!(matches!(
+            state.output.get(1),
+            Some(Output::Manual(page)) if page.title == second.title
+        ));
+
+        drop(update(
+            &mut state,
+            Message::ManualLink(1, "chapter99/nothing.md".to_owned()),
+        ));
+        assert!(
+            matches!(state.output.get(1), Some(Output::Manual(page)) if page.title == second.title)
+        );
+        assert!(matches!(state.output.last(), Some(Output::Error(_))));
+    }
+
+    #[test]
+    fn a_page_a_command_shows_is_read_from_its_start_once_the_command_is_done() {
+        let mut state = state();
+        drop(update(
+            &mut state,
+            Message::Interpreter(interpreter::Message::Manual(
+                manual_source::Request::Chapter(1),
+            )),
+        ));
+        assert_eq!(state.reveal, Some(0));
+        drop(update(
+            &mut state,
+            Message::Interpreter(interpreter::Message::Post(
+                "AUdoc display complete.\n".to_owned(),
+            )),
+        ));
+        assert_eq!(state.reveal, None);
+    }
+
+    #[test]
+    fn the_log_is_scrolled_from_its_end_to_where_a_page_starts() {
+        let find = |top: f32| {
+            let start = StartOf {
+                log: LOG.into(),
+                target: page_id(0).into(),
+                log_bounds: Some((
+                    Rectangle::new(iced::Point::new(0.0, 50.0), iced::Size::new(600.0, 100.0)),
+                    Rectangle::new(iced::Point::new(0.0, 50.0), iced::Size::new(600.0, 500.0)),
+                )),
+                top: Some(top),
+            };
+            match widget::Operation::finish(&start) {
+                widget::operation::Outcome::Some(offset) => offset.y,
+                _ => None,
+            }
+        };
+        // 400 can be scrolled; a page 150 down the log is 250 from where the log ends
+        assert_eq!(find(200.0), Some(250.0));
+        // a page at the very end cannot be scrolled past it
+        assert_eq!(find(500.0), Some(0.0));
+    }
+
+    fn pressed(
+        key: keyboard::Key,
+        modifiers: keyboard::Modifiers,
+        text: Option<&str>,
+    ) -> keyboard::Event {
+        keyboard::Event::KeyPressed {
+            key: key.clone(),
+            modified_key: key,
+            physical_key: keyboard::key::Physical::Unidentified(
+                keyboard::key::NativeCode::Unidentified,
+            ),
+            location: keyboard::Location::Standard,
+            modifiers,
+            repeat: false,
+            text: text.map(Into::into),
+        }
+    }
+
+    #[test]
+    fn text_typed_where_nothing_takes_it_goes_to_the_prompt() {
+        let t = keyboard::Key::Character("t".into());
+        assert!(matches!(
+            key_message(pressed(t.clone(), keyboard::Modifiers::empty(), Some("t"))),
+            Message::Typed(typed) if typed == "t"
+        ));
+        // shortcuts, and keys that type nothing to read, keep their meaning
+        for (key, modifiers, text) in [
+            (t, keyboard::Modifiers::COMMAND, Some("t")),
+            (enter(), keyboard::Modifiers::empty(), Some("\r")),
+            (arrow_right(), keyboard::Modifiers::empty(), None),
+        ] {
+            assert!(matches!(
+                key_message(pressed(key, modifiers, text)),
+                Message::Key(..)
+            ));
+        }
+
+        let mut state = state();
+        for typed in ["t", "in"] {
+            drop(update(&mut state, Message::Typed(typed.to_owned())));
+        }
+        assert_eq!(state.answer, "tin");
+
+        state.answer.clear();
+        state.question = Some(text_query("name: "));
+        drop(update(&mut state, Message::Typed("x".to_owned())));
+        assert_eq!(state.answer, "x", "an answer is typed as a command is");
+
+        state.question = Some(Query::new(
+            "sure? ".to_owned(),
+            Question::YesNo { default: true },
+        ));
+        drop(update(&mut state, Message::Typed("y".to_owned())));
+        assert_eq!(state.answer, "x", "the answers' switch takes no typing");
+    }
+
     fn arrow_right() -> keyboard::Key {
         keyboard::Key::Named(keyboard::key::Named::ArrowRight)
     }
@@ -1896,3 +2279,6 @@ mod tests {
         }
     }
 }
+
+#[cfg(test)]
+mod screenshots;

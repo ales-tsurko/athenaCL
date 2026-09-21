@@ -3,7 +3,7 @@ CRAP_REPORT := target/athenacl-crap.md
 CRAP_EXCLUDES := --exclude '**/build.rs' --exclude '**/benches/**' --exclude '**/examples/**' --exclude '**/tests.rs' --exclude '**/*_tests.rs' --exclude '**/tests/**'
 SIMILARITY_ARGS := src --threshold 0.92 --min-lines 12 --min-tokens 80 --fail-on-duplicates
 
-.PHONY: init check run test-all lint fmt code-health pack-macos
+.PHONY: init check run test-all screenshots lint fmt code-health pack-macos
 
 init:
 	git lfs pull
@@ -16,6 +16,10 @@ run:
 
 test:
 	cargo nextest run --all-features --all-targets
+
+# the manual's screenshots, into doc/src/images
+screenshots:
+	cargo test --lib app::app::screenshots -- --ignored
 
 lint:
 	@status=0; \
@@ -40,4 +44,6 @@ code-health:
 pack-macos:
 	cargo bundle --release
 	mv "target/release/bundle/osx/athenaCL.app/Contents/Resources/resources" "target/release/bundle/osx/athenaCL.app/Contents/MacOS/"
+	mv "target/release/bundle/osx/athenaCL.app/Contents/Resources/doc/src" "target/release/bundle/osx/athenaCL.app/Contents/MacOS/manual"
+	rmdir "target/release/bundle/osx/athenaCL.app/Contents/Resources/doc"
 	open "target/release/bundle/osx"

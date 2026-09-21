@@ -4,7 +4,10 @@ athenaCL provides two ways of helping the user access and learn commands. If the
 user only remembers the prefix of a command, this prefix can be entered at the
 prompt to produce a list of all commands associated with that prefix:
 
-**Displaying a command listing**
+
+
+
+## Displaying a command listing
 
 ```
 pi{b}ti{} :: pi
@@ -25,11 +28,14 @@ PI (PathInstance) commands:
 
 Help information is available for each command and can be accessed from the
 athenaCL prompt by typing either "?" or "help" followed by the name of the
-command. The following example provides the documentation for the PIn command.
+command. The following example provides the documentation for the `PIn` command.
 Notice that the main documentation is followed by "usage" documentation, or the
 format required for providing command-line arguments:
 
-**Using the help command**
+
+
+
+## Using the help command
 
 ```
 pi{b}ti{} :: help pin
@@ -81,7 +87,10 @@ topics, notations, and representations used within athenaCL. For example,
 information about Markov transition strings can be accessed with the same help
 command:
 
-**Accessing additional help topics**
+
+
+
+## Accessing additional help topics
 
 ```
 pi{b}ti{} :: ? markov

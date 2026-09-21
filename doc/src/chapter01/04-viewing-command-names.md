@@ -3,7 +3,10 @@
 When starting athenaCL, the user is presented with a prompt (::). To display a
 listing of all commands enter "cmd", for command:
 
-**Listing all commands**
+
+
+
+## Listing all commands
 
 ```
 pi{y0}ti{a2} :: cmd

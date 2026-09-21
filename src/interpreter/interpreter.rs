@@ -13,7 +13,7 @@ use vm::{
     Interpreter as PyInterpreter, PyObjectRef, PyResult, VirtualMachine,
 };
 
-use super::{athena_obj_ext, dialog_ext, figure_ext, sndhdr, xml_tools_ext};
+use super::{athena_obj_ext, dialog_ext, figure_ext, manual_ext, sndhdr, xml_tools_ext};
 use crate::figure::Figure;
 
 /// Global interpreter representation.
@@ -123,6 +123,8 @@ pub enum Message {
     LoadAudio(String),
     /// Show a figure (in the output area).
     Figure(Arc<Figure>),
+    /// Show a page of the manual (in the output area).
+    Manual(crate::manual::Request),
     /// Get scratch dir.
     GetScratchDir,
     /// The result of `Self::GetScratchDir`.
@@ -345,6 +347,7 @@ pub fn init_py_interpreter() -> PyInterpreter {
         .add_native_module(dialog_ext::module_def(&ctx))
         .add_native_module(athena_obj_ext::module_def(&ctx))
         .add_native_module(figure_ext::module_def(&ctx))
+        .add_native_module(manual_ext::module_def(&ctx))
         .add_native_module(sndhdr::module_def(&ctx))
         .add_frozen_modules(rustpython_pylib::FROZEN_STDLIB)
         .add_frozen_modules(vm::py_freeze!(dir = "../../pysrc"))

@@ -6,9 +6,12 @@ others will need to be configured the first time a command is used.
 
 For example, following the athenaCL prompt ("::") is the the athenaCL "cursor
 tool." This tool, providing information on the active Texture and Path, can be
-turned on or off with the command APcurs, for AthenaPreferences cursor:
+turned on or off with the command `APcurs`, for AthenaPreferences cursor:
 
-**Toggling the athenaCL cursor tool with APcurs**
+
+
+
+## Toggling the athenaCL cursor tool with `APcurs`
 
 ```
 pi{b}ti{} :: apcurs
@@ -24,11 +27,14 @@ athenaCL writes files. Some of these files are audio file formats, some are
 event list formats (scores, MIDI files), and some are image files. In most
 cases, athenaCL will write a file in a user specified "scratch" directory with
 an automatically-generated file name. This is convenient and fast. To set the
-scratch directory, enter the APdir command, for AthenaPreferences directory.
+scratch directory, enter the `APdir` command, for AthenaPreferences directory.
 (Replace "/Volumes/xdisc/_scratch" with a complete file path to a suitable
 directory.)
 
-**Setting the scratch directory with APdir**
+
+
+
+## Setting the scratch directory with `APdir`
 
 ```
 pi{b}ti{} :: apdir
@@ -51,15 +57,18 @@ cancel or select? (c or s): s
 user scratch directory set to /Volumes/xdisc/_scratch.
 ```
 
-The command PIh, for PathInstance hear, allows the creation of a MIDI file from
-a single Path specification. In this case, athenaCL writes the MIDI file in the
-user-specified scratch directory. After the file is written, athenaCL opens the
-file with the operating system. Depending on how the operating system is
+The command `PIh`, for PathInstance hear, allows the creation of a MIDI file
+from a single Path specification. In this case, athenaCL writes the MIDI file in
+the user-specified scratch directory. After the file is written, athenaCL opens
+the file with the operating system. Depending on how the operating system is
 configured, the MIDI file should open in an appropriate player. The athenaCL
 system frequently works in this manner with the operating system and external
 programs and resources.
 
-**Creating a MIDI file with PIh**
+
+
+
+## Creating a MIDI file with `PIh`
 
 ```
 pi{b}ti{} :: pih
@@ -74,13 +83,18 @@ below the command that produced them. Drag a graphic to pan it, scroll while
 holding Command (Control outside macOS) to zoom, and double-click to see all of
 it again; hovering shows the values under the pointer.
 
-To test the production of graphic output, the TPmap command, for
+To test the production of graphic output, the `TPmap` command, for
 TextureParameter map, can be used:
 
-**Producing a graphical diagram with TPmap**
+
+
+
+## Producing a graphical diagram with `TPmap`
 
 ```
 pi{b}ti{} :: tpmap 100 ru
 randomUniform, (constant, 0), (constant, 1)
 TPmap display complete.
 ```
+
+![TPmap of randomUniform over 100 events](../images/tpmap-uniform.png)

@@ -221,6 +221,18 @@ impl Colors {
         }
     }
 
+    /// Text in `color` that can be selected to copy, its selection marked in `mark`: the rule, as
+    /// the input marks its own, or the page, on what the rule fills.
+    pub(crate) fn selectable(
+        color: Color,
+        mark: Color,
+    ) -> impl Fn(&Theme) -> iced_selection::text::Style {
+        move |_| iced_selection::text::Style {
+            color: Some(color),
+            selection: mark,
+        }
+    }
+
     /// An outlined picker.
     pub(crate) fn picker(self) -> impl Fn(&Theme, pick_list::Status) -> pick_list::Style {
         move |_, status| pick_list::Style {

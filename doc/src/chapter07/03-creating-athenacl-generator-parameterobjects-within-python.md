@@ -15,7 +15,10 @@ formatted argument string. The __call__ method, accessed by calling the instance
 name, takes a single argument and returns the next value, or the value at the
 specified argument time value.
 
-**Creating a Generator ParameterObject**
+
+
+
+## Creating a Generator ParameterObject
 
 ```>>> from athenaCL.libATH.libPmtr import parameter
 >>>  po = parameter.factory(['ws','t',6,0,-1,1])

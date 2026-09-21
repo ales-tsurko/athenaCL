@@ -7,7 +7,10 @@ Generator ParameterObject to create raw duration values in seconds. Finally,
 This Texture, using a Path only as a reference pitch, employs the Texture's
 local field to provide harmonic shape.
 
-**Creating a Texture**
+
+
+
+## Creating a Texture
 
 ```
 pi{}ti{} :: emo m
@@ -52,14 +55,17 @@ texture (s)tatic
 texture (d)ynamic   none
 ```
 
-After creating a Texture, a Clone can be created with the command TCn, for
+After creating a Texture, a Clone can be created with the command `TCn`, for
 TextureClone New. The user is prompted to enter the name of the new Clone. By
 default, the Filter ParameterObject filterAdd is applied to the start time of
 all events with a duration equal to one Pulse. A Clone can be displayed with the
-TCv command. After displaying the Clone, the user examines the documentation for
-ParameterObject filterAdd:
+`TCv` command. After displaying the Clone, the user examines the documentation
+for ParameterObject filterAdd:
 
-**Creating and Viewing a Clone with TCn and TCv**
+
+
+
+## Creating and Viewing a Clone with `TCn` and `TCv`
 
 ```
 pi{auto}ti{a1} :: tcn
@@ -85,17 +91,20 @@ clone (s)tatic
 The Filter ParameterObject bypass is the default for most Clone attributes. This
 ParameterObject simply passes values through to the Clone unaltered.
 
-Upon creating a new EventList and auditioning the results (with ELn and ELh, see
-for more information), the descending melodic line of a1 can be heard echoed by
-Clone w1. In the following example, another Clone is created called w2. This
-Clone is then edited to have a time value that, rather than shifted by a
-constant, is scaled by a value that oscillates between 1 and 2. The Clone's
-local field filter is also set to transpose the Texture's pitches seven
-half-steps down. The procedure for editing Clone ParameterObjects is similar to
-that for editing Textures, except for that only Filter ParameterObjects can be
-provided.
+Upon creating a new EventList and auditioning the results (with `ELn` and `ELh`,
+see [Creating an EventList](../chapter02/05-creating-an-eventlist.md) for more
+information), the descending melodic line of a1 can be heard echoed by Clone w1.
+In the following example, another Clone is created called w2. This Clone is then
+edited to have a time value that, rather than shifted by a constant, is scaled
+by a value that oscillates between 1 and 2. The Clone's local field filter is
+also set to transpose the Texture's pitches seven half-steps down. The procedure
+for editing Clone ParameterObjects is similar to that for editing Textures,
+except for that only Filter ParameterObjects can be provided.
 
-**Editing a Clone with TCe**
+
+
+
+## Editing a Clone with `TCe`
 
 ```
 pi{auto}ti{a1} :: tcn w2
@@ -134,15 +143,17 @@ au(x)iliary         none
 clone (s)tatic
       s0            timeReferenceSource, textureTime
       s1            retrogradeMethodToggle, off
-
 ```
 
 As with Textures and other objects in athenaCL, Clones can be listed with the
-TCls command, and the active Clone can be selected with the TCo command.
-Further, upon examining the parent Texture with TIls, notice that two Clones are
-now displayed under the TC heading:
+`TCls` command, and the active Clone can be selected with the `TCo` command.
+Further, upon examining the parent Texture with `TIls`, notice that two Clones
+are now displayed under the TC heading:
 
-**Listing and Selecting Clones with TCls and TCo**
+
+
+
+## Listing and Selecting Clones with `TCls` and `TCo`
 
 ```
 pi{auto}ti{a1} :: tcls
@@ -168,7 +179,10 @@ Additionally, the Clone's time attribute is set with a filterMultuplyAnchor
 ParameterObject and the Clone's field attributes is set with a filterAdd
 ParameterObject:
 
-**Creating and Editing Clones**
+
+
+
+## Creating a Retrograde Clone
 
 ```
 pi{auto}ti{a1} :: tpv retrograde
@@ -197,18 +211,18 @@ pi{auto}ti{a1} :: tce f fa,(c,7)
 TC w3: parameter local field updated.
 ```
 
-The TEmap command displays all Textures as well as all Texture Clones. Texture
+The `TEmap` command displays all Textures as well as all Texture Clones. Texture
 Clones appear under their parent Texture. Textures and Clones, further, can be
 muted independently.
 
-**Viewing Textures and Clones with TEmap**
+
+
+
+## Viewing Textures and Clones with `TEmap`
 
 ```
 pi{auto}ti{a1} :: temap
-TextureEnsemble Map:
-15.22s              |      .       |      .       |      .      |       .      |
-a1                  _________________________                                   
-      w3            ............................................................
-      w2               .............................................
-      w1                 .........................
+TEmap display complete.
 ```
+
+![TEmap of Texture a1 and its Clones](../images/temap-clones.png)

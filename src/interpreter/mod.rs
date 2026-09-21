@@ -9,5 +9,6 @@ mod figure_ext;
     reason = "the module is the `interpreter` module's core"
 )]
 mod interpreter;
+mod manual_ext;
 mod sndhdr;
 mod xml_tools_ext;

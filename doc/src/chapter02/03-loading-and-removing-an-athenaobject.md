@@ -1,8 +1,8 @@
 # Loading and Removing an AthenaObject
 
-The command AOl, for AthenaObject load, permits the user to load an AthenaObject
-XML file. Numerous small demonstration files are included within athenaCL. In
-the following example, the user loads the file "demo01.xml".
+The command `AOl`, for AthenaObject load, permits the user to load an
+AthenaObject XML file. Numerous small demonstration files are included within
+athenaCL. In the following example, the user loads the file "demo01.xml".
 
 The following display demonstrates use of the text-based file-dialogs. When
 using the text-based interface, the user must select a directory before
@@ -13,7 +13,10 @@ directory, change the directory, or cancel. The user chooses to select a file
 with "f". After entering the name of the file ("demo01.xml") and confirming, the
 AthenaObject is loaded:
 
-**Loading an AthenaObject with text-based file selection**
+
+
+
+## Loading an AthenaObject with text-based file selection
 
 ```
 pi{}ti{} :: aol
@@ -33,11 +36,14 @@ name file? demo01.xml
 /Volumes/xdisc/_sync/_x/src/athenacl/athenaCL/demo/legacy/demo01.xml
 ```
 
-To confirm that the AthenaObject has been loaded, the user may enter TIls to
+To confirm that the AthenaObject has been loaded, the user may enter `TIls` to
 display a list of all TextureInstances. (For more information concerning
-Textures, see ).
+Textures, see [Tutorial 4: Creating and Editing Textures][tutorial-4]).
 
-**Listing TextureInstances with Tils**
+
+
+
+## Listing TextureInstances with Tils
 
 ```
 pi{y0}ti{a2} :: tils
@@ -50,11 +56,14 @@ TextureInstances available:
 ```
 
 The entire AthenaObject can be erased and set to its initial state without
-restarting the athenaCL program. The following example uses AOrm, for
-AthenaObject remove, to re-initialize the AthenaObject. Note: the AOrm will
+restarting the athenaCL program. The following example uses `AOrm`, for
+AthenaObject remove, to re-initialize the AthenaObject. Note: the `AOrm` will
 permanently remove all objects within athenaCL and cannot be un-done.
 
-**Reinitializing the AthenaObject with AOrm**
+
+
+
+## Reinitializing the AthenaObject with `AOrm`
 
 ```
 pi{y0}ti{a2} :: aorm
@@ -66,14 +75,19 @@ pi{}ti{} ::
 
 If the AthenaObject file is located in the athenaCL "demo" directory, or a
 directory from which a file was opened or saved-to by the user within the
-current session, athenaCL can find the file by giving the AOl command with the
+current session, athenaCL can find the file by giving the `AOl` command with the
 file's name as a command-line argument. To reload "demo01.xml", the user may
 enter the following arguments:
 
-**Loading an AthenaObject from the command-line**
+
+
+
+## Loading an AthenaObject from the command-line
 
 ```
 pi{}ti{} :: aol demo01.xml
       1.3.1 xml AthenaObject loaded (00:01):
 /Volumes/xdisc/_sync/_x/src/athenacl/athenaCL/demo/legacy/demo01.xml
 ```
+
+[tutorial-4]: ../chapter04/01-tutorial-4-creating-and-editing-textures.md

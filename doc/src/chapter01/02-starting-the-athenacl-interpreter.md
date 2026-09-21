@@ -1,30 +1,31 @@
 # Starting the athenaCL Interpreter
 
-Depending on your platform, there are a number of different ways to launch the
-athenaCL program and start the athenaCL Interpreter. For all platforms, using
-athenaCL requires installing (or finding) Python 2.6 (or better) on your system.
-Many advanced operating systems (UNIX-based operating systems including
-GNU/Linux and MacOS X) ship with Python installed.
+athenaCL is a single application: open it as you would any other program on your
+platform. Everything it needs, including its Python interpreter, is built into
+the application, so there is nothing to install alongside it.
 
-For complete instructions on installing and launching athenaCL in each platform,
-please see the file "README.txt" included in the athenaCL distribution and in .
+The window opens on the athenaCL prompt, with the caret already in it: a command
+can be typed straight away. Commands are entered at the prompt, and what they
+print appears above it, in the log. Enter `cmd` to see all commands, `help` for
+help with one of them, and `AUdoc` to read this manual inside the application.
 
-After launching athenaCL, the user is presented with a text-based display in a
-terminal or Python-interactive window. The user is presented with the following
-initialization information:
 
-**Initialization information**
+
+
+## The athenaCL prompt
 
 ```
-athenaCL 2.0.0 (on darwin via terminal)
-Enter "cmd" to see all commands. For help enter "?".
-Enter "c" for copyright, "w" for warranty, "r" for credits.
-
-pi{}ti{} :: 
+pi{}ti{} :: type a command or 'help'
 ```
 
-When starting up the Interpreter, athenaCL looks in the athenaCL directory for
-the "libATH" folder, and then various directories within the "libATH" folder.
-These directories contain essential files and must be present for the program to
-run. The athenaCL prompt "::" is preceded by information concerning the
-AthenaObject. This will be explained in greater detail below.
+The athenaCL prompt "::" is preceded by information concerning the AthenaObject.
+The active PathInstance is named within "pi{}", and the active TextureInstance
+within "ti{}"; both are empty until one is created. This will be explained in
+greater detail below.
+
+Around the log, the window carries the things that would otherwise need a
+command: above it, the scratch directory athenaCL writes its files to, with a
+button to change it, and a switch between the light and the dark look; below it,
+the active Path and Texture, and the tempo the built-in player plays at.
+
+![The athenaCL window, as it opens](../images/window.png)

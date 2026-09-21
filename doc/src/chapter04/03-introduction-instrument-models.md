@@ -9,15 +9,17 @@ parameters.
 
 athenaCL features an integrated library of Csound instruments, providing
 automated control of both Csound score and orchestra generation and control. For
-details on installing and using Csound within athenaCL, see . Csound instruments
-are signal processing and synthesis instructions. These instructions designates
-a certain number of parameters to expose to the user of the instrument. These
-parameters allow events in the score to communicate information and settings to
-the instrument. athenaCL's integrated library of Csound instruments permits
-dynamically constructed orchestra files to be used with athenaCL-generated
-Csound scores. Alternatively, users can use external, custom orchestras with
-athenaCL-written score files. EventModes csoundNative, csoundExternal, and
-csoundSilence support diverse ways of working with Csound within athenaCL.
+details on installing and using Csound within athenaCL, see
+[Configuring and Using Csound](../chapter02/06-configuring-and-using-csound.md).
+Csound instruments are signal processing and synthesis instructions. These
+instructions designates a certain number of parameters to expose to the user of
+the instrument. These parameters allow events in the score to communicate
+information and settings to the instrument. athenaCL's integrated library of
+Csound instruments permits dynamically constructed orchestra files to be used
+with athenaCL-generated Csound scores. Alternatively, users can use external,
+custom orchestras with athenaCL-written score files. EventModes csoundNative,
+csoundExternal, and csoundSilence support diverse ways of working with Csound
+within athenaCL.
 
 athenaCL provides instrument collections (Orchestras) for working with other
 EventOutput formats. For working with MIDI systems, General MIDI (GM) instrument
@@ -34,9 +36,12 @@ The instruments available during Texture creation are dependent on the active
 EventMode: that is, for any active EventMode, one Orchestra is available from
 which a Texture's instrument must be selected. In the following example, the
 user lists available EventModes to check that csoundNative is active, and then
-views the available instruments with the EMi command.
+views the available instruments with the `EMi` command.
 
-**Listing available Instruments with EMi**
+
+
+
+## Listing available Instruments with `EMi`
 
 ```
 pi{}ti{} :: emls
@@ -120,10 +125,13 @@ csoundNative instruments:
 ```
 
 Other EventModes provide other Orchestras for use in Textures. In the example
-below, the user selects the EventMode midiPercussion with the EMo command and
-examines the available instruments with the EMi command:
+below, the user selects the EventMode midiPercussion with the `EMo` command and
+examines the available instruments with the `EMi` command:
 
-**Examining additional Instruments with EMi**
+
+
+
+## Examining additional Instruments with `EMi`
 
 ```
 pi{}ti{} :: emo mp

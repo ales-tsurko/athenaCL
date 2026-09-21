@@ -13,7 +13,10 @@ Python data structures. The cmd() method will raise an exception on error. The
 following example creates an athenaCL Interpter instance named ath and sends it
 a number of commands to generate a drum beat.
 
-**An athenaCL Interpreter in Python**
+
+
+
+## An athenaCL Interpreter in Python
 
 ```
 from athenaCL.libATH import athenaObj
@@ -39,4 +42,4 @@ ath.cmd('eln; elh')
 For advanced and/or extended work with athenaCL, automating command string
 execution is highly recommended. Included with the athenaCL distribution is over
 30 Python files demonstrating fundamental concepts of working with the system.
-These files can be found in the demo directory and also in .
+These files can be found in the `demo` directory.

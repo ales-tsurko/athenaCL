@@ -41,6 +41,7 @@ from athenaCL.libATH.libOrc import generalMidi
 from athenaCL.libATH.omde import rand
 import dialogExt
 import figureExt
+import manualExt
 
 _MOD = "command.py"
 from athenaCL.libATH import prefTools
@@ -8050,30 +8051,28 @@ class AHexe(Command):
 # -----------------------------------------------------------------||||||||||||--
 # athena utility commands
 class AUdoc(Command):
-    "open html documentation"
+    """read the manual
+
+    with no arguments it shows the contents; with a chapter number it shows
+    that chapter; with words it searches; with "www" it opens the manual on
+    the web. the reading itself is done by the gui
+    """
 
     def __init__(self, ao, args="", **keywords):
         Command.__init__(self, ao, args, **keywords)
         self.processSwitch = 0  # display only
-        self.gatherSwitch = 0  # display only
+        self.gatherSwitch = 1  # display only
         self.cmdStr = "AUdoc"
+
+    def gather(self):
+        self.query = self.args.strip()
 
     def log(self):  # return an executable command str, subclass
         if self.gatherStatus and self.processStatus:
-            return "%s" % (self.cmdStr)
+            return "%s %s" % (self.cmdStr, self.query)
 
     def display(self):
-        import webbrowser
-
-        url = drawer.urlPrep(lang.msgAthDocURL, "http")
-        msg = "on-line documentation opened.\n"
-        try:
-            webbrowser.open(url)
-        # this exception was found from a bug report on linux
-        except KeyboardInterrupt:
-            msg = "unable to open documentation: visit https://github.com/ales-tsurko/athenaCL\n"
-
-        return msg
+        return manualExt.show(self.query)
 
 
 class AUup(Command):

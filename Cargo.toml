@@ -7,7 +7,7 @@ edition = "2021"
 name = "athenaCL"
 identifier = "by.alestsurko.athenacl"
 icon = ["resources/athenaCL.icns"]
-resources = ["resources/SGM-v2.01-YamahaGrand-Guit-Bass-v2.7.sf2"]
+resources = ["resources/SGM-v2.01-YamahaGrand-Guit-Bass-v2.7.sf2", "doc/src"]
 
 [dependencies]
 ahash = "0.8.12"
@@ -20,7 +20,11 @@ iced = { version = "0.14.0", features = [
     "tokio",
     "wgpu",
 ] }
+image = { version = "0.25.10", default-features = false, features = ["png"] }
+iced_selection = "0.5.0"
 midi-player = "0.2.3"
+open = "5.4.4"
+pulldown-cmark = { version = "0.13.4", default-features = false }
 quick-xml = "0.42.0"
 rfd = "0.17.2"
 rodio = { version = "0.22.2", default-features = false, features = [

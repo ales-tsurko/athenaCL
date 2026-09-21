@@ -1,11 +1,14 @@
 # Creating, Selecting, and Viewing PathInstances
 
-To create a PathInstance, enter PIn (for PathInstance new) at the athenaCL
+To create a PathInstance, enter `PIn` (for PathInstance new) at the athenaCL
 prompt. You must name the new Path, and then supply a pitch group, Forte-number,
 Xenakis sieve, or alternative pitch representation (enter "help pitch" for more
 information on pitch representations).
 
-**Creating a new PathInstance with PIn**
+
+
+
+## Creating a new PathInstance with `PIn`
 
 ```
 pi{}ti{} :: pin
@@ -30,10 +33,13 @@ pi{pathA}ti{} ::
 Note that after successfully creating a Path, the athenaCL cursor tool changes
 to reflect the active Path: the name in parenthesis following "pi" designates
 the active Path ("pathA"). The same information is provided for a
-TextureInstance following the "ti" prefix. To view the active PI, enter PIv at
+TextureInstance following the "ti" prefix. To view the active PI, enter `PIv` at
 the athenaCL prompt:
 
-**Viewing a Path with PIv**
+
+
+
+## Viewing a Path with `PIv`
 
 ```
 pi{pathA}ti{} :: piv
@@ -53,14 +59,18 @@ pitch class space, and set class representations. The label "TI references",
 when needed, provides information on which TextureInstances link to this
 PathInstance.
 
-In order to hear a possible interpretation of this Path, the command PIh
+In order to hear a possible interpretation of this Path, the command `PIh`
 generates a MIDI file based on a simple interpretation of the Path with the
 active TextureModule. The resulting musical structure is only provided to
 audition the Path, and uses default values for all musical parameters. The MIDI
-file is written in the user-specified scratch directory (see ) and is opened via
-the operating system.
+file is written in the user-specified scratch directory (see
+[Configuring the User Environment][user-environment]) and is opened via the
+operating system.
 
-**Creating a MIDI file with PIh**
+
+
+
+## Creating a MIDI file with `PIh`
 
 ```
 pi{pathA}ti{} :: pih
@@ -71,17 +81,23 @@ PI pathA hear with TM LineGroove complete.
 A second Path can be created exclusively with Forte set class numbers. In this
 example, all arguments are provided via the command line:
 
-**Creating a Path with Forte numbers**
+
+
+
+## Creating a Path with Forte numbers
 
 ```
 pi{pathA}ti{} :: pin pathB 5-3 6-4 7-34 4-14
 PI pathB added to PathInstances.
 ```
 
-A newly-created Path always becomes the active Path. Entering PIv will display
+A newly-created Path always becomes the active Path. Entering `PIv` will display
 the details of the newly created Path:
 
-**Displaying a Path**
+
+
+
+## Displaying a Path
 
 ```
 pi{pathB}ti{} :: piv
@@ -100,14 +116,17 @@ durFraction         1(25%)           1(25%)               1(25%)
 TI References: none.
 ```
 
-As is clear from the PIv display above, when a Multiset in a Path is entered as
-a Set class, a pitch space and a pitch class space representation (psPath,
+As is clear from the `PIv` display above, when a Multiset in a Path is entered
+as a Set class, a pitch space and a pitch class space representation (psPath,
 pcsPath) are created from the normal-form of the desired SetClass.
 
 In order to display the complete collection of Paths available in the
-AthenaObject, the user enters PIls, for PathInstance list:
+AthenaObject, the user enters `PIls`, for PathInstance list:
 
-**Listing Paths**
+
+
+
+## Listing Paths
 
 ```
 pi{pathB}ti{} :: pils
@@ -126,7 +145,7 @@ illustrates that this PI is currently active. All "ls" commands use a similar
 designation.
 
 Many commands in athenaCL function by using an "active" object. The active PI
-defines which Path is used in many different commands. For example, the PIv
+defines which Path is used in many different commands. For example, the `PIv`
 command, when used without an argument for which Path to display, displays the
 active Path.
 
@@ -135,7 +154,10 @@ prompted to either enter the name of the Path to select, or its order number
 from the "ls" view (where 1 is pathA, 2 is pathB). Displaying the list of all
 PathInstances will confirm that pathA is now the selected PI.
 
-**Selecting Paths**
+
+
+
+## Selecting Paths
 
 ```
 pi{pathB}ti{} :: pio
@@ -150,12 +172,17 @@ PathInstances available:
 ```
 
 Alternatively the user can enter the name of the Path to be selected as a
-command-line argument with the PIo command. After making pathA active, the user
-can make pathB active again by entering the following:
+command-line argument with the `PIo` command. After making pathA active, the
+user can make pathB active again by entering the following:
 
-**Selecting a Path with an argument**
+
+
+
+## Selecting a Path with an argument
 
 ```
 pi{pathA}ti{} :: pio pathB
 PI pathB now active.
 ```
+
+[user-environment]: ../chapter01/07-configuring-the-user-environment.md

@@ -9,7 +9,10 @@ distinct Path and the original Path is left unchanged. For example, to create
 the retrograde of the active Path, enter PIret. The user must provide the name
 of the new Path:
 
-**Creating a retrograde of a Path with PIret**
+
+
+
+## Creating a retrograde of a Path with `PIret`
 
 ```
 pi{pathC}ti{} :: piret
@@ -24,11 +27,14 @@ PathInstances available:
  + pathCret         0  4-14A,7-34,6-4,5-3A 
 ```
 
-To create a rotation, the user, after entering PIrot, must enter the number of
+To create a rotation, the user, after entering `PIrot`, must enter the number of
 the Multiset to occupy the new first position. If the new first position is to
 be the second Multiset, the user would enter 2:
 
-**Creating a rotation of a Path with PIrot**
+
+
+
+## Creating a rotation of a Path with `PIrot`
 
 ```
 pi{pathCret}ti{} :: pirot
@@ -50,7 +56,10 @@ user is prompted for the name of the new Path, and the start and end Multiset
 positions. If the slice is to only contain the last two chords of a four chord
 Path, for example, the start and end positions would be 3,4:
 
-**Creating a slice of a Path with PIslc**
+
+
+
+## Creating a slice of a Path with `PIslc`
 
 ```
 pi{pathCretRot}ti{} :: pislc
@@ -68,13 +77,16 @@ PathInstances available:
  + pathD            0  5-3A,4-14A      
 ```
 
-There are three ways to edit a single Multiset within a Path using the PIe
+There are three ways to edit a single Multiset within a Path using the `PIe`
 command: by replacement, by transposition, or by inversion. In all cases, the
 number of elements in the Multiset must be maintained.
 
-To edit a single Multiset in a Path enter PIe:
+To edit a single Multiset in a Path enter `PIe`:
 
-**Transposing a set within a Path**
+
+
+
+## Transposing a set within a Path
 
 ```
 pi{pathD}ti{} :: pie
@@ -109,7 +121,10 @@ Any Multiset in a Path can be replaced with a Multiset of equal size. For
 example, the same Multiset edited above can be replaced with any four-element
 Multiset:
 
-**Replacing a Multiset with a new Multiset**
+
+
+
+## Replacing a Multiset with a new Multiset
 
 ```
 pi{pathD}ti{} :: pie

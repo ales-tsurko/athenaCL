@@ -10,6 +10,7 @@ use std::{
 
 fn main() {
     link_resources();
+    link_manual();
     // recompile in case the puthon code has changed
     println!("cargo:rerun-if-changed=pysrc");
     // rerun-if-changed doesn't support globs, so tests/*.py are listed one by one
@@ -19,6 +20,34 @@ fn main() {
             println!("cargo:rerun-if-changed={}", path.display());
         }
     }
+}
+
+/// Links the manual next to the executable, where the app reads it as it does in a bundle.
+///
+/// The manual stays where the repository keeps it, in `doc/src`, which the published book is built
+/// from too; only the link is beside the executable.
+fn link_manual() {
+    let manual = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").expect("Expected during build"))
+        .join("doc")
+        .join("src");
+    let Some(link) = exe_dir().map(|dir| dir.join("manual")) else {
+        println!("cargo:warning=cannot find the executable directory, the manual is not linked");
+        return;
+    };
+    if let Err(err) = symlink_dir(&manual, &link) {
+        println!(
+            "cargo:warning=failed to link {} to {}: {err}",
+            link.display(),
+            manual.display()
+        );
+        return;
+    }
+    // re-run when the link is removed or broken, watched through a page as `resources` is through
+    // its files; the pages themselves are read when the app runs, so editing one needs no rebuild
+    println!(
+        "cargo:rerun-if-changed={}",
+        link.join("SUMMARY.md").display()
+    );
 }
 
 /// Links `resources` next to the executable, where the app looks for the soundfont.

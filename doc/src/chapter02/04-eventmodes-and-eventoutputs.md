@@ -11,9 +11,10 @@ The EventModes configure athenaCL for working with a particular sound source and
 Orchestra model, such as the internal Csound orchestra (csoundNative), external
 Csound orchestras (csoundExternal), various types of MIDI files (generalMidi an
 generalMidiPercussion), and others. The EventMode determines what instruments
-are available for Texture creation (see , as well as the operation of some
-EventList commands. In some cases, the EventMode forces certain EventOutput
-formats to be written as well.
+are available for Texture creation (see
+[Tutorial 4: Creating and Editing Textures][tutorial-4], as well as the
+operation of some EventList commands. In some cases, the EventMode forces
+certain EventOutput formats to be written as well.
 
 The EventOutputs select what file formats will be created when a new EventList
 is generated. athenaCL permits the user to create an EventList in numerous
@@ -28,7 +29,10 @@ based on the user-specified request.
 To view the current EventMode, enter EMls. To view the current list of selected
 EventOutputs, enter EOls. The following example demonstrates these commands:
 
-**Viewing EventMode and EventOutputs**
+
+
+
+## Viewing EventMode and EventOutputs
 
 ```
 pi{y0}ti{a2} :: emls
@@ -59,15 +63,18 @@ EventOutput active:
 ```
 
 To select an additional EventOutput to be requested when a new EventList is
-created, enter the command EOo, for EventOutput select. To remove an
-EventOutput, enter the command EOrm, for EventOutput remove. In the following
+created, enter the command `EOo`, for EventOutput select. To remove an
+EventOutput, enter the command `EOrm`, for EventOutput remove. In the following
 example, the user adds a tab-delimited table output ("textTab") and a
 specialized output file for the AC Toolbox ("acToolbox"). After viewing the
 EventOutput list, these EventOutputs are removed. Note: EventOutputs, like many
 selection in athenaCL, can be designated using automatic acronym expansion
 (AAE), the user providing only the leading character and capitals.
 
-**Adding and Removing EventOutputs**
+
+
+
+## Adding and Removing EventOutputs
 
 ```
 pi{y0}ti{a2} :: eoo tt at
@@ -92,3 +99,5 @@ EventOutput active:
 pi{y0}ti{a2} :: eorm tt at
 EventOutput formats: midiFile, xmlAthenaObject, csoundData.
 ```
+
+[tutorial-4]: ../chapter04/01-tutorial-4-creating-and-editing-textures.md

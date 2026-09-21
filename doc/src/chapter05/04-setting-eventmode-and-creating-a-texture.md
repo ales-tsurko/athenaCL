@@ -1,11 +1,15 @@
 # Setting EventMode and Creating a Texture
 
-As explained in , the athenaCL EventMode determines what instruments are
-available for Texture creation. In the following example, the EventMode is set
-to midi, the TextureModule LiteralVertical is selected, a new Texture is created
-with instrument 0, and the Texture is displayed with TIv.
+As explained in [Tutorial 4: Creating and Editing Textures][tutorial-4], the
+athenaCL EventMode determines what instruments are available for Texture
+creation. In the following example, the EventMode is set to midi, the
+TextureModule LiteralVertical is selected, a new Texture is created with
+instrument 0, and the Texture is displayed with TIv.
 
-**Creating a Texture with TM LiteralVertical**
+
+
+
+## Creating a Texture with TM LiteralVertical
 
 ```
 pi{q1}ti{} :: emo midi
@@ -64,22 +68,26 @@ texture (d)ynamic   none
 
 Notice that the Texture's Path attribute is set to q1. In all cases, a Texture,
 when created, links to the active Path. The Path a Texture links to can be
-edited later if necessary. Notice also that the Path listing in the TIv display
-shows the pitches of the Path, as well as timings for each set: 10, 6.25, and
-3.74 seconds respectively. These times are the result of the duration fraction
-applied to the Texture's duration.
+edited later if necessary. Notice also that the Path listing in the `TIv`
+display shows the pitches of the Path, as well as timings for each set: 10,
+6.25, and 3.74 seconds respectively. These times are the result of the duration
+fraction applied to the Texture's duration.
 
-To hear this Texture, create an EventList as explained in . After using the ELn
-command, the ELh command can be used to open the MIDI file. Notice that each
-chord lasts the appropriate duration fraction of the total twenty-second
-duration of the Texture.
+To hear this Texture, create an EventList as explained in
+[Creating an EventList](../chapter02/05-creating-an-eventlist.md). After using
+the `ELn` command, the `ELh` command can be used to open the MIDI file. Notice
+that each chord lasts the appropriate duration fraction of the total
+twenty-second duration of the Texture.
 
 A few small edits to this Texture will make it more interesting. In the
 following example, both the rhythm and amplitude are edited: the rhythm is given
 more Pulses and made to oscillate back and forth along the specified series; the
 amplitude randomly selects from a list of four amplitudes.
 
-**Editing a Texture**
+
+
+
+## Editing a Texture
 
 ```
 pi{q1}ti{a1} :: tie r l, ((4,1,1), (4,1,1), (4,3,0), (2,3,1), (3,2,1), (3,2,1)), oo
@@ -89,5 +97,7 @@ pi{q1}ti{a1} :: tie a bg, rc, (.5,.6,.8,1)
 TI a1: parameter amplitude updated.
 ```
 
-Again, ELn and ELh can be used to create and audition the resulting musical
+Again, `ELn` and `ELh` can be used to create and audition the resulting musical
 structure.
+
+[tutorial-4]: ../chapter04/01-tutorial-4-creating-and-editing-textures.md

@@ -1,10 +1,13 @@
 # Executing Commands
 
 To use a command, simply enter its name. The user will be prompted for all
-additional information. For example, type "PIn" (or "pin") at the athenaCL
+additional information. For example, type "`PIn`" (or "pin") at the athenaCL
 prompt:
 
-**Entering a command**
+
+
+
+## Entering a command
 
 ```
 pi{}ti{} :: pin
@@ -24,10 +27,13 @@ sharps as "#" and flats as "$") or pitch-classes (integers that represent the
 notes of the chromatic scale) (Straus 1990 [AN#34]). For instance, the chord
 D-major can be represented with the following pitch-name string: (D, F#, A). Or,
 the same chord can be represented as a pitch class set: (2,6,9), where 0 is
-always C, 1=C#, 2=D, …, 10=A#, and 11=B. Calling the PIn command to create a new
-path named "b" with this pitch class set gives us the following results:
+always C, 1=C#, 2=D, …, 10=A#, and 11=B. Calling the `PIn` command to create a
+new path named "b" with this pitch class set gives us the following results:
 
-**Entering a command with arguments**
+
+
+
+## Entering a command with arguments
 
 ```
 pi{a}ti{} :: pin b d,f#,a

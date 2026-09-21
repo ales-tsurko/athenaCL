@@ -1,12 +1,16 @@
 # Creating a Path with a Duration Fraction
 
-First, the user creates a path consisting of three Multisets. As demonstrated
-in , there are many ways to create and edit a Path. In the following example,
-the user creates a new path named q1 by simply providing pitch space values
-using conventional note names. The path is the then viewed with the PIv command,
-and auditioned with the PIh command.
+First, the user creates a path consisting of three Multisets. As demonstrated in
+[Tutorial 3: Creating and Editing Paths][tutorial-3], there are many ways to
+create and edit a Path. In the following example, the user creates a new path
+named q1 by simply providing pitch space values using conventional note names.
+The path is the then viewed with the `PIv` command, and auditioned with the
+`PIh` command.
 
-**Creating a Path with PIn**
+
+
+
+## Creating a Path with `PIn`
 
 ```
 pi{}ti{} :: pin
@@ -43,12 +47,15 @@ specifies that each Multiset in the Path has an equal duration weighting (1, or
 weighting to each Multiset in the Path. When a Texture interprets a Path, it
 partitions its duration into as many segments as there are Path Multisets, and
 each segment is given a duration proportional to the Path durFraction. The
-command PIdf can be used to alter a Path's duration weighting. The user must
+command `PIdf` can be used to alter a Path's duration weighting. The user must
 supply a list of values, either as percentages (floating point or integer) or
-simply as numeric weightings. In the following example, after calling PIdf, the
-command PIh is used to audition the results of an altered durFraction:
+simply as numeric weightings. In the following example, after calling `PIdf`,
+the command `PIh` is used to audition the results of an altered durFraction:
 
-**Altering a Path's durFraction with PIdf**
+
+
+
+## Altering a Path's durFraction with `PIdf`
 
 ```
 pi{q1}ti{} :: pidf
@@ -70,6 +77,8 @@ PI q1 hear with TM LineGroove complete.
 (/Volumes/xdisc/_scratch/ath2010.07.03.19.08.09.mid)
 ```
 
-The PIv display shows that the Multisets are weighted such that the first is
-given 50%, the second 31%, and the last 19%. The MIDI file created with PIh
+The `PIv` display shows that the Multisets are weighted such that the first is
+given 50%, the second 31%, and the last 19%. The MIDI file created with `PIh`
 should confirm this distribution.
+
+[tutorial-3]: ../chapter03/01-tutorial-3-creating-and-editing-paths.md

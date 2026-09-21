@@ -7,9 +7,9 @@ though the user, when entering commands, may use lower-case letters. Some common
 prefixes are "PI", for PathInstance, or "TI", for TextureInstance. What follows
 the prefix usually resembles UNIX shell commands: "ls" for listing objects, "rm"
 for removing objects. For example, the command to list all the available
-TextureModules is TMls: "TM" for TextureModule, "ls" for list. When no common
+TextureModules is `TMls`: "TM" for TextureModule, "ls" for list. When no common
 UNIX command-abbreviation is available, intuitive short abbreviations are used.
-For example, the command to create the retrograde of a PathInstance is PIret:
+For example, the command to create the retrograde of a PathInstance is `PIret`:
 "PI" for PathInstance, "ret" for retrograde.
 
 The division of commands into prefixes demonstrates, in part, the large-scale

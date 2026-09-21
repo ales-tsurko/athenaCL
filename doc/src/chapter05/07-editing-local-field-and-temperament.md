@@ -8,10 +8,13 @@ transposed and tuned with any ParameterObject by using the Texture local field
 attribute. Each integer represents a half-step transposition, and floating point
 values can provide any detail of microtonal specification. Second, each Texture
 can have a different Temperament, or tuning system based on either pitch class,
-pitch space, or algorithmic specification. The command TTls allows the user to
+pitch space, or algorithmic specification. The command `TTls` allows the user to
 list the available TextureTemperaments.
 
-**Listing all TextureTemperaments**
+
+
+
+## Listing all TextureTemperaments
 
 ```
 pi{q1}ti{b2} :: ttls
@@ -38,7 +41,10 @@ then selects the temperament NoiseMedium for Texture a1. In the last case, two
 command are given on the some command line. As is the UNIX convention, the
 commands and arguments are separated by a semicolon:
 
-**Selecting Texture Temperament with TTo**
+
+
+
+## Selecting Texture Temperament with `TTo`
 
 ```
 pi{q1}ti{b2} :: tto

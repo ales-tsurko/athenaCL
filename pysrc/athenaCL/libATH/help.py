@@ -495,8 +495,8 @@ class HelpDoc:
     AUsys = "AUsys: AthenaUtility: System: Displays a list of all athenaCL properties and their current status."
     AUsys_usage = "ausys"
 
-    AUdoc = "AUdoc: AthenaUtility: Documentation: Opens the athenaCL documentation in a web browser. Attempts to load documentation from a local copy; if this fails, the on-line version is loaded."
-    AUdoc_usage = "audoc"
+    AUdoc = "AUdoc: AthenaUtility: Documentation: Reads the athenaCL manual. With no argument the contents are shown, each chapter a link to open it. With a chapter number that chapter is shown. With one or more words the manual is searched, and every chapter holding all of them is listed. With \"www\" the on-line manual is opened in a web browser."
+    AUdoc_usage = "audoc [chapter number, words to find, or www]"
 
     AUup = "AUup: AthenaUtility: Update: Checks on-line to see if a new version of athenaCL is available; if so, the athenaCL download page will be opened in a web browser."
     AUup_usage = "auup"

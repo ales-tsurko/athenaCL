@@ -11,7 +11,10 @@ mod completion;
 mod figure;
 mod history;
 mod icons;
+mod manual;
 mod pixel;
 mod player;
+#[cfg(test)]
+mod snapshot;
 mod terminal_input;
 pub(crate) mod theme;
