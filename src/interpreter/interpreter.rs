@@ -248,10 +248,12 @@ struct Interpreter {
 
 impl Interpreter {
     fn new() -> InterpreterResult<Self> {
+        // one interpreter, the one the athenaCL objects are built in and served by: the objects and
+        // the calls on them belong to the same vm
         let py_interpreter = init_py_interpreter();
         let (ath_interpreter, ath_object) = Self::init_ath_interpreter(&py_interpreter)?;
         Ok(Self {
-            py_interpreter: init_py_interpreter(),
+            py_interpreter,
             ath_interpreter,
             ath_object,
         })
@@ -414,7 +416,7 @@ pub fn init_py_interpreter() -> PyInterpreter {
     settings.optimize = 2;
     let builder = PyInterpreter::builder(settings);
     let ctx = builder.ctx.clone();
-    builder
+    let interpreter = builder
         .add_native_modules(&rustpython_stdlib::stdlib_module_defs(&ctx))
         .add_native_module(xml_tools_ext::module_def(&ctx))
         .add_native_module(dialog_ext::module_def(&ctx))
@@ -426,9 +428,40 @@ pub fn init_py_interpreter() -> PyInterpreter {
         .add_native_module(libath::error::module_def(&ctx))
         .add_native_module(libath::permutate::module_def(&ctx))
         .add_native_module(libath::quantize::module_def(&ctx))
+        .add_native_module(libath::rng::module_def(&ctx))
         .add_frozen_modules(rustpython_pylib::FROZEN_STDLIB)
         .add_frozen_modules(vm::py_freeze!(dir = "../../pysrc"))
-        .build()
+        .build();
+    // before any athenaCL code imports, so module-level aliases of random's functions capture the
+    // redirected ones
+    install_random_redirect(&interpreter);
+    interpreter
+}
+
+/// Point the interpreter's `random` module at the parameters stream, so `TPsd`'s existing
+/// `random.seed()` call and every module-level `random.*` draw advance the Rust stream.
+#[expect(
+    clippy::expect_used,
+    reason = "a random module that cannot be redirected leaves the app misbehaving quietly"
+)]
+fn install_random_redirect(interpreter: &PyInterpreter) {
+    interpreter.enter(|vm| {
+        let scope = vm.new_scope_with_builtins();
+        let redirect = vm::py_compile!(
+            source = r#"
+import random
+from athenaCL.libATH import rngBridge
+
+random.seed = rngBridge.parameters.seed
+random.random = rngBridge.parameters.random
+random.randint = rngBridge.parameters.randint
+random.choice = rngBridge.parameters.choice
+random.shuffle = rngBridge.parameters.shuffle
+"#
+        );
+        vm.run_code_obj(vm.ctx.new_code(redirect), scope)
+            .expect("the random module redirects onto the parameters stream")
+    });
 }
 
 fn extract_result_tuple(vm: &VirtualMachine, result: PyObjectRef) -> PyResult<(bool, String)> {

@@ -43,12 +43,18 @@ rodio = { version = "0.22.2", default-features = false, features = [
     "symphonia-aiff",
     "symphonia-alac",
 ] }
+# the rng streams are ChaCha12 directly, with SHA-256 to fold seed values: both
+# named and stable, so a seed's draw sequence stays reproducible across builds
+rand = "0.8"
+rand_chacha = "0.3"
+sha2 = "0.10"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 tempfile = "3"
-# rustpython 0.5.0 hands libc::POSIX_SPAWN_SETSID to nix's PosixSpawnFlags, which libc 0.2.187
-# retyped from c_int to c_short: it no longer builds on Linux. Cargo.lock holds libc at 0.2.186
-# until rustpython releases a fix, so don't let `cargo update` carry it past that on its own.
+# rustpython 0.5.0 hands libc::POSIX_SPAWN_SETSID to nix's PosixSpawnFlags,
+# which libc 0.2.187 retyped from c_int to c_short: it no longer builds on
+# Linux. Cargo.lock holds libc at 0.2.186 until rustpython releases a fix, so
+# don't let `cargo update` carry it past that on its own.
 rustpython-pylib = { version = "0.5.0", features = ["freeze-stdlib"] }
 rustpython-stdlib = "0.5.0"
 rustpython-vm = { version = "0.5.0", features = ["freeze-stdlib"] }

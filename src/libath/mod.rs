@@ -19,3 +19,4 @@ pub(crate) mod error;
 pub(crate) mod number;
 pub(crate) mod permutate;
 pub(crate) mod quantize;
+pub(crate) mod rng;
