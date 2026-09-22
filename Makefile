@@ -17,13 +17,13 @@ $(SOUND_FONT):
 	mv "$@.part" "$@"
 
 check:
-	cargo check --all-features --all-targets
+	cargo check --workspace --all-features --all-targets
 
 run:
 	cargo run
 
 test:
-	cargo nextest run --all-features --all-targets
+	cargo nextest run --workspace --all-features --all-targets
 
 # the manual's screenshots, into doc/src/images, and the README's, into resources; SHOTS=name
 # makes only those whose names hold it
@@ -32,10 +32,10 @@ screenshots:
 
 lint:
 	@status=0; \
-	cargo clippy --all-targets --all-features -- -D warnings || status=$$?; \
+	cargo clippy --workspace --all-targets --all-features -- -D warnings || status=$$?; \
 	cargo +nightly fmt --check --all || status=$$?; \
 	rumdl fmt --check . || status=$$?; \
-	RUSTDOCFLAGS="-D warnings" cargo doc --all-features \
+	RUSTDOCFLAGS="-D warnings" cargo doc --workspace --all-features \
 		--no-deps --document-private-items || status=$$?; \
 	exit $$status
 
@@ -46,7 +46,7 @@ fmt:
 code-health:
 	similarity-rs $(SIMILARITY_ARGS)
 	cargo machete --skip-target-dir
-	cargo llvm-cov nextest --all-features --all-targets --lcov --output-path $(COVERAGE_LCOV)
+	cargo llvm-cov nextest --workspace --all-features --all-targets --lcov --output-path $(COVERAGE_LCOV)
 	cargo crap --workspace --lcov $(COVERAGE_LCOV) $(CRAP_EXCLUDES) --format markdown --output $(CRAP_REPORT)
 	cargo crap --workspace --lcov $(COVERAGE_LCOV) $(CRAP_EXCLUDES) --summary --fail-above
 

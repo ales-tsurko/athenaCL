@@ -238,6 +238,7 @@ fn fresh_state() -> State {
         figure_view: View::Plot,
         tempo: "120".to_owned(),
         reveal: None,
+        document: interpreter::Document::default(),
     }
 }
 

@@ -12,7 +12,7 @@
 # License:       GPL
 # -----------------------------------------------------------------||||||||||||--
 
-import sys, os, time, random, traceback, http.client, urllib.request, urllib.parse, urllib.error
+import sys, os, time, random, traceback, urllib.request, urllib.error
 import unittest
 
 # the rust host overwrites this with the package version at startup; it stands
@@ -119,77 +119,12 @@ class External(object):
         f.writelines(logLines)
         f.close()
 
-    def _logParse(self):
-        """open the log file and parse it into useful data"""
-        charSep = "-"
-
-        f = open(self.logPath, "r")
-        logLines = f.readlines()
-        f.close()
-        bundle = {}
-        i = -1  # first will be zero
-        for line in logLines:  # in order, ERROR always comes first
-            if line.strip() == "":
-                continue
-            if line.startswith("ERROR"):
-                i = i + 1  # increment
-                bundle[i] = []  # create new list
-            bundle[i].append(line)
-        # convert to value pairs
-        param = {}
-        for group in list(bundle.keys()):  # order here does not matter
-            i = 0  # first will be zero
-            for field in bundle[group]:  # order here matters
-                key = "%s%s%s" % (group, charSep, i)
-                param[key] = field
-                i = i + 1
-        return param
-
     def logCheck(self):
-        """test to see if a log exists; called when quitting to see
-        if a log send should be done"""
+        """test to see if a log exists"""
         if os.path.exists(self.logPath):
             return 1  # no log, do nothing
         else:
             return 0
-
-    def _logDelete(self):
-        """delete the error log, assuming that it is empty"""
-        os.remove(self.logPath)
-
-    def logSend(self):
-        """attempt to submit a log file"""
-        paramRaw = self._logParse()
-        paramRaw["stateNext"] = "8"  # state 8 is bug processing
-        params = urllib.parse.urlencode(paramRaw)
-        headers = {
-            "Content-type": "application/x-www-form-urlencoded",
-            "Accept": "text/plain",
-        }
-        try:
-            conn = http.client.HTTPConnection(lang.msgCgiDomain)
-            conn.request("POST", lang.msgCgiURL, params, headers)
-            connect = 1
-        except:  # no connection active
-            connect = 0
-        if connect:
-            try:
-                response = conn.getresponse()
-            except:  # some other failure is possible here
-                print("unknown connection error.")
-                return None
-            if response.status == 200:  # good
-                data = response.read()
-                dataLines = data.split("\n")
-                print(dataLines[0])
-                self._logDelete()  # delete old log
-            else:
-                environment.printWarn(["http error:", response.status])
-
-            conn.close()
-            return 1
-        else:
-            return None  # nothing happened
 
     def onlineVersionFetch(self):
         """if online, check current version
@@ -344,6 +279,10 @@ class AthenaObject(object):
         # audioFormat is stored in user prefs
         self.audioChannels = 2  # default, saved w/ ao
         self.audioRate = 44100  # default, saved w/ ao
+        # the file the ao was last loaded from or saved to, and the form it had
+        # then: whatever it holds beyond that form is not saved
+        self.document = None
+        self._savedForm = None
 
         # this may be init from a pref; but loaded and stored in ao
         self.orcObj = None  # initialized from setEventMode
@@ -549,6 +488,23 @@ class AthenaObject(object):
     def setActiveTexture(self, value):
         self.activeTexture = value
         athenaObjExt.activeTextureSet(value)
+
+    def setDocument(self, path):
+        """take the ao as saved: to path, the file it was loaded from or saved
+        to, or to None, when it has no file"""
+        self.document = path
+        self._savedForm = command.savedForm(self)
+
+    def isEdited(self):
+        """whether the ao holds work its file does not; without paths, it holds
+        none"""
+        return len(self.pathLib) > 0 and command.savedForm(self) != self._savedForm
+
+    def documentName(self):
+        """the name of the ao's file, to ask about it"""
+        if self.document == None:
+            return "the AthenaObject"
+        return os.path.basename(self.document)
 
     def prefixCmdGroup(self, prefix):
         """for a given prefix will return a list of
@@ -1150,9 +1106,27 @@ class Interpreter(object):
     def loadAthenaObject(self, path):
         """Load a literal browser path, preserving spaces and other filename characters."""
         loader = command.AOl(self.ao, verbose=self.verbose)
-        loader.path = path
-        loader.gatherSwitch = 0  # do not tokenize, expand variables, or show a file dialog
-        return loader.do()
+        # do not tokenize, expand variables, or show a file dialog
+        loader.literalPath = path
+        return self._settled(*loader.do())
+
+    def documentState(self):
+        """The file the AthenaObject was last loaded from or saved to, or an empty string, and
+        whether it holds work that file does not."""
+        return self.ao.document or "", self.ao.isEdited()
+
+    def _settled(self, ok, result):
+        """A command's result for the GUI: a cancelled command shows nothing, and is no error."""
+        if not ok and result == lang.msgReturnCancel:
+            return 1, ""
+        return ok, result
+
+    def _procPublic(self, cmdObj, data):
+        """Act on a sub command's data for cmd(), which shows nothing: quitting closes the GUI.
+        The others only work in the terminal's command loop."""
+        if cmdObj.cmdStr == "quit":
+            athenaObjExt.quit()
+        return 1, ""
 
     def setScratchDirectory(self, path):
         """Use the directory picker's literal path, without command-line parsing."""
@@ -1218,6 +1192,9 @@ class Interpreter(object):
             try:  # execute cmdClassNametion, manage threads
                 cmdObj = cmdClassName(self.ao, arg, verbose=self.verbose)
                 ok, result = cmdObj.do()  # no out on resutl here
+                if drawer.isDict(result):  # a sub command's data, to act on here
+                    return self._procPublic(cmdObj, result)
+                ok, result = self._settled(ok, result)
                 if not ok or lang.ERROR in result:
                     raise Exception("command level error: %s" % result.strip())
             except Exception:
@@ -1425,6 +1402,33 @@ class Interpreter(object):
 
 
 # -----------------------------------------------------------------||||||||||||--
+class _Gui(object):
+    """the gui, as tests stand in for it: save questions take their answers
+    from answers, in turn, and quitting is counted, not done"""
+
+    def __enter__(self):
+        self.asked = []
+        self.answers = []
+        self.quits = 0
+        self._ask = dialog.askYesNoCancel
+        self._quit = athenaObjExt.quit
+        dialog.askYesNoCancel = self._answer
+        athenaObjExt.quit = self._quitted
+        return self
+
+    def __exit__(self, *exception):
+        dialog.askYesNoCancel = self._ask
+        athenaObjExt.quit = self._quit
+        return False
+
+    def _answer(self, query, defaultSel=1, termObj=None):
+        self.asked.append(query)
+        return self.answers.pop(0)
+
+    def _quitted(self):
+        self.quits += 1
+
+
 class Test(unittest.TestCase):
 
     def runTest(self):
@@ -1582,6 +1586,95 @@ class Test(unittest.TestCase):
         self.assertEqual(athInt.ao.cloneLib.number("a"), 0)
         ok, result = athInt.cmd("tcn w", errorMode="return")
         self.assertTrue(ok, result)
+
+    def testDocumentFollowsSavingLoadingAndRemoving(self):
+        import tempfile
+
+        athInt = Interpreter("terminal")
+        # settings alone are no work: there is nothing to save without a path
+        athInt.cmd("emo m")
+        self.assertEqual(athInt.documentState(), ("", False))
+        athInt.cmd("pin a c4,e4,g4")
+        self.assertEqual(athInt.documentState(), ("", True))
+        with tempfile.TemporaryDirectory() as folder:
+            athInt.cmd("aow %s" % os.path.join(folder, "work.xml"))
+            path, edited = athInt.documentState()
+            self.assertEqual((os.path.basename(path), edited), ("work.xml", False))
+            # viewing changes nothing; a texture does
+            athInt.cmd("piv")
+            self.assertEqual(athInt.documentState(), (path, False))
+            athInt.cmd("tin a 0")
+            self.assertEqual(athInt.documentState(), (path, True))
+            # the copy written beside an event list is not the AthenaObject's file
+            copier = command.AOw(athInt.ao, os.path.join(folder, "copy.xml"), "quite")
+            copier.copy = True
+            copier.do()
+            self.assertEqual(athInt.documentState(), (path, True))
+            athInt.cmd("aorm confirm")
+            self.assertEqual(athInt.documentState(), ("", False))
+            athInt.cmd("aol %s" % path)
+            loaded, edited = athInt.documentState()
+            self.assertEqual((os.path.realpath(loaded), edited), (os.path.realpath(path), False))
+
+    def testQuitOffersToSaveUnsavedWork(self):
+        import tempfile
+
+        with _Gui() as gui:
+            athInt = Interpreter("terminal")
+            athInt.cmd("emo m")
+            # nothing to lose: it quits without a question
+            self.assertEqual(athInt.cmd("q"), (1, ""))
+            self.assertEqual((gui.asked, gui.quits), ([], 1))
+            athInt.cmd("pin a c4")
+            # cancelled: it stays, and shows nothing
+            gui.answers.append(-1)
+            self.assertEqual(athInt.cmd("q"), (1, ""))
+            self.assertEqual(gui.asked, ["save changes to the AthenaObject before quitting?"])
+            self.assertEqual(gui.quits, 1)
+            with tempfile.TemporaryDirectory() as folder:
+                athInt.cmd("aow %s" % os.path.join(folder, "work.xml"))
+                path = athInt.ao.document
+                athInt.cmd("tin a 0")
+                # saved to its file, then it quits
+                gui.answers.append(1)
+                self.assertEqual(athInt.cmd("quit"), (1, ""))
+                self.assertEqual(gui.asked[-1], "save changes to work.xml before quitting?")
+                self.assertEqual((athInt.documentState(), gui.quits), ((path, False), 2))
+                # not saved, it quits all the same
+                athInt.cmd("tin b 0")
+                gui.answers.append(0)
+                self.assertEqual(athInt.cmd("q"), (1, ""))
+                self.assertEqual((athInt.documentState(), gui.quits), ((path, True), 3))
+                # what was saved is what there was when asked
+                athInt.cmd("aorm confirm")
+                athInt.cmd("aol %s" % path)
+                self.assertEqual(sorted(athInt.ao.textureLib.keys()), ["a"])
+            # confirmed, it quits without asking
+            athInt.cmd("tin c 0")
+            self.assertEqual(athInt.cmd("q confirm"), (1, ""))
+            self.assertEqual((len(gui.asked), gui.quits), (3, 4))
+
+    def testLoadingOffersToSaveUnsavedWork(self):
+        fixture = "tests/xml/test01.xml"
+        with _Gui() as gui:
+            athInt = Interpreter("terminal")
+            athInt.cmd("pin a c4")
+            # cancelled: the work stays, unsaved, and nothing is shown
+            gui.answers.append(-1)
+            self.assertEqual(athInt.loadAthenaObject(fixture), (1, ""))
+            self.assertEqual(
+                gui.asked, ["save changes to the AthenaObject before loading test01.xml?"]
+            )
+            self.assertEqual(athInt.documentState(), ("", True))
+            # not saved: the file replaces it
+            gui.answers.append(0)
+            ok, result = athInt.loadAthenaObject(fixture)
+            self.assertTrue(ok, result)
+            self.assertEqual(athInt.documentState(), (fixture, False))
+            # a file loaded and unchanged since is loaded over without asking
+            ok, result = athInt.cmd("aol %s" % fixture)
+            self.assertTrue(ok, result)
+            self.assertEqual(len(gui.asked), 2)
 
     def testInterpreterEmbeddedParameterObject(self):
 

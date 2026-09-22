@@ -74,10 +74,10 @@ class HelpDoc:
     r = lang.msgCredits
     r_usage = "r"
 
-    quit = "quit: Exit athenaCL."
-    quit_usage = "quit"
+    quit = "quit: Exit athenaCL. If the AthenaObject has unsaved changes, first asks whether to save them; with confirm, exits without asking."
+    quit_usage = "quit [confirm]"
 
-    q = "q: Exit athenaCL."
+    q = "q: Exit athenaCL. If the AthenaObject has unsaved changes, first asks whether to save them; with confirm, exits without asking."
     q_usage = "q [confirm]"
 
     help = 'help: To get help for a command or any available topic, enter "help" or "?" followed by a search string. If no command is provided, a menu of all commands available is displayed.'
@@ -420,7 +420,7 @@ class HelpDoc:
     AOw = "AOw: AthenaObject: Save: Saves an AthenaObject file, containing all Paths, Textures, Clones, and environment settings."
     AOw_usage = "aow filename.xml"
 
-    AOl = "AOl: AthenaObject: Load: Load an athenaCL XML AthenaObject. Loading an AthenaObject will overwrite any objects in the current AthenaObject."
+    AOl = "AOl: AthenaObject: Load: Load an athenaCL XML AthenaObject. Loading an AthenaObject will overwrite any objects in the current AthenaObject; if it has unsaved changes, athenaCL first asks whether to save them."
     AOl_usage = "aol filename.xml"
 
     AOmg = "AOmg: AthenaObject: Merge: Merges a selected XML AthenaObject with the current AthenaObject."

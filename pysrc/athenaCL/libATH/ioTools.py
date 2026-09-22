@@ -84,6 +84,13 @@ def writeXML(filePath, aData, pData, tData):
     what is written is controled by how pData is packaged
     this is done internally in athenaObj
     """
+    f = open(filePath, "w", encoding="utf-8")
+    f.write(xmlText(aData, pData, tData))
+    f.close()
+
+
+def xmlText(aData, pData, tData):
+    """the xml text of an athenaObject, from the dictionaries writeXML takes"""
     msg = []
     parent = "athenaObject"
     msg.append(xmlTools.XMLHEAD)
@@ -100,9 +107,7 @@ def writeXML(filePath, aData, pData, tData):
         [None, None, ("textureLib", "ti", "cloneLib", "tc")],
     )
     msg.append("\n</%s>" % parent)  # close prefs
-    f = open(filePath, "w", encoding="utf-8")
-    f.writelines(msg)
-    f.close()
+    return "".join(msg)
 
 
 # -----------------------------------------------------------------||||||||||||--

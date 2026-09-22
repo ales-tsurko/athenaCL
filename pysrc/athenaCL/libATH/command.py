@@ -200,6 +200,36 @@ class Command(object):
         pass
 
     # -----------------------------------------------------------------------||--
+    # unsaved work
+
+    def _saveChanges(self, doing):
+        """offer to save the ao's unsaved work before doing drops it: None to go
+        on, or the message to stop with, as when cancelled"""
+        if not self.ao.isEdited():
+            return None
+        query = "save changes to %s before %s?" % (self.ao.documentName(), doing)
+        answer = dialog.askYesNoCancel(query, 1, self.termObj)
+        if answer == -1:
+            return lang.msgReturnCancel
+        if answer == 1:
+            return self._saveDocument()
+        return None
+
+    def _saveDocument(self):
+        """save the ao to its file, or to one asked for when it has none: None
+        once saved, or the message to stop with"""
+        saver = AOw(self.ao)
+        if self.ao.document != None:
+            # the file itself, as it is: not parsed, or asked for again
+            saver.path = self.ao.document
+            saver.gatherSwitch = 0
+        ok, msg = saver.do()
+        if not ok:
+            return msg
+        dialog.msgOut(msg, self.termObj)
+        return None
+
+    # -----------------------------------------------------------------------||--
     # utility display functions
     def _nameTest(self, name, charInclude=""):
         """makes sure a name has valid characters"""
@@ -1564,20 +1594,11 @@ class quit(Command):
             args = argTools.ArgOps(args)
             self.confirm = args.get(0, "end")
         if self.confirm != "confirm":
-            askUsr = dialog.askYesNo("exit athenaCL? ", 0, self.termObj)
-            if askUsr != 1:
-                return lang.msgReturnCancel
+            # with nothing unsaved, nothing is asked
+            post = self._saveChanges("quitting")
+            if post != None:
+                return post
             self.confirm = "confirm"
-
-            # only do this if user has interactively confirmed quit
-            if self.ao.external.logCheck() == 1:  # log exists, submit
-                ckUser = dialog.askYesNo(lang.msgSubmitLog, 0, self.termObj)
-                if ckUser == 1:
-                    result = self.ao.external.logSend()
-                    if result == None:  # nothing happend
-                        dialog.msgOut(lang.msgSubmitLogFail, self.termObj)
-                    else:
-                        dialog.msgOut(lang.msgSubmitLogSuccess, self.termObj)
 
     def result(self):
         return {"confirm": 1}
@@ -6584,6 +6605,7 @@ class ELn(Command):
             # getting pathe here from EventMode object
             pathXml = emObj.outFormatToFilePath("xmlAthenaObject")
             cmdObj = AOw(self.ao, pathXml, "quite")
+            cmdObj.copy = True
             ok, result = cmdObj.do()
             outComplete.append("xmlAthenaObject")
             self.report.append("%s\n" % pathXml)
@@ -7036,6 +7058,15 @@ class _CommandAO(Command):
                 c["pmtrQDict"] = clone.pmtrQDict
         return textureData
 
+    def _aoSavedForm(self):
+        """the ao as it is written to its file, but for the date it is written
+        on: equal forms hold the same work"""
+        athenaData = self._aoSaveAthenaData()
+        del athenaData["date"]
+        return ioTools.xmlText(
+            athenaData, self._aoSavePathData(), self._aoSaveTextureData()
+        )
+
     def _aoDetermineFileFormat(self, path):
         "check xml type of a file, or determine if it is an old pickled file"
         with open(path, "r", encoding="utf-8-sig") as f:
@@ -7082,6 +7113,16 @@ class _CommandAO(Command):
         return pData, tData
 
 
+def savedForm(ao):
+    """the ao as it is written to its file, but for the date it is written on
+
+    >>> from athenaCL.libATH import athenaObj; ao = athenaObj.AthenaObject()
+    >>> savedForm(ao) == savedForm(ao)
+    True
+    """
+    return _CommandAO(ao)._aoSavedForm()
+
+
 class AOl(_CommandAO):
     """load an AthenaObject, replacing the current one
 
@@ -7105,12 +7146,15 @@ class AOl(_CommandAO):
         self.processSwitch = 1  # display only
         self.gatherSwitch = 1  # display only
         self.cmdStr = "AOl"
+        # a file given as it is, as the browser gives it: not parsed from args,
+        # or asked for
+        self.literalPath = None
 
     def gather(self):
         args = self.args
 
-        self.path = None
-        if args != "":
+        self.path = self.literalPath
+        if self.path == None and args != "":
             args = argTools.ArgOps(args)  # no strip
             self.path = self._findFilePath(args.get(0))
             if self.path == None:
@@ -7122,7 +7166,7 @@ class AOl(_CommandAO):
             )
             if ok != 1:
                 return lang.msgReturnCancel
-        # problem if path is still == None
+        return self._saveChanges("loading %s" % os.path.basename(self.path))
 
     def process(self):
         self.timer = rhythm.Timer()  # start
@@ -7142,6 +7186,7 @@ class AOl(_CommandAO):
         self._piUpdateAllReferences()
         # only after self.path + texture data are loaded
         self.timer.stop()
+        self.ao.setDocument(self.path)
         # update last paths
         self.ao.aoInfo["fpLastDir"] = os.path.dirname(self.path)
         self.ao.external.writePref("athena", "fpLastDir", self.ao.aoInfo["fpLastDir"])
@@ -7171,6 +7216,8 @@ class AOw(_CommandAO):
         self.gatherSwitch = 1  # display only
         self.verbose = verbose
         self.cmdStr = "AOw"
+        # a copy, as written beside an event list, is not the ao's own file
+        self.copy = False
 
     def gather(self):
         args = self.args
@@ -7186,10 +7233,14 @@ class AOw(_CommandAO):
                 return self._getUsage()
         if self.path == None:
             prompt = lang.msgAOnameFile
+            directory = self.ao.aoInfo["fpLastDir"]
+            if directory == "":
+                directory = self.ao.external.getPref("athena", "fpScratchDir")
             while 1:  ## to make sure you a get a .xml ending
                 self.path, ok = dialogExt.promptSaveFile(
                     prompt,
-                    "ao.xml",
+                    directory,
+                    "untitled.xml",
                 )
                 if ok != 1:
                     return lang.msgReturnCancel
@@ -7217,6 +7268,8 @@ class AOw(_CommandAO):
             pass
         else:  # win or other
             pass
+        if not self.copy:
+            self.ao.setDocument(self.path)
         # update last paths
         self.ao.aoInfo["fpLastDir"] = os.path.dirname(self.path)
         self.ao.external.writePref("athena", "fpLastDir", self.ao.aoInfo["fpLastDir"])
@@ -7391,6 +7444,8 @@ class AOrm(_CommandAO):
         self.ao.setActiveTexture("")
         self.ao.setActivePath("")
         self._piUpdateAllReferences()
+        # what comes next is new work, not its file's
+        self.ao.setDocument(None)
 
     def log(self):  # no history stored, as ao is removed
         if self.gatherStatus and self.processStatus:  # if complete

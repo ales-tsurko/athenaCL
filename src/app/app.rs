@@ -12,7 +12,7 @@ use iced::{
         scrollable::{self, Direction},
         space, span, text, Button, Column, PickList, Row,
     },
-    Color, Element, Font, Length, Padding, Rectangle, Subscription, Task, Theme, Vector,
+    window, Color, Element, Font, Length, Padding, Rectangle, Subscription, Task, Theme, Vector,
 };
 use rfd::FileDialog;
 use rustyline::history::SearchDirection;
@@ -104,6 +104,8 @@ pub struct State {
     /// A page of the manual the running command showed, to scroll to once the command is done:
     /// what the command prints after it would push the page's start out of view.
     reveal: Option<usize>,
+    /// The AthenaObject's file, and whether it holds unsaved work, for the window's title.
+    document: interpreter::Document,
 }
 
 impl State {
@@ -254,6 +256,7 @@ impl Default for State {
             mode: Mode::default(),
             figure_view: View::default(),
             reveal: None,
+            document: interpreter::Document::default(),
             tempo,
         }
     }
@@ -374,9 +377,42 @@ pub fn update(state: &mut State, message: Message) -> Task<Message> {
         Message::Figure(message) => return update_figure(state, message),
         Message::Interpreter(message) => return update_interpreter(state, message),
         Message::Player(message) => return state.update_player(message),
+        Message::WindowOpened(id) => return route_quit(id),
+        Message::CloseRequested => return request_quit(state),
     }
 
     Task::none()
+}
+
+/// Point Cmd+Q and the app menu's Quit at the window's close button, so that quitting that way
+/// offers to save unsaved work too.
+fn route_quit(id: window::Id) -> Task<Message> {
+    window::run(id, |window| {
+        let routed = match window.window_handle() {
+            Ok(handle) => close_on_quit::route(handle.as_raw()).map_err(|error| error.to_string()),
+            Err(error) => Err(error.to_string()),
+        };
+        if let Err(error) = routed {
+            eprintln!("Cmd+Q quits without offering to save: {error}");
+        }
+    })
+    .discard()
+}
+
+/// Quit, as the window's close button and Cmd+Q ask: the interpreter first offers to save unsaved
+/// work. A question already waiting is brought into view instead, to be answered first.
+fn request_quit(state: &mut State) -> Task<Message> {
+    if state.question.is_some() {
+        return operation::scroll_to(
+            LOG,
+            AbsoluteOffset {
+                x: None,
+                y: Some(0.0),
+            },
+        )
+        .chain(operation::focus(state.input_id.clone()));
+    }
+    update_interpreter(state, interpreter::Message::SendCmd("quit".to_owned()))
 }
 
 /// Send what's typed: the answer to the question, or a command. It's read now rather than when
@@ -817,6 +853,12 @@ fn update_interpreter(state: &mut State, message: interpreter::Message) -> Task<
 
             Task::none()
         }
+        interpreter::Message::Document(document) => {
+            state.document = document;
+
+            Task::none()
+        }
+        interpreter::Message::Quit => iced::exit(),
         _ => Task::none(),
     }
 }
@@ -860,6 +902,11 @@ fn prompt(state: &State) -> Prompt {
 /// Show the interpreter's output, returning focus to the input.
 fn push_output(state: &mut State, output: Output) -> Task<Message> {
     state.output.push(output);
+    refocus(state)
+}
+
+/// Give the input its focus back, unless a file form in the browser has it.
+fn refocus(state: &State) -> Task<Message> {
     if state.browser.edit.is_some() {
         Task::none()
     } else {
@@ -868,9 +915,12 @@ fn push_output(state: &mut State, output: Output) -> Task<Message> {
 }
 
 /// Show what a command printed as it finished, and then the start of the page of the manual it
-/// showed, if it showed one.
+/// showed, if it showed one. A command that printed nothing, as one cancelled, leaves no line.
 fn push_result(state: &mut State, output: Output) -> Task<Message> {
-    let focus = push_output(state, output);
+    let focus = match output {
+        Output::Normal(text) if text.is_empty() => refocus(state),
+        output => push_output(state, output),
+    };
     match state.reveal.take() {
         Some(index) => focus.chain(reveal(index)),
         None => focus,
@@ -880,6 +930,25 @@ fn push_result(state: &mut State, output: Output) -> Task<Message> {
 /// The iced theme: the look's.
 pub fn theme(state: &State) -> Theme {
     state.mode.theme()
+}
+
+/// The window's title: the name of the AthenaObject's file, when it has one, marked while it holds
+/// unsaved work, as macOS titles documents.
+pub fn title(state: &State) -> String {
+    let name = state
+        .document
+        .path
+        .as_deref()
+        .and_then(std::path::Path::file_name)
+        .map_or_else(
+            || "athenaCL".to_owned(),
+            |name| name.to_string_lossy().into_owned(),
+        );
+    if state.document.edited {
+        format!("{name} — Edited")
+    } else {
+        name
+    }
 }
 
 /// The top-level iced view function.
@@ -1384,6 +1453,10 @@ pub enum Message {
     Interpreter(interpreter::Message),
     Player(player::Message),
     Figure(figure::Message),
+    /// The window has opened: Cmd+Q is pointed at its close button.
+    WindowOpened(window::Id),
+    /// The window's close button, or Cmd+Q, asks to quit.
+    CloseRequested,
 }
 
 impl From<interpreter::Message> for Message {
@@ -1466,6 +1539,8 @@ pub fn subscription(state: &State) -> Subscription<Message> {
         player::subscription(&state.player_state).map(Message::Player),
         state.browser.subscription().map(Message::Browser),
         keys,
+        window::open_events().map(Message::WindowOpened),
+        window::close_requests().map(|_| Message::CloseRequested),
     ])
 }
 
@@ -1499,6 +1574,7 @@ mod tests {
             figure_view: View::Plot,
             tempo: "120".to_owned(),
             reveal: None,
+            document: interpreter::Document::default(),
         }
     }
 
@@ -2597,6 +2673,69 @@ mod tests {
             Question::YesNoCancel { default: false }.answers(),
             ["YES", "NO", "CANCEL"]
         );
+    }
+
+    #[test]
+    fn the_title_names_the_athena_object_s_file_and_marks_unsaved_work() {
+        let mut state = state();
+        assert_eq!(title(&state), "athenaCL");
+
+        let document = |path: Option<&str>, edited| {
+            Message::Interpreter(interpreter::Message::Document(interpreter::Document {
+                path: path.map(Into::into),
+                edited,
+            }))
+        };
+        drop(update(&mut state, document(None, true)));
+        assert_eq!(title(&state), "athenaCL — Edited");
+        drop(update(
+            &mut state,
+            document(Some("/music/canon.xml"), false),
+        ));
+        assert_eq!(title(&state), "canon.xml");
+        drop(update(&mut state, document(Some("/music/canon.xml"), true)));
+        assert_eq!(title(&state), "canon.xml — Edited");
+    }
+
+    #[test]
+    fn quitting_waits_for_the_question_on_screen() {
+        let mut state = state();
+        state.question = Some(Query::new(
+            "destroy the current AthenaObject? ".to_owned(),
+            Question::YesNo { default: false },
+        ));
+
+        drop(update(&mut state, Message::CloseRequested));
+
+        assert!(
+            state.output.is_empty(),
+            "nothing is sent until it's answered"
+        );
+        assert!(state.question.is_some());
+    }
+
+    #[test]
+    fn a_settled_quit_closes_the_app() {
+        use iced::futures::{executor::block_on, StreamExt};
+        use iced_test::runtime::{task::into_stream, Action};
+        let mut state = state();
+
+        let task = update(&mut state, Message::Interpreter(interpreter::Message::Quit));
+
+        let stream = into_stream(task).expect("an exit");
+        let actions = block_on(stream.collect::<Vec<_>>());
+        assert!(matches!(actions.as_slice(), [Action::Exit]));
+    }
+
+    #[test]
+    fn a_command_that_shows_nothing_leaves_no_line() {
+        let mut state = state();
+        let post = |text: &str| Message::Interpreter(interpreter::Message::Post(text.to_owned()));
+
+        drop(update(&mut state, post("")));
+        assert!(state.output.is_empty());
+        drop(update(&mut state, post("done")));
+        assert!(matches!(state.output.as_slice(), [Output::Normal(text)] if text == "done"));
     }
 
     #[test]

@@ -42,13 +42,15 @@ pub(super) mod _inner {
         prompt_dialog(title, initial_dir, PromptType::ChooseFile, vm)
     }
 
+    /// Ask where to save a file, starting in `initial_dir` with `file_name` filled in.
     #[pyfunction(name = "promptSaveFile")]
     pub(crate) fn prompt_save_file(
         title: String,
         initial_dir: String,
+        file_name: String,
         vm: &VirtualMachine,
     ) -> PyResult {
-        prompt_dialog(title, initial_dir, PromptType::SaveFile, vm)
+        prompt_dialog(title, initial_dir, PromptType::SaveFile(file_name), vm)
     }
 
     fn prompt_dialog(
@@ -74,11 +76,11 @@ pub(super) mod _inner {
         response(prompt_type.pick(dialog), vm)
     }
 
-    #[derive(Clone, Copy)]
     enum PromptType {
         ChooseDir,
         ChooseFile,
-        SaveFile,
+        /// Saving, under a name to start with.
+        SaveFile(String),
     }
 
     impl PromptType {
@@ -87,7 +89,7 @@ pub(super) mod _inner {
             match self {
                 PromptType::ChooseDir => dialog.pick_folder(),
                 PromptType::ChooseFile => dialog.pick_file(),
-                PromptType::SaveFile => dialog.save_file(),
+                PromptType::SaveFile(name) => dialog.set_file_name(name).save_file(),
             }
         }
     }

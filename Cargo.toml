@@ -13,9 +13,14 @@ resources = [
     "doc/src",
 ]
 
+[workspace]
+# the app forbids unsafe code; what can only be done unsafely lives in these, each on its own
+members = ["crates/close-on-quit"]
+
 [dependencies]
 ahash = "0.8.12"
 async-channel = "2.5.0"
+close-on-quit = { path = "crates/close-on-quit" }
 cpal = "0.18.2"
 iced = { version = "0.14.0", features = [
     "advanced",

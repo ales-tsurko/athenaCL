@@ -64,4 +64,15 @@ pub(super) mod _inner {
 
         Ok(())
     }
+
+    /// Close the GUI: quitting is settled, and whatever was to be saved has been.
+    #[pyfunction(name = "quit")]
+    pub(crate) fn quit(vm: &VirtualMachine) -> PyResult<()> {
+        interpreter::INTERPRETER_WORKER
+            .gui_sender
+            .send_blocking(interpreter::Message::Quit)
+            .map_err(|_err| vm.new_runtime_error("cannot send message to the GUI".to_owned()))?;
+
+        Ok(())
+    }
 }

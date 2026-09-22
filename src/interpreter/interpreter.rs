@@ -1,6 +1,7 @@
 //! athenaCL interpreter.
 
 use std::{
+    path::PathBuf,
     sync::{Arc, LazyLock},
     thread,
 };
@@ -57,6 +58,8 @@ impl InterpreterWorker {
                 panic!("error initializating interpreter");
             });
 
+            // what the gui was last told of the AthenaObject's file
+            let mut document = Document::default();
             loop {
                 if let Ok(message) = r.recv_blocking() {
                     let refresh_scratch = matches!(
@@ -65,6 +68,8 @@ impl InterpreterWorker {
                             | Message::LoadAthenaObject(_)
                             | Message::SetScratchDir(_)
                     );
+                    let changes_work =
+                        matches!(message, Message::SendCmd(_) | Message::LoadAthenaObject(_));
                     let msg = match message {
                         Message::SendCmd(cmd) => interpreter.run_cmd(&cmd).map(Message::Post),
                         Message::LoadAthenaObject(path) => interpreter
@@ -98,6 +103,9 @@ impl InterpreterWorker {
                             s.send_blocking(Message::ScratchDir(path))
                                 .expect("GUI channel is unbounded");
                         }
+                    }
+                    if changes_work {
+                        interpreter.report_document(&mut document, &s);
                     }
 
                     s.send_blocking(msg).expect("cannot send message to gui");
@@ -167,6 +175,20 @@ pub enum Message {
     // Not system file path, but athenaCL pitch path
     ActivePathSet(String),
     ActiveTextureSet(String),
+    /// The AthenaObject's file, and whether it holds unsaved work, as it has changed.
+    Document(Document),
+    /// Quitting is settled: whatever was to be saved has been.
+    Quit,
+}
+
+/// The AthenaObject as a document: the file it was last loaded from or saved to, and whether it
+/// holds work that file does not.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct Document {
+    /// None until the AthenaObject is saved or loaded, and again once it's removed.
+    pub path: Option<PathBuf>,
+    /// Whether it holds work the file does not.
+    pub edited: bool,
 }
 
 /// A command offered by the interpreter's own registry.
@@ -308,6 +330,30 @@ interp"#
         })
     }
 
+    /// The AthenaObject's file, and whether it holds unsaved work.
+    fn document(&self) -> InterpreterResult<Document> {
+        self.py_interpreter.enter(|vm| {
+            let state = vm
+                .call_method(&self.ath_interpreter, "documentState", ())
+                .try_py()?;
+            extract_document(vm, state).try_py()
+        })
+    }
+
+    /// Tell the GUI of the AthenaObject's file and unsaved work, once either differs from what it
+    /// was last told, `shown`.
+    fn report_document(&self, shown: &mut Document, gui: &Sender<Message>) {
+        let report = match self.document() {
+            Ok(document) if document == *shown => return,
+            Ok(document) => {
+                shown.clone_from(&document);
+                Message::Document(document)
+            }
+            Err(error) => error.into(),
+        };
+        gui.send_blocking(report).expect("GUI channel is unbounded");
+    }
+
     /// A preference, from athenaCL's preferences file.
     fn pref(&self, category: &str, key: &str) -> InterpreterResult<String> {
         self.py_interpreter.enter(|vm| -> _ {
@@ -422,6 +468,21 @@ fn extract_vec_string(vm: &VirtualMachine, result: PyObjectRef) -> PyResult<Vec<
         })?
 }
 
+/// A document from athenaCL's `(path, edited)`, where an empty path is none.
+fn extract_document(vm: &VirtualMachine, state: PyObjectRef) -> PyResult<Document> {
+    let tuple = state
+        .downcast_ref::<PyTuple>()
+        .ok_or_else(|| vm.new_type_error("Expected a tuple".to_owned()))?;
+    let [path, edited] = tuple.as_slice() else {
+        return Err(vm.new_value_error("Expected a path and a flag".to_owned()));
+    };
+    let path = extract_string(vm, path.clone())?;
+    Ok(Document {
+        path: (!path.is_empty()).then(|| PathBuf::from(path)),
+        edited: edited.clone().try_to_bool(vm)?,
+    })
+}
+
 fn extract_string(vm: &VirtualMachine, result: PyObjectRef) -> PyResult<String> {
     result
         .downcast_ref::<PyStr>()
@@ -508,6 +569,37 @@ mod tests {
         interpreter
             .call_command("setScratchDirectory", path_text)
             .expect_err("a file is not a scratch folder");
+    }
+
+    #[test]
+    fn the_gui_hears_of_the_athena_object_s_file_and_unsaved_work_once_they_change() {
+        init_scratch_prefs();
+        let interpreter = Interpreter::new().expect("interpreter");
+        let (gui, heard) = unbounded();
+        let mut shown = Document::default();
+        let folder = tempfile::tempdir().expect("scratch directory");
+        let file = folder.path().join("work.xml");
+
+        interpreter.report_document(&mut shown, &gui);
+        interpreter.run_cmd("pin a c4,e4").expect("a path");
+        interpreter.report_document(&mut shown, &gui);
+        interpreter.report_document(&mut shown, &gui);
+        interpreter
+            .run_cmd(&format!("aow {}", file.display()))
+            .expect("saved");
+        interpreter.report_document(&mut shown, &gui);
+
+        let told: Vec<_> = std::iter::from_fn(|| heard.try_recv().ok()).collect();
+        assert!(
+            matches!(
+                told.as_slice(),
+                [
+                    Message::Document(Document { path: None, edited: true }),
+                    Message::Document(Document { path: Some(saved), edited: false }),
+                ] if saved.file_name() == file.file_name()
+            ),
+            "told of each change once: {told:?}"
+        );
     }
 
     #[test]

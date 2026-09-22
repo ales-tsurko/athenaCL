@@ -1,9 +1,9 @@
 # Saving and Merging AthenaObjects
 
 Loading a new AthenaObject will completely replace the current AthenaObject
-contents. For this reason, users should always save their work before loading a
-new AthenaObject. The user can, alternatively, merge AthenaObjects. Merging is a
-powerful tool: the user can combine many AthenaObjects that have been saved
+contents. If the current AthenaObject has unsaved changes, athenaCL first asks
+whether to save them. The user can, alternatively, merge AthenaObjects. Merging
+is a powerful tool: the user can combine many AthenaObjects that have been saved
 separately, or combine an AthenaObject numerous times with itself. In the
 example below, the user merges "demo01.xml", loaded above, with another of the
 same AthenaObject "demo01.xml". The file paths for athenaCL demonstration files

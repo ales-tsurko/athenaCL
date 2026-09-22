@@ -127,8 +127,6 @@ class LangEn:
     msgAuthorEmail = "ariza@flexatone.net"
     msgBugReport = "athenacl@googlegroups.com"
 
-    msgCgiDomain = "www.flexatone.net:80"
-    msgCgiURL = "/cgi-bin/py/flexNet/software/q.cgi"  # ?stateNext=8'
     msgVersionURL = "www.flexatone.net/athenaCL/version.txt"
     msgAthDownloadURL = "www.flexatone.net/athena.html#athenaDownload"
     # common file path to a tar file; insert version number
@@ -216,9 +214,7 @@ Apple, Macintosh, Mac OS, and QuickTime are trademarks or registered trademarks 
 
     # -----------------------------------------------------------------------||--
     msgAthObjError = "apologies: the previous command could not be completed as expected.\nplease report this bug when quitting, or examine the log (AUlog).\n"
-    msgSubmitLog = "anonymously submit bug report?"
     msgSubmitLogFail = "no connection possible; try again when on-line.\n"
-    msgSubmitLogSuccess = "thank you! submitting bugs is very important, please continue to do so in the future.\n"
     msgVersionCheck = "check online for updates to athenaCL?"
     msgVersionUpdate = "a %s update to athenaCL (%s) is now available.\nopen download page in a browser?"
     msgUpTodate = "athenaCL %s is up to date.\n"
