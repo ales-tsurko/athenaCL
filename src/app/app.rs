@@ -1858,7 +1858,8 @@ mod tests {
 
         let mut state = state();
         let line = "wrapping command output 音  ".repeat(6);
-        let normal = format!("Output: {line}");
+        // Fill a wrapped line with the embedded font, regardless of the system's CJK fallback.
+        let normal = format!("Output: {line}\n{}", "word ".repeat(30));
         let command = format!("Command: {line}");
         let error = format!("Error: {line}");
         let file = format!("File: {}\nSecond line", line.repeat(3));
@@ -1907,14 +1908,22 @@ mod tests {
                     Size::new(MIN_WINDOW_SIZE.0, 1600.0),
                     view(&state),
                 );
+                // Iced reserves scrollbar space only when the log overflows vertically.
+                let selector::Target::Scrollable { content_bounds, .. } =
+                    simulator.find(selector::id(LOG)).expect("log")
+                else {
+                    panic!("scrollable log")
+                };
                 for text in [&normal, &command, &error, &question, &code] {
                     let bounds = simulator
                         .find(text.as_str())
                         .expect("wrapped log text")
                         .bounds();
                     assert!(
-                        bounds.width <= OUTPUT_WIDTH + 1.0,
-                        "text fits the log: {bounds:?}"
+                        bounds.x >= content_bounds.x - 1.0
+                            && bounds.x + bounds.width
+                                <= content_bounds.x + content_bounds.width + 1.0,
+                        "text fits the log: {bounds:?} within {content_bounds:?}"
                     );
                     assert!(bounds.height > 36.0, "long lines wrap: {bounds:?}");
                 }
@@ -1923,7 +1932,7 @@ mod tests {
                     .expect("manual page")
                     .bounds();
                 assert!(
-                    manual.width <= LOG_MAX_WIDTH - 2.0 * WINDOW_PADDING && manual.height > 80.0,
+                    manual.width <= content_bounds.width + 1.0 && manual.height > 80.0,
                     "manual wraps within the log: {manual:?}"
                 );
                 let preview = simulator.find(file.as_str()).expect("file preview");
@@ -1941,7 +1950,7 @@ mod tests {
                     .expect("input")
                     .visible_bounds()
                     .expect("visible input");
-                assert!(input.width > 100.0 && input.width < OUTPUT_WIDTH);
+                assert!(input.width > 100.0 && input.width < content_bounds.width);
                 let fixed = [&normal, &second_file, &question];
                 let positions: Vec<_> = fixed
                     .iter()
