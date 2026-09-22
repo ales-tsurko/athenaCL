@@ -14,6 +14,8 @@
 //! recursion), the port normalizes it, says so in its docs, and the parity corpus states the
 //! narrowing.
 
+pub(crate) mod chaos;
 pub(crate) mod error;
-pub(crate) mod interpolate;
+pub(crate) mod number;
 pub(crate) mod permutate;
+pub(crate) mod quantize;

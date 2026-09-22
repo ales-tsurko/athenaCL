@@ -56,7 +56,6 @@ def run_tests(test_case_name=None):
             'athenaCL.libATH.grammar',
             'athenaCL.libATH.help',
             'athenaCL.libATH.htmlTools',
-            'athenaCL.libATH.interpolate',
             'athenaCL.libATH.ioTools',
             'athenaCL.libATH.language',
             'athenaCL.libATH.markov',
