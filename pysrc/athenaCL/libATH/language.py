@@ -178,7 +178,7 @@ Interactive help for every command. Complete HTML / PDF tutorials and reference 
 """
 
     msgAthFeatAlgo = """\
-Rapid creation of polyphonic event list structures. Theses event lists can be composed for GeneralMidi or as Csound scores using a built in library of internal instruments. Output formats include scores for internal or external Csound instruments, MIDI files, text-based output formats, and support for alternative algorithmic composition systems including Paul Berg's AC Toolbox and Michael Goggins' Silence.
+Rapid creation of polyphonic event list structures. Theses event lists can be composed for GeneralMidi or as Csound scores using a built in library of internal instruments. Output formats include scores for internal or external Csound instruments, MIDI files, text-based output formats, and support for alternative algorithmic composition systems including Michael Goggins' Silence.
 
 Over sixty integrated Csound instruments, all with default values and documentation.
 
@@ -545,8 +545,6 @@ Apple, Macintosh, Mac OS, and QuickTime are trademarks or registered trademarks 
 
     # note: find out what type of midi file
     docOeMidiFile = "Translates events to a standard (type 1) MIDI file. Compatible with all Orchestras; in all cases events are translated with the GeneralMidi Orchestra."
-
-    docOeAcToolbox = "Translates each Texture and each Clone into a Section and writes an Environment file for loading within Paul Berg's AC Toolbox. A Parallel Section, containing references to each of these Sections, is also provided. Compatible with all Orchestras; GeneralMidi Orchestra will be used for event postMap conversions."
 
     docOeText = "Translate events to a plain text file. All event parameter values are separated by a delimiter (tab or space) and ended with a return carriage. Compatible with all Orchestras; EventMode Orchestra will be used for event postMap conversions."
 

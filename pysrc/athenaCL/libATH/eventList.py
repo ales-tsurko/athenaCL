@@ -17,7 +17,6 @@ from athenaCL.libATH import language
 
 lang = language.LangObj()
 from athenaCL.libATH import midiTools
-from athenaCL.libATH import pitchTools
 from athenaCL.libATH import osTools
 from athenaCL.libATH import audioTools
 from athenaCL.libATH import outFormat
@@ -61,7 +60,6 @@ outputEngineNames = [
     "EngineSuperColliderTask",
     #    'EngineMaxColl',
     "EnginePureDataArray",
-    "EngineAcToolbox",
     "EngineMidiFile",
     "EngineText",
 ]
@@ -150,8 +148,7 @@ def selectOutEngineOrc(emName, oeName):
     #         # maxColl assumes midi values for all parameters
     #         return 'generalMidi'
 
-    # treate acToolbox the same as midiFile
-    elif oeName in ["EngineMidiFile", "EngineAcToolbox"]:
+    elif oeName == "EngineMidiFile":
         if emName in ["midi", "midiPercussion"]:
             return selectEventModeOrc(emName)  # will get gm or gmPercussion
         else:  # event mode may be something other than a midi variant
@@ -1313,14 +1310,6 @@ class _OutputEngine:
     def _fmtHeadClone(self, className, tName, cName, prepend=""):
         return "%s TM(%s), TI(%s), TC(%s)\n" % (prepend, className, tName, cName)
 
-    def _fmtTitleTexture(self, musicName, tName):
-        """used for naming ac toolbox sections"""
-        return "%s-%s" % (musicName, tName)
-
-    def _fmtTitleClone(self, musicName, tName, cName):
-        """used for naming ac toolbox sections"""
-        return "%s-%s-%s" % (musicName, tName, cName)
-
     def _strValue(self, value, ljust=8, sigDig=6, prefix="", postfix=" "):
         """given a value, prepare appropriate string version,
         w/ default space at end (only needed w/ csound scores)"""
@@ -1530,56 +1519,6 @@ class _OutputEngine:
             midiPan = self.orcObj.postMap(inst, "pan", event["pan"], orcMapMode)
             midiList.append((tStart, sus, midiVel, midiPs, midiPan))
         return midiList
-
-    def _translateAcToolbox(self, orcMapMode, esObj, ch=0, pgm=0):
-        """channel may be None; must provide default (0)
-        build a list of string to avoid un packing later"""
-        if ch == None:  # most shift and correct channel info
-            ch = 0
-        else:
-            ch = ch - 1
-        el = esObj.list()  # get event list
-        inst = el[0]["inst"]  # get inst from first event
-        dataList = []
-        midiPanLast = None  # store last to filter data
-        # add program change information, always starting at time 0
-        dataStr = "(%s (%s %s))\n" % (
-            self._strValue(0, 6, 0),
-            midiTools.decimalProgramChange(ch),
-            pgm,
-        )
-        dataList.append(dataStr)
-        for event in el:
-            if event["acc"] == 0:
-                continue  # do not write rests
-            tStart = event["time"] * 1000  # convert to ms
-            sus = event["sus"] * 1000  # convert to ms
-            midiVel = self.orcObj.postMap(inst, "amp", event["amp"], orcMapMode)
-            # cant use postMap here: no way to specify floating mid values
-            # only alternative is build a custom orchestra...
-            # midiPs = self.orcObj.postMap(inst, 'ps', event['ps'])
-            # pitchTools will cap values b/n 0 and 127, but keep floats
-            midiPs = pitchTools.psToMidi(event["ps"], "nolimit")
-            midiPan = self.orcObj.postMap(inst, "pan", event["pan"], orcMapMode)
-            # check if pan is different
-            if midiPan != midiPanLast:
-                midiPanLast = midiPan  # pan is controller 10
-                dataStr = "(%s (%s 10 %s))\n" % (
-                    self._strValue(tStart, 6, 0),
-                    midiTools.decimalController(ch),
-                    midiPan,
-                )
-                dataList.append(dataStr)
-            # only store note-on events now
-            dataStr = "(%s (%s %s %s) %s)\n" % (
-                self._strValue(tStart, 6, 0),  # int?
-                midiTools.decimalNoteOn(ch),
-                self._strValue(midiPs, 8, 4),
-                self._strValue(midiVel, 4, 0),  # an int
-                self._strValue(sus, 6, 0),
-            )  # assume this is an int
-            dataList.append(dataStr)
-        return dataList
 
     #     def _translateCollList(self, orcMapMode, esObj):
     #         """coll data must be integers; uses midi values"""
@@ -2449,134 +2388,6 @@ class EngineMidiFile(_OutputEngine):
 
 
 # -----------------------------------------------------------------||||||||||||--
-class EngineAcToolbox(_OutputEngine):
-    """writes a midi file"""
-
-    def __init__(self, emObj, fpRef, ao):
-        """
-        >>> from athenaCL.libATH import athenaObj
-        >>> ao = athenaObj.AthenaObject()
-        >>> a = EngineAcToolbox('generalMidi', {}, ao)
-        """
-        _OutputEngine.__init__(self, emObj, fpRef, ao)  # provide event name
-        self.name = "EngineAcToolbox"
-        self.doc = lang.docOeAcToolbox
-        # define orcs that are not compatible w/ this engine
-        self.orcIncompat = []  # all orchestras compatable
-        self.outAvailable = ["acToolbox"]
-        self.outMin = ["acToolbox"]
-        # store structured data
-        self.codeList = []
-        self.codeCmt = "created with %s" % lang.msgAth
-
-    def _acSection(self, title, dataList, dur):
-        """must convert dur from s to ms"""
-        msg = []
-        h = (
-            """(define %s (make-instance     'section
-    :input '(make-from-midi-file 'section)
-    :events '("""
-            % title
-        )
-        # comment is last quote
-        t = """  ) 
-    :duration %s 
-    :clock-unit nil)    "%s")""" % (
-            self._strValue(dur * 1000, 6, 0),
-            self.codeCmt,
-        )
-        msg.append(h)
-        for event in dataList:  # events are already strings w/ line cariage
-            msg.append(event)
-        msg.append(t)
-        msg.append("\n")
-        return "".join(msg)
-
-    def _acParallelSection(self, title, sectionList, dur):
-        """must convert dur from s to ms
-        dur does not seem to be necesary here; can set to nil"""
-        msg = []
-        h = (
-            """(define %s (make-instance     'section
-    :input '(make-parallel-section """
-            % title
-        )
-        t = """  ) 
-    :duration nil 
-    :clock-unit nil)    "%s")
-(setf (get-events %s)
-    (get-events (make-variant %s)))
-    """ % (
-            self.codeCmt,
-            title,
-            title,
-        )  # self._strValue(dur * 1000, 6, 0)
-        msg.append(h)
-        for s in sectionList:  # events are already strings w/ line cariage
-            msg.append(s)
-            msg.append("\n")
-        msg.append(t)
-        msg.append("\n")
-        return "".join(msg)
-
-    def _translatePoly(self):
-        self.codeList = []
-        # it is necessary to lead with this to permit a parallel section
-        # loading error
-        self.codeList.append("(setf *convert-from-old-midi-format* nil)\n")
-        sectionList = []  # store section names for parallel section
-        completeDur = 0  # does this need to be filled?
-        musicName = self.fpRef["fnOutputPrime"]
-        for tName in self.compatNames:
-            tDict = self.polySeq[tName]
-            orcMapMode = tDict["orcMapMode"]
-            ch = tDict["midiCh"]  # need w/ or w/o mute
-            pgm = tDict["midiPgm"]
-            if not tDict["mute"]:
-                esObj = tDict["esObj"]
-                totalDur = esObj.getTotalDuration()
-                dataList = self._translateAcToolbox(orcMapMode, esObj, ch, pgm)
-                title = self._fmtTitleTexture(musicName, tName)
-                self.codeList.append(self._acSection(title, dataList, totalDur))
-                sectionList.append(title)
-            for cName in list(tDict["TC"].keys()):
-                if not tDict["TC"][cName]["mute"]:
-                    esObj = tDict["TC"][cName]["esObj"]
-                    totalDur = esObj.getTotalDuration()
-                    dataList = self._translateAcToolbox(orcMapMode, esObj, ch, pgm)
-                    title = self._fmtTitleClone(musicName, tName, cName)
-                    self.codeList.append(self._acSection(title, dataList, totalDur))
-                    sectionList.append(title)
-        # write a parallel section of all individual sections
-        self.codeList.append(
-            self._acParallelSection(musicName, sectionList, completeDur)
-        )
-
-    def _write(self):
-        """ """
-        if "acToolbox" not in self.outRequest:
-            raise Exception("bas format request")
-
-        self._translatePoly()
-        f = open(self._outFormatToFilePath("acToolbox"), "w")
-        f.writelines(self.codeList)
-        f.close()
-
-        if os.name == "posix":
-            if drawer.isDarwin():  # try only if darwin
-                try:
-                    osTools.rsrcSetCreator(self.fpRef["pathAct"], "ACTP", "ACEX")
-                except ImportError:
-                    pass  # do nothing
-        else:
-            pass  # win or other
-        self.outComplete.append("acToolbox")
-
-    def _writePost(self):
-        pass
-
-
-# -----------------------------------------------------------------||||||||||||--
 class EngineText(_OutputEngine):
     def __init__(self, emObj, fpRef, ao):
         """
@@ -2833,8 +2644,6 @@ class EventMode(object):
             engineRequest.append("EnginePureDataArray")
         if "textTab" in outRequest or "textSpace" in outRequest:
             engineRequest.append("EngineText")
-        if "acToolbox" in outRequest:
-            engineRequest.append("EngineAcToolbox")
         if "audioFile" in outRequest:
             engineRequest.append("EngineAudioFile")
         # instantiate necessary objects

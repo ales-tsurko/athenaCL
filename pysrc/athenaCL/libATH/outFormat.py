@@ -35,7 +35,6 @@ outputFormatNames = {
     #    'mc'      :'maxColl',
     "pda": "pureDataArray",
     "xao": "xmlAthenaObject",
-    "at": "acToolbox",  # textures and clones as sections
 }
 
 
@@ -233,19 +232,6 @@ class FormatPureDataArray(_OutputFormat):
         self.emKey = "pathPureDataArray"
         self.doc = "PureData (PD) patch with defined arrays"
         self.ext = ".pd"
-
-
-# -----------------------------------------------------------------||||||||||||--
-class FormatAcToolbox(_OutputFormat):
-    def __init__(self):
-        """
-        >>> a = FormatAcToolbox()
-        """
-        _OutputFormat.__init__(self)
-        self.name = "acToolbox"
-        self.emKey = "pathAct"
-        self.doc = "AC Toolbox Environment file"
-        self.ext = ".act"
 
 
 # -----------------------------------------------------------------||||||||||||--

@@ -48,7 +48,6 @@ EventMode modes available:
 pi{y0}ti{a2} :: eols
 EventOutput active:
 {name}
-   acToolbox         
    audioFile         
    csoundBatch       
  + csoundData        
@@ -65,9 +64,8 @@ EventOutput active:
 To select an additional EventOutput to be requested when a new EventList is
 created, enter the command `EOo`, for EventOutput select. To remove an
 EventOutput, enter the command `EOrm`, for EventOutput remove. In the following
-example, the user adds a tab-delimited table output ("textTab") and a
-specialized output file for the AC Toolbox ("acToolbox"). After viewing the
-EventOutput list, these EventOutputs are removed. Note: EventOutputs, like many
+example, the user adds a tab-delimited table output ("textTab"). After viewing
+the EventOutput list, this EventOutput is removed. Note: EventOutputs, like many
 selection in athenaCL, can be designated using automatic acronym expansion
 (AAE), the user providing only the leading character and capitals.
 
@@ -77,13 +75,12 @@ selection in athenaCL, can be designated using automatic acronym expansion
 ## Adding and Removing EventOutputs
 
 ```
-pi{y0}ti{a2} :: eoo tt at
-EventOutput formats: midiFile, xmlAthenaObject, csoundData, textTab, acToolbox.
+pi{y0}ti{a2} :: eoo tt
+EventOutput formats: midiFile, xmlAthenaObject, csoundData, textTab.
 
 pi{y0}ti{a2} :: eols
 EventOutput active:
 {name}
- + acToolbox         
    audioFile         
    csoundBatch       
  + csoundData        
@@ -96,7 +93,7 @@ EventOutput active:
  + textTab           
  + xmlAthenaObject  
 
-pi{y0}ti{a2} :: eorm tt at
+pi{y0}ti{a2} :: eorm tt
 EventOutput formats: midiFile, xmlAthenaObject, csoundData.
 ```
 

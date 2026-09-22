@@ -26,26 +26,6 @@ def b(x):
 
 
 # -----------------------------------------------------------------||||||||||||--
-# midi decimal conversion routines
-# used for acToolbox output format
-
-
-def decimalNoteOn(ch=0):
-    assert ch >= 0 and ch <= 15  #
-    return ch + 144
-
-
-def decimalController(ch=0):
-    assert ch >= 0 and ch <= 15  #
-    return ch + 176
-
-
-def decimalProgramChange(ch=0):
-    assert ch >= 0 and ch <= 15  #
-    return ch + 192
-
-
-# -----------------------------------------------------------------||||||||||||--
 # midi number packing routines.
 def intToWord(x):
     """Convert a 2 byte MSB LSB value."""
