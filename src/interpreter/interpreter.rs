@@ -15,7 +15,7 @@ use vm::{
 };
 
 use super::{athena_obj_ext, dialog_ext, figure_ext, manual_ext, sndhdr, xml_tools_ext};
-use crate::figure::Figure;
+use crate::{figure::Figure, libath};
 
 /// Global interpreter representation.
 pub static INTERPRETER_WORKER: LazyLock<InterpreterWorker> = LazyLock::new(InterpreterWorker::run);
@@ -422,6 +422,9 @@ pub fn init_py_interpreter() -> PyInterpreter {
         .add_native_module(figure_ext::module_def(&ctx))
         .add_native_module(manual_ext::module_def(&ctx))
         .add_native_module(sndhdr::module_def(&ctx))
+        .add_native_module(libath::error::module_def(&ctx))
+        .add_native_module(libath::interpolate::module_def(&ctx))
+        .add_native_module(libath::permutate::module_def(&ctx))
         .add_frozen_modules(rustpython_pylib::FROZEN_STDLIB)
         .add_frozen_modules(vm::py_freeze!(dir = "../../pysrc"))
         .build()
