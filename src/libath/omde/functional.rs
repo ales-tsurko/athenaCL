@@ -29,8 +29,11 @@ pub(crate) fn module_def(
     _inner::module_def(ctx)
 }
 
+/// The base payloads, for the sibling omde ports to embed as their classes' bases.
+pub(crate) use _inner::{Function, FunctionModel};
+
 #[pymodule(name = "athenaCL.libATH.omde._functional")]
-pub(super) mod _inner {
+pub(crate) mod _inner {
     use rustpython_vm::{
         builtins::{PyType, PyTypeRef},
         function::FuncArgs,
@@ -91,7 +94,7 @@ pub(super) mod _inner {
 
     /// The arguments of a Function's call, in the reference's parameter name.
     #[derive(FromArgs)]
-    struct CallArgs {
+    pub(crate) struct CallArgs {
         #[pyarg(any, name = "t")]
         _t: PyObjectRef,
     }
@@ -141,7 +144,7 @@ pub(super) mod _inner {
     #[pyattr]
     #[pyclass(name = "FunctionModel")]
     #[derive(Debug, PyPayload)]
-    struct FunctionModel;
+    pub(crate) struct FunctionModel;
 
     impl Constructor for FunctionModel {
         // permissive: the arguments belong to a subclass's own __init__
@@ -165,7 +168,7 @@ pub(super) mod _inner {
     #[pyattr]
     #[pyclass(name = "Function", base = FunctionModel)]
     #[derive(Debug)]
-    struct Function(pub FunctionModel);
+    pub(crate) struct Function(pub FunctionModel);
 
     impl From<FunctionModel> for Function {
         fn from(base: FunctionModel) -> Self {
@@ -235,7 +238,7 @@ pub(super) mod _inner {
     #[pyattr]
     #[pyclass(name = "Generator")]
     #[derive(Debug, PyPayload)]
-    struct Generator;
+    pub(crate) struct Generator;
 
     impl Constructor for Generator {
         // permissive: the arguments belong to a subclass's own __init__

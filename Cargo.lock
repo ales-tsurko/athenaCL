@@ -323,6 +323,7 @@ dependencies = [
  "notify",
  "open",
  "pulldown-cmark",
+ "pymath",
  "quick-xml 0.42.0",
  "rand",
  "rand_chacha",
