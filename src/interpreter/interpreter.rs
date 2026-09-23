@@ -429,6 +429,7 @@ pub fn init_py_interpreter() -> PyInterpreter {
         .add_native_module(libath::permutate::module_def(&ctx))
         .add_native_module(libath::quantize::module_def(&ctx))
         .add_native_module(libath::rng::module_def(&ctx))
+        .add_native_module(libath::omde::functional::module_def(&ctx))
         .add_frozen_modules(rustpython_pylib::FROZEN_STDLIB)
         .add_frozen_modules(vm::py_freeze!(dir = "../../pysrc"))
         .build();

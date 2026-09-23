@@ -17,6 +17,9 @@ import sys
 
 PORTED = ['chaos', 'error', 'permutate', 'quantize']
 
+# functional ports under its omde path; the reference keeps the flat one
+FUNCTIONAL = ('athenaCL.libATH.omde.functional', 'athenaCL.libATH._pyref.functional')
+
 failures = []
 checks = 0
 
@@ -258,7 +261,219 @@ def test_permutate():
 for name in PORTED:
     modules(name)
 
-for test in (test_error, test_permutate, test_quantize, test_chaos):
+class _Missing(object):
+    """The marker for a block that never set RESULT."""
+
+
+MISSING = _Missing()
+
+
+def same_functional(source):
+    """A source over the module namespace `m` — the port's shim or the reference — must
+    agree. The block must set RESULT and must not let an exception escape: expected
+    errors are caught inside the block and compared as values, so an unintended raise
+    on both sides cannot pass as agreement."""
+    found = {}
+    for path in FUNCTIONAL:
+        module = importlib.import_module(path)
+        namespace = {'m': module, 'RESULT': MISSING}
+        try:
+            exec(source, namespace)
+            result = namespace['RESULT']
+            if result is MISSING:
+                found[path] = (None, 'the block set no RESULT')
+            else:
+                found[path] = (repr(result), None)
+        except Exception as err:
+            found[path] = (None, 'the block escaped: %s' % describe(err))
+    port, ref = FUNCTIONAL
+    value, error = found[port]
+    expected, expected_error = found[ref]
+    ok = value == expected and error == expected_error and error is None
+    note(ok,
+         'functional %s: %r%s != %r%s' % (source.splitlines()[0], value, error,
+                                          expected, expected_error))
+
+
+def test_functional():
+    """The functional bases, as permanent spike coverage: reflected operators and operand
+    order, Function/Generator mixtures, overrides, leaf constructors, coercion, lifespans,
+    deepcopy fallbacks, the freezer, and the division quirks."""
+    # forward and reflected subtraction, operand order visible in the stored halves
+    same_functional("""
+f = m.ConstantFunction(10)
+forward = f - 5
+reflected = 5 - f
+RESULT = (type(forward).__name__, forward.a.value, forward.b.value, forward(0),
+          type(reflected).__name__, reflected.a.value, reflected.b.value, reflected(0))
+""")
+    # mixtures: a Function combines a Generator by adapting it; a Generator combines a
+    # Function as a Function, and everything else as a Generator — each side's own order
+    same_functional("""
+f = m.ConstantFunction(3)
+g = m.ConstantGenerator(4)
+left = f + g
+right = g + f
+sub_g = g - 5
+rsub_g = 5 - g
+mul_f = 2 * f
+RESULT = (type(left).__name__, type(left.a).__name__, type(left.b).__name__, left(0),
+          type(right).__name__, type(right.a).__name__, type(right.b).__name__, right(0),
+          type(sub_g).__name__, sub_g.a is g, sub_g.b.value, sub_g(),
+          type(rsub_g).__name__, rsub_g.a.value, rsub_g.b is g, rsub_g(),
+          type(mul_f).__name__, mul_f.a.value, mul_f.b is f, mul_f(0))
+""")
+    # a Python subclass's own operators win over the native slots
+    same_functional("""
+class mine(m.Function):
+    def __call__(self, t):
+        return 1
+    def __add__(self, other):
+        return 'my add'
+    def __sub__(self, other):
+        return 'my sub'
+class mygen(m.Generator):
+    def __call__(self):
+        return 2
+    def __mul__(self, other):
+        return 'my mul'
+x = mine() + 0
+y = mine() - 0
+z = 3 * mygen()
+RESULT = (x, y, type(z).__name__, isinstance(mine(), m.FunctionModel))
+""")
+    # leaf constructors reach the base initializers, and their own signatures stand
+    same_functional("""
+class leaf(m.Function):
+    def __init__(self, a, b):
+        m.Function.__init__(self)
+        self.a = a
+        self.b = b
+    def __call__(self, t):
+        return self.a + self.b
+class leafgen(m.Generator):
+    def __init__(self, v):
+        m.Generator.__init__(self)
+        self.v = v
+    def __call__(self):
+        return self.v
+x = leaf(3, 4)
+y = leafgen(9) + leafgen(1)
+RESULT = (x(0), x(1), y(), isinstance(x, m.Function), isinstance(y, m.Generator))
+""")
+    # coercion: identity for its own kind, adaptation across, constants for everything
+    # else — and the check order, Generator before Function before model
+    same_functional("""
+f = m.ConstantFunction(1)
+g = m.ConstantGenerator(2)
+class model(m.FunctionModel):
+    def instance(self, begin, end):
+        return m.ConstantFunction((begin, end))
+adapted = m.make_function(g)
+constant = m.make_function('x')
+instanced = m.make_function(model(), 3, 7)
+frozen = m.make_generator(f, 2.5)
+same_gen = m.make_generator(g)
+const_gen = m.make_generator(4)
+RESULT = (m.make_function(f) is f,
+          type(adapted).__name__, adapted.tig is g,
+          type(constant).__name__, constant.value,
+          instanced(0),
+          type(frozen).__name__, frozen.f is f, frozen.t.value,
+          same_gen is g,
+          type(const_gen).__name__, const_gen.value,
+          m.make_generator(None))
+""")
+    # model lifespans: complete, or the two errors for the incomplete shapes
+    same_functional("""
+class model(m.FunctionModel):
+    def instance(self, begin, end):
+        return m.ConstantFunction(0)
+errors = []
+for args in ((model(), 3, None), (model(),), (model(), None, 5)):
+    try:
+        m.make_function(*args)
+        errors.append('no error')
+    except Exception as err:
+        errors.append('%s: %s' % (type(err).__name__, err))
+RESULT = errors
+""")
+    # the constants deep-copy when they can, and keep the original when they cannot
+    same_functional("""
+import sys
+original = [1, 2]
+copied = m.ConstantFunction(original)
+kept = m.ConstantFunction(sys)
+mutated = original.append(3)
+RESULT = (copied.value == [1, 2, 3], copied.value is original,
+          kept.value is sys)
+""")
+    # the freezer takes a Function and a freeze time; anything else is its error, raised
+    # exactly as the reference raises it
+    same_functional("""
+f = m.ConstantFunction(8)
+g = m.ConstantGenerator(9)
+frozen = m.Freezer(f, 3.0)
+errors = []
+for bad in (5, g):
+    try:
+        m.Freezer(bad)
+        errors.append('no error')
+    except Exception as err:
+        errors.append('%s: %s' % (type(err).__name__, err))
+RESULT = (frozen(), frozen.t.value, errors)
+""")
+    # division keeps its Python 2 shape: callable methods, no operator, and the
+    # Generator quirk of multiplying when the operand is a Function
+    same_functional("""
+f = m.ConstantFunction(10)
+g = m.ConstantGenerator(4)
+div = f.__div__(g)
+rdiv = f.__rdiv__(2)
+gen_div = g.__div__(f)
+gen_const_div = g.__div__(5)
+gen_rdiv = g.__rdiv__(2)
+kw_div = f.__div__(function=g)
+kw_gen_div = g.__div__(object=f)
+kw_gen_rdiv = g.__rdiv__(object=2)
+operator = None
+try:
+    f / g
+    operator = 'divided'
+except TypeError as err:
+    operator = type(err).__name__
+RESULT = (type(div).__name__, div(0), type(rdiv).__name__, rdiv(0),
+          type(gen_div).__name__, gen_div(0), type(gen_const_div).__name__,
+          gen_const_div(), type(gen_rdiv).__name__, gen_rdiv(), operator,
+          type(kw_div).__name__, kw_div(0),
+          type(kw_gen_div).__name__, kw_gen_div(0),
+          type(kw_gen_rdiv).__name__, kw_gen_rdiv())
+""")
+    # the bases themselves: calls raise, instances model as themselves, the inheritance
+    # chain reaches FunctionModel, and names are stable
+    same_functional("""
+f = m.ConstantFunction(1)
+class tig(m.Generator):
+    def __call__(self):
+        return 5
+adapted = m.make_function(tig())
+calls = []
+for make in (lambda: m.Function()(0), lambda: m.Function()(t=0),
+             lambda: m.Generator()(),
+             lambda: m.FunctionModel().instance(0, 1)):
+    try:
+        make()
+        calls.append('no error')
+    except Exception as err:
+        calls.append(type(err).__name__)
+RESULT = (calls, f.instance(3, 9) is f, f.instance(begin=3, end=9) is f,
+          isinstance(f, m.FunctionModel), isinstance(adapted, m.FunctionModel),
+          m.FunctionModel.__name__, m.Function.__name__, m.Generator.__name__,
+          adapted(0))
+""")
+
+
+for test in (test_error, test_permutate, test_quantize, test_chaos, test_functional):
     test()
 
 print('%d checks, %d failures' % (checks, len(failures)))

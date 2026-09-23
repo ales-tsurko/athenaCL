@@ -15,28 +15,128 @@
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 2 of the License, or
+# the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 
-# The three base classes live in the native module; this shim holds the
-# combination classes, constants, freezer, and coercions, and re-exports the
-# bases under the names everything imports. The native operators look the
-# combination classes up here.
-
-from athenaCL.libATH.omde._functional import FunctionModel, Function, Generator
-
 import unittest, doctest
 import copy
+
+
+class FunctionModel:
+    """
+    Base class for function models.
+    """
+
+    def __init__(self):
+        """
+        Return a FunctionalModel instance
+
+        It is an incomplete instance.
+        """
+        pass
+
+    def instance(self, begin, end):
+        """
+        Return an instance for this FunctionModel as
+        a real Function.
+
+        Function is defined in the [begin, end] range.
+
+        Pure virtual method.
+        """
+        raise NotImplementedError
+
+
+class Function(FunctionModel):
+    """
+    Abstract base class for functional scoring
+
+    A subclass of Function must define the __call__(self, t) method,
+    where t is the evaluation time.
+
+    A Function is also a FunctionModel (of itself).
+
+    You can also use arithmetic operators
+    (+, -, *, /) between generators and get the result generator.
+    """
+
+    def __init__(self):
+        """
+        Return a function instance.
+        """
+        FunctionModel.__init__(self)
+
+    def __call__(self, t):
+        """
+        Return the function value at time t.
+
+        Pure virtual method.
+        """
+        raise NotImplementedError
+
+    def __add__(self, function):
+        """
+        + operator implementation.
+        """
+        return AddFunction(self, function)
+
+    def __sub__(self, function):
+        """
+        - operator implementation.
+        """
+        return SubFunction(self, function)
+
+    def __mul__(self, function):
+        """
+        * operator implementation.
+        """
+        return MulFunction(self, function)
+
+    def __div__(self, function):
+        """
+        / operator implementation.
+        """
+        return DivFunction(self, function)
+
+    def __radd__(self, function):
+        """
+        + operator implementation (object is on the right)).
+        """
+        return AddFunction(function, self)
+
+    def __rsub__(self, function):
+        """
+        - operator implementation (object is on the right)).
+        """
+        return SubFunction(function, self)
+
+    def __rmul__(self, function):
+        """
+        * operator implementation (object is on the right)).
+        """
+        return MulFunction(function, self)
+
+    def __rdiv__(self, function):
+        """
+        / operator implementation (object is on the right)).
+        """
+        return DivFunction(function, self)
+
+    def instance(self, begin, end):
+        """
+        Return self as instance of this Function.
+        """
+        return self
 
 
 class TimeDependenceAdaptor(Function):
@@ -98,7 +198,7 @@ class SubFunction(Function):
 
     def __init__(self, a, b):
         """
-        Return a SubFunction instance for two given
+        Return an SubFunction instance for two given
         Functions a and b.
 
         a and b are made Function if necessary and possible.
@@ -166,19 +266,104 @@ class DivFunction(Function):
 
 class ConstantFunction(Function):
     """
-    Constant function.
+    Constant function
 
-    The original object is deep-copied, if possible.
+    it returns the same value at any time.
     """
 
     def __init__(self, value):
+        """
+        Return a ConstantFunction instance.
+
+        The original value object is deep-copied, if possible.
+        """
         try:
             self.value = copy.deepcopy(value)
         except:
             self.value = value
 
     def __call__(self, t):
+        """
+        Return the constant value at any time.
+        """
         return self.value
+
+
+class Generator:
+    """
+    Time-independent data generator base class.
+
+    The call method takes no arguments.
+
+    You can also use arithmetic operators (+, -, *, /) between
+    generators and get the result generator.
+    """
+
+    def __init__(self):
+        pass
+
+    def __call__(self):
+        raise NotImplementedError
+
+    def __add__(self, object):
+        """
+        + operator implementation.
+        """
+        if isinstance(object, Function):
+            return AddFunction(make_function(self), object)
+        else:
+            return AddGenerator(self, object)
+
+    def __sub__(self, object):
+        """
+        - operator implementation.
+        """
+        if isinstance(object, Function):
+            return SubFunction(make_function(self), object)
+        else:
+            return SubGenerator(self, object)
+
+    def __mul__(self, object):
+        """
+        * operator implementation.
+        """
+        if isinstance(object, Function):
+            return MulFunction(make_function(self), object)
+        else:
+            return MulGenerator(self, object)
+
+    def __div__(self, object):
+        """
+        / operator implementation.
+        """
+        if isinstance(object, Function):
+            return MulFunction(make_function(self), object)
+        else:
+            return DivGenerator(self, object)
+
+    def __radd__(self, object):
+        """
+        + operator implementation (object is on the right)).
+        """
+        return AddGenerator(object, self)
+
+    def __rsub__(self, object):
+        """
+        - operator implementation (object is on the right)).
+        """
+        return SubGenerator(object, self)
+
+    def __rmul__(self, object):
+        """
+        * operator implementation (object is on the right)).
+        """
+        return MulGenerator(object, self)
+
+    def __rdiv__(self, object):
+        """
+        / operator implementation (object is on the right)).
+        """
+        return DivGenerator(object, self)
 
 
 class AddGenerator(Generator):
