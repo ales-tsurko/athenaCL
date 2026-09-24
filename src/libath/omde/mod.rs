@@ -4,5 +4,6 @@ pub(crate) mod bpf;
 mod copy;
 pub(crate) mod functional;
 mod math;
+pub(crate) mod miscellaneous;
 pub(crate) mod oscillator;
 pub(crate) mod rand;

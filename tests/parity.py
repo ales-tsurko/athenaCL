@@ -26,6 +26,10 @@ OMDE = {
         'athenaCL.libATH._pyref.oscillator',
     ),
     'rand': ('athenaCL.libATH.omde.rand', 'athenaCL.libATH._pyref.rand'),
+    'miscellaneous': (
+        'athenaCL.libATH.omde.miscellaneous',
+        'athenaCL.libATH._pyref.miscellaneous',
+    ),
 }
 FUNCTIONAL = OMDE['functional']
 
@@ -1434,6 +1438,40 @@ def scripted(body):
             + "\nfinally:\n    while saved: restored()\n")
 
 
+# the miscellaneous generators draw through the rand module: Range and IntRange through
+# UniformRNG() at construction, List's random mode and both Choice classes through the module's
+# choice/random aliases at call — so the rand module is the seam this prelude routes, and both
+# sides route the same one: the reference's omdeRand alias binds the shared native module
+SCRIPTED_MISC = """
+import importlib
+class Scripted:
+    def __init__(self, draws):
+        self.draws = list(draws)
+        self.count = 0
+    def random(self):
+        self.count += 1
+        return self.draws.pop(0)
+randmod = importlib.import_module('athenaCL.libATH.omde.rand')
+saved = []
+def routed(texture_draws, parameter_draws):
+    parameters = Scripted(parameter_draws)
+    saved.append((randmod._the_same, randmod.random, randmod.choice))
+    randmod._the_same = Scripted(texture_draws)
+    randmod.random = parameters.random
+    randmod.choice = lambda seq: seq[int(parameters.random() * len(seq))]
+    return randmod._the_same, parameters
+def restored():
+    randmod._the_same, randmod.random, randmod.choice = saved.pop()
+"""
+
+
+def scripted_misc(body):
+    """Unwind every nested route, including when an unexpected error escapes."""
+    import textwrap
+    return (SCRIPTED_MISC + "\ntry:\n" + textwrap.indent(body, '    ')
+            + "\nfinally:\n    while saved: restored()\n")
+
+
 def test_rand():
     """The random module — stage two, the final planned backend migration: the port's
     draw source is deliberately new, so raw sequences do not compare against the
@@ -2026,13 +2064,606 @@ RESULT = (value, events)
 """, pair)
 
 
+def test_miscellaneous():
+    """The miscellaneous module — the Cmask data generators over the native rand module.
+    Its draws route through the rand module's streams, so scripted uniforms feed both sides:
+    Range and IntRange capture UniformRNG() at construction, List's random mode and both
+    Choice classes draw at call. The reference's own unreachable paths are pinned as they
+    stand — List's call over a class without __next__, Attractor's wrapped points — beside
+    the mode dispatch, the evaluation orders, and the choice machinery's double evaluation."""
+    import itertools
+    _misc_label = itertools.count()
+
+    def misc_omde(source):
+        same_omde(source, OMDE['miscellaneous'], 'misc block %d' % next(_misc_label))
+
+    def kind(fn):
+        try:
+            fn()
+            return 'no error'
+        except Exception as err:
+            return '%s: %s' % (type(err).__name__, err)
+
+    # the class shapes and the module surface
+    misc_omde("""from athenaCL.libATH.omde.functional import Generator, Function
+import importlib
+randmod = importlib.import_module('athenaCL.libATH.omde.rand')
+g = (m.Range(0, 1), m.IntRange(0, 1), m.List(1, 2))
+f = (m.Accumulator(1), m.Quantizer(0.5, 0.1), m.Attractor(1, [1.0]),
+     m.Mask(0.5, 0, 1), m.Choice((7, 1.0)), m.StaticChoice((7, 1.0)))
+RESULT = ([isinstance(x, Generator) for x in g], [isinstance(x, Function) for x in f],
+          m.omdeRand is randmod, callable(m.reduce), callable(m.make_function),
+          m.Function is Function, [hasattr(m, n) for n in ('rand', 'math', 'copy', 'types')])
+""")
+    # Range and IntRange over scripted textures draws, keyword names included
+    misc_omde(scripted_misc("""
+textures, parameters = routed([0.0, 0.5, 0.25, 0.99, 0.0, 0.5], [])
+r1 = m.Range(0, 10)()
+r2 = m.Range(-5, 5)()
+r3 = m.Range(min=0, max=4)()
+i1 = m.IntRange(0, 10)()
+i2 = m.IntRange(-3, 3)()
+i3 = m.IntRange(min=-3, max=3)()
+rng = m.Range(2, 7)
+RESULT = (r1, r2, r3, i1, i2, i3, i1 == int(i1), type(i1).__name__,
+          type(rng.delta).__name__, rng.delta, textures.count)
+"""))
+    # Range: the unscripted stream is shared, draws compare only as invariants
+    misc_omde(scripted_misc("""
+plain = m.Range(0, 1)
+a, b = plain(), plain()
+textures, parameters = routed([0.5], [])
+after = m.Range(0, 2)()
+RESULT = (isinstance(a, float), 0.0 <= a <= 1.0, isinstance(b, float),
+          after, textures.count)
+"""))
+    # Accumulator: the unbound mode, the state, and the add attribute
+    misc_omde("""a = m.Accumulator(5)
+vals = (a(0), a(1), a(2), a.sum, callable(a.add), a.add.__name__)
+b = m.Accumulator(5, sum0=100)
+kw = m.Accumulator(value_generator=5, mode='u', sum0=1)
+manual = m.Accumulator(1)
+manual.add(41, 0)
+RESULT = (vals, (b(0), b.sum), kw(9), kw.sum, manual.sum)
+""")
+    # Accumulator: every bound mode's folding, short names included
+    misc_omde("""def seq(mode, **bounds):
+    acc = m.Accumulator(6, mode, **bounds)
+    return [acc(i) for i in range(4)]
+RESULT = (seq('limit', lower=-10, upper=10), seq('reflect', lower=0, upper=10),
+          seq('wrap', lower=0, upper=10), seq('l', lower=0, upper=10),
+          seq('m', lower=0, upper=10), seq('w', lower=0, upper=10),
+          seq('r', lower=0, upper=10), seq('u'))
+""")
+    # Accumulator: bounds as functions, the generator first, then lower, then upper
+    misc_omde("""from athenaCL.libATH.omde.bpf import LinearSegment
+from athenaCL.libATH.omde.functional import Function
+events = []
+class Logged(Function):
+    def __init__(self, name, value):
+        self.name, self.value = name, value
+    def __call__(self, t):
+        events.append((self.name, t))
+        return self.value
+acc = m.Accumulator(Logged('gen', 3), 'limit', Logged('lower', -10), Logged('upper', 10))
+first = acc(0)
+second = acc(5)
+varying = m.Accumulator(3, 'wrap', lower=LinearSegment(((0.0, -10.0), (1.0, -5.0))),
+                        upper=LinearSegment(((0.0, 10.0), (1.0, 5.0))))
+moving = (varying(0), varying(1))
+RESULT = (first, second, events, moving)
+""")
+    # Accumulator: the validation order — bounds before mode — and the messages
+    misc_omde("""def kind(fn):
+    try:
+        fn()
+        return 'no error'
+    except Exception as err:
+        return '%s: %s' % (type(err).__name__, err)
+RESULT = (kind(lambda: m.Accumulator(5, 'limit')),
+          kind(lambda: m.Accumulator(5, 'bogus')),
+          kind(lambda: m.Accumulator(5, 'bogus', 0, 10)),
+          kind(lambda: m.Accumulator(5, 'wrap', 0)),
+          kind(lambda: m.Accumulator(5, 'limit', lower=0, upper=10)))
+""")
+    # Quantizer: the strength ladder and the int truncation on both signs
+    misc_omde("""q = m.Quantizer(0.37, 0.25)
+a = [q(t) for t in range(2)]
+q0 = m.Quantizer(0.37, 0.25, 0.0)
+b = [q0(t) for t in range(2)]
+q5 = m.Quantizer(0.37, 0.25, 0.5, 0.1)
+c = [q5(t) for t in range(2)]
+neg = m.Quantizer(-0.37, 0.25)
+d = [neg(t) for t in range(2)]
+kw = m.Quantizer(generator=-0.13, delta=0.25, strength=1.5, offset=0.0)
+RESULT = (a, b, c, d, kw(0))
+""")
+    # Quantizer: parameters as functions, generator, delta, strength, then offset
+    misc_omde("""from athenaCL.libATH.omde.bpf import LinearSegment
+from athenaCL.libATH.omde.functional import Function
+events = []
+class Logged(Function):
+    def __init__(self, name, value):
+        self.name, self.value = name, value
+    def __call__(self, t):
+        events.append((self.name, t))
+        return self.value
+q = m.Quantizer(Logged('gen', 0.5), Logged('delta', 0.5),
+                Logged('strength', 1.0), Logged('offset', 0.0))
+value = q(0)
+varying = m.Quantizer(0.9, LinearSegment(((0.0, 1.0), (1.0, 0.5))),
+                      LinearSegment(((0.0, 0.0), (1.0, 1.0))))
+RESULT = (value, events, varying(0), varying(1))
+""")
+    # Attractor: every reachable strength ends in the reference's own broken paths
+    misc_omde("""def kind(fn):
+    try:
+        fn()
+        return 'no error'
+    except Exception as err:
+        return '%s: %s' % (type(err).__name__, err)
+a = m.Attractor(m.Range(0, 100), [120.0, 160.0], 0.8, 1.0)
+at1 = kind(lambda: a(0))
+b = m.Attractor(0.5, [1.0], 2.0, 1.0)
+at2 = kind(lambda: b(0))
+c = m.Attractor(0.5, [1.0], 0.0, 1.0)
+at3 = kind(lambda: c(0))
+direct = kind(lambda: a.findClosest(0.5, 0))
+kw = m.Attractor(generator=0.5, points=[1.0], strength=2.0, exponent=1.0)
+RESULT = (at1, at2, at3, direct, kind(lambda: kw(0)),
+          type(a.points).__name__, a.points(0))
+""")
+    # Attractor: an iterable Function subclass reaches the arithmetic, exactly as wrapped
+    misc_omde("""from athenaCL.libATH.omde.functional import Function, ConstantFunction
+class Points(Function):
+    def __init__(self, items):
+        self.items = items
+    def __call__(self, t):
+        return 0.0
+    def __iter__(self):
+        return iter(self.items)
+a = m.Attractor(0.5, Points([ConstantFunction(120.0), ConstantFunction(160.0)]), 2.0, 1.0)
+found = a.findClosest(0.5, 0)
+value = a(0)
+RESULT = (found[0], type(found[1]).__name__, found[1](0),
+          type(value).__name__, value(0))
+""")
+    # Mask: the exponent ladder, the direct mapAt, and keyword names
+    misc_omde("""mf = m.Mask(0.5, 100, 300)
+a = mf(0)
+mb = m.Mask(0.5, 100, 300, 1)
+b = mb(0)
+mc = m.Mask(0.5, 100, 300, -1)
+c = mc(0)
+md = m.Mask(mainFunction=0.25, lowerLimit=0, upperLimit=10, exp=2.0)
+d = md(0)
+mapat = m.Mask(0.5, 0, 10, 2).mapAt(0.25, 7)
+RESULT = (a, b, c, d, mapat, type(mf.exponent).__name__, mf.exponent)
+""")
+    # Mask: limits as functions — the main generator, then the upper limit, then the lower
+    misc_omde("""from athenaCL.libATH.omde.bpf import LinearSegment
+from athenaCL.libATH.omde.functional import Function
+events = []
+class Logged(Function):
+    def __init__(self, name, value):
+        self.name, self.value = name, value
+    def __call__(self, t):
+        events.append((self.name, t))
+        return self.value
+mf = m.Mask(Logged('main', 0.5), Logged('lower', 100), Logged('upper', 300))
+value = mf(0)
+varying = m.Mask(0.5, LinearSegment(((0.0, 0.0), (1.0, 100.0))),
+                LinearSegment(((0.0, 10.0), (1.0, 110.0))))
+RESULT = (value, events, varying(0), varying(1))
+""")
+    # Mask: math's own domain and range errors, at init and at call
+    misc_omde("""def kind(fn):
+    try:
+        fn()
+        return 'no error'
+    except Exception as err:
+        return '%s: %s' % (type(err).__name__, err)
+RESULT = (kind(lambda: m.Mask(0.5, 0, 10, 2000)),
+          kind(lambda: m.Mask(-0.5, 0, 10, -1)(0)),
+          kind(lambda: m.Mask(-0.5, 0, 10, 0)(0)))
+""")
+    # List: the traversal modes and their state
+    misc_omde("""lc = m.List(1, 2, 3)
+cycle = [lc.next() for _ in range(7)]
+ls = m.List(1, 2, 3, mode='swing')
+swing = [ls.next() for _ in range(7)]
+lone = m.List(5, mode='swing')
+single = [lone.next() for _ in range(3)]
+lsr = m.List(1, 2, 3, mode='swing-repeat')
+sr = [lsr.next() for _ in range(7)]
+RESULT = (cycle, swing, single, lsr.list, sr, lc.index, ls.step,
+          lc.next.__name__, lsr.next.__name__)
+""")
+    # List: heap mode's permutations, the swing-repeat shape, and the short names
+    misc_omde("""lh = m.List(1, 2, 3, mode='heap')
+short = (m.List(1, 2, mode='c').index, m.List(1, 2, mode='s').step,
+         m.List(1, 2, mode='w').list, m.List(1, 2, mode='h').index,
+         m.List(1, 2, mode='r').next.__name__)
+RESULT = (lh.list, lh.index, short)
+""")
+    # List: random mode over the parameters stream, one draw per call
+    misc_omde(scripted_misc("""
+lr = m.List(10, 20, 30, mode='random')
+textures, parameters = routed([], [0.0, 0.99])
+a = lr.next()
+b = lr.next()
+RESULT = (a, b, parameters.count)
+"""))
+    # List: the copy contract, the errors, and the ignored keywords
+    misc_omde("""def kind(fn):
+    try:
+        fn()
+        return 'no error'
+    except Exception as err:
+        return '%s: %s' % (type(err).__name__, err)
+original = [1, [2]]
+lc = m.List(*original)
+original[1].append(9)
+ignored = m.List(1, 2, bogus=99, mode='cycle').list
+RESULT = (lc.list, lc.list[1] is original[1], ignored,
+          kind(lambda: m.List()),
+          kind(lambda: m.List(1, mode='bogus')))
+""")
+    # List: the reference's own call quirk, and the permutation helpers directly
+    misc_omde("""def kind(fn):
+    try:
+        fn()
+        return 'no error'
+    except Exception as err:
+        return '%s: %s' % (type(err).__name__, err)
+swap = [1, 2, 3, 4]
+m.List(0).swapAdiacentElements(swap, 1)
+direct = m.List(0).computePermutations([1, 2, 3])
+RESULT = (kind(lambda: m.List(1, 2)()), swap, direct)
+""")
+    # Choice: pair0 unpacks like any pair, with the interpreter's own unpacking errors
+    misc_omde("""def kind(fn):
+    try:
+        fn()
+        return 'no error'
+    except Exception as err:
+        return '%s: %s' % (type(err).__name__, err)
+short = kind(lambda: m.Choice([5]))
+long = kind(lambda: m.Choice([5, 1.0, 2]))
+plain = kind(lambda: m.Choice(5))
+pairs_short = kind(lambda: m.Choice((5, 1.0), (9,)))
+unsized = kind(lambda: m.Choice(iter([5, 1.0, 2])))
+RESULT = (short, long, plain, pairs_short, unsized)
+""")
+    # the helper classes: the floated factor beside the raw one
+    misc_omde("""prob = lambda t: 1.5
+pc = m._PossibleChoice(7, prob)
+ev = m._MarkAccumulatorEvaluate(3, 2)
+first = ev(pc) is pc
+mk = m._MarkAccumulator(2)
+pc2 = m._PossibleChoice(9, 3)
+second = mk(pc2) is pc2
+RESULT = (first, second, pc.mark, pc2.mark, ev.factor, type(ev.factor).__name__,
+          ev.value, mk.factor, type(mk.factor).__name__, pc.object)
+""")
+    # Choice: the double evaluation, the marks, and the draw after both passes
+    misc_omde(scripted_misc("""
+from athenaCL.libATH.omde.functional import Function
+events = []
+class Counting(Function):
+    def __init__(self, value):
+        self.value, self.calls = value, []
+    def __call__(self, t):
+        self.calls.append(t)
+        events.append('probability')
+        return self.value
+p1, p2 = Counting(1.0), Counting(3.0)
+ch = m.Choice((5, p1), (9, p2))
+textures, parameters = routed([], [0.0])
+picked = ch(0)
+RESULT = (picked, p1.calls, p2.calls, parameters.count,
+          [(x.object, x.mark) for x in ch.set], events)
+"""))
+    # Choice: the first mark the draw does not exceed, drawn after the marks
+    misc_omde(scripted_misc("""
+ch = m.Choice((5, 1.0), (9, 1.0))
+textures, parameters = routed([], [0.5])
+picked = ch(0)
+second = m.Choice((5, 1.0), (9, 3.0))
+textures, parameters = routed([], [0.9])
+picked2 = second(0)
+RESULT = (picked, picked2, parameters.count)
+"""))
+    # Choice: probabilities as functions, varying over time
+    misc_omde(scripted_misc("""
+from athenaCL.libATH.omde.bpf import LinearSegment
+ch = m.Choice((5, LinearSegment(((0.0, 1.0), (1.0, 0.0)))),
+              (9, LinearSegment(((0.0, 0.0), (1.0, 1.0)))))
+textures, parameters = routed([], [0.1, 0.1])
+early = ch(0.0)
+late = ch(1.0)
+RESULT = (early, late, parameters.count)
+"""))
+    # Choice: the unsubstituted message and the repr-as-traceback quirk — the interpreter's
+    # strict with_traceback turns the reference's raise into the TypeError both sides raise
+    misc_omde("""def kind(fn):
+    try:
+        fn()
+        return 'no error'
+    except Exception as err:
+        return '%s: %s' % (type(err).__name__, err)
+import collections
+NT = collections.namedtuple('NT', 'a b')
+not_tuple = kind(lambda: m.Choice((5, 1.0), [9, 1.0]))
+named = kind(lambda: m.Choice((5, 1.0), NT(9, 1.0)))
+trace = None
+try:
+    m.Choice((5, 1.0), [9, 1.0])
+    trace = 'no error'
+except Exception as err:
+    trace = (type(err).__name__, str(err), type(err.__traceback__).__name__)
+RESULT = (not_tuple, named, trace)
+""")
+    # Choice: pair0 slips past the type check; machinery errors by kind
+    misc_omde(scripted_misc("""
+def kind(fn):
+    try:
+        fn()
+        return 'no error'
+    except Exception as err:
+        return '%s: %s' % (type(err).__name__, err)
+textbook = kind(lambda: m.Choice(pair0=(5, 1.0)))
+missing = kind(lambda: m.Choice()).split(':')[0]
+pair0_list = m.Choice([9, 1.0])
+textures, parameters = routed([], [0.0])
+value = pair0_list(0)
+RESULT = (textbook.split(':')[0], missing, value, pair0_list.set[0].mark)
+"""))
+    # StaticChoice: the marks at init, over raw probabilities
+    misc_omde(scripted_misc("""
+def kind(fn):
+    try:
+        fn()
+        return 'no error'
+    except Exception as err:
+        return '%s: %s' % (type(err).__name__, err)
+sc = m.StaticChoice((5, 1), (9, 3))
+marks = [x.mark for x in sc.set]
+textures, parameters = routed([], [0.1, 0.9])
+a = sc(0)
+b = sc(1)
+zero = kind(lambda: m.StaticChoice((5, 0), (9, 0)))
+raw_list = m.StaticChoice([9, 1.0])
+RESULT = (marks, a, b, parameters.count, zero, raw_list.set[0].mark,
+          type(sc.set[0].mark).__name__)
+"""))
+    # the copy contract: sums, dispatch, and items survive a deepcopy apart
+    misc_omde("""import copy
+a = m.Accumulator(5, 'reflect', 0, 10)
+a(0)
+a(0)
+deep = copy.deepcopy(a)
+after = deep(0)
+shallow = copy.copy(a)
+lc = m.List([1], [2], mode='swing')
+deep_list = copy.deepcopy(lc)
+item = deep_list.next()
+RESULT = (a.sum, deep.sum, after, shallow.sum, deep_list.list, deep_list.index,
+          type(item).__name__, deep.add.__name__, deep_list.next.__name__)
+""")
+    # the copy contract, deeper: nested dispatch references rebind, and subclass slots ride
+    # the ordinary reduction, exactly as the reference's Python classes copy
+    misc_omde("""import copy
+a = m.Accumulator(1)
+a.callbacks = [a.add]
+b = copy.deepcopy(a)
+before = a.sum
+b.callbacks[0](5, 0)
+after = b(0)
+
+class SubAcc(m.Accumulator):
+    __slots__ = ('tag',)
+sub = SubAcc(3)
+sub.tag = 'kept'
+deep_sub = copy.deepcopy(sub)
+RESULT = (before, b.sum, a.sum, after, deep_sub.tag, deep_sub(0), sub.sum,
+          type(a.add).__name__, b.callbacks[0].__self__ is b)
+""")
+    # the dispatch resolves before its argument: a generator replacing add mid-call leaves
+    # the current call on the old method; mapAt resolves before the main function likewise
+    misc_omde("""from athenaCL.libATH.omde.functional import Function
+def fake(value, t):
+    return 'replaced'
+class Gen(Function):
+    def __call__(self, t):
+        acc.add = fake
+        return 5
+acc = m.Accumulator(Gen())
+first = acc(0)
+second = acc(1)
+def shifted(value, t):
+    return value + 1000
+class Main(Function):
+    def __call__(self, t):
+        mf.mapAt = shifted
+        return 0.5
+mf = m.Mask(Main(), 0, 10)
+mfirst = mf(0)
+RESULT = (first, second, mfirst, type(acc.add).__name__)
+""")
+    # in-place dispatch (__iadd__/__isub__) has its own test: this interpreter quickens
+    # binary operations after numeric warm-up, and its quickened fallback drops the in-place
+    # operation, so a reference already exercised with numbers runs `+=` as plain `+` — the
+    # probes live in tests/fresh_interpreter_tests.rs, whose frozen reference is still cold
+    # the augmented sites the corpus does reach stay numeric, where in-place and plain agree
+    misc_omde("""a = m.Accumulator(1)
+a(0)
+a(0)
+RESULT = (a.sum,)
+""")
+    # directly accessed methods bind as real method objects too — a.noBounds deepcopies to
+    # the copy's binding, not the original's
+    misc_omde("""import copy
+a = m.Accumulator(0)
+a.callbacks = [a.noBounds]
+b = copy.deepcopy(a)
+b.callbacks[0](5, 0)
+RESULT = (a.sum, b.sum, b.callbacks[0].__self__ is b, type(a.noBounds).__name__,
+          a.noBounds.__name__)
+""")
+    # an ordinary class alias of a method carries the binding behavior too: installed under
+    # another name, it still binds per instance, callable unbound from the class as well
+    misc_omde("""import copy
+class Alias(m.Accumulator):
+    noBounds = m.Accumulator.noBounds
+a = Alias(1)
+unbound = m.Accumulator.noBounds(a, 5, 0)
+after_unbound = a.sum
+b = copy.deepcopy(a)
+value = b(0)
+RESULT = (after_unbound, a.sum, b.sum, value, type(a.noBounds).__name__,
+          a.noBounds.__name__, m.Accumulator.noBounds.__name__)
+""")
+    # a subclass's alias under the same name cannot substitute its function: the method
+    # entry binds from the class it came from, however the descriptor was obtained
+    misc_omde("""class Weird(m.Accumulator):
+    noBounds = m.Accumulator.limitAtBounds
+class Proxy(Weird):
+    @property
+    def noBounds(self):
+        return m.Accumulator.noBounds.__get__(self)
+proxy = Proxy(15, 'limit', 0, 20)
+first = proxy(0)
+second = proxy(0)
+RESULT = (first, second, proxy.sum)
+""")
+    # super()-obtained bindings rebind too: callbacks saved off super() mutate the copy,
+    # never the source they came from
+    misc_omde("""import copy
+class Saved(m.Accumulator):
+    def __init__(self):
+        super().__init__(1)
+        self.callbacks = [super().noBounds]
+a = Saved()
+b = copy.deepcopy(a)
+b.callbacks[0](5, 0)
+RESULT = (a.sum, b.sum, b.callbacks[0].__self__ is b,
+          type(a.callbacks[0]).__name__)
+""")
+    # a descriptor shadowing the method still yields the method's own binding — and a
+    # binding under an instance-only alias stays callable, typed, and copyable
+    misc_omde("""import copy
+class Proxy(m.Accumulator):
+    @property
+    def noBounds(self):
+        return super().noBounds
+proxy = Proxy(1)
+value = proxy(0)
+direct = proxy.noBounds
+a = m.Accumulator(0, 'limit', -10, 10)
+a.renamed = a.limitAtBounds
+stored = a.renamed
+bound = a.renamed(5, 0)
+b = copy.deepcopy(a)
+alias_call = b.renamed(5, 0)
+RESULT = (value, type(direct).__name__, direct.__name__, type(stored).__name__,
+          bound, a.sum, b.sum, alias_call is None, b.renamed.__self__ is b)
+""")
+    # the dispatch resolves through the instance: an attribute assigned before the base
+    # __init__ runs overrides the class's method, and a staticmethod keeps its no-self
+    # binding — instance attributes first, exactly as the reference looked them up
+    misc_omde("""events = []
+class Sub(m.Accumulator):
+    def __init__(self):
+        self.noBounds = lambda value, t: events.append('overridden')
+        super().__init__(1)
+sub = Sub()
+value = sub(0)
+class StaticOverride(m.Accumulator):
+    def __init__(self):
+        self.noBounds = staticmethod(lambda value, t: events.append('static'))
+        super().__init__(1)
+static = StaticOverride()
+static_value = static(0)
+RESULT = (events, value, sub.sum, static_value, static.sum,
+          type(static.add).__name__, type(sub.add).__name__)
+""")
+    # the permutation walk calls the instance's own swap, subclass overrides included
+    misc_omde("""class NoSwap(m.List):
+    def swapAdiacentElements(self, list, n):
+        list[n:n + 2] = list[n:n + 2]
+heap = NoSwap(1, 2, 3, mode='heap')
+RESULT = (heap.list, len(heap.list))
+""")
+    # attributes are read where the reference read them: a comparison that replaces the sum
+    # is seen by the branch body, and a __getitem__ that advances the index is seen by the
+    # traversal that follows
+    misc_omde("""acc = None
+class Bound:
+    def __lt__(self, other):
+        acc.sum = 50
+        return False
+    def __gt__(self, other):
+        return True
+    def __sub__(self, other):
+        return 7 if other == 50 else 99
+    def __add__(self, other):
+        return ('folded', other)
+acc = m.Accumulator(1, 'reflect', Bound(), Bound())
+class Probing(list):
+    def __getitem__(self, index):
+        l.index = 1
+        return list.__getitem__(self, index)
+l = m.List(10, 20, 30)
+l.list = Probing([10, 20, 30])
+probed = l.next()
+RESULT = (acc(0), acc.sum, probed, l.index)
+""")
+    # Mask's bounds subtract before the power reads its exponent — the error kind and the
+    # exponent a stateful subtraction leaves behind both follow
+    misc_omde("""def kind(fn):
+    try:
+        fn()
+        return 'no error'
+    except Exception as err:
+        return '%s: %s' % (type(err).__name__, err)
+class Lower:
+    def __rsub__(self, other):
+        mask.exponent = 0.0
+        return 10
+    def __add__(self, other):
+        return ('summed', other)
+mask = m.Mask(0.5, Lower(), 10, 1)
+RESULT = (mask(0), kind(lambda: m.Mask(-1, 'bad', 10, -1)(0)))
+""")
+    # the mark accumulator captures its starting value before the probability evaluates, as
+    # Python's augmented assignment captures the left operand
+    misc_omde("""ev = m._MarkAccumulatorEvaluate(0, 2)
+class Evil:
+    def __call__(self, t):
+        ev.value = 100
+        return 1.0
+pc = m._PossibleChoice(7, Evil())
+returned = ev(pc)
+RESULT = (returned is pc, pc.mark, ev.value)
+""")
+    # the arithmetic inheritance: a Range composes as a Generator
+    misc_omde(scripted_misc("""
+from athenaCL.libATH.omde.functional import Generator
+textures, parameters = routed([0.5], [])
+combined = m.Range(0, 10) + 1
+value = combined()
+RESULT = (type(combined).__name__, isinstance(combined, Generator), value)
+"""))
+
+
 for test in (test_error, test_permutate, test_quantize, test_chaos, test_functional,
              test_bpf, test_oscillator, test_bpf_regressions, test_oscillator_regressions,
              test_omde_copy, test_omde_finalizers, test_omde_initializer_arguments,
              test_omde_mutating_callbacks,
              test_omde_read_boundaries, test_oscillator_callback_regressions,
              test_bpf_failed_initialization, test_rand, test_rand_contracts,
-             test_rand_lifetimes):
+             test_rand_lifetimes, test_miscellaneous):
     test()
 
 print('%d checks, %d failures' % (checks, len(failures)))
