@@ -432,6 +432,7 @@ pub fn init_py_interpreter() -> PyInterpreter {
         .add_native_module(libath::omde::bpf::module_def(&ctx))
         .add_native_module(libath::omde::functional::module_def(&ctx))
         .add_native_module(libath::omde::oscillator::module_def(&ctx))
+        .add_native_module(libath::omde::rand::module_def(&ctx))
         .add_frozen_modules(rustpython_pylib::FROZEN_STDLIB)
         .add_frozen_modules(vm::py_freeze!(dir = "../../pysrc"))
         .build();

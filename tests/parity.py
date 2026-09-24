@@ -25,6 +25,7 @@ OMDE = {
         'athenaCL.libATH.omde.oscillator',
         'athenaCL.libATH._pyref.oscillator',
     ),
+    'rand': ('athenaCL.libATH.omde.rand', 'athenaCL.libATH._pyref.rand'),
 }
 FUNCTIONAL = OMDE['functional']
 
@@ -38,12 +39,15 @@ def modules(name):
             importlib.import_module('athenaCL.libATH._pyref.' + name))
 
 
+_labels = []
+
+
 def note(ok, what):
     """Count a check and record it when it fails."""
     global checks
     checks += 1
     if not ok:
-        failures.append(what)
+        failures.append((_labels[-1] if _labels else '?', what))
 
 
 def same(found, expected, what):
@@ -276,7 +280,8 @@ class _Missing(object):
 MISSING = _Missing()
 
 
-def same_omde(source, pair):
+def same_omde(source, pair, label='?'):
+    _labels.append(label)
     """A source over the module namespace `m` — the port or the reference — must agree.
     The block must set RESULT and must not let an exception escape: expected errors are
     caught inside the block and compared as values, so an unintended raise on both sides
@@ -1398,12 +1403,636 @@ for pairs in ([], [(0, 99)], [(1, 30), (0, 50)]):
 """, OMDE['bpf'])
 
 
+
+
+# Script both implementations at their common seam; restore even when a block fails.
+SCRIPTED = """
+class Scripted:
+    def __init__(self, draws):
+        self.draws = list(draws)
+        self.count = 0
+    def random(self):
+        self.count += 1
+        return self.draws.pop(0)
+
+saved = []
+def routed(texture_draws, parameter_draws):
+    textures, parameters = Scripted(texture_draws), Scripted(parameter_draws)
+    saved.append((m._the_same, m.random))
+    m._the_same, m.random = textures, parameters.random
+    return textures, parameters
+
+def restored():
+    m._the_same, m.random = saved.pop()
+"""
+
+
+def scripted(body):
+    """Unwind every nested route, including when an unexpected error escapes."""
+    import textwrap
+    return (SCRIPTED + "\ntry:\n" + textwrap.indent(body, '    ')
+            + "\nfinally:\n    while saved: restored()\n")
+
+
+def test_rand():
+    """The random module — stage two, the final planned backend migration: the port's
+    draw source is deliberately new, so raw sequences do not compare against the
+    reference's MT19937. Instead identical scripted uniforms feed both sides'
+    distributions — results and draw consumption compared exactly, the rejection
+    boundaries and parameter evaluation order included — beside the class shapes, the
+    deepcopy contract, and the seeding seam."""
+    import itertools
+    _rand_label = itertools.count()
+
+    def rand_omde(source):
+        same_omde(source, OMDE['rand'], 'rand block %d' % next(_rand_label))
+
+    # the class shapes: every generator and function in the framework's hierarchy,
+    # the composition the operators give, and the call signatures the reference signed
+    rand_omde("""from athenaCL.libATH.omde.functional import Generator, Function
+generators = (m.UniformRandom(), m.LinearRandom(), m.InverseLinearRandom(),
+              m.TriangularRandom(), m.InverseTriangularRandom())
+functions = (m.ExponentialRandom(), m.ExponentialRandom(0.7),
+             m.InverseExponentialRandom(1.0), m.BilateralExponentialRandom(2.0),
+             m.GaussRandom(), m.GaussRandom(0.2, 0.2), m.CauchyRandom(0.5, 0.2),
+             m.BetaRandom(0.2, 0.2), m.BetaRandom(0.1, 0.3))
+weibull = m.WeibullRandom(0.5, 3.0)
+combined = m.ExponentialRandom(1.0) + 1
+adapted = m.UniformRandom() + 1
+RESULT = ([isinstance(g, Generator) for g in generators],
+          [isinstance(f, Function) for f in functions],
+          isinstance(weibull, Generator),
+          isinstance(combined, Function), 0 <= combined(5.0),
+          type(adapted).__name__)
+""")
+    # the call signatures: generators take nothing, functions and the Weibull generator
+    # take the time — error kinds compared, not the machinery's own messages
+    rand_omde("""def kind(callable_):
+    try:
+        callable_()
+        return 'no error'
+    except TypeError:
+        return 'TypeError'
+RESULT = (kind(m.UniformRandom()), kind(lambda: m.ExponentialRandom(1.0)()),
+          kind(lambda: m.WeibullRandom(0.5, 2.0)()))
+""")
+    # scripted draws feed both sides' sources: the reference's shared instance and the
+    # module alias, the port's bridge streams
+    rand_omde(scripted("""
+textures, parameters = routed([0.3, 0.6, 0.2, 0.9, 0.4], [])
+uniform = m.UniformRandom()()
+linear = m.LinearRandom()()
+inverse = m.InverseLinearRandom()()
+RESULT = (uniform, linear, inverse, textures.count)
+"""))
+    # the triangular pair walk: a rejected pair, then an accepted one
+    rand_omde(scripted("""
+textures, parameters = routed([0.2, 0.5, 0.4, 0.1], [])
+triangular = m.TriangularRandom()()
+first = (triangular, textures.count)
+
+textures, parameters = routed([0.2, 0.5], [])
+inverse_triangular = m.InverseTriangularRandom()()
+RESULT = (first, inverse_triangular, textures.count)
+"""))
+    # the exponential boundary: zero and 1e-7 itself are rejected, the next draw taken
+    rand_omde(scripted("""
+textures, parameters = routed([0, 1e-7, 0.4], [])
+value = m.ExponentialRandom(2.0)(5.0)
+first = (value, -__import__('math').log(0.4) / 2.0, textures.count)
+
+textures, parameters = routed([0.4], [])
+inverse = m.InverseExponentialRandom(2.0)(5.0)
+RESULT = (first, inverse, 1.0 - -__import__('math').log(0.4) / 2.0, textures.count)
+"""))
+    # the bilateral branch: both sides of the half, the exponential's draw before the
+    # branch's
+    rand_omde(scripted("""
+textures, parameters = routed([0.4, 0.6], [])
+upper = m.BilateralExponentialRandom(2.0)(5.0)
+restored()
+textures, parameters = routed([0.4, 0.3], [])
+lower = m.BilateralExponentialRandom(2.0)(5.0)
+RESULT = (upper, lower, textures.count)
+"""))
+    # the Cauchy singularity at exactly 0.5, rejected; the tangent within range after
+    rand_omde(scripted("""
+textures, parameters = routed([0.5, 0.25], [])
+value = m.CauchyRandom(0.1, 0.5)(5.0)
+RESULT = (value, 0.1 * __import__('math').tan(0.25 * __import__('math').pi) + 0.5,
+          textures.count)
+"""))
+    # the Weibull draw, from its generator-shaped call
+    rand_omde(scripted("""
+textures, parameters = routed([0.7], [])
+value = m.WeibullRandom(0.5, 2.0)(5.0)
+RESULT = (value, 0.5 * (-__import__('math').log(0.7)) ** (1.0 / 2.0), textures.count)
+"""))
+    # the beta branch draw before the two exponential draws, the second rate the
+    # reciprocal
+    rand_omde(scripted("""
+textures, parameters = routed([0.6, 0.4, 0.3], [])
+value = m.BetaRandom(2.0, 4.0)(5.0)
+y = -__import__('math').log(0.4) / 2.0
+z = -__import__('math').log(0.3) / 0.25
+RESULT = (value, 1.0 - z / (y + z), textures.count)
+"""))
+    # the Gauss pair from the parameters stream: the first call draws two, the cached
+    # call none, the cached spare scaled by the later call's own mu and sigma
+    rand_omde(scripted("""
+import math
+textures, parameters = routed([], [0.2, 0.9])
+rng = m.GaussRandom(0.5, 0.1)
+first = rng(1.0)
+second = rng(2.0)
+x2pi = 0.2 * math.pi * 2
+g2rad = math.sqrt(-2.0 * math.log(1.0 - 0.9))
+RESULT = (first, 0.5 + math.cos(x2pi) * g2rad * 0.1,
+          second, 0.5 + math.sin(2 * math.pi * 0.2) * g2rad * 0.1,
+          parameters.count)
+"""))
+    # the parameters evaluate once per call, in the reference's order, before any draw
+    rand_omde(scripted("""
+from athenaCL.libATH.omde.functional import Function
+log = []
+class Logged(Function):
+    def __init__(self, name, value):
+        self.name, self.value = name, value
+    def __call__(self, t):
+        log.append(self.name)
+        return self.value
+
+textures, parameters = routed([0.5, 0.25], [0.2, 0.9])
+cauchy = m.CauchyRandom(Logged('alpha', 0.1), Logged('mu', 0.5))
+gauss = m.GaussRandom(Logged('mu', 0.5), Logged('sigma', 0.1))
+cauchy(1.0)
+gauss(1.0)
+gauss(2.0)
+RESULT = list(log)
+"""))
+    # the Gauss pair's arithmetic is bit-identical: the reference's and the port's
+    # values agree exactly through the platform's own math
+    rand_omde(scripted("""
+textures, parameters = routed([], [0.2, 0.9, 0.6, 0.1])
+first = m.GaussRandom(0.5, 0.1)(1.0)
+fresh = m.GaussRandom(0.3, 0.2)(1.0)
+RESULT = (repr(first), repr(fresh))
+"""))
+    # the deepcopy contract: a copy snapshots the draw source, drawing the same future
+    # sequence independently; shared references in one graph stay shared
+    rand_omde("""import copy
+m.UniformRNG().seed(7)
+a = m.UniformRandom()
+x = a()
+c = copy.deepcopy(a)
+y = c()
+z = a()
+shared = m.LinearRandom()
+pair = [shared, shared]
+copied = copy.deepcopy(pair)
+RESULT = (x != z, y == z, c is not a, copied[0] is copied[1])
+""")
+    # the Gauss spare travels with a deep copy: the copy's first call consumes nothing
+    # and answers with its own parameters
+    rand_omde(scripted("""
+import copy
+textures, parameters = routed([], [0.2, 0.9])
+rng = m.GaussRandom(0.5, 0.1)
+first = rng(1.0)
+copied = copy.deepcopy(rng)
+second = copied(3.0)
+RESULT = (parameters.count, repr(second))
+"""))
+    # reseeding leaves a pending Gauss spare standing: the next call answers from the
+    # cache, not the reseeded stream, and with the current mu and sigma
+    rand_omde(scripted("""
+textures, parameters = routed([], [0.2, 0.9])
+rng = m.GaussRandom(0.5, 0.1)
+first = rng(1.0)
+restored()
+textures, parameters = routed([], [0.6, 0.1])
+second = rng(9.0)
+RESULT = (parameters.count, second == first)
+"""))
+    # the seeding seam: seeding through the shared object twice draws the same
+    # sequence, and the Lehmer congruence steps deterministically beside it
+    rand_omde("""m.UniformRNG().seed(7)
+first = [m.UniformRandom()() for _ in range(3)]
+m.UniformRNG().seed(7)
+again = [m.UniformRandom()() for _ in range(3)]
+lehmer = m._LehmerRNG(1)
+steps = [round(lehmer.random(), 9) for _ in range(4)]
+lehmer.seed(1)
+RESULT = (first == again, first != [], steps == [round(lehmer.random(), 9) for _ in range(4)])
+""")
+
+
+def test_rand_contracts():
+    pair = OMDE['rand']
+    same_omde(scripted("""# helpers expose the original keyword signatures and consumption
+textures, parameters = routed([0.0, 1e-7, 0.5, 0.4, 0.3, 0.7], [0.2, 0.9])
+expo = m._ExpovariateRNG().random(lambd=2)
+beta = m._BetavariateRNG().random(alpha=2, beta=4)
+weibull = m._WeibullvariateRNG().random(alpha=0.5, beta=2)
+gauss = m._GaussRNG()
+RESULT = (expo, beta, weibull, gauss.random(mu=0.5, sigma=0.1),
+          gauss.random(mu=0.3, sigma=0.2), textures.count, parameters.count)
+"""), pair)
+    same_omde(scripted("""# forced outer rejections and both triangular halves
+RESULT = []
+cases = [('TriangularRandom', (), [0.1, 0.9, 0.8, 0.1, 0.8, 0.9]),
+         ('InverseTriangularRandom', (), [0.4, 0.1, 0.6, 0.9, 0.6, 0.1]),
+         ('ExponentialRandom', (1.0,), [0.1, 0.9]),
+         ('InverseExponentialRandom', (1.0,), [0.1, 0.9]),
+         ('BilateralExponentialRandom', (1.0,), [0.1, 0.9, 0.5]),
+         ('CauchyRandom', (0.1, 0.5), [0.5, 0.49, 0.75]),
+         ('WeibullRandom', (1.0, 2.0), [0.01, 0.9])]
+for name, args, draws in cases:
+    textures, parameters = routed(draws + [0.123], [])
+    f = getattr(m, name)(*args)
+    value = f(t=0) if args else f()
+    RESULT.append((name, value, textures.count, textures.random()))
+    restored()
+"""), pair)
+    same_omde(scripted("""# acceptance of exact endpoints and the exp threshold's next float
+import math
+RESULT = []
+for name, args, draws in [('_ExpovariateRNG', (2,), [math.nextafter(1e-7, 0), 1e-7, math.nextafter(1e-7, 1)]),
+                         ('_WeibullvariateRNG', (0.5, 2), [1.0]),
+                         ('_BetavariateRNG', (2, 4), [1.0, 0.5])]:
+    textures, parameters = routed(draws, [])
+    RESULT.append((getattr(m, name)().random(*args), textures.count))
+    restored()
+for mu in (0, 1):
+    textures, parameters = routed([], [0, 0])
+    RESULT.append((m.GaussRandom(mu, 0)(t=0), parameters.count))
+    restored()
+"""), pair)
+    same_omde(scripted("""# errors preserve draw consumption and exact Python exception messages
+RESULT = []
+cases = [('m.ExponentialRandom(0)(0)', [0.5], []),
+         ('m.InverseExponentialRandom(-0.0)(0)', [0.5], []),
+         ('m.BetaRandom(2, 0)(0)', [0.2, 0.5], []),
+         ('m._BetavariateRNG().random(2, 4)', [1.0, 1.0], []),
+         ('m.WeibullRandom(0.5, 2)(0)', [0.0], []),
+         ('m.WeibullRandom(0.5, 0)(0)', [0.5], []),
+         ('m.ExponentialRandom(None)(0)', [0.5], []),
+         ('m.CauchyRandom(None)(0)', [0.25], []),
+         ('m.GaussRandom(None)(0)', [], [0.2, 0.9]),
+         ('m._GaussRNG().random(0, 1)', [], [0.2, 1.0])]
+for source, td, pd in cases:
+    textures, parameters = routed(td, pd)
+    try: eval(source)
+    except Exception as err:
+        RESULT.append((type(err).__name__, str(err), textures.count, parameters.count))
+    else: raise AssertionError('expected failure: ' + source)
+    restored()
+"""), pair)
+    same_omde(scripted("""# parameter functions evaluate once despite rejection, in source order
+from athenaCL.libATH.omde.functional import Function
+log = []
+class Parameter(Function):
+    def __init__(self, name, value): self.name, self.value = name, value
+    def __call__(self, t):
+        log.append((self.name, t))
+        return self.value
+textures, parameters = routed([0.1, 0.9, 0.1, 0.9, 0.5, 0.49, 0.25,
+                              0.2, 0.4, 0.3, 0.01, 0.9], [0.125, 0.999, 0, 0])
+m.ExponentialRandom(Parameter('lambda', 1))(1)
+m.BilateralExponentialRandom(Parameter('lambda', 1))(2)
+m.CauchyRandom(Parameter('alpha', 0.1), Parameter('mu', 0.5))(3)
+m.BetaRandom(Parameter('alpha', 2), Parameter('beta', 4))(4)
+m.WeibullRandom(Parameter('alpha', 1), Parameter('beta', 2))(5)
+m.GaussRandom(Parameter('mu', 0.5), Parameter('sigma', 1))(6)
+RESULT = (log, textures.count, parameters.count)
+"""), pair)
+    same_omde(scripted("""# numeric protocols and large ints are evaluated at the arithmetic boundary
+from athenaCL.libATH.omde.functional import Function
+log = []
+class Number:
+    def __rtruediv__(self, value):
+        log.append(('divide', value))
+        return value / 2
+class Value(Function):
+    def __call__(self, t): return Number()
+textures, parameters = routed([0.5, 0.5], [])
+RESULT = (m.ExponentialRandom(Value())(0), m.ExponentialRandom(2**100)(0), log,
+          textures.count)
+"""), pair)
+    same_omde("""# constructors reject duplicate, unknown and surplus arguments
+RESULT = []
+for source in ('m.UniformRandom(1)', 'm.LinearRandom(x=1)',
+               'm.ExponentialRandom(2, lambd=3)', 'm.ExponentialRandom(nope=2)',
+               'm.ExponentialRandom(1, 2)', 'm.GaussRandom(mu=1, typo=2)',
+               'm.BetaRandom(1, 2, 3)', 'm.WeibullRandom(alpha=1, typo=2)',
+               'm._ExpovariateRNG(1)', 'm._GaussRNG().random(mu=1)',
+               'm._LehmerRNG(1, seed=2)', 'm._LehmerRNG(1).seed(1, 2)'):
+    try: eval(source)
+    except TypeError: RESULT.append('TypeError')
+    else: raise AssertionError(source)
+""", pair)
+    same_omde(scripted("""# permissive new and typed init allow Python constructors and overrides
+from athenaCL.libATH.omde.functional import Function, Generator
+textures, parameters = routed([0.3, 0.5, 0.4, 0.7, 0.8], [])
+class U(m.UniformRandom):
+    def __init__(self, name, extra):
+        self.name = name
+        super().__init__()
+class E(m.ExponentialRandom):
+    def __init__(self, name, rate, extra):
+        self.name = name
+        super().__init__(lambd=rate)
+class Custom(m.LinearRandom):
+    def __call__(self): return 0.25
+u, e = U('u', 9), E('e', 2, 9)
+RESULT = (u.name, e.name, (3-u)(), (e*2)(0), Custom()(),
+          isinstance(u, Generator), isinstance(e, Function), textures.count)
+"""), pair)
+    same_omde(scripted("""# a copy graph shares a single snapshot; shallow copies share original helpers
+import copy
+textures, parameters = routed([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7], [])
+a, b = m.UniformRandom(), m.LinearRandom()
+ca, cb = copy.deepcopy([a, b])
+values = (ca(), cb(), a(), b())
+shallow = copy.copy(a)
+RESULT = (values, ca.rng is cb.rng, ca.rng is not a.rng, shallow.rng is a.rng,
+          textures.count)
+"""), pair)
+    same_omde(scripted("""# deepcopy retains subclass type, slots, cycles and cross-field aliases
+import copy
+class U(m.UniformRandom):
+    __slots__ = ('slot',)
+    def __init__(self, name):
+        super().__init__()
+        self.name = name
+        self.slot = self.rng
+        self.owner = self
+textures, parameters = routed([0.1, 0.2], [])
+a = U('saved')
+c = copy.deepcopy(a)
+RESULT = (type(c) is U, c.name, c.owner is c, c.slot is c.rng,
+          c.rng is not a.rng, c(), a(), textures.count)
+"""), pair)
+    same_omde(scripted("""# Gauss shallow copies share the helper; deep copies preserve its pending spare
+import copy
+from athenaCL.libATH.omde.functional import Function
+class TimeMu(Function):
+    def __call__(self, t): return t / 10
+textures, parameters = routed([], [0.2, 0.9, 0.6, 0.1])
+a = m.GaussRandom(TimeMu(), 0.1)
+first = a(5)
+b = copy.copy(a)
+c = copy.deepcopy(a)
+RESULT = (b.gaussRNG is a.gaussRNG, c.gaussRNG is not a.gaussRNG,
+          b(3), c(3), parameters.count, a(5), parameters.count)
+"""), pair)
+    same_omde(scripted("""# an arithmetic failure occurs after the Gauss spare is installed
+textures, parameters = routed([], [0.2, 0.9])
+g = m._GaussRNG()
+try: g.random(None, 0.1)
+except TypeError: pass
+else: raise AssertionError('invalid mu')
+RESULT = (g.random(mu=0.3, sigma=0.2), parameters.count, g.next is None)
+"""), pair)
+    same_omde("""# Lehmer retains integer/float modulo semantics, including arbitrary-width integers
+RESULT = []
+for args in [(1,), (-3, 97, 13, 2), (7, -97, 13, 2),
+             (2**150, 2**151+7, 2**130+5, 11)]:
+    r = m._LehmerRNG(*args)
+    RESULT.append([r.random() for _ in range(5)])
+    r.seed(seed=args[0])
+    RESULT.append(r.random())
+try: m._LehmerRNG(1, mod=0).random()
+except Exception as err: RESULT.append((type(err).__name__, str(err)))
+else: raise AssertionError('zero modulus')
+""", pair)
+    same_omde("""# clock reseeding covers zero, modulus and repeated zero ticks without sleeping
+from types import SimpleNamespace
+calls = []
+ticks = iter([123.0, 123.5, 123.25])
+saved_time = m.time
+m.time = SimpleNamespace(time=lambda: next(ticks), sleep=lambda t: calls.append(t))
+try:
+    r = m._LehmerRNG(0, mod=100, mul=3)
+    initial = (r._seed, r.random())
+    r.seed(100)
+    RESULT = (initial, r._seed, r.random(), calls)
+finally:
+    m.time = saved_time
+""", pair)
+
+    same_omde("""# compare full seeded distributions with both algorithms on the new draw source
+from athenaCL.libATH import rngBridge
+saved = m._the_same, m.random
+m._the_same, m.random = rngBridge.textures, rngBridge.parameters.random
+try:
+    RESULT = []
+    for seed in (0, 7, -12345, 2**200):
+        for name in ('UniformRandom', 'LinearRandom', 'InverseLinearRandom',
+                     'TriangularRandom', 'InverseTriangularRandom', 'ExponentialRandom',
+                     'InverseExponentialRandom', 'BilateralExponentialRandom',
+                     'GaussRandom', 'CauchyRandom', 'BetaRandom', 'WeibullRandom'):
+            rngBridge.textures.seed(seed)
+            rngBridge.parameters.seed(seed)
+            f = getattr(m, name)()
+            timed = name in ('ExponentialRandom', 'InverseExponentialRandom',
+                             'BilateralExponentialRandom', 'GaussRandom', 'CauchyRandom',
+                             'BetaRandom', 'WeibullRandom')
+            values = [f(t=i) if timed else f() for i in range(12)]
+            RESULT.append((name, values, rngBridge.textures.random(),
+                           rngBridge.parameters.random()))
+finally:
+    m._the_same, m.random = saved
+""", pair)
+
+
+def test_rand_lifetimes():
+    pair = OMDE['rand']
+    same_omde("""# accepted uniforms remain alive during distribution arithmetic
+from types import SimpleNamespace
+RESULT = []
+for name in ('ExponentialRandom', 'WeibullRandom'):
+    events = []
+    class Uniform(float):
+        def __del__(self): events.append('uniform finalized')
+    class Rate:
+        def __rtruediv__(self, other):
+            events.append('parameter division')
+            return 0.75 if 'uniform finalized' in events else 0.25
+    f = getattr(m, name)()
+    source = SimpleNamespace(random=lambda: Uniform(0.5))
+    if name == 'ExponentialRandom':
+        f.expovariateRNG.uniformRNG = source
+        f.lambd = lambda t: Rate()
+    else:
+        f.weibullvariateRNG.uniformRNG = source
+        f.beta = lambda t: Rate()
+    value = f(0)
+    assert events == ['parameter division', 'uniform finalized']
+    RESULT.append((name, value, list(events)))
+""", pair)
+    same_omde("""# Gaussian angle remains alive through cache storage and final arithmetic
+events = []
+g = m._GaussRNG()
+class Angle(float):
+    def __del__(self):
+        events.append(('angle finalized', g.next is None))
+        g.next = None
+class Radians(float):
+    def __mul__(self, other): return Angle(float(self) * other)
+class Uniform(float):
+    def __mul__(self, other): return Radians(float(self) * other)
+saved = m.random
+m.random = iter([Uniform(0.125), 0.2]).__next__
+try:
+    value = g.random(0, 1)
+    assert events == [('angle finalized', False)] and g.next is None
+    RESULT = (value, g.next, events)
+finally:
+    m.random = saved
+""", pair)
+    same_omde("""# a rejected sample survives until its replacement draw returns
+from types import SimpleNamespace
+RESULT = []
+for name, field in [('ExponentialRandom', 'expovariateRNG'),
+                    ('InverseExponentialRandom', 'expovariateRNG'),
+                    ('BilateralExponentialRandom', 'expovariateRNG'),
+                    ('GaussRandom', 'gaussRNG'), ('WeibullRandom', 'weibullvariateRNG')]:
+    events = []
+    class Rejected:
+        def __lt__(self, other): return False
+        def __gt__(self, other): return False
+        def __ge__(self, other): return False
+        def __rsub__(self, other): return self
+        def __del__(self): events.append('finalize')
+    class Helper:
+        def __init__(self): self.calls = 0
+        def random(self, *args):
+            self.calls += 1
+            events.append('draw')
+            return Rejected() if self.calls == 1 else 0.25
+    f = getattr(m, name)()
+    setattr(f, field, Helper())
+    if name == 'BilateralExponentialRandom':
+        f.uniformRNG = SimpleNamespace(random=lambda: 0.25)
+    value = f(0)
+    assert events == ['draw', 'draw', 'finalize']
+    RESULT.append((name, value, list(events)))
+""", pair)
+    same_omde("""# the exponential helper also retains its rejected uniform draw
+class Rejected(float):
+    def __del__(self): events.append('finalize')
+class Source:
+    def __init__(self): self.calls = 0
+    def random(self):
+        self.calls += 1
+        events.append('draw')
+        return Rejected(0) if self.calls == 1 else 0.5
+events = []
+f = m._ExpovariateRNG()
+f.uniformRNG = Source()
+value = f.random(2)
+assert events == ['draw', 'draw', 'finalize']
+RESULT = (value, events)
+""", pair)
+    same_omde("""# triangular retries replace a before drawing b, then replace b
+RESULT = []
+for name, first, second, final in [('TriangularRandom', 0.2, 0.4, (0.4, 0.2)),
+                                  ('InverseTriangularRandom', 0.4, 0.1, (0.2, 0.8))]:
+    events = []
+    class Sample(float):
+        def __new__(cls, value, name):
+            obj = float.__new__(cls, value)
+            obj.name = name
+            return obj
+        def __del__(self): events.append('finalize ' + self.name)
+    class Halved:
+        def __truediv__(self, other): return Sample(second, 'b')
+    class Source:
+        def __init__(self): self.calls = 0
+        def random(self):
+            self.calls += 1
+            events.append('draw %d' % self.calls)
+            if self.calls == 1: return Sample(first, 'a')
+            if self.calls == 2: return Halved()
+            return final[self.calls - 3]
+    f = getattr(m, name)()
+    f.rng = Source()
+    value = f()
+    assert events == ['draw 1', 'draw 2', 'draw 3', 'finalize a', 'draw 4', 'finalize b']
+    RESULT.append((name, value, list(events)))
+""", pair)
+    same_omde("""# Cauchy keeps x across outer retries and value until its replacement exists
+from athenaCL.libATH.omde.functional import Function
+events = []
+class Sample(float):
+    def __new__(cls, value, name):
+        obj = float.__new__(cls, value)
+        obj.name = name
+        return obj
+    def __del__(self): events.append('finalize ' + self.name)
+class Rejected:
+    def __le__(self, other): return False
+    def __del__(self): events.append('finalize value')
+class Product:
+    def __init__(self, first): self.first = first
+    def __add__(self, other): return Rejected() if self.first else 0.25
+class Factor:
+    def __init__(self): self.calls = 0
+    def __mul__(self, other):
+        self.calls += 1
+        return Product(self.calls == 1)
+class Alpha(Function):
+    def __call__(self, t): return Factor()
+class Source:
+    def __init__(self): self.calls = 0
+    def random(self):
+        self.calls += 1
+        events.append('draw %d' % self.calls)
+        if self.calls == 1: return Sample(0.49, 'x')
+        if self.calls == 2: return Sample(0.5, 'singularity')
+        return 0.25
+f = m.CauchyRandom(Alpha())
+f.uniformRNG = Source()
+value = f(0)
+assert events == ['draw 1', 'draw 2', 'finalize x', 'draw 3',
+                  'finalize singularity', 'finalize value']
+RESULT = (value, events)
+""", pair)
+    same_omde("""# Beta parameters remain alive while the returned value is inverted
+from athenaCL.libATH.omde.functional import Function
+events = []
+class Rate:
+    def __rtruediv__(self, other): return Numerator()
+    def __del__(self): events.append('rate finalized')
+class Numerator:
+    def __add__(self, other): return Denominator()
+class Denominator:
+    def __rtruediv__(self, other): return Value()
+class Value:
+    def __rsub__(self, other):
+        events.append('inversion')
+        return 'rate finalized' in events
+class Parameter(Function):
+    def __call__(self, t): return Rate()
+class Source:
+    def random(self): return 0.75
+f = m.BetaRandom(Parameter(), 2)
+f.uniformRNG = Source()
+f.betavariateRNG.expovariateRNG.uniformRNG = Source()
+value = f(0)
+assert value is False and events == ['inversion', 'rate finalized']
+RESULT = (value, events)
+""", pair)
+
+
 for test in (test_error, test_permutate, test_quantize, test_chaos, test_functional,
              test_bpf, test_oscillator, test_bpf_regressions, test_oscillator_regressions,
              test_omde_copy, test_omde_finalizers, test_omde_initializer_arguments,
              test_omde_mutating_callbacks,
              test_omde_read_boundaries, test_oscillator_callback_regressions,
-             test_bpf_failed_initialization):
+             test_bpf_failed_initialization, test_rand, test_rand_contracts,
+             test_rand_lifetimes):
     test()
 
 print('%d checks, %d failures' % (checks, len(failures)))

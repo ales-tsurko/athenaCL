@@ -264,7 +264,7 @@ RESULT = rngBridge.parameters.random()
 }
 
 /// The parameters and textures streams are seeded and drawn as units: `TPsd`'s own call —
-/// `random.seed()` — leaves the textures stream and the legacy `TMsd` generator where they were.
+/// `random.seed()` — leaves the textures stream used by `TMsd` where it was.
 #[test]
 fn parameters_and_textures_are_separate_streams() {
     with_interpreter(|vm| {
@@ -281,29 +281,29 @@ parameters_before = random.random()
 
 # the textures stream, seeded, holds its position across TPsd
 rngBridge.textures.seed(9)
-textures_before = rngBridge.textures.random()
+textures_first = rngBridge.textures.random()
 rngBridge.textures.seed(9)
 random.seed(5)
 parameters_again = random.random()
-textures_after = rngBridge.textures.random()
+textures_again = rngBridge.textures.random()
 
-# the legacy TMsd generator draws its own sequence, unmoved by TPsd: TMsd seeds it,
+# TMsd's generator is the textures stream, unmoved by TPsd: TMsd seeds it,
 # then it draws. Its continuation is captured first, then checked without reseeding —
 # a reset would hide any disturbance.
-legacy = rand.UniformRNG()
-legacy.seed(7)
-first_six = [legacy.random() for _ in range(6)]
-legacy.seed(7)
-legacy_before = [legacy.random() for _ in range(3)]
+textures = rand.UniformRNG()
+textures.seed(7)
+first_six = [textures.random() for _ in range(6)]
+textures.seed(7)
+textures_before = [textures.random() for _ in range(3)]
 random.seed(99)
 random.random()
-legacy_after = [legacy.random() for _ in range(3)]
+textures_after = [textures.random() for _ in range(3)]
 
 RESULT = repr((
     parameters_before == parameters_again,
-    textures_before == textures_after,
-    legacy_before == first_six[:3],
-    legacy_after == first_six[3:],
+    textures_first == textures_again,
+    textures_before == first_six[:3],
+    textures_after == first_six[3:],
 ))
 "#,
         );
@@ -440,5 +440,200 @@ RESULT = repr((
              makes'])\""
         );
         assert_eq!(drawn, expected);
+    });
+}
+
+/// Stage two uses the existing frozen uniforms, interleaved through every consumer's seam.
+#[test]
+fn textures_are_shared_with_native_and_python_generators() {
+    with_interpreter(|vm| {
+        let result = evaluate(
+            vm,
+            r#"
+from athenaCL.libATH import rngBridge
+from athenaCL.libATH.omde import rand, miscellaneous
+
+stream = rand.UniformRNG()
+stream.seed(0)
+frozen = [rand.UniformRandom()(), rngBridge.textures.random(), rand.UniformRandom()()]
+stream.seed(7)
+reference = [stream.random() for _ in range(6)]
+stream.seed(7)
+a, b = rand.UniformRandom(), rand.LinearRandom()
+r, i = miscellaneous.Range(-1, 2), miscellaneous.IntRange(2, 8)
+observed = [a(), b(), r(), i(), stream.random()]
+expected = [reference[0], min(reference[1:3]), -1 + 3 * reference[3],
+            int(2 + 6 * reference[4]), reference[5]]
+RESULT = (stream is rngBridge.textures, stream is rand.UniformRNG(),
+          frozen, observed == expected)
+"#,
+        );
+        assert_eq!(
+            result,
+            "(True, True, [0.8140322782963471, 0.9879443697944874, 0.7735099004168228], True)"
+        );
+    });
+}
+
+/// Execute both seed commands, then continue the opposite stream without a masking reset.
+#[test]
+fn seed_commands_route_to_their_own_streams() {
+    with_interpreter(|vm| {
+        let result = evaluate(
+            vm,
+            r#"
+import random
+from athenaCL.libATH import athenaObj, command, rngBridge
+from athenaCL.libATH.omde import rand
+
+ao = athenaObj.AthenaObject()
+def seed(cls, value):
+    return cls(ao, str(value)).do()[0]
+
+seed(command.TMsd, 7)
+textures = [rand.UniformRandom()() for _ in range(6)]
+seed(command.TMsd, 7)
+first = [rand.UniformRandom()() for _ in range(3)]
+pok = seed(command.TPsd, 42)
+p_first = random.random()
+after = [rand.UniformRandom()() for _ in range(3)]
+tok = seed(command.TMsd, 99)
+rand.UniformRandom()()
+p_second = rand.random()
+seed(command.TPsd, 42)
+parameters = [rngBridge.parameters.random() for _ in range(2)]
+seed(command.TMsd, 7)
+replay = [rand.UniformRandom()() for _ in range(6)]
+RESULT = (pok, tok, first == textures[:3], after == textures[3:],
+          [p_first, p_second] == parameters, replay == textures)
+"#,
+        );
+        assert_eq!(result, "(1, 1, True, True, True, True)");
+    });
+}
+
+/// UniformRNG's module instance and objects retained by its native classes stay local to a VM.
+#[test]
+fn texture_generators_are_isolated_between_interpreters() {
+    athenacl::init_scratch_prefs();
+    let a = athenacl::init_py_interpreter();
+    let b = athenacl::init_py_interpreter();
+    let first = a.enter(|vm| {
+        evaluate(
+            vm,
+            r#"
+from athenaCL.libATH.omde import rand
+rand.UniformRNG().seed(0)
+rand.retained_generator = rand.UniformRandom()
+RESULT = rand.retained_generator()
+"#,
+        )
+    });
+    let other = b.enter(|vm| {
+        evaluate(
+            vm,
+            r#"
+from athenaCL.libATH.omde import rand
+rand.UniformRNG().seed(0)
+RESULT = [rand.UniformRandom()() for _ in range(2)]
+"#,
+        )
+    });
+    let second = a.enter(|vm| {
+        evaluate(
+            vm,
+            r#"
+from athenaCL.libATH.omde import rand
+RESULT = rand.retained_generator()
+"#,
+        )
+    });
+    assert_eq!(first, "0.8140322782963471");
+    assert_eq!(other, "[0.8140322782963471, 0.9879443697944874]");
+    assert_eq!(second, "0.9879443697944874");
+}
+
+/// Reseeding never clears a Gaussian spare; two instances own independent caches, with new
+/// pairs continuing on parameters. Current parameter functions scale every cached sample.
+#[test]
+fn gaussian_cache_survives_reseeding_and_uses_parameters() {
+    with_interpreter(|vm| {
+        let result = evaluate(
+            vm,
+            r#"
+import math, random
+from athenaCL.libATH import rngBridge
+from athenaCL.libATH.omde import rand
+from athenaCL.libATH.omde.functional import Function
+class Mu(Function):
+    def __call__(self, t): return t / 10
+class Sigma(Function):
+    def __call__(self, t): return t / 100
+
+random.seed(7)
+u = [random.random() for _ in range(5)]
+def pair(values):
+    angle = values[0] * math.pi * 2
+    radius = math.sqrt(-2.0 * math.log(1.0 - values[1]))
+    return math.cos(angle) * radius, math.sin(angle) * radius
+z, w = pair(u[:2]), pair(u[2:4])
+random.seed(7)
+a, b = rand.GaussRandom(Mu(), Sigma()), rand.GaussRandom(Mu(), Sigma())
+first = a(5)
+other = b(5)
+rand.UniformRNG().seed(99)
+rand.UniformRandom()()
+continuation = random.random()
+random.seed(42)
+spare = a(3)
+other_spare = b(4)
+untouched = random.random()
+random.seed(42)
+expected = random.random()
+RESULT = (first == 0.5 + z[0] * 0.05, other == 0.5 + w[0] * 0.05,
+          continuation == u[4], spare == 0.3 + z[1] * 0.03,
+          other_spare == 0.4 + w[1] * 0.04, untouched == expected)
+"#,
+        );
+        assert_eq!(result, "(True, True, True, True, True, True)");
+    });
+}
+
+/// Deepcopy snapshots real ChaCha state once per graph, including consumers still in Python.
+#[test]
+fn copied_generators_share_one_independent_snapshot() {
+    with_interpreter(|vm| {
+        let result = evaluate(
+            vm,
+            r#"
+import copy
+from athenaCL.libATH.omde import rand, miscellaneous
+
+stream = rand.UniformRNG()
+stream.seed(7)
+reference = [stream.random() for _ in range(5)]
+stream.seed(7)
+a, b = rand.UniformRandom(), rand.LinearRandom()
+r = miscellaneous.Range(0, 1)
+ca, cb, cr, cs = copy.deepcopy([a, b, r, stream])
+values = [ca(), cb(), cr(), cs.random()]
+expected = [reference[0], min(reference[1:3]), reference[3], reference[4]]
+original = [stream.random() for _ in range(5)]
+shared = ca.rng is cb.rng is cr.rng is cs
+independent = cs is not stream
+stream.seed(99)
+copy_again = copy.deepcopy(ca)
+copy_future = copy_again()
+future = ca()
+shallow = copy.copy(b)
+listed = miscellaneous.List(r).list[0]
+listed_value = listed()
+original_value = r()
+RESULT = (values == expected, original == reference, shared, independent,
+          copy_future == future, shallow.rng is b.rng, listed.rng is not r.rng,
+          listed_value == original_value)
+"#,
+        );
+        assert_eq!(result, "(True, True, True, True, True, True, True, True)");
     });
 }

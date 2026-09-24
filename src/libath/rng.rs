@@ -1,8 +1,9 @@
 //! athenaCL's random streams, in Rust: the single home of the seeded chance the modules draw.
 //!
 //! Two streams are kept per interpreter, seeded and drawn as units: `parameters`, which the `TPsd`
-//! command seeds and the parameter objects draw from, and `textures`, which the `TMsd` command will
-//! seed once the omde random generators fold onto it. Each is a `ChaCha12Rng` with `SHA-256`-folded
+//! command seeds and the parameter objects draw from, and `textures`, which the `TMsd` command
+//! seeds through OMDE's shared `UniformRNG()`. Gauss keeps drawing from `parameters`. Each is a
+//! `ChaCha12Rng` with `SHA-256`-folded
 //! seeds — both named and stable, so a seed's draw sequence stays reproducible across builds. The
 //! streams live as instances on this module, which RustPython creates per interpreter, so separate
 //! interpreters never share state.
@@ -376,6 +377,21 @@ pub(super) mod _inner {
         #[pymethod]
         fn random(&self) -> f64 {
             self.rng.lock().gen::<f64>()
+        }
+
+        /// Copying a stream snapshots its position without advancing the original.
+        #[pymethod]
+        fn __copy__(&self) -> Self {
+            Self {
+                rng: PyMutex::new(self.rng.lock().clone()),
+            }
+        }
+
+        /// There are no child objects to copy. Python's deepcopy records this result in its memo,
+        /// so distinct generators sharing one stream also share one copied stream.
+        #[pymethod]
+        fn __deepcopy__(&self, _memo: PyObjectRef) -> Self {
+            self.__copy__()
         }
 
         /// An unbiased draw below `n`, for `1 <= n <= 2**64`.

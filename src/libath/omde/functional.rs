@@ -30,7 +30,7 @@ pub(crate) fn module_def(
 }
 
 /// The base payloads, for the sibling omde ports to embed as their classes' bases.
-pub(crate) use _inner::{Function, FunctionModel};
+pub(crate) use _inner::{Function, FunctionModel, Generator};
 
 #[pymodule(name = "athenaCL.libATH.omde._functional")]
 pub(crate) mod _inner {
