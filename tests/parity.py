@@ -3031,8 +3031,20 @@ finally:
     time.gmtime = saved_gmtime
 RESULT = paths
 """)
-    # platform probes, sudo over a routed subprocess
-    drawer_block("""import subprocess
+    # platform probes, sudo over a routed subprocess; provide uname on Windows too
+    drawer_block("""import os, subprocess
+had_uname = hasattr(os, 'uname')
+saved_uname = getattr(os, 'uname', None)
+try:
+    os.uname = lambda: ('Darwin',)
+    darwin = m.isDarwin()
+    os.uname = lambda: ('Linux',)
+    other = m.isDarwin()
+finally:
+    if had_uname:
+        os.uname = saved_uname
+    else:
+        del os.uname
 saved = subprocess.getstatusoutput
 subprocess.getstatusoutput = lambda cmd: (0, 'sudo version 2')
 try:
@@ -3043,24 +3055,26 @@ finally:
         without_sudo = m.isSudo()
     finally:
         subprocess.getstatusoutput = saved
-RESULT = (m.isCarbon(), m.isDarwin(), m.isIdle(), m.isPy24Better(),
+RESULT = (m.isCarbon(), darwin, other, m.isIdle(), m.isPy24Better(),
           m.getPrefsName(), with_sudo, without_sudo)
 """)
     # path scrubbing and existence, on real paths, and the application filters
-    drawer_block("""import os
+    drawer_block("""import os, tempfile
 def kind(fn):
     try:
         fn()
         return 'no error'
     except Exception as err:
         return '%s: %s' % (type(err).__name__, err)
-made = '/tmp/athenacl-drawer-port.app'
+made = os.path.join(tempfile.gettempdir(),
+                    'athenacl-drawer-port-%d.app' % os.getpid())
 open(made, 'w').close()
 try:
     filters = (m.appPathFilter(None), m.appPathFilter(''),
                m.appPathFilter('/definitely/not/there.app'),
                m.appPathFilter('/definitely/not/there'))
-    apps = (m.isApp(made), m.isApp('/definitely/not'), m.isApp(None), m.isApp('/tmp'),
+    apps = (m.isApp(made), m.isApp('/definitely/not'), m.isApp(None),
+            m.isApp(os.path.dirname(made)),
             m.isApp('/definitely/x.exe'))
 finally:
     os.remove(made)
