@@ -3084,6 +3084,34 @@ RESULT = (m.pathScrub('/a//b/../c'), m.pathScrub('relative'), m.pathScrub('~/x')
           m.pathExists('/'), m.getcwd() == os.getcwd(),
           m.getud() == os.path.expanduser('~'), filters, apps)
 """)
+    # Cover each platform's application suffix without depending on the CI host.
+    drawer_block("""import types
+class Paths:
+    def __init__(self, existing):
+        self.existing = existing
+        self.calls = []
+    def exists(self, path):
+        self.calls.append(path)
+        return path in self.existing
+saved_os = m.os
+try:
+    mac_paths = Paths({'synth.app', 'present'})
+    m.os = types.SimpleNamespace(name='posix', path=mac_paths,
+                                 uname=lambda: ('Darwin',))
+    mac = (m.appPathFilter('synth'), m.appPathFilter('present'),
+           m.appPathFilter('missing'), mac_paths.calls)
+    linux_paths = Paths({'synth.app'})
+    m.os = types.SimpleNamespace(name='posix', path=linux_paths,
+                                 uname=lambda: ('Linux',))
+    linux = (m.appPathFilter('synth'), linux_paths.calls)
+    windows_paths = Paths({'editor.exe', 'present'})
+    m.os = types.SimpleNamespace(name='nt', path=windows_paths)
+    windows = (m.appPathFilter('editor'), m.appPathFilter('present'),
+               m.appPathFilter('missing'), windows_paths.calls)
+finally:
+    m.os = saved_os
+RESULT = (mac, linux, windows)
+""")
     drawer_block("""import ntpath, types
 saved = m.os
 slash = chr(92)

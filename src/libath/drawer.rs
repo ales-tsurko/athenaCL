@@ -2618,6 +2618,35 @@ pub(super) mod _inner {
         fp: PyObjectRef,
     }
 
+    fn app_suffix(os: &PyObjectRef, vm: &VirtualMachine) -> PyResult<Option<&'static str>> {
+        let name = os.get_attr("name", vm)?;
+        if eq(&name, &text("posix", vm), vm)? {
+            Ok(is_darwin_value(vm)?.then_some(".app"))
+        } else {
+            Ok(Some(".exe"))
+        }
+    }
+
+    fn existing_app_extension(
+        fp: PyObjectRef,
+        os_path: &PyObjectRef,
+        suffix: &str,
+        vm: &VirtualMachine,
+    ) -> PyResult {
+        let modified = vm._add(&fp, &text(suffix, vm))?;
+        let fp_exists = os_path.get_attr("exists", vm)?.call((fp.clone(),), vm)?;
+        if truthy(&fp_exists, vm)? {
+            return Ok(fp);
+        }
+        let modified_exists = os_path
+            .get_attr("exists", vm)?
+            .call((modified.clone(),), vm)?;
+        if truthy(&modified_exists, vm)? {
+            return Ok(modified);
+        }
+        Ok(fp)
+    }
+
     #[pyfunction(name = "appPathFilter")]
     pub(crate) fn app_path_filter(args: AppPathFilterArgs, vm: &VirtualMachine) -> PyResult {
         let fp = args.fp;
@@ -2626,25 +2655,10 @@ pub(super) mod _inner {
         if eq(&fp, &none(vm), vm)? || eq(&fp, &text("", vm), vm)? {
             return Ok(fp);
         }
-        let name = os.get_attr("name", vm)?;
-        let suffix = if eq(&name, &text("posix", vm), vm)? {
-            if is_darwin_value(vm)? {
-                ".app"
-            } else {
-                return Ok(fp);
-            }
-        } else {
-            ".exe"
-        };
-        let modified = vm._add(&fp, &text(suffix, vm))?;
-        let fp_exists = os_path.get_attr("exists", vm)?.call((fp.clone(),), vm)?;
-        let modified_exists = os_path
-            .get_attr("exists", vm)?
-            .call((modified.clone(),), vm)?;
-        if !truthy(&fp_exists, vm)? && truthy(&modified_exists, vm)? {
-            return Ok(modified);
+        match app_suffix(&os, vm)? {
+            Some(suffix) => existing_app_extension(fp, &os_path, suffix, vm),
+            None => Ok(fp),
         }
-        Ok(fp)
     }
 
     #[derive(FromArgs)]
