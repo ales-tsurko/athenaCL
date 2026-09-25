@@ -425,6 +425,7 @@ pub fn init_py_interpreter() -> PyInterpreter {
         .add_native_module(manual_ext::module_def(&ctx))
         .add_native_module(sndhdr::module_def(&ctx))
         .add_native_module(libath::chaos::module_def(&ctx))
+        .add_native_module(libath::drawer::module_def(&ctx))
         .add_native_module(libath::error::module_def(&ctx))
         .add_native_module(libath::permutate::module_def(&ctx))
         .add_native_module(libath::quantize::module_def(&ctx))

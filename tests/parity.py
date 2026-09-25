@@ -15,7 +15,7 @@ import importlib
 import sys
 
 
-PORTED = ['chaos', 'error', 'permutate', 'quantize']
+PORTED = ['chaos', 'drawer', 'error', 'permutate', 'quantize']
 
 # the omde leaves port under their omde paths; the references keep the flat ones
 OMDE = {
@@ -31,6 +31,7 @@ OMDE = {
         'athenaCL.libATH._pyref.miscellaneous',
     ),
 }
+DRAWER = ('athenaCL.libATH.drawer', 'athenaCL.libATH._pyref.drawer')
 FUNCTIONAL = OMDE['functional']
 
 failures = []
@@ -2657,13 +2658,516 @@ RESULT = (type(combined).__name__, isinstance(combined, Generator), value)
 """))
 
 
+def test_drawer():
+    """The drawer module — the shared utilities in their three groups: the isinstance
+    predicates (subclasses, booleans, arbitrarily large integers — class checks, no
+    numeric conversion), the text and collection utilities (through the object protocol,
+    eval semantics included), and the environment helpers (clock, filesystem, platform,
+    preferences — the time, os, tempfile, and subprocess modules read at call time, so
+    routed probes are deterministic and ATHENACL_PREFS_DIR is honored). Weighted
+    rounding draws through the random module's alias, the parameters stream."""
+    import itertools
+    _drawer_label = itertools.count()
+
+    def drawer_block(source):
+        same_omde(source, DRAWER, 'drawer block %d' % next(_drawer_label))
+
+    def kind(fn):
+        try:
+            fn()
+            return 'no error'
+        except Exception as err:
+            return '%s: %s' % (type(err).__name__, err)
+
+    # the predicates: subclasses, booleans, arbitrarily large integers
+    drawer_block("""def kind(fn):
+    try:
+        fn()
+        return 'no error'
+    except Exception as err:
+        return '%s: %s' % (type(err).__name__, err)
+class IntSub(int):
+    pass
+class StrSub(str):
+    pass
+class FloatSub(float):
+    pass
+def a_py_func():
+    pass
+big = 10 ** 40
+RESULT = ([m.isInt(v) for v in (3, big, True, IntSub(5), '3', 3.0)],
+          [m.isNum(v) for v in (3, big, 3.2, True, FloatSub(1.5), '3')],
+          [m.isFloat(v) for v in (3.2, FloatSub(1.5), 3, True)],
+          [m.isBool(v) for v in (True, False, 1, 0)],
+          [m.isStr(v) for v in ('x', StrSub('s'), 3)],
+          [m.isList(v) for v in ([1], (1,), 'ab')],
+          [m.isDict(v) for v in ({}, [])],
+          m.isMod(m), m.isMod(3), m.isFunc(a_py_func), m.isFunc(lambda: 1),
+          m.isFunc(3), m.isMod(m.isList))
+""")
+    drawer_block("""class ReportsInt:
+    @property
+    def __class__(self):
+        return int
+RESULT = (m.isInt(ReportsInt()), m.isNum(ReportsInt()),
+          m.isType(ReportsInt(), 'int'))
+""")
+    # the float comparisons, keyword names included
+    drawer_block("""RESULT = (m.almostEquals(1.0, 1.0000000001), m.almostEquals(1.0, 1.01),
+          m.almostEquals(0.5), m.almostEquals(1.0, y=1.05, grain=0.1),
+          m.almostEquals(x=2.0, y=2.2, grain=0.5))
+""")
+    # character numbers, unicode digits included
+    drawer_block("""RESULT = (m.isCharNum('34'), m.isCharNum('34.234'), m.isCharNum('adsf'),
+          m.isCharNum('-3.5'), m.isCharNum('+3 5'), m.isCharNum('٣4'), m.isCharNum(''))
+""")
+    drawer_block("""class Digit(str):
+    def __eq__(self, other):
+        raise RuntimeError('isdigit must short-circuit membership')
+RESULT = m.isCharNum([Digit('5')])
+""")
+    # the friendly type names and the dispatch, boolean-through-int included
+    drawer_block("""def kind(fn):
+    try:
+        fn()
+        return 'no error'
+    except Exception as err:
+        return '%s: %s' % (type(err).__name__, err)
+class IntSub(int):
+    pass
+RESULT = ([m.typeAsStr(t) for t in ('list', 'num', 'bool', 'float', 'int', 'str',
+                                    'dict', 'bogus')],
+          m.typeAsStr(typeStr='float'),
+          m.isType(True, 'bool'), m.isType(3.2, 'float'), m.isType(IntSub(2), 'int'),
+          m.isType(True, 'int'),
+          kind(lambda: m.isType(3, 'bogus')))
+""")
+    drawer_block("""def outcome(fn):
+    try:
+        return ('ok', fn())
+    except Exception as err:
+        return (type(err).__name__, str(err))
+class SurrogateRepr:
+    def __repr__(self):
+        return 'odd(' + chr(0xd800) + ')'
+RESULT = (outcome(lambda: m.typeAsStr(())),
+          outcome(lambda: m.typeAsStr((1,))),
+          outcome(lambda: m.typeAsStr((1, 2))),
+          outcome(lambda: m.pathScrub(())),
+          outcome(lambda: m.pathScrub((1,))),
+          outcome(lambda: m.pathScrub((1, 2))),
+          outcome(lambda: m.pathScrub(SurrogateRepr())))
+""")
+    # membership with partial and case-insensitive matches, keyword names included
+    drawer_block("""L = [3, 'F', 'foo', 4.5]
+RESULT = (m.inList(3, L), m.inList('f', L), m.inList('f', L, 'noCase'),
+          m.inList('fo', L), m.inList('zo', L), m.inList(None, L),
+          m.inList(4.5, L, caseSens='noCase'), m.inList('F', valueList=L, caseSens='case'),
+          m.inList('f', L, 'bogus'))
+""")
+    # filtered search, exact matches prioritized
+    drawer_block("""RESULT = (m.inListSearch('pi', ['piv', 'pils']),
+          m.inListSearch('  PI ', ['xpi', 'PILS']),
+          m.inListSearch('', ['a']), m.inListSearch('zz', ['a']))
+""")
+    # string scrubbing, removals, conversions, and the bad-case error
+    drawer_block("""def kind(fn):
+    try:
+        fn()
+        return 'no error'
+    except Exception as err:
+        return '%s: %s' % (type(err).__name__, err)
+RESULT = (m.strScrub('    sdfwer  \\t\\t'), m.strScrub('AbC', 'upper'),
+          m.strScrub('AbC', 'lower'), m.strScrub('a b c', rm=[' ']), m.strScrub(3.50),
+          kind(lambda: m.strScrub('x', 'bogus')))
+""")
+    # alpha and number extraction, space compaction, unicode letters
+    drawer_block("""RESULT = (m.strStripAlpha('sdf234isdf345sg   234sdf4'),
+          m.strExtractAlpha('sfd234dfg09'), m.strExtractAlpha('a1b2', opt=['1', '2']),
+          m.strExtractAlpha('abc', None), m.strExtractAlpha('a1', iter(['1'])),
+          m.strExtractNum('sdf2349dfg3234'), m.strExtractNum('pm3x', optAccept='x'),
+          m.strCompactSpace('adsf  \\t 234 sdf 493  345   asdf'),
+          m.strStripAlpha('å1é2'))
+""")
+    # evaluation through eval, expressions included, exactly the converted exceptions
+    drawer_block("""RESULT = (m.strToNum('345'), m.strToNum('345.234'), m.strToNum('1+2'),
+          m.strToNum('1/0'), m.strToNum('open'), m.strToNum(None), m.strToNum('12', 'int'),
+          m.strToNum('12.5', 'int'), m.strToNum('5', min=10), m.strToNum('5', min=10, force=1),
+          m.strToNum('5', min=1, max=3), m.strToNum('5', max=3, force=1),
+          m.strToNum('5', 'bogus'), m.strToNum('  7 '), m.strToNum('1e3'),
+          m.strToNum('min', min=5), m.strToNum('min(1, 2)'),
+          m.strToNum('(drawer_eval_local := 12)'), m.strToNum('drawer_eval_local'),
+          hasattr(m, 'drawer_eval_local'))
+""")
+    # percentages, auto format detection included
+    drawer_block("""RESULT = (m.strToPercent(.5), m.strToPercent(40), m.strToPercent('6.18%'),
+          m.strToPercent('0.5'), m.strToPercent(150, 'macro'), m.strToPercent('abc'),
+          m.strToPercent(0.5, 'unit'))
+""")
+    # list forcing from strings, delimiters, nesting stripped, typed sequences
+    drawer_block("""RESULT = (m.strToList('this, is, a, test'), m.strToList('a;b', ';'),
+          m.strToListFlat('this, (is, a), test'), m.strToListFlat('A, B', 'lower'),
+          m.strToListFlat('a,,b'), m.strToSequence('3, 6, 3'),
+          m.strToSequence('3, 6', dataLen=3), m.strToSequence('3, x', dataTypeList=['int', 'int']),
+          m.strToSequence("1, 'a', 2.5", dataTypeList=['int', 'str', 'float']),
+          m.strToSequence('(3, x'), m.strToSequence('  '),
+          m.strToSequence('i, i + 1'), m.strToSequence('dataLen', dataLen=1))
+""")
+    drawer_block("""RESULT = (m.strToSequence('(a:=1), a+1'),
+          m.strToSequence('(i:=6), i'),
+          m.strToSequence('3, typeStr', dataTypeList=['int', 'str']))
+""")
+    # the list printers and walkers, every format
+    drawer_block("""def kind(fn):
+    try:
+        fn()
+        return 'no error'
+    except Exception as err:
+        return '%s: %s' % (type(err).__name__, err)
+RESULT = (m.listToStr([3, 4, 2.3]), m.listToStr(5),
+          m.listToStr([3, 4], removeSpace=False), m.listToStr([3, 4], removeOuter=True),
+          m.listToStr(['a b', 1]),
+          m.listToStrGrammar(['red', 'green', 'blue'], 'and'),
+          m.listToStrGrammar(['a', 'b'], 'or'), m.listToStrGrammar(['a']),
+          m.listToStrGrammar(['a', 'b', 'c', 'd']),
+          m.typeListAsStr(['float', 'bool', 'int'], 'or'),
+          m.listScrub([3, 4, 5]), m.listScrub([]), m.listScrub(3.5),
+          m.listScrub([1, 2, '']), m.listScrub(['foo,']),
+          m.listScrub(['"a"', 'b'], quote='rm'),
+          m.listInterleave([1, 2, 3], ['a', 'b', 'c']), m.listInterleave([1, 2, 3], ['a'], 1),
+          m.listSliceWrap(['a', 'b'], 0, 6), m.listSliceWrap(['a', 'b'], -1, 2),
+          m.listSliceWrap(['a', 'b', 'c'], -3, 3), m.listSliceWrap(['a', 'b'], 0, 2, 'index'),
+          m.listSliceWrap([5, 0, 7], 0, 3, 'valueactive'),
+          m.listSliceWrap(['a', 0, 'b'], 0, 3, 'pair'),
+          m.listSliceWrap([5, 0, 7], 0, 3, 'indexpassive'),
+          kind(lambda: m.listSliceWrap(['a'], 0, 3, 'bogus')))
+""")
+    drawer_block("""class IndicesOnly(list):
+    def __getitem__(self, index):
+        raise AssertionError('index mode read a value')
+class Changing(list):
+    def __init__(self, values):
+        super().__init__(values)
+        self.reads = 0
+    def __getitem__(self, index):
+        self.reads += 1
+        return self.reads
+changing = Changing([1])
+RESULT = (m.listSliceWrap(IndicesOnly([10, 20]), 0, 4, 'index'),
+          m.listSliceWrap(changing, 0, 1, 'valueactive'), changing.reads)
+""")
+    drawer_block("""source = []
+class Growing(int):
+    def __gt__(self, other):
+        source.append(99)
+        return True
+source.append(Growing(1))
+RESULT = (m.listSliceWrap(source, 0, 2, 'valueactive'), len(source),
+          m.listSliceWrap(None, 0.1, 0.2))
+""")
+    # zero buffering and the py3 true-division halves, doctests notwithstanding
+    drawer_block("""RESULT = (m.intToStr(3), m.intToStr(3, 3), m.intToStr(35, 5),
+          m.intToStr(35, zeroBuff=2), m.intToStr(3, zeroBuff=None),
+          m.intHalf(3), m.intHalf(4),
+          m.intHalf(3) == (1.5, 2.5), type(m.intHalf(3)[0]).__name__)
+""")
+    # rounding methods, banker's rounding included, and weighted rounding over routed
+    # draws from the random module's alias — the parameters stream
+    drawer_block("""import importlib
+class Scripted:
+    def __init__(self, draws):
+        self.draws = list(draws)
+        self.count = 0
+    def random(self):
+        self.count += 1
+        return self.draws.pop(0)
+randmod = importlib.import_module('random')
+saved = randmod.random
+source = Scripted([0.9, 0.1, 0.5, 0.9, 0.1, 0.5])
+try:
+    randmod.random = source.random
+    weights = [m.floatToInt(3.2, 'weight') for _ in range(3)]
+    halves = [m.floatToInt(0.5, 'weight') for _ in range(3)]
+    draws = source.count
+finally:
+    randmod.random = saved
+RESULT = (m.floatToInt(3.5), m.floatToInt(3.5, 'floor'), m.floatToInt(3.5, 'ceiling'),
+          m.floatToInt(2.5, 'round'), m.floatToInt(3.5, 'round'), m.floatToInt(7),
+          m.floatToInt(7, 'weight'), m.floatToInt(7.9, 'ceiling'), weights, halves, draws)
+""")
+    drawer_block("""class FixedRandom:
+    def __init__(self):
+        self.calls = 0
+    def random(self):
+        self.calls += 1
+        return 0.0
+saved = m.random
+source = FixedRandom()
+try:
+    m.random = source
+    rounded = m.floatToInt(2.1, 'weight')
+finally:
+    m.random = saved
+RESULT = (rounded, source.calls)
+""")
+    drawer_block("""import importlib
+def outcome(fn):
+    try:
+        return ('ok', fn())
+    except Exception as err:
+        return (type(err).__name__, str(err))
+class Roundable:
+    def __round__(self):
+        return 7
+randmod = importlib.import_module('random')
+saved = randmod.random
+calls = []
+randmod.random = lambda: (calls.append(1), 0.25)[1]
+try:
+    bad = outcome(lambda: m.floatToInt('bad', 'weight'))
+    nan = outcome(lambda: m.floatToInt(float('nan'), 'weight'))
+finally:
+    randmod.random = saved
+RESULT = (m.floatToInt(Roundable()), m.floatToInt(object(), 'unknown'),
+          bad, nan, len(calls))
+""")
+    drawer_block("""def outcome(fn):
+    try:
+        return ('ok', fn())
+    except Exception as err:
+        return (type(err).__name__, str(err))
+class PairList:
+    def __divmod__(self, other):
+        return [3, 0.5]
+class PairExtra:
+    def __divmod__(self, other):
+        return (3, 0.5, 99)
+class PairIterator:
+    def __divmod__(self, other):
+        return iter((3, 0.5, 99))
+class PairNumber:
+    def __divmod__(self, other):
+        return 3
+class PairDict:
+    def __divmod__(self, other):
+        return {'a': 1, 'b': 2, 'c': 3, 'd': 4}
+RESULT = (outcome(lambda: m.floatToInt(PairList(), 'floor')),
+          outcome(lambda: m.floatToInt(PairExtra(), 'floor')),
+          outcome(lambda: m.floatToInt(PairIterator(), 'floor')),
+          outcome(lambda: m.floatToInt(PairNumber(), 'floor')),
+          outcome(lambda: m.floatToInt(PairDict(), 'floor')))
+""")
+    # alphabetic labels across the single-letter boundary
+    drawer_block("""labels = m.genAlphaLabel(30)
+RESULT = (labels[:3], labels[25], labels[26], labels[27], len(labels), m.genAlphaLabel(0),
+          m._labelOrdered(['ignored'], 0, 'abc'),
+          m._labelOrdered(msg=['ignored'], n=4, symbols='abc'))
+""")
+    # acronyms and selection parsing, auto search, numeric choices, assertions
+    drawer_block("""def kind(fn):
+    try:
+        fn()
+        return 'no error'
+    except Exception as err:
+        return '%s: %s' % (type(err).__name__, err)
+refDict = {'oc': 'orderedCyclic', 'rw': 'randomWalk'}
+choiceA = {'limit': ['l', 'limit', 3], 'wrap': ['wsdf', 'wrap'], 'reflect': ['r', 'reflect']}
+RESULT = (m.acronymLibToStr({'o': 'open', 'ls': 'list'}),
+          m.acronymExtract('thisIsATest'), m.acronymExtract('thisIsAnotherTest'),
+          m.optionUniqueKeyLeadChar(refDict), m.optionUniqueKeyLeadChar({'ab': 1, 'ac': 2}),
+          m.acronymExpand('oc', refDict), m.acronymExpand('OC', refDict),
+          m.acronymExpand('orderedcyclic', refDict), m.acronymExpand('rw', refDict),
+          m.acronymExpand(None, refDict), m.acronymExpand('', refDict),
+          m.acronymExpand('ordered Cyclic', refDict),
+          m.acronymExpand('ordered Cyclic', refDict, autoSearch=None),
+          m.acronymExpand('ordered Cyclic', refDict, autoSearch=False),
+          m.acronymExpand('ordered Cyclic', refDict, autoSearch=True),
+          m.acronymExpand('unknown', refDict, autoSearch=True),
+          m.selectionParse('l', choiceA), m.selectionParse(3, choiceA),
+          m.selectionParse('LIMIT', choiceA), m.selectionParse('w', choiceA),
+          m.selectionParse('nope', choiceA),
+          m.selectionParse('L something', choiceA, autoSearch=None),
+          m.selectionParse('L something', choiceA, autoSearch=False),
+          m.selectionParseKeyLabel({'a': 1}), m.selectionParseKeyLabel({'a': 1, 'b': 2}, 'and'),
+          m.selectionParseKeyLabel({'a': 1, 'b': 2, 'c': 3}),
+          kind(lambda: m.acronymExpand(3, refDict)),
+          kind(lambda: m.selectionParse('x', 'notadict')))
+""")
+    # restringulation: quoting, nesting, commas within quotes and braces
+    drawer_block("""RESULT = (m.restringulator('this, is, a , test'),
+          m.restringulator('this, 3, 12.5, (test, (a, 3, 4)), test'),
+          m.restringulator('a{3,1,1}b,30,{2,1,1},(123, 123, "2,3")'),
+          m.restringulator(''), m.restringulator('|, &, 5'), m.restringulator("'a', 2"),
+          m.restringulator('bad"quote, 2'), m._restringComma('in', 'a{1,2}'),
+          m._restringComma('out', m._restringComma('in', 'a{1,2}b,3')))
+""")
+    # the clock helpers over a routed time module — deterministic stamps on both sides,
+    # the double-space asctime quirk included
+    drawer_block("""import time
+saved = (time.gmtime, time.localtime)
+time.gmtime = lambda *a: (2026, 9, 25, 14, 3, 7, 4, 268, 0)
+time.localtime = lambda *a: (2026, 9, 5, 4, 3, 2, 4, 268, 0)
+try:
+    stamps = (m.gmtimeStr(), m.localtimeStr(), m.gmtimeStamp(), m.localtimeStamp(3),
+              m.gmtimeStamp(-2), m.gmtimeStamp(2, 'local'), m.tempFileName('.xml'))
+finally:
+    time.gmtime, time.localtime = saved
+RESULT = stamps
+""")
+    # temporary paths over routed tempfile and time modules
+    drawer_block("""import os, tempfile, time
+saved_mkdtemp = tempfile.mkdtemp
+saved_mktemp = tempfile.mktemp
+saved_gmtime = time.gmtime
+tempfile.mkdtemp = lambda: 'FAKETMPDIR'
+tempfile.mktemp = lambda ext='.txt': 'FAKETEMP' + ext
+time.gmtime = lambda *a: (2026, 9, 25, 14, 3, 7, 4, 268, 0)
+try:
+    paths = (m.tempDir('/definitely/not/existing'), m.tempDir('/'),
+             m.tempFile(ext='.txt', fpDir=''), m.tempFile(fpDir='/'))
+finally:
+    tempfile.mkdtemp = saved_mkdtemp
+    tempfile.mktemp = saved_mktemp
+    time.gmtime = saved_gmtime
+RESULT = paths
+""")
+    # platform probes, sudo over a routed subprocess
+    drawer_block("""import subprocess
+saved = subprocess.getstatusoutput
+subprocess.getstatusoutput = lambda cmd: (0, 'sudo version 2')
+try:
+    with_sudo = m.isSudo()
+finally:
+    subprocess.getstatusoutput = lambda cmd: (1, 'not found')
+    try:
+        without_sudo = m.isSudo()
+    finally:
+        subprocess.getstatusoutput = saved
+RESULT = (m.isCarbon(), m.isDarwin(), m.isIdle(), m.isPy24Better(),
+          m.getPrefsName(), with_sudo, without_sudo)
+""")
+    # path scrubbing and existence, on real paths, and the application filters
+    drawer_block("""import os
+def kind(fn):
+    try:
+        fn()
+        return 'no error'
+    except Exception as err:
+        return '%s: %s' % (type(err).__name__, err)
+made = '/tmp/athenacl-drawer-port.app'
+open(made, 'w').close()
+try:
+    filters = (m.appPathFilter(None), m.appPathFilter(''),
+               m.appPathFilter('/definitely/not/there.app'),
+               m.appPathFilter('/definitely/not/there'))
+    apps = (m.isApp(made), m.isApp('/definitely/not'), m.isApp(None), m.isApp('/tmp'),
+            m.isApp('/definitely/x.exe'))
+finally:
+    os.remove(made)
+RESULT = (m.pathScrub('/a//b/../c'), m.pathScrub('relative'), m.pathScrub('~/x')[:1],
+          kind(lambda: m.pathScrub(3.5)),
+          m.pathExists('/definitely/not'), m.pathExists(['/definitely/not', '/']),
+          m.pathExists('/'), m.getcwd() == os.getcwd(),
+          m.getud() == os.path.expanduser('~'), filters, apps)
+""")
+    drawer_block("""import ntpath, types
+saved = m.os
+slash = chr(92)
+m.os = types.SimpleNamespace(name='nt', path=ntpath, sep=slash)
+try:
+    RESULT = (m.pathScrub('C:' + slash * 2), m.pathScrub(slash * 2))
+finally:
+    m.os = saved
+""")
+    # preference paths: the environment override honored, the missing-directory error
+    drawer_block("""import os
+saved = os.environ.get('ATHENACL_PREFS_DIR')
+os.environ['ATHENACL_PREFS_DIR'] = '/tmp/athenacl-drawer-prefs'
+try:
+    os.makedirs('/tmp/athenacl-drawer-prefs', exist_ok=True)
+    found = m.getPrefsDir()
+    path = m.getPrefsPath()
+    os.environ['ATHENACL_PREFS_DIR'] = '/definitely/not/there'
+    def missing():
+        try:
+            m.getPrefsPath()
+            return 'no error'
+        except Exception as err:
+            return '%s: %s' % (type(err).__name__, err)
+    failed = missing()
+finally:
+    if saved is None:
+        del os.environ['ATHENACL_PREFS_DIR']
+    else:
+        os.environ['ATHENACL_PREFS_DIR'] = saved
+RESULT = (found, path, failed, m._MOD,
+          [hasattr(m, name) for name in ('sys', 'os', 'string', 'types', 'random', 'time',
+                                         'unittest', 'tempfile')])
+""")
+
+
+    # url preparation and typeset breaking
+    drawer_block("""RESULT = (m.urlStrBreak('http://athenacl.org/manual;q=1'),
+          m.urlStrBreak('athenacl.org/docs'), m.urlPrep('athenacl.org'),
+          m.urlPrep('athenacl.org', None),
+          m.urlPrep('http://athenacl.org'), m.urlPrep('athenacl.org', 'http'),
+          m.urlPrep('athenacl.org/manual', 'file'), m.urlPrep('file://athenacl.org', 'file'),
+          m.pathStrBreak('/usr/local/docs'))
+""")
+    # membership over a container without __contains__: the iteration fallback
+    drawer_block("""RESULT = (m.inList(2, (x for x in [1, 2, 3])),
+          m.inList(9, (x for x in [1, 2, 3])))
+""")
+    drawer_block("""class Contains(list):
+    def __contains__(self, value):
+        return value == 2
+c = Contains([2, 3])
+c.__contains__ = lambda value: False
+RESULT = (m.inList(2, c), m.inList(3, c))
+""")
+    # the user and preference directories, windows branches over a routed os.name — the
+    # test framework's own ATHENACL_PREFS_DIR steps aside while the block runs
+    drawer_block("""import os
+saved_name = os.name
+saved_profile = os.environ.get('USERPROFILE')
+saved_appdata = os.environ.get('APPDATA')
+saved_override = os.environ.get('ATHENACL_PREFS_DIR')
+try:
+    os.name = 'win'
+    os.environ.pop('ATHENACL_PREFS_DIR', None)
+    plain = m.getud()
+    os.environ['USERPROFILE'] = os.path.expanduser('~')
+    with_profile = m.getud()
+    os.environ['APPDATA'] = '/tmp'
+    with_appdata = m.getPrefsDir()
+    del os.environ['APPDATA']
+    profile_app_data = m.getPrefsDir()
+    del os.environ['USERPROFILE']
+    fallback = m.getPrefsDir()
+    win_name = m.getPrefsName()
+finally:
+    os.name = saved_name
+    if saved_profile is None:
+        os.environ.pop('USERPROFILE', None)
+    else:
+        os.environ['USERPROFILE'] = saved_profile
+    if saved_appdata is None:
+        os.environ.pop('APPDATA', None)
+    else:
+        os.environ['APPDATA'] = saved_appdata
+    if saved_override is not None:
+        os.environ['ATHENACL_PREFS_DIR'] = saved_override
+RESULT = (plain, with_profile, with_appdata, profile_app_data, fallback, win_name)
+""")
+
+
 for test in (test_error, test_permutate, test_quantize, test_chaos, test_functional,
              test_bpf, test_oscillator, test_bpf_regressions, test_oscillator_regressions,
              test_omde_copy, test_omde_finalizers, test_omde_initializer_arguments,
              test_omde_mutating_callbacks,
              test_omde_read_boundaries, test_oscillator_callback_regressions,
              test_bpf_failed_initialization, test_rand, test_rand_contracts,
-             test_rand_lifetimes, test_miscellaneous):
+             test_rand_lifetimes, test_miscellaneous, test_drawer):
     test()
 
 print('%d checks, %d failures' % (checks, len(failures)))

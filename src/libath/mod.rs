@@ -15,6 +15,7 @@
 //! narrowing.
 
 pub(crate) mod chaos;
+pub(crate) mod drawer;
 pub(crate) mod error;
 pub(crate) mod number;
 pub(crate) mod omde;
