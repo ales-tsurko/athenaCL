@@ -7,12 +7,14 @@
 //! the language defines, and the port's own in-place operations must agree. The main parity corpus
 //! cannot hold these blocks — its earlier blocks do the warming.
 
+mod support;
+
 use rustpython_vm as vm;
 
 #[test]
 fn miscellaneous_in_place_dispatch() {
     // before the interpreter starts, so that its first read of the preferences already sees it
-    athenacl::init_scratch_prefs();
+    support::init_scratch_prefs();
     let interpreter = athenacl::init_py_interpreter();
 
     let failed = interpreter.enter(|vm| {

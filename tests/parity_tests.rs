@@ -1,11 +1,13 @@
 //! Runs the parity tests of the ported Python modules against their Rust ports.
 
+mod support;
+
 use rustpython_vm as vm;
 
 #[test]
 fn parity() {
     // before the interpreter starts, so that its first read of the preferences already sees it
-    athenacl::init_scratch_prefs();
+    support::init_scratch_prefs();
     let interpreter = athenacl::init_py_interpreter();
 
     // The vm is entered rather than run, so it is never finalized: finalizing collects every object

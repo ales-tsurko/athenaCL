@@ -1,11 +1,26 @@
 //! Runs the tests of the Python sources.
 
+mod support;
+
 use rustpython_vm as vm;
 
 #[test]
 fn test() {
+    // A previous process can have used this PID and left an incomplete preferences file behind.
+    let previous = std::env::temp_dir()
+        .join("athenacl-tests")
+        .join(std::process::id().to_string());
+    std::fs::create_dir_all(&previous).expect("old preferences directory");
+    let name = if cfg!(windows) {
+        ".athenaclrc.xml"
+    } else {
+        ".athenaclrc"
+    };
+    std::fs::write(previous.join(name), "<?xml version=\"1.0\"?>")
+        .expect("incomplete old preferences file");
+
     // before the interpreter starts, so that its first read of the preferences already sees it
-    athenacl::init_scratch_prefs();
+    support::init_scratch_prefs();
     let interpreter = athenacl::init_py_interpreter();
 
     // The vm is entered rather than run, so it is never finalized: finalizing collects every object

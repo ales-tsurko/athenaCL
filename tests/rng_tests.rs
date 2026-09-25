@@ -6,10 +6,12 @@
     reason = "a failing source should stop its test with the source named"
 )]
 
+mod support;
+
 use rustpython_vm as vm;
 
 fn with_interpreter(f: impl FnOnce(&vm::VirtualMachine)) {
-    athenacl::init_scratch_prefs();
+    support::init_scratch_prefs();
     let interpreter = athenacl::init_py_interpreter();
     interpreter.enter(f);
 }
@@ -189,7 +191,7 @@ RESULT = [rngBridge.parameters.below(2 ** 64) for _ in range(3)]
 /// Separate interpreters keep separate streams: one's draws never move the other's.
 #[test]
 fn interpreters_keep_separate_streams() {
-    athenacl::init_scratch_prefs();
+    support::init_scratch_prefs();
     let first = athenacl::init_py_interpreter();
     let second = athenacl::init_py_interpreter();
 
@@ -515,7 +517,7 @@ RESULT = (pok, tok, first == textures[:3], after == textures[3:],
 /// UniformRNG's module instance and objects retained by its native classes stay local to a VM.
 #[test]
 fn texture_generators_are_isolated_between_interpreters() {
-    athenacl::init_scratch_prefs();
+    support::init_scratch_prefs();
     let a = athenacl::init_py_interpreter();
     let b = athenacl::init_py_interpreter();
     let first = a.enter(|vm| {
