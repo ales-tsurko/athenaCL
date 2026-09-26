@@ -1,4 +1,4 @@
-//! Application's GUI.
+//! Application state, event handling, and rendering.
 use std::sync::Arc;
 
 use iced::{
@@ -35,42 +35,40 @@ use crate::{
     manual as manual_source,
     manual::Page as ManualPage,
 };
-
-mod bars;
-mod browser;
-mod playback;
+use super::{bars, playback};
 
 /// The log's original page width, including its side padding.
 const LOG_MAX_WIDTH: f32 = 800.0;
 /// Room for the browser, its file-action panel, and a usable log.
 pub const MIN_WINDOW_SIZE: (f32, f32) = (1040.0, 640.0);
-const WINDOW_PADDING: f32 = 40.0;
+pub(super) const WINDOW_PADDING: f32 = 40.0;
 /// The bars across the top and bottom of the page, and the frames of controls in them.
-const HEADER_HEIGHT: f32 = 56.0;
-const BOTTOM_BAR_HEIGHT: f32 = 76.0;
-pub(super) const FRAME_HEIGHT: f32 = 36.0;
+pub(super) const HEADER_HEIGHT: f32 = 56.0;
+pub(super) const BOTTOM_BAR_HEIGHT: f32 = 76.0;
+pub(in crate::app) const FRAME_HEIGHT: f32 = 36.0;
 /// Space between the items of a group in the header and bottom bar: a label, its control, and
 /// the button that goes with it.
-pub(super) const BAR_SPACING: f32 = 12.0;
+pub(in crate::app) const BAR_SPACING: f32 = 12.0;
 /// Space between those groups, twice that inside them, so each reads as one.
 pub(super) const GROUP_SPACING: f32 = 2.0 * BAR_SPACING;
 /// The width available to each entry in the output.
 #[cfg(test)]
-const OUTPUT_WIDTH: f32 = LOG_MAX_WIDTH - 2.0 * WINDOW_PADDING - scrollbar::RESERVED_WIDTH;
+pub(super) const OUTPUT_WIDTH: f32 =
+    LOG_MAX_WIDTH - 2.0 * WINDOW_PADDING - scrollbar::RESERVED_WIDTH;
 /// A picker's width: room for its longest option, its arrow, and never less than this.
 const PICKER_CHARACTER: f32 = 8.4;
 const PICKER_ARROW: f32 = 44.0;
 const PICKER_WIDTH: f32 = 104.0;
 const PICKER_PADDING: f32 = 8.0;
 /// The longest scratch folder path the header shows whole.
-const PATH_CHARACTERS: usize = 24;
+pub(super) const PATH_CHARACTERS: usize = 24;
 /// The manual on the web, for `AUdoc www`.
 const MANUAL_URL: &str = "https://athenacl.alestsurko.by";
 /// The tempo's range, in beats per minute, and the widths of the box it's typed in and of its
 /// steppers.
 const TEMPO: std::ops::RangeInclusive<u16> = 20..=600;
-const TEMPO_WIDTH: f32 = 52.0;
-const STEPPER_WIDTH: f32 = 24.0;
+pub(super) const TEMPO_WIDTH: f32 = 52.0;
+pub(super) const STEPPER_WIDTH: f32 = 24.0;
 /// Room either side of an answer's word in its button.
 const ANSWER_PADDING: u16 = 10;
 
@@ -82,34 +80,34 @@ pub(super) const SOUND_FONT: &str = "resources/FluidR3_GM.sf2";
 
 /// athenaCL GUI.
 pub struct State {
-    answer: String,
-    history: History,
-    suggestions: Suggestions,
-    output: Vec<Output>,
-    question: Option<Query>,
-    player_state: GlobalPlayerState,
-    playback: crate::app::playback::Preferences,
-    scratch_dir: String,
-    browser: Browser,
-    input_id: String,
-    path_lib: Vec<String>,
-    texture_lib: Vec<String>,
-    active_path: String, // not system path, but athenaCL pitch path
-    active_texture: String,
-    mode: Mode,
+    pub(super) answer: String,
+    pub(super) history: History,
+    pub(super) suggestions: Suggestions,
+    pub(super) output: Vec<Output>,
+    pub(super) question: Option<Query>,
+    pub(super) player_state: GlobalPlayerState,
+    pub(super) playback: crate::app::playback::Preferences,
+    pub(super) scratch_dir: String,
+    pub(super) browser: Browser,
+    pub(super) input_id: String,
+    pub(super) path_lib: Vec<String>,
+    pub(super) texture_lib: Vec<String>,
+    pub(super) active_path: String, // not system path, but athenaCL pitch path
+    pub(super) active_texture: String,
+    pub(super) mode: Mode,
     /// How figures of events open: as the last one was switched to.
-    figure_view: View,
+    pub(super) figure_view: View,
     /// The tempo as typed.
-    tempo: String,
+    pub(super) tempo: String,
     /// A page of the manual the running command showed, to scroll to once the command is done:
     /// what the command prints after it would push the page's start out of view.
-    reveal: Option<usize>,
+    pub(super) reveal: Option<usize>,
     /// The AthenaObject's file, and whether it holds unsaved work, for the window's title.
-    document: interpreter::Document,
+    pub(super) document: interpreter::Document,
 }
 
 impl State {
-    fn update_completion(&mut self, action: CompletionAction) -> Task<Message> {
+    pub(super) fn update_completion(&mut self, action: CompletionAction) -> Task<Message> {
         match action {
             CompletionAction::Edit(value, cursor) => self.edit_command(value, cursor),
             CompletionAction::Cycle(backwards, value, cursor) => {
@@ -178,13 +176,13 @@ pub fn settings() -> iced::Settings {
         default_text_size: 14.into(),
         default_font: Font::with_name("Fira Mono"),
         fonts: vec![
-            include_bytes!("../../resources/fonts/Fira_Mono/FiraMono-Bold.ttf")
+            include_bytes!("../../../resources/fonts/Fira_Mono/FiraMono-Bold.ttf")
                 .as_slice()
                 .into(),
-            include_bytes!("../../resources/fonts/Fira_Mono/FiraMono-Medium.ttf")
+            include_bytes!("../../../resources/fonts/Fira_Mono/FiraMono-Medium.ttf")
                 .as_slice()
                 .into(),
-            include_bytes!("../../resources/fonts/Fira_Mono/FiraMono-Regular.ttf")
+            include_bytes!("../../../resources/fonts/Fira_Mono/FiraMono-Regular.ttf")
                 .as_slice()
                 .into(),
         ],
@@ -339,7 +337,7 @@ pub(crate) struct FigureOutput {
     /// Its events as a score: a texture's, or one for each of an ensemble's. Empty when the
     /// figure has no events.
     scores: Vec<Arc<Score>>,
-    view: View,
+    pub(super) view: View,
 }
 
 /// How a figure of events is shown: as graphs, or as a score.
@@ -604,7 +602,7 @@ fn page_id(index: usize) -> String {
 }
 
 /// Scroll the log to the start of the page of the manual at `index`.
-fn reveal(index: usize) -> Task<Message> {
+pub(super) fn reveal(index: usize) -> Task<Message> {
     iced::advanced::widget::operate(StartOf {
         log: LOG.into(),
         target: page_id(index).into(),
@@ -688,7 +686,7 @@ fn answer(state: &mut State, question: &str, value: String) -> Task<Message> {
 }
 
 /// Let the user choose the scratch directory, and use it.
-fn set_scratch_dir() {
+pub(super) fn set_scratch_dir() {
     if let Some(value) = pick_directory("Choose scratch folder") {
         interpreter::INTERPRETER_WORKER
             .interp_sender
@@ -900,7 +898,7 @@ fn prompt(state: &State) -> Prompt {
 }
 
 /// Show the interpreter's output, returning focus to the input.
-fn push_output(state: &mut State, output: Output) -> Task<Message> {
+pub(super) fn push_output(state: &mut State, output: Output) -> Task<Message> {
     state.output.push(output);
     refocus(state)
 }
@@ -1036,7 +1034,7 @@ fn view_log(state: &State, colors: Colors, width: f32) -> Element<'_, Message> {
         .into()
 }
 
-fn view_output<'a>(
+pub(super) fn view_output<'a>(
     index: usize,
     output: &'a Output,
     state: &'a State,
@@ -1290,7 +1288,7 @@ fn answer_ink(chosen: bool, colors: Colors) -> Color {
 }
 
 /// One of the bottom bar's pickers, wide enough for its longest option.
-fn picker<'a>(
+pub(super) fn picker<'a>(
     colors: Colors,
     options: &[String],
     active: &str,
@@ -1315,7 +1313,7 @@ fn picker<'a>(
 }
 
 /// One of the tempo's steppers, stacked half each in the tempo's frame.
-fn stepper<'a>(colors: Colors, icon: Icon, step: i32) -> Button<'a, Message> {
+pub(super) fn stepper<'a>(colors: Colors, icon: Icon, step: i32) -> Button<'a, Message> {
     icon.button(colors.bare())
         .width(STEPPER_WIDTH)
         .height(Length::Fill)
@@ -1323,7 +1321,7 @@ fn stepper<'a>(colors: Colors, icon: Icon, step: i32) -> Button<'a, Message> {
 }
 
 /// Controls sharing one ink frame: the tempo and its steppers, the volume and its mute.
-pub(super) fn framed<'a, M: 'a>(colors: Colors, content: Row<'a, M>) -> Element<'a, M> {
+pub(in crate::app) fn framed<'a, M: 'a>(colors: Colors, content: Row<'a, M>) -> Element<'a, M> {
     container(content.align_y(Vertical::Center))
         .height(FRAME_HEIGHT)
         .padding(1)
@@ -1333,7 +1331,7 @@ pub(super) fn framed<'a, M: 'a>(colors: Colors, content: Row<'a, M>) -> Element<
 
 /// A framed row of segments, a rule between each: a figure's switch between its plot and score,
 /// the turns at the end of a page of the manual.
-pub(super) fn switch<'a, M: 'a>(
+pub(in crate::app) fn switch<'a, M: 'a>(
     colors: Colors,
     segments: impl IntoIterator<Item = Element<'a, M>>,
 ) -> Element<'a, M> {
@@ -1353,7 +1351,7 @@ pub(super) fn switch<'a, M: 'a>(
 
 /// A segment of a switch, labelled `label` and filled when `chosen`, that sends `message`; without
 /// one, it is dimmed and does nothing.
-pub(super) fn segment<'a, M: Clone + 'a>(
+pub(in crate::app) fn segment<'a, M: Clone + 'a>(
     label: &str,
     colors: Colors,
     chosen: bool,
@@ -1378,7 +1376,7 @@ pub(super) fn segment<'a, M: Clone + 'a>(
 }
 
 /// A rule across the window, `thickness` high.
-fn rule<'a>(color: Color, thickness: f32) -> Element<'a, Message> {
+pub(super) fn rule<'a>(color: Color, thickness: f32) -> Element<'a, Message> {
     container(space())
         .width(Length::Fill)
         .height(thickness)
@@ -1387,7 +1385,7 @@ fn rule<'a>(color: Color, thickness: f32) -> Element<'a, Message> {
 }
 
 /// A 1 pixel rule down its row.
-pub(super) fn rule_across<'a, M: 'a>(color: Color) -> Element<'a, M> {
+pub(in crate::app) fn rule_across<'a, M: 'a>(color: Color) -> Element<'a, M> {
     container(space())
         .width(1)
         .height(Length::Fill)
@@ -1396,7 +1394,7 @@ pub(super) fn rule_across<'a, M: 'a>(color: Color) -> Element<'a, M> {
 }
 
 /// A path, shortened from the front to `characters`.
-pub(super) fn shorten(path: &str, characters: usize) -> String {
+pub(in crate::app) fn shorten(path: &str, characters: usize) -> String {
     let count = path.chars().count();
     if count <= characters {
         return path.to_owned();
@@ -3023,6 +3021,3 @@ mod tests {
         }
     }
 }
-
-#[cfg(test)]
-mod screenshots;

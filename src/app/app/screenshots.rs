@@ -12,9 +12,23 @@ use std::{
     time::{Duration, Instant},
 };
 
-use iced::{widget::container, Size};
+use iced::{keyboard, widget::container, Element, Length, Size, Task};
 
-use super::*;
+use crate::{
+    app::{
+        browser::Browser,
+        completion::{Action as CompletionAction, Suggestions},
+        history::History,
+        manual,
+        player::GlobalState as GlobalPlayerState,
+        theme::{Colors, Mode},
+    },
+    interpreter,
+};
+use super::{
+    state::{view_output, OUTPUT_WIDTH},
+    *,
+};
 
 /// One of the manual's screenshots: the commands that make it, and what of theirs it shows.
 struct Shot {

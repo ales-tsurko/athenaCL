@@ -15,7 +15,7 @@ import importlib
 import sys
 
 
-PORTED = ['chaos', 'drawer', 'error', 'permutate', 'quantize']
+PORTED = ['chaos', 'drawer', 'error', 'permutate', 'quantize', 'unit']
 
 # the omde leaves port under their omde paths; the references keep the flat ones
 OMDE = {
@@ -32,6 +32,7 @@ OMDE = {
     ),
 }
 DRAWER = ('athenaCL.libATH.drawer', 'athenaCL.libATH._pyref.drawer')
+UNIT = ('athenaCL.libATH.unit', 'athenaCL.libATH._pyref.unit')
 FUNCTIONAL = OMDE['functional']
 
 failures = []
@@ -3203,13 +3204,171 @@ RESULT = (plain, with_profile, with_appdata, profile_app_data, fallback, win_nam
 """)
 
 
+def test_unit():
+    """Unit-interval arithmetic, boundaries, mutable ranges, and funnel state."""
+    for fn, cases in (
+        ('seriesMinMax', [([3, 4, 5],), ([5],), ([],), ([2.0, -1, 2],)]),
+        ('tableMinMax', [([[4, -2], [234, 0], [3, 7]],), ([],), ([[], [1]],)]),
+        ('unitNorm', [(3, (3, 10)), (1, (3, 10)), (5, (5, 5)), (0, (1.0, 1.0))]),
+        ('unitNormRange', [([0, 3, 4],), ([3],), ([0, 0],), ([],)]),
+        ('unitNormRangeTable', [([[4, -2], [234, 0], [3, 7]],), ([[2, 2], [2]],)]),
+        ('unitNormEqual', [(0,), (1,), (2,), (3,), (7,), (2.0,)]),
+        ('unitNormStep', [(0.5,), (0.5, -1, 1), (2, 0, 5), (1, 2, 2),
+                          (float('nan'),), (float('inf'),), (.5, float('nan'), 1)]),
+        ('unitNormProportion', [([0, 3, 4],), ([1, 1, 1],), ([0, 0],), ([-1, 2],)]),
+        ('unitNormAccumulate', [([.4, .1, .4, .1],), ([.8, .2, .5, .1],), ([],), ([0, 0],)]),
+        ('denorm', [(.5, 10, 20), (.5, 10, 10), (10, -20, 20), (0, 3, -3),
+                    (.5, float('nan'), 1)]),
+        ('denormList', [([.2, .5], 10, 20), ([.2, .5], 10, 10), ([2], 0, 1),
+                        ([], 'a', 'b'), ([], float('nan'), 1)]),
+        ('interpolate', [(.5, 10, 20), (0, 10, 20), (1, 10, 20), (2, 10, 20)]),
+        ('limit', [(2,), (-1,), (.5,), (float('nan'),)]),
+        ('unitBoundaryEqual', [(0,), (1,), (3,), (5,)]),
+        ('unitBoundaryFree', [([0, 3, 4],), ([3],), ([1, 1],)]),
+        ('unitBoundaryProportion', [([1, 1, 2],), ([1],), ([0, 1],), ([-1, 2],)]),
+        ('unitBoundaryPos', [(.4, [(0, .125, .25), (.25, .375, .5), (.5, .75, 1.0)]),
+                             (1, [(0, .5, 1.0)]), (.5, []), (2, [(0, .5, 1.0)]),
+                             (.5, [(0, .5, 1.0, 2)]), (.5, [(0, 1.0)])]),
+        ('discreteBinaryPad', [([3, 4, 5],), ([3, 20, 22],), ([],), ([1.0, 2],)]),
+        ('discreteCompress', [([3, 3, 2, 2, 8],), ([],), ([None, None, 2],)]),
+        ('boundaryFit', [(3, 9, 23, 'limit'), (3, 9, 10, 'reflect'),
+                         (3, 9, 12, 'wrap'), (3, 9, 5, 'wrap'), (3, 9, 5, 'unknown')]),
+        ('boundaryReject', [(3, 9, 23, 'limit'), (3, 9, 10, 'reflect'),
+                            (3, 9, 5, 'wrap'), (3, 9, 6, 'limit'), (3, 9, 5, 'unknown')]),
+    ):
+        for args in cases:
+            same_call('unit', fn, *args)
+    same_call('unit', 'unitNorm', value=3, valueRange=(3, 10))
+    same_call('unit', 'unitNormStep', step=.5, a=-1, b=1, normalized=False)
+    same_call('unit', 'boundaryFit', a=3, b=9, f=12, boundaryMethod='wrap')
+    same_call('unit', 'unitBoundaryPos', val=.5, bounds=[(0, .5, 1.0)])
+    for value in (0, .125, .5, 1, float('nan')):
+        for a, b in ((-3, 7), (3.5, -1.25), (2**100, 2**100 + 10)):
+            same_call('unit', 'interpolate', value, a, b)
+            same_call('unit', 'denorm', value, a, b)
+    for parts in (3, 7, 17):
+        same_call('unit', 'unitNormEqual', parts)
+        same_call('unit', 'unitBoundaryEqual', parts)
+    for fn in ('boundaryFit', 'boundaryReject'):
+        for method in ('limit', 'wrap', 'reflect', 'unknown'):
+            for value in (-7, 0, 3, 4, 6, 8, 9, 10, 20):
+                same_call('unit', fn, 3, 9, value, method)
+                same_call('unit', fn, 9, 3, value, method)
+            same_call('unit', fn, 3, 3, 4, method)
+    for source in (
+        "class Parts(int): pass\nRESULT = m.unitBoundaryEqual(Parts(3))",
+        ("class Parts(int):\n"
+         "    def __new__(cls):\n"
+         "        obj = int.__new__(cls, 4)\n"
+         "        obj.calls = 0\n"
+         "        return obj\n"
+         "    def __sub__(self, other):\n"
+         "        self.calls += 1\n"
+         "        return (2, 3)[self.calls - 1]\n"
+         "parts = Parts()\n"
+         "RESULT = (m.unitNormEqual(parts), parts.calls)"),
+        "row = [0, 1]\ndef rows():\n    yield row\n    row[:] = [2, 3]\n    yield row\nRESULT = m.tableMinMax(rows())",
+        "RESULT = m.unitNormProportion(iter([10**1000]))",
+        "class Bounds(list):\n    def __init__(self, rows):\n        super().__init__(rows)\n        self.reads = 0\n    def __getitem__(self, i):\n        self.reads += 1\n        return super().__getitem__(i)\nb = Bounds([(0, .5, 1.0)] * 100)\nRESULT = (m.unitBoundaryPos(.25, b), b.reads)",
+        "class Row:\n    def __init__(self):\n        self.items = [0, .5, 1, 2, 3]\n        self.reads = 0\n    def __getitem__(self, i): return self.items[i]\n    def __iter__(self):\n        for x in self.items:\n            self.reads += 1\n            yield x\nr = Row()\ntry: m.unitBoundaryPos(.5, [r])\nexcept ValueError as e: RESULT = (str(e), r.reads)",
+        "import copy\na = m.FunnelUnit([0, 1, 10])\na.callback = a.findNearest\nb = copy.deepcopy(a)\nb.__init__([0, 8, 10])\nRESULT = (b.callback.__self__ is b, b.callback(.5), b.findNearest(.5))",
+        "fix = [9, 1, 4]; RESULT = (m.unitNormRange([1, 5], fix), fix)",
+        "fix = [9, 1, 4]; RESULT = (m.discreteBinaryPad([1, 4], fix), fix)",
+        "f = m.FunnelUnit([0, 1, 2, 3, 4, 20]); RESULT = (f.srcSeriesUnit, f.binaryMap, f.binaryBound, f.discrComp)",
+        "f = m.FunnelUnit([0, 1, 2, 3, 4, 20]); RESULT = tuple((v, f.findReject(v), f.findNearest(v)) for v in (0, .1, .2, .5, .8, 1))",
+        "f = m.FunnelUnit([0, 1, 2, 3, 4, 20]); RESULT = (f._seriesPosToBinaryPos(3), f._binaryPosToSeriesPos(10), f._findAdjacent(10))",
+        "class F(m.FunnelUnit):\n    def _binaryPosToSeriesPos(self, pos): return 0\n    def _findAdjacent(self, pos): return (0, 20)\nf = F([0, 1, 2, 3, 4, 20]); RESULT = (f.findReject(1), f.findNearest(.8))",
+        "import copy; f = m.FunnelUnit([0, 1, 2, 3, 4, 20]); g = copy.deepcopy(f); g.srcSeries.append(21); RESULT = (f.srcSeries, g.srcSeries, g.findNearest(.8))",
+        "RESULT = tuple((type(e).__name__, str(e)) for e in [caught(lambda: m.FunnelUnit(s)) for s in ([], [1.0], [0, 1.5])])",
+        "f = m.FunnelUnit([0, 1, 2, 3, 4, 20]); RESULT = tuple((type(e).__name__, str(e)) for e in [error for run in (lambda: f.findReject(2), lambda: f._findAdjacent(20), lambda: f._seriesPosToBinaryPos(30)) for error in [caught(run)]])",
+    ):
+        if 'caught(' in source:
+            source = "def caught(run):\n    try: run()\n    except Exception as e: return e\n" + source
+        same_omde(source, UNIT)
+
+    for expression in ('m.denorm(value, 0, High(10))',
+                       'm.denormList([value], 0, High(10))'):
+        same_omde("""
+state = [10]
+calls = []
+class Value(float):
+    def __float__(self):
+        calls.append('float')
+        state[0] = 20
+        return 0.5
+class High(int):
+    def __sub__(self, other):
+        calls.append('subtract')
+        return state[0] - other
+value = Value(0.5)
+RESULT = (%s, calls)
+""" % expression, UNIT)
+    same_omde("""
+class Value(float):
+    def __float__(self): raise RuntimeError('convert before missing bound')
+def result(run):
+    try: return run()
+    except Exception as error: return (type(error).__name__, str(error))
+RESULT = (result(lambda: m.denorm(Value(0.5), float('nan'), 1)),
+          result(lambda: m.denormList([Value(0.5)], float('nan'), 1)))
+""", UNIT)
+    same_omde("""
+class F(m.FunnelUnit):
+    def _findAdjacent(self, pos): return iter((0, 10))
+RESULT = F([0, 1, 10]).findNearest(0.5)
+""", UNIT)
+    same_omde("""
+class F(m.FunnelUnit):
+    def _findAdjacent(self, pos): return self.answer
+def result(answer):
+    funnel = F([0, 1, 10])
+    funnel.answer = answer
+    try: return funnel.findNearest(0.5)
+    except Exception as error: return (type(error).__name__, str(error))
+RESULT = tuple(result(answer) for answer in (iter((0,)), iter((0, 10, 11)), 3))
+""", UNIT)
+    same_omde("""
+class Pair:
+    def __init__(self, values): self.values = values
+    def __iter__(self): return iter(self.values)
+f = m.FunnelUnit([0, 1, 10])
+f.discrComp = [Pair(pair) for pair in f.discrComp]
+RESULT = (f.findNearest(.5), f.findNearest(.5))
+assert RESULT == (.1, .1)
+""", UNIT)
+    same_omde("""
+class Bounds(list):
+    def __getitem__(self, index):
+        if index == -1: raise RuntimeError('last boundary should not be read')
+        return super().__getitem__(index)
+try: m.unitBoundaryPos(.5, Bounds([(.1, .5, 1)]))
+except Exception as error: RESULT = (type(error).__name__, str(error))
+assert RESULT == ('UnitException', 'incomplete bounds')
+""", UNIT)
+    same_omde("""
+try: m.unitBoundaryPos(.75, [(0, .2, .4), 7, (.8, .9, 1)])
+except Exception as error: RESULT = (type(error).__name__, str(error))
+assert RESULT == ('TypeError', 'cannot unpack non-iterable int object')
+""", UNIT)
+    same_omde("""
+series = []
+class Value:
+    def __eq__(self, other):
+        if len(series) == 2: series.append(2)
+        return other is None
+series.extend([Value(), 1])
+RESULT = m.discreteCompress(series)
+assert RESULT == []
+""", UNIT)
+
+
 for test in (test_error, test_permutate, test_quantize, test_chaos, test_functional,
              test_bpf, test_oscillator, test_bpf_regressions, test_oscillator_regressions,
              test_omde_copy, test_omde_finalizers, test_omde_initializer_arguments,
              test_omde_mutating_callbacks,
              test_omde_read_boundaries, test_oscillator_callback_regressions,
              test_bpf_failed_initialization, test_rand, test_rand_contracts,
-             test_rand_lifetimes, test_miscellaneous, test_drawer):
+             test_rand_lifetimes, test_miscellaneous, test_drawer, test_unit):
     test()
 
 print('%d checks, %d failures' % (checks, len(failures)))

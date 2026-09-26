@@ -1,17 +1,12 @@
-//! athenaCL's bitmap fonts.
-//!
-//! A port of `FontBitMap` from athenaCL's `fontLibrary.py`: text is laid out glyph by glyph,
+//! Render bitmap text glyph by glyph,
 //! each glyph trimmed of its empty right columns and followed by a fixed gap.
 
-mod glyphs;
-
-/// A character and its rows of pixels.
-type Glyph = (char, &'static [&'static str]);
+use super::glyphs::{self, Glyph};
 
 /// One of athenaCL's bitmap fonts.
 ///
-/// Figures only use the micro font, as athenaCL's graphs did; the others are athenaCL's too,
-/// ported along with it.
+/// Figures only use the micro font, as athenaCL's graphs did; the others are athenaCL's too, ported
+/// along with it.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[cfg_attr(
     not(test),

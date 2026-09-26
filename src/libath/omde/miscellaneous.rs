@@ -55,15 +55,12 @@ pub(crate) fn module_def(
 #[pymodule(name = "athenaCL.libATH.omde.miscellaneous")]
 pub(super) mod _inner {
     use rustpython_vm::{
-        builtins::{PyBaseException, PyBoundMethod, PyModule, PyStr, PyType},
+        builtins::{PyBaseException, PyModule, PyStr, PyType},
         function::{FuncArgs, OptionalArg},
         protocol::PyNumberMethods,
         pyclass,
-        types::{
-            AsNumber, Callable, Constructor, GetAttr, GetDescriptor, Initializer, PyComparisonOp,
-        },
-        AsObject, FromArgs, Py, PyObject, PyObjectRef, PyPayload, PyRef, PyResult, Traverse,
-        VirtualMachine,
+        types::{AsNumber, Callable, Constructor, Initializer, PyComparisonOp},
+        AsObject, FromArgs, Py, PyObject, PyObjectRef, PyPayload, PyRef, PyResult, VirtualMachine,
     };
 
     use super::super::functional::{Function, FunctionModel, Generator};
@@ -441,89 +438,10 @@ pub(super) mod _inner {
                 .downcast()
                 .map_err(|_absent| vm.new_type_error("the dispatch classes are not reachable"))?;
             for method in methods.iter().copied() {
-                let entry = class.get_attr(vm.ctx.intern_str(method)).ok_or_else(|| {
-                    vm.new_type_error(format!("the {method} method is not reachable"))
-                })?;
-                let binding: PyObjectRef = MethodBinding { method: entry }.into_ref(&vm.ctx).into();
-                class.set_attr(vm.ctx.intern_str(method), binding);
+                super::super::super::method_binding::bind_method(&class, method, vm)?;
             }
         }
         Ok(())
-    }
-
-    /// A class-dictionary method entry that binds as a real `method` object wherever it is obtained
-    /// — instance access, `super()`, a property's return, an alias — because only method objects
-    /// rebind under deepcopy, which is what the reference's Python-level methods were. Class access
-    /// yields the binding itself, as the reference's class access yielded the function: callable
-    /// unbound, still binding as a method under any other name, and shared by copies the way
-    /// functions are.
-    #[pyattr]
-    #[pyclass(name = "_MethodBinding", traverse)]
-    #[derive(Debug, PyPayload)]
-    pub(crate) struct MethodBinding {
-        method: PyObjectRef,
-    }
-
-    impl GetDescriptor for MethodBinding {
-        fn descr_get(
-            zelf: PyObjectRef,
-            obj: Option<PyObjectRef>,
-            _cls: Option<PyObjectRef>,
-            vm: &VirtualMachine,
-        ) -> PyResult {
-            match obj {
-                None => Ok(zelf),
-                Some(instance) => {
-                    let binding = zelf.downcast_ref::<MethodBinding>().ok_or_else(|| {
-                        vm.new_type_error("unexpected payload for __get__".to_owned())
-                    })?;
-                    Ok(PyBoundMethod::new(instance, binding.method.clone())
-                        .into_ref(&vm.ctx)
-                        .into())
-                }
-            }
-        }
-    }
-
-    impl Callable for MethodBinding {
-        type Args = FuncArgs;
-
-        fn call(zelf: &Py<Self>, args: FuncArgs, vm: &VirtualMachine) -> PyResult {
-            // unbound: the caller supplies the instance, as the reference's function did
-            zelf.method.call(args, vm)
-        }
-    }
-
-    impl GetAttr for MethodBinding {
-        fn getattro(zelf: &Py<Self>, name: &Py<PyStr>, vm: &VirtualMachine) -> PyResult {
-            let class_attr = vm
-                .ctx
-                .interned_str(name)
-                .and_then(|attr_name| zelf.get_class_attr(attr_name));
-            if let Some(obj) = class_attr {
-                return vm.call_if_get_descriptor(&obj, zelf.to_owned().into());
-            }
-            zelf.method.get_attr(name, vm)
-        }
-    }
-
-    #[derive(FromArgs)]
-    struct MemoArgs {
-        #[pyarg(any)]
-        _memo: PyObjectRef,
-    }
-
-    #[pyclass(with(GetDescriptor, Callable, GetAttr))]
-    impl MethodBinding {
-        #[pymethod(name = "__copy__")]
-        fn copy_shared(zelf: &Py<Self>) -> PyObjectRef {
-            zelf.to_owned().into()
-        }
-
-        #[pymethod(name = "__deepcopy__")]
-        fn deepcopy_shared(zelf: &Py<Self>, _args: MemoArgs) -> PyObjectRef {
-            zelf.to_owned().into()
-        }
     }
 
     /// Constructors allocate stateless payloads; typed initializers own validation and mutation.

@@ -3,7 +3,8 @@
 //! Each glyph is a list of rows: `#` is a set pixel, `.` an empty one. Glyphs are sorted by
 //! character, so they can be binary-searched.
 
-use super::Glyph;
+/// A character and its rows of pixels.
+pub(super) type Glyph = (char, &'static [&'static str]);
 
 pub(super) static MICRO: &[Glyph] = &[
     (

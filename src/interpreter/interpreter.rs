@@ -417,6 +417,7 @@ pub fn init_py_interpreter() -> PyInterpreter {
         .add_native_module(libath::permutate::module_def(&ctx))
         .add_native_module(libath::quantize::module_def(&ctx))
         .add_native_module(libath::rng::module_def(&ctx))
+        .add_native_module(libath::unit::module_def(&ctx))
         .add_native_module(libath::omde::bpf::module_def(&ctx))
         .add_native_module(libath::omde::functional::module_def(&ctx))
         .add_native_module(libath::omde::miscellaneous::module_def(&ctx))

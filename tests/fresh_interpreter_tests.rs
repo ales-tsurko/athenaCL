@@ -34,3 +34,26 @@ fn miscellaneous_in_place_dispatch() {
         "the fresh in-place probes failed: the report is above"
     );
 }
+
+#[test]
+fn unit_mutating_step_dispatch() {
+    support::init_scratch_prefs();
+    let interpreter = athenacl::init_py_interpreter();
+
+    let failed = interpreter.enter(|vm| {
+        let scope = vm.new_scope_with_builtins();
+        let code = vm::py_compile!(file = "fresh_unit.py");
+        match vm.run_code_obj(vm.ctx.new_code(code), scope) {
+            Ok(_) => false,
+            Err(exception) => {
+                vm.print_exception(exception);
+                true
+            }
+        }
+    });
+
+    assert!(
+        !failed,
+        "the fresh unit step probe failed: the report is above"
+    );
+}

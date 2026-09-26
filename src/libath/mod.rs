@@ -17,8 +17,10 @@
 pub(crate) mod chaos;
 pub(crate) mod drawer;
 pub(crate) mod error;
+pub(crate) mod method_binding;
 pub(crate) mod number;
 pub(crate) mod omde;
 pub(crate) mod permutate;
 pub(crate) mod quantize;
 pub(crate) mod rng;
+pub(crate) mod unit;
